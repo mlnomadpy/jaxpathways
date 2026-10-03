@@ -1,0 +1,6 @@
+{
+  "name": "jaxpathways",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {"dev": "python3 -m http.server 4173 --directory site", "check": "node --check site/app.js"}
+}

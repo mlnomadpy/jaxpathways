@@ -1,0 +1,376 @@
+[
+  {
+    "id": "foundations",
+    "title": "Start with JAX",
+    "description": "Turn familiar Python into functions you can differentiate, batch, and compile.",
+    "prerequisites": "Python basics and a little NumPy",
+    "outcome": "A small model trained with your own update loop",
+    "libraries": "jax \u00b7 jax.numpy",
+    "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+    "lessons": [
+      {
+        "id": "foundations-0",
+        "title": "Your first gradient",
+        "status": "sample"
+      },
+      {
+        "id": "foundations-1",
+        "title": "Arrays, shapes, and dtypes",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-2",
+        "title": "Pure functions and explicit state",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-3",
+        "title": "Random keys without surprises",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-4",
+        "title": "Batching with vmap",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-5",
+        "title": "Compilation with jit",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-6",
+        "title": "Pytrees and structured parameters",
+        "status": "planned"
+      },
+      {
+        "id": "foundations-7",
+        "title": "Loops with lax.scan",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "models",
+    "title": "Train neural networks",
+    "description": "Go from a handwritten training loop to models you can save, evaluate, and extend.",
+    "prerequisites": "Shared foundations",
+    "outcome": "A reproducible image classifier",
+    "libraries": "Flax \u00b7 Optax \u00b7 Orbax",
+    "source": "https://flax.readthedocs.io/",
+    "lessons": [
+      {
+        "id": "models-0",
+        "title": "Build a tiny multilayer perceptron",
+        "status": "planned"
+      },
+      {
+        "id": "models-1",
+        "title": "Optimize with Optax",
+        "status": "planned"
+      },
+      {
+        "id": "models-2",
+        "title": "Model state with Flax NNX",
+        "status": "planned"
+      },
+      {
+        "id": "models-3",
+        "title": "Build a reliable input pipeline",
+        "status": "planned"
+      },
+      {
+        "id": "models-4",
+        "title": "Evaluate and checkpoint",
+        "status": "planned"
+      },
+      {
+        "id": "models-5",
+        "title": "Attention from small pieces",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "science",
+    "title": "Simulate and discover",
+    "description": "Differentiate through numerical models and fit them to observations.",
+    "prerequisites": "Shared foundations and calculus",
+    "outcome": "Fit the parameters of a dynamical system",
+    "libraries": "Diffrax \u00b7 Equinox \u00b7 Lineax",
+    "source": "https://docs.kidger.site/diffrax/",
+    "lessons": [
+      {
+        "id": "science-0",
+        "title": "Solve your first differential equation",
+        "status": "planned"
+      },
+      {
+        "id": "science-1",
+        "title": "Differentiate through a solver",
+        "status": "planned"
+      },
+      {
+        "id": "science-2",
+        "title": "Fit a physical model",
+        "status": "planned"
+      },
+      {
+        "id": "science-3",
+        "title": "Neural differential equations",
+        "status": "planned"
+      },
+      {
+        "id": "science-4",
+        "title": "Linear solves and numerical accuracy",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "probability",
+    "title": "Model uncertainty",
+    "description": "Make predictions that describe what you know\u2014and what you do not.",
+    "prerequisites": "Shared foundations and probability",
+    "outcome": "A Bayesian regression with uncertainty intervals",
+    "libraries": "NumPyro \u00b7 BlackJAX",
+    "source": "https://num.pyro.ai/en/stable/",
+    "lessons": [
+      {
+        "id": "probability-0",
+        "title": "Distributions and sampling",
+        "status": "planned"
+      },
+      {
+        "id": "probability-1",
+        "title": "Build a Bayesian regression",
+        "status": "planned"
+      },
+      {
+        "id": "probability-2",
+        "title": "Understand Hamiltonian Monte Carlo",
+        "status": "planned"
+      },
+      {
+        "id": "probability-3",
+        "title": "Diagnose your sampler",
+        "status": "planned"
+      },
+      {
+        "id": "probability-4",
+        "title": "Variational inference",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "rl",
+    "title": "Learn by interacting",
+    "description": "Build environments and train agents with batches of simulated experience.",
+    "prerequisites": "Shared foundations and basic ML",
+    "outcome": "An agent learning in a small environment",
+    "libraries": "JAX \u00b7 Gymnax \u00b7 Jumanji",
+    "source": "https://github.com/FLAIROx/Jumanji",
+    "lessons": [
+      {
+        "id": "rl-0",
+        "title": "Write a functional environment",
+        "status": "planned"
+      },
+      {
+        "id": "rl-1",
+        "title": "Batch rollouts",
+        "status": "planned"
+      },
+      {
+        "id": "rl-2",
+        "title": "A policy-gradient baseline",
+        "status": "planned"
+      },
+      {
+        "id": "rl-3",
+        "title": "Build a PPO training loop",
+        "status": "planned"
+      },
+      {
+        "id": "rl-4",
+        "title": "Evaluate across random seeds",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "scale",
+    "title": "Make it fast. Make it scale.",
+    "description": "Measure what matters, then move from one device to many.",
+    "prerequisites": "Shared foundations and a working training loop",
+    "outcome": "A measured, sharded training experiment",
+    "libraries": "JAX sharding \u00b7 profiling \u00b7 Pallas",
+    "source": "https://docs.jax.dev/en/latest/",
+    "lessons": [
+      {
+        "id": "scale-0",
+        "title": "Benchmark asynchronous work",
+        "status": "planned"
+      },
+      {
+        "id": "scale-1",
+        "title": "Find recompilation and memory costs",
+        "status": "planned"
+      },
+      {
+        "id": "scale-2",
+        "title": "Shard arrays across a device mesh",
+        "status": "planned"
+      },
+      {
+        "id": "scale-3",
+        "title": "Scale a training step",
+        "status": "planned"
+      },
+      {
+        "id": "scale-4",
+        "title": "Write a first Pallas kernel",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "internals",
+    "title": "Understand JAX itself",
+    "description": "Look beneath the transformations and learn how a Python function becomes a program.",
+    "prerequisites": "Shared foundations and advanced autodiff",
+    "outcome": "Inspect a jaxpr and define a custom derivative",
+    "libraries": "jaxpr \u00b7 autodiff \u00b7 XLA",
+    "source": "https://docs.jax.dev/en/latest/",
+    "lessons": [
+      {
+        "id": "internals-0",
+        "title": "Read your first jaxpr",
+        "status": "planned"
+      },
+      {
+        "id": "internals-1",
+        "title": "JVPs and VJPs",
+        "status": "planned"
+      },
+      {
+        "id": "internals-2",
+        "title": "Custom derivative rules",
+        "status": "planned"
+      },
+      {
+        "id": "internals-3",
+        "title": "Lowering and compilation",
+        "status": "planned"
+      },
+      {
+        "id": "internals-4",
+        "title": "Build a tiny transformation",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "tpu",
+    "title": "Build a TPU training system",
+    "description": "Connect the foundations to reproducible training, failure recovery, and measured optimization.",
+    "prerequisites": "Shared foundations and basic machine learning",
+    "outcome": "A training run you can interrupt, restore, and profile",
+    "libraries": "Flax NNX \u00b7 Optax \u00b7 Grain \u00b7 Orbax \u00b7 XProf",
+    "source": "https://docs.jax.dev/en/latest/",
+    "lessons": [
+      {
+        "id": "tpu-0",
+        "title": "TPU runtime setup and device checks",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-1",
+        "title": "JIT, tracing, static arguments, and recompilation",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-2",
+        "title": "Autodiff: value_and_grad, JVPs, VJPs, and gradient checks",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-3",
+        "title": "Vectorization: nested vmap and per-example gradients",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-4",
+        "title": "Compiled loops, state, and PRNG discipline",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-5",
+        "title": "Flax NNX and Optax training system",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-6",
+        "title": "Grain and Orbax reproducible recovery",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-7",
+        "title": "Build and benchmark a Transformer block",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-8",
+        "title": "Profile and optimize with XProf",
+        "status": "planned"
+      },
+      {
+        "id": "tpu-9",
+        "title": "Capstone: interrupt, recover, and explain performance",
+        "status": "planned"
+      }
+    ]
+  },
+  {
+    "id": "ship",
+    "title": "Ship and adapt JAX workloads",
+    "description": "Move an experiment into a usable system, or bring your existing NumPy and framework experience along.",
+    "prerequisites": "Shared foundations and a working model",
+    "outcome": "An inference plan with measured latency and capacity",
+    "libraries": "JAX export \u00b7 serving \u00b7 framework bridges",
+    "source": "https://docs.jax.dev/en/latest/",
+    "lessons": [
+      {
+        "id": "ship-0",
+        "title": "From NumPy to transformed JAX",
+        "status": "planned"
+      },
+      {
+        "id": "ship-1",
+        "title": "From Keras to explicit JAX state",
+        "status": "planned"
+      },
+      {
+        "id": "ship-2",
+        "title": "PyTorch and XLA: understand the bridge",
+        "status": "planned"
+      },
+      {
+        "id": "ship-3",
+        "title": "Export and serve a trained model",
+        "status": "planned"
+      },
+      {
+        "id": "ship-4",
+        "title": "Measure inference latency and capacity",
+        "status": "planned"
+      },
+      {
+        "id": "ship-5",
+        "title": "Plan batching and autoscaling",
+        "status": "planned"
+      }
+    ]
+  }
+]
