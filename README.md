@@ -1,50 +1,55 @@
 # JAX Pathways
 
-One foundation. Many pathways.
+Learn JAX through a shared course, then follow the work you want to do.
 
-A friendly, project-led guide to JAX and its ecosystem, with a technical visual direction inspired by [AI Engineering from Scratch](https://aiengineeringfromscratch.com/). The interface, diagrams, and curriculum outline are original.
+## Choose your work
 
-## Start locally
+| Core domain | What you become capable of doing | Career routes |
+| --- | --- | --- |
+| Training & model development | Build, evaluate, checkpoint, and reproduce neural-network training | ML/training engineer; RL engineer |
+| Inference & deployment | Adapt, export, verify, and plan serving capacity for trained models | Inference/deployment engineer |
+| Operations & accelerator systems | Observe workloads, recover failures, diagnose bottlenecks, and scale computations | Operations engineer; accelerator/performance engineer |
+| Research & scientific computing | Differentiate simulations, fit parameters, model uncertainty, and validate algorithms | Scientific ML engineer; research engineer |
+
+## One course, several routes
+
+**Setup → arrays and functions → transformations → state and loops → optimization.**
+
+Then build **models → data and recovery → Transformers → performance**, or branch into scientific computing, probabilistic modeling, RL, distributed systems, kernels, internals, inference, or operations. Each route includes its prerequisites and ends in a project with a capability assessment.
+
+Read the complete [curriculum](CURRICULUM.md). It has **17 phases, 72 canonical lesson briefs, 10 pathways, four core domains, and seven career routes**. These are course-design artifacts, not 72 published lessons. One sample lesson is authored; the remaining lessons, phase projects, and pathway assessments are planned.
+
+## Use the site
 
 ```sh
 npm run dev
 ```
 
-Open http://localhost:4173. Only Python 3 and Node (for syntax checks) are needed; the site has no package dependencies or build step.
+Open http://localhost:4173.
 
-## Choose what you want to build
+- **Home:** course introduction, core domains, recommended start, and ordered curriculum.
+- **Learning paths:** role responsibilities, skills, portfolio expectations, and routes through shared phases.
+- **Learning notebook:** saved route, self-reported evidence, backup import/export, and draft club plans.
 
-- **Start with JAX:** arrays, pure functions, differentiation, vectorization, compilation, keys, and state.
-- **Train neural networks:** Flax NNX, Optax, evaluation, checkpoints, and attention.
-- **Simulate and discover:** differentiable solvers and scientific inverse problems.
-- **Model uncertainty:** Bayesian models and inference.
-- **Learn by interacting:** functional environments and batched reinforcement learning.
-- **Make it fast. Make it scale:** measurement, profiling, sharding, and kernels.
-- **Understand JAX itself:** jaxpr, autodiff, custom derivatives, and compilation.
-- **Build a TPU training system:** the focused fundamentals → training loop → Grain/Orbax recovery → Transformer → XProf → integration route.
-- **Ship and adapt JAX workloads:** framework bridges, serving, and capacity planning.
+The homepage has no portfolio forms, club planner, duplicate learning map, or extra motivational sections. Those tools live on their own page.
 
-## What works today
+Python 3 serves the site. Node runs the checks. No package dependencies or build step are needed. Use a server rather than opening the HTML directly because the course loads from JSON.
 
-Responsive homepage, searchable/expandable curriculum, sample lesson reader, a selectable TPU pathway map, saved route selection, evidence notebook, JSON backup export/import, and downloadable 4/8-week learning club plans. Learner data stays in the current browser. Imported evidence is rendered as text and links are restricted to HTTP(S).
+## Where notebooks fit
 
-## Content status
+The earlier training, Grain/Orbax recovery, and XProf notebooks belong in phases 05, 06, and 08. They become lesson companions and phase integration labs, with the course providing prerequisites, explanation, exercises, and assessments around them.
 
-This repository contains **9 proposed pathways, 55 proposed topics, and 1 authored sample lesson**. These are not the 56 authored competencies described in earlier project notes. The source for that Astro collection was unavailable: `mlnomadpy/ai-tpu-pathways` had only an initial README and license when inspected. No full lessons, exams, or notebooks from that project have been imported.
+Their source files and the previously reported 56-lesson Astro collection have not been imported. No TPU validation has been performed in this repository. Learner evidence is self-reported; the site does not issue credentials.
 
-The TPU outline follows the supplied brief. The three earlier training/recovery/profiling notebooks are not present here. No TPU execution or advanced lesson validation has been performed. Evidence is self-reported; the site does not award certificates or claim verified readiness.
-
-## Authoring
-
-Edit `site/curriculum.json` for the route map. See `content/README.md` for the lesson contract and `docs/design.md` for design choices. Read → experiment → checkpoint → evidence → synthesis exam should remain distinct as authored content is added.
-
-Primary references: [JAX](https://docs.jax.dev/), [Flax](https://flax.readthedocs.io/), [Diffrax](https://docs.kidger.site/diffrax/), [NumPyro](https://num.pyro.ai/en/stable/).
-
-## Checks
+## Author and verify
 
 ```sh
 npm run check
-node --check site/platform.js
+npm run curriculum:docs
 ```
 
-Use a served preview rather than opening `index.html` directly: the curriculum is loaded from JSON.
+`site/curriculum.json` is the single source of truth. The checks verify unique canonical lessons, acyclic prerequisites, route ordering, and domain/role coverage. The document generator produces the GitHub curriculum and phase READMEs.
+
+See [the authoring contract](content/README.md) and [lesson template](LESSON_TEMPLATE.md).
+
+Original layout and curriculum implementation, with design inspiration from [AI Engineering from Scratch](https://aiengineeringfromscratch.com/). Primary technical references are linked by phase.

@@ -1,376 +1,1659 @@
-[
-  {
-    "id": "foundations",
-    "title": "Start with JAX",
-    "description": "Turn familiar Python into functions you can differentiate, batch, and compile.",
-    "prerequisites": "Python basics and a little NumPy",
-    "outcome": "A small model trained with your own update loop",
-    "libraries": "jax \u00b7 jax.numpy",
-    "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
-    "lessons": [
-      {
-        "id": "foundations-0",
-        "title": "Your first gradient",
-        "status": "sample"
-      },
-      {
-        "id": "foundations-1",
-        "title": "Arrays, shapes, and dtypes",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-2",
-        "title": "Pure functions and explicit state",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-3",
-        "title": "Random keys without surprises",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-4",
-        "title": "Batching with vmap",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-5",
-        "title": "Compilation with jit",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-6",
-        "title": "Pytrees and structured parameters",
-        "status": "planned"
-      },
-      {
-        "id": "foundations-7",
-        "title": "Loops with lax.scan",
-        "status": "planned"
+{
+  "schemaVersion": 2,
+  "title": "JAX from first principles to working systems",
+  "parts": [
+    {
+      "title": "Start here",
+      "description": "Set up your workspace and run one small experiment."
+    },
+    {
+      "title": "Shared foundations",
+      "description": "Build a mental model of arrays, transformations, state, and learning."
+    },
+    {
+      "title": "Training systems",
+      "description": "Train, recover, and measure a complete model."
+    },
+    {
+      "title": "Specializations",
+      "description": "Take the shared ideas into the work you want to do."
+    }
+  ],
+  "phases": [
+    {
+      "id": "welcome",
+      "number": "00",
+      "title": "Setup & first steps",
+      "part": "Start here",
+      "prerequisitePhaseIds": [],
+      "hardware": "CPU; TPU setup is an optional bridge",
+      "project": "A reproducible environment report",
+      "checkpoint": "Explain which device ran your code and reproduce the result in a fresh environment.",
+      "source": "https://docs.jax.dev/en/latest/installation.html",
+      "lessons": [
+        {
+          "id": "welcome-01",
+          "title": "Set up your learning workspace",
+          "status": "planned",
+          "objective": "Create an isolated Python environment and record the interpreter and JAX version.",
+          "prerequisites": [],
+          "exercise": "Create an isolated Python environment and record the interpreter and JAX version.",
+          "evidence": "A reproducible experiment for “Set up your learning workspace”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Set up your learning workspace”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "welcome-02",
+          "title": "Meet your arrays and devices",
+          "status": "planned",
+          "objective": "Create an array, inspect its dtype and device, and explain the result.",
+          "prerequisites": [
+            "welcome-01"
+          ],
+          "exercise": "Create an array, inspect its dtype and device, and explain the result.",
+          "evidence": "A reproducible experiment for “Meet your arrays and devices”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Meet your arrays and devices”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "welcome-03",
+          "title": "Move your experiment to a TPU",
+          "status": "planned",
+          "objective": "Run a device check on a TPU runtime and distinguish installation from successful execution.",
+          "prerequisites": [
+            "welcome-02"
+          ],
+          "exercise": "Run a device check on a TPU runtime and distinguish installation from successful execution.",
+          "evidence": "A reproducible experiment for “Move your experiment to a TPU”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Move your experiment to a TPU”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "arrays",
+      "number": "01",
+      "title": "Arrays & pure functions",
+      "part": "Shared foundations",
+      "prerequisitePhaseIds": [
+        "welcome"
+      ],
+      "hardware": "CPU",
+      "project": "A tested array-processing function",
+      "checkpoint": "Predict output shapes and explain why a pure function is easier to transform.",
+      "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+      "lessons": [
+        {
+          "id": "arrays-01",
+          "title": "From NumPy to jax.numpy",
+          "status": "planned",
+          "objective": "Port a small NumPy computation and compare shapes and values.",
+          "prerequisites": [],
+          "exercise": "Port a small NumPy computation and compare shapes and values.",
+          "evidence": "A reproducible experiment for “From NumPy to jax.numpy”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “From NumPy to jax.numpy”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "arrays-02",
+          "title": "Shapes, broadcasting, and dtypes",
+          "status": "planned",
+          "objective": "Predict a broadcast result and catch a deliberately incompatible shape.",
+          "prerequisites": [
+            "arrays-01"
+          ],
+          "exercise": "Predict a broadcast result and catch a deliberately incompatible shape.",
+          "evidence": "A reproducible experiment for “Shapes, broadcasting, and dtypes”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Shapes, broadcasting, and dtypes”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "arrays-03",
+          "title": "Pure functions and explicit inputs",
+          "status": "planned",
+          "objective": "Remove hidden state from a function without changing its result.",
+          "prerequisites": [
+            "arrays-02"
+          ],
+          "exercise": "Remove hidden state from a function without changing its result.",
+          "evidence": "A reproducible experiment for “Pure functions and explicit inputs”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Pure functions and explicit inputs”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "arrays-04",
+          "title": "Immutable updates and indexing",
+          "status": "planned",
+          "objective": "Express an array update with .at and verify the original array remains unchanged.",
+          "prerequisites": [
+            "arrays-03"
+          ],
+          "exercise": "Express an array update with .at and verify the original array remains unchanged.",
+          "evidence": "A reproducible experiment for “Immutable updates and indexing”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Immutable updates and indexing”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "transforms",
+      "number": "02",
+      "title": "JAX transformations",
+      "part": "Shared foundations",
+      "prerequisitePhaseIds": [
+        "arrays"
+      ],
+      "hardware": "CPU",
+      "project": "A compiled batch of gradients",
+      "checkpoint": "Compose grad, vmap, and jit; explain what each transformation changes.",
+      "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+      "lessons": [
+        {
+          "id": "first-gradient",
+          "title": "Your first gradient",
+          "status": "sample",
+          "objective": "Differentiate x², predict the derivative of x³, and check the result.",
+          "prerequisites": [],
+          "exercise": "Differentiate x², predict the derivative of x³, and check the result.",
+          "evidence": "A reproducible experiment for “Your first gradient”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Your first gradient”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transforms-02",
+          "title": "Losses and value_and_grad",
+          "status": "planned",
+          "objective": "Compute a scalar loss and its parameter gradients in one call.",
+          "prerequisites": [
+            "first-gradient"
+          ],
+          "exercise": "Compute a scalar loss and its parameter gradients in one call.",
+          "evidence": "A reproducible experiment for “Losses and value_and_grad”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Losses and value_and_grad”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transforms-03",
+          "title": "Batch a function with vmap",
+          "status": "planned",
+          "objective": "Replace an explicit example loop with vmap and check equivalence.",
+          "prerequisites": [
+            "transforms-02"
+          ],
+          "exercise": "Replace an explicit example loop with vmap and check equivalence.",
+          "evidence": "A reproducible experiment for “Batch a function with vmap”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Batch a function with vmap”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transforms-04",
+          "title": "Compile a function with jit",
+          "status": "planned",
+          "objective": "Compare first-call and repeated-call timing with correct synchronization.",
+          "prerequisites": [
+            "transforms-03"
+          ],
+          "exercise": "Compare first-call and repeated-call timing with correct synchronization.",
+          "evidence": "A reproducible experiment for “Compile a function with jit”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Compile a function with jit”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transforms-05",
+          "title": "Tracing, static arguments, and recompilation",
+          "status": "planned",
+          "objective": "Vary shapes and configuration and explain when a new compiled program is needed.",
+          "prerequisites": [
+            "transforms-04"
+          ],
+          "exercise": "Vary shapes and configuration and explain when a new compiled program is needed.",
+          "evidence": "A reproducible experiment for “Tracing, static arguments, and recompilation”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Tracing, static arguments, and recompilation”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "state",
+      "number": "03",
+      "title": "State, randomness & control flow",
+      "part": "Shared foundations",
+      "prerequisitePhaseIds": [
+        "transforms"
+      ],
+      "hardware": "CPU",
+      "project": "A deterministic batched simulation",
+      "checkpoint": "Replay the same experiment with saved state and keys; explain the update order.",
+      "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+      "lessons": [
+        {
+          "id": "state-01",
+          "title": "Random keys without surprises",
+          "status": "planned",
+          "objective": "Split keys and show reproducibility without accidental key reuse.",
+          "prerequisites": [],
+          "exercise": "Split keys and show reproducibility without accidental key reuse.",
+          "evidence": "A reproducible experiment for “Random keys without surprises”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Random keys without surprises”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "state-02",
+          "title": "Pytrees and structured parameters",
+          "status": "planned",
+          "objective": "Represent parameters and state in a nested structure and transform its leaves.",
+          "prerequisites": [
+            "state-01"
+          ],
+          "exercise": "Represent parameters and state in a nested structure and transform its leaves.",
+          "evidence": "A reproducible experiment for “Pytrees and structured parameters”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Pytrees and structured parameters”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "state-03",
+          "title": "Compiled loops with lax.scan",
+          "status": "planned",
+          "objective": "Replace a fixed-length Python loop with scan and compare final states.",
+          "prerequisites": [
+            "state-02"
+          ],
+          "exercise": "Replace a fixed-length Python loop with scan and compare final states.",
+          "evidence": "A reproducible experiment for “Compiled loops with lax.scan”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Compiled loops with lax.scan”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "state-04",
+          "title": "Branches with lax.cond",
+          "status": "planned",
+          "objective": "Implement a data-dependent branch that works inside a compiled function.",
+          "prerequisites": [
+            "state-03"
+          ],
+          "exercise": "Implement a data-dependent branch that works inside a compiled function.",
+          "evidence": "A reproducible experiment for “Branches with lax.cond”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Branches with lax.cond”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "optimization",
+      "number": "04",
+      "title": "Math & optimization",
+      "part": "Shared foundations",
+      "prerequisitePhaseIds": [
+        "state"
+      ],
+      "hardware": "CPU",
+      "project": "A fitted regression model",
+      "checkpoint": "Explain the loss, check a gradient numerically, and justify one optimization choice.",
+      "source": "https://docs.jax.dev/en/latest/automatic-differentiation.html",
+      "lessons": [
+        {
+          "id": "optimization-01",
+          "title": "Linear algebra and loss intuition",
+          "status": "planned",
+          "objective": "Connect a matrix-vector product to predictions and a scalar regression loss.",
+          "prerequisites": [],
+          "exercise": "Connect a matrix-vector product to predictions and a scalar regression loss.",
+          "evidence": "A reproducible experiment for “Linear algebra and loss intuition”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Linear algebra and loss intuition”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "optimization-02",
+          "title": "Gradient checking and numerical accuracy",
+          "status": "planned",
+          "objective": "Compare autodiff with finite differences over several step sizes.",
+          "prerequisites": [
+            "optimization-01"
+          ],
+          "exercise": "Compare autodiff with finite differences over several step sizes.",
+          "evidence": "A reproducible experiment for “Gradient checking and numerical accuracy”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Gradient checking and numerical accuracy”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "optimization-03",
+          "title": "Write gradient descent yourself",
+          "status": "planned",
+          "objective": "Fit a regression model using explicit parameter updates.",
+          "prerequisites": [
+            "optimization-02"
+          ],
+          "exercise": "Fit a regression model using explicit parameter updates.",
+          "evidence": "A reproducible experiment for “Write gradient descent yourself”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Write gradient descent yourself”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "optimization-04",
+          "title": "Optimize with Optax",
+          "status": "planned",
+          "objective": "Replace the handwritten update with an optimizer and track its state.",
+          "prerequisites": [
+            "optimization-03"
+          ],
+          "exercise": "Replace the handwritten update with an optimizer and track its state.",
+          "evidence": "A reproducible experiment for “Optimize with Optax”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Optimize with Optax”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "networks",
+      "number": "05",
+      "title": "Neural network training",
+      "part": "Training systems",
+      "prerequisitePhaseIds": [
+        "optimization"
+      ],
+      "hardware": "CPU first; accelerator for larger experiments",
+      "project": "A reproducible classifier",
+      "checkpoint": "Keep train and evaluation behavior separate and reproduce metrics from a saved configuration.",
+      "source": "https://flax.readthedocs.io/",
+      "lessons": [
+        {
+          "id": "networks-01",
+          "title": "Build a tiny multilayer perceptron",
+          "status": "planned",
+          "objective": "Implement a small model with explicit parameters before adding a model library.",
+          "prerequisites": [],
+          "exercise": "Implement a small model with explicit parameters before adding a model library.",
+          "evidence": "A reproducible experiment for “Build a tiny multilayer perceptron”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Build a tiny multilayer perceptron”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "networks-02",
+          "title": "Model and state with Flax NNX",
+          "status": "planned",
+          "objective": "Express a model and inspect the distinction between parameters and other state.",
+          "prerequisites": [
+            "networks-01"
+          ],
+          "exercise": "Express a model and inspect the distinction between parameters and other state.",
+          "evidence": "A reproducible experiment for “Model and state with Flax NNX”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Model and state with Flax NNX”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "networks-03",
+          "title": "A compiled train and evaluation step",
+          "status": "planned",
+          "objective": "Build train and eval steps and check that evaluation does not update weights.",
+          "prerequisites": [
+            "networks-02"
+          ],
+          "exercise": "Build train and eval steps and check that evaluation does not update weights.",
+          "evidence": "A reproducible experiment for “A compiled train and evaluation step”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “A compiled train and evaluation step”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "networks-04",
+          "title": "Train a CNN on a small dataset",
+          "status": "planned",
+          "objective": "Train a classifier with a fixed data split and report held-out metrics.",
+          "prerequisites": [
+            "networks-03"
+          ],
+          "exercise": "Train a classifier with a fixed data split and report held-out metrics.",
+          "evidence": "A reproducible experiment for “Train a CNN on a small dataset”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Train a CNN on a small dataset”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "networks-05",
+          "title": "Debug unstable learning",
+          "status": "planned",
+          "objective": "Introduce a bad learning rate and diagnose it using loss and gradient evidence.",
+          "prerequisites": [
+            "networks-04"
+          ],
+          "exercise": "Introduce a bad learning rate and diagnose it using loss and gradient evidence.",
+          "evidence": "A reproducible experiment for “Debug unstable learning”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Debug unstable learning”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "recovery",
+      "number": "06",
+      "title": "Data & checkpoint recovery",
+      "part": "Training systems",
+      "prerequisitePhaseIds": [
+        "networks"
+      ],
+      "hardware": "CPU first; TPU for system measurements",
+      "project": "An interrupted run restored with its full state",
+      "checkpoint": "Compare resumed and uninterrupted runs under a stated determinism tolerance.",
+      "source": "https://orbax.readthedocs.io/en/latest/",
+      "lessons": [
+        {
+          "id": "recovery-01",
+          "title": "Design an input pipeline",
+          "status": "planned",
+          "objective": "Measure data preparation and explain the distinction between data order and model state.",
+          "prerequisites": [],
+          "exercise": "Measure data preparation and explain the distinction between data order and model state.",
+          "evidence": "A reproducible experiment for “Design an input pipeline”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Design an input pipeline”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "recovery-02",
+          "title": "Load, batch, and prefetch with Grain",
+          "status": "planned",
+          "objective": "Build a deterministic input pipeline and check example order.",
+          "prerequisites": [
+            "recovery-01"
+          ],
+          "exercise": "Build a deterministic input pipeline and check example order.",
+          "evidence": "A reproducible experiment for “Load, batch, and prefetch with Grain”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Load, batch, and prefetch with Grain”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "recovery-03",
+          "title": "Save model, optimizer, and random state",
+          "status": "planned",
+          "objective": "Checkpoint all state required for the next training step with Orbax.",
+          "prerequisites": [
+            "recovery-02"
+          ],
+          "exercise": "Checkpoint all state required for the next training step with Orbax.",
+          "evidence": "A reproducible experiment for “Save model, optimizer, and random state”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Save model, optimizer, and random state”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "recovery-04",
+          "title": "Recover data position and resume",
+          "status": "planned",
+          "objective": "Interrupt a run, restore data position where supported, and compare subsequent steps.",
+          "prerequisites": [
+            "recovery-03"
+          ],
+          "exercise": "Interrupt a run, restore data position where supported, and compare subsequent steps.",
+          "evidence": "A reproducible experiment for “Recover data position and resume”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Recover data position and resume”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "recovery-05",
+          "title": "Asynchronous checkpoints and failure boundaries",
+          "status": "planned",
+          "objective": "Simulate an interruption and distinguish a started checkpoint from a completed one.",
+          "prerequisites": [
+            "recovery-04"
+          ],
+          "exercise": "Simulate an interruption and distinguish a started checkpoint from a completed one.",
+          "evidence": "A reproducible experiment for “Asynchronous checkpoints and failure boundaries”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Asynchronous checkpoints and failure boundaries”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "transformers",
+      "number": "07",
+      "title": "Transformers & language models",
+      "part": "Training systems",
+      "prerequisitePhaseIds": [
+        "recovery"
+      ],
+      "hardware": "CPU for small blocks; TPU or GPU for training experiments",
+      "project": "A checkpointed causal language model",
+      "checkpoint": "Verify masking, sequence handling, restoration, and generation before comparing speed.",
+      "source": "https://flax.readthedocs.io/",
+      "lessons": [
+        {
+          "id": "transformers-01",
+          "title": "Attention from small pieces",
+          "status": "planned",
+          "objective": "Implement scaled dot-product attention and test its output shape.",
+          "prerequisites": [],
+          "exercise": "Implement scaled dot-product attention and test its output shape.",
+          "evidence": "A reproducible experiment for “Attention from small pieces”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Attention from small pieces”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transformers-02",
+          "title": "Masking, tokenization, and sequence packing",
+          "status": "planned",
+          "objective": "Construct a causal mask and prevent packed sequences from attending across boundaries.",
+          "prerequisites": [
+            "transformers-01"
+          ],
+          "exercise": "Construct a causal mask and prevent packed sequences from attending across boundaries.",
+          "evidence": "A reproducible experiment for “Masking, tokenization, and sequence packing”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Masking, tokenization, and sequence packing”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transformers-03",
+          "title": "A Transformer block and mixed precision",
+          "status": "planned",
+          "objective": "Build a residual attention block and compare numerical behavior across precision choices.",
+          "prerequisites": [
+            "transformers-02"
+          ],
+          "exercise": "Build a residual attention block and compare numerical behavior across precision choices.",
+          "evidence": "A reproducible experiment for “A Transformer block and mixed precision”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “A Transformer block and mixed precision”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "transformers-04",
+          "title": "Train, checkpoint, and generate",
+          "status": "planned",
+          "objective": "Train a tiny causal model, restore it, and generate from a fixed seed.",
+          "prerequisites": [
+            "transformers-03"
+          ],
+          "exercise": "Train a tiny causal model, restore it, and generate from a fixed seed.",
+          "evidence": "A reproducible experiment for “Train, checkpoint, and generate”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Train, checkpoint, and generate”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "performance",
+      "number": "08",
+      "title": "Performance diagnosis",
+      "part": "Training systems",
+      "prerequisitePhaseIds": [
+        "networks"
+      ],
+      "hardware": "CPU for timing concepts; TPU or GPU for profiling",
+      "project": "A trace-backed before-and-after performance report",
+      "checkpoint": "Separate compilation, execution, input stalls, and synchronization before claiming a speedup.",
+      "source": "https://openxla.org/xprof",
+      "lessons": [
+        {
+          "id": "performance-01",
+          "title": "Benchmark asynchronous work correctly",
+          "status": "planned",
+          "objective": "Warm up a computation and synchronize results before reporting timing.",
+          "prerequisites": [],
+          "exercise": "Warm up a computation and synchronize results before reporting timing.",
+          "evidence": "A reproducible experiment for “Benchmark asynchronous work correctly”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Benchmark asynchronous work correctly”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "performance-02",
+          "title": "Diagnose recompilation and host synchronization",
+          "status": "planned",
+          "objective": "Find a shape-changing call or host read and connect it to observed overhead.",
+          "prerequisites": [
+            "performance-01"
+          ],
+          "exercise": "Find a shape-changing call or host read and connect it to observed overhead.",
+          "evidence": "A reproducible experiment for “Diagnose recompilation and host synchronization”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Diagnose recompilation and host synchronization”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "performance-03",
+          "title": "Read an XProf trace",
+          "status": "planned",
+          "objective": "Capture and annotate a trace showing execution and input behavior.",
+          "prerequisites": [
+            "performance-02"
+          ],
+          "exercise": "Capture and annotate a trace showing execution and input behavior.",
+          "evidence": "A reproducible experiment for “Read an XProf trace”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Read an XProf trace”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "performance-04",
+          "title": "Reason with HLO and the roofline model",
+          "status": "planned",
+          "objective": "Relate a measured bottleneck to arithmetic intensity and program structure.",
+          "prerequisites": [
+            "performance-03"
+          ],
+          "exercise": "Relate a measured bottleneck to arithmetic intensity and program structure.",
+          "evidence": "A reproducible experiment for “Reason with HLO and the roofline model”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Reason with HLO and the roofline model”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "performance-05",
+          "title": "Memory, rematerialization, and optimization tradeoffs",
+          "status": "planned",
+          "objective": "Compare memory and execution time while preserving numerical checks.",
+          "prerequisites": [
+            "performance-04"
+          ],
+          "exercise": "Compare memory and execution time while preserving numerical checks.",
+          "evidence": "A reproducible experiment for “Memory, rematerialization, and optimization tradeoffs”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Memory, rematerialization, and optimization tradeoffs”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "distributed",
+      "number": "09",
+      "title": "Distributed training",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "recovery",
+        "performance"
+      ],
+      "hardware": "Multiple devices; multi-host labs require a cluster",
+      "project": "A resilient sharded training experiment",
+      "checkpoint": "Explain partitioning, communication costs, and recovery behavior with measured evidence.",
+      "source": "https://docs.jax.dev/en/latest/",
+      "lessons": [
+        {
+          "id": "distributed-01",
+          "title": "Arrays, meshes, and sharding",
+          "status": "planned",
+          "objective": "Partition an array over a device mesh and inspect its local shards.",
+          "prerequisites": [],
+          "exercise": "Partition an array over a device mesh and inspect its local shards.",
+          "evidence": "A reproducible experiment for “Arrays, meshes, and sharding”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Arrays, meshes, and sharding”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "distributed-02",
+          "title": "A sharded training step",
+          "status": "planned",
+          "objective": "Run a training step with explicit data and parameter placement.",
+          "prerequisites": [
+            "distributed-01"
+          ],
+          "exercise": "Run a training step with explicit data and parameter placement.",
+          "evidence": "A reproducible experiment for “A sharded training step”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “A sharded training step”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "distributed-03",
+          "title": "Communication-efficient algorithms",
+          "status": "planned",
+          "objective": "Compare two partitioning strategies and account for their communication.",
+          "prerequisites": [
+            "distributed-02"
+          ],
+          "exercise": "Compare two partitioning strategies and account for their communication.",
+          "evidence": "A reproducible experiment for “Communication-efficient algorithms”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Communication-efficient algorithms”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "distributed-04",
+          "title": "Resilient distributed training",
+          "status": "planned",
+          "objective": "Define a restore protocol for model, optimizer, and data state across workers.",
+          "prerequisites": [
+            "distributed-03"
+          ],
+          "exercise": "Define a restore protocol for model, optimizer, and data state across workers.",
+          "evidence": "A reproducible experiment for “Resilient distributed training”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Resilient distributed training”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "science",
+      "number": "10",
+      "title": "Scientific computing",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "optimization"
+      ],
+      "hardware": "CPU first; TPU for scaled simulation",
+      "project": "A differentiable inverse problem",
+      "checkpoint": "Recover a known physical parameter and report error, stability, and gradient checks.",
+      "source": "https://docs.kidger.site/diffrax/",
+      "lessons": [
+        {
+          "id": "science-01",
+          "title": "A functional physical simulation",
+          "status": "planned",
+          "objective": "Build a small dynamical simulation with explicit state.",
+          "prerequisites": [],
+          "exercise": "Build a small dynamical simulation with explicit state.",
+          "evidence": "A reproducible experiment for “A functional physical simulation”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “A functional physical simulation”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "science-02",
+          "title": "Vectorize trajectories and scan time",
+          "status": "planned",
+          "objective": "Batch initial conditions and scan the time evolution.",
+          "prerequisites": [
+            "science-01"
+          ],
+          "exercise": "Batch initial conditions and scan the time evolution.",
+          "evidence": "A reproducible experiment for “Vectorize trajectories and scan time”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Vectorize trajectories and scan time”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "science-03",
+          "title": "Differentiate through a solver",
+          "status": "planned",
+          "objective": "Use a differentiable solve and check the gradient of a trajectory-based loss.",
+          "prerequisites": [
+            "science-02"
+          ],
+          "exercise": "Use a differentiable solve and check the gradient of a trajectory-based loss.",
+          "evidence": "A reproducible experiment for “Differentiate through a solver”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Differentiate through a solver”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "science-04",
+          "title": "Fit parameters and scale the simulation",
+          "status": "planned",
+          "objective": "Recover a hidden parameter, validate it on held-out trajectories, and measure batching behavior.",
+          "prerequisites": [
+            "science-03"
+          ],
+          "exercise": "Recover a hidden parameter, validate it on held-out trajectories, and measure batching behavior.",
+          "evidence": "A reproducible experiment for “Fit parameters and scale the simulation”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Fit parameters and scale the simulation”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "probability",
+      "number": "11",
+      "title": "Probabilistic modeling",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "optimization"
+      ],
+      "hardware": "CPU",
+      "project": "A Bayesian model with diagnostic evidence",
+      "checkpoint": "Report sampler diagnostics and distinguish uncertainty from predictive error.",
+      "source": "https://num.pyro.ai/en/stable/",
+      "lessons": [
+        {
+          "id": "probability-01",
+          "title": "Distributions and sampling",
+          "status": "planned",
+          "objective": "Generate samples and compare empirical moments with a known distribution.",
+          "prerequisites": [],
+          "exercise": "Generate samples and compare empirical moments with a known distribution.",
+          "evidence": "A reproducible experiment for “Distributions and sampling”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Distributions and sampling”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "probability-02",
+          "title": "Build a Bayesian regression",
+          "status": "planned",
+          "objective": "Specify a prior and likelihood and inspect posterior predictions.",
+          "prerequisites": [
+            "probability-01"
+          ],
+          "exercise": "Specify a prior and likelihood and inspect posterior predictions.",
+          "evidence": "A reproducible experiment for “Build a Bayesian regression”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Build a Bayesian regression”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "probability-03",
+          "title": "Hamiltonian Monte Carlo and sampler diagnostics",
+          "status": "planned",
+          "objective": "Run inference and diagnose convergence before trusting summaries.",
+          "prerequisites": [
+            "probability-02"
+          ],
+          "exercise": "Run inference and diagnose convergence before trusting summaries.",
+          "evidence": "A reproducible experiment for “Hamiltonian Monte Carlo and sampler diagnostics”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Hamiltonian Monte Carlo and sampler diagnostics”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "probability-04",
+          "title": "Variational inference and model checking",
+          "status": "planned",
+          "objective": "Compare an approximate posterior and test posterior predictions.",
+          "prerequisites": [
+            "probability-03"
+          ],
+          "exercise": "Compare an approximate posterior and test posterior predictions.",
+          "evidence": "A reproducible experiment for “Variational inference and model checking”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Variational inference and model checking”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "rl",
+      "number": "12",
+      "title": "Reinforcement learning",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "networks"
+      ],
+      "hardware": "CPU for small environments; accelerator for batched rollouts",
+      "project": "An evaluated policy in a functional environment",
+      "checkpoint": "Compare a trained policy to a baseline across several seeds and report variability.",
+      "source": "https://github.com/FLAIROx/Jumanji",
+      "lessons": [
+        {
+          "id": "rl-01",
+          "title": "Write a functional environment",
+          "status": "planned",
+          "objective": "Express environment transitions and resets as explicit functions.",
+          "prerequisites": [],
+          "exercise": "Express environment transitions and resets as explicit functions.",
+          "evidence": "A reproducible experiment for “Write a functional environment”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Write a functional environment”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "rl-02",
+          "title": "Batch environments and scan rollouts",
+          "status": "planned",
+          "objective": "Run batched environments with explicit per-environment keys.",
+          "prerequisites": [
+            "rl-01"
+          ],
+          "exercise": "Run batched environments with explicit per-environment keys.",
+          "evidence": "A reproducible experiment for “Batch environments and scan rollouts”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Batch environments and scan rollouts”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "rl-03",
+          "title": "Policy gradients and PPO",
+          "status": "planned",
+          "objective": "Build a policy-gradient baseline before adding a clipped update objective.",
+          "prerequisites": [
+            "rl-02"
+          ],
+          "exercise": "Build a policy-gradient baseline before adding a clipped update objective.",
+          "evidence": "A reproducible experiment for “Policy gradients and PPO”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Policy gradients and PPO”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "rl-04",
+          "title": "Evaluate agents across seeds",
+          "status": "planned",
+          "objective": "Report returns for multiple independent seeds and compare against a baseline.",
+          "prerequisites": [
+            "rl-03"
+          ],
+          "exercise": "Report returns for multiple independent seeds and compare against a baseline.",
+          "evidence": "A reproducible experiment for “Evaluate agents across seeds”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Evaluate agents across seeds”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "kernels",
+      "number": "13",
+      "title": "Pallas kernels",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "distributed"
+      ],
+      "hardware": "Supported GPU or TPU; target-specific labs",
+      "project": "A measured custom kernel with correctness checks",
+      "checkpoint": "Compare against a reference across shapes and justify each optimization with evidence.",
+      "source": "https://docs.jax.dev/en/latest/pallas/index.html",
+      "lessons": [
+        {
+          "id": "kernels-01",
+          "title": "Pallas grids and BlockSpecs",
+          "status": "planned",
+          "objective": "Map a small array operation to a kernel grid and check its result.",
+          "prerequisites": [],
+          "exercise": "Map a small array operation to a kernel grid and check its result.",
+          "evidence": "A reproducible experiment for “Pallas grids and BlockSpecs”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Pallas grids and BlockSpecs”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "kernels-02",
+          "title": "A first TPU kernel",
+          "status": "planned",
+          "objective": "Implement and validate a target-specific kernel on supported hardware.",
+          "prerequisites": [
+            "kernels-01"
+          ],
+          "exercise": "Implement and validate a target-specific kernel on supported hardware.",
+          "evidence": "A reproducible experiment for “A first TPU kernel”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “A first TPU kernel”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "kernels-03",
+          "title": "Tiling, memory, and pipelining",
+          "status": "planned",
+          "objective": "Compare tiling choices and explain their memory and execution tradeoffs.",
+          "prerequisites": [
+            "kernels-02"
+          ],
+          "exercise": "Compare tiling choices and explain their memory and execution tradeoffs.",
+          "evidence": "A reproducible experiment for “Tiling, memory, and pipelining”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Tiling, memory, and pipelining”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "kernels-04",
+          "title": "Iterate with correctness and performance evidence",
+          "status": "planned",
+          "objective": "Optimize a kernel while checking reference agreement over representative shapes.",
+          "prerequisites": [
+            "kernels-03"
+          ],
+          "exercise": "Optimize a kernel while checking reference agreement over representative shapes.",
+          "evidence": "A reproducible experiment for “Iterate with correctness and performance evidence”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Iterate with correctness and performance evidence”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "internals",
+      "number": "14",
+      "title": "Autodiff & JAX internals",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "optimization"
+      ],
+      "hardware": "CPU",
+      "project": "A custom derivative with an explained jaxpr",
+      "checkpoint": "Explain tracing and verify the derivative rule numerically.",
+      "source": "https://docs.jax.dev/en/latest/",
+      "lessons": [
+        {
+          "id": "internals-01",
+          "title": "Read your first jaxpr",
+          "status": "planned",
+          "objective": "Inspect a small transformed function and identify its operations.",
+          "prerequisites": [],
+          "exercise": "Inspect a small transformed function and identify its operations.",
+          "evidence": "A reproducible experiment for “Read your first jaxpr”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Read your first jaxpr”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "internals-02",
+          "title": "JVPs, VJPs, and higher-order derivatives",
+          "status": "planned",
+          "objective": "Compute directional derivatives and compare forward and reverse formulations.",
+          "prerequisites": [
+            "internals-01"
+          ],
+          "exercise": "Compute directional derivatives and compare forward and reverse formulations.",
+          "evidence": "A reproducible experiment for “JVPs, VJPs, and higher-order derivatives”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “JVPs, VJPs, and higher-order derivatives”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "internals-03",
+          "title": "Custom derivative rules",
+          "status": "planned",
+          "objective": "Define a custom derivative for a small function and check it numerically.",
+          "prerequisites": [
+            "internals-02"
+          ],
+          "exercise": "Define a custom derivative for a small function and check it numerically.",
+          "evidence": "A reproducible experiment for “Custom derivative rules”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Custom derivative rules”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "internals-04",
+          "title": "Lowering, compilation, and a tiny transformation",
+          "status": "planned",
+          "objective": "Inspect a lowered program and implement a minimal transformation exercise.",
+          "prerequisites": [
+            "internals-03"
+          ],
+          "exercise": "Inspect a lowered program and implement a minimal transformation exercise.",
+          "evidence": "A reproducible experiment for “Lowering, compilation, and a tiny transformation”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Lowering, compilation, and a tiny transformation”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "deployment",
+      "number": "15",
+      "title": "Inference & model adaptation",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "recovery",
+        "performance"
+      ],
+      "hardware": "CPU for bridges; deployment-specific hardware for serving",
+      "project": "An inference artifact and capacity plan",
+      "checkpoint": "Measure latency and throughput under a stated workload and test the exported artifact.",
+      "source": "https://docs.jax.dev/en/latest/",
+      "lessons": [
+        {
+          "id": "deployment-01",
+          "title": "Keras and PyTorch bridges to explicit JAX",
+          "status": "planned",
+          "objective": "Map familiar model and optimizer state to explicit JAX concepts; distinguish the PyTorch/XLA route.",
+          "prerequisites": [],
+          "exercise": "Map familiar model and optimizer state to explicit JAX concepts; distinguish the PyTorch/XLA route.",
+          "evidence": "A reproducible experiment for “Keras and PyTorch bridges to explicit JAX”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Keras and PyTorch bridges to explicit JAX”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "deployment-02",
+          "title": "Adapt a pretrained model and choose a post-training objective",
+          "status": "planned",
+          "objective": "Separate supervised adaptation from preference or RL objectives and specify an evaluation plan.",
+          "prerequisites": [
+            "deployment-01"
+          ],
+          "exercise": "Separate supervised adaptation from preference or RL objectives and specify an evaluation plan.",
+          "evidence": "A reproducible experiment for “Adapt a pretrained model and choose a post-training objective”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Adapt a pretrained model and choose a post-training objective”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "deployment-03",
+          "title": "Export and serve a trained computation",
+          "status": "planned",
+          "objective": "Export a computation and verify predictions in the serving environment.",
+          "prerequisites": [
+            "deployment-02"
+          ],
+          "exercise": "Export a computation and verify predictions in the serving environment.",
+          "evidence": "A reproducible experiment for “Export and serve a trained computation”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Export and serve a trained computation”, identify one failure case, and show how you verified the fix."
+        },
+        {
+          "id": "deployment-04",
+          "title": "Inference capacity, batching, and autoscaling",
+          "status": "planned",
+          "objective": "Measure latency and throughput across batch sizes and derive a capacity plan.",
+          "prerequisites": [
+            "deployment-03"
+          ],
+          "exercise": "Measure latency and throughput across batch sizes and derive a capacity plan.",
+          "evidence": "A reproducible experiment for “Inference capacity, batching, and autoscaling”: code, environment, observed output, and an explanation of one deliberate change.",
+          "check": "Explain your result for “Inference capacity, batching, and autoscaling”, identify one failure case, and show how you verified the fix."
+        }
+      ]
+    },
+    {
+      "id": "operations",
+      "number": "16",
+      "title": "Workload operations",
+      "part": "Specializations",
+      "prerequisitePhaseIds": [
+        "distributed"
+      ],
+      "hardware": "Multi-device runtime; cluster exercises need controlled infrastructure access",
+      "project": "An observable, restartable accelerator job with a tested recovery runbook",
+      "checkpoint": "Diagnose a failed or stalled job, restore it correctly, and justify its resource plan from recorded measurements.",
+      "source": "https://docs.jax.dev/en/latest/",
+      "lessons": [
+        {
+          "id": "operations-01",
+          "title": "Accelerator jobs and runtime lifecycle",
+          "status": "planned",
+          "objective": "Define a job configuration, device requirements, and a restartable entry point.",
+          "prerequisites": [],
+          "exercise": "Define a job configuration, device requirements, and a restartable entry point.",
+          "evidence": "An operational artifact for “Accelerator jobs and runtime lifecycle”: configuration, observed workload output, and a tested failure or capacity scenario.",
+          "check": "Explain the assumptions behind “Accelerator jobs and runtime lifecycle” and demonstrate the behavior under one changed or failed condition."
+        },
+        {
+          "id": "operations-02",
+          "title": "Health, logs, and workload observability",
+          "status": "planned",
+          "objective": "Record progress, throughput, failures, and checkpoint freshness so a stalled job can be diagnosed.",
+          "prerequisites": [
+            "operations-01"
+          ],
+          "exercise": "Record progress, throughput, failures, and checkpoint freshness so a stalled job can be diagnosed.",
+          "evidence": "An operational artifact for “Health, logs, and workload observability”: configuration, observed workload output, and a tested failure or capacity scenario.",
+          "check": "Explain the assumptions behind “Health, logs, and workload observability” and demonstrate the behavior under one changed or failed condition."
+        },
+        {
+          "id": "operations-03",
+          "title": "Failure recovery and operational runbooks",
+          "status": "planned",
+          "objective": "Write and test a runbook for a worker failure using complete state recovery.",
+          "prerequisites": [
+            "operations-02"
+          ],
+          "exercise": "Write and test a runbook for a worker failure using complete state recovery.",
+          "evidence": "An operational artifact for “Failure recovery and operational runbooks”: configuration, observed workload output, and a tested failure or capacity scenario.",
+          "check": "Explain the assumptions behind “Failure recovery and operational runbooks” and demonstrate the behavior under one changed or failed condition."
+        },
+        {
+          "id": "operations-04",
+          "title": "Changes, rollback, and artifact provenance",
+          "status": "planned",
+          "objective": "Track configuration and artifact versions and define a rollback for a failed workload change.",
+          "prerequisites": [
+            "operations-03"
+          ],
+          "exercise": "Track configuration and artifact versions and define a rollback for a failed workload change.",
+          "evidence": "An operational artifact for “Changes, rollback, and artifact provenance”: configuration, observed workload output, and a tested failure or capacity scenario.",
+          "check": "Explain the assumptions behind “Changes, rollback, and artifact provenance” and demonstrate the behavior under one changed or failed condition."
+        },
+        {
+          "id": "operations-05",
+          "title": "Capacity, utilization, and operating cost",
+          "status": "planned",
+          "objective": "Estimate resource needs from measured utilization and workload duration; explain the assumptions.",
+          "prerequisites": [
+            "operations-04"
+          ],
+          "exercise": "Estimate resource needs from measured utilization and workload duration; explain the assumptions.",
+          "evidence": "An operational artifact for “Capacity, utilization, and operating cost”: configuration, observed workload output, and a tested failure or capacity scenario.",
+          "check": "Explain the assumptions behind “Capacity, utilization, and operating cost” and demonstrate the behavior under one changed or failed condition."
+        }
+      ]
+    }
+  ],
+  "pathways": [
+    {
+      "id": "foundations",
+      "title": "Start with JAX",
+      "description": "Turn familiar Python into functions you can differentiate, batch, and compile.",
+      "prerequisites": "Python basics and a little NumPy",
+      "outcome": "A fitted regression model",
+      "libraries": "jax · jax.numpy",
+      "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization"
+      ],
+      "capstone": {
+        "title": "A fitted regression model",
+        "status": "planned",
+        "assessment": "Show a tested loss, numerically checked gradients, and a reproducible fit.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "models",
-    "title": "Train neural networks",
-    "description": "Go from a handwritten training loop to models you can save, evaluate, and extend.",
-    "prerequisites": "Shared foundations",
-    "outcome": "A reproducible image classifier",
-    "libraries": "Flax \u00b7 Optax \u00b7 Orbax",
-    "source": "https://flax.readthedocs.io/",
-    "lessons": [
-      {
-        "id": "models-0",
-        "title": "Build a tiny multilayer perceptron",
-        "status": "planned"
-      },
-      {
-        "id": "models-1",
-        "title": "Optimize with Optax",
-        "status": "planned"
-      },
-      {
-        "id": "models-2",
-        "title": "Model state with Flax NNX",
-        "status": "planned"
-      },
-      {
-        "id": "models-3",
-        "title": "Build a reliable input pipeline",
-        "status": "planned"
-      },
-      {
-        "id": "models-4",
-        "title": "Evaluate and checkpoint",
-        "status": "planned"
-      },
-      {
-        "id": "models-5",
-        "title": "Attention from small pieces",
-        "status": "planned"
+    },
+    {
+      "id": "models",
+      "title": "Train neural networks",
+      "description": "Go from a handwritten training loop to models you can save, evaluate, and extend.",
+      "prerequisites": "Shared foundations",
+      "outcome": "A checkpointed classifier or tiny language model",
+      "libraries": "Flax · Optax · Orbax",
+      "source": "https://flax.readthedocs.io/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "transformers"
+      ],
+      "capstone": {
+        "title": "A checkpointed classifier or tiny language model",
+        "status": "planned",
+        "assessment": "Demonstrate evaluation, restore behavior, and predictions from a saved artifact.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "science",
-    "title": "Simulate and discover",
-    "description": "Differentiate through numerical models and fit them to observations.",
-    "prerequisites": "Shared foundations and calculus",
-    "outcome": "Fit the parameters of a dynamical system",
-    "libraries": "Diffrax \u00b7 Equinox \u00b7 Lineax",
-    "source": "https://docs.kidger.site/diffrax/",
-    "lessons": [
-      {
-        "id": "science-0",
-        "title": "Solve your first differential equation",
-        "status": "planned"
-      },
-      {
-        "id": "science-1",
-        "title": "Differentiate through a solver",
-        "status": "planned"
-      },
-      {
-        "id": "science-2",
-        "title": "Fit a physical model",
-        "status": "planned"
-      },
-      {
-        "id": "science-3",
-        "title": "Neural differential equations",
-        "status": "planned"
-      },
-      {
-        "id": "science-4",
-        "title": "Linear solves and numerical accuracy",
-        "status": "planned"
+    },
+    {
+      "id": "science",
+      "title": "Simulate and discover",
+      "description": "Differentiate through numerical models and fit them to observations.",
+      "prerequisites": "Shared foundations and calculus",
+      "outcome": "A scientific inverse problem",
+      "libraries": "Diffrax · Equinox · Lineax",
+      "source": "https://docs.kidger.site/diffrax/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "science"
+      ],
+      "capstone": {
+        "title": "A scientific inverse problem",
+        "status": "planned",
+        "assessment": "Recover a known parameter and validate predictions on unseen trajectories.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "probability",
-    "title": "Model uncertainty",
-    "description": "Make predictions that describe what you know\u2014and what you do not.",
-    "prerequisites": "Shared foundations and probability",
-    "outcome": "A Bayesian regression with uncertainty intervals",
-    "libraries": "NumPyro \u00b7 BlackJAX",
-    "source": "https://num.pyro.ai/en/stable/",
-    "lessons": [
-      {
-        "id": "probability-0",
-        "title": "Distributions and sampling",
-        "status": "planned"
-      },
-      {
-        "id": "probability-1",
-        "title": "Build a Bayesian regression",
-        "status": "planned"
-      },
-      {
-        "id": "probability-2",
-        "title": "Understand Hamiltonian Monte Carlo",
-        "status": "planned"
-      },
-      {
-        "id": "probability-3",
-        "title": "Diagnose your sampler",
-        "status": "planned"
-      },
-      {
-        "id": "probability-4",
-        "title": "Variational inference",
-        "status": "planned"
+    },
+    {
+      "id": "probability",
+      "title": "Model uncertainty",
+      "description": "Make predictions that describe what you know—and what you do not.",
+      "prerequisites": "Shared foundations and probability",
+      "outcome": "A checked Bayesian regression",
+      "libraries": "NumPyro · BlackJAX",
+      "source": "https://num.pyro.ai/en/stable/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "probability"
+      ],
+      "capstone": {
+        "title": "A checked Bayesian regression",
+        "status": "planned",
+        "assessment": "Submit posterior predictive checks and sampler or approximation diagnostics.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "rl",
-    "title": "Learn by interacting",
-    "description": "Build environments and train agents with batches of simulated experience.",
-    "prerequisites": "Shared foundations and basic ML",
-    "outcome": "An agent learning in a small environment",
-    "libraries": "JAX \u00b7 Gymnax \u00b7 Jumanji",
-    "source": "https://github.com/FLAIROx/Jumanji",
-    "lessons": [
-      {
-        "id": "rl-0",
-        "title": "Write a functional environment",
-        "status": "planned"
-      },
-      {
-        "id": "rl-1",
-        "title": "Batch rollouts",
-        "status": "planned"
-      },
-      {
-        "id": "rl-2",
-        "title": "A policy-gradient baseline",
-        "status": "planned"
-      },
-      {
-        "id": "rl-3",
-        "title": "Build a PPO training loop",
-        "status": "planned"
-      },
-      {
-        "id": "rl-4",
-        "title": "Evaluate across random seeds",
-        "status": "planned"
+    },
+    {
+      "id": "rl",
+      "title": "Learn by interacting",
+      "description": "Build environments and train agents with batches of simulated experience.",
+      "prerequisites": "Shared foundations and basic ML",
+      "outcome": "An evaluated policy",
+      "libraries": "JAX · Gymnax · Jumanji",
+      "source": "https://github.com/FLAIROx/Jumanji",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "rl"
+      ],
+      "capstone": {
+        "title": "An evaluated policy",
+        "status": "planned",
+        "assessment": "Compare trained and baseline returns across independent seeds.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "scale",
-    "title": "Make it fast. Make it scale.",
-    "description": "Measure what matters, then move from one device to many.",
-    "prerequisites": "Shared foundations and a working training loop",
-    "outcome": "A measured, sharded training experiment",
-    "libraries": "JAX sharding \u00b7 profiling \u00b7 Pallas",
-    "source": "https://docs.jax.dev/en/latest/",
-    "lessons": [
-      {
-        "id": "scale-0",
-        "title": "Benchmark asynchronous work",
-        "status": "planned"
-      },
-      {
-        "id": "scale-1",
-        "title": "Find recompilation and memory costs",
-        "status": "planned"
-      },
-      {
-        "id": "scale-2",
-        "title": "Shard arrays across a device mesh",
-        "status": "planned"
-      },
-      {
-        "id": "scale-3",
-        "title": "Scale a training step",
-        "status": "planned"
-      },
-      {
-        "id": "scale-4",
-        "title": "Write a first Pallas kernel",
-        "status": "planned"
+    },
+    {
+      "id": "scale",
+      "title": "Make it fast. Make it scale.",
+      "description": "Measure what matters, then move from one device to many.",
+      "prerequisites": "Shared foundations and a working training loop",
+      "outcome": "A measured sharded workload",
+      "libraries": "JAX sharding · profiling · Pallas",
+      "source": "https://docs.jax.dev/en/latest/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "distributed",
+        "kernels"
+      ],
+      "capstone": {
+        "title": "A measured sharded workload",
+        "status": "planned",
+        "assessment": "Submit correctness checks, a trace, partitioning decisions, and a performance comparison.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "internals",
-    "title": "Understand JAX itself",
-    "description": "Look beneath the transformations and learn how a Python function becomes a program.",
-    "prerequisites": "Shared foundations and advanced autodiff",
-    "outcome": "Inspect a jaxpr and define a custom derivative",
-    "libraries": "jaxpr \u00b7 autodiff \u00b7 XLA",
-    "source": "https://docs.jax.dev/en/latest/",
-    "lessons": [
-      {
-        "id": "internals-0",
-        "title": "Read your first jaxpr",
-        "status": "planned"
-      },
-      {
-        "id": "internals-1",
-        "title": "JVPs and VJPs",
-        "status": "planned"
-      },
-      {
-        "id": "internals-2",
-        "title": "Custom derivative rules",
-        "status": "planned"
-      },
-      {
-        "id": "internals-3",
-        "title": "Lowering and compilation",
-        "status": "planned"
-      },
-      {
-        "id": "internals-4",
-        "title": "Build a tiny transformation",
-        "status": "planned"
+    },
+    {
+      "id": "internals",
+      "title": "Understand JAX itself",
+      "description": "Look beneath the transformations and learn how a Python function becomes a program.",
+      "prerequisites": "Shared foundations and advanced autodiff",
+      "outcome": "An explained transformation and custom derivative",
+      "libraries": "jaxpr · autodiff · XLA",
+      "source": "https://docs.jax.dev/en/latest/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "internals"
+      ],
+      "capstone": {
+        "title": "An explained transformation and custom derivative",
+        "status": "planned",
+        "assessment": "Connect a jaxpr to your function and numerically verify the derivative rule.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "tpu",
-    "title": "Build a TPU training system",
-    "description": "Connect the foundations to reproducible training, failure recovery, and measured optimization.",
-    "prerequisites": "Shared foundations and basic machine learning",
-    "outcome": "A training run you can interrupt, restore, and profile",
-    "libraries": "Flax NNX \u00b7 Optax \u00b7 Grain \u00b7 Orbax \u00b7 XProf",
-    "source": "https://docs.jax.dev/en/latest/",
-    "lessons": [
-      {
-        "id": "tpu-0",
-        "title": "TPU runtime setup and device checks",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-1",
-        "title": "JIT, tracing, static arguments, and recompilation",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-2",
-        "title": "Autodiff: value_and_grad, JVPs, VJPs, and gradient checks",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-3",
-        "title": "Vectorization: nested vmap and per-example gradients",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-4",
-        "title": "Compiled loops, state, and PRNG discipline",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-5",
-        "title": "Flax NNX and Optax training system",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-6",
-        "title": "Grain and Orbax reproducible recovery",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-7",
-        "title": "Build and benchmark a Transformer block",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-8",
-        "title": "Profile and optimize with XProf",
-        "status": "planned"
-      },
-      {
-        "id": "tpu-9",
-        "title": "Capstone: interrupt, recover, and explain performance",
-        "status": "planned"
+    },
+    {
+      "id": "tpu",
+      "title": "Build a TPU training system",
+      "description": "Connect the foundations to reproducible training, failure recovery, and measured optimization.",
+      "prerequisites": "Shared foundations and basic machine learning",
+      "outcome": "From notebook to training system",
+      "libraries": "Flax NNX · Optax · Grain · Orbax · XProf",
+      "source": "https://docs.jax.dev/en/latest/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "transformers",
+        "performance"
+      ],
+      "capstone": {
+        "title": "From notebook to training system",
+        "status": "planned",
+        "assessment": "Interrupt, restore, and profile a seeded training run; explain correctness and performance evidence.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  },
-  {
-    "id": "ship",
-    "title": "Ship and adapt JAX workloads",
-    "description": "Move an experiment into a usable system, or bring your existing NumPy and framework experience along.",
-    "prerequisites": "Shared foundations and a working model",
-    "outcome": "An inference plan with measured latency and capacity",
-    "libraries": "JAX export \u00b7 serving \u00b7 framework bridges",
-    "source": "https://docs.jax.dev/en/latest/",
-    "lessons": [
-      {
-        "id": "ship-0",
-        "title": "From NumPy to transformed JAX",
-        "status": "planned"
-      },
-      {
-        "id": "ship-1",
-        "title": "From Keras to explicit JAX state",
-        "status": "planned"
-      },
-      {
-        "id": "ship-2",
-        "title": "PyTorch and XLA: understand the bridge",
-        "status": "planned"
-      },
-      {
-        "id": "ship-3",
-        "title": "Export and serve a trained model",
-        "status": "planned"
-      },
-      {
-        "id": "ship-4",
-        "title": "Measure inference latency and capacity",
-        "status": "planned"
-      },
-      {
-        "id": "ship-5",
-        "title": "Plan batching and autoscaling",
-        "status": "planned"
+    },
+    {
+      "id": "ship",
+      "title": "Ship and adapt JAX workloads",
+      "description": "Move an experiment into a usable system, or bring your existing NumPy and framework experience along.",
+      "prerequisites": "Shared foundations and a working model",
+      "outcome": "A served model with a capacity plan",
+      "libraries": "JAX export · serving · framework bridges",
+      "source": "https://docs.jax.dev/en/latest/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "deployment"
+      ],
+      "capstone": {
+        "title": "A served model with a capacity plan",
+        "status": "planned",
+        "assessment": "Verify exported predictions and justify batching and capacity using measured workload results.",
+        "evidence": [
+          "Runnable code and environment specification",
+          "Observed output and correctness checks",
+          "A short explanation of decisions and limitations"
+        ]
       }
-    ]
-  }
-]
+    },
+    {
+      "id": "ops",
+      "title": "Operate JAX workloads",
+      "description": "Connect repeatable jobs, data and checkpoint recovery, observability, and accelerator capacity into an operational workflow.",
+      "prerequisites": "Shared foundations and a runnable training system",
+      "outcome": "An observable accelerator workload with a tested recovery runbook",
+      "libraries": "JAX distributed · Grain · Orbax · XProf",
+      "source": "https://docs.jax.dev/en/latest/",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "distributed",
+        "operations"
+      ],
+      "capstone": {
+        "title": "Operate and recover an accelerator job",
+        "status": "planned",
+        "assessment": "Run a controlled failure drill, identify it from workload signals, restore full state, and explain the capacity and rollback plan.",
+        "evidence": [
+          "Versioned job configuration and artifact provenance",
+          "Logs, workload measurements, and checkpoint evidence",
+          "Tested failure/recovery runbook and capacity assumptions"
+        ]
+      }
+    }
+  ],
+  "notebookIntegration": [
+    {
+      "legacy": "Notebook 1: Flax NNX + Optax training system",
+      "phaseId": "networks",
+      "status": "Source pending"
+    },
+    {
+      "legacy": "Notebook 2: Grain + Orbax reproducible training",
+      "phaseId": "recovery",
+      "status": "Source pending"
+    },
+    {
+      "legacy": "Notebook 3: XProf performance",
+      "phaseId": "performance",
+      "status": "Source pending"
+    }
+  ],
+  "roles": [
+    {
+      "id": "training-engineer",
+      "title": "ML & training engineer",
+      "headline": "Build models that train reliably.",
+      "description": "Turn a model idea into a tested training system, from the first update to recovery after an interruption.",
+      "defaultPathwayId": "tpu",
+      "pathwayIds": [
+        "models",
+        "tpu"
+      ],
+      "responsibilities": [
+        "Build and evaluate neural networks",
+        "Design data pipelines and resumable training",
+        "Debug losses, state, and model quality"
+      ],
+      "skills": [
+        "Flax NNX and explicit state",
+        "Optax and train/eval steps",
+        "Grain, Orbax, and XProf"
+      ],
+      "portfolio": "A seeded training system with held-out evaluation, complete checkpoint recovery, and a performance report.",
+      "readiness": "Demonstrate that your model trains, evaluates, resumes correctly, and produces reproducible results."
+    },
+    {
+      "id": "research-engineer",
+      "title": "Research engineer",
+      "headline": "Turn mathematical ideas into experiments.",
+      "description": "Implement a method, inspect its gradients, and test whether the evidence supports the idea.",
+      "defaultPathwayId": "internals",
+      "pathwayIds": [
+        "internals",
+        "probability"
+      ],
+      "responsibilities": [
+        "Prototype differentiable algorithms",
+        "Investigate uncertainty and inference",
+        "Run controlled experiments and numerical checks"
+      ],
+      "skills": [
+        "JVPs, VJPs, and custom derivatives",
+        "jaxpr and program inspection",
+        "NumPyro and sampler diagnostics"
+      ],
+      "portfolio": "A small research implementation with checked gradients or posterior diagnostics, baselines, and reproducible results.",
+      "readiness": "Explain the assumptions of your method and support a conclusion with correctness checks and an appropriate baseline."
+    },
+    {
+      "id": "scientific-ml",
+      "title": "Scientific ML engineer",
+      "headline": "Simulate systems. Learn their hidden parameters.",
+      "description": "Use differentiable computing to connect physical models, observations, and learned components.",
+      "defaultPathwayId": "science",
+      "pathwayIds": [
+        "science"
+      ],
+      "responsibilities": [
+        "Build and batch numerical simulations",
+        "Differentiate through dynamics and solvers",
+        "Recover parameters from observed trajectories"
+      ],
+      "skills": [
+        "scan and batched simulation",
+        "Diffrax and differentiable solvers",
+        "Numerical accuracy and inverse problems"
+      ],
+      "portfolio": "A differentiable inverse problem that recovers a physical parameter and predicts held-out trajectories.",
+      "readiness": "Verify parameter recovery, gradient accuracy, and simulation stability on a stated test problem."
+    },
+    {
+      "id": "rl-engineer",
+      "title": "RL engineer",
+      "headline": "Build agents that learn by interacting.",
+      "description": "Connect functional environments, batched experience, and policy updates into a repeatable learning experiment.",
+      "defaultPathwayId": "rl",
+      "pathwayIds": [
+        "rl"
+      ],
+      "responsibilities": [
+        "Build reproducible environments and rollouts",
+        "Implement and diagnose policy updates",
+        "Evaluate agents across independent seeds"
+      ],
+      "skills": [
+        "Vectorized environments and PRNG",
+        "scan-based rollouts",
+        "Policy gradients and PPO"
+      ],
+      "portfolio": "A trained policy compared with a simple baseline across multiple seeds, with reproducible learning curves.",
+      "readiness": "Show that the evaluation measures policy improvement rather than a lucky seed or a changed environment."
+    },
+    {
+      "id": "performance-engineer",
+      "title": "Accelerator & performance engineer",
+      "headline": "Find bottlenecks. Scale the right computation.",
+      "description": "Explain where time and memory go, then improve a workload with evidence rather than guesses.",
+      "defaultPathwayId": "scale",
+      "pathwayIds": [
+        "scale"
+      ],
+      "responsibilities": [
+        "Diagnose compute, input, and communication bottlenecks",
+        "Partition workloads across devices",
+        "Optimize custom kernels when justified"
+      ],
+      "skills": [
+        "XProf, HLO, and roofline reasoning",
+        "Meshes, sharding, and distributed recovery",
+        "Pallas and reference correctness checks"
+      ],
+      "portfolio": "A sharded workload or custom kernel with trace-backed analysis, correctness checks, and a measured speed comparison.",
+      "readiness": "Preserve correctness, separate compile time from execution, and justify the improvement using workload measurements."
+    },
+    {
+      "id": "inference-engineer",
+      "title": "Inference & deployment engineer",
+      "headline": "Make a trained model usable.",
+      "description": "Bridge experiments and deployed workloads, with tested predictions and a capacity plan grounded in measurements.",
+      "defaultPathwayId": "ship",
+      "pathwayIds": [
+        "ship"
+      ],
+      "responsibilities": [
+        "Adapt and export trained computations",
+        "Measure serving latency and throughput",
+        "Plan batching, capacity, and rollout behavior"
+      ],
+      "skills": [
+        "Framework and state bridges",
+        "JAX export and artifact verification",
+        "Batching and capacity analysis"
+      ],
+      "portfolio": "A verified inference artifact with a workload definition, latency/throughput measurements, and a batching plan.",
+      "readiness": "Reproduce exported predictions and defend the serving plan under a clearly stated workload."
+    },
+    {
+      "id": "operations-engineer",
+      "title": "JAX / accelerator operations engineer",
+      "headline": "Keep real workloads observable and recoverable.",
+      "description": "Make accelerator jobs reproducible, diagnose failures, and plan resources for dependable operation.",
+      "defaultPathwayId": "ops",
+      "pathwayIds": [
+        "ops",
+        "scale"
+      ],
+      "responsibilities": [
+        "Manage accelerator jobs and runtime lifecycle",
+        "Monitor throughput, stalls, and checkpoint health",
+        "Test failure recovery and plan capacity"
+      ],
+      "skills": [
+        "Distributed JAX and workload configuration",
+        "Grain, Orbax, and recovery protocols",
+        "Profiling, observability, and operational runbooks"
+      ],
+      "portfolio": "A restartable accelerator workload with logs, a tested recovery runbook, and a measured resource plan.",
+      "readiness": "Detect and diagnose a controlled failure, restore full workload state, and explain operational tradeoffs."
+    }
+  ],
+  "domains": [
+    {
+      "id": "training",
+      "title": "Training & model development",
+      "headline": "Build a model that learns.",
+      "description": "Move from a loss and a handwritten update to neural networks, Transformers, reproducible data, and recoverable training.",
+      "skills": [
+        "Design models and optimization loops",
+        "Evaluate quality and debug training",
+        "Checkpoint and reproduce complete runs"
+      ],
+      "pathwayIds": [
+        "models",
+        "tpu",
+        "rl"
+      ],
+      "defaultPathwayId": "tpu",
+      "roleIds": [
+        "training-engineer",
+        "rl-engineer"
+      ],
+      "artifact": "A trained, evaluated model with reproducible state recovery."
+    },
+    {
+      "id": "inference",
+      "title": "Inference & deployment",
+      "headline": "Make trained models useful.",
+      "description": "Adapt models, export computations, verify predictions, and plan serving capacity using measured latency and throughput.",
+      "skills": [
+        "Adapt and export trained models",
+        "Verify inference correctness",
+        "Plan batching, latency, and capacity"
+      ],
+      "pathwayIds": [
+        "ship"
+      ],
+      "defaultPathwayId": "ship",
+      "roleIds": [
+        "inference-engineer"
+      ],
+      "artifact": "A verified inference artifact and a measured serving plan."
+    },
+    {
+      "id": "ops",
+      "title": "Operations & accelerator systems",
+      "headline": "Keep workloads fast and dependable.",
+      "description": "Operate jobs, trace bottlenecks, recover from failures, shard across devices, and optimize kernels when the evidence calls for it.",
+      "skills": [
+        "Monitor jobs and test recovery",
+        "Profile and plan accelerator capacity",
+        "Scale workloads and optimize bottlenecks"
+      ],
+      "pathwayIds": [
+        "ops",
+        "scale"
+      ],
+      "defaultPathwayId": "ops",
+      "roleIds": [
+        "operations-engineer",
+        "performance-engineer"
+      ],
+      "artifact": "An observable workload, a recovery runbook, and a performance report."
+    },
+    {
+      "id": "research",
+      "title": "Research & scientific computing",
+      "headline": "Turn ideas into tested experiments.",
+      "description": "Differentiate simulations, model uncertainty, inspect transformed programs, and validate methods with numerical evidence.",
+      "skills": [
+        "Build differentiable simulations",
+        "Fit parameters and model uncertainty",
+        "Check derivatives and compare methods"
+      ],
+      "pathwayIds": [
+        "science",
+        "probability",
+        "internals"
+      ],
+      "defaultPathwayId": "science",
+      "roleIds": [
+        "scientific-ml",
+        "research-engineer"
+      ],
+      "artifact": "A validated simulation, inverse problem, or research experiment."
+    }
+  ]
+}

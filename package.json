@@ -2,5 +2,9 @@
   "name": "jaxpathways",
   "private": true,
   "version": "0.1.0",
-  "scripts": {"dev": "python3 -m http.server 4173 --directory site", "check": "node --check site/app.js"}
+  "scripts": {
+    "dev": "python3 -m http.server 4173 --directory site",
+    "check": "node --check site/app.js && node --check site/platform.js && node --check site/choices.js && node scripts/validate-curriculum.mjs",
+    "curriculum:docs": "node scripts/render-curriculum.mjs"
+  }
 }
