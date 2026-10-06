@@ -14,7 +14,35 @@ Every device computed a partial gradient. Does every device need the complete re
 
 ## The idea
 
-All-reduce leaves a complete sum on every participating device. Reduce-scatter leaves each device with a different slice of that sum. The global mathematical answer can stay the same while its placement changes. Communication only decreases for the whole algorithm if subsequent work can use the partitioned result.
+A collective combines or redistributes values among participants. Track chunk identity and reduction state at each stage to understand what the operation achieves. Communication volume also depends on the assumed algorithm.
+
+## Track reduced chunks through communication
+
+Reduce-scatter combines contributions and leaves each participant with its assigned portion of the result. An all-gather can then distribute those portions so each holds the full result. Together they can implement the corresponding all-reduce.
+
+Distinguish an original contribution from a chunk whose contributions have already been combined. Sending values and reducing values are different actions, even when arrows look similar.
+
+The byte bars are modeled payloads under the lesson's assumptions. They do not capture all protocol overhead or establish physical overlap. Use them to predict a tradeoff, then measure the actual topology if network performance is the question.
+
+### Reduce-scatter followed by all-gather
+
+**Predict:** Does every participant hold the complete reduced array after reduce-scatter?
+
+![Reduce-scatter followed by all-gather](../../phases/09-distributed/03-communication-efficient-algorithms/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Contributions $[1,2]$ and $[3,4]$ are summed into portions $[4]$ and $[6]$. After reduce-scatter neither participant holds the full result. All-gather then gives each $[4,6]$. This analytic example shows ownership, not a physical schedule or measured traffic.
+
+### Pause and reason
+
+Does every participant hold the complete reduced array after reduce-scatter?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Each holds its reduced portion. Replicating the complete result requires the appropriate gather stage or another collective contract.
+
+</details>
 
 ## Keep normalization independent of device count
 
@@ -274,17 +302,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:36.597223+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:08.661272+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 61.91711872816086, 'reduce_scatter': 65.33297710120678, 'all_gather_only': 57.04094655811787}
+Completed CPU median microseconds: {'all_reduce': 77.04179733991623, 'reduce_scatter': 66.74975156784058, 'all_gather_only': 70.54116576910019}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 73.54188710451126, 'reduce_scatter': 71.29204459488392, 'all_gather_only': 73.20800796151161}
+Completed CPU median microseconds: {'all_reduce': 75.20802319049835, 'reduce_scatter': 68.66687908768654, 'all_gather_only': 64.79118019342422}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]

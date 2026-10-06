@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "A model can fit the training data closely and still make poor predictions on new data. Can we trade a little training fit for a simpler model? We will make that tradeoff visible with a dataset small enough to solve by hand, while keeping the validation data separate from fitting.",
-    "idea": "Regularization changes the objective we optimize. Ridge regression adds a penalty for large weights. The penalty strength is a modeling choice, not a numerical repair to hide a broken loss. Compare unpenalized prediction errors on held-out data when choosing it, and reserve a separate test set for final evaluation after choices are fixed.",
+    "idea": "Regularization changes which solutions training prefers. Validation helps choose settings using data that did not fit the model, and a final test estimates performance after those choices are fixed. Keeping these jobs separate makes the reported result interpretable.",
     "objectives": [
       "Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.",
       "State the exact objective",
@@ -16,6 +16,15 @@
       "Choose which parameters to penalize"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Give each split one job",
+        "body": "Imagine trying several penalty strengths. For each setting, fit weights on the training split, then score the frozen result on validation. Pick a setting using those validation results. Repeatedly using test performance to make that choice quietly turns the test into another validation set.\n\nPreprocessing belongs inside the same boundary: fit means, scales and feature selection using training data only. Applying a transformation to validation is allowed; allowing validation to choose the transformation's fitted statistics changes the experiment.\n\nThe regularization plot may show training error improving while validation error worsens. That gap motivates model selection, but one small fixture does not prove a universal best penalty. Preserve split identities and the selection rule so another person can reconstruct the decision.",
+        "check": {
+          "prompt": "After selecting a penalty, you inspect the test score and change the penalty again. What has changed?",
+          "answer": "The test data has influenced model selection. Its score no longer represents a single untouched final evaluation under the original protocol. Use a fresh evaluation protocol or disclose the repeated selection."
+        }
+      },
       {
         "title": "State the exact objective",
         "body": "Let \\(n\\) be the training sample count and \\(\\lambda\\ge0\\) the penalty strength. We use mean squared error plus \\(\\lambda\\|w\\|_2^2\\), without a factor of one half. Differentiating gives \\(2X^\\mathsf{T}(Xw-y)/n+2\\lambda w\\). Setting it to zero gives the linear system below. Other conventions change the numerical meaning of the same penalty value, so copy the objective along with a reported hyperparameter.",

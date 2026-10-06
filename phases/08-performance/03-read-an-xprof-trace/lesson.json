@@ -4,7 +4,7 @@
   "minutes": 100,
   "content": {
     "problem": "Your timer says a training step is slow, but it cannot show whether the time was spent waiting for input or computing. We will capture a real JAX trace, add names that match the code, and read four steps from the recorded events before proposing an optimization.",
-    "idea": "A trace is a timeline of intervals and relationships. We annotate the step, an injected input wait and a compiled computation with an explicit readiness wait. The generated XPlane file can be inspected in XProf, while the exported Perfetto events let the lesson verify its labels and durations directly on CPU. Host annotations describe code regions; they are not automatically device-kernel measurements.",
+    "idea": "A trace places events on a shared timeline so we can inspect order, waiting and overlap. Begin with a specific question about a slow step and identify which recorded events can answer it. Host annotations and device operations are different evidence.",
     "objectives": [
       "Capture an actual warmed CPU trace with named steps.",
       "Identify nested intervals and avoid double-counting their durations.",
@@ -12,6 +12,15 @@
       "Explain how to inspect the trace in XProf and bound a bottleneck claim."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Do not add nested durations twice",
+        "body": "An outer step lasting \\(10\\) milliseconds can contain a preprocessing region lasting \\(3\\) milliseconds. Their sum is not \\(13\\) milliseconds of elapsed work: the smaller region is already inside the larger one.\n\nInspect event starts, ends, nesting and lanes before aggregating durations. A gap may be waiting or uninstrumented work; it needs context before being assigned a cause.\n\nThe host-region plot summarizes recorded annotations, not GPU kernel execution. State a hypothesis, change one workload component and collect a comparable trace. A useful explanation predicts which interval changes and why, rather than only celebrating a shorter bar.",
+        "check": {
+          "prompt": "What should accompany a claimed trace-based optimization?",
+          "answer": "The event boundary, comparable workload, specific intervention and repeated completed measurements showing its predicted effect. A changed unrelated interval is insufficient."
+        }
+      },
       {
         "title": "Give the timeline a question",
         "body": "We want to know where this particular step spends time. Input creation and compilation happen before tracing. Each recorded step then contains an explicitly injected host sleep and a compiled model call that waits for its output. The sleep is a controlled stand-in for a stalled input stage; it is not a measurement of Grain, network storage or a real dataset.\n\nBefore running, predict which named interval should contain the wait. If the annotation surrounds the wrong code, a polished timeline will answer the wrong question. Keep the code region and annotation name together."

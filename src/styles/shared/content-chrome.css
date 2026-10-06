@@ -1,0 +1,138 @@
+footer {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
+footer p {
+  margin: 0;
+}
+.credit {
+  flex-basis: 100%;
+}
+.credit a {
+  text-decoration: underline;
+}
+dialog {
+  background: var(--bg);
+  color: var(--ink);
+  border: 1px solid var(--blue);
+  width: min(760px, calc(100% - 30px));
+  max-height: 90vh;
+  padding: 40px;
+}
+dialog::backdrop {
+  background: #030611cf;
+}
+.close {
+  float: right;
+  padding: 2px 10px;
+  font-size: 25px;
+}
+dialog h2 {
+  margin: 15px 0 25px;
+}
+dialog h3 {
+  font-size: 17px;
+  margin-top: 28px;
+}
+dialog p {
+  color: var(--muted);
+  font-size: 16px;
+}
+dialog pre {
+  background: var(--panel);
+  padding: 20px;
+  font-size: 12px;
+  overflow: auto;
+}
+dialog a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.skip {
+  position: absolute;
+  top: -100px;
+}
+.skip:focus {
+  top: 0;
+  padding: 10px;
+  background: var(--bg);
+  z-index: 3;
+}
+@media (max-width: 1000px) {
+  .hero {
+    gap: 30px;
+  }
+  nav {
+    gap: 16px;
+  }
+  h1 {
+    letter-spacing: -2px;
+  }
+  .transform {
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  nav {
+    flex-wrap: wrap;
+    font-size: 11px;
+    gap: 20px;
+  }
+  .hero {
+    padding-top: 45px;
+  }
+  .transform {
+    margin-top: 15px;
+  }
+  .start-strip {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+  .start-strip a {
+    margin-left: 28px;
+  }
+  .section-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 18px;
+  }
+  .foundation-block {
+    padding: 20px;
+  }
+  summary {
+    font-size: 12px;
+    gap: 12px;
+  }
+  .badge {
+    font-size: 9px;
+  }
+  .learning-loop {
+    grid-template-columns: 1fr 1fr;
+  }
+  dialog {
+    padding: 25px;
+  }
+  .diagram-foot {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+}
+select,
+input,
+textarea {
+  font:
+    13px/1.5 ui-monospace,
+    monospace;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  padding: 13px;
+  width: 100%;
+  margin-top: 8px;
+}
+select {
+  cursor: pointer;
+}

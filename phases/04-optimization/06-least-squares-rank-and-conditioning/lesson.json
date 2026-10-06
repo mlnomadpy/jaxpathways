@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "Before training a linear model step by step, can we solve it directly? A tiny least-squares fit gives us a reference answer. Then we will make two features nearly identical and see why a good prediction can hide unreliable coefficients.",
-    "idea": "All predictions from a design matrix \\(X\\) lie in the span of its columns: their weighted combinations. Least squares picks the prediction closest to the target vector \\(y\\). The remaining error is perpendicular to every feature column. Unique coefficients require independent columns; reliable coefficients also require that those columns are not almost dependent.",
+    "idea": "Least squares finds parameters whose predictions are close to the targets under a squared-error objective. Whether those parameters are uniquely determined and stable is a separate question. Nearly redundant features can make weights sensitive even when predictions look good.",
     "objectives": [
       "Fit a linear model with a direct solver and diagnose nonunique or sensitive coefficients.",
       "Solve a fit you can verify by hand",
@@ -16,6 +16,15 @@
       "Measure sensitivity rather than guessing"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A good fit can hide uncertain parameters",
+        "body": "Suppose two feature columns are identical. A prediction using weights \\(w_1\\) and \\(w_2\\) depends only on their sum. The pairs \\((1,2)\\) and \\((2,1)\\) therefore produce identical predictions. A low residual cannot tell us which pair is the intended explanation.\n\nIf the columns are almost, rather than exactly, identical, tiny data changes can lead to large changes in the separate weights. This is conditioning: how strongly the solution responds to perturbations. Inspect parameter changes as well as prediction error.\n\nThe geometric view projects the target vector onto the space spanned by the columns. A target component outside that space remains as residual even after a correct solve. A residual and an unstable parameter estimate are different problems and call for different diagnostics.",
+        "check": {
+          "prompt": "What evidence would distinguish an unavoidable residual from a faulty least-squares implementation?",
+          "answer": "Compare with an independent solver or known projection, inspect rank, and check the residual's orthogonality to the column space within tolerance. A nonzero residual alone does not imply a bug."
+        }
+      },
       {
         "title": "Solve a fit you can verify by hand",
         "body": "Take rows \\((1,0)\\), \\((0,1)\\), \\((1,1)\\) and targets \\(y=(1,2,2)\\). These targets cannot all be matched. The best weights are \\(w=(2/3,5/3)\\), with predictions \\((2/3,5/3,7/3)\\). The residual \\(r=Xw-y=(-1/3,-1/3,1/3)\\) has zero dot product with each column. The mean squared error is \\(1/9\\).",

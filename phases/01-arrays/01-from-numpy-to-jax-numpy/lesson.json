@@ -3,7 +3,7 @@
   "id": "arrays-01",
   "minutes": 45,
   "content": {
-    "idea": "An array is a collection of values with a shape and a dtype. In this lesson, axis \\(0\\) indexes observations and axis \\(1\\) indexes features. Those meanings come from the data contract, not from JAX. `jax.numpy` supplies familiar array operations, so begin with a numerical expression you understand rather than compiling the entire program immediately.\n\nFor rows \\([1, 10]\\), \\([3, 14]\\), and \\([5, 18]\\), the feature means are \\([3, 14]\\). Subtracting that length-2 vector from each row centers the columns. The two features have different standard deviations; scaling each feature by its training standard deviation gives them comparable units under this preprocessing choice.",
+    "idea": "Feature preprocessing answers a specific question: how does each measurement compare with the training data's scale and center? Compute statistics along the observation axis, then reuse those fitted statistics. A held-out example must not help choose the transformation used to evaluate it.",
     "code": "import jax.numpy as jnp\nx = jnp.array([[1., 10.], [3., 14.], [5., 18.]])\nmean = x.mean(axis=0)\ncentered = x - mean\nprint(\"Mean:\", mean)\nprint(\"Centered:\\n\", centered)\nassert jnp.allclose(mean, jnp.array([3., 14.]))\nassert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))",
     "output": "Mean: [ \\(3\\). \\(14\\).]; centered rows: \\([-2., -4.]\\), \\([0., 0.]\\), \\([2., 4.]\\).",
     "exercise": "Foundation · Standardize the original data using its standard deviation plus epsilon \\(10^{-6}\\). Predict the transformed rows and check feature means and scales. Explain why the scale is only approximately one with epsilon.",
@@ -24,6 +24,15 @@
     ],
     "problem": "Suppose your dataset records two measurements on very different scales. How can we put them on a more comparable footing before training a model? We’ll center each feature and divide by its scale. First we’ll work through three rows by hand; then we’ll write the JAX version and try new data, including a feature that never changes.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Why held-out data should not center itself",
+        "body": "Use a small new case: training values for one feature are \\(2\\) and \\(6\\), so their mean is \\(4\\). Centered training values become \\(-2\\) and \\(2\\). A held-out value of \\(10\\) becomes \\(6\\) when we apply the training mean.\n\nIf we center that single held-out value using its own mean, it becomes zero. The computation succeeds, but it has erased the evidence that the new value lies far from the training center. With several features, retain one fitted mean per feature rather than collapsing the entire table to one mean.\n\nThe lesson's centering plot compares values before and after the same columnwise operation. It explains a translation of each feature, not a guarantee that future observations will have zero mean. Add scaling only after specifying the variance convention and how constant features are handled.",
+        "check": {
+          "prompt": "Should a correctly transformed held-out batch always have mean zero?",
+          "answer": "No. Its mean reflects how that batch differs from training. Zero training mean is a property of the fitted centering operation; forcing held-out mean to zero changes the evaluation contract."
+        }
+      },
       {
         "title": "Follow an axis through a reduction",
         "body": "A shape \\((3, 2)\\) means three observations with two feature values each. `mean(axis=0)` reduces the three observations and leaves two feature means, so its output shape is \\((2,)\\). `mean(axis=1)` instead averages unlike feature values within each observation, leaving shape \\((3,)\\). `mean()` with no axis reduces every value to a scalar.\n\nAll three calculations are legal. Only the first answers the question about each feature across observations. A valid shape is not evidence of a meaningful statistic: if the features represent different units, averaging them within a row might have no useful interpretation.",

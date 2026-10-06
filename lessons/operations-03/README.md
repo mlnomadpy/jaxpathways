@@ -14,7 +14,25 @@ A restarted job reaches a plausible final loss, but did it continue the same exp
 
 ## The idea
 
-Recovery is a state transition, not a second invocation with the same seed. A complete state includes parameters, optimizer momentum, random key, completed step and provenance for the code, configuration and dataset. The checkpoint represents a precise boundary before the next sampled minibatch. After restore, the next key split, batch, loss and update must match the original continuation.
+An operational runbook connects a symptom with evidence, a decision and a verified recovery action. Its purpose is to reduce uncertainty during failure, not merely list restart commands.
+
+## A runbook should choose the next diagnostic action
+
+For an interrupted training job, first identify the failure boundary and newest accepted compatible checkpoint. Verify data, configuration and artifact identity before resuming. A restart from a convenient file can silently become a new experiment.
+
+After recovery, compare the next data and state transition with the expected continuation. If that comparison fails, preserve the mismatch and investigate the state boundary rather than repeatedly restarting.
+
+The replayed loss curve checks one part of the fixture. A complete incident record also explains what failed, why the selected recovery point was valid, what work was replayed and which observation confirmed the repair. Keep prevention work separate from the immediate restoration action.
+
+### Pause and reason
+
+What makes “restart the job” an incomplete runbook instruction?
+
+<details><summary>Compare your reasoning</summary>
+
+It does not identify a valid recovery point, compatibility checks or a success criterion. Specify those decisions and the evidence needed to make them.
+
+</details>
 
 ## Identify the boundary before issuing a retry
 
@@ -438,7 +456,7 @@ visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training ste
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:17.223190+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:48.265981+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]

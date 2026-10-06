@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="381.6pt" viewBox="0 0 576 381.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>The sixteen cells preserve the four-by-four image layout. Green patches 0 and 3 provide visible values. Hatched patches 1 and 2 are hidden targets for reconstruction loss. Hatching means missing input, not observed black pixels. This maps the actual mask without inventing a reconstructed image or error measurement.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 381.6 
+L 576 381.6 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 109.143086 11.943086 
+L 288 11.943086 
+L 288 190.8 
+L 109.143086 190.8 
+z
+" clip-path="url(#p8aa1f8254a)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 288 11.943086 
+L 466.856914 11.943086 
+L 466.856914 190.8 
+L 288 190.8 
+z
+" clip-path="url(#p8aa1f8254a)" style="fill: url(#h28b327df36); stroke: #a64d20; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 109.143086 190.8 
+L 288 190.8 
+L 288 369.656914 
+L 109.143086 369.656914 
+z
+" clip-path="url(#p8aa1f8254a)" style="fill: url(#h28b327df36); stroke: #a64d20; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 288 190.8 
+L 466.856914 190.8 
+L 466.856914 369.656914 
+L 288 369.656914 
+z
+" clip-path="url(#p8aa1f8254a)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 2; stroke-linejoin: miter"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 100.20024 101.371543 
+L 475.79976 101.371543 
+" clip-path="url(#p8aa1f8254a)" style="fill: none; stroke: #172334; stroke-opacity: 0.25; stroke-width: 0.7; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_2">
+    <path d="M 198.571543 378.59976 
+L 198.571543 3.00024 
+" clip-path="url(#p8aa1f8254a)" style="fill: none; stroke: #172334; stroke-opacity: 0.25; stroke-width: 0.7; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_3">
+    <path d="M 100.20024 280.228457 
+L 475.79976 280.228457 
+" clip-path="url(#p8aa1f8254a)" style="fill: none; stroke: #172334; stroke-opacity: 0.25; stroke-width: 0.7; stroke-linecap: square"/>
+   </g>
+   <g id="line2d_4">
+    <path d="M 377.428457 378.59976 
+L 377.428457 3.00024 
+" clip-path="url(#p8aa1f8254a)" style="fill: none; stroke: #172334; stroke-opacity: 0.25; stroke-width: 0.7; stroke-linecap: square"/>
+   </g>
+   <g id="text_1">
+    <g id="patch_6">
+     <path d="M 150.926699 121.024699 
+L 246.216387 121.024699 
+L 246.216387 81.718387 
+L 150.926699 81.718387 
+z
+" style="fill: #ffffff; opacity: 0.94"/>
+    </g>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(172.668262 97.396199)">Patch 0</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(155.966699 113.073137)">visible input</text>
+   </g>
+   <g id="text_2">
+    <g id="patch_7">
+     <path d="M 324.867207 121.024699 
+L 429.989707 121.024699 
+L 429.989707 81.718387 
+L 324.867207 81.718387 
+z
+" style="fill: #ffffff; opacity: 0.94"/>
+    </g>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(351.525176 97.396199)">Patch 1</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(329.907207 113.073137)">hidden target</text>
+   </g>
+   <g id="text_3">
+    <g id="patch_8">
+     <path d="M 146.010293 299.881613 
+L 251.132793 299.881613 
+L 251.132793 260.575301 
+L 146.010293 260.575301 
+z
+" style="fill: #ffffff; opacity: 0.94"/>
+    </g>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(172.668262 276.253113)">Patch 2</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(151.050293 291.930051)">hidden target</text>
+   </g>
+   <g id="text_4">
+    <g id="patch_9">
+     <path d="M 329.783613 299.881613 
+L 425.073301 299.881613 
+L 425.073301 260.575301 
+L 329.783613 260.575301 
+z
+" style="fill: #ffffff; opacity: 0.94"/>
+    </g>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(351.525176 276.253113)">Patch 3</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(334.823613 291.930051)">visible input</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p8aa1f8254a">
+   <rect x="100.20024" y="3.00024" width="375.59952" height="375.59952"/>
+  </clipPath>
+ </defs>
+ <defs>
+  <pattern id="h28b327df36" patternUnits="userSpaceOnUse" x="0" y="0" width="72" height="72">
+   <rect x="0" y="0" width="73" height="73" fill="#fff0e6"/>
+   <path d="M -36 36 
+L 36 -36 
+M -32 40 
+L 40 -32 
+M -28 44 
+L 44 -28 
+M -24 48 
+L 48 -24 
+M -20 52 
+L 52 -20 
+M -16 56 
+L 56 -16 
+M -12 60 
+L 60 -12 
+M -8 64 
+L 64 -8 
+M -4 68 
+L 68 -4 
+M 0 72 
+L 72 0 
+M 4 76 
+L 76 4 
+M 8 80 
+L 80 8 
+M 12 84 
+L 84 12 
+M 16 88 
+L 88 16 
+M 20 92 
+L 92 20 
+M 24 96 
+L 96 24 
+M 28 100 
+L 100 28 
+M 32 104 
+L 104 32 
+M 36 108 
+L 108 36 
+" style="fill: #a64d20; stroke: #a64d20; stroke-width: 1.0; stroke-linecap: butt; stroke-linejoin: miter"/>
+  </pattern>
+ </defs>
+</svg>

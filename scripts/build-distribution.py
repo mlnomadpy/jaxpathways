@@ -33,6 +33,15 @@ def chapter(lesson):
     body += '<h2>The idea</h2>'+prose(c['idea'])
     for section in c.get('sections',[]):
         body += '<h2>'+esc(section['title'])+'</h2>'+prose(section['body'])
+        if section.get('id')=='guided-reasoning' and c.get('diagram'):
+            d=c['diagram']; artifact=lesson.get('visualArtifact',{})
+            body += '<h3>'+esc(d['title'])+'</h3><p><strong>Predict:</strong> '+rich(d['prediction'])+'</p>'
+            if artifact.get('mechanismPng'):
+                body += '<figure><img src="figures/'+esc(lesson['id'])+'-mechanism.png" alt="'+esc(d['title'])+'"/><figcaption>'+esc(d['scope'])+'</figcaption></figure>'
+            body += prose(d['reading'])
+        if section.get('check'):
+            check=section['check']
+            body += '<h3>Pause and reason</h3>'+prose(check['prompt'])+'<details><summary>Compare your reasoning</summary>'+prose(check['answer'])+'</details>'
         for command in section.get('commands',[]):
             body += '<h3>'+esc(command['label'])+'</h3>'+code_block(command['code'])+'<p><strong>Expected:</strong></p>'+prose(command['expected'])
         if section.get('math'): body += math_markup['equations'][section['math']]
@@ -79,6 +88,9 @@ with ZipFile(OUT / 'jax-foundations.epub','w',compression=ZIP_DEFLATED) as book:
         if lesson.get('visualArtifact'):
             book.write(ROOT/'public'/lesson['visualArtifact']['png'], 'OEBPS/figures/'+lesson['id']+'.png')
             items += '<item id="figure-'+lesson['id']+'" href="figures/'+lesson['id']+'.png" media-type="image/png"/>'
+        if lesson.get('visualArtifact',{}).get('mechanismPng'):
+            book.write(ROOT/'public'/lesson['visualArtifact']['mechanismPng'], 'OEBPS/figures/'+lesson['id']+'-mechanism.png')
+            items += '<item id="mechanism-'+lesson['id']+'" href="figures/'+lesson['id']+'-mechanism.png" media-type="image/png"/>'
     spine=''.join(f'<itemref idref="c{i}"/>' for i in range(len(chapters)))
     book.writestr('OEBPS/package.opf',f'<?xml version="1.0"?><package xmlns="http://www.idpf.org/2007/opf" version="3.0" unique-identifier="book-id"><metadata xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:identifier id="book-id">urn:sha256:{identity}</dc:identifier><dc:title>JAX Pathways: course reader</dc:title><dc:language>en</dc:language><meta property="dcterms:modified">2026-10-03T00:00:00Z</meta></metadata><manifest><item id="intro" href="intro.xhtml" media-type="application/xhtml+xml"/><item id="nav" href="nav.xhtml" media-type="application/xhtml+xml" properties="nav"/><item id="style" href="style.css" media-type="text/css"/>{items}</manifest><spine><itemref idref="intro"/>{spine}</spine></package>')
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
@@ -99,9 +111,10 @@ setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
     bundle.writestr('jax-start-here/first_experiment.py',setup['content']['code']+'\n')
     bundle.write(ROOT/'requirements-cpu.txt','jax-start-here/requirements-cpu.txt')
-    setup_text=(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg')
+    setup_text=(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg').replace('../outputs/mechanism.svg','mechanism.svg')
     bundle.writestr('jax-start-here/START-HERE.md',setup_text)
     if setup.get('visualArtifact'):bundle.write(ROOT/setup['path']/'outputs/figure.svg','jax-start-here/figure.svg')
+    if setup.get('visualArtifact',{}).get('mechanismImage'):bundle.write(ROOT/setup['path']/'outputs/mechanism.svg','jax-start-here/mechanism.svg')
 
 # A portable course root for tutors: skills alone do not include their lesson sources.
 workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'scripts/course.py',

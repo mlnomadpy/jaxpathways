@@ -15,7 +15,35 @@ You need to simulate a collection of experimental starts, not just one. Which di
 
 ## The idea
 
-Time steps depend on their predecessors, so scan handles that dependency. Different initial conditions can evolve independently under the same rate, so vmap handles that batch. These transformations describe different kinds of structure. Neither is a promise that the program will run faster on a particular device.
+A simulation ensemble repeats one rule across independent systems and across time. Vectorization handles the independent systems; recurrence handles each system's evolving state. Name those axes before composing transforms.
+
+## There are two different axes of repetition
+
+Picture a grid with time running left to right and one independent trajectory per row. State arrows connect adjacent times within a row. No state arrow crosses into another trajectory unless the physical model explicitly couples them.
+
+Initial conditions can vary by trajectory while a physical parameter stays shared, or both may vary. That is an argument-mapping choice, not merely a shape convenience. Record it before applying vectorization.
+
+The trajectory plot shows outputs of that grid. Preserve the returned time/batch axis order when plotting; an accidental transpose can connect different systems instead of successive times. Compare one row with an independently run single trajectory.
+
+### Vectorize across systems; scan through time
+
+**Predict:** What should happen if you permute independent initial conditions?
+
+![Vectorize across systems; scan through time](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.
+
+### Pause and reason
+
+What should happen if you permute independent initial conditions?
+
+<details><summary>Compare your reasoning</summary>
+
+The trajectories should undergo the same permutation, with each trajectory's time evolution unchanged. This checks independence and axis handling.
+
+</details>
 
 ## Improve one step before multiplying trajectories
 
@@ -179,7 +207,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:42.732612+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:15.386349+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]

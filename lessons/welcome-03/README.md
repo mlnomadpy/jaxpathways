@@ -14,7 +14,25 @@ Your notebook imports JAX successfully, but is the prediction actually running o
 
 ## The idea
 
-Moving to an accelerator has three separate checks: the runtime can discover the requested device, the inputs and completed result live there, and the arithmetic agrees with a reference. We execute the small CPU reference here and supply the exact TPU execution path for an existing supported runtime.
+Moving an experiment to a TPU gives us two questions: did it calculate the intended result, and did it actually execute on the requested device? We answer the first with an independent numerical reference and the second with an observed device receipt.
+
+## Check arithmetic and placement separately
+
+Consider a prediction that adds a scalar bias after a dot product. Reducing the bias by $0.25$ should reduce every prediction by $0.25$, whatever compatible device performs the computation. That is a numerical invariant you can derive before running.
+
+Now inspect where the completed result resides. A correct NumPy comparison on CPU does not show that a TPU was selected. Conversely, a TPU device label does not show that the formula or input data was correct. Keep both checks.
+
+Wait for the result before recording completion or timing. A returned array handle can precede finished device work. Preserve the requested platform, observed platform, environment and error tolerance alongside the values.
+
+### Pause and reason
+
+The values match NumPy but the requested TPU run reports a CPU result. Which part passed?
+
+<details><summary>Compare your reasoning</summary>
+
+The arithmetic comparison passed. The requested placement did not. Investigate runtime/device selection instead of treating the numerical match as TPU validation.
+
+</details>
 
 ## Carry a prediction, not just an installation
 
@@ -176,7 +194,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:39.619648+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:06.296443+00:00. JAX 0.9.2.
 
 ```text
 {

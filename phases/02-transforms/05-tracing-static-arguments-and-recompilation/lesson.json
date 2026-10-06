@@ -3,7 +3,7 @@
   "id": "transforms-05",
   "minutes": 60,
   "content": {
-    "idea": "During tracing, ordinary array inputs stand for values that will be supplied at execution time. Their shapes and dtypes are generally available, but their element values are not ordinary concrete Python values. Python executes while the computation is being staged; JAX array operations are recorded into the staged computation.\n\nA small configuration value can be declared static so Python sees it while tracing. That value then participates in specialization, and changing it may cause a new trace and compilation. Runtime numerical decisions should instead use a supported JAX operation such as lax.cond or an elementwise selection. Static is a configuration choice, not a general cure for tracing errors.",
+    "idea": "Tracing observes how Python builds an array computation from abstract inputs. Static arguments are part of that program-building decision; dynamic array values are data for the resulting computation. Keep a small call ledger to separate these roles.",
     "code": "import jax\nimport jax.numpy as jnp\ndef reduce_values(x, mode):\n    if mode == \"sum\":\n        return x.sum()\n    if mode == \"mean\":\n        return x.mean()\n    raise ValueError(\"mode must be sum or mean\")\ncompiled = jax.jit(reduce_values, static_argnames=(\"mode\",))\nx = jnp.array([1., 2., 3.])\nprint(\"Sum:\", float(compiled(x, mode=\"sum\")))\nprint(\"Mean:\", float(compiled(x, mode=\"mean\")))\nassert jnp.allclose(compiled(x, mode=\"sum\"), 6.)\nassert jnp.allclose(compiled(x, mode=\"mean\"), 2.)",
     "output": "Sum: \\(6.0\\); Mean: \\(2.0\\). These mode choices can use separate compiled specializations.",
     "exercise": "Foundation · Extend reduce_values with a static max mode while preserving sum and mean. Reject unknown modes. Verify all three modes on \\([1, 2, 3]\\) and on \\([-4, -1, -2]\\).",
@@ -24,6 +24,15 @@
     ],
     "problem": "A function works until you put a Python if statement inside jit. Why does that change things? We’ll separate what Python knows while tracing from what the program learns at runtime. Then you’ll choose between a small static configuration and an array-based decision, rather than making every difficult argument static.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Build a call ledger before diagnosing recompilation",
+        "body": "Record each call's shape, dtype and static choices next to the observed trace count. Change only values first. Then change one shape, then one static option. This controlled sequence makes a trace increase interpretable; changing everything at once does not.\n\nA Python branch needs a concrete decision during tracing. If the decision is intended to vary with array data at execution time, use an appropriate JAX control-flow operation instead of converting a tracer to a Python boolean. If it genuinely selects a small number of program variants, an explicit static argument may be suitable.\n\nDo not turn every input into a static value to silence an error. Many distinct static values can create many specializations. Trace counts are useful observations, but they are not a universal count of all compilation work or a cross-process cache guarantee.",
+        "check": {
+          "prompt": "A loop passes a new Python configuration value on every call as a static argument. What should you inspect?",
+          "answer": "Inspect whether that value truly changes program structure. If it is ordinary changing data, represent it dynamically where possible. Keep the call ledger and compare traces after changing one factor at a time."
+        }
+      },
       {
         "title": "Separate metadata, configuration, and data",
         "body": "A tensor shape such as \\((3,)\\) describes the size of the computation; its values \\([1, 2, 3]\\) are runtime data. A string mode such as sum describes which computation to construct. In this lesson mode is a small finite configuration, so marking it static is reasonable.\n\nIf mode changes rarely while batches change constantly, static configuration lets a stable compiled specialization accept many batches. If you make frequently changing data static, you encourage distinct specializations and may run into hashability constraints. A JAX array is not a convenient static argument just because a Python branch wants to inspect it."

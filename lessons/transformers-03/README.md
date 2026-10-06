@@ -15,9 +15,35 @@ An attention head mixes information across positions. What else makes it a Trans
 
 ## The idea
 
-This is a teaching block with one attention head, no dropout, no learned normalization scale/bias and no rotary embeddings. It isolates the mechanics rather than reproducing a production architecture. The next lesson adds embeddings and an output head.
+A Transformer block adds learned corrections to token representations. This lesson uses a single attention head, normalization before each branch, and two residual additions. Follow the implemented dimensions rather than assuming all Transformer architectures are interchangeable.
 
-All checks run on CPU. A bfloat16 comparison checks numeric behavior on the installed backend; it does not establish TPU throughput or a universal tolerance.
+## Follow the residual stream through the actual block
+
+Four token positions each carry eight features. Query/key scores therefore form a four-by-four matrix. Weighted values and the output projection return to eight features, allowing the attention correction to be added to the input.
+
+The feed-forward branch expands eight features to sixteen, applies GELU and returns to eight. It processes each token's feature vector; attention is the part that mixes eligible positions. Each residual addition requires matching shapes.
+
+The saved output-minus-input heatmap shows the combined correction. Its equal rows arise from this fixture's constant-offset input and normalization behavior. They are not a universal property of attention. Use the architecture to identify which input change would test that explanation.
+
+### The actual single-head pre-LN block
+
+**Predict:** What should happen when every learned projection is zero?
+
+![The actual single-head pre-LN block](../../phases/07-transformers/03-a-transformer-block-and-mixed-precision/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.
+
+### Pause and reason
+
+What should happen when every learned projection is zero?
+
+<details><summary>Compare your reasoning</summary>
+
+The block returns its input: both correction branches are zero and the residual path remains. This checks the structure independently of learned performance.
+
+</details>
 
 ## Follow the two residual paths
 
@@ -177,7 +203,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:19.125960+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:50.629197+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)

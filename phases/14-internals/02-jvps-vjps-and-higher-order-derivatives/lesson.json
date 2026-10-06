@@ -4,13 +4,22 @@
   "minutes": 105,
   "content": {
     "problem": "A large model may have millions of inputs or outputs, but you often need only one sensitivity direction. How can we compute the useful product without constructing the full Jacobian—and verify that forward, reverse and higher-order calculations agree?",
-    "idea": "A derivative is a local linear map. A JVP pushes an input perturbation \\(v\\) through that map; a VJP pulls an output weighting \\(u\\) back to the inputs. We will make the full Jacobian only for a tiny reference problem, then use its algebra to check the products and a Hessian-vector product.",
+    "idea": "A JVP asks how an input direction changes outputs. A VJP asks how an output sensitivity pulls back to inputs. Both use the same local derivative, but their vectors belong to different spaces.",
     "objectives": [
       "Compute and interpret JVP and VJP products with correct domains and shapes.",
       "Verify the adjoint dot-product identity against a hand-derived Jacobian.",
       "Compute an exact Hessian-vector product and distinguish it from a Gauss–Newton approximation."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Forward and reverse products answer complementary questions",
+        "body": "For a map from three inputs to two outputs, the Jacobian has shape \\((2,3)\\). A JVP consumes a three-component direction and returns two components. A VJP consumes a two-component cotangent and returns three.\n\nCheck the adjoint relation \\(u^T(Jv)=(J^Tu)^Tv\\) using independent dot products. It connects both directions without requiring the full Jacobian to be materialized.\n\nWhen reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.",
+        "check": {
+          "prompt": "Does a VJP simply return the same vector as a JVP?",
+          "answer": "No. They apply the derivative in different directions and can have different result dimensions. Their relationship is the adjoint identity, not equality of vectors."
+        }
+      },
       {
         "title": "Separate the point from the direction",
         "body": "For \\(f(a,b)=(ab,\\sin(a)+b^2)\\), the point \\(x=(0.4,-0.7)\\) determines a Jacobian. The direction \\(v=(1.2,-0.3)\\) says how the inputs will move near that point. JVP returns both the original output and \\(J(x)v\\). It does not evaluate the nonlinear function at \\(x+v\\); its approximation becomes meaningful when multiplied by a sufficiently small displacement.",
@@ -139,6 +148,37 @@
       "Count directions before choosing a Jacobian strategy",
       "Curvature includes the changing Jacobian",
       "Use finite differences as a second perspective"
-    ]
+    ],
+    "diagram": {
+      "title": "JVP and VJP use different vector spaces",
+      "prediction": "Does a VJP simply return the same vector as a JVP?",
+      "reading": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+      "alt": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 3.5,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "Mode",
+          "Input",
+          "Linear map",
+          "Result"
+        ],
+        "rows": [
+          [
+            "JVP",
+            "direction: (3,)",
+            "J: (2, 3)",
+            "Jv: (2,)"
+          ],
+          [
+            "VJP",
+            "sensitivity: (2,)",
+            "Jᵀ: (3, 2)",
+            "Jᵀu: (3,)"
+          ]
+        ]
+      }
+    }
   }
 }

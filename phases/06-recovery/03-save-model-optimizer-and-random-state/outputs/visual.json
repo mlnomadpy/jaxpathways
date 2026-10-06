@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "f9cceb87d34622e3e9ed17cd66d2880610affe8ad0a40274c3fbdb8ccc722006",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "3c2d84de5d5c73d83c676b449a6ed308824a9a49c1d74996400fed47ebe5f52e",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "conceptual",
-  "generatedAt": "2026-10-05T22:15:40.544658+00:00",
+  "generatedAt": "2026-10-06T15:35:32.712839+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

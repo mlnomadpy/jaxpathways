@@ -15,7 +15,25 @@ If we split a batch across four devices, should the model learn four times as mu
 
 ## The idea
 
-Data parallelism partitions examples while replicating small model parameters. Every shard contributes to the same global objective. Here the loss is a global mean over eight observations, so the gradient is $\frac{2}{8}X^\mathsf{T}(Xw-y)$. Automatic differentiation of the global sharded-array program preserves that mathematical objective; explicit placement defines where its data and results live.
+A sharded training step must preserve the intended global objective. Local reductions and collective operations should produce the same normalized gradient as an unsharded reference on the same examples.
+
+## Derive the global denominator
+
+One shard has two examples with mean gradient $1$; another has one example with gradient $4$. The global mean is $(2+4)/3=2$. Averaging the local means gives $2.5$, overweighting the small shard.
+
+Carry contributions and counts so the final denominator matches the objective. With masked sequence losses, count valid targets rather than automatically counting devices or sequences.
+
+The matching gradient bars are an important check on the current fixture. Add unequal valid counts to expose a weighting rule that balanced shards could hide. Numerical agreement should be tested where the implementation's assumptions are most vulnerable.
+
+### Pause and reason
+
+Which test exposes an incorrect average of local means?
+
+<details><summary>Compare your reasoning</summary>
+
+Use unequal example or valid-token counts per shard and compare with an independently calculated global mean.
+
+</details>
 
 ## Write the objective before splitting the data
 
@@ -191,7 +209,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:35.449035+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:07.454478+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875

@@ -1,4 +1,5 @@
 ---
+import { currentRelease, feedbackUrl, feedbackAccess } from '../../lib/releases.js';
 import { siteUrl } from '../../lib/urls.js';
 ---
 
@@ -6,12 +7,17 @@ import { siteUrl } from '../../lib/urls.js';
   <a class="brand" href={siteUrl('index.html')}>
     JAX Pathways
   </a>
-  <p>Independent course. Built in the open.</p>
+  <p>
+    Independent course by Taha Bouhsine.{' '}
+    <a href={siteUrl('updates.html')}>Version {currentRelease.version} · What changed</a>
+  </p>
   <nav aria-label="Footer">
     <a href="https://github.com/mlnomadpy/jaxpathways">Source</a>
-    <a href="https://github.com/mlnomadpy/jaxpathways/issues">Give feedback</a>
+    <a href={feedbackUrl()}>Give feedback</a>
     <a href="https://docs.jax.dev/">JAX docs</a>
   </nav>
+  <p>Found an error or a confusing explanation? Open a GitHub issue to help improve the book.</p>
+  {feedbackAccess && <p>{feedbackAccess}</p>}
   <p class="credit">
     Design inspiration:{' '}
     <a href="https://aiengineeringfromscratch.com/">AI Engineering from Scratch</a>.

@@ -4,7 +4,7 @@
   "minutes": 70,
   "content": {
     "problem": "You ran two training configurations yesterday. Today you remember which curve looked better, but not which dataset, preprocessing or checkpoint produced it. Let’s make the comparison reproducible: train two small JAX models, log them to a real local MLflow database, then retrieve the selected run and its artifact.",
-    "idea": "An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment.",
+    "idea": "A tracker is useful when a plotted point leads back to the data, source, configuration and artifact that produced it. A run name or best label is not enough to identify a deployable checkpoint or reproduce its evaluation.",
     "objectives": [
       "Decide what makes runs comparable",
       "Give data and code an identity",
@@ -12,6 +12,15 @@
       "Log at a useful boundary"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Make every metric point traceable",
+        "body": "Two runs may log validation loss at step 100 using different splits or denominators. The matching metric name and step do not make the values comparable. Record what was averaged and which examples contributed.\n\nLink a selection decision to the precise checkpoint and evaluation. A run often contains many checkpoints, so selecting a run is not the same as selecting weights. Keep the model artifact's identity even if a dashboard display name changes.\n\nThe MLflow curves are recorded observations. Read configuration and metric definitions before ranking them. Tracking preserves a comparison's evidence; it cannot repair incompatible evaluation contracts. The same principle applies to Weights & Biases and other experiment trackers.",
+        "check": {
+          "prompt": "What belongs with a selected checkpoint besides its minimum validation value?",
+          "answer": "Its artifact identity, dataset revision, metric definition, step convention, source/configuration and selection rule. Together these explain and reproduce the decision."
+        }
+      },
       {
         "title": "Decide what makes runs comparable",
         "body": "We reuse a known regression problem so the engineering does not hide behind model complexity. Training inputs and validation inputs are separate. The target is \\(y=2x+1\\), and the learned parameters are a weight and bias. Both runs start from zero, use the same examples and receive \\(30\\) updates. Only the learning rate changes. Log those choices as parameters. Never compare two metrics with the same name when one is a sum and the other a mean, or one was measured before the update and the other afterward."

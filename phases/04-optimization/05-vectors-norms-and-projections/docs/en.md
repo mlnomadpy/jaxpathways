@@ -16,7 +16,25 @@ When a model multiplies features by weights, what is it measuring? Start with tw
 
 ## The idea
 
-A vector is an ordered list of coordinates. Its Euclidean norm measures length. A dot product multiplies matching coordinates and adds them; it mixes length with alignment. Projection asks a more specific question: how much of a vector can we explain using one chosen direction?
+Projecting a vector onto a direction keeps the part parallel to that direction. The residual is what the direction cannot explain. This small geometric idea will reappear in least squares, gradient components and constrained updates.
+
+## A projection explains what remains
+
+Take $v=(3,4)$ and direction $u=(1,0)$. The projection is $(3,0)$, leaving residual $(0,4)$. Their sum recovers $v$, and the residual is perpendicular to $u$. The original norm is $5$, consistent with the right triangle.
+
+Now replace $u$ by $(2,0)$. The direction has not changed, so the projected vector should not change. The coefficient must adjust for the direction's squared norm. Forgetting that denominator makes the result depend on an arbitrary scaling of the direction.
+
+Read the vector figure by following the projection and then the residual to the original endpoint. Use equal axis scale: otherwise a mathematically right angle may not look right on the page.
+
+### Pause and reason
+
+What happens if the direction vector is zero?
+
+<details><summary>Compare your reasoning</summary>
+
+It defines no direction and has zero squared norm, so the usual projection formula is undefined. Reject that input or define a separate application-specific convention explicitly.
+
+</details>
 
 ## Read length and alignment separately
 
@@ -136,7 +154,7 @@ visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:00.996276+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:28.720073+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]

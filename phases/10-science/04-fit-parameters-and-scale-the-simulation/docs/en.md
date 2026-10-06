@@ -15,7 +15,25 @@ Suppose we can observe cooling trajectories but do not know the rate. Can we rec
 
 ## The idea
 
-The unknown rate becomes a trainable parameter, and the differentiable simulator becomes the prediction function. We fit $k=e^\theta$, where $\theta$ is unrestricted. A good fit must survive independent data generation, held-out conditions and a changed numerical grid. Synthetic recovery is a controlled validation exercise; real instruments add noise, model mismatch and uncertain initial conditions.
+An inverse problem uses observations to infer parameters of a forward model. A small fitting error is meaningful only if the observations contain information about those parameters and the forward model matches the observation process.
+
+## Ask whether observations identify the parameter
+
+For exponential decay $y(t)=y_0e^{-at}$, an observation only at $t=0$ equals $y_0$ for every rate $a$. No optimizer can recover the rate from that observation alone. Later observations supply rate information, provided their noise and timing are understood.
+
+The fitting loop changes the parameter, runs the solver at the declared observation times and compares with the data. Keep those times fixed when comparing candidate parameters. Solver error can otherwise be mistaken for a physical parameter effect.
+
+Read the fitted trajectory alongside the residuals and objective history. A decreasing objective shows progress on that objective; it does not establish uniqueness or uncertainty. Test a changed observation schedule to see which part of the result is supported by data.
+
+### Pause and reason
+
+Can zero fitting error imply that the parameter is uniquely identified?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Several parameter settings can fit the same insufficient observations. Examine identifiability and changed observation conditions, not only residual size.
+
+</details>
 
 ## Choose data that can reveal the parameter
 
@@ -226,7 +244,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:05.352253+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:41.399109+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -238,7 +256,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.005250098183751106, 0.005250098183751106), (16, 0.005082925781607628, 0.00031768286135047674), (256, 0.04937499761581421, 0.00019287108443677425)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.005666632205247879, 0.005666632205247879), (16, 0.006166752427816391, 0.00038542202673852444), (256, 0.03733299672603607, 0.0001458320184610784)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05

@@ -1,16 +1,29 @@
 {
   "schemaVersion": 1,
   "id": "posttraining-02",
-  "minutes": 75,
+  "minutes": 105,
   "content": {
     "problem": "A trained dense layer already works, but the task changes. Can we fit the change while leaving the original weights untouched? We will first train a base, then learn and audit a low-rank update.",
-    "idea": "LoRA parameterizes a weight change as two smaller matrices. It reduces trainable parameter and optimizer-state counts for selected layers; it does not eliminate activation memory or guarantee a latency improvement. Our changed target is deliberately rank one, which makes the adaptation test exact and interpretable.",
+    "idea": "LoRA adds a trainable low-rank correction to a frozen weight map. The base still participates in the forward pass while a smaller set of factors adapts the output. Shape convention and scaling determine how those paths combine.",
     "objectives": [
       "Separate the frozen base from trainable adapters",
       "Understand initialization and the first gradient",
       "Verify the changed-condition exercise and explain the limits of this fixture."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate the frozen path from the low-rank correction",
+        "body": "Here the base matrix has shape \\((6,4)\\). With rank \\(r\\), factors have shapes \\((6,r)\\) and \\((r,4)\\), so their product has the same shape as the base. The correction is scaled by \\(\\alpha/r\\) before addition.\n\nIn the fixture, the second factor starts at zero. The correction is initially zero; the first factor's initial gradient is also zero, while the second factor can receive a nonzero gradient. This is an informative initialization check rather than evidence that training is broken.\n\nAfter training, compare separate-branch inference with merged weights using the same scaling. Freezing parameters does not mean their computation vanishes. The plot of factor gradients explains which path learns first; it does not imply every full-model adapter behaves identically.",
+        "check": {
+          "prompt": "If rank changes while alpha stays fixed, can you omit the scaling when merging?",
+          "answer": "No. Merge the exact scaled correction used in forward computation. Otherwise the merged model computes a different function."
+        }
+      },
+      {
+        "title": "Before coding: adapt a change, not an entire matrix",
+        "body": "Begin with a base mapping that already works on a source task. The new task changes the output in a small number of directions. LoRA represents an added matrix through two smaller factors while preserving the base weights. Freezing the base protects those stored weights; it does not guarantee the adapted outputs retain the old behavior. That is why adaptation and retention need separate evaluation.\n\nTrace dimensions for input width \\(d\\), output width \\(k\\), and rank \\(r\\). The first factor compresses inputs into \\(r\\) coordinates, and the second expands them into the output coordinates. The update matrix can have rank at most \\(r\\), regardless of training time."
+      },
       {
         "title": "Separate the frozen base from trainable adapters",
         "body": "For input-by-output weights \\(W_0\\), let \\(A\\) have shape \\((d,r)\\) and \\(B\\) shape \\((r,k)\\). Compute the base output plus the scaled adapter output. Only the adapter tuple is passed to the gradient function. Keep a copy of \\(W_0\\) and compare it exactly after training.",
@@ -19,6 +32,15 @@
       {
         "title": "Understand initialization and the first gradient",
         "body": "Initialize \\(A\\) randomly and \\(B\\) to zero. The initial adapter output is zero, so predictions match the base. At this first step the gradient with respect to \\(A\\) is zero because it multiplies \\(B\\); the gradient for \\(B\\) can be nonzero. Initializing both factors to zero would block both gradients for this bilinear update."
+      },
+      {
+        "title": "Derive the first-step asymmetry",
+        "body": "Write the dense-layer output gradient as \\(G\\), with the same batch-by-output shape as the prediction. Let \\(s=\\alpha/r\\). The two derivatives below explain initialization. When \\(B=0\\), the first derivative vanishes, while the second can be nonzero if \\(A\\) is random. After one update to \\(B\\), both factors may learn. If both factors start at zero, both gradients vanish and training stalls.\n\nThis is a property of the bilinear parameterization, not a JAX bug. Inspect factor norms and individual gradients before changing the learning rate.",
+        "math": "\\nabla_A L=sX^\\top GB^\\top,\\qquad \\nabla_B L=sA^\\top X^\\top G"
+      },
+      {
+        "title": "Use rank to predict a failure before training",
+        "body": "A rank-one update can represent one independent output-change direction. Consider an ideal update with singular values \\(3\\) and \\(1\\). Any rank-one approximation leaves at least squared Frobenius error \\(1\\); increasing optimization steps cannot remove that rank constraint. This matrix-space statement translates into prediction error only under assumptions about the input distribution. The exercise uses identity inputs so that distinction is visible.\n\nOur main target was constructed as a rank-one update, so near-zero training error is expected. A convincing study compares several ranks on a harder held-out task and reports trainable parameters, optimizer memory, activation memory and measured runtime separately."
       },
       {
         "title": "Count the right kind of savings",
@@ -31,6 +53,10 @@
       {
         "title": "Save the adaptation identity",
         "body": "An adapter artifact needs the base checkpoint hash, target module names, rank, alpha, dtype and exact factor arrays. Match all of these on load. Compare the adapted task and original task separately; low rank does not prevent forgetting, and this rank-one teacher does not predict the rank required by a real task."
+      },
+      {
+        "title": "Make an adapter artifact reproducible",
+        "body": "Save the exact base identity, target layer names, tensor orientation, rank, scaling, factor dtype and adapter weights. Reconstruct the unmerged computation before testing a merge. A rank-two adapter with \\(\\alpha=3\\) requires scale \\(1.5\\); forgetting that scale may go unnoticed in rank-one examples where it equals one.\n\nMerging is exact algebraically for this dense layer, subject to floating-point rounding. Quantized bases, packed layouts and adapter dropout need additional contracts. Retain original artifacts, compare changed inputs after reload, and reject applying the same update twice. Keep a source-task metric alongside the new task before claiming that adaptation preserved useful behavior."
       }
     ],
     "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef lora_forward(x, base, a, b, alpha=1.):\n    rank = a.shape[1]\n    return x @ base + (alpha/rank) * (x @ a @ b)\n\nx=jnp.asarray(np.random.default_rng(4).normal(size=(24,6)),jnp.float32)\nsource_w=jnp.arange(24,dtype=jnp.float32).reshape(6,4)/40\nbase=jnp.zeros_like(source_w)\nbase_step=jax.jit(jax.grad(lambda w:jnp.mean((x@w-x@source_w)**2)))\nfor _ in range(150):base=base-.15*base_step(base)\nassert float(jnp.mean((x@base-x@source_w)**2))<1e-4\nfrozen=np.asarray(base).copy()\nu=jnp.array([[.2],[-.3],[.1],[.2],[-.1],[.4]])\nv=jnp.array([[.5,-.2,.3,.1]])\ntarget=x@(base+u@v)\na=jax.random.normal(jax.random.key(4),(6,1))*.1;b=jnp.zeros((1,4));params=(a,b)\nloss=lambda ab:jnp.mean((lora_forward(x,base,*ab,alpha=1.)-target)**2)\nstep=jax.jit(jax.value_and_grad(loss));history=[]\ninitial_grads=step(params)[1]\nnp.testing.assert_array_equal(initial_grads[0],np.zeros((6,1)))\nassert np.linalg.norm(initial_grads[1])>0\nfor _ in range(250):\n    value,g=step(params);history.append(float(value));params=jax.tree.map(lambda a,b:a-.4*b,params,g)\na,b=params\nassert history[-1]<history[0]*.02\nnp.testing.assert_array_equal(base,frozen)\nmerged=base+a@b\nnp.testing.assert_allclose(lora_forward(x,base,a,b),x@merged,rtol=1e-5,atol=1e-6)\nprint('LoRA initial/final:',history[0],history[-1],'; trainable:',a.size+b.size,'base:',base.size)\n",
@@ -42,6 +68,13 @@
         "code": "zero=(jnp.zeros_like(a),jnp.zeros_like(b))\nzero_grad=jax.grad(loss)(zero)\nassert all(np.array_equal(np.asarray(g),np.zeros(g.shape)) for g in zero_grad)\nprint('Both zero factors produce zero first gradients.')",
         "output": "Both factor gradients are exactly zero.",
         "explanation": "Each factor’s derivative contains the other factor. Randomizing one and zeroing the other preserves the initial base output without blocking the whole update."
+      },
+      {
+        "title": "Check both factor gradients with matrix calculus",
+        "prediction": "At nonzero factors, will the two matrix-gradient formulas agree with autodiff including nonunit alpha?",
+        "code": "rng=np.random.default_rng(14)\na_probe=jnp.asarray(rng.normal(size=(6,2))*.1,jnp.float32)\nb_probe=jnp.asarray(rng.normal(size=(2,4))*.1,jnp.float32)\nscale=3./2\noutput_gradient=2*(lora_forward(x,base,a_probe,b_probe,3.)-target)/target.size\nexpected_a=scale*x.T@output_gradient@b_probe.T\nexpected_b=scale*a_probe.T@x.T@output_gradient\nactual_a,actual_b=jax.grad(lambda aa,bb:jnp.mean((lora_forward(x,base,aa,bb,3.)-target)**2),argnums=(0,1))(a_probe,b_probe)\nnp.testing.assert_allclose(actual_a,expected_a,atol=1e-6)\nnp.testing.assert_allclose(actual_b,expected_b,atol=1e-6)\nprint('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')",
+        "output": "Both factor derivatives match the independent output-gradient calculation.",
+        "explanation": "Nonzero factors exercise both gradient paths, while nonunit scaling catches a factor missing from the derivative. The separate all-zero experiment demonstrates the initialization failure."
       }
     ],
     "exercise": "Save both adapter factors and their rank/scaling metadata, reload them and check merged versus unmerged predictions.",
@@ -54,6 +87,14 @@
         "hint": "The equivalence is algebraic, so a new input should still agree.",
         "solution": "new_x=jnp.asarray(np.random.default_rng(91).normal(size=(7,6)),jnp.float32)\nnp.testing.assert_allclose(lora_forward(new_x,base,a,b),new_x@merged,atol=1e-6,rtol=1e-5)\nassert np.linalg.norm(np.asarray(new_x@(base+2*a@b)-new_x@merged))>1e-3\nprint('New-input merge passes; accidental double merge changes outputs.')",
         "explanation": "The second check detects an operational merge error that training loss alone would not reveal."
+      },
+      {
+        "title": "Test nonunit scaling and an impossible rank-one target",
+        "difficulty": "Challenge",
+        "prompt": "Check merge equivalence at rank two with alpha three. Then use identity inputs and a diagonal target with singular values three and one to calculate the best rank-one residual.",
+        "hint": "Use an independent singular-value decomposition for the rank bound, and divide alpha by rank in both serving paths.",
+        "solution": "rng=np.random.default_rng(8)\na2=jnp.asarray(rng.normal(size=(6,2)),jnp.float32);b2=jnp.asarray(rng.normal(size=(2,4)),jnp.float32)\nnp.testing.assert_allclose(lora_forward(x,base,a2,b2,alpha=3.),x@(base+1.5*a2@b2),rtol=1e-5,atol=2e-6)\ntarget_update=np.diag([3.,1.]);u_s,s_s,v_s=np.linalg.svd(target_update)\nrank_one=(u_s[:,:1]*s_s[:1])@v_s[:1]\nnp.testing.assert_allclose(np.sum((target_update-rank_one)**2),1.)\nnp.testing.assert_allclose(np.mean((np.eye(2)@target_update-np.eye(2)@rank_one)**2),.25)\nprint('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')",
+        "explanation": "The residual predicts a capacity limit independently of an optimizer. The nonunit-alpha case catches a scaling bug that the main rank-one demonstration would miss."
       }
     ],
     "question": "Does LoRA require updating the base weights during adapter training?",
@@ -77,11 +118,133 @@
     "visual": {
       "title": "LoRA: adapt, save and merge low-rank updates — recorded experiment",
       "kind": "executed",
-      "prediction": "Predict what should change during training and what this curve cannot establish.",
-      "reading": "The plot is adaptation MSE before each update, falling from about \\(0.044\\) to below \\(10^{-6}\\). It does not include the preceding base-training run. The target update was constructed to have rank one, so this is an achievable representation test rather than a universal LoRA performance claim.",
+      "prediction": "Which initial adapter-gradient bar is zero, and why can training still begin?",
+      "reading": "The plot is adaptation MSE before each update, falling from about \\(0.044\\) to below \\(10^{-6}\\). It does not include the preceding base-training run. The target update was constructed to have rank one, so this is an achievable representation test rather than a universal LoRA performance claim.\n\nThe second panel compares the two initial factor-gradient norms. The zero-height A bar is expected because B starts at zero; the positive B bar shows the update has a route to begin learning. After B changes, A can receive gradient. These are initial gradients while the first panel spans the full adaptation run. The all-zero initialization experiment predicts two zero bars and nonzero loss, exposing a stalled parameterization.",
       "connection": "The first adapter update affects B; later updates can train both factors. The unchanged-base assertion, reloaded adapter and new-input merge comparison are separate evidence from the falling training line.",
-      "alt": "The plot is adaptation MSE before each update, falling from about \\(0.044\\) to below \\(10^{-6}\\). It does not include the preceding base-training run. The target update was constructed to have rank one, so this is an achievable representation test rather than a universal LoRA performance claim.",
-      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+      "alt": "LoRA: adapt, save and merge low-rank updates — recorded experiment. A measured training curve is accompanied by an audit of initial adapter gradients.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'adaptation MSE (squared output units)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n\nextra_panel={'kind':'bar','x':[0,1],'labels':['factor A','factor B'],'series':[{'label':'initial gradient norm','y':[float(jnp.linalg.norm(initial_grads[0])),float(jnp.linalg.norm(initial_grads[1]))]}],'xlabel':'trainable factor','ylabel':'gradient L2 norm','title':'Why the first update changes only B'}\nvisual_data={\"panels\":[*visual_data.get(\"panels\",[visual_data]),extra_panel]}\n"
+    },
+    "buildSteps": [
+      {
+        "title": "1. Define the frozen-plus-adapter forward pass",
+        "instruction": "Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef lora_forward(x, base, a, b, alpha=1.):\n    rank = a.shape[1]\n    return x @ base + (alpha/rank) * (x @ a @ b)",
+        "explanation": "The base is an input to the forward pass but is not in the adapter tuple differentiated by loss."
+      },
+      {
+        "title": "2. Train a base, freeze it and initialize the adapter",
+        "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
+        "code": "x=jnp.asarray(np.random.default_rng(4).normal(size=(24,6)),jnp.float32)\nsource_w=jnp.arange(24,dtype=jnp.float32).reshape(6,4)/40\nbase=jnp.zeros_like(source_w)\nbase_step=jax.jit(jax.grad(lambda w:jnp.mean((x@w-x@source_w)**2)))\nfor _ in range(150):base=base-.15*base_step(base)\nassert float(jnp.mean((x@base-x@source_w)**2))<1e-4\nfrozen=np.asarray(base).copy()\nu=jnp.array([[.2],[-.3],[.1],[.2],[-.1],[.4]])\nv=jnp.array([[.5,-.2,.3,.1]])\ntarget=x@(base+u@v)\na=jax.random.normal(jax.random.key(4),(6,1))*.1;b=jnp.zeros((1,4));params=(a,b)\nloss=lambda ab:jnp.mean((lora_forward(x,base,*ab,alpha=1.)-target)**2)\nstep=jax.jit(jax.value_and_grad(loss));history=[]\ninitial_grads=step(params)[1]\nnp.testing.assert_array_equal(initial_grads[0],np.zeros((6,1)))\nassert np.linalg.norm(initial_grads[1])>0",
+        "explanation": "This step includes the source-task training. Inspect the initial factor gradients: A has zero gradient and B has a nonzero one."
+      },
+      {
+        "title": "3. Adapt and verify the serving merge",
+        "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
+        "code": "for _ in range(250):\n    value,g=step(params);history.append(float(value));params=jax.tree.map(lambda a,b:a-.4*b,params,g)\na,b=params\nassert history[-1]<history[0]*.02\nnp.testing.assert_array_equal(base,frozen)\nmerged=base+a@b\nnp.testing.assert_allclose(lora_forward(x,base,a,b),x@merged,rtol=1e-5,atol=1e-6)\nprint('LoRA initial/final:',history[0],history[-1],'; trainable:',a.size+b.size,'base:',base.size)",
+        "explanation": "The reference target has rank one by construction. Exact base equality and changed-input merge checks answer different questions from adaptation loss."
+      }
+    ],
+    "takeaways": [
+      "Write the dense-layer output gradient as \\(G\\), with the same batch-by-output shape as the prediction. Let \\(s=\\alpha/r\\). The two derivatives below explain initialization. When \\(B=0\\), the first derivative vanishes, while the second can be nonzero if \\(A\\) is random. After one update to \\(B\\), both factors may learn. If both factors start at zero, both gradients vanish and training stalls.",
+      "Save the exact base identity, target layer names, tensor orientation, rank, scaling, factor dtype and adapter weights. Reconstruct the unmerged computation before testing a merge. A rank-two adapter with \\(\\alpha=3\\) requires scale \\(1.5\\); forgetting that scale may go unnoticed in rank-one examples where it equals one."
+    ],
+    "diagram": {
+      "title": "Frozen base plus a low-rank correction",
+      "prediction": "If rank changes while alpha stays fixed, can you omit the scaling when merging?",
+      "reading": "Input enters both branches. The base weight is frozen; A and B are trainable. Both paths return four features before addition. Include \\(\\alpha/r\\) when merging. These are forward-data arrows: gradients update adapter factors but not frozen base parameters.",
+      "alt": "Input enters both branches. The base weight is frozen; A and B are trainable. Both paths return four features before addition. Include \\(\\alpha/r\\) when merging. These are forward-data arrows: gradients update adapter factors but not frozen base parameters.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 7,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "x",
+            "x": 5,
+            "y": 0.8,
+            "label": "X: batch × 6",
+            "tone": "data",
+            "w": 4,
+            "h": 0.85
+          },
+          {
+            "id": "w",
+            "x": 2.3,
+            "y": 2.8,
+            "label": "Frozen W\n6 × 4",
+            "tone": "fixed",
+            "w": 3.4,
+            "h": 1
+          },
+          {
+            "id": "a",
+            "x": 7.4,
+            "y": 2.8,
+            "label": "Trainable A\n6 × r",
+            "tone": "state",
+            "w": 3.4,
+            "h": 1
+          },
+          {
+            "id": "b",
+            "x": 7.4,
+            "y": 4.5,
+            "label": "Trainable B\nr × 4",
+            "tone": "state",
+            "w": 3.4,
+            "h": 1
+          },
+          {
+            "id": "scale",
+            "x": 7.4,
+            "y": 6.1,
+            "label": "Scale by alpha / r",
+            "tone": "data",
+            "w": 3.8,
+            "h": 0.85
+          },
+          {
+            "id": "sum",
+            "x": 5,
+            "y": 8,
+            "label": "Add: batch × 4",
+            "tone": "result",
+            "w": 4,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "x",
+            "to": "w"
+          },
+          {
+            "from": "x",
+            "to": "a"
+          },
+          {
+            "from": "a",
+            "to": "b"
+          },
+          {
+            "from": "b",
+            "to": "scale"
+          },
+          {
+            "from": "scale",
+            "to": "sum"
+          },
+          {
+            "from": "w",
+            "to": "sum",
+            "exit": "bottom",
+            "enter": "left",
+            "curve": "arc3,rad=0.12"
+          }
+        ],
+        "height": 9,
+        "width": 10
+      }
     }
   }
 }

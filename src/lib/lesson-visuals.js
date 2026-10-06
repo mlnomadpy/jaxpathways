@@ -2,6 +2,16 @@ import { escapeHtml } from './html.js';
 import { inlineMath, mathProse } from './math.js';
 import { siteUrl } from './urls.js';
 
+/** A conceptual mechanism belongs beside its worked explanation. */
+export function lessonMechanism(lesson) {
+  const diagram = lesson.content?.diagram;
+  const artifact = lesson.visualArtifact;
+  if (!diagram || !artifact?.mechanismImage || artifact.contentHash !== lesson.contentHash)
+    return '';
+  const id = `mechanism-${lesson.id}`;
+  return `<figure class="lesson-mechanism" aria-labelledby="${escapeHtml(id)}"><h3 id="${escapeHtml(id)}">${escapeHtml(diagram.title)}</h3><p class="visual-prediction"><strong>Predict:</strong> ${inlineMath(diagram.prediction)}</p><div class="figure-scroll" role="region" aria-label="${escapeHtml(diagram.title)}" tabindex="0"><img src="${escapeHtml(siteUrl(artifact.mechanismImage))}" alt="${escapeHtml(diagram.title)}. The explanation below describes the relationships." aria-describedby="${escapeHtml(id)}-reading" loading="lazy" decoding="async" /></div><figcaption>${escapeHtml(diagram.scope)}</figcaption><div id="${escapeHtml(id)}-reading">${mathProse(diagram.reading)}</div><a href="${escapeHtml(siteUrl(artifact.mechanismImage))}">Open full-size diagram</a></figure>`;
+}
+
 /** Render only artifacts bound to the current canonical lesson content. */
 export function lessonVisual(lesson) {
   const visual = lesson.content?.visual;

@@ -1,4 +1,5 @@
 ---
+import GuideContents from '../../components/shared/GuideContents.astro';
 import 'katex/dist/katex.min.css';
 import '../../styles/tokens.css';
 import '../../styles/base.css';
@@ -8,7 +9,7 @@ import '../../styles/features/math.css';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
-import { projectGuide } from '../../lib/project-guide.js';
+import { projectGuide } from '../../lib/server/project-guide.js';
 import { siteUrl } from '../../lib/urls.js';
 export function getStaticPaths() {
   return registry.projects.map((project) => ({ params: { id: project.id }, props: { project } }));
@@ -36,16 +37,11 @@ const content = projectGuide(project, course);
         Download code and evidence
       </a>
     </div>
-    <nav class="assessment-contents" aria-label="Project guide sections">
-      <strong>In this guide</strong>
-      <ol>
-        {content.sections.map((section) => (
-          <li>
-            <a href={`#${section.id}`} set:html={section.label} />
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <GuideContents
+      sections={content.sections}
+      label="Project guide sections"
+      title="In this guide"
+    />
     <article set:html={content.body} />
     <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
       Build and check your implementation

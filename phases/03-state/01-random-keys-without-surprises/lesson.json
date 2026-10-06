@@ -3,7 +3,7 @@
   "id": "state-01",
   "minutes": 60,
   "content": {
-    "idea": "JAX random operations use explicit keys instead of a hidden mutable generator. A key is an input to a deterministic random function. Reusing it reproduces the same sample; it does not advance an implicit stream. Split the key when you need independent draws.\n\nTreat each key as a value to consume once for a draw. Retain a separate key for the next step, and pass it through your training or simulation state. A seed enables reproducibility of the experiment, while splitting expresses the structure of its randomness.",
+    "idea": "A random sampler in JAX receives an explicit key. Reusing the same key with the same sampler repeats the same computation. Splitting gives us separately owned keys, so the program can show which operation receives which randomness.",
     "code": "import jax\nimport jax.numpy as jnp\nkey = jax.random.key(42)\nkey, sample_key = jax.random.split(key)\na = jax.random.normal(sample_key, (3,))\nrepeated = jax.random.normal(sample_key, (3,))\nkey, next_key = jax.random.split(key)\nb = jax.random.normal(next_key, (3,))\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
     "output": "Replay equal: True; Fresh draw equal: False.",
     "exercise": "Split a fresh seed into four keys, then use vmap to draw two normal values from each. Replay from the seed and compare.",
@@ -18,6 +18,15 @@
     "explanation": "Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.",
     "problem": "You saved the seed, yet your simulation repeats exactly the same noise at every step. Let’s follow the random key. In JAX, using a key again repeats the same draw; splitting it gives you keys for separate draws. We’ll practice both deliberate replay and fresh sampling before adding randomness to a training loop.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A key is an input, not a moving cursor",
+        "body": "Imagine a training step that needs dropout randomness and a key for the next step. Split the incoming key, use one child for dropout, and return the other as the continuation key. The drawing should branch once; it should not show a sampler secretly advancing the parent key.\n\nIf two augmentation calls receive the same key and otherwise identical inputs, they can produce the same augmentation. Different variable names do not make the underlying key values different. This is a data-flow bug that ordinary shape checks will miss.\n\nFor recovery, save the continuation key at the same boundary as model and data position. Reconstructing an initial seed and restarting the random stream is not equivalent to restoring the next key after many training steps.",
+        "check": {
+          "prompt": "Does calling a sampler consume or mutate the key variable?",
+          "answer": "No. The key is an explicit value. Your program must choose new child keys and carry the next key forward; otherwise repeated calls can replay the same sample."
+        }
+      },
       {
         "title": "Treat a key as an explicit input",
         "body": "A JAX random operation is deterministic given its key and other arguments. The key is not a mutable generator that automatically advances after a call. Calling normal twice with the same key, shape and dtype reproduces the draw. That property is useful for replay and dangerous when accidental reuse makes samples correlated.\n\nA seed is only the initial description of an experiment. Splitting describes where subsequent random choices come from. Write down which function owns the continuation key and which subkey is consumed by a draw. Do not pass one subkey to two independent components.",

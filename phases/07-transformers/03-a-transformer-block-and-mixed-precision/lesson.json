@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "An attention head mixes information across positions. What else makes it a Transformer block? We’ll add normalization, a small feature-processing network and two residual connections. Then we’ll inspect gradients and compare a lower-precision version. This is a deliberately small CPU teaching block, not a production architecture.",
-    "idea": "This is a teaching block with one attention head, no dropout, no learned normalization scale/bias and no rotary embeddings. It isolates the mechanics rather than reproducing a production architecture. The next lesson adds embeddings and an output head.\n\nAll checks run on CPU. A bfloat16 comparison checks numeric behavior on the installed backend; it does not establish TPU throughput or a universal tolerance.",
+    "idea": "A Transformer block adds learned corrections to token representations. This lesson uses a single attention head, normalization before each branch, and two residual additions. Follow the implemented dimensions rather than assuming all Transformer architectures are interchangeable.",
     "objectives": [
       "Follow the two residual paths",
       "Normalize features rather than examples",
@@ -15,6 +15,15 @@
       "Separate storage precision from sensitive arithmetic"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Follow the residual stream through the actual block",
+        "body": "Four token positions each carry eight features. Query/key scores therefore form a four-by-four matrix. Weighted values and the output projection return to eight features, allowing the attention correction to be added to the input.\n\nThe feed-forward branch expands eight features to sixteen, applies GELU and returns to eight. It processes each token's feature vector; attention is the part that mixes eligible positions. Each residual addition requires matching shapes.\n\nThe saved output-minus-input heatmap shows the combined correction. Its equal rows arise from this fixture's constant-offset input and normalization behavior. They are not a universal property of attention. Use the architecture to identify which input change would test that explanation.",
+        "check": {
+          "prompt": "What should happen when every learned projection is zero?",
+          "answer": "The block returns its input: both correction branches are zero and the residual path remains. This checks the structure independently of learned performance."
+        }
+      },
       {
         "title": "Follow the two residual paths",
         "body": "The first sublayer normalizes each token’s features, creates Q/K/V projections, performs causal attention and projects back to the model width. Add that result to the original \\(x\\). The second sublayer normalizes the intermediate residual, expands feature width, applies GELU, contracts back and adds again.\n\nEvery residual addition needs matching shapes. Zeroing all six projection matrices makes both sublayers contribute zero, so the block must return \\(x\\) exactly. This is an independent boundary case that catches many incorrect residual connections.",
@@ -126,6 +135,136 @@
       "connection": "Why do the rows look identical? The example builds input rows that differ only by a constant offset across their features. Per-token layer normalization removes that offset, so the normalized rows match. Their projected values match too, so attention’s weighted average is the same even when the causal mask allows different numbers of tokens. The subsequent normalized feed-forward branch preserves this symmetry.\n\nThe block therefore adds almost the same correction to different input rows; the final rows themselves are still different. This repeated pattern comes from the chosen input, not a rule that transformers treat every token identically. Change one feature of one token, rather than shifting the entire row, to break the symmetry and inspect how the correction changes.",
       "alt": "A residual block adds a correction to its input. Rows are token positions and columns are features. Every cell shows output minus input at that location, so this is a map of the block’s correction, not its raw output. Purple indicates a positive correction, brown a negative correction, and near-white little change. Feature \\(3\\) increases by about \\(0.0897\\), while feature \\(7\\) decreases by about \\(0.385\\). Those same column patterns repeat across all four rows, up to floating-point rounding. The strongest color marks the largest change in magnitude, not the feature with the largest original activation.",
       "code": "visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['token ' + str(i) for i in range(4)], 'columns': ['f' + str(i) for i in range(8)], 'unit': 'output minus input', 'diverging': True}"
+    },
+    "diagram": {
+      "title": "The actual single-head pre-LN block",
+      "prediction": "What should happen when every learned projection is zero?",
+      "reading": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
+      "alt": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 8.7,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "x",
+            "x": 5,
+            "y": 0.7,
+            "label": "Input X: 4 × 8",
+            "tone": "data",
+            "w": 4,
+            "h": 0.85
+          },
+          {
+            "id": "ln1",
+            "x": 5,
+            "y": 2,
+            "label": "Layer norm → Q, K, V\nEach: 4 × 8",
+            "tone": "data",
+            "w": 5,
+            "h": 1
+          },
+          {
+            "id": "att",
+            "x": 5,
+            "y": 3.6,
+            "label": "QKᵀ / √8 → causal mask → softmax\nScores / weights: 4 × 4",
+            "tone": "data",
+            "w": 7,
+            "h": 1.1
+          },
+          {
+            "id": "v",
+            "x": 5,
+            "y": 5.2,
+            "label": "Weighted V → output projection\nCorrection: 4 × 8",
+            "tone": "data",
+            "w": 6,
+            "h": 1
+          },
+          {
+            "id": "a1",
+            "x": 5,
+            "y": 6.7,
+            "label": "Add first residual: 4 × 8",
+            "tone": "result",
+            "w": 5,
+            "h": 0.85
+          },
+          {
+            "id": "ff",
+            "x": 5,
+            "y": 8.3,
+            "label": "Layer norm → 8 to 16\nGELU → 16 to 8",
+            "tone": "data",
+            "w": 6,
+            "h": 1
+          },
+          {
+            "id": "a2",
+            "x": 5,
+            "y": 9.9,
+            "label": "Add second residual: 4 × 8",
+            "tone": "result",
+            "w": 5,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "x",
+            "to": "ln1"
+          },
+          {
+            "from": "ln1",
+            "to": "att"
+          },
+          {
+            "from": "att",
+            "to": "v"
+          },
+          {
+            "from": "v",
+            "to": "a1"
+          },
+          {
+            "from": "a1",
+            "to": "ff"
+          },
+          {
+            "from": "ff",
+            "to": "a2"
+          },
+          {
+            "from": "x",
+            "to": "a1",
+            "exit": "left",
+            "enter": "left",
+            "curve": "arc3,rad=0.65"
+          },
+          {
+            "from": "a1",
+            "to": "a2",
+            "exit": "right",
+            "enter": "right",
+            "curve": "arc3,rad=-0.9"
+          },
+          {
+            "from": "ln1",
+            "to": "v",
+            "exit": "right",
+            "enter": "right",
+            "curve": "arc3,rad=-0.55",
+            "label": "V",
+            "labelAt": [
+              9.25,
+              3.55
+            ]
+          }
+        ],
+        "height": 10.7,
+        "width": 10
+      }
     }
   }
 }

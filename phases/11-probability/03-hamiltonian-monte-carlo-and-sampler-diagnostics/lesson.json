@@ -4,7 +4,7 @@
   "minutes": 140,
   "content": {
     "problem": "An approximate inference program returns a long list of weights. Before treating those weights as posterior samples, how can we tell whether its mechanics are correct and whether its chains explored the target? We will build a transparent Hamiltonian Monte Carlo sampler for a correlated Gaussian with a known mean and covariance, then deliberately damage its step size.",
-    "idea": "Hamiltonian Monte Carlo, or HMC, introduces a temporary momentum and follows approximate trajectories through position and momentum space. The gradient of negative log-density guides the path. A Metropolis acceptance decision corrects integration error. This lesson fixes the trajectory length and uses an identity mass matrix; it teaches the mechanism, not a production replacement for adaptive NUTS.",
+    "idea": "Hamiltonian Monte Carlo introduces momentum to propose distant states while accounting for the target density. Numerical integration and acceptance control the proposal, but diagnostics are still needed to judge whether the retained samples explore the posterior adequately.",
     "objectives": [
       "Implement leapfrog with the correct half-step boundaries",
       "Check reversibility and an independent analytic gradient",
@@ -12,6 +12,15 @@
       "Interpret energy error, acceptance and classical split R-hat without claiming convergence"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A moving chain is not automatically a well-mixed chain",
+        "body": "Follow position and momentum through a leapfrog trajectory. A proposal can travel far without behaving like an independent posterior draw. Integration error and acceptance behavior provide one diagnostic, while between-chain agreement and autocorrelation provide others.\n\nStart multiple chains from meaningfully different positions where appropriate. Inspect the same retained sampling region across chains, and separate adaptation from retained draws. A trace that looks active may still stay in one region or be strongly correlated.\n\nThe lesson's trace plot uses a known posterior mean as a reference. Matching that mean is not sufficient: spread and dependence matter too. Compute diagnostics from the retained samples with their conventions recorded; plotting a thinned subset should not silently redefine the diagnostic sample.",
+        "check": {
+          "prompt": "Why can many saved samples still provide little effective information?",
+          "answer": "Strong dependence or poor exploration can make them redundant. Sample count and effective sample size answer different questions; neither a smooth trace nor a correct mean alone establishes adequate mixing."
+        }
+      },
       {
         "title": "Turn log-density into potential energy",
         "body": "For a normal target with mean \\(m\\) and covariance \\(\\Sigma\\), the potential is \\(U(q)=(q-m)^\\top\\Sigma^{-1}(q-m)/2\\), ignoring a constant. Its gradient is \\(\\Sigma^{-1}(q-m)\\), so we have an independent formula for autodiff. Momentum has a standard-normal distribution and kinetic energy \\(p^\\top p/2\\). The combined energy should remain constant along an exact trajectory.",

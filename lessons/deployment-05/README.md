@@ -15,9 +15,35 @@ Someone asks you for an “8-bit model.” A helpful first question is: 8-bit we
 
 ## The idea
 
-Weights are the numbers a model has learned. Activations are the values it computes for the current input. Accumulators hold intermediate sums. We can choose a different precision for each, so it helps to write those choices separately.
+A precision policy specifies how weights, activations, accumulations and outputs are represented. Quantization adds scales, zero-points and rounding/clipping rules. Track those units through the computation instead of describing the whole model with one dtype label.
 
-For example, W8A16 describes 8-bit weights and 16-bit activations, but leaves other questions open: how are values scaled, how wide are the sums, and which runtime kernels can use that format? Our CPU experiments isolate the numerical effects. They do not claim packed INT4 storage or accelerator speed.
+## Follow the units through integer arithmetic
+
+For an illustrative scale $s=0.5$ and zero-point $z=3$, the real value $1$ maps to integer $q=5$, since $q=\operatorname{round}(1/0.5)+3$. Reconstructing gives $0.5(5-3)=1$. Real zero maps to the zero-point, not necessarily integer zero.
+
+In a dot product, centered integer products accumulate in an appropriately wide type. The accumulator's scale comes from the input and weight scales. Bias must use compatible units before the output is rescaled or requantized.
+
+The error plots compare specific representation policies. Read weight, activation and accumulation choices separately. Per-channel scales also require a declared axis. Numerical error, downstream quality and target-runtime speed need separate evidence.
+
+### Integer values need scales and zero-points
+
+**Predict:** What happens if you ignore a nonzero zero-point when interpreting quantized values?
+
+![Integer values need scales and zero-points](../../phases/15-deployment/05-weight-activation-and-accumulation-precision/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.
+
+### Pause and reason
+
+What happens if you ignore a nonzero zero-point when interpreting quantized values?
+
+<details><summary>Compare your reasoning</summary>
+
+You introduce an offset error before multiplication or reconstruction. Correct integer storage alone is insufficient; arithmetic must honor the affine mapping.
+
+</details>
 
 ## Write the policy before choosing a dtype
 
@@ -186,7 +212,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:21.773000+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:54.155485+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0

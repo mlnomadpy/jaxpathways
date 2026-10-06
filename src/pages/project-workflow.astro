@@ -1,0 +1,58 @@
+---
+import GuideContents from '../components/shared/GuideContents.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/reader.css';
+import '../styles/features/assessment.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { assessmentContent } from '../lib/server/assessment-content.js';
+import { siteUrl } from '../lib/urls.js';
+const content = assessmentContent('content/guides/project-workflow.md', siteUrl);
+---
+
+<SiteLayout
+  title="Tools, project structure, and experiments — JAX Pathways"
+  description="Organize source, configuration, data and run evidence. Practice with a downloadable Python CLI and choose tools as your JAX project grows."
+  active="course"
+>
+  <main id="main">
+    <div id="assessment" class="workflow-guide">
+      <a href={siteUrl('course.html')}>Back to the course</a>
+      <p class="edition">Practical guide · Python standard library · before your first project</p>
+      <Fragment set:html={content.heading} />
+      <div class="assessment-actions">
+        <a class="button primary" href={siteUrl('downloads/jax-project-workspace.zip')} download>
+          Download the practice workspace
+        </a>
+        <a class="button" href={siteUrl('downloads/project-workflow.md')} download>
+          Save the guide
+        </a>
+      </div>
+      <GuideContents sections={content.sections} label="Project workflow guide sections" />
+      <article set:html={content.body} />
+    </div>
+    <SiteFooter />
+  </main>
+</SiteLayout>
+
+<style>
+  .workflow-guide :global(pre) {
+    color: var(--ink);
+  }
+  .workflow-guide :global(table) {
+    display: block;
+    overflow-x: auto;
+    font: 15px/1.65 var(--ui);
+  }
+  .workflow-guide :global(th),
+  .workflow-guide :global(td) {
+    min-width: 150px;
+    padding: 12px;
+    vertical-align: top;
+  }
+  .workflow-guide :global(a:not(.button)) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

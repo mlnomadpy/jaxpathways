@@ -5,7 +5,7 @@ const {courseState}=require('../src/lib/course-state.js');
 // Exercise the real submit handler with an isolated DOM/storage fixture; no user records.
 async function harness(failStorage){
  const nodes=new Map();
- const element=()=>({value:'',textContent:'',innerHTML:'',hidden:false,children:[],append(...values){this.children.push(...values);},replaceChildren(...values){this.children=values;},setAttribute(){},focus(){},reset(){for(const id of ['#evidence-title','#evidence-url','#evidence-note'])nodes.get(id).value='';}});
+ const element=()=>({value:'',textContent:'',innerHTML:'',hidden:false,children:[],addEventListener(type,listener){this.listeners ||= {}; (this.listeners[type] ||= []).push(listener);},append(...values){this.children.push(...values);},replaceChildren(...values){this.children=values;},setAttribute(){},focus(){},reset(){for(const id of ['#evidence-title','#evidence-url','#evidence-note'])nodes.get(id).value='';}});
  for(const id of ['active-route','continue','evidence-route','evidence-lesson','evidence-project','evidence-stage','evidence-title','evidence-url','evidence-note','evidence-submit','evidence-status','evidence-form','cancel-edit','evidence-filter-route','evidence-filter-type','undo-remove','evidence-count','evidence-results','evidence-list','backup-status','export','import','import-button','route-next','lesson-progress-summary','project-progress-summary','saved-career'])nodes.set('#'+id,element());
  const lesson={id:'welcome-01',title:'A fixture lesson',status:'authored'},phase={id:'welcome',title:'Welcome',lessons:[lesson]};
  const storage=new Map();

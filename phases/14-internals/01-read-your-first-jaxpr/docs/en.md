@@ -16,9 +16,25 @@ Your function returns the right answer. Now let’s look inside the computation 
 
 ## The idea
 
-A jaxpr is JAX’s typed, functional intermediate representation. make_jaxpr traces a function using the shapes and dtypes of example arguments and returns a ClosedJaxpr. Reading it helps you understand transformations and tracing failures. It is not executable machine code and its operation count is not a performance measurement.
+A jaxpr records primitive operations and the values that connect them. Read it as a data-flow program with shapes and dtypes, not as a literal description of final hardware instructions or Python execution order.
 
-You need the earlier pure-function, grad, jit, scan and cond lessons. Use the CPU environment from setup. Work in a new main.py file, adding the three build steps below, and keep a prediction sheet alongside it.
+## Read a jaxpr as a typed computation
+
+Start at the inputs and trace one intermediate to its consumers. For a reduction, identify the consumed axes and resulting shape. Distinguish array inputs from closed constants: both can affect the output, but they enter the program differently.
+
+Then connect each primitive to the corresponding part of the original expression. A variable name in a printed jaxpr is a local label, not a stable API to test verbatim.
+
+The intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.
+
+### Pause and reason
+
+Why avoid a correctness test that compares the entire printed jaxpr string?
+
+<details><summary>Compare your reasoning</summary>
+
+Formatting, names and primitive details can change across versions. Test intended structure where appropriate and verify numerical behavior independently.
+
+</details>
 
 ## Compute the values before reading the representation
 
@@ -177,7 +193,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:58.947250+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:31.817733+00:00. JAX 0.9.2.
 
 ```text
 Forward program:

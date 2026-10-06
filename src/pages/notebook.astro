@@ -56,25 +56,41 @@ import pages from '../data/pages.json';
             <div class="artifact-context-fields">
               <label for="evidence-route">
                 <span class="field-caption">Pathway</span>
-                <select id="evidence-route"></select>
+                <select
+                  data-choices="disclosure"
+                  data-choice-label="Pathway"
+                  id="evidence-route"
+                ></select>
               </label>
               <label for="evidence-lesson">
                 <span class="field-caption">
                   Related lesson <span class="soft">(optional)</span>
                 </span>
-                <select id="evidence-lesson"></select>
+                <select
+                  data-choices="disclosure"
+                  data-choice-label="Lesson"
+                  id="evidence-lesson"
+                ></select>
               </label>
               <label for="evidence-project">
                 <span class="field-caption">
                   Related project <span class="soft">(optional)</span>
                 </span>
-                <select id="evidence-project"></select>
+                <select
+                  data-choices="disclosure"
+                  data-choice-label="Project"
+                  id="evidence-project"
+                ></select>
               </label>
               <label for="evidence-stage">
                 <span class="field-caption">
                   Project stage <span class="soft">(optional)</span>
                 </span>
-                <select id="evidence-stage"></select>
+                <select
+                  data-choices="disclosure"
+                  data-choice-label="Stage"
+                  id="evidence-stage"
+                ></select>
               </label>
             </div>
           </details>
@@ -134,7 +150,7 @@ import pages from '../data/pages.json';
         </select>
         <label>
           Show saved work
-          <select id="evidence-filter-type">
+          <select data-choices="inline" data-choice-label="Artifact type" id="evidence-filter-type">
             <option value="">All work</option>
             <option value="lesson">Lessons</option>
             <option value="project">Projects</option>

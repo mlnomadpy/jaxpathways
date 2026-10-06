@@ -15,7 +15,25 @@ Training changes a model; evaluation should measure it without changing it. Weâ€
 
 ## The idea
 
-A compiled train step is a state transition: compute logits, calculate a scalar objective, differentiate parameters, and apply updates. A compiled evaluation step computes metrics only. Compilation changes how execution is staged; it does not enforce this distinction for you.
+Training computes gradients and changes the model. Evaluation measures a fixed model under a declared input and scoring contract. Keeping those roles separate prevents held-out data from quietly participating in fitting.
+
+## Evaluation observes a frozen model
+
+Suppose validation loss improves after an accidental optimizer step on validation examples. The number is real, but it no longer evaluates the unchanged training result. The evaluation has influenced fitting.
+
+Capture parameter and relevant state values before evaluation and compare afterward. If the model has training-only randomness or running statistics, verify its evaluation convention too. Depict only the mechanisms the actual model uses.
+
+Aggregate evaluation contributions with their counts. Unequal batch sizes make an average of batch means different from an example mean. Finally, inspect actual errors in the held-out prediction field: a visually attractive boundary cannot rule out leakage or a denominator mistake.
+
+### Pause and reason
+
+Why compare state before and after evaluation instead of checking only the score?
+
+<details><summary>Compare your reasoning</summary>
+
+A score can look plausible even if evaluation updates parameters or statistics. State comparison tests whether the measurement changed the object it was meant to evaluate.
+
+</details>
 
 ## Choose a transparent train and held-out split
 
@@ -192,7 +210,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:39.962136+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:09.255275+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0

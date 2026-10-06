@@ -14,7 +14,25 @@ A process is alive and prints messages, yet useful training may have stopped. Wh
 
 ## The idea
 
-Observability should answer a decision. Progress step and processed examples tell us whether work advances. Update duration estimates the speed of the compiled training operation; total job duration includes startup and operational overhead. Checkpoint step tells us how much completed work remains uncommitted. We keep these quantities separate instead of calling every ratio utilization.
+Logs tell us what a process reported; accepted checkpoints tell us what can be resumed. Monitoring should connect these signals without treating them as interchangeable. Their difference helps estimate the consequences of a failure.
+
+## Keep observed progress separate from recoverable progress
+
+If the live process reports step 42 and the newest accepted checkpoint is step 40, there are two completed steps beyond that recovery boundary. Whether they must be replayed depends on the recovery contract and recorded input state.
+
+Name metric units and update points: examples processed, valid tokens, optimizer steps and accepted checkpoint steps are different counters. A sudden flat line can indicate stalled computation, blocked logging or a failed collector; inspect another signal before assigning the cause.
+
+Read the two progress curves at the same time coordinate and locate the failure. The gap describes lag in recoverable progress, while the slope of live progress describes reported work rate. Neither alone proves hardware utilization.
+
+### Pause and reason
+
+Does a recent log line prove that its reported step is durable?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It proves the observation reached the log. Recovery durability depends on the accepted checkpoint and storage contract.
+
+</details>
 
 ## An event needs meaning and units
 
@@ -470,15 +488,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:03.401245+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:34.293950+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005469173192977905, 'update_examples_per_s': 175529.2740102989, 'job_examples_per_s': 157.8143481242871, 'update_duty_fraction': 0.0008990770856548272}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00021733413450419903, 'update_examples_per_s': 184048.40128427767, 'job_examples_per_s': 68.04208061803776, 'update_duty_fraction': 0.00036969666752465424}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00046362518332898617, 'update_examples_per_s': 207063.81674672506, 'job_examples_per_s': 161.20108241721204, 'update_duty_fraction': 0.0007785091811303223}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002401240635663271, 'update_examples_per_s': 166580.55592562965, 'job_examples_per_s': 68.72298729861558, 'update_duty_fraction': 0.0004125510742640164}
-examples / synchronized seconds: 96 0.00046362518332898617
-measured update duty fraction, not hardware utilization: 0.0007785091811303223
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00036583421751856804, 'update_examples_per_s': 262413.94435753534, 'job_examples_per_s': 190.10257051228302, 'update_duty_fraction': 0.000724437761787807}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00013270927593111992, 'update_examples_per_s': 301410.7319880277, 'job_examples_per_s': 78.76784121464831, 'update_duty_fraction': 0.0002613305793563351}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00047399988397955894, 'update_examples_per_s': 202531.69514307298, 'job_examples_per_s': 166.37048796195725, 'update_duty_fraction': 0.0008214540832457328}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00015625124797224998, 'update_examples_per_s': 255997.9553385964, 'job_examples_per_s': 79.03260797159444, 'update_duty_fraction': 0.0003087235906515806}
+examples / synchronized seconds: 96 0.00047399988397955894
+measured update duty fraction, not hardware utilization: 0.0008214540832457328
 PASS: operations-02
 
 ```

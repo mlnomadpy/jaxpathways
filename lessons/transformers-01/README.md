@@ -15,9 +15,25 @@ When a model reads a sequence, how can one position use information from another
 
 ## The idea
 
-Queries ask which keys match; values are the information mixed after matching. This lesson uses separate $Q$, $K$ and $V$ so that matching and retrieval are visible. In self-attention, learned projections of the same sequence supply those three arrays.
+Attention uses queries and keys to determine weights, then combines values using those weights. Scores describe compatibility; values provide the content being mixed. The attention matrix is an intermediate computation rather than the model's complete output.
 
-Use CPU and small arrays. No model download or accelerator is required. This head has no mask yet; the next lesson adds causal, padding and packed-sequence boundaries.
+## Calculate one weighted value mixture
+
+Suppose one query gives weights $0.25$ and $0.75$ to values $[2,0]$ and $[0,4]$. The mixture is $[0.5,3]$. The weights sum to one, but output coordinates need not sum to one or lie between zero and one.
+
+Read one heatmap row as a query's distribution over eligible keys, after confirming the axes. Scaling affects concentration, and a mask determines which keys can participate.
+
+Hold the weights fixed and change a value vector: the output changes while the heatmap does not. Conversely, redundant values can make different weight patterns produce the same mixture. Use a hand-computed row to connect the heatmap to the actual value multiplication.
+
+### Pause and reason
+
+Can an attention-weight heatmap alone reconstruct the output?
+
+<details><summary>Compare your reasoning</summary>
+
+No. You also need the value vectors and any output projection. Weights explain the mixing coefficients, not the content being mixed.
+
+</details>
 
 ## Track query, key and value axes
 
@@ -151,7 +167,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:10.686813+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:41.553442+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]

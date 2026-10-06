@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-05",
-  "contentHash": "b503e31ca2a672adf247aeb700c6ad6b820b5f69f4b621cc3b194e957f019b64",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "200bba512f457328e80a3a67033c3ccd8c3608a932503a0585081fe9fe0a62b6",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:31:45.042902+00:00",
+  "generatedAt": "2026-10-06T15:35:50.253479+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +12,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[5.150004290044308e-05, 3.200001083314419e-05, 3.066682256758213e-05, 1.2333039194345474e-05, 1.158309169113636e-05], [8.820882067084312e-05, 7.258402183651924e-05, 5.024997517466545e-05, 4.975008778274059e-05, 5.179201252758503e-05]]\nIndependent reverse recurrence agrees with both gradients.\n",
+  "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[2.7041882276535034e-05, 1.1916272342205048e-05, 8.916947990655899e-06, 8.540693670511246e-06, 8.665956556797028e-06], [1.925043761730194e-05, 1.0832678526639938e-05, 8.124858140945435e-06, 8.542090654373169e-06, 7.957685738801956e-06]]\nIndependent reverse recurrence agrees with both gradients.\n",
   "data": {
     "kind": "panels",
     "panels": [

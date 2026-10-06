@@ -15,7 +15,25 @@ Your training loop says “saved,” then the process disappears. Which step can
 
 ## The idea
 
-A request to save and permission to forget the previous checkpoint are different events. We use a real Orbax asynchronous writer, keep its snapshot separate from the continuing state, wait for completion, verify restoration, and only then update a small application manifest. The manifest is a teaching example of acceptance policy; it does not replace Orbax’s checkpoint format or establish crash durability on every filesystem.
+Asynchronous saving overlaps writing with training. A snapshot moves through requested, writing, completed and accepted states. Recovery must select a checkpoint whose completion and validity satisfy the actual storage contract.
+
+## Distinguish a save request from a recovery point
+
+Imagine live training reaches step 42 while a snapshot of step 40 is still being written. The live progress log does not make step 42 recoverable. Failure before the pending snapshot is accepted may leave an earlier checkpoint as the valid choice.
+
+Keep completion signals separate from the record used to select accepted snapshots. Validate required files and metadata before making a new snapshot eligible. Also ensure live training cannot mutate the snapshot's intended contents during writing.
+
+The saved/live/accepted bars represent different boundaries. Their gaps describe work at risk of replay or loss, not necessarily a defect. Interpret them against the failure location and the checkpoint API's stated guarantees.
+
+### Pause and reason
+
+Can a “save requested” message justify deleting the previous accepted checkpoint?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The replacement may never complete or validate. Retention should preserve a recoverable accepted checkpoint until the replacement meets the acceptance contract.
+
+</details>
 
 ## Define a completed training boundary
 
@@ -215,21 +233,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:03.739531+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:34.415758+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-wa0buu8h
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-hm5vba4z
 {
-  "save_call_seconds": 0.002576791914179921,
-  "remaining_work_and_wait_seconds": 0.014356916071847081,
+  "save_call_seconds": 0.002465624827891588,
+  "remaining_work_and_wait_seconds": 0.013811375014483929,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-1086q1h7
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-b9_4mz0x
 {
-  "save_call_seconds": 0.0014767078682780266,
-  "remaining_work_and_wait_seconds": 0.010046958923339844,
+  "save_call_seconds": 0.0015274579636752605,
+  "remaining_work_and_wait_seconds": 0.007230333983898163,
   "accepted_step": 1,
   "live_step": 2
 }

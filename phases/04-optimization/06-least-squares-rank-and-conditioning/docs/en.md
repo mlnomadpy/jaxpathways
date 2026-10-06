@@ -16,7 +16,25 @@ Before training a linear model step by step, can we solve it directly? A tiny le
 
 ## The idea
 
-All predictions from a design matrix $X$ lie in the span of its columns: their weighted combinations. Least squares picks the prediction closest to the target vector $y$. The remaining error is perpendicular to every feature column. Unique coefficients require independent columns; reliable coefficients also require that those columns are not almost dependent.
+Least squares finds parameters whose predictions are close to the targets under a squared-error objective. Whether those parameters are uniquely determined and stable is a separate question. Nearly redundant features can make weights sensitive even when predictions look good.
+
+## A good fit can hide uncertain parameters
+
+Suppose two feature columns are identical. A prediction using weights $w_1$ and $w_2$ depends only on their sum. The pairs $(1,2)$ and $(2,1)$ therefore produce identical predictions. A low residual cannot tell us which pair is the intended explanation.
+
+If the columns are almost, rather than exactly, identical, tiny data changes can lead to large changes in the separate weights. This is conditioning: how strongly the solution responds to perturbations. Inspect parameter changes as well as prediction error.
+
+The geometric view projects the target vector onto the space spanned by the columns. A target component outside that space remains as residual even after a correct solve. A residual and an unstable parameter estimate are different problems and call for different diagnostics.
+
+### Pause and reason
+
+What evidence would distinguish an unavoidable residual from a faulty least-squares implementation?
+
+<details><summary>Compare your reasoning</summary>
+
+Compare with an independent solver or known projection, inspect rank, and check the residual's orthogonality to the column space within tolerance. A nonzero residual alone does not imply a bug.
+
+</details>
 
 ## Solve a fit you can verify by hand
 
@@ -132,7 +150,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:04.590246+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:32.414501+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113

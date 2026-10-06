@@ -15,7 +15,35 @@ Let’s bring model recovery and data recovery together. We’ll interrupt train
 
 ## The idea
 
-A restart boundary is consistent only when data consumption and completed model updates describe the same point in time. Save after the second update and after its batch has been consumed; then restore both components together. Restoring parameters at step two while restarting the reader at batch zero reprocesses earlier examples with later model state.
+Exact recovery joins numerical state and input-pipeline state at one completed update. Mixing boundaries can repeat or skip examples while producing a plausible training curve.
+
+## Align model time with data time
+
+If saved weights include the C/D update but the iterator still points to C/D, recovery trains on that batch again. If the iterator is one batch too far ahead, it skips data. Both runs can continue without a shape error.
+
+Draw one vertical boundary after an update and align parameters, optimizer, key and cursor with it. The next restored arrow must consume the same examples as the uninterrupted run.
+
+When comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.
+
+### One checkpoint, one completed-step boundary
+
+**Predict:** Why reject a resume even when its first loss nearly matches the reference?
+
+![One checkpoint, one completed-step boundary](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.
+
+### Pause and reason
+
+Why reject a resume even when its first loss nearly matches the reference?
+
+<details><summary>Compare your reasoning</summary>
+
+Different data or optimizer state can coincidentally produce similar loss. Exact continuation requires the intended full state and data boundary.
+
+</details>
 
 ## Commit one logical boundary
 
@@ -341,7 +369,7 @@ The diagram is conceptual; its box sizes do not measure storage or runtime. The 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:01.867573+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:32.501552+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]

@@ -4,8 +4,17 @@
   "minutes": 60,
   "content": {
     "problem": "You can explore how JAX splits an array across devices using just your laptop. We’ll create four logical CPU devices, give each one a piece of an array, and compare the result with NumPy. Start with the setup and array/device lessons. These logical devices share your CPU: they help us learn placement, but they do not reproduce accelerator speed or memory.",
-    "idea": "Virtual CPU devices let one Python process exercise JAX placement APIs without renting an accelerator. The devices are logical execution targets backed by the same host. You can practice global shapes, local shards, replicated inputs and shape constraints. They do not reproduce TPU memory, interconnect bandwidth, accelerator instructions, multi-host failures or performance.",
+    "idea": "Logical CPU devices let us practice how a global array is divided and addressed. They share a physical host. Treat them as a way to make placement visible, then use a real accelerator run to investigate accelerator memory, communication and speed.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Distinguish ownership from extra computing power",
+        "body": "Suppose a global array has four rows and each logical device owns one row. The global shape still describes all four rows; a local shard describes the one row stored for that owner. Asking for the global shape and inspecting a local buffer are different operations.\n\nThe ownership heatmap assigns a category to each device. A darker device color does not mean more work or a faster device. Follow the row boundary and the device label together.\n\nSet the logical-device configuration before JAX initializes its backend, then inspect the actual device count in a fresh process. Changing a flag after initialization does not retroactively repartition an already-running process.",
+        "check": {
+          "prompt": "A four-device CPU exercise passes. What can you now claim about four TPU chips?",
+          "answer": "You have checked the array-placement exercise on logical CPU devices. TPU execution, memory behavior and performance still require a separate run on that hardware. The ownership reasoning transfers; the measured performance does not."
+        }
+      },
       {
         "title": "Configure the runtime before it exists",
         "body": "Open the lesson workspace from setup and create main.py. The first block imports JAX, chooses CPU, and requests four CPU devices. Importing jax is allowed before the configuration; querying devices or creating an array can initialize the backend. That initialization is the boundary after which changing the count is too late.\n\nRun python main.py as a fresh process. In Jupyter or Colab, restart the kernel/runtime and use Run all so this configuration is the first JAX operation. If you already ran an earlier lesson in that kernel, merely rerunning this cell cannot reliably rebuild the runtime. The explicit count check gives you a repair instruction instead of silently proceeding with one device. A terminal alternative is `JAX_PLATFORMS=cpu JAX_NUM_CPU_DEVICES=4 python main.py`; Windows PowerShell uses `$env:JAX_PLATFORMS=\"cpu\"` and `$env:JAX_NUM_CPU_DEVICES=\"4\"` before python main.py."

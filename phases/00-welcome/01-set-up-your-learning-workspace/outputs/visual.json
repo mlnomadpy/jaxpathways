@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-01",
-  "contentHash": "e8fcf356a4c4a495a9bba1da822bd0a16fe8eb3e96fb38d471cf8727787e2d4c",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "c38065d7263e08e36efb458ed54fa941d1ed50c33eae1967b6e7f422d5f5d13f",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "conceptual",
-  "generatedAt": "2026-10-05T21:23:53.198264+00:00",
+  "generatedAt": "2026-10-06T15:41:22.113614+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -23,5 +23,70 @@
       "Read sum and assertion"
     ],
     "layout": "sequence"
+  },
+  "diagram": {
+    "title": "Where the first result comes from",
+    "prediction": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
+    "reading": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
+    "alt": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "Working folder + terminal command",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.7,
+          "label": "Selected Python interpreter / environment",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4.4,
+          "label": "Saved first_experiment.py + JAX import",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 6.1,
+          "label": "Computed sum + assertion + device receipt",
+          "tone": "result",
+          "w": 8,
+          "h": 1.05
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 7,
+      "width": 10
+    }
   }
 }

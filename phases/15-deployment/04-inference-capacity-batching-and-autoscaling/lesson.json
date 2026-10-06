@@ -4,7 +4,7 @@
   "minutes": 115,
   "content": {
     "problem": "A model call looks fast in isolation, yet users may wait when requests arrive together. We will measure actual completed inference at several batch sizes, then use those observations in a clearly labeled queue simulation. The aim is to connect milliseconds per batch, examples per second and response latency without confusing a local benchmark with a deployed service.",
-    "idea": "A service can spend time waiting for a worker, collecting a batch and executing inference. Batching amortizes some fixed work but can add waiting and memory. Capacity planning needs a declared workload, timed boundary and arrival process. Our local CPU timings measure only resident-input inference; the queue experiment adds a hypothetical arrival schedule, not an observed network workload.",
+    "idea": "Inference capacity depends on arrivals, queueing, batching, service time and response work. A fast model call is one component. Define the request boundary before estimating throughput or deciding when to add capacity.",
     "objectives": [
       "Measure completed inference after warming each batch shape",
       "Report batch latency and example throughput with correct units",
@@ -12,6 +12,15 @@
       "Distinguish utilization, batch-collection delay and hypothetical replica planning from measured service evidence"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A request spends time before and after computation",
+        "body": "A request may wait for a batch, wait behind existing work, execute and then be encoded for response. Larger batches can improve work per call while increasing the first waiting request's latency. These objectives can conflict.\n\nDraw arrival, enqueue, dispatch and completion on one timeline. Then measure or model each interval with its source stated. Tail latency depends on the arrival pattern and concurrency, not just the mean of isolated calls.\n\nThis lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.",
+        "check": {
+          "prompt": "Can higher batch throughput coexist with worse user latency?",
+          "answer": "Yes. Requests can wait longer to form a batch or reach service. Report both completed throughput and the declared end-to-end latency distribution."
+        }
+      },
       {
         "title": "Choose the clock boundary first",
         "body": "JAX dispatch may return before numerical work has completed. The timer calls block_until_ready inside the measured interval. Inputs and weights are already resident; preprocessing, device placement, request decoding and response encoding are excluded. The first call for each shape can include compilation and is recorded separately from \\(40\\) warm calls. A p95 from \\(40\\) samples is a small descriptive statistic, not a reliable production tail estimate. Timings change across hosts and repeated runs; correctness checks must not assert a fixed speedup."

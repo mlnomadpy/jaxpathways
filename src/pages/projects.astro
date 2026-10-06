@@ -7,6 +7,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
 import pages from '../data/pages.json';
 import registry from '../../public/api/v1/projects.json';
+import projectPlans from '../../curriculum/project-plans.json';
 import { course } from '../lib/course-data.js';
 import { siteUrl } from '../lib/urls.js';
 const planned = course.phases.filter((phase) => !phase.projectId);
@@ -21,9 +22,18 @@ const planned = course.phases.filter((phase) => !phase.projectId);
         Choose a project, work through its stages, and keep the evidence. Every available project
         includes starter code, a reference solution, and checks you can run on CPU.
       </p>
+      <p>
+        Starting a new repository?{' '}
+        <a href={siteUrl('project-workflow.html')}>
+          Set up your folders, experiment records and CLI.
+        </a>
+      </p>
       <div class="actions">
         <a class="button primary" href="#available">
           Available projects
+        </a>
+        <a class="button" href="#alignment-retrieval">
+          CLIP, SigLIP & retrieval plans
         </a>
         {planned.length > 0 && (
           <a class="button" href="#planned">
@@ -91,6 +101,25 @@ const planned = course.phases.filter((phase) => !phase.projectId);
       </p>
     </section>
     <ModalityTracks />
+    <section id="alignment-retrieval" class="project-roadmap" aria-labelledby="alignment-heading">
+      <h2 id="alignment-heading">Next: alignment and retrieval</h2>
+      <p>
+        Three planned capstones connect model training to search. Read their staged specifications;
+        runnable workspaces and measured results are still to come.
+      </p>
+      <ul>
+        {projectPlans.map((project) => (
+          <li data-planned-project-id={project.id}>
+            <div>
+              <p class="edition">Planned capstone</p>
+              <h3>{project.title}</h3>
+              <p>{project.summary}</p>
+            </div>
+            <a href={siteUrl(`project-plans/${project.id}.html`)}>Read project plan</a>
+          </li>
+        ))}
+      </ul>
+    </section>
     {planned.length > 0 && (
       <section id="planned" class="project-roadmap" aria-labelledby="planned-heading">
         <h2 id="planned-heading">Future project briefs</h2>

@@ -4,7 +4,7 @@
   "minutes": 110,
   "content": {
     "problem": "Can a small model tell horizontal bars from vertical bars in noisy images? We’ll create the images locally and train a convolutional classifier on CPU. You’ll then test images from a different random seed and read a confusion matrix. The task is small enough to inspect without downloading a dataset.",
-    "idea": "A convolution reuses one local filter at every image position. Nonlinear activation and spatial pooling turn those local responses into features for a linear classification head. This tiny bar task makes the mechanism inspectable on a CPU; success here does not establish handwritten-digit or natural-image accuracy.",
+    "idea": "A convolution combines a local input patch with weights reused across spatial positions. Layout, stride and padding decide which pixels contribute to each output. Trace one position first; the full feature map repeats that same rule.",
     "objectives": [
       "Generate images with an explicit label rule",
       "Derive the convolution output shape",
@@ -12,6 +12,15 @@
       "Read a confusion matrix rather than a success label"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Trace one convolution output",
+        "body": "In a separate shape example, a three-by-three kernel sliding over a five-by-five image with stride one and no padding has three valid positions along each axis. It produces a three-by-three output per filter.\n\nFor one output location, multiply the selected patch by the kernel and sum over spatial and input-channel axes, then add the filter bias. Moving to another location changes the patch while reusing the filter. A new padding or stride convention changes the indexing contract.\n\nThe confusion matrix answers a later question about classification errors. Pick one off-diagonal cell, identify its true/predicted labels, and inspect an image from that cell. Correct synthetic-shape classification does not establish recognition of natural photographs.",
+        "check": {
+          "prompt": "What stays shared when the kernel moves?",
+          "answer": "The filter weights and bias. The input patch changes. This is different from learning unrelated weights at every spatial location."
+        }
+      },
       {
         "title": "Generate images with an explicit label rule",
         "body": "Our images have height eight, width eight, and one channel. Class zero contains a horizontal bright bar; class one contains a vertical bright bar. The bar position varies among interior rows or columns, and independent Gaussian noise perturbs every pixel. Alternate labels so both splits are balanced. Generate training and held-out sets from different seeds; identical seeds would reproduce images and create leakage. Every observation follows a known rule, so inspect a few images and labels before training. This synthetic distribution contains no occlusion, perspective, or multiple objects and should never be described as realistic vision evaluation."
@@ -121,6 +130,17 @@
       "connection": "The upper-left confusion cell counts horizontal images classified as horizontal; the lower-right counts vertical images classified as vertical. Off-diagonal counts would identify the two kinds of confusion. Here the \\(24\\) held-out images are all classified correctly.\n\nUse the sample image to understand the task and the confusion matrix to understand the observed errors. The single image cannot establish accuracy, and a zero in the matrix means no observed mistakes of that kind in this set, not that such a mistake is impossible. This is a small synthetic stripe task, not evidence of general image recognition.",
       "alt": "See the image task and its classification errors. The upper panel is one held-out image, with pixel columns across and rows down. Its dark horizontal stripe is near row \\(3\\); the faint variation elsewhere is added noise. This color bar measures pixel value, so the picture is an input to the classifier. The lower panel summarizes all held-out predictions. Rows are actual classes and columns are predicted classes. The two diagonal cells contain \\(12\\) each; both off-diagonal cells contain zero. The lower color bar measures example count, which is a different quantity from pixel intensity.",
       "code": "visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-out image 0', 'values': test_x[0, :, :, 0].tolist(), 'unit': 'pixel value'}, {'kind': 'heatmap', 'title': 'Held-out confusion', 'values': confusion.tolist(), 'rows': ['actual horizontal', 'actual vertical'], 'columns': ['pred. horizontal', 'pred. vertical'], 'unit': 'example count'}]}"
+    },
+    "diagram": {
+      "title": "Pixels behind one convolution output",
+      "prediction": "What stays shared when the kernel moves?",
+      "reading": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
+      "alt": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 5.5,
+      "panel": {
+        "kind": "receptive-field"
+      }
     }
   }
 }

@@ -1,0 +1,256 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="309.6pt" viewBox="0 0 576 309.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted \((n,n)\) intermediate. Each row describes a different shape contract.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 309.6 
+L 576 309.6 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 3.00024 92.90641 
+L 145.50012 92.90641 
+L 145.50012 51.644017 
+L 3.00024 51.644017 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="75.586464" transform="rotate(-0 74.25018 75.586464)">Purpose</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 145.50012 92.90641 
+L 288 92.90641 
+L 288 51.644017 
+L 145.50012 51.644017 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="75.586464" transform="rotate(-0 216.75006 75.586464)">Left</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 288 92.90641 
+L 430.49988 92.90641 
+L 430.49988 51.644017 
+L 288 51.644017 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="75.539589" transform="rotate(-0 359.24994 75.539589)">Right aligned</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 430.49988 92.90641 
+L 572.99976 92.90641 
+L 572.99976 51.644017 
+L 430.49988 51.644017 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="75.586464" transform="rotate(-0 501.74982 75.586464)">Result</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 3.00024 134.168803 
+L 145.50012 134.168803 
+L 145.50012 92.90641 
+L 3.00024 92.90641 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="116.848857" transform="rotate(-0 74.25018 116.848857)">Feature bias</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 145.50012 134.168803 
+L 288 134.168803 
+L 288 92.90641 
+L 145.50012 92.90641 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="116.848857" transform="rotate(-0 216.75006 116.848857)">(2, 3)</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 288 134.168803 
+L 430.49988 134.168803 
+L 430.49988 92.90641 
+L 288 92.90641 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="116.848857" transform="rotate(-0 359.24994 116.848857)">(1, 3)</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 430.49988 134.168803 
+L 572.99976 134.168803 
+L 572.99976 92.90641 
+L 430.49988 92.90641 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="116.848857" transform="rotate(-0 501.74982 116.848857)">(2, 3)</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 3.00024 175.431197 
+L 145.50012 175.431197 
+L 145.50012 134.168803 
+L 3.00024 134.168803 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="158.11125" transform="rotate(-0 74.25018 158.11125)">Row offsets</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 145.50012 175.431197 
+L 288 175.431197 
+L 288 134.168803 
+L 145.50012 134.168803 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="158.11125" transform="rotate(-0 216.75006 158.11125)">(2, 3)</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 288 175.431197 
+L 430.49988 175.431197 
+L 430.49988 134.168803 
+L 288 134.168803 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="158.11125" transform="rotate(-0 359.24994 158.11125)">(2, 1)</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 430.49988 175.431197 
+L 572.99976 175.431197 
+L 572.99976 134.168803 
+L 430.49988 134.168803 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="158.11125" transform="rotate(-0 501.74982 158.11125)">(2, 3)</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 3.00024 216.69359 
+L 145.50012 216.69359 
+L 145.50012 175.431197 
+L 3.00024 175.431197 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="199.373643" transform="rotate(-0 74.25018 199.373643)">Aligned residual</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 145.50012 216.69359 
+L 288 216.69359 
+L 288 175.431197 
+L 145.50012 175.431197 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="199.373643" transform="rotate(-0 216.75006 199.373643)">(n,)</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 288 216.69359 
+L 430.49988 216.69359 
+L 430.49988 175.431197 
+L 288 175.431197 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="199.373643" transform="rotate(-0 359.24994 199.373643)">(n,)</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 430.49988 216.69359 
+L 572.99976 216.69359 
+L 572.99976 175.431197 
+L 430.49988 175.431197 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="199.373643" transform="rotate(-0 501.74982 199.373643)">(n,)</text>
+    </g>
+    <g id="patch_18">
+     <path d="M 3.00024 257.955983 
+L 145.50012 257.955983 
+L 145.50012 216.69359 
+L 3.00024 216.69359 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_17">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="74.25018" y="240.636036" transform="rotate(-0 74.25018 240.636036)">Wrong target axis</text>
+    </g>
+    <g id="patch_19">
+     <path d="M 145.50012 257.955983 
+L 288 257.955983 
+L 288 216.69359 
+L 145.50012 216.69359 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_18">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="216.75006" y="240.636036" transform="rotate(-0 216.75006 240.636036)">(n, 1)</text>
+    </g>
+    <g id="patch_20">
+     <path d="M 288 257.955983 
+L 430.49988 257.955983 
+L 430.49988 216.69359 
+L 288 216.69359 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_19">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="359.24994" y="240.636036" transform="rotate(-0 359.24994 240.636036)">(1, n)</text>
+    </g>
+    <g id="patch_21">
+     <path d="M 430.49988 257.955983 
+L 572.99976 257.955983 
+L 572.99976 216.69359 
+L 430.49988 216.69359 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_20">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="240.636036" transform="rotate(-0 501.74982 240.636036)">(n, n)</text>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

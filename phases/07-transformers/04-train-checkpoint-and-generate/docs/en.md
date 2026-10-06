@@ -16,9 +16,25 @@ Let’s connect the pieces into a tiny next-token model. We’ll use a repeating
 
 ## The idea
 
-We use a three-character periodic corpus and a context of four tokens. This is a deterministic CPU integration exercise, not a pretrained model, useful language system, or generalization benchmark. The held-out string follows the same periodic rule and repeats contexts already represented in training.
+Training provides known shifted targets. Generation predicts a next-token distribution and applies a decoding rule, then feeds the chosen token back as context. These two procedures use the model for different jobs.
 
-The objective connects integer IDs → embeddings and positions → causal Transformer block → vocabulary logits → cross entropy. A correct causal mask and shifted targets are required before a low training loss means anything.
+## Separate teacher-forced targets from generated context
+
+For probabilities $0.6,0.3,0.1$, greedy decoding selects the first token. Sampling may select another nonzero-probability token. That different choice changes the context and therefore the distribution at the following step.
+
+Read each row of the probability figure before interpreting the generated string. Confidence on the fixture's target shows behavior on this small task; it does not establish broad language ability.
+
+Keep tokenizer identity, context limit and termination rules with the checkpoint. Correct weights with a changed token-to-ID mapping define a different system. The text harness adds explicit cache behavior later; do not infer that this lesson's simple generation loop already implements it.
+
+### Pause and reason
+
+Why can two decoding policies produce different later distributions from identical weights?
+
+<details><summary>Compare your reasoning</summary>
+
+They can choose different earlier tokens, giving the model different later contexts. That is an expected consequence of decoding, not necessarily a numerical mismatch.
+
+</details>
 
 ## Assemble the token-to-logit contract
 
@@ -417,7 +433,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:26.901182+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:58.717862+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0

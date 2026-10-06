@@ -4,7 +4,7 @@
   "minutes": 110,
   "content": {
     "problem": "You have three noisy measurements and want to predict at a new input. A fitted line gives one answer, but how uncertain should that answer be? We will write a prior, combine it with a likelihood, solve the posterior exactly, and separate uncertainty about the line from noise in a new observation. This exact answer will become our reference when we build an approximate sampler.",
-    "idea": "Our weights \\(w\\) have a zero-mean normal prior with covariance \\(\\tau^2 I\\). Each target is normal around \\(Xw\\), with known standard deviation \\(\\sigma\\). Multiplying these Gaussian densities and completing the square gives another Gaussian. “Conjugate” means this prior and likelihood combination has a posterior in the same tractable family.",
+    "idea": "Bayesian regression represents uncertainty about parameters and propagates it to predictions. A latent-function prediction and a future noisy observation are different random quantities, so their intervals generally have different widths.",
     "objectives": [
       "State the prior, likelihood and observation-noise assumptions",
       "Derive posterior precision and check a closed-form special case",
@@ -12,6 +12,15 @@
       "Demonstrate prior strength and extrapolation effects"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate uncertainty about the function from observation noise",
+        "body": "For features \\(x\\), posterior parameter covariance \\(\\Sigma\\) gives latent predictive variance \\(x^T\\Sigma x\\). If independent observation noise has variance \\(\\sigma^2\\), a new observation has variance \\(x^T\\Sigma x+\\sigma^2\\). Name each term before combining them.\n\nMoving away from well-observed feature combinations can increase parameter-related uncertainty. It does not require the assumed observation-noise variance to change. Plot the posterior mean with separately labeled latent and observation bands to make this distinction visible.\n\nThe saved spread curves show how uncertainty varies with the input. They are conditional on the model, prior and noise assumptions. Check held-out behavior and model adequacy instead of reading any narrow posterior band as a guarantee.",
+        "check": {
+          "prompt": "Which interval is appropriate for a new noisy measurement?",
+          "answer": "The posterior predictive interval that includes observation noise, under the model's assumptions. A latent-function interval omits that additional variability."
+        }
+      },
       {
         "title": "State what is random",
         "body": "The features are fixed inputs. We treat the intercept and slope as uncertain, and condition on the observed targets. The prior scale \\(\\tau=2\\) expresses uncertainty about each weight before seeing these targets; it is not the sensor noise. The noise scale \\(\\sigma=1\\) describes repeated readings around the same latent line. We deliberately assume it known. Learning that scale would remove this exact two-parameter shortcut unless we used a richer conjugate model.",

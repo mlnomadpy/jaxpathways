@@ -1,4 +1,10 @@
-import { learnerStorageKeys, validateLessonProgress } from './learner-records.js';
+import { fetchJson } from './http.js';
+import { readStoredJson } from './storage.js';
+import {
+  learnerStorageKeys,
+  validateLessonProgress,
+  validateReadingState,
+} from './learner-records.js';
 
 function phaseById(id) {
   return courseState.course.phases.find((p) => p.id === id);
@@ -31,31 +37,36 @@ const courseState = {
   lessonProgress: { version: 1, lessons: {} },
 };
 
-const readingKey = 'jaxpathways-reading-v1';
+const readingKey = learnerStorageKeys.reading;
 
-const progressKey = 'jaxpathways-lessons-v1';
+const progressKey = learnerStorageKeys.lessonProgress;
 
 async function loadCourse() {
   courseState.standalone = Boolean(document.querySelector('#lesson-page'));
-  const response = await fetch('curriculum.json');
-  if (!response.ok) throw Error('Curriculum unavailable');
-  courseState.course = await response.json();
+  courseState.course = await fetchJson('curriculum.json');
   courseState.curriculum = courseState.course.pathways.map((route) => ({
     ...route,
     lessons: route.phaseIds.flatMap((id) => phaseById(id).lessons),
   }));
+  courseState.completed = false;
   try {
     courseState.completed = localStorage.getItem(learnerStorageKeys.sampleCompleted) === 'true';
   } catch {}
-  try {
-    const saved = JSON.parse(localStorage.getItem(readingKey));
-    if (saved?.version === 1 && saved.lessons && typeof saved.lessons === 'object')
-      courseState.readingState = saved;
-  } catch {}
-  try {
-    const saved = JSON.parse(localStorage.getItem(progressKey));
-    if (validateLessonProgress(saved, authoredIds())) courseState.lessonProgress = saved;
-  } catch {}
+  const savedReading = readStoredJson(readingKey);
+  const context = {
+    lessonIds: courseState.course.phases.flatMap((phase) =>
+      phase.lessons.map((lesson) => lesson.id),
+    ),
+    routeIds: courseState.curriculum.map((route) => route.id),
+  };
+  courseState.readingState =
+    savedReading && validateReadingState(savedReading, context)
+      ? savedReading
+      : { version: 1, lessons: {} };
+  const savedProgress = readStoredJson(progressKey);
+  courseState.lessonProgress = validateLessonProgress(savedProgress, authoredIds())
+    ? savedProgress
+    : { version: 1, lessons: {} };
   return courseState.course;
 }
 

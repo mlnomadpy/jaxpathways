@@ -11,6 +11,11 @@ export function loadLessonEvidence(lesson) {
       for (const ext of ['svg', 'png']) copyFileSync(`${folder}/figure.${ext}`, `public/figures/${lesson.id}.${ext}`);
       copyFileSync(visualPath, `public/figures/${lesson.id}.json`);
       lesson.visualArtifact = { image: `figures/${lesson.id}.svg`, png: `figures/${lesson.id}.png`, data: `figures/${lesson.id}.json`, generatedAt: record.generatedAt, environment: record.environment, contentHash: record.contentHash, kind: record.kind };
+      if (lesson.content.diagram && ['svg','png'].every(ext=>existsSync(`${folder}/mechanism.${ext}`))) {
+        for (const ext of ['svg','png']) copyFileSync(`${folder}/mechanism.${ext}`, `public/figures/${lesson.id}-mechanism.${ext}`);
+        lesson.visualArtifact.mechanismImage = `figures/${lesson.id}-mechanism.svg`;
+        lesson.visualArtifact.mechanismPng = `figures/${lesson.id}-mechanism.png`;
+      }
     }
   }
   const executionPath = `${folder}/execution.json`;

@@ -1,10 +1,11 @@
 ---
+import GuideContents from '../../components/shared/GuideContents.astro';
 import 'katex/dist/katex.min.css';
 import '../../styles/features/math.css';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import AssessmentActions from '../../components/shared/AssessmentActions.astro';
 import assessments from '../../../curriculum/assessments.json';
-import { assessmentContent } from '../../lib/assessment-content.js';
+import { assessmentContent } from '../../lib/server/assessment-content.js';
 import '../../styles/tokens.css';
 import '../../styles/base.css';
 import '../../styles/features/reader.css';
@@ -30,16 +31,11 @@ const content = assessmentContent(assessment.source);
     <p class="edition">Synthesis assessment · CPU · editorial review draft</p>
     <Fragment set:html={content.heading} />
     <AssessmentActions assessment={assessment} />
-    <nav class="assessment-contents" aria-label="Assessment sections">
-      <strong>In this assessment</strong>
-      <ol>
-        {content.sections.map((section) => (
-          <li>
-            <a href={`#${section.id}`} set:html={section.label} />
-          </li>
-        ))}
-      </ol>
-    </nav>
+    <GuideContents
+      sections={content.sections}
+      label="Assessment sections"
+      title="In this assessment"
+    />
     <article set:html={content.body} />
     <AssessmentActions assessment={assessment} />
     <footer>

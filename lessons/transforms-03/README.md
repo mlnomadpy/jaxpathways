@@ -15,9 +15,35 @@ You have a prediction function that works for one example. Now you need it for a
 
 ## The idea
 
-vmap transforms a function by mapping designated input axes and collecting an output axis. Start with $\hat y=w^\mathsf{T}x$. Both inputs to the single-example function have shape $(D,)$, and the result is scalar. A data batch has shape $(B, D)$. With `in_axes=(None, 0)`, the weight remains shared while axis $0$ of the data supplies one example. The batched output has shape $(B,)$.
+Vectorization lets us describe one example clearly and then apply that rule across an axis. The crucial decision is which arguments vary by example and which are shared. `vmap` expresses that decision; it does not require us to write a Python loop or assign hardware threads.
 
-The mental model is a loop over examples, but JAX applies batching rules to the operations rather than requiring you to write that loop. It is a transformation, not a claim of multiple devices, independent processes, or automatic speedup. Start with shape and value correctness before asking about performance.
+## Map examples without changing the single-example rule
+
+Imagine three observations that use one common weight vector. Each row enters the same dot-product rule, producing one scalar, and the three scalars are stacked. Mapping the observation axis while keeping weights shared means the model is the same for every observation.
+
+Now imagine three different weight vectors, one per observation. Mapping both arguments would answer a different question: three input/model pairs rather than one model applied to a batch. Neither choice is automatically wrong, but only one matches the intended task.
+
+The existing output bars show the lesson's three results, $1,1,8$. Their heights check the values; the axis diagram explains how the rows produced them. Compare against an explicit stack of single-row calls, then permute the rows and predict the same permutation of outputs.
+
+### Mapped rows and shared weights
+
+**Predict:** What should happen if you duplicate an input row while keeping the same shared weights?
+
+![Mapped rows and shared weights](../../phases/02-transforms/03-batch-a-function-with-vmap/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.
+
+### Pause and reason
+
+What should happen if you duplicate an input row while keeping the same shared weights?
+
+<details><summary>Compare your reasoning</summary>
+
+The duplicated row should produce the same deterministic output. If it does not, inspect argument mapping and any state/randomness before blaming batching itself.
+
+</details>
 
 ## Write down the axis contract
 
@@ -102,7 +128,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:50.448789+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:17.732151+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]

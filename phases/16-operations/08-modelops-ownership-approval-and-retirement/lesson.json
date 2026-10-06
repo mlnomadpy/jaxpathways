@@ -4,7 +4,7 @@
   "minutes": 65,
   "content": {
     "problem": "A model passed evaluation last week. Someone changed its preprocessing or image today and reused the old approval. Let’s bind a review to the exact release bundle, reject stale decisions and preserve the current version when a gate fails.",
-    "idea": "Here ModelOps means the operational ownership of models across their lifecycle: inventory, intended use, review, deployment status, monitoring, incident response and retirement. Teams use overlapping MLOps and ModelOps terms; the useful distinction is the responsibility and evidence each process owns.",
+    "idea": "Model governance connects ownership, evaluation, approval and lifecycle transitions. An approval should identify exactly what was reviewed, where it may be used and when it remains valid. A label saying approved is not enough.",
     "objectives": [
       "Inventory the complete release",
       "Bind review to immutable evidence",
@@ -12,6 +12,15 @@
       "Separate selection, rollout and monitoring"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Approval applies to a specific release",
+        "body": "Suppose a model passes review, then its tokenizer or weights change. Reusing the old approval would apply a decision to an object that was never evaluated under that identity. Bind approvals to the relevant model, processor, configuration and evaluation records.\n\nSpecify transitions for activation, expiration, rejection and retirement. Invalid transitions should leave the active state unchanged rather than partially applying a release. A retired artifact may remain archived for reproducibility while no longer being eligible for new use.\n\nThe acceptance bars are summaries of discrete policy decisions. Read the underlying state and reason for each result. The fixture demonstrates decision logic, not completion of an organization's actual review process.",
+        "check": {
+          "prompt": "Does changing a display name require the same response as changing weights?",
+          "answer": "Not necessarily. Define which identities and semantics the policy binds. A cosmetic label and a changed numerical artifact are different events, and the policy should distinguish them explicitly."
+        }
+      },
       {
         "title": "Inventory the complete release",
         "body": "Record the model artifact, data/evaluation identity, image digest, preprocessing/signature, precision, intended target and responsible owner. The fixture compresses that into a small bundle with model, data and evaluation hashes, image digest, owner, target and passing result. Real release records should also identify training/code versions, documented limitations, dependency/license obligations where applicable, and how to reach the owner. Registry tags help discovery but are not access control."

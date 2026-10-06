@@ -14,7 +14,25 @@ A restarted sharded run loads the right weights, yet its next update differs. Wh
 
 ## The idea
 
-A recovery point is a consistent boundary in a state machine. Every value needed to choose the next batch and compute the next update belongs to that boundary. Sharding adds a placement contract and multi-controller execution adds coordination; neither makes a weights-only checkpoint sufficient.
+Distributed recovery must reconstruct a consistent global state. Participants cannot independently load arbitrary local snapshots and assume the pieces describe one completed update. Checkpoint identity and step meaning must agree.
+
+## Agree on one global recovery boundary
+
+Two local files from different steps can each load successfully while forming no valid global checkpoint. A shared manifest should identify which pieces belong together and what happens if a required piece is missing.
+
+After restore, compare the next global computation with an uninterrupted reference, including input position and random-state ownership. Silent partial recovery changes the computation instead of continuing it.
+
+The CPU replay checks this bounded fixture's continuation. It does not establish multi-host failure handling, storage durability or accelerator networking. Those require additional operational evidence when deploying the design.
+
+### Pause and reason
+
+Why is successful loading on every worker insufficient?
+
+<details><summary>Compare your reasoning</summary>
+
+Workers may load incompatible steps or pieces. Correct recovery requires one consistent global identity and the intended next computation.
+
+</details>
 
 ## Name the values that determine the next transition
 
@@ -366,7 +384,7 @@ visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:38.990416+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:11.160668+00:00. JAX 0.9.2.
 
 ```text
 Recorded backend/processes/devices: cpu 1 4
@@ -374,13 +392,13 @@ Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-9teq3xry/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-g2a8f4zr/step-one
 Recorded backend/processes/devices: cpu 1 4
 Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-6yhi1_zf/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-rb5_hzny/step-one
 Same next sample IDs, different weights after missing momentum: 0.0195157527923584
 Five resumed transitions and all addressable parameter replicas agree.
 Current-epoch batch matches; next-epoch batch exposes the wrong key.

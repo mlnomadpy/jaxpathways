@@ -4,7 +4,7 @@
   "minutes": 90,
   "content": {
     "problem": "Your function returns the right answer. Now let’s look inside the computation JAX traced. We’ll start with three operations, calculate each intermediate value ourselves, and match them to a jaxpr. Then we’ll see what changes after differentiation. The printed representation is a learning tool, not a measurement of execution speed.",
-    "idea": "A jaxpr is JAX’s typed, functional intermediate representation. make_jaxpr traces a function using the shapes and dtypes of example arguments and returns a ClosedJaxpr. Reading it helps you understand transformations and tracing failures. It is not executable machine code and its operation count is not a performance measurement.\n\nYou need the earlier pure-function, grad, jit, scan and cond lessons. Use the CPU environment from setup. Work in a new main.py file, adding the three build steps below, and keep a prediction sheet alongside it.",
+    "idea": "A jaxpr records primitive operations and the values that connect them. Read it as a data-flow program with shapes and dtypes, not as a literal description of final hardware instructions or Python execution order.",
     "objectives": [
       "Translate jaxpr variables and array types into a data-flow diagram.",
       "Compare a forward computation with its gradient program.",
@@ -13,6 +13,15 @@
       "Compare an unrolled loop with a scan without claiming a speedup."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Read a jaxpr as a typed computation",
+        "body": "Start at the inputs and trace one intermediate to its consumers. For a reduction, identify the consumed axes and resulting shape. Distinguish array inputs from closed constants: both can affect the output, but they enter the program differently.\n\nThen connect each primitive to the corresponding part of the original expression. A variable name in a printed jaxpr is a local label, not a stable API to test verbatim.\n\nThe intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.",
+        "check": {
+          "prompt": "Why avoid a correctness test that compares the entire printed jaxpr string?",
+          "answer": "Formatting, names and primitive details can change across versions. Test intended structure where appropriate and verify numerical behavior independently."
+        }
+      },
       {
         "title": "Compute the values before reading the representation",
         "body": "Start with \\(x=[1, 2, 3]\\). Adding \\(1\\) gives \\([2, 3, 4]\\). Elementwise multiplication of this vector by itself gives \\([4, 9, 16]\\). The sum is \\(29\\). The first two operations retain shape \\((3,)\\), while the reduction produces a scalar, whose array shape is ().\n\nThe derivative of each \\((x_i+1)^2\\) is \\(2(x_i+1)\\), so the gradient at this input is \\([4, 6, 8]\\). A different implementation could produce the same values with different primitives. We use multiplication explicitly to keep this first trace readable. Do not infer an algorithm from the spelling of a Python expression alone.",

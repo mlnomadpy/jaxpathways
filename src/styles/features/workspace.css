@@ -103,24 +103,16 @@
     grid-template-columns: 1fr;
     gap: 25px;
   }
-}
-@media (max-width: 760px) {
   .club-controls {
     flex-direction: column;
     align-items: stretch;
   }
-}
-@media (max-width: 760px) {
   .club-controls label {
     min-width: 0;
   }
-}
-@media (max-width: 760px) {
   .evidence-form label:nth-child(4) {
     grid-column: auto;
   }
-}
-@media (max-width: 760px) {
   .backup-actions {
     flex-wrap: wrap;
   }
@@ -167,8 +159,6 @@
     gap: 8px;
     font-size: 11px;
   }
-}
-@media (max-width: 760px) {
   .preview-mechanism .function-box {
     padding: 8px 10px;
   }
@@ -225,8 +215,6 @@
   .atlas-home .preview-heading {
     align-items: flex-start;
   }
-}
-@media (max-width: 760px) {
   .atlas-home .preview-heading span {
     max-width: 18ch;
   }
@@ -327,26 +315,18 @@ body:has(#club) .club-controls {
     gap: 12px;
     flex-wrap: wrap;
   }
-}
-@media (max-width: 760px) {
   .atlas-home .preview-heading a {
     font-size: 14px;
     min-height: 44px;
     display: inline-flex;
     align-items: center;
   }
-}
-@media (max-width: 760px) {
   .learner-workspace .learner-home-grid {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 760px) {
   .learner-workspace .page-intro h1 {
     font-size: 37px;
   }
-}
-@media (max-width: 760px) {
   .learner-workspace #portfolio .section-head {
     flex-direction: column;
     gap: 8px;
@@ -514,33 +494,21 @@ body:has(#club) .club-controls {
   .learner-workspace .club-plan {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 680px) {
   .learner-workspace .evidence-form {
     padding: 1.25rem;
   }
-}
-@media (max-width: 680px) {
   .portfolio-heading {
     align-items: start;
   }
-}
-@media (max-width: 680px) {
   .learner-workspace {
     padding-inline: 1rem;
   }
-}
-@media (max-width: 680px) {
   .learner-workspace .page-intro {
     padding-top: 2rem;
   }
-}
-@media (max-width: 680px) {
   .artifact-filters {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 680px) {
   .workspace-route {
     padding: 1.25rem;
   }
@@ -642,8 +610,6 @@ body:has(#club) .club-controls {
   .learner-workspace .club-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
-}
-@media (max-width: 900px) {
   .club-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -652,8 +618,6 @@ body:has(#club) .club-controls {
   .learner-workspace .club-controls {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 680px) {
   .learner-workspace .artifact-context-fields > label {
     grid-template-rows: auto auto;
   }

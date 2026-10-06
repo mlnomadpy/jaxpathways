@@ -4,7 +4,7 @@
   "minutes": 70,
   "content": {
     "problem": "A candidate looks good on an average dashboard, yet performs badly for a small group of requests. Let’s make an MLOps release decision from data identity, slice counts and independently checked metrics.",
-    "idea": "MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.",
+    "idea": "A release pipeline should connect data contracts, evaluation and artifact selection. Aggregate metrics help summarize behavior, but important subpopulations may require explicit gates. Define those slices and acceptance rules before selecting the model.",
     "objectives": [
       "Validate data before the expensive job",
       "Use a fixed release evaluation",
@@ -12,6 +12,15 @@
       "Compare distributions without inventing labels"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A passing average can hide a failing slice",
+        "body": "Suppose nine examples have error \\(0\\) and one important slice has error \\(10\\). The overall mean error is \\(1\\). Whether that is acceptable depends on the task and slice policy; the average alone cannot answer it.\n\nKeep counts with slice metrics so a tiny subgroup is not mistaken for strong statistical evidence. Freeze evaluation data and decisions separately from training, and bind the resulting approval to the evaluated artifact.\n\nThe slice plot shows where the fixture's aggregate hides a problem. Monitoring later asks whether input or outcome behavior changed. Drift is a signal to investigate; it does not by itself determine that retraining is the correct intervention.",
+        "check": {
+          "prompt": "Why define a slice gate before inspecting candidate results?",
+          "answer": "It makes the selection rule explicit and reduces post-hoc cherry-picking. The gate should reflect the application's requirements, with sample counts and uncertainty considered."
+        }
+      },
       {
         "title": "Validate data before the expensive job",
         "body": "The fixture gives every observation an ID, a source group and a split. Validate names, finite numbers, allowed split values and group separation before training. Two different rows from the same subject or document can leak across splits even when row IDs differ. Hash the accepted manifest; reject unexpected schema changes explicitly. In a feature pipeline, also record event time, transformation version and missing-value rules to diagnose training-serving skew."

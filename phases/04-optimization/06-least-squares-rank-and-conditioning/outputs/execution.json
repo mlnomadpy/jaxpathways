@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-06",
-  "contentHash": "61b3e69844733813d1a05e6094d3f4cb4ca7d15ee5b417b394053e889bfb1d73",
-  "executedAt": "2026-10-06T01:23:04.590246+00:00",
+  "contentHash": "f8b9393c5c5bf511a7aa4644238129bb6d525fcb82e067a030ae64778c0b1851",
+  "executedAt": "2026-10-06T15:39:32.414501+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -50,7 +50,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",

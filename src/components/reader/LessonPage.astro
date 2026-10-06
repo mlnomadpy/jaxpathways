@@ -1,0 +1,121 @@
+---
+import '../../styles/features/lesson-visuals.css';
+import 'katex/dist/katex.min.css';
+import '../../styles/features/math.css';
+import '../../styles/features/lesson-list.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/features/reader.css';
+import '../../styles/features/project.css';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import SiteFooter from '../../components/shared/SiteFooter.astro';
+import pages from '../../data/pages.json';
+import { authoredLessons, course } from '../../lib/course-data.js';
+import { renderLesson } from '../../lib/lesson-template.js';
+import { escapeHtml } from '../../lib/html.js';
+import { siteUrl } from '../../lib/urls.js';
+import snapshots from '../../../curriculum/release-snapshots.json';
+interface Props {
+  lessonId?: string;
+}
+const { lessonId } = Astro.props;
+const phase = course.phases.find((p) => p.lessons.some((l) => l.id === lessonId));
+const lesson = phase?.lessons.find((l) => l.id === lessonId);
+const revision = lesson
+  ? snapshots[0].lessons[lesson.id as keyof (typeof snapshots)[0]['lessons']]
+  : null;
+const prerequisiteLinks =
+  lesson?.prerequisites
+    .map((id) => {
+      const item = authoredLessons.find((l) => l.id === id);
+      return `<a href="lesson-${encodeURIComponent(id)}.html">${escapeHtml(item?.title || id)}</a>`;
+    })
+    .join('; ') || 'Basic Python; begin with the setup phase.';
+const html =
+  lesson && phase
+    ? renderLesson({
+        phase,
+        lesson,
+        prerequisiteLinks,
+        allLessons: authoredLessons,
+        index: authoredLessons.findIndex((l) => l.id === lesson.id),
+        activePath: 'all',
+      })
+    : '';
+const metadata = lesson
+  ? { ...pages.lesson, title: `${lesson.title} — JAX Pathways`, description: lesson.objective }
+  : pages.lesson;
+const schema = lesson
+  ? {
+      '@context': 'https://schema.org',
+      '@type': 'LearningResource',
+      name: lesson.title,
+      description: lesson.objective,
+      learningResourceType: 'Lesson',
+      inLanguage: 'en',
+      isAccessibleForFree: true,
+      author: { '@type': 'Person', name: 'Taha Bouhsine' },
+      dateModified: revision?.date,
+      isPartOf: {
+        '@type': 'Course',
+        name: course.title,
+        url: new URL(siteUrl('course.html'), Astro.site).href,
+      },
+    }
+  : undefined;
+---
+
+<SiteLayout {...metadata} noindex={!lesson} structuredData={schema}>
+  <main id="lesson-page" class="reader-layout" data-static-lesson={lessonId}>
+    <button id="reader-menu" aria-controls="reader-sidebar" aria-expanded="false">
+      Lesson list
+    </button>
+    <aside id="reader-sidebar" class="reader-sidebar" aria-label="Lesson navigation">
+      <p id="reader-route" class="edition">
+        Shared JAX course
+      </p>
+      <h2 id="reader-phase-title">{phase?.title}</h2>
+      <details class="reader-phases">
+        <summary>Other course steps</summary>
+        <nav id="reader-phases" aria-label="Course steps"></nav>
+      </details>
+      <nav id="reader-lessons" aria-label="Phase lessons">
+        {phase?.lessons.map((item) => (
+          <a
+            href={siteUrl(`lesson-${item.id}.html`)}
+            aria-current={item.id === lessonId ? 'page' : undefined}
+          >
+            {item.title}
+          </a>
+        ))}
+      </nav>
+      <p class="soft">
+        Drafts contain teaching material. Unwritten entries show roadmap status only.
+      </p>
+      <button class="close">Back to course</button>
+    </aside>
+    <article id="lesson-body" data-lesson={lessonId}>
+      {lesson ? (
+        <Fragment set:html={html} />
+      ) : (
+        <Fragment>
+          <h1>Choose a lesson</h1>
+          <p>
+            <a href={siteUrl('course.html')}>Browse every lesson in the course.</a> Existing lesson
+            links will open their permanent page.
+          </p>
+        </Fragment>
+      )}
+    </article>
+    <aside class="reader-outline">
+      <details id="reader-outline-disclosure" open>
+        <summary>On this page</summary>
+        <nav id="reader-toc" aria-label="On this page"></nav>
+      </details>
+    </aside>
+  </main>
+  <SiteFooter />
+  <script>
+    import '../../scripts/entries/lesson.js';
+  </script>
+</SiteLayout>

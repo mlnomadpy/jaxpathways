@@ -15,7 +15,25 @@ We can split examples across devices, split features across devices, or keep a f
 
 ## The idea
 
-A Mesh names device axes, a PartitionSpec maps array dimensions to those axes, and NamedSharding combines both into a placement description. The numerical array and its placement are separate objects. Correct values do not prove correct placement, and a placement diagram is not proof of performance.
+Sharding places one global array across a named mesh. Global shape, local shard shape and replication describe different views of the same computation. Make ownership explicit before reasoning about communication.
+
+## Compare the global array with each local piece
+
+A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.
+
+Replication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.
+
+Connect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.
+
+### Pause and reason
+
+Must changing row sharding to column sharding change the answer?
+
+<details><summary>Compare your reasoning</summary>
+
+No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees.
+
+</details>
 
 ## Read the mapping from left to right
 
@@ -181,7 +199,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:34.338301+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:06.282859+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]

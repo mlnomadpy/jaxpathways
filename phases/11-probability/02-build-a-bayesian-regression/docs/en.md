@@ -15,7 +15,25 @@ You have three noisy measurements and want to predict at a new input. A fitted l
 
 ## The idea
 
-Our weights $w$ have a zero-mean normal prior with covariance $\tau^2 I$. Each target is normal around $Xw$, with known standard deviation $\sigma$. Multiplying these Gaussian densities and completing the square gives another Gaussian. “Conjugate” means this prior and likelihood combination has a posterior in the same tractable family.
+Bayesian regression represents uncertainty about parameters and propagates it to predictions. A latent-function prediction and a future noisy observation are different random quantities, so their intervals generally have different widths.
+
+## Separate uncertainty about the function from observation noise
+
+For features $x$, posterior parameter covariance $\Sigma$ gives latent predictive variance $x^T\Sigma x$. If independent observation noise has variance $\sigma^2$, a new observation has variance $x^T\Sigma x+\sigma^2$. Name each term before combining them.
+
+Moving away from well-observed feature combinations can increase parameter-related uncertainty. It does not require the assumed observation-noise variance to change. Plot the posterior mean with separately labeled latent and observation bands to make this distinction visible.
+
+The saved spread curves show how uncertainty varies with the input. They are conditional on the model, prior and noise assumptions. Check held-out behavior and model adequacy instead of reading any narrow posterior band as a guarantee.
+
+### Pause and reason
+
+Which interval is appropriate for a new noisy measurement?
+
+<details><summary>Compare your reasoning</summary>
+
+The posterior predictive interval that includes observation noise, under the model's assumptions. A latent-function interval omits that additional variability.
+
+</details>
 
 ## State what is random
 
@@ -157,7 +175,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:11.150837+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:47.040229+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]

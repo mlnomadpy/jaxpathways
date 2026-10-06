@@ -1,25 +1,146 @@
 ---
 import links from '../../data/navigation.json';
 import { siteUrl } from '../../lib/urls.js';
+import GitHubLink from './GitHubLink.astro';
 interface Props {
   active?: string;
 }
 const { active } = Astro.props;
 ---
 
-<header>
+<header class="site-header">
   <a
     class="brand"
     href={siteUrl('index.html')}
     aria-current={active === 'index' ? 'page' : undefined}
   >
+    <img src={siteUrl('assets/pathway-mark.svg')} width="36" height="36" alt="" />
     JAX Pathways
   </a>
-  <nav aria-label="Main navigation">
+  <button
+    class="navigation-toggle"
+    type="button"
+    aria-controls="main-navigation"
+    aria-expanded="false"
+    hidden
+  >
+    Menu
+  </button>
+  <nav id="main-navigation" aria-label="Main navigation">
     {links.map((link) => (
       <a href={siteUrl(link.href)} aria-current={active === link.id ? 'page' : undefined}>
         {link.label}
       </a>
     ))}
+    <GitHubLink />
   </nav>
 </header>
+
+<style>
+  .site-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px 24px;
+    max-width: 1320px;
+    margin-inline: auto;
+    padding: 18px 5%;
+    border-bottom: 1px solid var(--line);
+    font-family: var(--ui);
+  }
+  .site-header .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font: 700 21px/1.2 var(--ui);
+    letter-spacing: -0.04em;
+    color: var(--atlas);
+    white-space: nowrap;
+  }
+  .site-header .brand::before {
+    content: none;
+  }
+  .brand img {
+    flex-shrink: 0;
+  }
+  .site-header nav {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    font: 14px/1.5 var(--ui);
+  }
+  .site-header nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 10px 12px;
+    border-radius: 6px;
+    color: var(--muted);
+  }
+  .site-header nav a:hover,
+  .site-header nav a[aria-current='page'] {
+    background: var(--nav-surface);
+    color: var(--atlas);
+    text-decoration: none;
+  }
+  .site-header nav a[aria-current='page'] {
+    font-weight: 700;
+  }
+  .site-header .navigation-toggle {
+    display: none;
+  }
+  .site-header :focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+  }
+  @media (max-width: 1050px) and (min-width: 761px) {
+    .site-header {
+      gap: 8px;
+    }
+    .site-header nav {
+      gap: 0;
+      font-size: 13px;
+    }
+    .site-header nav a {
+      padding-inline: 8px;
+    }
+  }
+  @media (max-width: 760px) {
+    .site-header {
+      padding: 14px 6%;
+    }
+    .site-header .brand {
+      font-size: 20px;
+    }
+    .site-header .navigation-toggle:not([hidden]) {
+      display: block;
+      margin-left: auto;
+      min-height: 44px;
+      padding: 8px 14px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--panel);
+      color: var(--atlas);
+      font: 14px/1.5 var(--ui);
+      cursor: pointer;
+    }
+    .site-header nav {
+      flex-basis: 100%;
+      align-items: stretch;
+      gap: 4px;
+      padding-top: 8px;
+    }
+    .site-header nav a {
+      border: 0;
+      padding: 10px 12px;
+    }
+    .site-header:has(.navigation-toggle[hidden]) nav {
+      display: flex !important;
+    }
+    .site-header.navigation-open nav {
+      gap: 4px;
+    }
+  }
+</style>

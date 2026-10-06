@@ -4,7 +4,7 @@
   "minutes": 105,
   "content": {
     "problem": "A simulation can produce a convincing curve and an incorrect sensitivity. Before using gradients to infer a physical parameter, how can we tell whether the derivative is right, and whether it describes the continuous equation closely enough?",
-    "idea": "Automatic differentiation differentiates the operations we executed. For a numerical solver that is the discrete method, not the exact differential equation. We will compare against an algebraic derivative of RK4, a finite difference of the observation loss, and the continuous analytic sensitivity. Each comparison tests a different layer.",
+    "idea": "Differentiating a numerical solver gives sensitivity of its discrete computation. That sensitivity can approach the continuous system's sensitivity as the discretization improves, but the two are not automatically identical at a finite step size.",
     "objectives": [
       "Derive an independent discrete solver sensitivity.",
       "Check an observation-loss gradient at a nonoptimal parameter.",
@@ -12,6 +12,15 @@
       "Explain static-grid differentiation and the limits of this solver."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Differentiate the computation you actually executed",
+        "body": "For \\(y'=-ay\\), Euler gives \\(y_N=(1-ah)^N y_0\\), where \\(h\\) is step size and \\(N\\) is step count. Differentiating that expression gives \\(-Nh(1-ah)^{N-1}y_0\\). The continuous derivative at time \\(T=Nh\\) is instead \\(-Ty_0e^{-aT}\\).\n\nThese expressions give two distinct references: one checks differentiation through the discrete steps, and the other measures convergence toward the continuous sensitivity. Hold final time fixed as you refine the grid.\n\nIn the sensitivity plot, disagreement with the continuous answer can be discretization error even when autodiff is correct. Compare the discrete analytic derivative first, then inspect refinement behavior.",
+        "check": {
+          "prompt": "Which reference isolates an autodiff implementation error from solver approximation error?",
+          "answer": "The derivative of the same discrete update rule. The continuous sensitivity is valuable for convergence, but includes the effect of discretization."
+        }
+      },
       {
         "title": "Follow one parameter through every time step",
         "body": "Changing \\(k\\) changes every state transition. RK4 on this linear equation is multiplication by \\(R(-kh)\\), so the final state after \\(N\\) steps is \\(u_0R(-kh)^N\\). Differentiate that expression with the chain rule. The derivative includes \\(-h\\), which is easy to lose when differentiating the polynomial. For our parameters it is about \\(-0.98638781\\): increasing the rate lowers the remaining temperature.",

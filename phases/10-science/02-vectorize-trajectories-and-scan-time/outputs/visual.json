@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-02",
-  "contentHash": "ce7d0872e87d02e419bf69f502aa92a6b9aae5dd47e9dcbe77b2ec50745fa90b",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "cc173d9493681ba4165c3849f536a7b0cb6dfbd8866a336f60a4480411deda4b",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:32:36.776458+00:00",
+  "generatedAt": "2026-10-06T15:41:29.899953+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -200,5 +200,139 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Vectorize across systems; scan through time",
+    "prediction": "What should happen if you permute independent initial conditions?",
+    "reading": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
+    "alt": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 5,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "00",
+          "x": 2,
+          "y": 1.2,
+          "label": "Trajectory 0\nstate at t=0",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "01",
+          "x": 5,
+          "y": 1.2,
+          "label": "Trajectory 0\nstate at t=1",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "02",
+          "x": 8,
+          "y": 1.2,
+          "label": "Trajectory 0\nstate at t=2",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "10",
+          "x": 2,
+          "y": 3.2,
+          "label": "Trajectory 1\nstate at t=0",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "11",
+          "x": 5,
+          "y": 3.2,
+          "label": "Trajectory 1\nstate at t=1",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "12",
+          "x": 8,
+          "y": 3.2,
+          "label": "Trajectory 1\nstate at t=2",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "20",
+          "x": 2,
+          "y": 5.2,
+          "label": "Trajectory 2\nstate at t=0",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "21",
+          "x": 5,
+          "y": 5.2,
+          "label": "Trajectory 2\nstate at t=1",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "22",
+          "x": 8,
+          "y": 5.2,
+          "label": "Trajectory 2\nstate at t=2",
+          "tone": "state",
+          "w": 2.5,
+          "h": 0.85
+        }
+      ],
+      "edges": [
+        {
+          "from": "00",
+          "to": "01",
+          "exit": "right",
+          "enter": "left"
+        },
+        {
+          "from": "01",
+          "to": "02",
+          "exit": "right",
+          "enter": "left"
+        },
+        {
+          "from": "10",
+          "to": "11",
+          "exit": "right",
+          "enter": "left"
+        },
+        {
+          "from": "11",
+          "to": "12",
+          "exit": "right",
+          "enter": "left"
+        },
+        {
+          "from": "20",
+          "to": "21",
+          "exit": "right",
+          "enter": "left"
+        },
+        {
+          "from": "21",
+          "to": "22",
+          "exit": "right",
+          "enter": "left"
+        }
+      ],
+      "height": 6.4,
+      "width": 10
+    }
   }
 }

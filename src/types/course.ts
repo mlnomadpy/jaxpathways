@@ -6,6 +6,17 @@ export interface Command {
   shell?: string;
 }
 export interface LessonContent {
+  runtime?: { kind: string };
+  execution?: { kind: string };
+  diagram?: {
+    title: string;
+    prediction: string;
+    reading: string;
+    alt: string;
+    scope: string;
+    height: number;
+    panel: Record<string, unknown>;
+  };
   visual?: {
     title: string;
     kind: 'executed' | 'conceptual';
@@ -21,8 +32,10 @@ export interface LessonContent {
   problem?: string;
   idea: string;
   sections?: {
+    id?: string;
     title: string;
     body: string;
+    check?: { prompt: string; answer: string };
     commands?: Command[];
     math?: string;
     formula?: string;
@@ -58,8 +71,11 @@ export interface LessonContent {
   references?: { title: string; url: string }[];
 }
 export interface Lesson {
+  prerequisites: string[];
   contentHash?: string;
   visualArtifact?: {
+    mechanismImage?: string;
+    mechanismPng?: string;
     image: string;
     png: string;
     data: string;
@@ -124,6 +140,7 @@ export interface Pathway {
   phaseIds: string[];
 }
 export interface Course {
+  title: string;
   phases: Phase[];
   pathways: Pathway[];
   projectIds: string[];

@@ -15,7 +15,25 @@ A simulation can produce a convincing curve and an incorrect sensitivity. Before
 
 ## The idea
 
-Automatic differentiation differentiates the operations we executed. For a numerical solver that is the discrete method, not the exact differential equation. We will compare against an algebraic derivative of RK4, a finite difference of the observation loss, and the continuous analytic sensitivity. Each comparison tests a different layer.
+Differentiating a numerical solver gives sensitivity of its discrete computation. That sensitivity can approach the continuous system's sensitivity as the discretization improves, but the two are not automatically identical at a finite step size.
+
+## Differentiate the computation you actually executed
+
+For $y'=-ay$, Euler gives $y_N=(1-ah)^N y_0$, where $h$ is step size and $N$ is step count. Differentiating that expression gives $-Nh(1-ah)^{N-1}y_0$. The continuous derivative at time $T=Nh$ is instead $-Ty_0e^{-aT}$.
+
+These expressions give two distinct references: one checks differentiation through the discrete steps, and the other measures convergence toward the continuous sensitivity. Hold final time fixed as you refine the grid.
+
+In the sensitivity plot, disagreement with the continuous answer can be discretization error even when autodiff is correct. Compare the discrete analytic derivative first, then inspect refinement behavior.
+
+### Pause and reason
+
+Which reference isolates an autodiff implementation error from solver approximation error?
+
+<details><summary>Compare your reasoning</summary>
+
+The derivative of the same discrete update rule. The continuous sensitivity is valuable for convergence, but includes the effect of discretization.
+
+</details>
 
 ## Follow one parameter through every time step
 
@@ -191,7 +209,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:46.773131+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:20.220839+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257

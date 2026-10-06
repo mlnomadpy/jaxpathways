@@ -15,7 +15,25 @@ A model works on your computer, and now you want it to run near the user—perha
 
 ## The idea
 
-Edge AI runs inference near the data source. A mobile app with CPU/GPU/NPU delegates, a Linux board, and a microcontroller have different runtimes and operator budgets. Choose the device and execution path first, then prove the exported computation fits. This CPU lesson teaches the measurement boundary; it does not emulate an NPU, battery draw or microcontroller memory.
+An edge deployment includes input decoding, preprocessing, transfers, inference and output handling under device constraints. Choose a target and an explicit request contract before claiming that an exported model is ready for that device.
+
+## Measure the device path the user actually experiences
+
+A converted operator may run on the intended accelerator while another falls back to the CPU. The end-to-end request can then pay transfer and scheduling costs absent from an isolated kernel measurement. Inspect actual runtime placement and supported operators.
+
+Memory also has several parts: weights, activations, temporary workspace and runtime overhead. A smaller weight file does not guarantee the whole request fits the device's working-memory budget.
+
+The CPU request trace is a useful reference for the interface. It cannot establish phone, browser, NPU or TPU performance. Repeat the same correctness cases on the named target, then measure cold and warm behavior with its runtime and power/thermal conditions recorded when relevant.
+
+### Pause and reason
+
+What should you verify after conversion before interpreting a faster timing?
+
+<details><summary>Compare your reasoning</summary>
+
+Verify output behavior on the same inputs, operator placement/fallbacks and the complete request boundary. A faster but different computation is not a qualified optimization.
+
+</details>
 
 ## Choose a deployment lane
 
@@ -121,47 +139,47 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:25.160375+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:57.642444+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 10.835832916200161,
+  "first_request_ms": 11.552124749869108,
   "warm_samples_ms": [
-    0.13049994595348835,
-    0.056416960433125496,
-    0.04233303479850292,
-    0.03800005652010441,
-    0.03429199568927288,
-    0.03337510861456394,
-    0.031084055081009865,
-    0.0299159437417984,
-    0.02883397974073887,
-    0.028916867449879646,
-    0.02929195761680603,
-    0.028374837711453438,
-    0.02683396451175213,
-    0.02674991264939308,
-    0.026250025257468224,
-    0.026082852855324745,
-    0.026708003133535385,
-    0.026332912966609,
-    0.02654106356203556,
-    0.026167137548327446,
-    0.026332912966609,
-    0.026625115424394608,
-    0.02687494270503521,
-    0.027207890525460243,
-    0.02629193477332592,
-    0.02733292058110237,
-    0.026209047064185143,
-    0.02591707743704319,
-    0.02574990503489971,
-    0.02537504769861698
+    0.17729075625538826,
+    0.05508400499820709,
+    0.04258379340171814,
+    0.03758305683732033,
+    0.0355415977537632,
+    0.03291713073849678,
+    0.032333191484212875,
+    0.03045797348022461,
+    0.030416063964366913,
+    0.03020884469151497,
+    0.029957853257656097,
+    0.028875190764665604,
+    0.02800021320581436,
+    0.027624890208244324,
+    0.0278339721262455,
+    0.027957838028669357,
+    0.027416739612817764,
+    0.027624890208244324,
+    0.027417205274105072,
+    0.027792062610387802,
+    0.027250032871961594,
+    0.026999972760677338,
+    0.02750009298324585,
+    0.027792062610387802,
+    0.027082860469818115,
+    0.027957838028669357,
+    0.026916153728961945,
+    0.02695806324481964,
+    0.026667024940252304,
+    0.02674991264939308
   ],
-  "p50_ms": 0.02685445360839367,
-  "p95_ms": 0.050079193897545296,
+  "p50_ms": 0.027895905077457428,
+  "p95_ms": 0.04945890977978703,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }

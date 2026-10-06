@@ -15,7 +15,25 @@ A sensor model says that a future reading has mean $2$ and standard deviation $3
 
 ## The idea
 
-A probability distribution describes possible outcomes and their relative plausibility. Sampling produces individual outcomes; a density evaluates a candidate outcome. For a continuous distribution, density is not the probability of exactly that point. Probability comes from integrating density over an interval. We work in float32 on CPU and keep random keys explicit so an experiment can be replayed.
+A distribution describes variability in outcomes. Averaging independent observations can reduce uncertainty in their mean without removing the spread of individual outcomes. Keep these two uncertainties on separate labels and scales.
+
+## A precise mean does not make individual outcomes predictable
+
+Suppose observations have standard deviation $2$. For $100$ independent observations from the same distribution, the sample mean's standard deviation is $2/\sqrt{100}=0.2$. A new individual observation still has standard deviation $2$.
+
+The standard-error curve is calculated under its sampling assumptions; it is not itself a collection of measured repeated experiments. Correlated observations can reduce the amount of independent information in a batch.
+
+When interpreting a narrow interval, ask what random quantity the interval describes: a mean, a latent parameter or a new observation. More data can make an estimated average precise while the underlying process remains noisy.
+
+### Pause and reason
+
+Does a tenfold smaller standard error mean future individual observations are ten times less variable?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Standard error concerns the estimator of the mean. The observation distribution can retain the same variability.
+
+</details>
 
 ## Start with units, not an API
 
@@ -150,7 +168,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:08.030950+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:43.940948+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766

@@ -4,13 +4,22 @@
   "minutes": 90,
   "content": {
     "problem": "A short local training job finishes quickly. How many workers would a stream of jobs require, and what can this measurement actually tell us about cost? We will measure complete CPU jobs of several lengths, separate update work from startup overhead and apply transparent capacity arithmetic to explicitly hypothetical arrival rates and prices.",
-    "idea": "Capacity planning connects a workload duration to an arrival process and resource policy. A measured job lasting \\(t\\) seconds consumes \\(t/3600\\) worker-hours if one worker is reserved for its lifetime. Multiply by jobs arriving per hour to obtain offered worker demand. Divide by worker count for nominal load, then leave a stated reserve. This first-order plan is useful arithmetic, not a queueing guarantee or a cloud price quote.",
+    "idea": "Operating cost depends on resource allocation, runtime and the billing model. A workload's fraction of time in useful updates is not the same as device utilization. Keep cost accounting and performance measurements explicit.",
     "objectives": [
       "Measure end-to-end local service time at more than one workload length.",
       "Compute offered load, worker reserve and illustrative cost with consistent units.",
       "Identify assumptions that prevent a CPU fixture from establishing accelerator fleet capacity."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Account for billed time as well as useful work",
+        "body": "A job may spend time provisioning, loading, compiling, updating and shutting down. For short jobs, fixed startup costs can dominate even if the update loop is efficient. Reusing a warm service changes that tradeoff but introduces its own allocation costs.\n\nTrack the resource count and billed interval under the actual pricing assumptions. If a rate is hypothetical, label the resulting cost as modeled. A duration multiplied by an assumed price is not an invoice.\n\nThe timing panels compare different intervals. Their ratios can describe job-level busy fraction, but they do not measure accelerator instruction or memory utilization. Choose the metric that answers the operational question before optimizing it.",
+        "check": {
+          "prompt": "Can a high fraction of time in the update loop prove high accelerator utilization?",
+          "answer": "No. The loop can wait on data, synchronization or inefficient kernels. Device utilization requires suitable device observations in addition to job timing."
+        }
+      },
       {
         "title": "Measure the service boundary you intend to provision",
         "body": "We run jobs with \\(8\\), \\(32\\) and \\(64\\) updates in fresh child processes. Supervisor wall time includes imports, runtime startup, compilation, updates, logs and checkpoints. If a production worker stays warm across many jobs, this measurement overstates repeated startup cost; if production adds queueing or remote data, it understates those delays. Write the boundary alongside the number. We use the maximum of these three local observations as an illustrative conservative input, not a statistical tail estimate."

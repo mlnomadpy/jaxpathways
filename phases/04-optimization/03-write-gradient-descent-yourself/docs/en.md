@@ -16,9 +16,25 @@ You now have a loss and a gradient. Let’s use them to move a weight toward a b
 
 ## The idea
 
-For the loss $(w-2)^2$, the gradient is $2(w-2)$. Gradient descent subtracts learning_rate times that gradient. The error after one step is multiplied by $1-2\eta$. For this particular quadratic, learning rates strictly between $0$ and $1$ contract the error.
+Gradient descent subtracts a scaled gradient from the current parameters. The gradient points toward local increase; its negative gives a local descent direction. A sufficiently large step can cross the useful local region and increase the loss instead.
 
-This bound is specific to the curvature of this loss. Do not reuse it as a universal rule. lax.scan carries the current parameter and records a loss at each step; the loop stays compatible with JAX transformations.
+## The sign tells you which way to step
+
+Take $L(w)=(w-3)^2$, starting from $w=0$. The derivative is $-6$. With learning rate $0.1$, the update gives $w=0.6$, and the loss falls from $9$ to $5.76$. The negative derivative produces a positive parameter change because we subtract it.
+
+With learning rate $1.1$, the first update jumps to $6.6$. The new loss is $12.96$, larger than the starting loss. The derivative was correct in both cases; the step length changed the outcome.
+
+When the loss plot rises, inspect the parameter trajectory and update norm before changing the derivative implementation. Loss hides the side of the minimum on which the parameter lies. A signed trajectory exposes overshoot.
+
+### Pause and reason
+
+Does a correct gradient guarantee that any positive learning rate reduces the loss?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The gradient describes local behavior. Step-size stability depends on the objective's curvature and the update rule; the worked large-step case increases the loss despite the correct derivative.
+
+</details>
 
 ## Derive one update before writing the loop
 
@@ -151,7 +167,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:14.025652+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:42.770350+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717

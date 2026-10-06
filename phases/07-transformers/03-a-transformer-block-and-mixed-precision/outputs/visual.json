@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-03",
-  "contentHash": "baf365086e2e92737356f5291281aa3ef4141989217ef0ea41cbb048ff0ceade",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "1406e35cd748652e9f4dcfd842eb658e610b5d087bf7d5bf1687fec4496cccb1",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:38:19.856086+00:00",
+  "generatedAt": "2026-10-06T15:41:28.396628+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -75,5 +75,135 @@
     ],
     "unit": "output minus input",
     "diverging": true
+  },
+  "diagram": {
+    "title": "The actual single-head pre-LN block",
+    "prediction": "What should happen when every learned projection is zero?",
+    "reading": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
+    "alt": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 8.7,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "x",
+          "x": 5,
+          "y": 0.7,
+          "label": "Input X: 4 \u00d7 8",
+          "tone": "data",
+          "w": 4,
+          "h": 0.85
+        },
+        {
+          "id": "ln1",
+          "x": 5,
+          "y": 2,
+          "label": "Layer norm \u2192 Q, K, V\nEach: 4 \u00d7 8",
+          "tone": "data",
+          "w": 5,
+          "h": 1
+        },
+        {
+          "id": "att",
+          "x": 5,
+          "y": 3.6,
+          "label": "QK\u1d40 / \u221a8 \u2192 causal mask \u2192 softmax\nScores / weights: 4 \u00d7 4",
+          "tone": "data",
+          "w": 7,
+          "h": 1.1
+        },
+        {
+          "id": "v",
+          "x": 5,
+          "y": 5.2,
+          "label": "Weighted V \u2192 output projection\nCorrection: 4 \u00d7 8",
+          "tone": "data",
+          "w": 6,
+          "h": 1
+        },
+        {
+          "id": "a1",
+          "x": 5,
+          "y": 6.7,
+          "label": "Add first residual: 4 \u00d7 8",
+          "tone": "result",
+          "w": 5,
+          "h": 0.85
+        },
+        {
+          "id": "ff",
+          "x": 5,
+          "y": 8.3,
+          "label": "Layer norm \u2192 8 to 16\nGELU \u2192 16 to 8",
+          "tone": "data",
+          "w": 6,
+          "h": 1
+        },
+        {
+          "id": "a2",
+          "x": 5,
+          "y": 9.9,
+          "label": "Add second residual: 4 \u00d7 8",
+          "tone": "result",
+          "w": 5,
+          "h": 0.85
+        }
+      ],
+      "edges": [
+        {
+          "from": "x",
+          "to": "ln1"
+        },
+        {
+          "from": "ln1",
+          "to": "att"
+        },
+        {
+          "from": "att",
+          "to": "v"
+        },
+        {
+          "from": "v",
+          "to": "a1"
+        },
+        {
+          "from": "a1",
+          "to": "ff"
+        },
+        {
+          "from": "ff",
+          "to": "a2"
+        },
+        {
+          "from": "x",
+          "to": "a1",
+          "exit": "left",
+          "enter": "left",
+          "curve": "arc3,rad=0.65"
+        },
+        {
+          "from": "a1",
+          "to": "a2",
+          "exit": "right",
+          "enter": "right",
+          "curve": "arc3,rad=-0.9"
+        },
+        {
+          "from": "ln1",
+          "to": "v",
+          "exit": "right",
+          "enter": "right",
+          "curve": "arc3,rad=-0.55",
+          "label": "V",
+          "labelAt": [
+            9.25,
+            3.55
+          ]
+        }
+      ],
+      "height": 10.7,
+      "width": 10
+    }
   }
 }

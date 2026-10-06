@@ -15,9 +15,35 @@ Your code runs, but has it added the bias to the right axis? This is a common ar
 
 ## The idea
 
-Broadcasting aligns dimensions from the right. A pair of aligned dimensions is compatible when their sizes match or one size is $1$; a missing leading dimension behaves like a singleton. Thus a feature bias $(3,)$ can be added to a batch $(2, 3)$, producing $(2, 3)$. The feature vector is reused over observations.
+Before adding or subtracting arrays, name what each axis represents. Broadcasting aligns dimensions from the right and reuses singleton dimensions. A legal broadcast can still answer the wrong question, especially when a final mean hides the resulting shape.
 
-The operation need not physically copy the vector in the way a handwritten repeat would. Broadcasting specifies values and output shape; storage and compiler behavior are separate matters. First decide which values belong in each output position.
+## Catch the scalar that hides a shape mistake
+
+Take predictions $[1,3]$ and matching targets $[1,3]$. The intended residuals are $[0,0]$, so mean squared error is zero. If the targets are stored as a column, subtraction instead compares each target against both predictions. The residual matrix has entries $0,2,-2,0$, and its mean squared error is $2$.
+
+Both calculations return a scalar after averaging. Looking only at the final loss, or checking that autodiff can differentiate it, will not expose the problem. Inspect the residual shape before reducing it and compare against a known aligned example.
+
+This is also why a reshape should express a data contract. A singleton feature axis can mean one offset per observation; a singleton observation axis can mean one offset per feature. They are different operations even when an unlucky square fixture makes both expressions run.
+
+### Align axes before reducing
+
+**Predict:** Why is checking that the loss is scalar insufficient?
+
+![Align axes before reducing](../../phases/01-arrays/02-shapes-broadcasting-and-dtypes/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted $(n,n)$ intermediate. Each row describes a different shape contract.
+
+### Pause and reason
+
+Why is checking that the loss is scalar insufficient?
+
+<details><summary>Compare your reasoning</summary>
+
+A mean can reduce an incorrectly broadcast matrix to a scalar. Check prediction/target alignment and an independently known loss before reduction, not only the final result's rank.
+
+</details>
 
 ## Work the shape rule one dimension at a time
 
@@ -101,7 +127,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:42.475892+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:09.275426+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]

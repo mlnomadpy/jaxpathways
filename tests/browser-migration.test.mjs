@@ -124,6 +124,20 @@ test('notebook saves evidence through the real form and planner uses canonical d
   } finally {await p.close();}
   p=await page('organizer');
   try {
-    await loadCourse();await setupPlatform(courseState.curriculum);assert(p.all('#club-plan article').length>0);assert.equal(p.$('#club-download').disabled,false);assert(p.$('#club-summary').textContent.length>20);
+    await loadCourse();await setupPlatform(courseState.curriculum);assert(!p.requests.some(request=>request.endsWith('/api/v1/projects.json')),'organizer must not fetch notebook project data');assert(p.all('#club-plan article').length>0);assert.equal(p.$('#club-download').disabled,false);assert(p.$('#club-summary').textContent.length>20);
+  } finally {await p.close();}
+});
+
+test('permanent lesson pages retain pathway, section and existing learner evidence when enhanced', async()=>{
+  const p=await page('lesson-welcome-01','?path=foundations#section-2',{'jaxpathways-lessons-v1':{version:1,lessons:{'welcome-01':{checkpointPassed:true,evidenceSaved:true}}}});
+  try {
+    assert.equal(p.$('#lesson-title').textContent,'Set up your learning workspace');
+    await loadCourse();courseState.activePath='foundations';initReaderEvents();
+    const found=courseState.course.phases[0];showLesson(found,found.lessons[0]);
+    assert.equal(location.pathname,'/jaxpathways/lesson-welcome-01.html');
+    assert.equal(location.search,'?path=foundations');assert.equal(location.hash,'#section-2');
+    assert.match(p.$('#exercise-complete').textContent,/unfinished/);
+    assert.match(p.$('#checkpoint-result').textContent,/previously passed/);
+    assert.equal(JSON.parse(localStorage.getItem('jaxpathways-lessons-v1')).lessons['welcome-01'].evidenceSaved,true);
   } finally {await p.close();}
 });

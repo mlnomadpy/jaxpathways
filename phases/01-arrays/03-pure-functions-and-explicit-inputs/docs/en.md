@@ -15,9 +15,25 @@ Have you ever rerun a notebook cell and got a different result because another c
 
 ## The idea
 
-A pure numerical function returns results determined by its explicit inputs and avoids changing hidden state. `predict(params, x)` exposes both parameter values and observations. An update produces a new parameter value, and the caller decides which value to use next.
+A pure function makes its changing inputs visible and returns its result without secretly changing shared state. That gives transformations such as differentiation and compilation a clear computation to work with. When a prediction changes, we should be able to identify the input that changed.
 
-This is a boundary design for the numerical core, not a demand to eliminate files, logging, or mutable containers from an entire Python application. Load data, write checkpoints, and report results in surrounding orchestration. Keep the computation being transformed easy to replay with controlled inputs.
+## Make a repeated call explainable
+
+Imagine a prediction function that receives features and weights but reads a global bias. You compile it, change that Python global, and call the compiled function again. The source file now displays the new bias, but the already-traced computation may still embody the old value. The hidden dependency makes the result difficult to reason about.
+
+Pass the bias as an explicit argument instead. Then two calls with different bias arrays are visibly two computations with different data. For a linear prediction, increasing the bias by $1$ must increase every output by $1$, while changing the weight vector can affect rows differently.
+
+Purity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.
+
+### Pause and reason
+
+Where should a changing training step or random key live?
+
+<details><summary>Compare your reasoning</summary>
+
+In explicit state passed into the computation and returned when updated. Hiding it in a mutable Python global makes replay and transformed execution harder to verify.
+
+</details>
 
 ## Hidden state makes the signature incomplete
 
@@ -95,7 +111,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:43.524095+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:10.345809+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]

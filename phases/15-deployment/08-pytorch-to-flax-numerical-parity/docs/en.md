@@ -14,7 +14,25 @@ You copied a checkpoint and the new model runs, but its answers differ. Is the w
 
 ## The idea
 
-Numerical parity is an architecture audit, not a file-format check. Match the input contract and every operation, compare intermediate activations with explicit error budgets, then verify gradients and reloaded-artifact outputs. This lab converts a dense–LayerNorm–exact-GELU–dense network on CPU; it is not a universal checkpoint converter.
+When a converted model disagrees with its reference, compare aligned intermediate activations on identical inputs. The earliest divergent boundary usually gives a more useful diagnosis than the final output alone.
+
+## Find the earliest disagreement
+
+Suppose the first dense output agrees but normalized activations do not. Inspect the normalization axis, epsilon and parameter mapping before changing the final layer. A later output difference may only be a consequence of the earlier mismatch.
+
+Record absolute error and an appropriate relative measure. Near-zero references can make relative error large even when absolute error is small, so tolerances need scale and dtype context.
+
+The layer-error plot identifies a location to investigate, not a universal threshold for all architectures. Use several inputs, including boundary cases, and compare the full preprocessing-to-output contract. Matching one fixture does not establish arbitrary checkpoint compatibility.
+
+### Pause and reason
+
+Why can only comparing final probabilities hide useful information?
+
+<details><summary>Compare your reasoning</summary>
+
+Different intermediate errors can cancel or be compressed by the final nonlinearity. Layerwise comparisons locate where the intended computation first changed.
+
+</details>
 
 ## Write the architecture contract before mapping weights
 
@@ -186,7 +204,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:19.603422+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:51.932518+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}

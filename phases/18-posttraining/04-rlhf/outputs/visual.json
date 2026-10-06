@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
-  "contentHash": "48d9207aaa1e9f73c17bb516ea30bc4aa6984442869326ed54345911cb2ce81c",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "5a7e0978a30804f1427e121068539f3e177e60b0dd41017d1881802b484a1cbe",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T01:21:56.680302+00:00",
+  "generatedAt": "2026-10-06T15:41:37.184927+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -286,7 +286,84 @@
           39,
           40
         ]
+      },
+      {
+        "kind": "bar",
+        "x": [
+          0,
+          1,
+          2
+        ],
+        "labels": [
+          "action 0",
+          "action 1",
+          "action 2"
+        ],
+        "series": [
+          {
+            "label": "fixed reference",
+            "y": [
+              0.4017595648765564,
+              0.32893288135528564,
+              0.2693074941635132
+            ]
+          },
+          {
+            "label": "trained policy",
+            "y": [
+              0.9739989638328552,
+              0.018571145832538605,
+              0.007429859135299921
+            ]
+          }
+        ],
+        "xlabel": "terminal response action",
+        "ylabel": "probability",
+        "title": "How increased reward redistributes action probability"
       }
     ]
+  },
+  "diagram": {
+    "title": "Different objects have different update lifetimes",
+    "prediction": "Which frozen object refreshes between rollout batches: old policy probabilities or the reference policy?",
+    "reading": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
+    "alt": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 5.2,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Object",
+        "Purpose",
+        "Changes when"
+      ],
+      "rows": [
+        [
+          "Current policy",
+          "new probabilities",
+          "inner updates"
+        ],
+        [
+          "Old probabilities",
+          "ratio denominator",
+          "new rollout"
+        ],
+        [
+          "Reference",
+          "KL comparison",
+          "fixed"
+        ],
+        [
+          "Reward model",
+          "score actions",
+          "fitted earlier"
+        ],
+        [
+          "Exact baseline",
+          "center advantages",
+          "rollout calculation"
+        ]
+      ]
+    }
   }
 }

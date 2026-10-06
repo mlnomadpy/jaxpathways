@@ -3,7 +3,7 @@
   "id": "welcome-02",
   "minutes": 45,
   "content": {
-    "idea": "A JAX array has a shape, a dtype, and a placement on a device. Shape describes the axes of your data. Dtype describes the numerical representation. Device placement describes where computation can happen. Keep these three questions separate when debugging.\n\nOperations usually preserve device placement. Converting an array to a Python float or a NumPy array transfers its value to the host and can force the program to wait. That is useful when inspecting a small result, but should not be repeated inside a high-throughput training loop.",
+    "idea": "An array is a collection of values with a shape, a dtype and a device. Shape tells us how to index the values; dtype tells us how they are represented; device tells us where the computation lives. Start by predicting a small reduction before asking JAX to perform it.",
     "code": "import jax\nimport jax.numpy as jnp\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
     "output": "Shape: \\((2, 3)\\); Dtype: float32; Row sums: [ \\(3\\). \\(12\\).]. Device names vary.",
     "exercise": "Compute column sums instead. State the resulting shape before running the code.",
@@ -18,6 +18,15 @@
     "explanation": "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
     "problem": "Imagine a small table: two observations, with three measurements in each row. If we ask JAX to add the values, should it add across the rows or down the columns? Let’s work out both answers before running any code. You’ll learn to check an array’s shape, number format and device, so a plausible-looking result does not hide a mistake.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Read one array two ways",
+        "body": "Take the two rows \\([1,2,3]\\) and \\([4,5,6]\\). Summing across each row gives \\([6,15]\\): one answer per observation. Summing down the rows gives \\([5,7,9]\\): one answer per feature. The values are the same; the question determines the axis.\n\nIn Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.\n\nRead the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.",
+        "check": {
+          "prompt": "If the batch gains a third observation with the same three features, which reduction still returns three values?",
+          "answer": "The feature sums still return three values because `axis=0` removes the observation axis. Row sums now return three values too, but for a different reason. This is why unequal axis sizes make debugging easier."
+        }
+      },
       {
         "title": "Read the table before using an API",
         "body": "Start with the six values \\(0\\) through \\(5\\). Reshape them into two rows: \\([0, 1, 2]\\) and \\([3, 4, 5]\\). The first axis selects an observation; the second selects a measurement. Shape \\((2, 3)\\) describes that organization, not the numerical values. Reshape preserves element count and ordering here; it does not create new measurements.\n\nA length-six array and a two-by-three array contain the same values but invite different operations. In your notebook, write an axis label beside each dimension. This becomes important when a later model expects one prediction per row.",

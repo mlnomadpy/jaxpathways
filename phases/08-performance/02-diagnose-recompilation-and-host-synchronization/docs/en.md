@@ -15,9 +15,25 @@ A new batch size makes one call pause; reading a metric makes another loop wait.
 
 ## The idea
 
-A jitted program is specialized to argument properties such as shape and dtype and to values explicitly declared static. Changing array contents while keeping their signature usually reuses an existing specialization; changing shape or static metadata can require a new one. A Python diagnostic inside the function observes tracing, not device execution or the number of compiled executables.
+Slow steps can come from preparing new program specializations or from waiting for already-compiled work. Use a controlled call ledger and timing boundaries to separate those causes.
 
-A host read such as `float(array)` needs the scalar value and therefore introduces a completion boundary. Moving that read changes what can remain in a device-side computation chain. It does not guarantee faster execution on this small CPU example.
+## Distinguish new tracing from host waiting
+
+Change only array values while keeping shapes, dtypes and static choices fixed. Then change one signature component and record the observed trace behavior. Changing everything together makes the cause ambiguous.
+
+Inspect host reads and logging next. Converting device results into Python values can force a wait even when no retracing occurs. That delay needs a different intervention from reducing signature variation.
+
+Trace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.
+
+### Pause and reason
+
+If the trace count stays constant but a step is slow, what should you inspect?
+
+<details><summary>Compare your reasoning</summary>
+
+Inspect synchronization, transfers, data preparation and logging. A stable trace count does not rule out those boundaries.
+
+</details>
 
 ## A call signature is different from its numerical data
 
@@ -204,7 +220,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:29.184925+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:01.041439+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -320,8 +336,8 @@ CPU run: 2026-10-06T01:24:29.184925+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 8.716597221791744e-05
-Final-only wait seconds: 1.8999911844730377e-05
+Per-step host reads seconds: 7.3291826993227e-05
+Final-only wait seconds: 1.8584076315164566e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure

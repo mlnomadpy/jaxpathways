@@ -1,7 +1,7 @@
 {
   "pathways": {
     "title": "Learning paths & career routes \u2014 JAX Pathways",
-    "description": "A friendly, project-led map of JAX: learn the foundations, then choose your pathway.",
+    "description": "Choose a JAX learning path for foundations, model training, scientific computing or production engineering, with prerequisites and project milestones.",
     "bodyClass": "",
     "active": "pathways",
     "skipTarget": "#main",
@@ -37,19 +37,21 @@
     "bodyClass": "",
     "active": "notebook",
     "skipTarget": "#main",
-    "skipLabel": "Skip to content"
+    "skipLabel": "Skip to content",
+    "noindex": true
   },
   "organizer": {
     "title": "Learning club planner \u2014 JAX Pathways",
-    "description": "Learn JAX with practical lessons and projects.",
+    "description": "Plan a JAX study group with a shared learning route, meeting rhythm and project evidence.",
     "bodyClass": "",
     "active": "organizer",
     "skipTarget": "#main",
-    "skipLabel": "Skip to content"
+    "skipLabel": "Skip to content",
+    "noindex": true
   },
   "course": {
-    "title": "The course \u2014 JAX Pathways",
-    "description": "A friendly, project-led map of JAX: learn the foundations, then choose your pathway.",
+    "title": "Learn JAX: lessons, projects & training systems \u2014 JAX Pathways",
+    "description": "Study JAX arrays, automatic differentiation, optimization, neural networks, distributed training and deployment with worked Python examples and projects.",
     "bodyClass": "course-page",
     "active": "course",
     "skipTarget": "#main",
@@ -57,11 +59,12 @@
   },
   "project": {
     "title": "Project workspace \u2014 JAX Pathways",
-    "description": "Learn JAX with practical lessons and projects.",
+    "description": "Work through a JAX project in stages and record reproducible checks, experiments and evidence.",
     "bodyClass": "",
     "active": "projects",
     "skipTarget": "#project",
-    "skipLabel": "Skip to project"
+    "skipLabel": "Skip to project",
+    "noindex": true
   },
   "developer": {
     "title": "Learner resources \u2014 JAX Pathways",

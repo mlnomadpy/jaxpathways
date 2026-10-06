@@ -15,7 +15,25 @@ An approximate inference program returns a long list of weights. Before treating
 
 ## The idea
 
-Hamiltonian Monte Carlo, or HMC, introduces a temporary momentum and follows approximate trajectories through position and momentum space. The gradient of negative log-density guides the path. A Metropolis acceptance decision corrects integration error. This lesson fixes the trajectory length and uses an identity mass matrix; it teaches the mechanism, not a production replacement for adaptive NUTS.
+Hamiltonian Monte Carlo introduces momentum to propose distant states while accounting for the target density. Numerical integration and acceptance control the proposal, but diagnostics are still needed to judge whether the retained samples explore the posterior adequately.
+
+## A moving chain is not automatically a well-mixed chain
+
+Follow position and momentum through a leapfrog trajectory. A proposal can travel far without behaving like an independent posterior draw. Integration error and acceptance behavior provide one diagnostic, while between-chain agreement and autocorrelation provide others.
+
+Start multiple chains from meaningfully different positions where appropriate. Inspect the same retained sampling region across chains, and separate adaptation from retained draws. A trace that looks active may still stay in one region or be strongly correlated.
+
+The lesson's trace plot uses a known posterior mean as a reference. Matching that mean is not sufficient: spread and dependence matter too. Compute diagnostics from the retained samples with their conventions recorded; plotting a thinned subset should not silently redefine the diagnostic sample.
+
+### Pause and reason
+
+Why can many saved samples still provide little effective information?
+
+<details><summary>Compare your reasoning</summary>
+
+Strong dependence or poor exploration can make them redundant. Sample count and effective sample size answer different questions; neither a smooth trace nor a correct mean alone establishes adequate mixing.
+
+</details>
 
 ## Turn log-density into potential energy
 
@@ -198,7 +216,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:16.228857+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:52.001088+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]

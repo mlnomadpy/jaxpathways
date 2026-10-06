@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-01",
-  "contentHash": "7d5b379962faf68fd8f79b09898068e39850b835d557214700a7d811d0d6d01b",
-  "executedAt": "2026-10-06T01:25:58.947250+00:00",
+  "contentHash": "f66d736270670ec38da6091eaaa175ba5c7900440a6d9ebfde246b33cd721f45",
+  "executedAt": "2026-10-06T15:42:31.817733+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -68,7 +68,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",

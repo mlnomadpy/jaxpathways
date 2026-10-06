@@ -4,7 +4,7 @@
   "minutes": 130,
   "content": {
     "problem": "Reading a jaxpr tells you what operations exist, but implementing one small transformation makes its rules concrete. Can we propagate a value and a directional derivative through a traced program, compile that transformed computation, and clearly reject programs we do not support?",
-    "idea": "We will write a tiny forward-mode interpreter for a pure, flat floating-point primitive subset. Each variable carries a pair \\((a,\\dot a)\\). The interpreter applies primal and tangent rules to each equation in order. This is a real derivative transformation with explicit limitations, not a general replacement for JAX’s interpreter or compiler.",
+    "idea": "A small interpreter makes program transformations concrete: read operations and propagate additional information through them. Keep tracing, interpretation, lowering and compilation as distinct stages so the exercise's scope stays clear.",
     "objectives": [
       "Interpret literals, captured constants and variables in a supported flat jaxpr.",
       "Implement actual forward derivative rules without calling jax.jvp inside the interpreter.",
@@ -12,6 +12,15 @@
       "Compare interpreted, JAX, analytic and compiled transformed results."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Locate your transformation in the compilation pipeline",
+        "body": "Imagine an interpreter carrying a value and a directional derivative through each supported operation. Addition combines both pairs; multiplication applies the product rule. The interpreter must explicitly define behavior for every primitive it accepts.\n\nReject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.\n\nThe directional-derivative curve checks the bounded interpreter example. It does not establish a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.",
+        "check": {
+          "prompt": "What should a tiny interpreter do when it sees a primitive without a defined rule?",
+          "answer": "Raise a clear unsupported-operation error. A plausible fallback would hide a gap in the transformation's mathematical contract."
+        }
+      },
       {
         "title": "Treat a jaxpr as a typed data-flow program",
         "body": "A closed jaxpr contains input variables, captured constants, equations and output variables. Each equation reads already-defined values and writes new values. Its variable names are presentation details; the object identities and data dependencies carry meaning. We use the public extension namespace for the Literal type, and inspect the installed JAX representation rather than matching printed variable names. The executed environment is JAX 0.9.2, where the closed trace exposes .jaxpr and .consts separately. Newer documentation may describe a unified representation; inspect the installed version and rerun these contracts when upgrading."

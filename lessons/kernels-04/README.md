@@ -15,7 +15,25 @@ A custom kernel is useful only if it stays correct when shapes and dtypes change
 
 ## The idea
 
-Treat each optimization as a hypothesis about a measured bottleneck. Freeze the mathematical and precision contract, test representative boundaries, then compare completed target execution with a strong baseline. This lesson executes the correctness side on CPU simulation and makes target-only evidence impossible to fabricate through fallback.
+A low-precision kernel can differ from a high-precision calculation because inputs changed representation, arithmetic changed, or the implementation is wrong. Separate these causes with references that answer different questions.
+
+## Use two references to locate a precision gap
+
+First compare the kernel with an independent computation using the same represented inputs. That isolates implementation behavior under the chosen numeric contract. Then compare the represented-input reference with the original high-precision calculation to estimate representation effects.
+
+If the first comparison passes while the second shows a gap, changing indexing is unlikely to fix that gap. Investigate the precision policy and whether downstream quality tolerates it.
+
+The error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.
+
+### Pause and reason
+
+Which comparison should you inspect before blaming quantization for a wrong output?
+
+<details><summary>Compare your reasoning</summary>
+
+Compare against an independent reference on the same represented inputs. A mismatch there may be an implementation error rather than unavoidable representation error.
+
+</details>
 
 ## Choose cases that challenge the contract
 
@@ -334,7 +352,7 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:57.378596+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:30.333568+00:00. JAX 0.9.2.
 
 ```text
 Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]

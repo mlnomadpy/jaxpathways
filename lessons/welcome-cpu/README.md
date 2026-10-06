@@ -15,7 +15,25 @@ You can explore how JAX splits an array across devices using just your laptop. W
 
 ## The idea
 
-Virtual CPU devices let one Python process exercise JAX placement APIs without renting an accelerator. The devices are logical execution targets backed by the same host. You can practice global shapes, local shards, replicated inputs and shape constraints. They do not reproduce TPU memory, interconnect bandwidth, accelerator instructions, multi-host failures or performance.
+Logical CPU devices let us practice how a global array is divided and addressed. They share a physical host. Treat them as a way to make placement visible, then use a real accelerator run to investigate accelerator memory, communication and speed.
+
+## Distinguish ownership from extra computing power
+
+Suppose a global array has four rows and each logical device owns one row. The global shape still describes all four rows; a local shard describes the one row stored for that owner. Asking for the global shape and inspecting a local buffer are different operations.
+
+The ownership heatmap assigns a category to each device. A darker device color does not mean more work or a faster device. Follow the row boundary and the device label together.
+
+Set the logical-device configuration before JAX initializes its backend, then inspect the actual device count in a fresh process. Changing a flag after initialization does not retroactively repartition an already-running process.
+
+### Pause and reason
+
+A four-device CPU exercise passes. What can you now claim about four TPU chips?
+
+<details><summary>Compare your reasoning</summary>
+
+You have checked the array-placement exercise on logical CPU devices. TPU execution, memory behavior and performance still require a separate run on that hardware. The ownership reasoning transfers; the measured performance does not.
+
+</details>
 
 ## Configure the runtime before it exists
 
@@ -163,7 +181,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:38.622504+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:05.285014+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2

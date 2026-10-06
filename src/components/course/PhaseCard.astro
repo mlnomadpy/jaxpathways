@@ -1,4 +1,5 @@
 ---
+import RevisionStamp from '../shared/RevisionStamp.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
 import { runtimeLabel } from '../../lib/runtime.js';
@@ -23,6 +24,7 @@ const { phase: p } = Astro.props;
     </span>
   </summary>
   <div class="route-details">
+    <RevisionStamp kind="phases" id={p.id} />
     <p>{p.description}</p>
     <p class="soft">{p.learningAdvice}</p>
     <p>
@@ -32,7 +34,7 @@ const { phase: p } = Astro.props;
       <p>
         <strong>Direct links for the first project:</strong>{' '}
         {p.coreLessonIds.map((id) => (
-          <a class="inline-phase" href={siteUrl(`lesson.html?lesson=${id}`)}>
+          <a class="inline-phase" href={siteUrl(`lesson-${id}.html`)}>
             {p.lessons.find((lesson) => lesson.id === id)?.title}
           </a>
         ))}
@@ -58,11 +60,7 @@ const { phase: p } = Astro.props;
     <ul class="lessons">
       {p.lessons.map((lesson, index) => (
         <li id={lesson.id}>
-          <a
-            class="lesson-link"
-            data-lesson={lesson.id}
-            href={siteUrl(`lesson.html?lesson=${lesson.id}`)}
-          >
+          <a class="lesson-link" data-lesson={lesson.id} href={siteUrl(`lesson-${lesson.id}.html`)}>
             <span>
               <span class="lesson-number">
                 {p.number}.{String(index + 1).padStart(2, '0')}

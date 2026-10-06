@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-12",
-  "contentHash": "d61fa3f2c87600728ac5f2f551089c866cd38fa4ea4aa794c2b96396c7efec6a",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "3f093b4a35e9b5635e4a322fcd126c89785a9503087145d84254201ca156813c",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:30:22.137851+00:00",
+  "generatedAt": "2026-10-06T15:41:25.079415+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -241,5 +241,16 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "A norm ball and a coordinate box",
+    "prediction": "Does coordinate clipping at \\(2.5\\) guarantee that the whole gradient norm is at most \\(2.5\\)?",
+    "reading": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
+    "alt": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6,
+    "panel": {
+      "kind": "clipping"
+    }
   }
 }

@@ -8,7 +8,7 @@ import CopyText from '../shared/CopyText.astro';
 <section class="tutor-band" id="tutor" aria-labelledby="tutor-title">
   <div class="tutor-heading">
     <h2 id="tutor-title">{tutor.title}</h2>
-    <p>{tutor.hosts}</p>
+    <p>{tutor.description}</p>
   </div>
   <p class="tutor-prereq">
     <strong>1.</strong>{' '}
@@ -25,6 +25,7 @@ import CopyText from '../shared/CopyText.astro';
     label="Copy course starting prompt"
     kind="prompt"
   />
+  <p class="tutor-hosts">{tutor.hosts}</p>
   <details class="tutor-more">
     <summary>Using a browser chatbot, or need setup help?</summary>
     <p>

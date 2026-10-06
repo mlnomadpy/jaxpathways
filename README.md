@@ -23,7 +23,9 @@ Two connected phases now cover [masked and contrastive pretraining](phases/17-pr
 
 The [2026-10-06 full curriculum audit](docs/full-course-audit-2026-10-06.md) distinguishes current coverage from the remaining gaps. The [next-course plan](docs/course-roadmap-2026-10-06.md) scopes 61 candidate lesson units across 16 packages, beginning with a 14-unit connected text lifecycle. These are planned extensions, not additional authored lessons.
 
-The [model lifecycle capstone catalog](docs/model-lifecycle-capstones.md) specifies seven planned projects: 300M-scale text embeddings and causal language models, image/audio understanding, image/audio generation, and grounded multimodal generation. Each connects data recipes, model-specific training phases, benchmarks, monitoring and Hugging Face release. The [tooling plan](docs/model-lifecycle-tooling.md) adds Weights & Biases alongside MLflow and focused evaluation/data/serving tools. These specifications are available; training and release implementation remain planned.
+The [teaching-depth review](docs/teaching-depth-audit-2026-10-06.md) distinguishes lesson availability from instructional depth and records the rewrite of the eight pretraining/post-training lessons, with the remaining integration gaps.
+
+The [model lifecycle capstone catalog](docs/model-lifecycle-capstones.md) specifies ten planned projects: 300M-scale text embeddings and causal language models, image/audio understanding, image/audio generation, grounded multimodal generation, CLIP, SigLIP, and retrieval systems. Each connects data recipes, model-specific training phases, benchmarks, monitoring and Hugging Face release. The [tooling plan](docs/model-lifecycle-tooling.md) adds Weights & Biases alongside MLflow and focused evaluation/data/serving tools. These specifications are available; training and release implementation remain planned.
 
 Each phase now includes a study guide with a starting diagnostic, linked build milestones, a changed-condition task and specific project evidence. Read the [phase quality audit](docs/phase-quality-audit.md) for the improvements and remaining content priorities.
 
@@ -179,3 +181,7 @@ python3 scripts/course.py guide image
 ```
 
 The ten pathways distinguish focus-phase coverage from shared preparation. Career routes describe a work scenario, portfolio evidence and review questions. The [math synthesis draft](assessments/math.md) assesses geometry, regularization, minibatch noise and optimizer state; its [numerical reference](assessments/math-reference.py) can be run separately on CPU. See [the upgrade record](docs/pathways-course-upgrade.md) for implemented changes and remaining gaps.
+
+## Project organization guide
+
+The [tools and project workflow guide](content/guides/project-workflow.md) teaches source/config/data separation, reproducible experiment records, CLI design, and when to add tracking or infrastructure tools. The [practice workspace](resources/project-workspace/README.md) runs with Python’s standard library. `npm run build` publishes the guide and downloadable ZIP at `project-workflow.html`.

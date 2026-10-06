@@ -3,7 +3,7 @@
   "id": "arrays-02",
   "minutes": 50,
   "content": {
-    "idea": "Broadcasting aligns dimensions from the right. A pair of aligned dimensions is compatible when their sizes match or one size is \\(1\\); a missing leading dimension behaves like a singleton. Thus a feature bias \\((3,)\\) can be added to a batch \\((2, 3)\\), producing \\((2, 3)\\). The feature vector is reused over observations.\n\nThe operation need not physically copy the vector in the way a handwritten repeat would. Broadcasting specifies values and output shape; storage and compiler behavior are separate matters. First decide which values belong in each output position.",
+    "idea": "Before adding or subtracting arrays, name what each axis represents. Broadcasting aligns dimensions from the right and reuses singleton dimensions. A legal broadcast can still answer the wrong question, especially when a final mean hides the resulting shape.",
     "code": "import jax.numpy as jnp\nbatch = jnp.array([[1., 2., 3.], [4., 5., 6.]], dtype=jnp.float32)\nbias = jnp.array([10., 20., 30.], dtype=jnp.float32)\ny = batch + bias\nprint(y)\nprint(\"Shape:\", y.shape, \"dtype:\", y.dtype)\nassert y.shape == (2, 3)\nassert jnp.allclose(y[1], jnp.array([14., 25., 36.]))",
     "output": "Rows: \\([11., 22., 33.]\\) and \\([14., 25., 36.]\\); shape \\((2, 3)\\), dtype float32.",
     "exercise": "Add a different scalar offset to each row using offsets \\([100., 200.]\\). Make its shape explicit.",
@@ -24,6 +24,15 @@
     ],
     "problem": "Your code runs, but has it added the bias to the right axis? This is a common array puzzle: a legal operation can still answer the wrong question. We’ll use small tables to see exactly which values combine, then catch a broadcasting mistake that turns one error per example into a whole matrix of errors.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Catch the scalar that hides a shape mistake",
+        "body": "Take predictions \\([1,3]\\) and matching targets \\([1,3]\\). The intended residuals are \\([0,0]\\), so mean squared error is zero. If the targets are stored as a column, subtraction instead compares each target against both predictions. The residual matrix has entries \\(0,2,-2,0\\), and its mean squared error is \\(2\\).\n\nBoth calculations return a scalar after averaging. Looking only at the final loss, or checking that autodiff can differentiate it, will not expose the problem. Inspect the residual shape before reducing it and compare against a known aligned example.\n\nThis is also why a reshape should express a data contract. A singleton feature axis can mean one offset per observation; a singleton observation axis can mean one offset per feature. They are different operations even when an unlucky square fixture makes both expressions run.",
+        "check": {
+          "prompt": "Why is checking that the loss is scalar insufficient?",
+          "answer": "A mean can reduce an incorrectly broadcast matrix to a scalar. Check prediction/target alignment and an independently known loss before reduction, not only the final result's rank."
+        }
+      },
       {
         "title": "Work the shape rule one dimension at a time",
         "body": "Align \\((2, 3)\\) and \\((3,)\\) as \\((2, 3)\\) and \\((1, 3)\\). The trailing \\(3\\) matches, and the leading \\(1\\) can broadcast to \\(2\\). By contrast, \\((2,)\\) aligns as \\((1, 2)\\): trailing \\(2\\) conflicts with \\(3\\). That expression cannot add one scalar per row without another axis.\n\nRepresent row offsets as \\((2, 1)\\). The leading \\(2\\) matches observations and the trailing \\(1\\) broadcasts over the three features. A singleton axis is a statement about how data should be reused, not a random reshape to silence an exception.",
@@ -106,6 +115,49 @@
       "connection": "The bias has shape \\((3,)\\), which aligns with the last axis of the \\((2,3)\\) batch. Broadcasting applies the same feature-wise addition to both rows. For example, the input \\((1,2,3)\\) becomes \\((11,22,33)\\), while \\((4,5,6)\\) becomes \\((14,25,36)\\).\n\nIdentical rows in this picture mean identical additions, not identical predictions. If you intended a different offset for each observation, you would need a row-wise bias with a compatible shape, such as \\((2,1)\\); this figure would then have horizontal bands.",
       "alt": "Broadcasting repeats the bias across rows. This heatmap shows the added amount, computed as the output minus the input batch. It does not show the final output array. Rows are observations and columns are features; the cell values and color bar measure added bias. Both rows read \\((10,20,30)\\). The repeated vertical bands show that feature \\(0\\) receives \\(10\\) in every observation, feature \\(1\\) receives \\(20\\), and feature \\(2\\) receives \\(30\\).",
       "code": "visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['observation 0', 'observation 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'added bias'}"
+    },
+    "diagram": {
+      "title": "Align axes before reducing",
+      "prediction": "Why is checking that the loss is scalar insufficient?",
+      "reading": "Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted \\((n,n)\\) intermediate. Each row describes a different shape contract.",
+      "alt": "Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted \\((n,n)\\) intermediate. Each row describes a different shape contract.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 4.3,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "Purpose",
+          "Left",
+          "Right aligned",
+          "Result"
+        ],
+        "rows": [
+          [
+            "Feature bias",
+            "(2, 3)",
+            "(1, 3)",
+            "(2, 3)"
+          ],
+          [
+            "Row offsets",
+            "(2, 3)",
+            "(2, 1)",
+            "(2, 3)"
+          ],
+          [
+            "Aligned residual",
+            "(n,)",
+            "(n,)",
+            "(n,)"
+          ],
+          [
+            "Wrong target axis",
+            "(n, 1)",
+            "(1, n)",
+            "(n, n)"
+          ]
+        ]
+      }
     }
   }
 }

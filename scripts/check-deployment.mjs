@@ -7,6 +7,7 @@ function run(script,args=[],env=process.env){
 try {
  run('node_modules/astro/bin/astro.mjs',['build'],{...process.env,BASE_PATH:base});
  run('scripts/check-site.mjs',[],{...process.env,BASE_PATH:base});
+ run('scripts/check-seo.mjs',[],{...process.env,BASE_PATH:base});
  run('tests/browser-migration.test.mjs',[],{...process.env,BASE_PATH:base});
 } finally {
  // Leave the normal local preview build in place, even when a subpath check fails.

@@ -15,7 +15,25 @@ Your timer says a training step is slow, but it cannot show whether the time was
 
 ## The idea
 
-A trace is a timeline of intervals and relationships. We annotate the step, an injected input wait and a compiled computation with an explicit readiness wait. The generated XPlane file can be inspected in XProf, while the exported Perfetto events let the lesson verify its labels and durations directly on CPU. Host annotations describe code regions; they are not automatically device-kernel measurements.
+A trace places events on a shared timeline so we can inspect order, waiting and overlap. Begin with a specific question about a slow step and identify which recorded events can answer it. Host annotations and device operations are different evidence.
+
+## Do not add nested durations twice
+
+An outer step lasting $10$ milliseconds can contain a preprocessing region lasting $3$ milliseconds. Their sum is not $13$ milliseconds of elapsed work: the smaller region is already inside the larger one.
+
+Inspect event starts, ends, nesting and lanes before aggregating durations. A gap may be waiting or uninstrumented work; it needs context before being assigned a cause.
+
+The host-region plot summarizes recorded annotations, not GPU kernel execution. State a hypothesis, change one workload component and collect a comparable trace. A useful explanation predicts which interval changes and why, rather than only celebrating a shorter bar.
+
+### Pause and reason
+
+What should accompany a claimed trace-based optimization?
+
+<details><summary>Compare your reasoning</summary>
+
+The event boundary, comparable workload, specific intervention and repeated completed measurements showing its predicted effect. A changed unrelated interval is insufficient.
+
+</details>
 
 ## Give the timeline a question
 
@@ -198,56 +216,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:30.150597+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:02.043543+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-d_ejj68l
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-4hfgtu7q
 {
   "input_wait_us": [
-    1513,
-    1355,
-    1447,
-    1504
+    1257,
+    1256,
+    1258,
+    1254
   ],
   "model_and_wait_us": [
-    245,
-    46,
+    43,
+    32,
     31,
-    29
+    24
   ],
   "step_us": [
-    1766,
-    1404,
-    1481,
-    1537
+    1307,
+    1291,
+    1291,
+    1281
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-5md146he
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-7agdsn2p
 {
   "input_wait_us": [
-    1432,
-    1203,
-    1505,
-    1509
+    1258,
+    1254,
+    1259,
+    1259
   ],
   "model_and_wait_us": [
-    50,
-    27,
-    33,
-    25
+    36,
+    24,
+    30,
+    23
   ],
   "step_us": [
-    1487,
-    1232,
-    1541,
-    1537
+    1297,
+    1280,
+    1291,
+    1284
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [5, 2, 3, 3]
-Wrong double-counted totals: [2969, 2462, 3079, 3071]
-{'minimum_ms': 0.025, 'median_ms': 0.03, 'maximum_ms': 0.05}
+Unattributed outer time, microseconds: [3, 2, 2, 2]
+Wrong double-counted totals: [2591, 2558, 2580, 2566]
+{'minimum_ms': 0.023, 'median_ms': 0.027, 'maximum_ms': 0.036}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 

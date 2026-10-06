@@ -4,8 +4,17 @@
   "minutes": 70,
   "content": {
     "problem": "Your dataset has eleven examples, but your model takes batches of four. What happens to the last three? We’ll build a small input pipeline and follow example IDs through shuffling and batching. That lets us catch missing examples or mismatched labels before a model’s loss hides the problem.",
-    "idea": "An input pipeline defines membership, order, transformation, batching and transfer. Model parameters do not encode those choices. Record stable example IDs alongside data and use a deterministic epoch ordering rule. Then check coverage, alignment and final-batch semantics independently of a model loss.",
+    "idea": "An input pipeline decides which examples reach the model and in what order. Preserve example identities so duplication, omission and split leakage remain detectable. Shapes alone cannot tell us whether the intended data was used.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Preserve identity through shuffling and batching",
+        "body": "Imagine IDs A, B, C, D shuffled into C, A, D, B. Membership stays the same while order changes. A batch size of three leaves one example after the first batch. Dropping it, padding it or emitting a smaller batch are different policies.\n\nPadding requires a validity mask so an artificial slot does not become another observation. Dropping requires acknowledging the lost coverage. Fixed shape should not silently choose the statistical meaning of an epoch.\n\nRead the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.",
+        "check": {
+          "prompt": "Does the right epoch length prove every example occurred once?",
+          "answer": "No. A duplicate and an omission preserve the count. Check identities and multiplicities against the intended membership."
+        }
+      },
       {
         "title": "Preserve identity across every transformation",
         "body": "The dataset has IDs \\(0\\) through \\(10\\). Each ID maps to \\(x=\\mathrm{id}/10\\) and \\(y=2x-1\\), giving a direct alignment reference. Shuffle indices, then use the same indices for IDs, features and labels. Shuffling feature and target arrays separately creates plausible shapes with the wrong learning problem.\n\nAn ID can identify an original record even when a transform changes its values. For a real dataset, choose stable identifiers and retain the data revision. Our digest includes shape, dtype and bytes of features and labels. It detects changes to this exact tiny dataset; it is not a substitute for a versioned data source contract.",

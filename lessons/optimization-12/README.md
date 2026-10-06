@@ -17,7 +17,35 @@ An optimizer can lower the loss while hiding several choices: how it averages gr
 
 ## The idea
 
-Adam retains moving averages of gradients and squared gradients. It corrects the initial bias caused by starting those averages at zero, then scales each coordinate. Clipping and learning-rate schedules are separate transformations. Their position, state and step count are part of the algorithm and must be recorded with the run.
+Adam combines gradient history with coordinatewise scaling. Clipping limits a gradient or update according to a chosen rule, while a learning-rate schedule changes scale over training. These mechanisms interact, but we should inspect each separately before interpreting their combined loss curve.
+
+## Clipping changes a vector; a schedule changes a clocked scale
+
+Use the analytic gradient $g=(3,4)$, whose norm is $5$. Global-norm clipping at $2.5$ scales the entire vector to $(1.5,2)$, preserving its direction. Clipping each coordinate to the interval $[-2.5,2.5]$ instead produces $(2.5,2.5)$, whose direction and norm differ.
+
+Now consider four microbatches accumulated into one optimizer update. A schedule indexed by optimizer updates should advance once for that group, not four times. The schedule's clock is part of the algorithm and should be restored with optimizer state.
+
+The existing optimizer plot uses its labeled learning rates and shows nonmonotone trajectories, including rebounds. It compares that specific fixture; it does not demonstrate clipping or scheduling. Use the separate clipping diagram to understand the geometry, then test each mechanism with its own controlled change.
+
+### A norm ball and a coordinate box
+
+**Predict:** Does coordinate clipping at $2.5$ guarantee that the whole gradient norm is at most $2.5$?
+
+![A norm ball and a coordinate box](../../phases/04-optimization/12-adam-clipping-and-learning-rate-schedules/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+The blue arrow is $(3,4)$. Green scales it to norm $2.5$ along the same ray. Orange clips each coordinate to $2.5$, landing at the box corner with norm $2.5\sqrt{2}$. The circle and box are analytic constraints, not training measurements.
+
+### Pause and reason
+
+Does coordinate clipping at $2.5$ guarantee that the whole gradient norm is at most $2.5$?
+
+<details><summary>Compare your reasoning</summary>
+
+No. For the clipped vector $(2.5,2.5)$, the norm is $2.5\sqrt{2}$. A coordinate bound describes a box; a global-norm bound describes a ball.
+
+</details>
 
 ## Calculate the first two Adam steps
 
@@ -171,7 +199,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:28.073711+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:56.989492+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]

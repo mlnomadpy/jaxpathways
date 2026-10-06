@@ -4,8 +4,17 @@
   "minutes": 75,
   "content": {
     "problem": "Now that you can check example order yourself, let’s use Grain to manage the input pipeline. We’ll shuffle two small epochs, batch the records, save the iterator position, and replay the next batch. Using zero worker processes keeps the sequence easy to inspect; this exercise does not measure prefetch speed.",
-    "idea": "Grain separates source lookup, sampler ordering, transformations and iteration. A DataLoader combines these choices, while its iterator owns the consumed position. Rebuilding a loader from the same seed starts over; restoring a compatible iterator snapshot resumes from the saved boundary.",
+    "idea": "A resumable iterator preserves a position in a particular data sequence. Restoring it should reproduce the next batch under the same dataset and configuration. Prefetching makes it especially important to separate requested data from consumed data.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Restore the next batch by identity",
+        "body": "Suppose batches are A/B, C/D and E/F. After training completes the C/D update, the next restored batch should be E/F. Returning another two-element array passes a shape check but may repeat or skip data.\n\nCapture the iterator state at the model's completed-update boundary. Do not substitute a guessed offset unless the pipeline contract makes it sufficient. Shuffling, filtering and prefetching can make requested batch counts differ from completed training work.\n\nCompare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.",
+        "check": {
+          "prompt": "Why can a correct cursor still produce an incorrect resume?",
+          "answer": "Position only has meaning relative to its data sequence and configuration. Recovery needs those identities as well as the cursor."
+        }
+      },
       {
         "title": "Map a record key to a testable source",
         "body": "TutorialSource implements len and indexing. A request for key i returns the same \\(\\mathrm{id}=i\\), \\(x=i/10\\) and \\(y=2x-1\\). Its repr includes a version and count because the iterator state records its source configuration. No file I/O, decoder or download is hidden in this example.\n\nIn a real corpus, a source key must remain associated with the same record revision. A human-readable repr is only a basic compatibility check; preserve a dataset revision or digest separately. Changing the underlying values without changing the source identity can defeat a cursor restore even if record counts match."

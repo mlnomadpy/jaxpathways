@@ -15,9 +15,25 @@ Suppose your dataset records two measurements on very different scales. How can 
 
 ## The idea
 
-An array is a collection of values with a shape and a dtype. In this lesson, axis $0$ indexes observations and axis $1$ indexes features. Those meanings come from the data contract, not from JAX. `jax.numpy` supplies familiar array operations, so begin with a numerical expression you understand rather than compiling the entire program immediately.
+Feature preprocessing answers a specific question: how does each measurement compare with the training data's scale and center? Compute statistics along the observation axis, then reuse those fitted statistics. A held-out example must not help choose the transformation used to evaluate it.
 
-For rows $[1, 10]$, $[3, 14]$, and $[5, 18]$, the feature means are $[3, 14]$. Subtracting that length-2 vector from each row centers the columns. The two features have different standard deviations; scaling each feature by its training standard deviation gives them comparable units under this preprocessing choice.
+## Why held-out data should not center itself
+
+Use a small new case: training values for one feature are $2$ and $6$, so their mean is $4$. Centered training values become $-2$ and $2$. A held-out value of $10$ becomes $6$ when we apply the training mean.
+
+If we center that single held-out value using its own mean, it becomes zero. The computation succeeds, but it has erased the evidence that the new value lies far from the training center. With several features, retain one fitted mean per feature rather than collapsing the entire table to one mean.
+
+The lesson's centering plot compares values before and after the same columnwise operation. It explains a translation of each feature, not a guarantee that future observations will have zero mean. Add scaling only after specifying the variance convention and how constant features are handled.
+
+### Pause and reason
+
+Should a correctly transformed held-out batch always have mean zero?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Its mean reflects how that batch differs from training. Zero training mean is a property of the fitted centering operation; forcing held-out mean to zero changes the evaluation contract.
+
+</details>
 
 ## Follow an axis through a reduction
 
@@ -102,7 +118,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:41.200774+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:07.945211+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]

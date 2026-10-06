@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "When a model reads a sequence, how can one position use information from another? We’ll build a single attention head as a weighted average. Start with a query whose answer we know, then change the query and watch which values it emphasizes. Small arrays let us see every part of the calculation.",
-    "idea": "Queries ask which keys match; values are the information mixed after matching. This lesson uses separate \\(Q\\), \\(K\\) and \\(V\\) so that matching and retrieval are visible. In self-attention, learned projections of the same sequence supply those three arrays.\n\nUse CPU and small arrays. No model download or accelerator is required. This head has no mask yet; the next lesson adds causal, padding and packed-sequence boundaries.",
+    "idea": "Attention uses queries and keys to determine weights, then combines values using those weights. Scores describe compatibility; values provide the content being mixed. The attention matrix is an intermediate computation rather than the model's complete output.",
     "objectives": [
       "Track query, key and value axes",
       "Derive the uniform-query result",
@@ -15,6 +15,15 @@
       "Test relationships that should survive a change"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Calculate one weighted value mixture",
+        "body": "Suppose one query gives weights \\(0.25\\) and \\(0.75\\) to values \\([2,0]\\) and \\([0,4]\\). The mixture is \\([0.5,3]\\). The weights sum to one, but output coordinates need not sum to one or lie between zero and one.\n\nRead one heatmap row as a query's distribution over eligible keys, after confirming the axes. Scaling affects concentration, and a mask determines which keys can participate.\n\nHold the weights fixed and change a value vector: the output changes while the heatmap does not. Conversely, redundant values can make different weight patterns produce the same mixture. Use a hand-computed row to connect the heatmap to the actual value multiplication.",
+        "check": {
+          "prompt": "Can an attention-weight heatmap alone reconstruct the output?",
+          "answer": "No. You also need the value vectors and any output projection. Weights explain the mixing coefficients, not the content being mixed."
+        }
+      },
       {
         "title": "Track query, key and value axes",
         "body": "\\(Q\\) has two query rows with two features each; \\(K\\) has three key rows with the same feature dimension. \\(QK^\\mathsf{T}\\) produces a \\((2, 3)\\) score matrix: one row per query and one column per key. \\(V\\) has three value rows, so the weighted sum returns two output rows. Its value-feature dimension need not equal the key-feature dimension.\n\nSoftmax acts along the last axis because a query chooses among keys. A softmax over queries instead would normalize a different problem. Check a rectangular example first: equal query and key counts can hide transposed-axis errors.",

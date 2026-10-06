@@ -1,8 +1,12 @@
 ---
+import '../styles/features/releases.css';
+import ReleaseNotice from '../components/shared/ReleaseNotice.astro';
 import SiteHeader from '../components/shared/SiteHeader.astro';
 import { siteUrl } from '../lib/urls.js';
 interface Props {
   title: string;
+  noindex?: boolean;
+  structuredData?: Record<string, unknown>;
   description: string;
   bodyClass?: string;
   active?: string;
@@ -11,12 +15,41 @@ interface Props {
 }
 const {
   title,
+  noindex = false,
+  structuredData,
   description,
   bodyClass,
   active,
   skipTarget = '#main',
   skipLabel = 'Skip to content',
 } = Astro.props;
+const canonical = new URL(Astro.url.pathname, Astro.site || 'https://www.tahabouhsine.com');
+if (canonical.pathname.endsWith('/index.html'))
+  canonical.pathname = canonical.pathname.slice(0, -10);
+const jsonLd =
+  structuredData ||
+  (active === 'index'
+    ? {
+        '@context': 'https://schema.org',
+        '@type': 'WebSite',
+        name: 'JAX Pathways',
+        url: canonical.href,
+        description,
+        author: { '@type': 'Person', name: 'Taha Bouhsine' },
+        inLanguage: 'en',
+      }
+    : active === 'course' && !Astro.url.pathname.includes('lesson')
+      ? {
+          '@context': 'https://schema.org',
+          '@type': 'Course',
+          name: title,
+          description,
+          url: canonical.href,
+          isAccessibleForFree: true,
+          inLanguage: 'en',
+          author: { '@type': 'Person', name: 'Taha Bouhsine' },
+        }
+      : undefined);
 ---
 
 <!doctype html>
@@ -26,6 +59,31 @@ const {
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <meta name="description" content={description} />
     <title>{title}</title>
+    <link rel="canonical" href={canonical.href} />
+    {noindex && <meta name="robots" content="noindex,follow" />}
+    <meta name="author" content="Taha Bouhsine" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="JAX Pathways" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical.href} />
+    <meta
+      property="og:image"
+      content={new URL(siteUrl('assets/social-card.png'), Astro.site).href}
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="JAX Pathways — Learn, build, explain. A practical course by Taha Bouhsine."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    {jsonLd && (
+      <script
+        type="application/ld+json"
+        set:html={JSON.stringify(jsonLd).replace(/</g, '\\u003c')}
+      />
+    )}
     <link rel="icon" type="image/svg+xml" href={siteUrl('assets/pathway-mark.svg')} />
   </head>
   <body class={bodyClass}>
@@ -33,6 +91,7 @@ const {
       {skipLabel}
     </a>
     <SiteHeader active={active} />
+    <ReleaseNotice />
     <slot />
   </body>
 </html>

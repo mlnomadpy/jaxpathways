@@ -87,55 +87,35 @@
   .curriculum-section {
     padding: 20px 0 36px;
   }
-}
-@media (max-width: 760px) {
   .curriculum-section .section-heading {
     padding-top: 30px;
   }
-}
-@media (max-width: 760px) {
   .lesson-preview a {
     grid-template-columns: 40px 1fr 18px;
     gap: 12px;
     padding: 18px 0;
   }
-}
-@media (max-width: 760px) {
   .lesson-title {
     font-size: 16px;
   }
-}
-@media (max-width: 760px) {
   .lesson-summary {
     font-size: 12px;
   }
-}
-@media (max-width: 760px) {
   .lesson-time {
     display: none;
   }
-}
-@media (max-width: 760px) {
   .lesson-number {
     font-size: 11px;
   }
-}
-@media (max-width: 760px) {
   .lesson-arrow {
     font-size: 20px;
   }
-}
-@media (max-width: 760px) {
   .course-inventory {
     gap: 8px 16px;
   }
-}
-@media (max-width: 760px) {
   .course-inventory dt {
     font-size: 11px;
   }
-}
-@media (max-width: 760px) {
   .course-inventory dd {
     font-size: 13px;
   }

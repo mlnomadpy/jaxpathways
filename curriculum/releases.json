@@ -1,0 +1,15 @@
+[
+  {
+    "version": "0.2.0",
+    "date": "2026-10-06",
+    "title": "Clearer lessons, visible revisions and searchable chapters",
+    "summary": "A course-wide teaching revision, with a recorded version for every lesson and phase.",
+    "changes": [
+      "Expanded explanations and reasoning checks across all 97 authored lessons, with 22 concept diagrams and explanations of what each figure shows.",
+      "Added project organization and CLI guidance, expanded modality project plans, and preserved explicit CPU validation and TPU limitations.",
+      "Published a permanent HTML page for every authored lesson, search metadata and a sitemap.",
+      "Added lesson and phase revision labels, a release history, and notices when this browser encounters changed material. Your saved progress stays intact.",
+      "Added contextual GitHub feedback links."
+    ]
+  }
+]

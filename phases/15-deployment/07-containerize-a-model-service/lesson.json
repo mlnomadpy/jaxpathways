@@ -4,7 +4,7 @@
   "minutes": 75,
   "content": {
     "problem": "Your model works in a notebook, but another machine has a different interpreter, library set and working directory. Let’s export a small prediction artifact, verify it in a fresh process, then run the same boundary in a real Docker container.",
-    "idea": "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.",
+    "idea": "Containerization packages a runtime environment; a running container executes a process; a model artifact supplies versioned numerical content. Keeping these identities separate makes deployment and debugging reproducible.",
     "objectives": [
       "Separate training from inference",
       "Understand the build context",
@@ -12,6 +12,15 @@
       "Prove the same request survives the boundary"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "An image, a process and an artifact have different identities",
+        "body": "A container image can start successfully while loading the wrong model path or configuration. Conversely, a valid model artifact can fail because the runtime lacks a compatible dependency. Record the image identity and model/configuration identities together.\n\nTrace the build context into the image, then configuration and artifact mounts into the running process. Mark the request boundary where decoding, validation, inference and response encoding happen. A readiness signal should reflect the actual service contract, not merely process existence.\n\nThe current subprocess experiment demonstrates a process boundary. It is not evidence that a Docker build or container benchmark ran. Use that distinction when extending the lesson to your own container execution and keep the resulting receipt.",
+        "check": {
+          "prompt": "Does pinning a container image automatically pin a model loaded from a mutable path?",
+          "answer": "No. The external artifact can change independently. Pin and verify its identity as part of the release configuration."
+        }
+      },
       {
         "title": "Separate training from inference",
         "body": "Our service evaluates an exported scalar affine model using the Python standard library. The connected lab actually trains that model in JAX first. Inference does not need the optimizer, training data or MLflow server. This small portable contract makes it possible to compare Python-process, MLflow pyfunc and container outputs independently. Larger JAX exports need a compatible runtime and their own serialization checks; copying two coefficients does not demonstrate arbitrary graph portability."

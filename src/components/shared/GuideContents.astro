@@ -1,0 +1,19 @@
+---
+interface Props {
+  sections: { id: string; label: string }[];
+  label: string;
+  title?: string;
+}
+const { sections, label, title } = Astro.props;
+---
+
+<nav class="assessment-contents" aria-label={label}>
+  {title && <strong>{title}</strong>}
+  <ol>
+    {sections.map((section) => (
+      <li>
+        <a href={`#${section.id}`} set:html={section.label} />
+      </li>
+    ))}
+  </ol>
+</nav>

@@ -263,73 +263,47 @@
   .resources-intro {
     padding-top: 36px;
   }
-}
-@media (max-width: 760px) {
   .resource-jumps {
     gap: 8px 18px;
   }
-}
-@media (max-width: 760px) {
   .resources-page .resource-section {
     padding-block: 32px;
   }
-}
-@media (max-width: 760px) {
   .resource-grid,
   .resource-split {
     grid-template-columns: 1fr;
     gap: 18px;
   }
-}
-@media (max-width: 760px) {
   .resource-heading {
     margin-bottom: 16px;
   }
-}
-@media (max-width: 760px) {
   .resource-heading h2 {
     font-size: 26px;
   }
-}
-@media (max-width: 760px) {
   .resource-item {
     padding-top: 18px;
   }
-}
-@media (max-width: 760px) {
   .install-steps {
     padding-left: 22px;
   }
-}
-@media (max-width: 760px) {
   .install-steps > li {
     padding-left: 5px;
   }
-}
-@media (max-width: 760px) {
   .skill-list > div {
     grid-template-columns: 1fr;
     gap: 4px;
   }
-}
-@media (max-width: 760px) {
   .resources-page pre {
     font-size: 12px;
     padding: 14px;
   }
-}
-@media (max-width: 760px) {
   .api-list {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 760px) {
   .resources-page footer {
     padding-inline: 6%;
     flex-wrap: wrap;
   }
-}
-@media (max-width: 760px) {
   .resources-page .intro {
     font-size: 19px;
   }

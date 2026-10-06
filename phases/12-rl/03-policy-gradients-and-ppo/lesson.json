@@ -4,13 +4,22 @@
   "minutes": 110,
   "content": {
     "problem": "The collector produces experiences, but which parameter change makes useful actions more likely? We will train an actual stochastic policy from freshly sampled episodes, first with REINFORCE and then with repeated clipped policy updates. An exact calculation in this tiny environment will tell us whether the policy improved, independently of its noisy training rewards.",
-    "idea": "An action that is followed by a good return should become more probable. Multiply its log probability by its reward-to-go, sum over active actions, then average over episodes. Differentiating the negative of that quantity gives a descent direction for a loss. The discrete rollout is fixed data during this derivative. PPO reuses a batch cautiously by comparing the new action probability with the probability that generated that batch.",
+    "idea": "A policy gradient increases the likelihood of actions with favorable estimated advantage. PPO compares a current policy with the rollout-time policy and clips part of the surrogate objective. The sign of the advantage determines which changes the clipping discourages.",
     "objectives": [
       "Derive and implement the score-function policy gradient for complete episodes.",
       "Train with fresh stochastic rollouts and a fixed behavior policy per PPO batch.",
       "Explain both signs of the clipping objective and verify improvement against exact expected return."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "The clipped objective depends on the advantage sign",
+        "body": "Let \\(r\\) be the current-to-old action-probability ratio. With positive advantage, making \\(r\\) much larger than the upper clipping threshold stops improving the clipped surrogate. With negative advantage, moving below the lower threshold has the corresponding saturation.\n\nThis does not impose a hard bound on the new policy probabilities. Shared parameters, multiple updates and other loss terms can still move the policy beyond the threshold. Inspect the ratio distribution and KL behavior rather than claiming clipping guarantees a trust region.\n\nKeep old probabilities and advantage estimates fixed for the intended inner updates. The training-return curve reports the particular sampled runs; use the same evaluator and multiple seeds before concluding one procedure reliably performs better.",
+        "check": {
+          "prompt": "Is a ratio outside the clipping interval proof that PPO was implemented incorrectly?",
+          "answer": "No. Clipping modifies the objective incentive, not a hard constraint on ratios. Check the actual surrogate calculation, fixed rollout quantities and update behavior."
+        }
+      },
       {
         "title": "The derivative does not pass through the sampled action",
         "body": "Let \\(\\theta\\) denote the three position logits. We maximize expected episode return \\(J(\\theta)\\). The score-function identity gives the expectation below. Rewards before an action do not depend on that action, so reward-to-go is a valid credit signal. Our baseline is zero; we do not fit a critic or use generalized advantage estimation. We freeze sampled actions and targets with stop_gradient. Trying to differentiate through Bernoulli sampling is a different, inappropriate estimator for this exercise.",

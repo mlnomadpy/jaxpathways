@@ -15,9 +15,25 @@ Imagine a small table: two observations, with three measurements in each row. If
 
 ## The idea
 
-A JAX array has a shape, a dtype, and a placement on a device. Shape describes the axes of your data. Dtype describes the numerical representation. Device placement describes where computation can happen. Keep these three questions separate when debugging.
+An array is a collection of values with a shape, a dtype and a device. Shape tells us how to index the values; dtype tells us how they are represented; device tells us where the computation lives. Start by predicting a small reduction before asking JAX to perform it.
 
-Operations usually preserve device placement. Converting an array to a Python float or a NumPy array transfers its value to the host and can force the program to wait. That is useful when inspecting a small result, but should not be repeated inside a high-throughput training loop.
+## Read one array two ways
+
+Take the two rows $[1,2,3]$ and $[4,5,6]$. Summing across each row gives $[6,15]$: one answer per observation. Summing down the rows gives $[5,7,9]$: one answer per feature. The values are the same; the question determines the axis.
+
+In Python, the row sums use `axis=1`, because the feature axis is reduced. The feature sums use `axis=0`, because the observation axis is reduced. The axis you name is the one you consume, not the one you keep.
+
+Read the heatmap by locating one row and one column before looking at its color. Color helps compare values, but labels establish which observation and feature you are comparing. A device label is a separate property; moving the same values to another device does not change what a row means.
+
+### Pause and reason
+
+If the batch gains a third observation with the same three features, which reduction still returns three values?
+
+<details><summary>Compare your reasoning</summary>
+
+The feature sums still return three values because `axis=0` removes the observation axis. Row sums now return three values too, but for a different reason. This is why unequal axis sizes make debugging easier.
+
+</details>
 
 ## Read the table before using an API
 
@@ -132,7 +148,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:37.512953+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:04.243980+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)

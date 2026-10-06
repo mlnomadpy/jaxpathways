@@ -15,7 +15,25 @@ Reading a jaxpr tells you what operations exist, but implementing one small tran
 
 ## The idea
 
-We will write a tiny forward-mode interpreter for a pure, flat floating-point primitive subset. Each variable carries a pair $(a,\dot a)$. The interpreter applies primal and tangent rules to each equation in order. This is a real derivative transformation with explicit limitations, not a general replacement for JAX’s interpreter or compiler.
+A small interpreter makes program transformations concrete: read operations and propagate additional information through them. Keep tracing, interpretation, lowering and compilation as distinct stages so the exercise's scope stays clear.
+
+## Locate your transformation in the compilation pipeline
+
+Imagine an interpreter carrying a value and a directional derivative through each supported operation. Addition combines both pairs; multiplication applies the product rule. The interpreter must explicitly define behavior for every primitive it accepts.
+
+Reject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.
+
+The directional-derivative curve checks the bounded interpreter example. It does not establish a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.
+
+### Pause and reason
+
+What should a tiny interpreter do when it sees a primitive without a defined rule?
+
+<details><summary>Compare your reasoning</summary>
+
+Raise a clear unsupported-operation error. A plausible fallback would hide a gap in the transformation's mathematical contract.
+
+</details>
 
 ## Treat a jaxpr as a typed data-flow program
 
@@ -278,7 +296,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:06.438471+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:38.833782+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']

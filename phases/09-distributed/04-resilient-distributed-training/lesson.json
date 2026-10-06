@@ -4,7 +4,7 @@
   "minutes": 105,
   "content": {
     "problem": "A restarted sharded run loads the right weights, yet its next update differs. Which missing state could explain that? We will checkpoint a real sharded training step, restore its parameters, momentum, random key and data position, then compare three subsequent updates across an epoch boundary.",
-    "idea": "A recovery point is a consistent boundary in a state machine. Every value needed to choose the next batch and compute the next update belongs to that boundary. Sharding adds a placement contract and multi-controller execution adds coordination; neither makes a weights-only checkpoint sufficient.",
+    "idea": "Distributed recovery must reconstruct a consistent global state. Participants cannot independently load arbitrary local snapshots and assume the pieces describe one completed update. Checkpoint identity and step meaning must agree.",
     "runtime": {
       "kind": "virtual-cpu",
       "deviceCount": 4
@@ -15,6 +15,15 @@
       "Explain single-controller evidence and the additional requirements of a real multi-controller restart."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Agree on one global recovery boundary",
+        "body": "Two local files from different steps can each load successfully while forming no valid global checkpoint. A shared manifest should identify which pieces belong together and what happens if a required piece is missing.\n\nAfter restore, compare the next global computation with an uninterrupted reference, including input position and random-state ownership. Silent partial recovery changes the computation instead of continuing it.\n\nThe CPU replay checks this bounded fixture's continuation. It does not establish multi-host failure handling, storage durability or accelerator networking. Those require additional operational evidence when deploying the design.",
+        "check": {
+          "prompt": "Why is successful loading on every worker insufficient?",
+          "answer": "Workers may load incompatible steps or pieces. Correct recovery requires one consistent global identity and the intended next computation."
+        }
+      },
       {
         "title": "Name the values that determine the next transition",
         "body": "The state contains weights \\(w\\), momentum \\(v\\), a random key, the current example permutation, the cursor into that permutation and the completed step. A batch is selected from the saved order, then a global mean gradient updates momentum and weights. After the final batch in an epoch, a new split key creates the next order. Saving only the current permutation can therefore reproduce the first resumed batch but fail at the next epoch.",

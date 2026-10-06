@@ -15,7 +15,25 @@ A candidate looks good on an average dashboard, yet performs badly for a small g
 
 ## The idea
 
-MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.
+A release pipeline should connect data contracts, evaluation and artifact selection. Aggregate metrics help summarize behavior, but important subpopulations may require explicit gates. Define those slices and acceptance rules before selecting the model.
+
+## A passing average can hide a failing slice
+
+Suppose nine examples have error $0$ and one important slice has error $10$. The overall mean error is $1$. Whether that is acceptable depends on the task and slice policy; the average alone cannot answer it.
+
+Keep counts with slice metrics so a tiny subgroup is not mistaken for strong statistical evidence. Freeze evaluation data and decisions separately from training, and bind the resulting approval to the evaluated artifact.
+
+The slice plot shows where the fixture's aggregate hides a problem. Monitoring later asks whether input or outcome behavior changed. Drift is a signal to investigate; it does not by itself determine that retraining is the correct intervention.
+
+### Pause and reason
+
+Why define a slice gate before inspecting candidate results?
+
+<details><summary>Compare your reasoning</summary>
+
+It makes the selection rule explicit and reduces post-hoc cherry-picking. The gate should reflect the application's requirements, with sample counts and uncertainty considered.
+
+</details>
 
 ## Validate data before the expensive job
 
@@ -235,7 +253,7 @@ visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:27.968107+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:59.346914+00:00. JAX 0.9.2.
 
 ```text
 Overall MSE: 0.409 high-slice MSE: 4.0 release: False

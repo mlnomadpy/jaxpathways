@@ -70,8 +70,6 @@
     gap: 24px;
     padding: 42px 0;
   }
-}
-@media (max-width: 760px) {
   .course-book {
     width: 110px;
     min-height: 164px;
@@ -79,47 +77,31 @@
     border-left-width: 4px;
     box-shadow: 5px 5px 0 #d1c8e7;
   }
-}
-@media (max-width: 760px) {
   .book-title {
     font-size: 20px;
     margin-bottom: 12px;
   }
-}
-@media (max-width: 760px) {
   .course-book svg {
     width: 65px;
     height: 38px;
     margin: 10px 0;
   }
-}
-@media (max-width: 760px) {
   .book-subtitle {
     font-size: 9px;
   }
-}
-@media (max-width: 760px) {
   .offline-copy h2 {
     font-size: 29px;
     margin-bottom: 12px;
   }
-}
-@media (max-width: 760px) {
   .offline-copy > p {
     font-size: 15px;
   }
-}
-@media (max-width: 760px) {
   .offline-copy .actions {
     gap: 6px;
   }
-}
-@media (max-width: 760px) {
   .offline-copy .button {
     padding: 10px 12px;
   }
-}
-@media (max-width: 760px) {
   .offline-copy .small {
     font-size: 11px;
   }
@@ -128,25 +110,17 @@
   .offline-section {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 380px) {
   .course-book {
     width: 160px;
     min-height: 210px;
     padding: 22px;
   }
-}
-@media (max-width: 380px) {
   .book-title {
     font-size: 25px;
   }
-}
-@media (max-width: 380px) {
   .course-book svg {
     width: 90px;
   }
-}
-@media (max-width: 380px) {
   .book-subtitle {
     font-size: 11px;
   }

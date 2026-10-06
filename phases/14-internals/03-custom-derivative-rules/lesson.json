@@ -4,7 +4,7 @@
   "minutes": 120,
   "content": {
     "problem": "Sometimes you know a stable formula for a derivative, or need to control what a reverse pass saves. How do you replace JAX’s default differentiation without quietly changing the mathematics? We will write two exact custom rules, check higher derivatives, and catch a deliberately plausible wrong rule.",
-    "idea": "A custom derivative is a mathematical contract attached to a primal function. The primal still computes its original value. The rule must describe its true local derivative, with correct shapes and linear dependence on tangent or cotangent seeds. We use softplus and log-sum-exp because their stable derivatives have compact independent formulas.",
+    "idea": "A custom derivative rule changes how differentiation treats a function. It must preserve the intended derivative while respecting transformation requirements. Stability of the primal computation and correctness of the derivative need separate checks.",
     "objectives": [
       "Implement actual custom_jvp and custom_vjp rules with correct return and residual contracts.",
       "Verify seed linearity, stable extreme values and second derivatives.",
@@ -12,6 +12,15 @@
       "Explain the forward-mode limitation of a custom_vjp function."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A custom rule is a mathematical contract",
+        "body": "Start from a known analytic function and derive its slope. Compare the custom rule with that result over ordinary and extreme inputs, then examine the second derivative if higher-order use is intended.\n\nA forward rule must be linear in its tangent input; a reverse rule must be linear in its incoming cotangent. Inserting an arbitrary nonlinear operation on that sensitivity can produce a rule that no longer represents a derivative.\n\nThe slope and curvature curves show more than a successful first gradient at one point. Follow their behavior near numerically difficult regions and use finite differences only where that independent approximation is reliable.",
+        "check": {
+          "prompt": "Why check more than one tangent magnitude or cotangent value?",
+          "answer": "It can expose a rule that is incorrectly nonlinear in the sensitivity input. Matching a single derivative call can hide that contract violation."
+        }
+      },
       {
         "title": "Keep the primal stable before customizing its derivative",
         "body": "Softplus is \\(s(x)=\\log(1+e^x)\\). Direct exponentiation overflows for a large positive input, even though the correct output is approximately \\(x\\). logaddexp computes the same mathematical function without forming the dangerous exponential. Its derivative is the sigmoid \\(\\sigma(x)\\), and its second derivative is \\(\\sigma(x)(1-\\sigma(x))\\). We use these identities as checks, not as permission to ignore the primal calculation.",

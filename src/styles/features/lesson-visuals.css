@@ -3,6 +3,27 @@
   padding-block: 1.5rem;
   border-block: 1px solid var(--line, #d8d1e3);
 }
+.lesson-mechanism {
+  margin: 1.5rem 0;
+}
+.reasoning-check {
+  margin-block: 1.5rem;
+  padding: 1rem 1.25rem;
+  border-left: 3px solid #17735c;
+  background: #edf6f1;
+  color: #172334;
+}
+.reasoning-check h3 {
+  margin-top: 0;
+}
+.reasoning-check summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.lesson-mechanism figcaption {
+  margin-top: 0.6rem;
+  font-size: 0.85rem;
+}
 .lesson-visual figure {
   margin: 1.25rem 0;
 }

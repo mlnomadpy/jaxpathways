@@ -14,7 +14,25 @@ A hot object cools toward its surroundings. Can we predict its remaining excess 
 
 ## The idea
 
-Let $u(t)$ be temperature above ambient, in temperature units, and let $k>0$ be the cooling rate in inverse seconds. A larger excess temperature loses heat faster: $du/dt=-ku$. We use synthetic observations so that the exact solution is known. This is a testable simulator, not a claim that one exponential describes every real cooling process.
+A numerical solver approximates a continuous process with discrete steps. A program can implement its update rule correctly and still differ from the physical solution. Check implementation error and discretization error separately.
+
+## Separate a correct program from an accurate solver
+
+For $y'=-y$, start at $y=1$. One Euler step of size $0.5$ gives $0.5$. The exact value at that time is $e^{-0.5}\approx0.6065$. The difference is expected discretization error, not necessarily an indexing bug.
+
+Two Euler steps of size $0.25$ give $0.75^2=0.5625$ at the same final time. Comparing at equal physical time matters: taking the same number of smaller steps would change the question.
+
+Read the trajectory plot by matching time coordinates and the analytic reference. Then reduce the step size and inspect the error trend. A finer step often improves this example, but stability, precision and compute cost still constrain a useful solver.
+
+### Pause and reason
+
+Why compare solutions at equal final time when changing the step size?
+
+<details><summary>Compare your reasoning</summary>
+
+Otherwise you compare different points of the physical trajectory. Increase the number of steps as needed to preserve the same time interval.
+
+</details>
 
 ## Start with units and one step
 
@@ -165,7 +183,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:40.789912+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:13.177214+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213

@@ -4,7 +4,7 @@
   "minutes": 85,
   "content": {
     "problem": "The loss is growing. Should you immediately lower the learning rate? Let’s first gather evidence. We’ll use a one-weight model whose update we can derive, deliberately make it unstable, and inspect its losses, gradients and weights. You’ll learn how to connect a symptom to a cause.",
-    "idea": "Use a one-weight linear head as a diagnostic microscope. Its squared-loss curvature can be calculated independently, giving a precise learning-rate bound for this fixture. The same instrumentation is useful for the previous classifier, but the bound itself does not transfer to nonlinear networks or Adam.",
+    "idea": "Unstable learning is a symptom with several possible causes. Connect the first unexpected value to inputs, forward computation, loss, gradients, optimizer state or the applied update. That ordering turns a vague failure into a testable diagnosis.",
     "objectives": [
       "Derive the gradient and curvature on paper",
       "Record pre-update and post-update quantities distinctly",
@@ -12,6 +12,15 @@
       "Change the feature scale and predict the new bound"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Locate the first broken boundary",
+        "body": "Start with a reproducible failing batch. Check inputs and forward loss before differentiating. If the loss is finite but gradients are not, inspect derivative-sensitive operations. If gradients are finite but the next loss explodes, inspect update size and parameter change.\n\nChange one factor at a time and keep the original failing case. Clipping can limit damage without repairing the cause, so test whether the intervention predicts behavior on a changed input or learning rate.\n\nThe loss curve shows when behavior diverges. To explain why, add the relevant evidence: gradient norm, parameter norm, update norm and the first nonfinite intermediate. Keep those quantities distinct; a large parameter norm does not automatically imply a large gradient.",
+        "check": {
+          "prompt": "Why is “the loss is NaN” not yet a diagnosis?",
+          "answer": "It names the final symptom. Find the earliest nonfinite value and its producing operation, then test a specific repair against the same failing case."
+        }
+      },
       {
         "title": "Derive the gradient and curvature on paper",
         "body": "The training pairs are \\(x=[1, 2, 3]\\) and \\(y=2x\\). The head predicts \\(wx\\), so the mean squared loss is \\(\\operatorname{mean}(x^2)(w-2)^2=\\frac{14}{3}(w-2)^2\\). The gradient is \\(\\frac{28}{3}(w-2)\\), and the constant curvature is \\(28/3\\). Gradient descent transforms the weight error \\(e=w-2\\) into \\((1-\\eta\\,28/3)e\\). Stability requires the magnitude of that multiplier to be less than one, hence \\(0<\\eta<\\frac{3}{14}\\) for this specific objective. This calculation lets us predict failure before observing a plot.",

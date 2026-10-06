@@ -14,7 +14,25 @@ A short local training job finishes quickly. How many workers would a stream of 
 
 ## The idea
 
-Capacity planning connects a workload duration to an arrival process and resource policy. A measured job lasting $t$ seconds consumes $t/3600$ worker-hours if one worker is reserved for its lifetime. Multiply by jobs arriving per hour to obtain offered worker demand. Divide by worker count for nominal load, then leave a stated reserve. This first-order plan is useful arithmetic, not a queueing guarantee or a cloud price quote.
+Operating cost depends on resource allocation, runtime and the billing model. A workload's fraction of time in useful updates is not the same as device utilization. Keep cost accounting and performance measurements explicit.
+
+## Account for billed time as well as useful work
+
+A job may spend time provisioning, loading, compiling, updating and shutting down. For short jobs, fixed startup costs can dominate even if the update loop is efficient. Reusing a warm service changes that tradeoff but introduces its own allocation costs.
+
+Track the resource count and billed interval under the actual pricing assumptions. If a rate is hypothetical, label the resulting cost as modeled. A duration multiplied by an assumed price is not an invoice.
+
+The timing panels compare different intervals. Their ratios can describe job-level busy fraction, but they do not measure accelerator instruction or memory utilization. Choose the metric that answers the operational question before optimizing it.
+
+### Pause and reason
+
+Can a high fraction of time in the update loop prove high accelerator utilization?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The loop can wait on data, synchronization or inefficient kernels. Device utilization requires suitable device observations in addition to job timing.
+
+</details>
 
 ## Measure the service boundary you intend to provision
 
@@ -494,16 +512,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:27.024822+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:58.466789+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.49369908310472965, 0.4885221249423921, 0.5049728329759091]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08416213882931818, 'load_fraction': 0.04208106941465909, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021040534707329547, 'within_reserve': True}
+measured local job seconds: [0.5061356667429209, 0.5033108750358224, 0.5213103331625462]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08688505552709103, 'load_fraction': 0.04344252776354551, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021721263881772758, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.49332916690036654, 0.4850145000964403, 0.5038862081710249]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08398103469517082, 'load_fraction': 0.04199051734758541, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00020995258673792705, 'within_reserve': True}
+measured local job seconds: [0.5177415832877159, 0.5072174170054495, 0.5224072500132024]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08706787500220041, 'load_fraction': 0.043533937501100205, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021766968750550102, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.04199051734758541 0.08398103469517082
+nominal load at two demand scenarios: 0.043533937501100205 0.08706787500220041
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 

@@ -163,8 +163,6 @@
   .reader-sidebar:not(.is-open) {
     display: none;
   }
-}
-@media (max-width: 760px) {
   #reader-menu {
     display: block;
     margin-bottom: 25px;
@@ -400,8 +398,6 @@
   .reader-outline summary {
     list-style: none;
   }
-}
-@media (min-width: 1101px) {
   .reader-outline summary::-webkit-details-marker {
     display: none;
   }
@@ -417,25 +413,17 @@
     border-radius: 8px;
     margin: 0;
   }
-}
-@media (max-width: 1100px) {
   .reader-outline summary {
     margin: 0;
     min-height: 24px;
   }
-}
-@media (max-width: 1100px) {
   .reader-outline details[open] summary {
     margin-bottom: 16px;
   }
-}
-@media (max-width: 1100px) {
   .reader #lesson-body {
     grid-column: 2;
     grid-row: 2;
   }
-}
-@media (max-width: 1100px) {
   .reader-sidebar {
     grid-column: 1;
     grid-row: 1 / span 2;
@@ -445,66 +433,42 @@
   .reader-layout {
     padding-top: 20px;
   }
-}
-@media (max-width: 760px) {
   .reader-sidebar {
     position: static;
   }
-}
-@media (max-width: 760px) {
   .reader-outline {
     margin: 0 0 24px;
   }
-}
-@media (max-width: 760px) {
   .reader #lesson-body {
     order: 1;
     width: 100%;
     min-width: 0;
   }
-}
-@media (max-width: 760px) {
   .reader #reader-menu {
     margin-bottom: 12px;
     min-height: 44px;
   }
-}
-@media (max-width: 760px) {
   .reader h2 {
     font-size: 24px;
   }
-}
-@media (max-width: 760px) {
   .reader pre {
     padding: 16px;
   }
-}
-@media (max-width: 760px) {
   .reader .lesson-artifacts .button {
     font-size: 12px;
   }
-}
-@media (max-width: 760px) {
   .reader .lesson-checkpoint {
     padding-inline: 16px;
   }
-}
-@media (max-width: 760px) {
   .reader .lesson-checkpoint label {
     font-size: 15px;
   }
-}
-@media (max-width: 760px) {
   .reader-layout > article {
     min-width: 0;
   }
-}
-@media (max-width: 760px) {
   .reader-outline nav {
     font-size: 13px;
   }
-}
-@media (max-width: 760px) {
   .reader-footer {
     padding: 28px 6%;
   }
@@ -628,18 +592,12 @@
   .reader .code-panel-heading button {
     min-height: 44px;
   }
-}
-@media (max-width: 760px) {
   .reader .code-panel-heading {
     padding: 4px 12px;
   }
-}
-@media (max-width: 760px) {
   .reader .lesson-nav {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 760px) {
   .reader .build-step h2 {
     font-size: 22px;
   }
@@ -707,15 +665,11 @@
     padding: 0.7rem;
     margin: 1.5rem 0;
   }
-}
-@media (max-width: 600px) {
   .attention-lab th,
   .attention-lab td {
     padding: 0.35rem;
     font-size: 12px;
   }
-}
-@media (max-width: 600px) {
   .attention-controls {
     gap: 0.6rem;
   }
@@ -810,13 +764,9 @@
     min-height: 36px;
     padding: 8px;
   }
-}
-@media (max-width: 760px) {
   .reader .practice-modes {
     flex-wrap: wrap;
   }
-}
-@media (max-width: 760px) {
   .reader #lesson-body .practice-drawer {
     padding-inline: 14px;
   }
@@ -880,26 +830,18 @@
   .concept-mechanism {
     padding: 16px;
   }
-}
-@media (max-width: 760px) {
   .concept-mechanism ol {
     display: block;
   }
-}
-@media (max-width: 760px) {
   .concept-mechanism li {
     margin-bottom: 30px;
   }
-}
-@media (max-width: 760px) {
   .concept-mechanism li:not(:last-child):after {
     content: '↓';
     right: auto;
     left: 0;
     top: 100%;
   }
-}
-@media (max-width: 760px) {
   .concept-mechanism li:last-child {
     margin-bottom: 0;
   }
@@ -983,18 +925,12 @@
     grid-template-columns: 180px minmax(0, 1fr);
     gap: 24px;
   }
-}
-@media (max-width: 1100px) {
   .reader #lesson-body {
     padding: 32px;
   }
-}
-@media (max-width: 1100px) {
   .reader-outline {
     background: #e5ddf5;
   }
-}
-@media (max-width: 1100px) {
   .reader-layout .reader-outline {
     grid-column: 2;
   }
@@ -1003,23 +939,15 @@
   .reader #lesson-body {
     border-radius: 15px 15px 0 0;
   }
-}
-@media (max-width: 760px) {
   .reader-sidebar {
     margin-block: 8px 18px;
   }
-}
-@media (max-width: 760px) {
   .reader-outline {
     border-radius: 9px;
   }
-}
-@media (max-width: 760px) {
   .reader #lesson-body {
     font-size: 17px;
   }
-}
-@media (max-width: 760px) {
   .reader .code-panel pre {
     padding: 14px;
     font-size: 12px;
@@ -1232,98 +1160,64 @@ body pre code .syntax-variable {
     gap: 0;
     padding: 16px 4% 0;
   }
-}
-@media (max-width: 760px) {
   #reader-menu {
     margin: 0 0 16px;
     align-self: flex-start;
   }
-}
-@media (max-width: 760px) {
   #lesson-body {
     order: 2;
     width: 100%;
   }
-}
-@media (max-width: 760px) {
   .reader-outline {
     order: 3;
     position: static;
     width: 100%;
     padding: 16px 0;
   }
-}
-@media (max-width: 760px) {
   .reader-sidebar {
     width: 100%;
     margin: 0 0 20px;
   }
-}
-@media (max-width: 760px) {
   .reader #lesson-body {
     padding: 26px 22px;
   }
-}
-@media (max-width: 760px) {
   .reader h1 {
     font-size: 34px;
   }
-}
-@media (max-width: 760px) {
   .reader #lesson-body .lesson-status {
     font-size: 14px;
   }
-}
-@media (max-width: 760px) {
   .reader-outline details > summary {
     font: 15px var(--ui);
     padding: 12px;
   }
-}
-@media (max-width: 760px) {
   .reader .before-start {
     margin: 18px 0;
   }
-}
-@media (max-width: 760px) {
   .reader .lesson-artifacts {
     margin: 20px 0;
   }
-}
-@media (max-width: 760px) {
   #activity-bar {
     border-radius: 0;
     gap: 8px;
     padding: 10px 4% calc(10px + env(safe-area-inset-bottom));
     font-size: 12px;
   }
-}
-@media (max-width: 760px) {
   #activity-bar .button {
     padding: 10px 12px;
   }
-}
-@media (max-width: 760px) {
   #activity-position {
     text-align: center;
   }
-}
-@media (max-width: 760px) {
   .reader pre {
     font-size: 13px !important;
   }
-}
-@media (max-width: 760px) {
   .reader-footer {
     padding-bottom: 30px;
   }
-}
-@media (max-width: 760px) {
   .learner-workspace #lesson-progress-summary {
     padding: 24px;
   }
-}
-@media (max-width: 760px) {
   .learner-workspace #lesson-progress-summary h3 {
     font-size: 29px;
   }
@@ -1335,13 +1229,9 @@ body pre code .syntax-variable {
   .learner-workspace #lesson-progress-summary p {
     line-height: 1.6;
   }
-}
-@media (max-width: 760px) {
   #activity-bar .button {
     font-size: 12px;
   }
-}
-@media (max-width: 760px) {
   #activity-position {
     max-width: 65px;
   }
@@ -1352,20 +1242,14 @@ body pre code .syntax-variable {
   .reader-outline {
     display: none !important;
   }
-}
-@media print {
   .reader-layout {
     display: block;
   }
-}
-@media print {
   .reader #lesson-body {
     padding: 0;
     background: white;
     border-radius: 0;
   }
-}
-@media print {
   .copy-snippet {
     display: none !important;
   }
@@ -1386,21 +1270,15 @@ body pre code .syntax-variable {
     max-width: 130px;
     text-align: center;
   }
-}
-@media (max-width: 760px) {
   #activity-position {
     flex: 0 0 48px;
     overflow-wrap: anywhere;
   }
-}
-@media (max-width: 760px) {
   .reader .run-command {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
   }
-}
-@media (max-width: 760px) {
   .reader .run-command code {
     max-width: 100%;
     white-space: nowrap;

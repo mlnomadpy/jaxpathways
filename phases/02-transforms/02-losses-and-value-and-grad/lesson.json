@@ -3,7 +3,7 @@
   "id": "transforms-02",
   "minutes": 55,
   "content": {
-    "idea": "A prediction answers “what value does the model expect?” A loss answers “how far are those predictions from the targets?” For each example, our model predicts \\(\\hat y_i=wx_i\\). We subtract the target, square the difference, and average. This gives one number for the whole batch.\n\nJAX’s `value_and_grad` returns that loss and its derivative with respect to the weight. At weight \\(1\\), our model predicts too little, and the gradient is negative. Subtracting a small multiple of that negative number increases the weight toward \\(2\\). Let’s check those steps with the three examples before running the program.",
+    "idea": "A loss value tells us how the current prediction is scored. Its derivative tells us how a small parameter change affects that score locally. `value_and_grad` returns both so we can inspect progress and choose an update without confusing the two quantities.",
     "code": "import jax\nimport jax.numpy as jnp\nx = jnp.array([1., 2., 3.])\ny = 2. * x\ndef loss(weight):\n    return jnp.mean((weight * x - y) ** 2)\nvalue, gradient = jax.value_and_grad(loss)(1.0)\nprint(\"Loss:\", float(value), \"gradient:\", float(gradient))\nassert jnp.allclose(value, 14./3.)\nassert jnp.allclose(gradient, -28./3.)",
     "output": "Loss ≈ \\(4.666667\\); gradient ≈ \\(-9.333334\\). Small floating-point differences are normal.",
     "exercise": "Foundation · Starting from \\(w=1\\), calculate the next weight and loss for \\(\\alpha=0.1\\) and \\(\\alpha=0.3\\). Verify both. Explain the overshoot using the error multiplier rather than concluding that autodiff is wrong.",
@@ -24,6 +24,15 @@
     ],
     "problem": "Let’s turn the slope idea into a learning problem. We have three measurements and a model with one weight. How should that weight change to make its predictions better? We’ll calculate the prediction errors, combine them into one loss, and check the gradient by hand before asking JAX for the same result.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Read the value and derivative at the same point",
+        "body": "Take \\(L(w)=(w-2)^2+1\\) as a new hand-worked objective. At \\(w=0\\), the loss is \\(5\\) and the derivative is \\(-4\\). A small positive change in the weight should decrease the loss. At \\(w=2\\), the derivative is zero but the loss remains \\(1\\).\n\nThe added constant changes every loss value but leaves the derivative unchanged. This is a useful diagnostic: if a derivative implementation changes when you add a parameter-independent constant, investigate the implementation. Equally, a nonzero minimum loss need not mean optimization failed.\n\nWhen reading a plot of value and slope, compare them at the same horizontal coordinate and respect their different vertical units. The loss is not a gradient norm, and a small loss does not establish that all parameters are close to their intended values.",
+        "check": {
+          "prompt": "If every loss value is multiplied by \\(10\\), what happens to the gradient?",
+          "answer": "It is multiplied by \\(10\\) as well. Unlike adding a constant, scaling the objective changes an unadjusted gradient-descent step. Learning-rate comparisons must account for the loss normalization."
+        }
+      },
       {
         "title": "From three residuals to one decision",
         "body": "Read the formula from the inside out. For example \\(i\\), the model predicts \\(wx_i\\). Subtract the observed target \\(y_i\\) to get the residual, square it, and then average over all \\(N\\) examples. The symbol \\(\\sum\\) just tells us to add the individual terms.\n\nFor inputs \\([1, 2, 3]\\), targets \\([2, 4, 6]\\) and weight \\(1\\), the predictions are \\([1, 2, 3]\\). The residuals are \\([-1, -2, -3]\\). Their squares add to \\(14\\), so the mean loss is \\(14/3\\). At weight \\(2\\), every residual is zero. These two settings give us independent checks before we use gradients.",

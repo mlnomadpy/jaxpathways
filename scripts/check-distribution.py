@@ -40,14 +40,24 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
         if annotations: assert 'mathml' in items[f'c{index}'].attrib.get('properties','').split()
         if lesson['content'].get('visual'):
             v=lesson['content']['visual']
-            image=chapter.find('.//{http://www.w3.org/1999/xhtml}img')
+            image=chapter.find('.//{http://www.w3.org/1999/xhtml}img[@src="figures/'+lesson['id']+'.png"]')
             assert image is not None and image.attrib['src']=='figures/'+lesson['id']+'.png'
             assert book.read('OEBPS/'+image.attrib['src'])==(ROOT/lesson['path']/'outputs/figure.png').read_bytes()
             for field in ['prediction','reading','connection']:
                 for paragraph in v[field].split('\n\n'):assert_narrative(paragraph,text,chapter)
             assert lesson['execution']['stdout'] in text
+        if lesson['content'].get('diagram'):
+            diagram=lesson['content']['diagram']
+            image=chapter.find('.//{http://www.w3.org/1999/xhtml}img[@src="figures/'+lesson['id']+'-mechanism.png"]')
+            assert image is not None, lesson['id']+': missing mechanism image'
+            assert book.read('OEBPS/'+image.attrib['src'])==(ROOT/lesson['path']/'outputs/mechanism.png').read_bytes()
+            for field in ['prediction','reading']:
+                for paragraph in diagram[field].split('\n\n'): assert_narrative(paragraph,text,chapter)
         for section in lesson['content'].get('sections',[]):
             if section.get('math'): assert section['math'] in annotations, f'{lesson["id"]}: missing display equation'
+            if section.get('check'):
+                for field in ['prompt','answer']:
+                    for paragraph in section['check'][field].split('\n\n'): assert_narrative(paragraph,text,chapter)
         for section in lesson['content'].get('sections',[]):
             for paragraph in section['body'].split('\n\n'):
                 assert_narrative(paragraph, text, chapter)
@@ -88,10 +98,14 @@ print(f'OK: {len(authored)} offline chapters, EPUB XML/references, project/tutor
 
 with ZipFile(OUT/'jax-start-here.zip') as bundle:
     setup=next(l for l in authored if l['id']=='welcome-01')
-    assert set(bundle.namelist())=={'jax-start-here/first_experiment.py','jax-start-here/requirements-cpu.txt','jax-start-here/START-HERE.md','jax-start-here/figure.svg'}
+    expected={'jax-start-here/first_experiment.py','jax-start-here/requirements-cpu.txt','jax-start-here/START-HERE.md','jax-start-here/figure.svg'}
+    if setup['content'].get('diagram'):
+        expected.add('jax-start-here/mechanism.svg')
+        assert bundle.read('jax-start-here/mechanism.svg')==(ROOT/setup['path']/'outputs/mechanism.svg').read_bytes()
+    assert set(bundle.namelist())==expected
     assert bundle.read('jax-start-here/first_experiment.py').decode()==setup['content']['code']+'\n'
     assert bundle.read('jax-start-here/requirements-cpu.txt')==(ROOT/'requirements-cpu.txt').read_bytes()
-    assert bundle.read('jax-start-here/START-HERE.md').decode()==(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg')
+    assert bundle.read('jax-start-here/START-HERE.md').decode()==(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg').replace('../outputs/mechanism.svg','mechanism.svg')
     assert bundle.read('jax-start-here/figure.svg')==(ROOT/setup['path']/'outputs/figure.svg').read_bytes()
 print('OK: beginner workspace source/package/instruction fidelity.')
 
@@ -109,7 +123,7 @@ with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
         for source in (lesson['path']+'/lesson.json',lesson['artifacts']['source'],lesson['artifacts']['scriptSource'],lesson['artifacts']['notebookSource'],lesson['artifacts']['quizSource'],lesson['artifacts']['evidenceSource']):
             assert bundle.read('jaxpathways/'+source)==(ROOT/source).read_bytes()
     for lesson in authored:
-        for name in ('figure.svg','figure.png','visual.json','execution.json'):
+        for name in ('figure.svg','figure.png','visual.json','execution.json')+(('mechanism.svg','mechanism.png') if lesson['content'].get('diagram') else ()):
             source=lesson['path']+'/outputs/'+name
             assert bundle.read('jaxpathways/'+source)==(ROOT/source).read_bytes()
     for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):

@@ -4,7 +4,7 @@
   "minutes": 80,
   "content": {
     "problem": "An optimizer helps turn gradients into parameter changes. Before introducing a more complicated one, we’ll check that Optax SGD agrees with the update you already know. Then we’ll add momentum and follow the extra state it remembers, so you can explain why resetting that state changes the next step.",
-    "idea": "An Optax optimizer is a gradient transformation. Initialize its state from the parameter pytree. Each update consumes gradients, previous state, and optionally parameters, then returns updates and new state. Apply those updates to obtain new parameters.\n\nFor plain SGD, this reproduces subtracting learning_rate times the gradient. Momentum and Adam introduce additional state. Always carry the returned state into the next step; reinitializing it on every step changes the algorithm.",
+    "idea": "An optimizer transforms gradients into parameter updates and may retain state between steps. Optax makes that state explicit: initialize it, pass it into each update, and keep the returned state together with the new parameters.",
     "code": "import jax\nimport jax.numpy as jnp\nimport optax\nparams = {\"weight\": jnp.array(0.), \"bias\": jnp.array(0.)}\nx = jnp.linspace(-1., 1., 21)\ny = 2. * x + 1.\ndef loss(p):\n    return jnp.mean((p[\"weight\"] * x + p[\"bias\"] - y) ** 2)\noptimizer = optax.sgd(0.2)\nstate = optimizer.init(params)\ninitial_loss = loss(params)\nfor _ in range(120):\n    grads = jax.grad(loss)(params)\n    updates, state = optimizer.update(grads, state, params)\n    params = optax.apply_updates(params, updates)\nprint(\"Parameters:\", params)\nprint(\"Loss:\", float(loss(params)))\nassert loss(params) < 1e-8\nassert jnp.allclose(params[\"weight\"], 2., atol=1e-4)\nassert jnp.allclose(params[\"bias\"], 1., atol=1e-4)",
     "output": "Weight approaches \\(2.0\\), bias approaches \\(1.0\\), and loss is below \\(10^{-8}\\).",
     "exercise": "At the original zero parameters, compare the first Optax SGD update with an explicit tree-map gradient descent step.",
@@ -19,6 +19,15 @@
     "explanation": "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
     "diagnosis": "If an adaptive optimizer behaves differently after restarting, compare both parameter values and optimizer state. Equal parameters alone do not establish an identical continuation.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "The optimizer has memory of earlier gradients",
+        "body": "For plain gradient descent without extra state, the current parameters and gradient can determine the next update. For momentum or Adam, earlier gradients also matter through stored accumulators. Two runs at the same parameters can therefore take different next steps if their optimizer states differ.\n\nFollow the update cycle in order: calculate the loss and gradients from current parameters, ask the optimizer for updates and new state, then apply those updates to the parameters. Keeping only one returned object breaks the cycle.\n\nThe fitted-line figure shows that the example recovered a useful prediction rule. It does not by itself prove correct state continuation. Save a mid-run state and compare the next update with an uninterrupted run to test that separate capability.",
+        "check": {
+          "prompt": "You restore weights but initialize Adam from scratch. Is that an exact continuation?",
+          "answer": "No. The moment estimates and step counter have changed, so subsequent updates can differ. This may be a deliberate new optimization run, but it is not an exact resume."
+        }
+      },
       {
         "title": "Distinguish gradients, updates, and parameters",
         "body": "A gradient describes local sensitivity; an update is the change the optimizer wants to add to parameters. Optax SGD transforms \\(g\\) into \\(-\\eta g\\). apply_updates adds that update, so subtracting it again would reverse the intended direction. The tree structure of gradients and updates follows the parameter tree.\n\nFor our evenly spaced \\(x\\) values, \\(\\operatorname{mean}(x)=0\\) and \\(\\operatorname{mean}(x^2)=\\frac{11}{30}\\). At zero parameters, the weight derivative is \\(-4\\cdot\\frac{11}{30}=-\\frac{22}{15}\\) and the bias derivative is \\(-2\\). With rate \\(0.2\\), the first weight becomes \\(22/75\\) and bias \\(0.4\\). Compute these values before trusting a long run.",

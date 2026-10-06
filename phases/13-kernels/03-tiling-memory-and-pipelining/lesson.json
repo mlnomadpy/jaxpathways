@@ -4,7 +4,7 @@
   "minutes": 120,
   "content": {
     "problem": "A larger tile reduces the number of kernel invocations, but it also consumes more local memory and may compute more padded values. Can we make those tradeoffs concrete and execute a real buffered pipeline without claiming that CPU simulation measures TPU overlap?",
-    "idea": "We keep the arithmetic \\(Z=2X+Y\\) fixed and change how data travels through the kernel. An outer Pallas call exposes global references; emit_pipeline copies block windows into local buffers, invokes the arithmetic, and writes results back. The reference run simulates these TPU operations on CPU with race checking enabled.",
+    "idea": "Pipelining overlaps stages such as loading, computing and storing by giving work separate buffers and a valid schedule. The key question is when each buffer becomes safe to reuse, not merely how many buffers exist.",
     "objectives": [
       "Execute actual emit_pipeline semantics under explicit CPU TPU-layout simulation.",
       "Compare synchronous and buffered schedules against an independent oracle.",
@@ -12,6 +12,15 @@
       "Distinguish correctness of scheduling from measured transfer/compute overlap."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A buffer cannot be reused while a consumer still needs it",
+        "body": "Draw time across the page and a separate lane for load, compute and store. Label buffers by identity and mark the last use of each version. Loading new data too early can overwrite values still needed by computation.\n\nLarger tiles may reduce program count while increasing local storage and per-program work. The lesson's bars expose those modeled tradeoffs. Fewer programs alone is not proof of lower runtime.\n\nKeep illustrative overlap separate from measured overlap. The CPU interpretation and race checks validate bounded aspects of the schedule; a device trace and completed measurements are needed to claim TPU performance. Buffer-count changes should be checked against both correctness and the actual target constraints.",
+        "check": {
+          "prompt": "Why is double buffering not automatically faster?",
+          "answer": "It requires useful overlap and enough resources without creating another bottleneck. Correct buffer lifetimes establish validity; measured target behavior establishes any performance benefit."
+        }
+      },
       {
         "title": "Keep one numerical operation while changing data movement",
         "body": "The arithmetic body remains unchanged from the first lesson. The outer kernel receives entire buffers in a global-memory space, and the inner pipeline sees block-local references. This separation lets us change the movement schedule without changing the mathematical result. If a new schedule changes values, it is a correctness regression rather than a performance tradeoff."

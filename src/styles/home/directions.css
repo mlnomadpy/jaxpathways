@@ -66,28 +66,18 @@
     grid-template-columns: 1fr 1fr;
     padding: 8px 18px;
   }
-}
-@media (max-width: 1050px) {
   .work-route {
     padding: 24px 18px;
   }
-}
-@media (max-width: 1050px) {
   .work-route:nth-child(2) {
     border: 0;
   }
-}
-@media (max-width: 1050px) {
   .work-route:nth-child(-n + 2) {
     border-bottom: 1px solid var(--line);
   }
-}
-@media (max-width: 1050px) {
   .work-route:nth-child(3) {
     border-right: 1px solid var(--line);
   }
-}
-@media (max-width: 1050px) {
   .route-symbol {
     margin-bottom: 15px;
   }
@@ -96,47 +86,31 @@
   .work-section {
     padding: 44px 0 20px;
   }
-}
-@media (max-width: 760px) {
   .work-routes {
     padding: 0 20px;
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 760px) {
   .work-route:nth-child(n) {
     padding: 23px 0;
     border: 0;
     border-bottom: 1px solid var(--line);
   }
-}
-@media (max-width: 760px) {
   .work-route:last-child {
     border: 0;
   }
-}
-@media (max-width: 760px) {
   .route-symbol {
     display: none;
   }
-}
-@media (max-width: 760px) {
   .work-route h3 {
     font-size: 23px;
     margin-bottom: 10px;
   }
-}
-@media (max-width: 760px) {
   .work-route > p {
     margin-bottom: 12px;
   }
-}
-@media (max-width: 760px) {
   .work-route .route-availability {
     margin-bottom: 4px;
   }
-}
-@media (max-width: 760px) {
   .work-route .route-availability strong {
     display: inline;
     margin-right: 8px;

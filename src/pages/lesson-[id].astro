@@ -1,0 +1,13 @@
+---
+import LessonPage from '../components/reader/LessonPage.astro';
+import { authoredLessons } from '../lib/course-data.js';
+export function getStaticPaths() {
+  return authoredLessons.map((lesson) => ({
+    params: { id: lesson.id },
+    props: { lessonId: lesson.id },
+  }));
+}
+const { lessonId } = Astro.props;
+---
+
+<LessonPage lessonId={lessonId} />

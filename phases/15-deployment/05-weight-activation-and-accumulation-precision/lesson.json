@@ -4,7 +4,7 @@
   "minutes": 75,
   "content": {
     "problem": "Someone asks you for an “8-bit model.” A helpful first question is: 8-bit weights, activations, or both? We’ll separate those choices, compare them with a float32 reference, and watch what happens when an input falls outside the calibrated range. You’ll leave with a precision policy you can explain, not just a dtype label.",
-    "idea": "Weights are the numbers a model has learned. Activations are the values it computes for the current input. Accumulators hold intermediate sums. We can choose a different precision for each, so it helps to write those choices separately.\n\nFor example, W8A16 describes 8-bit weights and 16-bit activations, but leaves other questions open: how are values scaled, how wide are the sums, and which runtime kernels can use that format? Our CPU experiments isolate the numerical effects. They do not claim packed INT4 storage or accelerator speed.",
+    "idea": "A precision policy specifies how weights, activations, accumulations and outputs are represented. Quantization adds scales, zero-points and rounding/clipping rules. Track those units through the computation instead of describing the whole model with one dtype label.",
     "objectives": [
       "Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.",
       "Implement per-output-channel symmetric INT8 and INT4 weight quantization.",
@@ -12,6 +12,15 @@
       "Explain FP64, FP8, weight-only, full integer and mixed precision policies."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Follow the units through integer arithmetic",
+        "body": "For an illustrative scale \\(s=0.5\\) and zero-point \\(z=3\\), the real value \\(1\\) maps to integer \\(q=5\\), since \\(q=\\operatorname{round}(1/0.5)+3\\). Reconstructing gives \\(0.5(5-3)=1\\). Real zero maps to the zero-point, not necessarily integer zero.\n\nIn a dot product, centered integer products accumulate in an appropriately wide type. The accumulator's scale comes from the input and weight scales. Bias must use compatible units before the output is rescaled or requantized.\n\nThe error plots compare specific representation policies. Read weight, activation and accumulation choices separately. Per-channel scales also require a declared axis. Numerical error, downstream quality and target-runtime speed need separate evidence.",
+        "check": {
+          "prompt": "What happens if you ignore a nonzero zero-point when interpreting quantized values?",
+          "answer": "You introduce an offset error before multiplication or reconstruction. Correct integer storage alone is insufficient; arithmetic must honor the affine mapping."
+        }
+      },
       {
         "title": "Write the policy before choosing a dtype",
         "body": "Use separate fields for stored weights, input/intermediate activations, multiply operands, accumulator, output and optimizer/master weights. FP32 is a useful baseline. FP64 can help sensitive numerical work; in JAX enable jax_enable_x64 before creating arrays and account for target support and cost. FP16 has a narrower exponent range than BF16, while BF16 gives up fraction precision for range. Keep reductions, normalization statistics and sensitive losses in FP32 when needed. The example rounds operands to each format, then explicitly returns them to FP32 for multiplication; it isolates representation error rather than proving low-precision kernel behavior."
@@ -127,6 +136,71 @@
       "connection": "For the floating-point policies, both inputs and weights are rounded, then converted to FP32 for accumulation. FP16 has finer precision than BF16 around these particular values; BF16’s wider exponent range is not being tested here. The weight-only policies keep activations in FP32 and reconstruct quantized weights before multiplication.\n\nFour-bit quantization uses fewer representable weight levels, so its larger rounding steps can create larger output discrepancies. The code uses per-output-column scales and checks an independent error bound. This is simulated quantization using ordinary CPU arrays, not a measurement of packed four-bit storage or native low-bit kernels. Accuracy, memory, and latency must each be evaluated on the intended workload and runtime.\n\nUse the lower panel to decide what to inspect: zero-point subtraction and bias units for an offset mismatch; output range and clipping counts for saturation. The upper panel compares precision policies on the original fixture, while the lower panel isolates operator bookkeeping on a different fixture. Neither measures latency.",
       "alt": "Precision choices trade representation for output error. The horizontal categories are precision policies; the vertical axis is maximum absolute output error against the FP32 reference on the same small input. Lower bars mean closer numerical agreement, not faster execution. The FP32 baseline is zero by construction. The errors are approximately \\(0.00105\\) for FP16 rounding, \\(0.00617\\) for BF16 rounding, \\(0.00803\\) for W8 A32, and \\(0.146\\) for W4 A32. The four-bit weight simulation has about eighteen times the output error of the eight-bit simulation in this example. These are output units, not percentages or classification error rates. A second panel compares correct affine outputs with an omitted zero point and a clipping output grid; the text supplies every value and its interpretation.",
       "code": "names = []\nerrors = []\nfor name, dtype in [('FP32', jnp.float32), ('FP16 → FP32', jnp.float16), ('BF16 → FP32', jnp.bfloat16)]:\n    names.append(name)\n    errors.append(float(np.max(np.abs(mixed_forward(x, w, dtype) - reference))))\nfor bits_plot in (8, 4):\n    q_plot, s_plot = quantize_weights(w, bits_plot)\n    names.append('W' + str(bits_plot) + ' A32')\n    errors.append(float(np.max(np.abs(x @ (q_plot.astype(np.float32) * s_plot) - reference))))\nvisual_data = {'kind': 'bar', 'labels': names, 'ylabel': 'maximum absolute output error', 'series': [{'label': 'CPU reference error', 'y': errors}]}\n# Deliberately exact grid values make an independent hand calculation possible.\na_sx, a_zx = .25, -3\na_sw = np.array([.5, .25], np.float64)\na_qx = np.array([[-3, 1, 5]], np.int8)\na_qw = np.array([[2, -1], [-1, 2], [1, 1]], np.int8)\na_bias = np.array([.125, -.0625], np.float64)\na_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)\n# Check the wide result before representing it with an INT32 accumulator.\na_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes\nassert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))\na_acc = a_wide.astype(np.int32)\nnp.testing.assert_array_equal(a_acc, [[5, 15]])\na_real = a_acc.astype(np.float64) * a_sx * a_sw\n# Independent real-valued input/weights, written without decoding the codes.\na_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias\nnp.testing.assert_array_equal(a_real, [[.625, .9375]])\nnp.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)\ndef output_grid(real, scale, zero_point):\n    if not np.isfinite(scale) or scale <= 0:\n        raise ValueError('positive finite output scale required')\n    if type(zero_point) is not int or not -128 <= zero_point <= 127:\n        raise ValueError('integer INT8 zero point required')\n    unbounded = np.rint(real / scale) + zero_point\n    clipped = (unbounded < -128) | (unbounded > 127)\n    codes = np.clip(unbounded, -128, 127).astype(np.int8)\n    return codes, (codes.astype(np.float64) - zero_point) * scale, clipped\n\na_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)\nnp.testing.assert_array_equal(a_codes, [[2, 7]])\nassert not a_clipped.any()\nnp.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)\na_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw\nnp.testing.assert_array_equal(a_wrong, [[-.125, .5625]])\n_, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)\nassert a_small_clipped.all()\nnp.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])\nprint('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())\nprint('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())\n\nfirst_panel = visual_data\nvisual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'output 1'], 'ylabel': 'output value', 'series': [\n    {'label': 'correct affine / float reference', 'y': a_restored[0].tolist()},\n    {'label': 'input zero point omitted', 'y': a_wrong[0].tolist()},\n    {'label': 'narrow output grid clips', 'y': a_saturated[0].tolist()}]}]}\n"
+    },
+    "diagram": {
+      "title": "Integer values need scales and zero-points",
+      "prediction": "What happens if you ignore a nonzero zero-point when interpreting quantized values?",
+      "reading": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
+      "alt": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 6.4,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "0",
+            "x": 5,
+            "y": 1,
+            "label": "Real activations + weights\nChoose scales, zero-points and ranges",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "1",
+            "x": 5,
+            "y": 2.7,
+            "label": "Round → add zero-point → clamp\nStore quantized codes",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "2",
+            "x": 5,
+            "y": 4.4,
+            "label": "Center codes → products → wide accumulation\nMatch bias to accumulator units",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "3",
+            "x": 5,
+            "y": 6.1,
+            "label": "Rescale / requantize output\nCompare independent references",
+            "tone": "result",
+            "w": 8,
+            "h": 1.05
+          }
+        ],
+        "edges": [
+          {
+            "from": "0",
+            "to": "1"
+          },
+          {
+            "from": "1",
+            "to": "2"
+          },
+          {
+            "from": "2",
+            "to": "3"
+          }
+        ],
+        "height": 7,
+        "width": 10
+      }
     }
   }
 }

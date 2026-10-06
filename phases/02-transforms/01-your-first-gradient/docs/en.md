@@ -15,9 +15,25 @@ Imagine that you can turn one dial, and a score tells you how far you are from t
 
 ## The idea
 
-A derivative is a local sensitivity: it tells us how much the output changes for a small input change. For $f(x)=x^2$, the slope is $2x$. At $x=3$, that is $6$; increasing the input by $0.01$ should increase the output by about $0.06$. “About” matters because the curve bends.
+A derivative tells us how an output changes near a particular input. We can understand it before using autodiff: move the input a small amount, estimate the output change from the local slope, then compare that prediction with the function.
 
-In JAX, `jax.grad(f)` creates a function that computes the derivative. Calling that new function at $3.0$ gives the slope there. We’ll compare it with an answer we derived ourselves, then with a finite-difference estimate. These are different checks, and each helps us understand the result.
+## Use a slope to predict a nearby change
+
+For a separate hand calculation, let $f(x)=x^2$. At $x=3$, the derivative is $6$. Moving to $3.01$ gives a first-order prediction of $9+6(0.01)=9.06$. The exact value is $9.0601$; the small difference comes from curvature.
+
+In the tangent figure, the tangent agrees with the curve at the selected point and has the same local slope. It need not follow the curve far away. Move the point and watch the slope change; then move only a small distance from that point to judge the linear approximation.
+
+Autodiff computes the derivative of the operations you wrote. It does not choose a meaningful objective for you. A gradient of the wrong loss can be numerically correct, which is why later lessons check both the formula and its derivative.
+
+### Pause and reason
+
+Does a positive derivative mean the function value itself is positive?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The derivative describes local change. For $f(x)=x-10$ at $x=0$, the value is $-10$ while the derivative is $1$.
+
+</details>
 
 ## Read a slope before you compute it
 
@@ -120,7 +136,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:46.841500+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:13.871361+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339

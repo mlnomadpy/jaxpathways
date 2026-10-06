@@ -4,8 +4,17 @@
   "minutes": 110,
   "content": {
     "problem": "Let’s bring model recovery and data recovery together. We’ll interrupt training after two batches, save both the model state and the next-read position, then continue. Comparing the remaining batches with an uninterrupted run will show whether we really resumed at the same point, including across an epoch boundary.",
-    "idea": "A restart boundary is consistent only when data consumption and completed model updates describe the same point in time. Save after the second update and after its batch has been consumed; then restore both components together. Restoring parameters at step two while restarting the reader at batch zero reprocesses earlier examples with later model state.",
+    "idea": "Exact recovery joins numerical state and input-pipeline state at one completed update. Mixing boundaries can repeat or skip examples while producing a plausible training curve.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Align model time with data time",
+        "body": "If saved weights include the C/D update but the iterator still points to C/D, recovery trains on that batch again. If the iterator is one batch too far ahead, it skips data. Both runs can continue without a shape error.\n\nDraw one vertical boundary after an update and align parameters, optimizer, key and cursor with it. The next restored arrow must consume the same examples as the uninterrupted run.\n\nWhen comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.",
+        "check": {
+          "prompt": "Why reject a resume even when its first loss nearly matches the reference?",
+          "answer": "Different data or optimizer state can coincidentally produce similar loss. Exact continuation requires the intended full state and data boundary."
+        }
+      },
       {
         "title": "Commit one logical boundary",
         "body": "consume retrieves a batch, computes an update and returns the updated training state. After two calls, the model step is two and the iterator points at batch three. We pack that iterator snapshot in the same Orbax payload as the model, Adam memory, random stream and contract.\n\nA real prefetcher may prepare data ahead of consumption; the snapshot semantics must refer to the iterator boundary supported by its implementation. This tutorial uses a serial Grain loader and synchronous checkpointing, so no speculative workers or asynchronous outstanding writes complicate the boundary. Do not extrapolate this protocol to an arbitrary data queue without checking its restore contract.",
@@ -144,6 +153,49 @@
         "Same next batch → same transition"
       ],
       "layout": "merge"
+    },
+    "diagram": {
+      "title": "One checkpoint, one completed-step boundary",
+      "prediction": "Why reject a resume even when its first loss nearly matches the reference?",
+      "reading": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
+      "alt": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 5,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "State",
+          "Accepted boundary",
+          "Next use"
+        ],
+        "rows": [
+          [
+            "Parameters",
+            "after update t",
+            "forward at t + 1"
+          ],
+          [
+            "Optimizer",
+            "after update t",
+            "next update"
+          ],
+          [
+            "Random key",
+            "next unused key",
+            "next stochastic input"
+          ],
+          [
+            "Iterator",
+            "next unconsumed batch",
+            "batch for t + 1"
+          ],
+          [
+            "Step counter",
+            "t completed",
+            "schedule convention"
+          ]
+        ]
+      }
     }
   }
 }

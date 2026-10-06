@@ -15,7 +15,25 @@ Now that you can check example order yourself, let’s use Grain to manage the i
 
 ## The idea
 
-Grain separates source lookup, sampler ordering, transformations and iteration. A DataLoader combines these choices, while its iterator owns the consumed position. Rebuilding a loader from the same seed starts over; restoring a compatible iterator snapshot resumes from the saved boundary.
+A resumable iterator preserves a position in a particular data sequence. Restoring it should reproduce the next batch under the same dataset and configuration. Prefetching makes it especially important to separate requested data from consumed data.
+
+## Restore the next batch by identity
+
+Suppose batches are A/B, C/D and E/F. After training completes the C/D update, the next restored batch should be E/F. Returning another two-element array passes a shape check but may repeat or skip data.
+
+Capture the iterator state at the model's completed-update boundary. Do not substitute a guessed offset unless the pipeline contract makes it sufficient. Shuffling, filtering and prefetching can make requested batch counts differ from completed training work.
+
+Compare exact IDs and values before and after restore. Then change the dataset identity deliberately and require the restore process to detect the incompatible sequence. The same numeric cursor can point to different examples in another dataset.
+
+### Pause and reason
+
+Why can a correct cursor still produce an incorrect resume?
+
+<details><summary>Compare your reasoning</summary>
+
+Position only has meaning relative to its data sequence and configuration. Recovery needs those identities as well as the cursor.
+
+</details>
 
 ## Map a record key to a testable source
 
@@ -182,7 +200,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:52.842835+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:23.091145+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]

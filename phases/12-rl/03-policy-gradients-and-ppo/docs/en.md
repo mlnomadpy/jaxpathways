@@ -14,7 +14,25 @@ The collector produces experiences, but which parameter change makes useful acti
 
 ## The idea
 
-An action that is followed by a good return should become more probable. Multiply its log probability by its reward-to-go, sum over active actions, then average over episodes. Differentiating the negative of that quantity gives a descent direction for a loss. The discrete rollout is fixed data during this derivative. PPO reuses a batch cautiously by comparing the new action probability with the probability that generated that batch.
+A policy gradient increases the likelihood of actions with favorable estimated advantage. PPO compares a current policy with the rollout-time policy and clips part of the surrogate objective. The sign of the advantage determines which changes the clipping discourages.
+
+## The clipped objective depends on the advantage sign
+
+Let $r$ be the current-to-old action-probability ratio. With positive advantage, making $r$ much larger than the upper clipping threshold stops improving the clipped surrogate. With negative advantage, moving below the lower threshold has the corresponding saturation.
+
+This does not impose a hard bound on the new policy probabilities. Shared parameters, multiple updates and other loss terms can still move the policy beyond the threshold. Inspect the ratio distribution and KL behavior rather than claiming clipping guarantees a trust region.
+
+Keep old probabilities and advantage estimates fixed for the intended inner updates. The training-return curve reports the particular sampled runs; use the same evaluator and multiple seeds before concluding one procedure reliably performs better.
+
+### Pause and reason
+
+Is a ratio outside the clipping interval proof that PPO was implemented incorrectly?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Clipping modifies the objective incentive, not a hard constraint on ratios. Check the actual surrogate calculation, fixed rollout quantities and update behavior.
+
+</details>
 
 ## The derivative does not pass through the sampled action
 
@@ -368,7 +386,7 @@ visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:32.687663+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:07.050693+00:00. JAX 0.9.2.
 
 ```text
 REINFORCE initial/final exact return: 0.46687505 0.9521624

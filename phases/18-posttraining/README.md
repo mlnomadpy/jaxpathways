@@ -28,23 +28,23 @@ Review: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md
 
 ### Build in stages
 
-1. **Supervised fine-tuning with response-only token loss.** Supervised fine-tuning learns from demonstrations. The example uses a tiny next-token table so the alignment is visible: prompt IDs determine answer IDs, followed by an end token. In a pretrained Transformer, the same response-mask bookkeeping surrounds a much richer causal forward pass.
+1. **Supervised fine-tuning with response-only token loss.** Write an input/next-target/role table, audit ragged likelihood sums, identify supervised positions in the gradient map, and demonstrate a context distinction the transition model cannot represent.
 
    Lessons: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md).
 
-2. **LoRA: adapt, save and merge low-rank updates.** LoRA parameterizes a weight change as two smaller matrices. It reduces trainable parameter and optimizer-state counts for selected layers; it does not eliminate activation memory or guarantee a latency improvement. Our changed target is deliberately rank one, which makes the adaptation test exact and interpretable.
+2. **LoRA: adapt, save and merge low-rank updates.** Derive and check both adapter-factor gradients, explain asymmetric initialization, verify nonunit merge scaling, and calculate a rank-one capacity limit before interpreting the adaptation curve.
 
    Lessons: [LoRA: adapt, save and merge low-rank updates](02-lora/docs/en.md).
 
-3. **Learn a reward model from pairwise preferences.** The reward model assigns a scalar to response features and fits pairwise comparisons using a logistic preference likelihood. All labels here are synthetic and declared. Training such a model from actual human feedback additionally requires a documented rating protocol, disagreement handling and independent evaluation.
+3. **Learn a reward model from pairwise preferences.** Derive preference likelihood and its linear gradient, inspect contradictory labels, distinguish offsets from scale, and explain the measured comparison margins before handing off a reward model.
 
    Lessons: [Learn a reward model from pairwise preferences](03-reward/docs/en.md).
 
-4. **RLHF mechanics: a frozen reward and PPO policy updates.** This is a one-prompt, one-terminal-action preference bandit. It isolates the reward-model → rollout → policy-update loop used in RLHF. Synthetic preferences supply the reward model; no humans or language generations are used. Existing RL lessons cover trajectories and PPO in an environment; real language PPO adds sequence masks, value estimation and rollout infrastructure.
+4. **RLHF mechanics: a frozen reward and PPO policy updates.** Identify current, behavior, reference and reward states; work both clipping signs; verify baseline cancellation by enumeration; and compare the trained bandit with its regularized optimum and probability plot.
 
    Lessons: [RLHF mechanics: a frozen reward and PPO policy updates](04-rlhf/docs/en.md).
 
-5. **Direct preference optimization and reference-corrected margins.** DPO compares policy log-probability differences with the same differences under a frozen reference. The lab treats each response as one categorical action to isolate the objective. For language responses, substitute the sum of valid response-token log probabilities, with a consistent tokenizer and mask; arbitrary mean-length normalization changes the objective.
+5. **Direct preference optimization and reference-corrected margins.** Work through reference correction and its gradient, reproduce a falling chosen-probability counterexample, and explain why positive margins do not by themselves prove improved response behavior.
 
    Lessons: [Direct preference optimization and reference-corrected margins](05-dpo/docs/en.md).
 
@@ -64,7 +64,7 @@ Only improvement against the learned reward. Investigate reward exploitation, pr
 
 ### Decide what is ready
 
-Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
+Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.
 
 ### Further work
 

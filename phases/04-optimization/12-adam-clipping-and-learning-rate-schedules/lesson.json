@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "An optimizer can lower the loss while hiding several choices: how it averages gradients, rescales coordinates, clips large values, and changes the step size. We will expose those choices one at a time before running a controlled comparison. The goal is to explain a training decision, not to crown a universal winner.",
-    "idea": "Adam retains moving averages of gradients and squared gradients. It corrects the initial bias caused by starting those averages at zero, then scales each coordinate. Clipping and learning-rate schedules are separate transformations. Their position, state and step count are part of the algorithm and must be recorded with the run.",
+    "idea": "Adam combines gradient history with coordinatewise scaling. Clipping limits a gradient or update according to a chosen rule, while a learning-rate schedule changes scale over training. These mechanisms interact, but we should inspect each separately before interpreting their combined loss curve.",
     "objectives": [
       "Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.",
       "Calculate the first two Adam steps",
@@ -17,6 +17,15 @@
       "Bring the phase together in a training audit"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Clipping changes a vector; a schedule changes a clocked scale",
+        "body": "Use the analytic gradient \\(g=(3,4)\\), whose norm is \\(5\\). Global-norm clipping at \\(2.5\\) scales the entire vector to \\((1.5,2)\\), preserving its direction. Clipping each coordinate to the interval \\([-2.5,2.5]\\) instead produces \\((2.5,2.5)\\), whose direction and norm differ.\n\nNow consider four microbatches accumulated into one optimizer update. A schedule indexed by optimizer updates should advance once for that group, not four times. The schedule's clock is part of the algorithm and should be restored with optimizer state.\n\nThe existing optimizer plot uses its labeled learning rates and shows nonmonotone trajectories, including rebounds. It compares that specific fixture; it does not demonstrate clipping or scheduling. Use the separate clipping diagram to understand the geometry, then test each mechanism with its own controlled change.",
+        "check": {
+          "prompt": "Does coordinate clipping at \\(2.5\\) guarantee that the whole gradient norm is at most \\(2.5\\)?",
+          "answer": "No. For the clipped vector \\((2.5,2.5)\\), the norm is \\(2.5\\sqrt{2}\\). A coordinate bound describes a box; a global-norm bound describes a ball."
+        }
+      },
       {
         "title": "Calculate the first two Adam steps",
         "body": "Let \\(g_t\\) be the gradient at update \\(t\\). Adam tracks a first moment \\(m_t\\) and a second raw moment \\(v_t\\), using decay rates \\(\\beta_1\\) and \\(\\beta_2\\). Starting at zero makes the early averages small; divide by \\(1-\\beta_1^t\\) and \\(1-\\beta_2^t\\) to correct that bias. At the first step, corrected moments are \\(g_1\\) and \\(g_1^2\\). With a small \\(\\epsilon\\), each nonzero coordinate initially moves close to the learning rate in the opposite sign direction. This does not mean later steps ignore magnitude.",
@@ -133,6 +142,17 @@
       "connection": "Now follow the dashed momentum curve. Its loss falls to about \\(0.568\\) at update \\(2\\), then rises to about \\(3.714\\) at update \\(4\\). Momentum retains past gradients, so a favorable current position does not guarantee a favorable next step: the accumulated update can carry the parameters past the minimum. The repeated dips and rebounds occur under a generally declining envelope. They are deterministic optimizer behavior in this example, not noise from shuffled minibatches.\n\nThe dash-dot Adam curve makes the same caution especially clear. It reaches about \\(1.45\\times10^{-4}\\) at update \\(11\\), then rises to about \\(0.410\\) by update \\(19\\). Adam adapts coordinate-wise update sizes using gradient history, but that history can still move parameters away after a close approach. A deep dip means the current parameters are near the minimum; it does not mean subsequent updates will stay there. The scalar loss alone does not tell us which side of the minimum each coordinate occupies.\n\nAt update \\(50\\), the losses are approximately \\(1.28\\times10^{-4}\\) for Adam, \\(2.96\\times10^{-3}\\) for SGD, and \\(2.49\\times10^{-2}\\) for momentum. Adam finishes lowest under these settings, although it was not lowest at every earlier update. Compare the same update budget, read the endpoint as well as the dips, and remember that equal update counts do not imply equal runtime. This figure uses fixed rates without clipping or a schedule; the later experiments examine those separate choices.",
       "alt": "Compare optimizer paths under a fixed update budget. Start with the axes. The horizontal axis counts completed parameter updates; \\(0\\) is the shared starting point. The vertical axis is the objective \\(L(w)=\\tfrac12(w_0^2+10w_1^2)\\), so lower is better. It is logarithmic: falling from \\(10^{-2}\\) to \\(10^{-3}\\) means a tenfold reduction, not a decrease of one unit. Zero cannot appear on this scale. All three methods begin at \\(w=(1,1)\\), with loss \\(5.5\\). The solid SGD curve drops smoothly and then develops a slower tail. With learning rate \\(0.05\\), each update multiplies the two coordinates by \\(0.95\\) and \\(0.5\\). The steep direction shrinks quickly; the flatter direction accounts for the slow remaining progress.",
       "code": "def plot_bowl(z):\n    return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)\nseries = []\nfor name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]:\n    p_plot = jnp.array([1.0, 1.0])\n    s_plot = tx.init(p_plot)\n    vals = [float(plot_bowl(p_plot))]\n    for _ in range(50):\n        delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)\n        p_plot = optax.apply_updates(p_plot, delta)\n        vals.append(float(plot_bowl(p_plot)))\n    series.append({'label': name, 'y': vals})\nvisual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update', 'ylabel': 'objective', 'yscale': 'log', 'series': series}"
+    },
+    "diagram": {
+      "title": "A norm ball and a coordinate box",
+      "prediction": "Does coordinate clipping at \\(2.5\\) guarantee that the whole gradient norm is at most \\(2.5\\)?",
+      "reading": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
+      "alt": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 6,
+      "panel": {
+        "kind": "clipping"
+      }
     }
   }
 }

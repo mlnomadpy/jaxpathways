@@ -3,7 +3,7 @@
   "id": "arrays-04",
   "minutes": 45,
   "content": {
-    "idea": "x.at[index].`set(value)` returns a value with selected entries replaced. x.at[index].`add(value)` returns a value with contributions added at selected positions. The original array value is unchanged. If you need to keep the result, assign or return it; calling the operation and ignoring the result does not update \\(x\\).\n\nThis is the observable functional contract. It does not prove that every expression allocates a fresh physical buffer. Compilers can reuse storage when safe, and later performance features can make ownership more explicit. Reason about values here; measure storage or performance separately when that becomes the question.",
+    "idea": "An indexed update in JAX returns an array value. This makes the relationship between old and new state explicit: the caller chooses which result to keep. The programming model describes values; compiler decisions about physical memory reuse are a separate issue.",
     "code": "import jax.numpy as jnp\nx = jnp.array([1., 2., 3., 4.])\ny = x.at[1].set(20.)\nz = x.at[jnp.array([0, 2])].add(5.)\nprint(\"Original:\", x)\nprint(\"Set:\", y)\nprint(\"Add:\", z)\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
     "output": "Original: \\([1., 2., 3., 4.]\\); Set: \\([1., 20., 3., 4.]\\); Add: \\([6., 2., 8., 4.]\\).",
     "exercise": "Replace the last two elements with zero in a new array. Keep \\(x\\) unchanged.",
@@ -24,6 +24,15 @@
     ],
     "problem": "You want to replace a few array entries, but JAX rejects the NumPy-style assignment. The key idea is small: describe the new array value, then keep the result. We’ll try replacement and addition, check that the original value is still available, and see what happens when an index appears more than once.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate a new value from a new physical buffer",
+        "body": "Start with \\([2,4,6]\\). Setting the middle entry to \\(10\\) produces \\([2,10,6]\\). Adding \\(10\\) at that position produces \\([2,14,6]\\). Both operations begin from the same original values; the second is not automatically applied to the result of the first.\n\nDraw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.\n\nDo not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.",
+        "check": {
+          "prompt": "You call an indexed update but keep using the original variable. Why might later predictions be unchanged?",
+          "answer": "The returned updated value was discarded. Assign or pass that result into the next computation; do not expect the original array value to mutate."
+        }
+      },
       {
         "title": "A Python name and an array value are different",
         "body": "After `y = x.at[1].set(20)`, \\(x\\) still denotes the original array and \\(y\\) denotes the updated value. After `x = x.at[1].set(20)`, the Python name \\(x\\) is rebound to the new value. That spelling does not retroactively change another name holding the original value.\n\nKeep `original = x` before an update when you want a reference for tests. Comparing original and updated makes the semantics visible. Repeatedly inspecting only the newly rebound name can make a functional update look like mutation even though the old value still exists."

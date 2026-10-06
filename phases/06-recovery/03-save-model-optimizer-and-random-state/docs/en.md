@@ -15,7 +15,25 @@ A saved file is useful only if it contains what you need to continue. We’ll tr
 
 ## The idea
 
-Recovery state is the information that determines the next transition: parameters, optimizer memory/count, random stream and training step. Model-only inference artifacts are a different contract. Orbax stores the pytree, while the application must define the expected structure, dataset/configuration identity and compatibility checks.
+A training checkpoint needs enough state to reproduce the next update. Weights alone do not capture optimizer memory or random-state ownership. Think of the checkpoint as the complete input to a future state transition.
+
+## Save the inputs to the next update
+
+Two runs with identical weights but different Adam moments can receive the same gradient and take different next steps. Different random keys can change augmentation or dropout before the gradient is computed.
+
+The existing diagram merges state components into one snapshot. Its arrows mean membership in the snapshot, not a sequence in which parameters must be computed before moments or randomness. Every component must agree on the completed-step boundary.
+
+Loading bytes successfully checks serialization. Test continuation by restoring into a fresh process and comparing the next transition with an uninterrupted run. Add iterator state through the data-recovery procedure that follows this lesson.
+
+### Pause and reason
+
+What is stronger evidence than matching loaded weights?
+
+<details><summary>Compare your reasoning</summary>
+
+Match the next example identities, random state, optimizer update and resulting parameters. This tests the checkpoint's purpose rather than only its stored parameter values.
+
+</details>
 
 ## Inventory everything the next step reads
 
@@ -272,7 +290,7 @@ Read the diagram as a checklist of coupled state. A file existing on disk only d
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:56.085672+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:26.587451+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3

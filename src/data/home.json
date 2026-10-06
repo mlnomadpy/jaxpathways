@@ -1,25 +1,27 @@
 {
   "hero": {
-    "title": ["Learn JAX.", "From arrays", "to models."],
-    "intro": "Understand the functions behind machine learning. Write them, transform them, and build a model—with your AI tutor alongside you.",
-    "note": "Basic Python to begin. A laptop CPU is enough.",
+    "title": ["Learn JAX.", "Build working models."],
+    "intro": "From arrays and gradients to training, evaluation, and deployment. Learn the ideas, run the experiments, and build with an AI tutor alongside you.",
+    "note": "Start with basic Python and a laptop CPU. The course is in active development.",
     "actions": [
       {
-        "label": "Start with a tutor  ↗",
-        "href": "#tutor"
+        "label": "Start the course",
+        "href": "lesson.html?lesson=welcome-01"
       },
       {
-        "label": "Explore the course",
-        "href": "course.html"
+        "label": "Explore learning paths",
+        "href": "pathways.html"
       }
-    ]
+    ],
+    "author": "Taha Bouhsine"
   },
   "tutor": {
-    "title": "Your agent. Your JAX tutor.",
+    "title": "Learn with your own AI tutor",
     "hosts": "Codex · Claude Code · Cursor · other skill-enabled agents",
     "command": "npx skills add . --skill start-learning learn-jax jax-course-guide check-jax",
     "prompt": "Use start-learning to help me learn JAX from this workspace.",
-    "workspace": "downloads/jax-course-workspace.zip"
+    "workspace": "downloads/jax-course-workspace.zip",
+    "description": "Start with a placement check, choose a learning path, and work through explanations and exercises with your agent."
   },
   "directions": {
     "title": "Where do you want to take it?",

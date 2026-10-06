@@ -15,7 +15,35 @@ Can a small model tell horizontal bars from vertical bars in noisy images? We’
 
 ## The idea
 
-A convolution reuses one local filter at every image position. Nonlinear activation and spatial pooling turn those local responses into features for a linear classification head. This tiny bar task makes the mechanism inspectable on a CPU; success here does not establish handwritten-digit or natural-image accuracy.
+A convolution combines a local input patch with weights reused across spatial positions. Layout, stride and padding decide which pixels contribute to each output. Trace one position first; the full feature map repeats that same rule.
+
+## Trace one convolution output
+
+In a separate shape example, a three-by-three kernel sliding over a five-by-five image with stride one and no padding has three valid positions along each axis. It produces a three-by-three output per filter.
+
+For one output location, multiply the selected patch by the kernel and sum over spatial and input-channel axes, then add the filter bias. Moving to another location changes the patch while reusing the filter. A new padding or stride convention changes the indexing contract.
+
+The confusion matrix answers a later question about classification errors. Pick one off-diagonal cell, identify its true/predicted labels, and inspect an image from that cell. Correct synthetic-shape classification does not establish recognition of natural photographs.
+
+### Pixels behind one convolution output
+
+**Predict:** What stays shared when the kernel moves?
+
+![Pixels behind one convolution output](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.
+
+### Pause and reason
+
+What stays shared when the kernel moves?
+
+<details><summary>Compare your reasoning</summary>
+
+The filter weights and bias. The input patch changes. This is different from learning unrelated weights at every spatial location.
+
+</details>
 
 ## Generate images with an explicit label rule
 
@@ -207,7 +235,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:44.342965+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:13.793103+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:

@@ -15,9 +15,25 @@ Let’s turn the slope idea into a learning problem. We have three measurements 
 
 ## The idea
 
-A prediction answers “what value does the model expect?” A loss answers “how far are those predictions from the targets?” For each example, our model predicts $\hat y_i=wx_i$. We subtract the target, square the difference, and average. This gives one number for the whole batch.
+A loss value tells us how the current prediction is scored. Its derivative tells us how a small parameter change affects that score locally. `value_and_grad` returns both so we can inspect progress and choose an update without confusing the two quantities.
 
-JAX’s `value_and_grad` returns that loss and its derivative with respect to the weight. At weight $1$, our model predicts too little, and the gradient is negative. Subtracting a small multiple of that negative number increases the weight toward $2$. Let’s check those steps with the three examples before running the program.
+## Read the value and derivative at the same point
+
+Take $L(w)=(w-2)^2+1$ as a new hand-worked objective. At $w=0$, the loss is $5$ and the derivative is $-4$. A small positive change in the weight should decrease the loss. At $w=2$, the derivative is zero but the loss remains $1$.
+
+The added constant changes every loss value but leaves the derivative unchanged. This is a useful diagnostic: if a derivative implementation changes when you add a parameter-independent constant, investigate the implementation. Equally, a nonzero minimum loss need not mean optimization failed.
+
+When reading a plot of value and slope, compare them at the same horizontal coordinate and respect their different vertical units. The loss is not a gradient norm, and a small loss does not establish that all parameters are close to their intended values.
+
+### Pause and reason
+
+If every loss value is multiplied by $10$, what happens to the gradient?
+
+<details><summary>Compare your reasoning</summary>
+
+It is multiplied by $10$ as well. Unlike adding a constant, scaling the objective changes an unadjusted gradient-descent step. Learning-rate comparisons must account for the loss normalization.
+
+</details>
 
 ## From three residuals to one decision
 
@@ -105,7 +121,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:48.816067+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:16.000318+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211

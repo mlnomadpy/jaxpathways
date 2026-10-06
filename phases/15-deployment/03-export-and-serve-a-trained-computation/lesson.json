@@ -4,13 +4,22 @@
   "minutes": 75,
   "content": {
     "problem": "Your function works in the training process. Let’s make sure it also works after saving and reloading its inference computation. We’ll define one request shape, check a known prediction, and deliberately send an incompatible request. These checks give us a clear contract before adding a service around the model.",
-    "idea": "A serving artifact has an interface: names, shapes, dtypes, preprocessing and output meaning. Serialization captures a staged computation; it does not provide an HTTP server, input validation or an edge runtime. This lesson verifies a local JAX export round trip on CPU. Use trusted artifacts and a compatible runtime; this is not a claim of arbitrary version or hardware portability.",
+    "idea": "Export packages a computation for a supported runtime. The consumer still needs input validation, preprocessing, output meaning and compatibility information. Separate the artifact boundary from the surrounding service.",
     "objectives": [
       "Serialize and reload a fixed-shape JAX inference computation.",
       "Test known values and changed requests independently.",
       "Distinguish export compatibility from service and edge-device readiness."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A serialized computation still needs an interface",
+        "body": "The lesson exports a fixed float32 input of shape \\((1,3)\\) to an output of shape \\((1,2)\\). A Python function may accept a larger batch while that particular exported signature does not. The consumer must follow the artifact's declared contract.\n\nSerialize, load the file again and call the restored computation on new inputs. Comparing only the original in-memory function does not test the exported bytes. Keep artifact hash, environment and tolerance with the result.\n\nIf preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.",
+        "check": {
+          "prompt": "What should happen to a request with the wrong feature count?",
+          "answer": "Reject it at the interface with a clear explanation before inference. Silently reshaping may alter example meaning and does not make the request compatible with the exported signature."
+        }
+      },
       {
         "title": "Freeze the inference boundary",
         "body": "The example closes over trained weights and bias, so those values become part of the exported computation. The single input is float32 \\([1, 3]\\); the output is float32 \\([1, 2]\\). A new weight version requires a new artifact here. For systems that pass weights as inputs, define and version those parameter signatures instead. Remove optimizer state and training-only behavior from this inference boundary."

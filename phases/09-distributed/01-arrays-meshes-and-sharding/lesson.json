@@ -4,8 +4,17 @@
   "minutes": 80,
   "content": {
     "problem": "We can split examples across devices, split features across devices, or keep a full copy on each one. Let’s make those choices visible on four logical CPU devices. You’ll inspect the pieces and see why some reductions must combine results. No cluster is needed, and these observations do not measure accelerator performance.",
-    "idea": "A Mesh names device axes, a PartitionSpec maps array dimensions to those axes, and NamedSharding combines both into a placement description. The numerical array and its placement are separate objects. Correct values do not prove correct placement, and a placement diagram is not proof of performance.",
+    "idea": "Sharding places one global array across a named mesh. Global shape, local shard shape and replication describe different views of the same computation. Make ownership explicit before reasoning about communication.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Compare the global array with each local piece",
+        "body": "A four-by-four array on two devices can be split into two-by-four row shards or four-by-two column shards. Both layouts contain the same global values. Their local operations and communication requirements differ.\n\nReplication gives each participant the full value instead of a disjoint portion. Use explicit labels so duplicated ownership cannot be mistaken for partitioning.\n\nConnect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.",
+        "check": {
+          "prompt": "Must changing row sharding to column sharding change the answer?",
+          "answer": "No. A correct compatible computation preserves the intended global result. Storage and communication can change even when the result agrees."
+        }
+      },
       {
         "title": "Read the mapping from left to right",
         "body": "Start with eight rows and four columns. Our one-dimensional mesh contains four devices along data. `P(\"data\",None)` partitions eight rows into four groups of two and preserves four features per shard. `P(None,\"data\")` leaves rows intact and assigns one of four columns to each device. The same global shape supports both arrangements.\n\nNone means an array dimension is not partitioned by this specification, not that the values are missing. `P()` replicates the whole array. A device mesh axis may not be reused across multiple array dimensions within one PartitionSpec. More complex two-dimensional meshes need distinct axis names and a reason for assigning each dimension.",

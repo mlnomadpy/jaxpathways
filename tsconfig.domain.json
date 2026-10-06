@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": [],
+    "skipLibCheck": true
+  },
+  "include": [
+    "src/lib/html.js",
+    "src/lib/storage.js",
+    "src/lib/http.js",
+    "src/lib/manifests.js",
+    "src/lib/schedule.js",
+    "src/lib/search.js",
+    "src/lib/runtime.js",
+    "src/types/**/*.ts"
+  ]
+}

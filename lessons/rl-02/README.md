@@ -14,7 +14,35 @@ One episode is easy to inspect, but an agent needs many experiences. How do we c
 
 ## The idea
 
-Use vmap for independent environments and scan for dependent time steps. Each environment owns a state; each time step consumes new action keys. The rollout has a time axis and an environment axis, written $(T,B)$. We keep finished episodes in place until the batch horizon ends, recording an active mask before each transition. This makes one array represent exactly $B$ episodes.
+Batched rollouts put independent environments on one axis and time on another. Some environments finish earlier, so masks describe which transitions remain meaningful while arrays keep fixed shapes.
+
+## Keep the array shape fixed while activity changes
+
+Draw one environment per row and time across columns. Mark the transition that terminates an episode, then mark later padding separately. The terminal transition can still earn reward; masking it out too early loses part of the episode.
+
+Carry the next state and activity information explicitly. If the implementation resets finished environments, distinguish that contract from absorbing padding instead of mixing them in one explanation.
+
+The active-count curve decreases while the tensor shape stays fixed. It measures active environments, not shrinking allocation. Verify one environment independently, then permute the batch to check that unrelated trajectories stay independent.
+
+### A terminal transition still counts
+
+**Predict:** Should every cell after the first done flag be treated identically to the transition that caused done?
+
+![A terminal transition still counts](../../phases/12-rl/02-batch-environments-and-scan-rollouts/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.
+
+### Pause and reason
+
+Should every cell after the first done flag be treated identically to the transition that caused done?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The terminating transition can contain valid reward and learning information. Later padding follows the declared terminal policy and should not invent extra transitions.
+
+</details>
 
 ## Give each axis one meaning
 
@@ -242,7 +270,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:26.078276+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:00.989231+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716

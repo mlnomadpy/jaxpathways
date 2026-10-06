@@ -16,9 +16,25 @@ JAX can differentiate your loss, but how can you check the answer independently?
 
 ## The idea
 
-A central finite difference estimates a derivative from nearby function values. For a vector input, perturb one coordinate at a time to build an approximate gradient. Compare with absolute and relative tolerances, rather than demanding exact equality.
+A finite difference estimates a derivative by comparing nearby function values. It gives us an independent check on autodiff, but it introduces its own approximation and floating-point errors. The perturbation must be small enough to be local and large enough to produce a resolvable difference.
 
-The step size trades approximation error against floating-point cancellation. Smaller is not always better. Start with a smooth function and a moderate step in float32. Nondifferentiable points need separate interpretation.
+## Explain why a smaller perturbation can be worse
+
+For a centered difference, evaluate the function on both sides of the point, subtract, and divide by twice the perturbation. With a quadratic, the centered formula has an exact cancellation of its truncation term in real arithmetic. That special case should not be described as a universal error curve for every smooth function.
+
+In floating point, the two function values can become almost indistinguishable as the perturbation shrinks. Subtracting them loses useful information, and dividing by a tiny number amplifies the error. The smallest perturbation is therefore not automatically the best check.
+
+Read the saved error plot using its logarithmic axes and actual minimum region. Keep dtype, parameter scale and tolerance together. Compare several perturbations, then use an analytic derivative where available to decide whether disagreement comes from autodiff or the numerical oracle.
+
+### Pause and reason
+
+A gradient check fails only at the smallest perturbations. What should you try before changing the model?
+
+<details><summary>Compare your reasoning</summary>
+
+Inspect dtype and cancellation, increase the perturbation, and compare across a range. A fragile finite-difference estimate is not sufficient evidence that the autodiff gradient is wrong.
+
+</details>
 
 ## Build an independent derivative estimate
 
@@ -146,7 +162,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:09.118469+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:37.622723+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]

@@ -86,8 +86,6 @@
     padding: 25px;
     margin-top: 32px;
   }
-}
-@media (max-width: 760px) {
   .project-preview li {
     font-size: 14px;
     padding: 10px 0;
@@ -219,13 +217,9 @@
   .project-command > div {
     flex-wrap: wrap;
   }
-}
-@media (max-width: 760px) {
   #project {
     padding-top: 28px;
   }
-}
-@media (max-width: 760px) {
   .project-stages {
     padding-left: 22px;
   }
@@ -284,8 +278,6 @@
     border-radius: 0;
     gap: 20px;
   }
-}
-@media (max-width: 760px) {
   .atlas-home .project-preview li {
     font-size: 14px;
   }
@@ -335,13 +327,9 @@
   .atlas-home .project-preview {
     padding: 30px 24px;
   }
-}
-@media (max-width: 760px) {
   .atlas-home .project-preview h2 {
     font-size: 31px;
   }
-}
-@media (max-width: 760px) {
   .project-stage-links {
     flex-direction: column;
   }

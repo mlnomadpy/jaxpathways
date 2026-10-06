@@ -59,35 +59,23 @@
   .project-section {
     padding: 36px 0;
   }
-}
-@media (max-width: 760px) {
   .project-grid {
     grid-template-columns: 1fr;
     gap: 20px;
   }
-}
-@media (max-width: 760px) {
   .project-copy {
     padding: 22px;
   }
-}
-@media (max-width: 760px) {
   .project-copy h3 {
     font-size: 24px;
   }
-}
-@media (max-width: 760px) {
   .project-copy p {
     font-size: 16px;
   }
-}
-@media (max-width: 760px) {
   .project-drawing {
     min-height: 145px;
     padding: 16px;
   }
-}
-@media (max-width: 760px) {
   .project-drawing :is(svg, img) {
     height: 110px;
   }

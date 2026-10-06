@@ -4,13 +4,22 @@
   "minutes": 90,
   "content": {
     "problem": "A single training run looks excellent. Would another random seed learn the same behavior, and did the evaluation quietly reuse the training data? We will separate randomness used to fit an agent from randomness used to test it, retain per-agent results and compare with policies whose behavior we already understand.",
-    "idea": "There are two sources of randomness: the training procedure produces a policy, then evaluation samples episodes from that frozen policy. Five evaluations of one trained policy do not equal five independent training runs. We train \\(5\\) agents, evaluate each on \\(4\\) reserved streams of \\(512\\) episodes, and report one mean per trained agent. The exact corridor expectation lets us identify sampling error without trusting a smooth graph.",
+    "idea": "A policy's result can vary because training produced a different policy and because evaluation sampled different episodes. A useful comparison records both sources instead of pooling every episode as though it came from one independent training run.",
     "objectives": [
       "Separate training seeds, evaluation streams and individual episodes.",
       "Report per-agent means and variability with an explicit aggregation unit.",
       "Compare a trained policy to uniform and known deterministic baselines without mutating it."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate training randomness from evaluation randomness",
+        "body": "Train several agents with distinct training seeds. Evaluate each on a declared set of held-out conditions. First summarize within-agent episode variability; then compare the results across independently trained agents.\n\nWhen methods share evaluation conditions, paired comparisons can make differences easier to interpret. Preserve that pairing rather than mixing episode identities. A large number of episodes from one trained agent does not replace multiple training seeds.\n\nThe mean-return bars summarize the fixture. Inspect individual seed results before trusting a small average difference. If you add an uncertainty interval, state its unit of resampling and method rather than attaching an unexplained error bar.",
+        "check": {
+          "prompt": "Do a thousand episodes from one trained policy establish training-seed robustness?",
+          "answer": "No. They improve knowledge of that policy's evaluation behavior. Training variability needs independently trained policies."
+        }
+      },
       {
         "title": "Write the protocol before inspecting results",
         "body": "Fix the environment, horizon, training budget and evaluation procedure before seeing the held-out metrics. We use training seeds \\((0,7,23,41,59)\\) and evaluation seeds \\((1000,1001,1002,1003)\\). These seed identifiers are part of this protocol, not proof of statistical independence by themselves. The generator receives separate keys for fitting and testing. Do not change the learning rate after inspecting final test results and still call the same results held out."

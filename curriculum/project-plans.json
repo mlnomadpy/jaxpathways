@@ -1,0 +1,62 @@
+[
+  {
+    "id": "clip-model",
+    "title": "Train a CLIP image–text model",
+    "summary": "Learn paired representations, test zero-shot classification, and qualify both retrieval directions before releasing the encoders.",
+    "trackIds": [
+      "image",
+      "text",
+      "cross-modal"
+    ],
+    "harnessId": "cross-modal-harness",
+    "lessonIds": [
+      "pretraining-03",
+      "networks-04",
+      "transformers-01",
+      "recovery-04",
+      "deployment-05"
+    ],
+    "status": "planned",
+    "source": "projects/clip-model/README.md"
+  },
+  {
+    "id": "siglip-model",
+    "title": "Train and compare a SigLIP model",
+    "summary": "Replace the softmax objective with pairwise sigmoid training. Audit labels, reduction, negatives and distributed gradients against a controlled CLIP baseline.",
+    "trackIds": [
+      "image",
+      "text",
+      "cross-modal"
+    ],
+    "harnessId": "cross-modal-harness",
+    "lessonIds": [
+      "pretraining-03",
+      "optimization-02",
+      "distributed-02",
+      "deployment-05"
+    ],
+    "status": "planned",
+    "source": "projects/siglip-model/README.md"
+  },
+  {
+    "id": "retrieval-system",
+    "title": "Build a measured retrieval service",
+    "summary": "Take a qualified text or cross-modal encoder through exact search, approximate indexes, hybrid retrieval, reranking, evaluation and safe index migration.",
+    "trackIds": [
+      "text",
+      "image",
+      "audio",
+      "cross-modal"
+    ],
+    "harnessId": "cross-modal-harness",
+    "lessonIds": [
+      "pretraining-03",
+      "recovery-01",
+      "deployment-04",
+      "deployment-05",
+      "operations-06"
+    ],
+    "status": "planned",
+    "source": "projects/retrieval-system/README.md"
+  }
+]

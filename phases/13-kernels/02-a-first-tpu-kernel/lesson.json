@@ -4,7 +4,7 @@
   "minutes": 110,
   "content": {
     "problem": "An interpreted kernel can be numerically correct and still violate a TPU layout or compilation restriction. How do we build a genuine TPU launch path without pretending that a CPU test ran on an accelerator? We will implement a fused bias-and-ReLU kernel with separate, enforceable execution modes.",
-    "idea": "The numerical contract is \\(Y_{ij}=\\max(X_{ij}+b_j,0)\\). A matrix tile and a column-bias window enter the kernel, and one output tile is written. CPU interpretation checks this behavior. The same target branch launches Pallas without interpretation only when actual TPU inputs and backend are present.",
+    "idea": "Once a tile's inputs are identified, a kernel performs local arithmetic and writes the corresponding outputs. Bias broadcasting, activation and dtype rules must preserve the declared shape and value contract.",
     "objectives": [
       "Implement a real TPU-targeted Pallas launch with a broadcast BlockSpec.",
       "Specify target layout and float32 compute/output-cast policies.",
@@ -12,6 +12,15 @@
       "Refuse target execution claims when only interpretation is available."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate tile ownership from the local arithmetic",
+        "body": "Take one illustrative row \\([-2,1]\\) and feature bias \\([1,-3]\\). Addition gives \\([-1,-2]\\), and ReLU gives \\([0,0]\\). A bias indexed by row instead of feature can preserve output shape while computing the wrong result.\n\nTrace loads into the tile, the exact broadcast axis, activation and stores. Keep boundary guards visible beside the arithmetic rather than assuming a correct formula guarantees correct indexing.\n\nThe activation plot checks the resulting values. Compare against an independent array implementation on awkward dimensions and negative/positive inputs. CPU interpretation helps test semantics; it does not qualify TPU throughput or prove a particular memory schedule.",
+        "check": {
+          "prompt": "What can a value reference detect that an output-shape assertion cannot?",
+          "answer": "Wrong broadcast axes, incorrect activation order or indexing errors that retain the expected shape. Use distinguishable values so those errors cannot cancel."
+        }
+      },
       {
         "title": "Map each operand according to its meaning",
         "body": "The activation matrix has shape \\((M,N)\\); the bias has shape \\((N,)\\). We reshape the padded bias to \\((1,N_p)\\) and map its block coordinates to \\((0,j)\\), so changing the row-program index does not change the bias window. The output uses \\((i,j)\\) and is written exactly once per tile. This is intentional broadcasting with an explicit contract, unlike accepting accidentally mismatched matrices."

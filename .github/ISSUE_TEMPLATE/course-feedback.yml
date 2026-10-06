@@ -1,0 +1,23 @@
+name: Improve the book
+description: Report a confusing explanation, incorrect result, missing topic or accessibility problem.
+title: "[Feedback] "
+body:
+  - type: textarea
+    id: context
+    attributes:
+      label: Lesson or page and course version
+      description: Paste the page URL and version from the footer. Lesson feedback links fill this in.
+    validations:
+      required: true
+  - type: textarea
+    id: feedback
+    attributes:
+      label: What could we improve?
+      description: Describe the confusing step, expected result or proposed improvement. Include the exact error if code failed. Do not include credentials or private data.
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment (if relevant)
+      description: Python and JAX versions, operating system, device, or browser.

@@ -4,7 +4,7 @@
   "minutes": 80,
   "content": {
     "problem": "JAX can differentiate your loss, but how can you check the answer independently? We’ll nudge one weight a little in each direction and compare the change in loss with the reported gradient. You’ll also see why making the nudge smaller and smaller eventually hurts a floating-point calculation.",
-    "idea": "A central finite difference estimates a derivative from nearby function values. For a vector input, perturb one coordinate at a time to build an approximate gradient. Compare with absolute and relative tolerances, rather than demanding exact equality.\n\nThe step size trades approximation error against floating-point cancellation. Smaller is not always better. Start with a smooth function and a moderate step in float32. Nondifferentiable points need separate interpretation.",
+    "idea": "A finite difference estimates a derivative by comparing nearby function values. It gives us an independent check on autodiff, but it introduces its own approximation and floating-point errors. The perturbation must be small enough to be local and large enough to produce a resolvable difference.",
     "code": "import jax\nimport jax.numpy as jnp\ndef objective(w):\n    return jnp.sum((w - jnp.array([2., -1.])) ** 2)\nw = jnp.array([0.5, 0.25], dtype=jnp.float32)\nh = 1e-2\nbasis = jnp.eye(2)\nfinite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)\nautomatic = jax.grad(objective)(w)\nanalytic = 2 * (w - jnp.array([2., -1.]))\nprint(\"Finite difference:\", finite)\nprint(\"Autodiff:\", automatic)\nassert jnp.allclose(automatic, analytic)\nassert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)",
     "output": "Both gradients are approximately \\([-3., 2.5]\\). The analytic and autodiff gradients agree; finite differences agree within tolerance.",
     "exercise": "Check the gradient again at \\(w=[2., -1.]\\). Explain why this checks a minimum but does not prove correctness everywhere.",
@@ -19,6 +19,15 @@
     "explanation": "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.",
     "diagnosis": "If the finite-difference check fails, sweep several step sizes before changing the model. Inspect dtype, reduction axes, and whether the point crosses a nonsmooth operation.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Explain why a smaller perturbation can be worse",
+        "body": "For a centered difference, evaluate the function on both sides of the point, subtract, and divide by twice the perturbation. With a quadratic, the centered formula has an exact cancellation of its truncation term in real arithmetic. That special case should not be described as a universal error curve for every smooth function.\n\nIn floating point, the two function values can become almost indistinguishable as the perturbation shrinks. Subtracting them loses useful information, and dividing by a tiny number amplifies the error. The smallest perturbation is therefore not automatically the best check.\n\nRead the saved error plot using its logarithmic axes and actual minimum region. Keep dtype, parameter scale and tolerance together. Compare several perturbations, then use an analytic derivative where available to decide whether disagreement comes from autodiff or the numerical oracle.",
+        "check": {
+          "prompt": "A gradient check fails only at the smallest perturbations. What should you try before changing the model?",
+          "answer": "Inspect dtype and cancellation, increase the perturbation, and compare across a range. A fragile finite-difference estimate is not sufficient evidence that the autodiff gradient is wrong."
+        }
+      },
       {
         "title": "Build an independent derivative estimate",
         "body": "Our objective is \\((w_0-2)^2+(w_1+1)^2\\). At \\([0.5, 0.25]\\), the derivative is \\([-3, 2.5]\\). This formula comes from elementary differentiation, so it can check the automatic result without invoking another autodiff API. The function returns a scalar because grad requires a scalar output.\n\nCentral differences probe each coordinate along a basis vector: hold all other coordinates fixed, evaluate at \\(w+h e_i\\) and \\(w-h e_i\\), then divide the difference by \\(2h\\). vmap batches these independent probes; it does not make the approximation exact. In the formula, \\(e_i\\) is a vector with a \\(1\\) in position \\(i\\) and zeros elsewhere. It lets us move just one weight while keeping the others fixed. The symbol \\(\\approx\\) reminds us that this is an estimate.",

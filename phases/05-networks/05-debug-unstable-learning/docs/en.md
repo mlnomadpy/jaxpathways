@@ -15,7 +15,25 @@ The loss is growing. Should you immediately lower the learning rate? Let’s fir
 
 ## The idea
 
-Use a one-weight linear head as a diagnostic microscope. Its squared-loss curvature can be calculated independently, giving a precise learning-rate bound for this fixture. The same instrumentation is useful for the previous classifier, but the bound itself does not transfer to nonlinear networks or Adam.
+Unstable learning is a symptom with several possible causes. Connect the first unexpected value to inputs, forward computation, loss, gradients, optimizer state or the applied update. That ordering turns a vague failure into a testable diagnosis.
+
+## Locate the first broken boundary
+
+Start with a reproducible failing batch. Check inputs and forward loss before differentiating. If the loss is finite but gradients are not, inspect derivative-sensitive operations. If gradients are finite but the next loss explodes, inspect update size and parameter change.
+
+Change one factor at a time and keep the original failing case. Clipping can limit damage without repairing the cause, so test whether the intervention predicts behavior on a changed input or learning rate.
+
+The loss curve shows when behavior diverges. To explain why, add the relevant evidence: gradient norm, parameter norm, update norm and the first nonfinite intermediate. Keep those quantities distinct; a large parameter norm does not automatically imply a large gradient.
+
+### Pause and reason
+
+Why is “the loss is NaN” not yet a diagnosis?
+
+<details><summary>Compare your reasoning</summary>
+
+It names the final symptom. Find the earliest nonfinite value and its producing operation, then test a specific repair against the same failing case.
+
+</details>
 
 ## Derive the gradient and curvature on paper
 
@@ -155,7 +173,7 @@ visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-updat
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:45.874568+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:15.523863+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:

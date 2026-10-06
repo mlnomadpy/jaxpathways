@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "a0c3437bc6b210fac1831e9025102c0430250808474c7fe3041309828233828d",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "4bcb6f222e85e32dd9ec3b416d193db9578d5517aad07a32638a48f6b7cbb896",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:57:52.910477+00:00",
+  "generatedAt": "2026-10-06T15:41:32.307798+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -105,5 +105,42 @@
     ],
     "xlabel": "logical column",
     "ylabel": "logical row"
+  },
+  "diagram": {
+    "title": "Program coordinates and partial boundary tiles",
+    "prediction": "Why test an awkward shape in addition to a tile-aligned shape?",
+    "reading": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
+    "alt": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4.6,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Grid row",
+        "Column 0",
+        "Column 1",
+        "Column 2"
+      ],
+      "rows": [
+        [
+          "0",
+          "ID 0: rows 0\u20131\ncols 0\u20133",
+          "ID 1: rows 0\u20131\ncols 4\u20137",
+          "ID 2: rows 0\u20131\ncols 8\u201310"
+        ],
+        [
+          "1",
+          "ID 3: rows 2\u20133\ncols 0\u20133",
+          "ID 4: rows 2\u20133\ncols 4\u20137",
+          "ID 5: rows 2\u20133\ncols 8\u201310"
+        ],
+        [
+          "2",
+          "ID 6: row 4\ncols 0\u20133",
+          "ID 7: row 4\ncols 4\u20137",
+          "ID 8: row 4\ncols 8\u201310"
+        ]
+      ]
+    }
   }
 }

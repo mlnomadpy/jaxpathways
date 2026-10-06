@@ -15,9 +15,25 @@ A function works until you put a Python if statement inside jit. Why does that c
 
 ## The idea
 
-During tracing, ordinary array inputs stand for values that will be supplied at execution time. Their shapes and dtypes are generally available, but their element values are not ordinary concrete Python values. Python executes while the computation is being staged; JAX array operations are recorded into the staged computation.
+Tracing observes how Python builds an array computation from abstract inputs. Static arguments are part of that program-building decision; dynamic array values are data for the resulting computation. Keep a small call ledger to separate these roles.
 
-A small configuration value can be declared static so Python sees it while tracing. That value then participates in specialization, and changing it may cause a new trace and compilation. Runtime numerical decisions should instead use a supported JAX operation such as lax.cond or an elementwise selection. Static is a configuration choice, not a general cure for tracing errors.
+## Build a call ledger before diagnosing recompilation
+
+Record each call's shape, dtype and static choices next to the observed trace count. Change only values first. Then change one shape, then one static option. This controlled sequence makes a trace increase interpretable; changing everything at once does not.
+
+A Python branch needs a concrete decision during tracing. If the decision is intended to vary with array data at execution time, use an appropriate JAX control-flow operation instead of converting a tracer to a Python boolean. If it genuinely selects a small number of program variants, an explicit static argument may be suitable.
+
+Do not turn every input into a static value to silence an error. Many distinct static values can create many specializations. Trace counts are useful observations, but they are not a universal count of all compilation work or a cross-process cache guarantee.
+
+### Pause and reason
+
+A loop passes a new Python configuration value on every call as a static argument. What should you inspect?
+
+<details><summary>Compare your reasoning</summary>
+
+Inspect whether that value truly changes program structure. If it is ordinary changing data, represent it dynamically where possible. Keep the call ledger and compare traces after changing one factor at a time.
+
+</details>
 
 ## Separate metadata, configuration, and data
 
@@ -98,7 +114,7 @@ The arrows describe dependencies, and the box sizes do not encode runtime. Use t
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:53.383842+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:20.759735+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0

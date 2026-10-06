@@ -4,13 +4,22 @@
   "minutes": 85,
   "content": {
     "problem": "One episode is easy to inspect, but an agent needs many experiences. How do we collect a batch without mixing time, environments or random streams? We will turn the previous transition into a fixed-shape rollout and prove that its padded rows cannot become training evidence.",
-    "idea": "Use vmap for independent environments and scan for dependent time steps. Each environment owns a state; each time step consumes new action keys. The rollout has a time axis and an environment axis, written \\((T,B)\\). We keep finished episodes in place until the batch horizon ends, recording an active mask before each transition. This makes one array represent exactly \\(B\\) episodes.",
+    "idea": "Batched rollouts put independent environments on one axis and time on another. Some environments finish earlier, so masks describe which transitions remain meaningful while arrays keep fixed shapes.",
     "objectives": [
       "Build a scan over vmapped transitions with explicit key ownership.",
       "Reconstruct episode returns and reward-to-go from padded trajectories.",
       "Verify the live-transition mask and distinguish batch dimensions from time dimensions."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Keep the array shape fixed while activity changes",
+        "body": "Draw one environment per row and time across columns. Mark the transition that terminates an episode, then mark later padding separately. The terminal transition can still earn reward; masking it out too early loses part of the episode.\n\nCarry the next state and activity information explicitly. If the implementation resets finished environments, distinguish that contract from absorbing padding instead of mixing them in one explanation.\n\nThe active-count curve decreases while the tensor shape stays fixed. It measures active environments, not shrinking allocation. Verify one environment independently, then permute the batch to check that unrelated trajectories stay independent.",
+        "check": {
+          "prompt": "Should every cell after the first done flag be treated identically to the transition that caused done?",
+          "answer": "No. The terminating transition can contain valid reward and learning information. Later padding follows the declared terminal policy and should not invent extra transitions."
+        }
+      },
       {
         "title": "Give each axis one meaning",
         "body": "For \\(T=8\\) and \\(B=64\\), the reward array has shape \\((8,64)\\). Summing axis zero gives one return per episode. Summing axis one gives total reward at each time index across the batch, a different statistic. vmap maps reset and step over environments; scan threads the complete batch of states through time. The carry has the same structure, shapes and dtypes at every iteration."
@@ -134,6 +143,47 @@
         "code": "theta = jnp.zeros(3)\nfinal, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)\nassert records['reward'].shape == (8, 64)\nassert bool(final.done.all())\nassert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))\nassert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))\nepisode_returns = records['reward'].sum(axis=0)\nprint('return mean:', float(episode_returns.mean()))\nprint('active environments by transition:', records['active'].sum(axis=1))",
         "explanation": "Exactly one ending event and zero padded rewards are stronger checks than a plausible mean return."
       }
-    ]
+    ],
+    "diagram": {
+      "title": "A terminal transition still counts",
+      "prediction": "Should every cell after the first done flag be treated identically to the transition that caused done?",
+      "reading": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
+      "alt": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 4.1,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "Environment",
+          "Step 0",
+          "Step 1",
+          "Step 2",
+          "Step 3"
+        ],
+        "rows": [
+          [
+            "A",
+            "active",
+            "terminal\n+ reward",
+            "padding",
+            "padding"
+          ],
+          [
+            "B",
+            "active",
+            "active",
+            "terminal\n+ reward",
+            "padding"
+          ],
+          [
+            "C",
+            "active",
+            "active",
+            "active",
+            "active"
+          ]
+        ]
+      }
+    }
   }
 }

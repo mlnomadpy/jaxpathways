@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "arrays-02",
-  "contentHash": "c36e9197276dab539ebeb183bea158a7e84e0384a15c5b1c61fb15894f20b389",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "bf89c41fadbb106d3fa152d3590f0c14c589de1257c36aedad49a48890724c39",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:23:56.794443+00:00",
+  "generatedAt": "2026-10-06T15:41:22.230172+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -37,5 +37,48 @@
       "feature 2"
     ],
     "unit": "added bias"
+  },
+  "diagram": {
+    "title": "Align axes before reducing",
+    "prediction": "Why is checking that the loss is scalar insufficient?",
+    "reading": "Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted \\((n,n)\\) intermediate. Each row describes a different shape contract.",
+    "alt": "Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted \\((n,n)\\) intermediate. Each row describes a different shape contract.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4.3,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Purpose",
+        "Left",
+        "Right aligned",
+        "Result"
+      ],
+      "rows": [
+        [
+          "Feature bias",
+          "(2, 3)",
+          "(1, 3)",
+          "(2, 3)"
+        ],
+        [
+          "Row offsets",
+          "(2, 3)",
+          "(2, 1)",
+          "(2, 3)"
+        ],
+        [
+          "Aligned residual",
+          "(n,)",
+          "(n,)",
+          "(n,)"
+        ],
+        [
+          "Wrong target axis",
+          "(n, 1)",
+          "(1, n)",
+          "(n, n)"
+        ]
+      ]
+    }
   }
 }

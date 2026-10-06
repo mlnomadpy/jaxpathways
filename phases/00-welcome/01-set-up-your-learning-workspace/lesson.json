@@ -3,7 +3,7 @@
   "id": "welcome-01",
   "minutes": 40,
   "content": {
-    "idea": "A Python file contains instructions for Python to execute. A terminal is the application where you tell your computer to run that file. The terminal works inside a particular folder, called its working directory. We will check that folder before running anything.\n\nJAX and NumPy are additional Python packages. We will install them inside a project-specific folder named .venv, so they stay separate from packages used by other projects. On macOS/Linux, activation makes the short command python select that environment. On Windows, the commands below select its Python directly, so activation is unnecessary. Each step includes a result to check before you move on.",
+    "idea": "Your first goal is a small, repeatable result: save a Python file, run it with the intended Python environment, and explain its output. A terminal accepts commands; Python executes the program; JAX is a package that Python imports. Keeping those three roles separate makes setup errors much easier to locate.",
     "code": "import os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\nimport platform\nimport jax\nimport numpy as np\nprint(\"Python:\", platform.python_version())\nprint(\"JAX:\", jax.__version__)\nprint(\"NumPy:\", np.__version__)\nprint(\"Backend:\", jax.default_backend())\nprint(\"Devices:\", jax.devices())\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\nprint(\"Sum:\", float(x.sum()))\nassert float(x.sum()) == 6.0",
     "output": "The package versions match the pins, Backend is cpu, and the last line is Sum: \\(6.0\\). The exact Python patch and CPU device text depend on your installation.",
     "exercise": "Edit the starter as shown in Step \\(6\\): change the array length from \\(4\\) to \\(6\\) and the expected sum from \\(6\\) to \\(15\\). Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.",
@@ -28,6 +28,15 @@
       "title": "Download the beginner workspace"
     },
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Follow a file from saving to running",
+        "body": "Imagine that your editor shows first_experiment.py, but the terminal says the file does not exist. The program has not reached JAX yet. First save the file, check its full filename, and compare its folder with the terminal's working folder. A file visible in an editor can still be unsaved or stored elsewhere.\n\nNow suppose Python finds the file but cannot import JAX. That is a different boundary: the selected interpreter cannot find the package. Check the interpreter path and its environment before installing anything again. On Windows, the commands below select the environment's Python directly; shell activation is not required.\n\nOnce the calculation runs, retain the command and printed result together. Tomorrow, the command tells you how to reproduce the result; a screenshot of the number alone cannot identify the file or environment that produced it.",
+        "check": {
+          "prompt": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
+          "answer": "Compare the Python executables used by the notebook kernel and terminal. They can belong to different environments. Install into, or select, the intended environment only after identifying that difference."
+        }
+      },
       {
         "title": "1. Download and unpack your workspace",
         "body": "Use the “Download the beginner workspace” button above. Open your Downloads folder and unzip jax-start-here.zip. On Windows, right-click it and choose Extract All; on macOS, double-click it. Open the extracted jax-start-here folder. Do not work inside the ZIP preview.\n\nYou should see first_experiment.py, requirements-cpu.txt, and START-HERE.md. first_experiment.py is the program you will run. requirements-cpu.txt lists the package versions to install. START-HERE.md is a copy of these instructions. Keep your own files alongside them, outside .venv. You do not need to clone the repository for this lesson."
@@ -180,6 +189,71 @@
         "JAX executes on CPU",
         "Read sum and assertion"
       ]
+    },
+    "diagram": {
+      "title": "Where the first result comes from",
+      "prediction": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
+      "reading": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
+      "alt": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 6,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "0",
+            "x": 5,
+            "y": 1,
+            "label": "Working folder + terminal command",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "1",
+            "x": 5,
+            "y": 2.7,
+            "label": "Selected Python interpreter / environment",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "2",
+            "x": 5,
+            "y": 4.4,
+            "label": "Saved first_experiment.py + JAX import",
+            "tone": "data",
+            "w": 8,
+            "h": 1.05
+          },
+          {
+            "id": "3",
+            "x": 5,
+            "y": 6.1,
+            "label": "Computed sum + assertion + device receipt",
+            "tone": "result",
+            "w": 8,
+            "h": 1.05
+          }
+        ],
+        "edges": [
+          {
+            "from": "0",
+            "to": "1"
+          },
+          {
+            "from": "1",
+            "to": "2"
+          },
+          {
+            "from": "2",
+            "to": "3"
+          }
+        ],
+        "height": 7,
+        "width": 10
+      }
     }
   }
 }

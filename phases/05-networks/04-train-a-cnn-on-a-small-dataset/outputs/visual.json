@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-04",
-  "contentHash": "5f79c4633395adae74d1ce54d903b7679eb6ac0e042ba62154f36b5389b66e08",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "28cd2658e8665913848f22f7ac6a8fcc447788c177417c8d9ff48bc557681394",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T22:15:33.446345+00:00",
+  "generatedAt": "2026-10-06T15:41:25.924139+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -127,5 +127,16 @@
         "unit": "example count"
       }
     ]
+  },
+  "diagram": {
+    "title": "Pixels behind one convolution output",
+    "prediction": "What stays shared when the kernel moves?",
+    "reading": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
+    "alt": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 5.5,
+    "panel": {
+      "kind": "receptive-field"
+    }
   }
 }

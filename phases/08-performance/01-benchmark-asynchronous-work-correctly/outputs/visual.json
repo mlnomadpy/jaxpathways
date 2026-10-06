@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-01",
-  "contentHash": "b83b877686dcadf3fafc52a191c4f8aa2a3ac1e37979beacced37ea022e433ce",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "bd50a8605ca20e5d7ca445422e66a8fb452808b3f4740839d0b30e1768f2c744",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:38:25.947954+00:00",
+  "generatedAt": "2026-10-06T15:41:28.905544+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +12,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.03564854199066758,\n  \"warm_samples_seconds\": [\n    4.0624989196658134e-05,\n    1.950003206729889e-05,\n    1.1083902791142464e-05,\n    1.1167023330926895e-05,\n    1.0167015716433525e-05,\n    9.833835065364838e-06,\n    1.037493348121643e-05\n  ],\n  \"warm_median_seconds\": 1.1083902791142464e-05,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
+  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.03063633292913437,\n  \"warm_samples_seconds\": [\n    3.220932558178902e-05,\n    1.1833850294351578e-05,\n    8.250121027231216e-06,\n    7.874798029661179e-06,\n    7.665716111660004e-06,\n    6.541144102811813e-06,\n    7.582828402519226e-06\n  ],\n  \"warm_median_seconds\": 7.874798029661179e-06,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
   "data": {
     "kind": "panels",
     "panels": [
@@ -27,7 +27,7 @@
           {
             "label": "synchronized call",
             "y": [
-              0.03564854199066758
+              0.03063633292913437
             ]
           }
         ]
@@ -50,17 +50,28 @@
           {
             "label": "synchronized call",
             "y": [
-              4.0624989196658134e-05,
-              1.950003206729889e-05,
-              1.1083902791142464e-05,
-              1.1167023330926895e-05,
-              1.0167015716433525e-05,
-              9.833835065364838e-06,
-              1.037493348121643e-05
+              3.220932558178902e-05,
+              1.1833850294351578e-05,
+              8.250121027231216e-06,
+              7.874798029661179e-06,
+              7.665716111660004e-06,
+              6.541144102811813e-06,
+              7.582828402519226e-06
             ]
           }
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Time the completed result",
+    "prediction": "Where should synchronization occur in completed-result latency measurement?",
+    "reading": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
+    "alt": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 3.8,
+    "panel": {
+      "kind": "timeline"
+    }
   }
 }

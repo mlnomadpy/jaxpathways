@@ -15,9 +15,35 @@ Suppose a simulator keeps part of its current value and adds a new input at each
 
 ## The idea
 
-lax.scan expresses a loop as a state transition. Each step receives the carry and one input, then returns a new carry and one output. Scan combines these outputs and returns the final carry. This separates state carried through time from values recorded at each step.
+A scan separates the state carried between steps from the outputs collected at each step. This is useful whenever the same rule repeats over time while the state keeps a fixed structure, shape and dtype.
 
-The carry must keep a consistent structure, shape, and dtype. Unlike a long Python loop traced inside jit, scan represents the repeated computation as a loop operation. It is useful for recurrent models, simulations, and repeated optimization steps.
+## Unroll three steps before compiling the loop
+
+For a separate hand-worked recurrence, start with carry $0$ and inputs $[1,2,3]$. Let each step add its input to the carry and emit the new carry. The successive carries are $1,3,6$; the final carry is $6$, while the stacked outputs are $[1,3,6]$.
+
+Those two returned objects answer different questions. Keeping only the final carry discards the intermediate outputs. Keeping outputs does not mean the carry itself grows on each iteration. A fixed carry contract is what makes the repeated computation structured.
+
+Trace one horizontal state edge and one downward output edge in the diagram. When adapting a Python loop, write down which variables belong on each edge before translating the loop to `lax.scan`.
+
+### Carry moves through time; outputs are collected
+
+**Predict:** What changes if the step emits the old carry instead of the new carry?
+
+![Carry moves through time; outputs are collected](../../phases/03-state/03-compiled-loops-with-lax-scan/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+An additive scan starts with carry $0$ and inputs $1,2,3$. Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry $6$ and outputs $[1,3,6]$ are different return values. Arrow lengths do not represent runtime.
+
+### Pause and reason
+
+What changes if the step emits the old carry instead of the new carry?
+
+<details><summary>Compare your reasoning</summary>
+
+The final carry is still $6$, but outputs become $[0,1,3]$. A final-state check alone would miss this off-by-one output convention.
+
+</details>
 
 ## Separate carry from recorded outputs
 
@@ -134,7 +160,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:58.095458+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:25.588548+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]

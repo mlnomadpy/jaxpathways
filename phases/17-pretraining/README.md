@@ -24,19 +24,19 @@ Check whether hidden pixels entered the encoder or were copied into the predicti
 
 </details>
 
-Review: [Masked language modeling: predict hidden tokens](01-mlm/docs/en.md).
+Review: [Masked image modeling: reconstruct missing patches](02-mim/docs/en.md).
 
 ### Build in stages
 
-1. **Masked language modeling: predict hidden tokens.** Masked language modeling predicts selected original tokens from a corrupted input. It differs from causal next-token prediction: allowed context can come from both sides. Our repeated-token fixture makes the correct answer inspectable; this is a small objective and attention experiment, not a BERT reproduction or a language benchmark.
+1. **Masked language modeling: predict hidden tokens.** Trace clean targets, corrupted IDs, attention axes and selected counts. Reproduce unequal-mask loss with a host calculation, derive the full logit gradient, and explain the final probability matrix.
 
    Lessons: [Masked language modeling: predict hidden tokens](01-mlm/docs/en.md).
 
-2. **Masked image modeling: reconstruct missing patches.** We split small synthetic images into patches, expose only two patches to a linear encoder/decoder map and train on the other two. This teaches masking, spatial order and reconstruction accounting. It is not a full ViT masked autoencoder; the simple image generator makes independent checks possible.
+2. **Masked image modeling: reconstruct missing patches.** Verify every patch on a rectangular RGB input, intervene on hidden pixels, and explain an ambiguous target that no deterministic decoder can reconstruct perfectly. Compare actual hidden targets with predictions.
 
    Lessons: [Masked image modeling: reconstruct missing patches](02-mim/docs/en.md).
 
-3. **Contrastive learning: views, positives and negatives.** The lab trains a shared linear encoder with a symmetric cross-view contrastive loss. Each row’s paired view is its positive and other rows are negatives. This resembles the paired objective used in cross-modal retrieval; it is not the full SimCLR denominator, which includes additional same-view negatives.
+3. **Contrastive learning: views, positives and negatives.** Derive a two-pair loss, change temperature without changing ranking, compare encoder gradients with finite differences, and diagnose broken identity or duplicate false negatives from the similarity matrix.
 
    Lessons: [Contrastive learning: views, positives and negatives](03-contrastive/docs/en.md).
 
@@ -56,7 +56,7 @@ No. Decide positives by source or semantic identity and use a compatible objecti
 
 ### Decide what is ready
 
-Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits.
+Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption.
 
 ### Further work
 

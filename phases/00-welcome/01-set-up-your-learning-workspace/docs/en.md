@@ -19,9 +19,35 @@ Let’s get your first JAX experiment running. You do not need to know Git or te
 
 ## The idea
 
-A Python file contains instructions for Python to execute. A terminal is the application where you tell your computer to run that file. The terminal works inside a particular folder, called its working directory. We will check that folder before running anything.
+Your first goal is a small, repeatable result: save a Python file, run it with the intended Python environment, and explain its output. A terminal accepts commands; Python executes the program; JAX is a package that Python imports. Keeping those three roles separate makes setup errors much easier to locate.
 
-JAX and NumPy are additional Python packages. We will install them inside a project-specific folder named .venv, so they stay separate from packages used by other projects. On macOS/Linux, activation makes the short command python select that environment. On Windows, the commands below select its Python directly, so activation is unnecessary. Each step includes a result to check before you move on.
+## Follow a file from saving to running
+
+Imagine that your editor shows first_experiment.py, but the terminal says the file does not exist. The program has not reached JAX yet. First save the file, check its full filename, and compare its folder with the terminal's working folder. A file visible in an editor can still be unsaved or stored elsewhere.
+
+Now suppose Python finds the file but cannot import JAX. That is a different boundary: the selected interpreter cannot find the package. Check the interpreter path and its environment before installing anything again. On Windows, the commands below select the environment's Python directly; shell activation is not required.
+
+Once the calculation runs, retain the command and printed result together. Tomorrow, the command tells you how to reproduce the result; a screenshot of the number alone cannot identify the file or environment that produced it.
+
+### Where the first result comes from
+
+**Predict:** The notebook imports JAX, but the terminal script does not. What should you compare first?
+
+![Where the first result comes from](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.
+
+### Pause and reason
+
+The notebook imports JAX, but the terminal script does not. What should you compare first?
+
+<details><summary>Compare your reasoning</summary>
+
+Compare the Python executables used by the notebook kernel and terminal. They can belong to different environments. Install into, or select, the intended environment only after identifying that difference.
+
+</details>
 
 ## 1. Download and unpack your workspace
 
@@ -243,7 +269,7 @@ If your result is missing, walk backward through the boxes: did Python run the s
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:36.259152+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:03.029200+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3

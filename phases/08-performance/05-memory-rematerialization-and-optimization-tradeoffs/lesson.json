@@ -4,7 +4,7 @@
   "minutes": 100,
   "content": {
     "problem": "A model runs out of memory during differentiation. Someone suggests checkpointing every layer. Will that change the answer, and will it necessarily reduce this program’s memory? We will compare gradients, inspect saved residuals and measure compiled estimates and timings before making that decision.",
-    "idea": "Reverse-mode differentiation reuses intermediate values from the forward calculation. Rematerialization lets selected values be recomputed during the backward pass instead of retained. That changes a time–memory tradeoff, while the mathematical derivative should remain the same for this pure deterministic function. Saved autodiff residuals, compiler buffer estimates and measured peak device memory are three different kinds of evidence.",
+    "idea": "Reverse-mode differentiation needs information from forward execution. Rematerialization recomputes some of that information instead of retaining it. This exchanges storage for work inside a computation and is distinct from saving a training checkpoint to disk.",
     "objectives": [
       "Explain why reverse-mode differentiation needs forward intermediates.",
       "Compare ordinary and rematerialized gradients with an independent reverse recurrence.",
@@ -12,6 +12,15 @@
       "Measure warm gradient calls and explain why a memory benefit is workload-dependent."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Follow an intermediate from creation to last use",
+        "body": "Imagine a backward rule needs an intermediate from the first operation in a chain. One strategy retains it; another reruns enough forward work to reconstruct it. Draw the value's lifetime and mark which computation is repeated.\n\nSaved autodiff entries, estimated bytes and compiled peak memory are different quantities. Fusion, temporary buffers and reuse can change the compiled memory picture even when a source-level list of saved values changes.\n\nRead each plot with its own units. Fewer entries alone do not establish lower peak device memory or faster execution. Use the storage model to form a hypothesis, then inspect compiler information and actual target behavior.",
+        "check": {
+          "prompt": "Why might fewer saved values leave compiled memory unchanged?",
+          "answer": "The compiler may already eliminate or reuse them, while other temporaries dominate peak usage. Source-level counts do not fully determine compiled buffer lifetimes."
+        }
+      },
       {
         "title": "Follow one layer backward",
         "body": "Our layer multiplies a vector by a fixed matrix and applies tanh. In the backward pass, the derivative of tanh uses the forward output. If that output is retained, the derivative can reuse it. If selected intermediates are discarded, the program must reconstruct the needed value from retained inputs and weights.\n\nFor layer output \\(h\\), the local derivative factor is \\(1-h^2\\). Multiplying the incoming cotangent by that factor, then applying the transposed weight matrix, propagates sensitivity to the preceding vector. The NumPy reference implements this recurrence explicitly instead of calling autodiff.",

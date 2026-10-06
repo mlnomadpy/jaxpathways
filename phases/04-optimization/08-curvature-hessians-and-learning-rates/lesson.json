@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "Why can the same learning rate crawl along one direction and explode along another? A gradient tells us the local slope. Curvature tells us how quickly that slope changes. We will use a two-dimensional bowl whose behavior can be predicted exactly.",
-    "idea": "The Hessian is the matrix of second derivatives. For a quadratic bowl it is constant, so each principal direction behaves like a separate one-dimensional update. This lets us derive a safe range for a learning rate and understand the effect of uneven feature scales.",
+    "idea": "Curvature describes how quickly the gradient changes as we move. A direction with high curvature can overshoot under a learning rate that makes slow progress in a flatter direction. Contours make this imbalance easier to see than loss alone.",
     "objectives": [
       "Use curvature to explain learning-rate stability, slow directions and why a zero gradient need not be a minimum.",
       "Read a bowl through its curvature",
@@ -16,6 +16,15 @@
       "Distinguish a minimum from a stationary point"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Why one learning rate must respect the steep direction",
+        "body": "For the illustrative quadratic \\(L(x,y)=(x^2+10y^2)/2\\), a gradient step multiplies the coordinates by \\(1-\\eta\\) and \\(1-10\\eta\\). Here \\(\\eta\\) is the learning rate. With \\(\\eta=0.1\\), the steep coordinate reaches zero in one exact-arithmetic step while the other shrinks by \\(0.9\\).\n\nWith \\(\\eta=0.25\\), the steep coordinate is multiplied by \\(-1.5\\): it changes sign and grows in magnitude. The flatter coordinate still shrinks, so observing one coordinate could make the update look healthy while the total objective diverges.\n\nSketch narrow elliptical contours for this quadratic and mark the first two iterates. The saved coordinate plot shows how each direction progresses. Keep the objective coefficients, initial point and rate labels aligned when comparing this calculation with a trajectory; a path from another quadratic would tell a different story.",
+        "check": {
+          "prompt": "For this quadratic, what condition on a positive learning rate contracts both coordinates?",
+          "answer": "Require \\(\\lvert1-10\\eta\\rvert<1\\) and \\(\\lvert1-\\eta\\rvert<1\\). For a positive rate, both hold when \\(0<\\eta<0.2\\). At the boundary the steep coordinate can oscillate without shrinking."
+        }
+      },
       {
         "title": "Read a bowl through its curvature",
         "body": "Consider \\(L(w)=\\tfrac12(w_0^2+10w_1^2)\\). Its gradient is \\((w_0,10w_1)\\), and its Hessian is diagonal with entries \\(1\\) and \\(10\\). Moving equally far along the second axis changes the slope ten times as much. An eigenvector of a matrix keeps its direction when multiplied by that matrix; its eigenvalue is the scale factor. Here the coordinate axes are eigenvectors, and their eigenvalues are those diagonal entries.",

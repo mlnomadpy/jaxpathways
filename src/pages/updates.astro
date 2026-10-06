@@ -1,0 +1,105 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import snapshots from '../../curriculum/release-snapshots.json';
+import { siteUrl } from '../lib/urls.js';
+---
+
+<SiteLayout
+  title="Course updates & version history — JAX Pathways"
+  description="See which JAX lessons and phases changed, read release notes, and revisit updated material without losing learning progress."
+>
+  <main id="main" class="updates-page">
+    <p class="edition">The living book · by Taha Bouhsine</p>
+    <h1>What changed in the course.</h1>
+    <p>
+      Each release records the content of every lesson and phase. Revisit what changed when it is
+      useful to you; your saved checkpoints and exercise progress stay intact.
+    </p>
+    <p>
+      Returning readers see an update notice in this browser. Lesson and phase notices compare the
+      material with your last visit. These notices use local browser storage and do not send email
+      or synchronize across devices.
+    </p>
+    <p>
+      Version tracking begins with v0.2.0. Earlier edits do not have a recorded revision history.
+    </p>
+    {snapshots.map((release) => (
+      <article id={`v${release.version}`}>
+        <p class="edition">
+          v{release.version} · <time datetime={release.date}>{release.date}</time>
+        </p>
+        <h2>{release.notes.title}</h2>
+        <p>{release.notes.summary}</p>
+        <ul>
+          {release.notes.changes.map((change) => (
+            <li>{change}</li>
+          ))}
+        </ul>
+        <h3>Phases in this revision</h3>
+        <ul class="updated-phases">
+          {release.changedPhases.map((id) => (
+            <li>
+              <a href={siteUrl(`phase-guides/${id}.html`)}>
+                {release.phases[id as keyof typeof release.phases].title}
+              </a>
+            </li>
+          ))}
+        </ul>
+        <details>
+          <summary>See the {release.changedLessons.length} revised lessons</summary>
+          <ul>
+            {release.changedLessons.map((id) => (
+              <li>
+                <a href={siteUrl(`lesson-${id}.html`)}>
+                  {release.lessons[id as keyof typeof release.lessons].title}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      </article>
+    ))}
+    <SiteFooter />
+  </main>
+</SiteLayout>
+<style>
+  .updates-page {
+    max-width: 960px;
+    margin: 48px auto;
+    padding: 0 6%;
+  }
+  h1 {
+    font: 700 clamp(32px, 5vw, 52px)/1.15 var(--ui);
+    letter-spacing: -0.04em;
+  }
+  p,
+  li {
+    line-height: 1.8;
+  }
+  article {
+    border-top: 1px solid var(--line);
+    margin-top: 40px;
+    padding-top: 24px;
+  }
+  .updated-phases {
+    columns: 2;
+    column-gap: 40px;
+  }
+  li {
+    break-inside: avoid;
+  }
+  summary {
+    cursor: pointer;
+    min-height: 44px;
+    padding-block: 12px;
+    color: var(--blue);
+  }
+  @media (max-width: 600px) {
+    .updated-phases {
+      columns: 1;
+    }
+  }
+</style>

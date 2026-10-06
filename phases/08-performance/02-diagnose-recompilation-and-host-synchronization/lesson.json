@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "A new batch size makes one call pause; reading a metric makes another loop wait. Those delays can look similar, but they have different causes. We’ll record the shapes, dtypes and static choices of each call, then inspect where Python asks for device values. The evidence will guide the change.",
-    "idea": "A jitted program is specialized to argument properties such as shape and dtype and to values explicitly declared static. Changing array contents while keeping their signature usually reuses an existing specialization; changing shape or static metadata can require a new one. A Python diagnostic inside the function observes tracing, not device execution or the number of compiled executables.\n\nA host read such as `float(array)` needs the scalar value and therefore introduces a completion boundary. Moving that read changes what can remain in a device-side computation chain. It does not guarantee faster execution on this small CPU example.",
+    "idea": "Slow steps can come from preparing new program specializations or from waiting for already-compiled work. Use a controlled call ledger and timing boundaries to separate those causes.",
     "objectives": [
       "Record shapes, dtypes and dynamic/static choices beside observed tracing.",
       "Separate Python trace diagnostics from compilation evidence.",
@@ -15,6 +15,15 @@
       "Compare per-step host consumption with one final host consumption while checking equivalent results."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Distinguish new tracing from host waiting",
+        "body": "Change only array values while keeping shapes, dtypes and static choices fixed. Then change one signature component and record the observed trace behavior. Changing everything together makes the cause ambiguous.\n\nInspect host reads and logging next. Converting device results into Python values can force a wait even when no retracing occurs. That delay needs a different intervention from reducing signature variation.\n\nTrace counts describe observed Python tracing. They are not a universal count of compiler work or a guarantee of cache reuse after restart. Combine the ledger with a trace of completed work before deciding which change improves the actual workload.",
+        "check": {
+          "prompt": "If the trace count stays constant but a step is slow, what should you inspect?",
+          "answer": "Inspect synchronization, transfers, data preparation and logging. A stable trace count does not rule out those boundaries."
+        }
+      },
       {
         "title": "A call signature is different from its numerical data",
         "body": "Our score is the sum of squared scaled inputs. With \\(x=[0, \\ldots, 7]\\) and gain \\(1\\), the answer is \\(140\\); with gain \\(2\\) it becomes \\(560\\). Passing a float32 scalar gain keeps its abstract shape and dtype unchanged when the value changes. The transformed computation can read that value at execution time.\n\nAn array of twelve elements has a different shape from the eight-element array. Ordinary jit specializes to these shapes, so this is a plausible cause of new staging work. A ledger records the actual calls before attributing a pause. Sharding, compiler options, callable identity and other context can matter too; the ledger is a diagnosis aid, not a full cache-key specification.",

@@ -4,13 +4,22 @@
   "minutes": 45,
   "content": {
     "problem": "Your notebook imports JAX successfully, but is the prediction actually running on a TPU? We will build a portable device check with an independent numerical answer, then require the requested backend so an unavailable accelerator cannot silently become a successful CPU demonstration.",
-    "idea": "Moving to an accelerator has three separate checks: the runtime can discover the requested device, the inputs and completed result live there, and the arithmetic agrees with a reference. We execute the small CPU reference here and supply the exact TPU execution path for an existing supported runtime.",
+    "idea": "Moving an experiment to a TPU gives us two questions: did it calculate the intended result, and did it actually execute on the requested device? We answer the first with an independent numerical reference and the second with an observed device receipt.",
     "objectives": [
       "Verify the device of a completed prediction and its independent numerical reference.",
       "Run an explicit TPU target path that fails when TPU is unavailable.",
       "Separate installation, placement and numerical evidence in a reproducibility report."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Check arithmetic and placement separately",
+        "body": "Consider a prediction that adds a scalar bias after a dot product. Reducing the bias by \\(0.25\\) should reduce every prediction by \\(0.25\\), whatever compatible device performs the computation. That is a numerical invariant you can derive before running.\n\nNow inspect where the completed result resides. A correct NumPy comparison on CPU does not show that a TPU was selected. Conversely, a TPU device label does not show that the formula or input data was correct. Keep both checks.\n\nWait for the result before recording completion or timing. A returned array handle can precede finished device work. Preserve the requested platform, observed platform, environment and error tolerance alongside the values.",
+        "check": {
+          "prompt": "The values match NumPy but the requested TPU run reports a CPU result. Which part passed?",
+          "answer": "The arithmetic comparison passed. The requested placement did not. Investigate runtime/device selection instead of treating the numerical match as TPU validation."
+        }
+      },
       {
         "title": "Carry a prediction, not just an installation",
         "body": "We will move one small function between runtimes: a matrix-vector prediction with a scalar bias. Each row is an observation; three columns are three features. The weights are fixed so we can calculate the answer independently. For the first row, \\([0,1/8,2/8]\\), the prediction is \\(0-1/32+1/4+1/8=11/32\\). A working package import is useful, but it does not establish where this computation finished.",

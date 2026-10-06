@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="460.8pt" viewBox="0 0 576 460.8" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 460.8 
+L 576 460.8 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 288 104.079203 
+Q 288 123.196617 288 140.413372 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 135.213372 
+L 288 140.413372 
+L 285.4 135.213372 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 288 214.530515 
+Q 288 233.647929 288 250.864684 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 245.664684 
+L 288 250.864684 
+L 285.4 245.664684 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 288 324.981827 
+Q 288 344.099241 288 361.315996 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 356.115996 
+L 288 361.315996 
+L 285.4 356.115996 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 62.85019 32.562209 
+L 513.14981 32.562209 
+Q 517.139807 32.562209 517.139807 37.110204 
+L 517.139807 98.832996 
+Q 517.139807 103.380991 513.14981 103.380991 
+L 62.85019 103.380991 
+Q 58.860193 103.380991 58.860193 98.832996 
+L 58.860193 37.110204 
+Q 58.860193 32.562209 62.85019 32.562209 
+z
+" clip-path="url(#p640006c78a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 62.85019 143.013521 
+L 513.14981 143.013521 
+Q 517.139807 143.013521 517.139807 147.561516 
+L 517.139807 209.284308 
+Q 517.139807 213.832303 513.14981 213.832303 
+L 62.85019 213.832303 
+Q 58.860193 213.832303 58.860193 209.284308 
+L 58.860193 147.561516 
+Q 58.860193 143.013521 62.85019 143.013521 
+z
+" clip-path="url(#p640006c78a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 62.85019 253.464833 
+L 513.14981 253.464833 
+Q 517.139807 253.464833 517.139807 258.012828 
+L 517.139807 319.73562 
+Q 517.139807 324.283615 513.14981 324.283615 
+L 62.85019 324.283615 
+Q 58.860193 324.283615 58.860193 319.73562 
+L 58.860193 258.012828 
+Q 58.860193 253.464833 62.85019 253.464833 
+z
+" clip-path="url(#p640006c78a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 62.85019 363.916145 
+L 513.14981 363.916145 
+Q 517.139807 363.916145 517.139807 368.46414 
+L 517.139807 430.186932 
+Q 517.139807 434.734927 513.14981 434.734927 
+L 62.85019 434.734927 
+Q 58.860193 434.734927 58.860193 430.186932 
+L 58.860193 368.46414 
+Q 58.860193 363.916145 62.85019 363.916145 
+z
+" clip-path="url(#p640006c78a)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(208.120313 64.564163)">Real activations + weights</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(172.318125 78.001538)">Choose scales, zero-points and ranges</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(189.411563 175.015474)">Round → add zero-point → clamp</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(220.973438 188.45285)">Store quantized codes</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(147.875625 285.466787)">Center codes → products → wide accumulation</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(191.455313 298.904161)">Match bias to accumulator units</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(205.442813 395.918098)">Rescale / requantize output</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(187.272188 409.355473)">Compare independent references</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p640006c78a">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="454.79952"/>
+  </clipPath>
+ </defs>
+</svg>

@@ -15,7 +15,35 @@ A variational optimizer finishes with a stable objective, and its posterior mean
 
 ## The idea
 
-Variational inference chooses a tractable family $q$ and adjusts it to approximate a posterior $p$. Our objective is $\operatorname{KL}(q\Vert p)$, available exactly for this Gaussian fixture. In a general model the evidence lower bound, or ELBO, replaces the unknown posterior normalization. A successful optimizer can only find distributions inside its chosen family.
+Variational inference fits a tractable approximation to a posterior. The approximation family limits what dependencies it can represent. A good mean estimate can coexist with a poor uncertainty estimate.
+
+## Missing covariance can hide uncertainty
+
+Consider two variables, each with variance $1$, and covariance $0.8$. Their sum has variance $1+1+2(0.8)=3.6$. A diagonal approximation with the same marginal variances but zero covariance would give variance $2$ for the sum.
+
+This isolates the effect of ignoring covariance; an actual fitted approximation can also change the marginal variances. Draw covariance ellipses from the real matrices rather than sketching arbitrary shapes.
+
+The lesson's variance comparison asks which downstream quantities are sensitive to the approximation. Check projections such as sums and differences, not only coordinate means. A different approximation family or objective can behave differently, so avoid treating one fixture as a universal direction of error.
+
+### The covariance changes uncertainty in a sum
+
+**Predict:** Can matching each coordinate's mean prove a correct distribution for their sum?
+
+![The covariance changes uncertainty in a sum](../../phases/11-probability/04-variational-inference-and-model-checking/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Both analytic matrices have unit marginal variances. Purple adds covariance $0.8$, stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are $3.6$ and $2$, respectively.
+
+### Pause and reason
+
+Can matching each coordinate's mean prove a correct distribution for their sum?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The sum depends on variances and covariances too. Compare the relevant projected distribution or moments.
+
+</details>
 
 ## Name the approximation and the KL direction
 
@@ -169,7 +197,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:19.902414+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:55.434790+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855

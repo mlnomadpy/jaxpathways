@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "When a model multiplies features by weights, what is it measuring? Start with two arrows you can draw on paper. We will measure length, alignment and the part of one arrow that lies along the other. These ideas make regression and gradient directions easier to reason about.",
-    "idea": "A vector is an ordered list of coordinates. Its Euclidean norm measures length. A dot product multiplies matching coordinates and adds them; it mixes length with alignment. Projection asks a more specific question: how much of a vector can we explain using one chosen direction?",
+    "idea": "Projecting a vector onto a direction keeps the part parallel to that direction. The residual is what the direction cannot explain. This small geometric idea will reappear in least squares, gradient components and constrained updates.",
     "objectives": [
       "Read a dot product geometrically and separate a vector into a projection and an orthogonal residual.",
       "Read length and alignment separately",
@@ -16,6 +16,15 @@
       "Know when the formula is undefined"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A projection explains what remains",
+        "body": "Take \\(v=(3,4)\\) and direction \\(u=(1,0)\\). The projection is \\((3,0)\\), leaving residual \\((0,4)\\). Their sum recovers \\(v\\), and the residual is perpendicular to \\(u\\). The original norm is \\(5\\), consistent with the right triangle.\n\nNow replace \\(u\\) by \\((2,0)\\). The direction has not changed, so the projected vector should not change. The coefficient must adjust for the direction's squared norm. Forgetting that denominator makes the result depend on an arbitrary scaling of the direction.\n\nRead the vector figure by following the projection and then the residual to the original endpoint. Use equal axis scale: otherwise a mathematically right angle may not look right on the page.",
+        "check": {
+          "prompt": "What happens if the direction vector is zero?",
+          "answer": "It defines no direction and has zero squared norm, so the usual projection formula is undefined. Reject that input or define a separate application-specific convention explicitly."
+        }
+      },
       {
         "title": "Read length and alignment separately",
         "body": "Let \\(u=(3,4)\\) and \\(a=(1,0)\\). The length of \\(u\\) is \\(5\\), and \\(u^\\mathsf{T}a=3\\). The dot product is not a distance or a probability: reversing \\(a\\) changes its sign. For nonzero vectors, dividing by both lengths gives the cosine of their angle, here \\(3/5\\). In higher dimensions we use exactly the same sum, even when we cannot draw all the axes.",

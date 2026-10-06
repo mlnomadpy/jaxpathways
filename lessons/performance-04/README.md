@@ -15,7 +15,25 @@ A matrix multiplication appears in your Python code, but what reaches the compil
 
 ## The idea
 
-Lowering exposes a typed representation of a computation; it is not a record of hardware activity. A roofline model combines a compute budget with a memory-transfer budget. The smaller budget limits the model’s possible throughput. The model is useful only when its operation count, data traffic, hardware assumptions and measured workload refer to the same computation.
+A roofline compares arithmetic work with data movement under stated compute and bandwidth assumptions. It helps us predict which resource may constrain a workload. It is a model to test against measurements, not a hardware benchmark by itself.
+
+## Read a roofline as a conditional bound
+
+As a separate analytic example, assume $100$ GB/s bandwidth and $1000$ GFLOP/s compute capacity. The ridge is at $10$ FLOP/byte. At intensity $2$ FLOP/byte, the bandwidth-based bound is $200$ GFLOP/s.
+
+The implementation need not reach that bound. Traffic estimates may omit intermediates, padding or cache effects; the assumed peaks may not apply to the actual dtype and device.
+
+Use the lesson's hypothetical curve to propose a change, such as reducing data movement. Then inspect the resulting computation and measure the same workload. Moving a modeled point rightward does not establish that the implementation became faster.
+
+### Pause and reason
+
+Does reaching the compute-limited side guarantee peak throughput?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It identifies the tighter bound in this model. Other bottlenecks and inefficient execution can keep observed performance far below it.
+
+</details>
 
 ## Read the contract before the compiler text
 
@@ -206,17 +224,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:31.281347+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:03.151695+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0}
-Local CPU samples seconds: [2.0041828975081444e-05, 1.7582904547452927e-05, 2.4417182430624962e-05, 3.824988380074501e-05, 2.3250002413988113e-05]
+Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0}
+Local CPU samples seconds: [1.3208948075771332e-05, 1.3417098671197891e-05, 9.790994226932526e-06, 9.082723408937454e-06, 9.54093411564827e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'flops': 8192.0, 'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0}
-Local CPU samples seconds: [1.3249926269054413e-05, 1.291581429541111e-05, 9.707873687148094e-06, 9.249895811080933e-06, 8.624978363513947e-06]
+Compiler estimates (backend-specific): {'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0}
+Local CPU samples seconds: [1.958431676030159e-05, 2.3709144443273544e-05, 2.5165732949972153e-05, 1.3208016753196716e-05, 9.208917617797852e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]

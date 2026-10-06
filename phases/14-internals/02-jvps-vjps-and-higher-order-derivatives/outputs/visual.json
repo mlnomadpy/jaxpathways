@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "b16547d6f5e169c41b3617cb72311289d8ade3cafffedc83bde4eb512d380ed2",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "d9a99b8cfb149b83c69a4e03c642696f456e010cc1281f7a35671f89b8b04471",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:43:34.467286+00:00",
+  "generatedAt": "2026-10-06T15:41:32.370943+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -64,5 +64,36 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "JVP and VJP use different vector spaces",
+    "prediction": "Does a VJP simply return the same vector as a JVP?",
+    "reading": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+    "alt": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 3.5,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Mode",
+        "Input",
+        "Linear map",
+        "Result"
+      ],
+      "rows": [
+        [
+          "JVP",
+          "direction: (3,)",
+          "J: (2, 3)",
+          "Jv: (2,)"
+        ],
+        [
+          "VJP",
+          "sensitivity: (2,)",
+          "J\u1d40: (3, 2)",
+          "J\u1d40u: (3,)"
+        ]
+      ]
+    }
   }
 }

@@ -1,7 +1,7 @@
 ---
 import { inlineMath, renderMath } from '../../lib/math.js';
 import Prose from './Prose.astro';
-import { lessonVisual, lessonExecution } from '../../lib/lesson-visuals.js';
+import { lessonVisual, lessonExecution, lessonMechanism } from '../../lib/lesson-visuals.js';
 import type { authoredLessons } from '../../lib/course-data.js';
 interface Props {
   lesson: (typeof authoredLessons)[number];
@@ -36,6 +36,17 @@ const c = lesson.content!;
     <>
       <h2>{section.title}</h2>
       <Prose text={section.body} />
+      {section.id === 'guided-reasoning' && <Fragment set:html={lessonMechanism(lesson)} />}
+      {section.check && (
+        <aside class="reasoning-check">
+          <h3>Pause and reason</h3>
+          <Prose text={section.check.prompt} />
+          <details>
+            <summary>Compare your reasoning</summary>
+            <Prose text={section.check.answer} />
+          </details>
+        </aside>
+      )}
       {section.commands?.map((command) => (
         <>
           <h3>{command.label}</h3>

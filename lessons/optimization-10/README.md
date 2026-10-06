@@ -16,7 +16,25 @@ A model can fit the training data closely and still make poor predictions on new
 
 ## The idea
 
-Regularization changes the objective we optimize. Ridge regression adds a penalty for large weights. The penalty strength is a modeling choice, not a numerical repair to hide a broken loss. Compare unpenalized prediction errors on held-out data when choosing it, and reserve a separate test set for final evaluation after choices are fixed.
+Regularization changes which solutions training prefers. Validation helps choose settings using data that did not fit the model, and a final test estimates performance after those choices are fixed. Keeping these jobs separate makes the reported result interpretable.
+
+## Give each split one job
+
+Imagine trying several penalty strengths. For each setting, fit weights on the training split, then score the frozen result on validation. Pick a setting using those validation results. Repeatedly using test performance to make that choice quietly turns the test into another validation set.
+
+Preprocessing belongs inside the same boundary: fit means, scales and feature selection using training data only. Applying a transformation to validation is allowed; allowing validation to choose the transformation's fitted statistics changes the experiment.
+
+The regularization plot may show training error improving while validation error worsens. That gap motivates model selection, but one small fixture does not prove a universal best penalty. Preserve split identities and the selection rule so another person can reconstruct the decision.
+
+### Pause and reason
+
+After selecting a penalty, you inspect the test score and change the penalty again. What has changed?
+
+<details><summary>Compare your reasoning</summary>
+
+The test data has influenced model selection. Its score no longer represents a single untouched final evaluation under the original protocol. Use a fresh evaluation protocol or disclose the repeated selection.
+
+</details>
 
 ## State the exact objective
 
@@ -145,7 +163,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:19.869890+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:48.777254+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0

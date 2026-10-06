@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-03",
-  "contentHash": "68167e166f45b2f4f8c399bc087560e4b91e067297049a5f31c177b374b3797f",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "d47c92fb0090efaf371ef4ec8491be3ee50ab417c775bf6a0639eaf02a6afecb",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:29:19.884014+00:00",
+  "generatedAt": "2026-10-06T15:41:23.025461+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -31,5 +31,43 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Mapped rows and shared weights",
+    "prediction": "What should happen if you duplicate an input row while keeping the same shared weights?",
+    "reading": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
+    "alt": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Mapped input",
+        "Shared argument",
+        "Single-example result"
+      ],
+      "rows": [
+        [
+          "row 0",
+          "same weights",
+          "1"
+        ],
+        [
+          "row 1",
+          "same weights",
+          "1"
+        ],
+        [
+          "row 2",
+          "same weights",
+          "8"
+        ],
+        [
+          "in_axes = 0",
+          "in_axes = None",
+          "stack \u2192 [1, 1, 8]"
+        ]
+      ]
+    }
   }
 }

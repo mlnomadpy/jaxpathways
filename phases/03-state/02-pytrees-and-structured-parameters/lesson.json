@@ -3,7 +3,7 @@
   "id": "state-02",
   "minutes": 60,
   "content": {
-    "idea": "A pytree is a nested structure whose leaves contain values. Dictionaries, tuples, and lists are common containers for model parameters. Transformations can operate on these structures without flattening the model into an unreadable vector in your application code.\n\nThe gradient pytree mirrors the parameter pytree. `jax.tree.map` can combine corresponding leaves to implement an update. Matching structure matters: a missing dictionary key or mismatched container is a structural error, separate from numerical shape problems.",
+    "idea": "A pytree is a nested structure whose leaves hold values such as parameters. JAX can transform the leaves while preserving the structure. This makes a model's parameter groups explicit and lets us compare the gradient tree with the parameters it differentiates.",
     "code": "import jax\nimport jax.numpy as jnp\nparams = {\"weight\": jnp.array([1., -1.]), \"bias\": jnp.array(0.)}\nx = jnp.array([2., 1.])\ndef loss(p):\n    prediction = jnp.dot(p[\"weight\"], x) + p[\"bias\"]\n    return (prediction - 3.) ** 2\nvalue, grads = jax.value_and_grad(loss)(params)\nupdated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)\nprint(\"Before/after:\", float(value), float(loss(updated)))\nassert grads.keys() == params.keys()\nassert loss(updated) < value",
     "output": "Before/after: \\(4.0\\), approximately \\(0.64\\).",
     "exercise": "Compute the squared norm of all gradient leaves. Verify it by adding the weight and bias contributions directly.",
@@ -18,6 +18,15 @@
     "explanation": "The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf.",
     "problem": "Our model has a weight vector and a bias. How do we keep each parameter paired with its gradient? We’ll store them in a small nested structure called a pytree, calculate one update by hand, and check that JAX follows the same structure. The tree is just a way to keep related values organized.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Match leaves by meaning as well as shape",
+        "body": "Suppose parameters contain a dense-layer weight matrix and a bias vector. Each gradient leaf describes sensitivity to its corresponding parameter leaf. Match paths such as layer/weight and layer/bias before comparing shapes; two equal-shaped leaves can still be swapped.\n\nOptimizer state is related but need not have exactly the parameter tree's structure. It may contain moment trees plus a scalar step counter or other metadata. A useful diagram aligns matching parameter/gradient paths and then shows the additional optimizer state separately.\n\nWhen a tree operation fails, inspect structure, leaf paths, shapes and dtypes in that order. Flattening everything immediately may hide the semantic distinction that would explain the error.",
+        "check": {
+          "prompt": "Two parameter leaves have the same shape. Is swapping their gradients safe?",
+          "answer": "No. Shape compatibility does not identify which parameter a derivative belongs to. Preserve tree paths and compare the result with an independently known update."
+        }
+      },
       {
         "title": "Identify containers, leaves and structure",
         "body": "A pytree separates a nested container structure from its leaves. A dictionary with weight and bias keys is a tree; each array is a leaf. A leaf can itself have many numerical elements. Two leaves therefore do not mean two scalar parameters.\n\nJAX transformations understand common dictionaries, lists and tuples. tree.flatten returns an ordered leaf list plus a tree definition that can reconstruct the original containers. Treat that definition as part of the contract, rather than manually guessing where each flattened value belongs.",

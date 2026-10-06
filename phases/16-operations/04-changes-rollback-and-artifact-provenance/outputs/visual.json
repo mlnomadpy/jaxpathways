@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "ac9415c0adc49ea3b0a1abc225e345027389102efe37e125d1acec45bff69768",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "24cc1847177a7e29855edf2264c117629751fe5506cdbc9c251c99b99a7f5783",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:46:47.489176+00:00",
+  "generatedAt": "2026-10-06T15:41:33.892665+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -36,5 +36,96 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Rejected candidates do not become active",
+    "prediction": "Should a rejected candidate change the active artifact pointer?",
+    "reading": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+    "alt": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6.3,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "candidate",
+          "x": 5,
+          "y": 1,
+          "label": "Candidate B published",
+          "tone": "data",
+          "w": 5,
+          "h": 0.85
+        },
+        {
+          "id": "gate",
+          "x": 5,
+          "y": 2.8,
+          "label": "Evaluate immutable B + config",
+          "tone": "state",
+          "w": 6,
+          "h": 0.85
+        },
+        {
+          "id": "pass",
+          "x": 2.7,
+          "y": 4.8,
+          "label": "Gate passes",
+          "tone": "result",
+          "w": 3.5,
+          "h": 0.85
+        },
+        {
+          "id": "fail",
+          "x": 7.3,
+          "y": 4.8,
+          "label": "Gate fails",
+          "tone": "warning",
+          "w": 3.5,
+          "h": 0.85
+        },
+        {
+          "id": "activeb",
+          "x": 2.7,
+          "y": 6.8,
+          "label": "Activate qualified B",
+          "tone": "result",
+          "w": 4,
+          "h": 0.85
+        },
+        {
+          "id": "activea",
+          "x": 7.3,
+          "y": 6.8,
+          "label": "Keep active A",
+          "tone": "fixed",
+          "w": 4,
+          "h": 0.85
+        }
+      ],
+      "edges": [
+        {
+          "from": "candidate",
+          "to": "gate"
+        },
+        {
+          "from": "gate",
+          "to": "pass"
+        },
+        {
+          "from": "gate",
+          "to": "fail"
+        },
+        {
+          "from": "pass",
+          "to": "activeb"
+        },
+        {
+          "from": "fail",
+          "to": "activea"
+        }
+      ],
+      "height": 8,
+      "width": 10
+    }
   }
 }

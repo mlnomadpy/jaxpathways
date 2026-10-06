@@ -4,13 +4,22 @@
   "minutes": 75,
   "content": {
     "problem": "A learner agent reaches a goal, but its reported reward keeps increasing afterward. Is the policy improving, or is the environment paying it repeatedly? Before training anything, we will build a small environment whose entire transition table can be checked. You will leave with explicit rules for starting, moving, ending and resetting an episode.",
-    "idea": "Think of a corridor with positions \\(0,1,2,3\\). Position \\(3\\) is the goal. Action \\(0\\) moves left and action \\(1\\) moves right; the left boundary stops movement. Each active non-goal transition costs \\(0.01\\), while entering the goal pays \\(1\\). An episode begins uniformly at position \\(0\\) or \\(1\\), and stops after at most \\(8\\) actions. The policy chooses actions; the environment defines what those actions mean.",
+    "idea": "A functional environment receives state and action and returns the next state, reward and termination information. Define exactly which transition earns reward and what later terminal padding means. This keeps rollouts and return calculations consistent.",
     "objectives": [
       "Implement reset and step as pure functions with explicit state.",
       "Distinguish termination, time-limit truncation and an absorbing finished state.",
       "Check transitions independently before using rewards to train a policy."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Reward belongs to a transition",
+        "body": "Suppose entering the goal earns one reward. The transition into the goal counts once. Later padded steps in the terminal state should not repeatedly earn the same reward unless that is explicitly the task's intended reward rule.\n\nDraw separate arrows for an ordinary move, a goal-reaching move and terminal padding. A timeout is another condition whose treatment must be specified; it is not automatically the same learning signal as reaching a terminal goal.\n\nThe reward trace shows one event followed by absorbing padding. Read the event's time index against the transition convention. Then test actions after termination to ensure padding does not introduce extra rewards or unintended state changes.",
+        "check": {
+          "prompt": "Why can checking only the final state miss a reward bug?",
+          "answer": "A rollout can end in the correct goal while counting its reward repeatedly during padding. Check transition rewards and accumulated return as well as final state."
+        }
+      },
       {
         "title": "State contains what the next transition needs",
         "body": "Our state holds position, elapsed steps and a done flag. Observation is position: enough for the stationary policy used here, but not the full finite-horizon decision state. A policy that needs to reason about time remaining should also observe elapsed time. Carrying elapsed time in environment state prevents a time limit from depending on a hidden Python counter. NamedTuple fields are JAX pytree leaves, so the same function can run directly, under jit, or under vmap."

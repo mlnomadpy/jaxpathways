@@ -4,13 +4,22 @@
   "minutes": 85,
   "content": {
     "problem": "A process is alive and prints messages, yet useful training may have stopped. What signals distinguish real progress from noise, and what could be lost if the process fails now? We will measure synchronized updates, count examples and compare progress with the latest committed checkpoint using events emitted by actual runs.",
-    "idea": "Observability should answer a decision. Progress step and processed examples tell us whether work advances. Update duration estimates the speed of the compiled training operation; total job duration includes startup and operational overhead. Checkpoint step tells us how much completed work remains uncommitted. We keep these quantities separate instead of calling every ratio utilization.",
+    "idea": "Logs tell us what a process reported; accepted checkpoints tell us what can be resumed. Monitoring should connect these signals without treating them as interchangeable. Their difference helps estimate the consequences of a failure.",
     "objectives": [
       "Build useful summaries from structured events emitted by a real worker.",
       "Define throughput with explicit numerator, denominator and synchronization boundary.",
       "Estimate uncheckpointed work from progress and checkpoint events."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Keep observed progress separate from recoverable progress",
+        "body": "If the live process reports step 42 and the newest accepted checkpoint is step 40, there are two completed steps beyond that recovery boundary. Whether they must be replayed depends on the recovery contract and recorded input state.\n\nName metric units and update points: examples processed, valid tokens, optimizer steps and accepted checkpoint steps are different counters. A sudden flat line can indicate stalled computation, blocked logging or a failed collector; inspect another signal before assigning the cause.\n\nRead the two progress curves at the same time coordinate and locate the failure. The gap describes lag in recoverable progress, while the slope of live progress describes reported work rate. Neither alone proves hardware utilization.",
+        "check": {
+          "prompt": "Does a recent log line prove that its reported step is durable?",
+          "answer": "No. It proves the observation reached the log. Recovery durability depends on the accepted checkpoint and storage contract."
+        }
+      },
       {
         "title": "An event needs meaning and units",
         "body": "Each event has a monotonic timestamp and an event name. A progress event adds completed step, scalar loss, examples processed, synchronized update seconds and a hash of the resulting complete state. Checkpoint events record the step that was actually replaced on disk. A heartbeat would show liveness only; it must not increment examples or claim training progress. Monotonic time is useful for local durations but is not a globally comparable timestamp across unrelated hosts."

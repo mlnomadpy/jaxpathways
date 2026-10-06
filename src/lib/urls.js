@@ -5,7 +5,17 @@ export function siteUrl(path = '') {
   return `${base.replace(/\/$/, '')}/${path.replace(/^\//, '')}`;
 }
 
-/** Existing top-level lesson URLs stay stable across local and Pages deployments. */
+/** Permanent, pre-rendered lesson pages; the old query reader remains a compatibility entry. */
 export function lessonLink(lessonId, pathwayId = 'all') {
-  return `lesson.html?lesson=${encodeURIComponent(lessonId)}${pathwayId === 'all' ? '' : '&path=' + encodeURIComponent(pathwayId)}`;
+  return `lesson-${encodeURIComponent(lessonId)}.html${pathwayId === 'all' ? '' : '?path=' + encodeURIComponent(pathwayId)}`;
+}
+
+/** Keep pathway, search and saved section when opening a historical reader link. */
+export function legacyLessonUrl(lessonId, href) {
+  const old = new URL(href);
+  const next = new URL(`lesson-${encodeURIComponent(lessonId)}.html`, old);
+  old.searchParams.delete('lesson');
+  next.search = old.searchParams.toString();
+  next.hash = old.hash;
+  return next.href;
 }

@@ -4,13 +4,22 @@
   "minutes": 85,
   "content": {
     "problem": "A hot object cools toward its surroundings. Can we predict its remaining excess temperature two seconds later, and tell a coding bug from a time-step error? We will build a small physical simulation, compare it with two independent references, and deliberately choose an unstable step.",
-    "idea": "Let \\(u(t)\\) be temperature above ambient, in temperature units, and let \\(k>0\\) be the cooling rate in inverse seconds. A larger excess temperature loses heat faster: \\(du/dt=-ku\\). We use synthetic observations so that the exact solution is known. This is a testable simulator, not a claim that one exponential describes every real cooling process.",
+    "idea": "A numerical solver approximates a continuous process with discrete steps. A program can implement its update rule correctly and still differ from the physical solution. Check implementation error and discretization error separately.",
     "objectives": [
       "Implement a pure scalar state transition with units and a fixed time grid.",
       "Separate a discrete implementation oracle from continuous approximation error.",
       "Demonstrate convergence and diagnose loss of stability."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate a correct program from an accurate solver",
+        "body": "For \\(y'=-y\\), start at \\(y=1\\). One Euler step of size \\(0.5\\) gives \\(0.5\\). The exact value at that time is \\(e^{-0.5}\\approx0.6065\\). The difference is expected discretization error, not necessarily an indexing bug.\n\nTwo Euler steps of size \\(0.25\\) give \\(0.75^2=0.5625\\) at the same final time. Comparing at equal physical time matters: taking the same number of smaller steps would change the question.\n\nRead the trajectory plot by matching time coordinates and the analytic reference. Then reduce the step size and inspect the error trend. A finer step often improves this example, but stability, precision and compute cost still constrain a useful solver.",
+        "check": {
+          "prompt": "Why compare solutions at equal final time when changing the step size?",
+          "answer": "Otherwise you compare different points of the physical trajectory. Increase the number of steps as needed to preserve the same time interval."
+        }
+      },
       {
         "title": "Start with units and one step",
         "body": "The derivative gives change per second. Multiplying by a time step \\(h\\) in seconds produces a change in temperature, which can be added to the current state. With \\(u_0=2\\), \\(k=0.7\\) and \\(h=0.5\\), the first change is \\(-0.7\\), so Euler predicts \\(u_1=1.3\\). The exact value at that time is about \\(1.4094\\): the slope becomes less negative as the object cools, but Euler holds the initial slope for the whole step.",

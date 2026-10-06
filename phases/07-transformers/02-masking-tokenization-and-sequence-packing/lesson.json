@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "An attention head should not always see every token. For example, a next-token model must not peek at the future. We’ll build a causal mask one row at a time, then add padding and boundaries between packed examples. Before training, you’ll be able to explain exactly which positions may read each other.",
-    "idea": "Tokenization maps text to integer IDs; a vocabulary is part of the model contract. Our tiny vocabulary is deliberately local and transparent. Sequence packing concatenates independent examples; attention must still respect their boundaries.\n\nA boolean allowed-mask means True permits a key. For the calculation here scores are zero on allowed entries so outputs are easy-to-check prefix means. Real attention replaces those zero scores with query/key dot products.",
+    "idea": "An attention mask controls which positions supply context. A loss mask controls which targets contribute to the objective. Tokenization, target shifting and sequence packing decide the positions to which those different rules apply.",
     "objectives": [
       "Build a causal mask from positions",
       "Keep token IDs and targets aligned",
@@ -15,6 +15,15 @@
       "Handle padding without an all-masked softmax"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Keep context eligibility separate from scored targets",
+        "body": "At input position \\(t\\), causal next-token training predicts target \\(t+1\\). A response-only role flag must follow that shifted target. Using unshifted role flags can score the wrong token at the prompt/response boundary.\n\nAn unscored prompt token can still influence a scored response through attention. Removing its direct loss does not remove it from the computation. A blocked attention edge instead prevents a context contribution.\n\nPacked documents need segment boundaries in addition to a causal triangle. A later segment must not read an unrelated earlier segment merely because its positions occur earlier in the tensor. Trace one query and target across these rules before trusting a batch average.",
+        "check": {
+          "prompt": "Why is a triangular mask alone insufficient for packed documents?",
+          "answer": "It blocks future positions but can allow one document to attend to another earlier document. Segment eligibility must enforce the intended document separation."
+        }
+      },
       {
         "title": "Build a causal mask from positions",
         "body": "For query position i, allow keys j ≤ i. Including the diagonal lets a token use its own representation. The model predicts the next token from that prefix; the target array is shifted one position ahead. Excluding the diagonal is a different convention that requires changing how inputs and labels are aligned.\n\nWith values \\(2\\), \\(4\\), \\(8\\), \\(16\\) and uniform permitted scores, the outputs are prefix means: \\(2\\), \\(3\\), \\(14/3\\) and \\(7.5\\). Changing the last value must not change the first three outputs. This counterfactual tests causal isolation directly.",

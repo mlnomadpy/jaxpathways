@@ -4,7 +4,7 @@
   "minutes": 90,
   "content": {
     "problem": "Your training loop says “saved,” then the process disappears. Which step can you safely resume? We will separate an asynchronous save request, completed storage work and the application’s announcement of a recoverable checkpoint. You will interrupt publication deliberately and show which state recovery selects.",
-    "idea": "A request to save and permission to forget the previous checkpoint are different events. We use a real Orbax asynchronous writer, keep its snapshot separate from the continuing state, wait for completion, verify restoration, and only then update a small application manifest. The manifest is a teaching example of acceptance policy; it does not replace Orbax’s checkpoint format or establish crash durability on every filesystem.",
+    "idea": "Asynchronous saving overlaps writing with training. A snapshot moves through requested, writing, completed and accepted states. Recovery must select a checkpoint whose completion and validity satisfy the actual storage contract.",
     "objectives": [
       "Distinguish requested, completed, verified and published checkpoint state.",
       "Continue a functional update while an asynchronous writer is alive.",
@@ -12,6 +12,15 @@
       "Surface an asynchronous failure before announcing a checkpoint."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Distinguish a save request from a recovery point",
+        "body": "Imagine live training reaches step 42 while a snapshot of step 40 is still being written. The live progress log does not make step 42 recoverable. Failure before the pending snapshot is accepted may leave an earlier checkpoint as the valid choice.\n\nKeep completion signals separate from the record used to select accepted snapshots. Validate required files and metadata before making a new snapshot eligible. Also ensure live training cannot mutate the snapshot's intended contents during writing.\n\nThe saved/live/accepted bars represent different boundaries. Their gaps describe work at risk of replay or loss, not necessarily a defect. Interpret them against the failure location and the checkpoint API's stated guarantees.",
+        "check": {
+          "prompt": "Can a “save requested” message justify deleting the previous accepted checkpoint?",
+          "answer": "No. The replacement may never complete or validate. Retention should preserve a recoverable accepted checkpoint until the replacement meets the acceptance contract."
+        }
+      },
       {
         "title": "Define a completed training boundary",
         "body": "Let the completed training step be \\(s\\). Our state contains a weight vector and that step counter. A snapshot at \\(s=1\\) must restore the vector belonging to that step, even if the live computation advances to \\(s=2\\). The example adds the same known increment to every weight, so an independent array comparison can identify the snapshot without relying on a decreasing training loss.\n\nA real training snapshot also includes optimizer memory, random state and input position from the preceding lessons. Asynchronous writing changes when storage finishes; it does not reduce the state that must be captured."

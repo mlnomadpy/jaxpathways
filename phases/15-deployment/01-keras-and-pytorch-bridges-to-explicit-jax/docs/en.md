@@ -14,7 +14,25 @@ You have a dense layer in PyTorch and the same model idea in Keras. Can you reus
 
 ## The idea
 
-Interoperability has three different jobs: reproduce a model in another framework, share tensor data, or export inference to another runtime. Each has a different contract. Start with a deterministic, asymmetric dense layer: three input features and two outputs expose the transpose that a square matrix can hide. The CPU companion uses NumPy and JAX; the optional lab below executes the real Keras backends.
+Cross-framework conversion must preserve the meaning of inputs, parameters and outputs. A layout transpose can be necessary, but architecture, preprocessing and arithmetic conventions must agree too. Start by writing the function each framework computes.
+
+## Map the function, not just the weight file
+
+For a dense layer, one framework may store weights as input-by-output while another stores output-by-input. The transpose can align the intended multiplication. If both dimensions happen to match, an incorrect mapping may still have a legal shape.
+
+Use unequal dimensions and distinguishable values, then compare intermediate results on the same input. Check bias placement, activation and normalization conventions instead of inferring equivalence from a successful load.
+
+The transpose heatmaps show storage correspondence. They do not demonstrate conversion of an arbitrary Keras, TensorFlow or PyTorch architecture. A supported converter needs an explicit model-family contract, including tokenizer or image/audio processor identity where relevant.
+
+### Pause and reason
+
+Why is a square weight matrix a weak first conversion test?
+
+<details><summary>Compare your reasoning</summary>
+
+The wrong orientation can still have the expected shape. Unequal dimensions and independently known values make layout mistakes easier to detect.
+
+</details>
 
 ## A parameter file is not a model
 
@@ -113,7 +131,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:12.161424+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:44.617912+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]

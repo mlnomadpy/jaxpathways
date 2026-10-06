@@ -15,9 +15,25 @@ You saved the seed, yet your simulation repeats exactly the same noise at every 
 
 ## The idea
 
-JAX random operations use explicit keys instead of a hidden mutable generator. A key is an input to a deterministic random function. Reusing it reproduces the same sample; it does not advance an implicit stream. Split the key when you need independent draws.
+A random sampler in JAX receives an explicit key. Reusing the same key with the same sampler repeats the same computation. Splitting gives us separately owned keys, so the program can show which operation receives which randomness.
 
-Treat each key as a value to consume once for a draw. Retain a separate key for the next step, and pass it through your training or simulation state. A seed enables reproducibility of the experiment, while splitting expresses the structure of its randomness.
+## A key is an input, not a moving cursor
+
+Imagine a training step that needs dropout randomness and a key for the next step. Split the incoming key, use one child for dropout, and return the other as the continuation key. The drawing should branch once; it should not show a sampler secretly advancing the parent key.
+
+If two augmentation calls receive the same key and otherwise identical inputs, they can produce the same augmentation. Different variable names do not make the underlying key values different. This is a data-flow bug that ordinary shape checks will miss.
+
+For recovery, save the continuation key at the same boundary as model and data position. Reconstructing an initial seed and restarting the random stream is not equivalent to restoring the next key after many training steps.
+
+### Pause and reason
+
+Does calling a sampler consume or mutate the key variable?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The key is an explicit value. Your program must choose new child keys and carry the next key forward; otherwise repeated calls can replay the same sample.
+
+</details>
 
 ## Treat a key as an explicit input
 
@@ -133,7 +149,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:55.192684+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:22.637768+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True

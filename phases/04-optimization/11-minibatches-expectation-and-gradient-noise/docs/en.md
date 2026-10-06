@@ -16,7 +16,25 @@ A minibatch may suggest a different update from the full dataset. Is it wrong, o
 
 ## The idea
 
-An expectation is a probability-weighted average of possible outcomes. For uniform sampling, the expected single-example gradient equals the mean dataset gradient. A minibatch averages several sampled gradients. At fixed parameters, independent draws reduce the variance of that average. This is a statement about the sampling process, not a promise that every training step decreases the full loss.
+A minibatch gradient estimates the full-data gradient using fewer examples. Its noise depends on the sampling scheme and batch size. When combining batches, the denominator must still represent the population you intend to average over.
+
+## Average examples rather than batch averages
+
+Suppose one batch has two examples with mean loss $1$, and another has one example with loss $4$. Averaging batch means gives $2.5$. The mean over all three examples is $(2+4)/3=2$. The first calculation gave the small batch too much weight.
+
+Carry loss sums and example counts through aggregation, then divide once. For token losses, carry valid-token counts instead: examples and tokens are different denominators when lengths vary. The same weighting issue appears when combining gradients across devices.
+
+The variance plot illustrates the benefit of averaging under its stated sampling assumptions. Correlated examples, sampling without replacement, and nonuniform sampling can change the relationship. Batch size alone does not fully describe the estimator.
+
+### Pause and reason
+
+Why might doubling batch size fail to halve observed gradient variance?
+
+<details><summary>Compare your reasoning</summary>
+
+The usual inverse-size relationship assumes a particular sampling model, often independent samples. Correlation, finite-population effects, changing parameters or too few repeated measurements can alter the observed ratio.
+
+</details>
 
 ## Define the population before estimating it
 
@@ -149,7 +167,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:22.610391+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:51.575470+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625

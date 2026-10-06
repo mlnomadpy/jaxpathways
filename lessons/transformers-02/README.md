@@ -15,9 +15,25 @@ An attention head should not always see every token. For example, a next-token m
 
 ## The idea
 
-Tokenization maps text to integer IDs; a vocabulary is part of the model contract. Our tiny vocabulary is deliberately local and transparent. Sequence packing concatenates independent examples; attention must still respect their boundaries.
+An attention mask controls which positions supply context. A loss mask controls which targets contribute to the objective. Tokenization, target shifting and sequence packing decide the positions to which those different rules apply.
 
-A boolean allowed-mask means True permits a key. For the calculation here scores are zero on allowed entries so outputs are easy-to-check prefix means. Real attention replaces those zero scores with query/key dot products.
+## Keep context eligibility separate from scored targets
+
+At input position $t$, causal next-token training predicts target $t+1$. A response-only role flag must follow that shifted target. Using unshifted role flags can score the wrong token at the prompt/response boundary.
+
+An unscored prompt token can still influence a scored response through attention. Removing its direct loss does not remove it from the computation. A blocked attention edge instead prevents a context contribution.
+
+Packed documents need segment boundaries in addition to a causal triangle. A later segment must not read an unrelated earlier segment merely because its positions occur earlier in the tensor. Trace one query and target across these rules before trusting a batch average.
+
+### Pause and reason
+
+Why is a triangular mask alone insufficient for packed documents?
+
+<details><summary>Compare your reasoning</summary>
+
+It blocks future positions but can allow one document to attend to another earlier document. Segment eligibility must enforce the intended document separation.
+
+</details>
 
 ## Build a causal mask from positions
 
@@ -163,7 +179,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:12.620747+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:43.722005+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]

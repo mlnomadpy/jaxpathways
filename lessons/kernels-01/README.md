@@ -15,7 +15,35 @@ A kernel can produce the right answer on a divisible matrix and silently miss th
 
 ## The idea
 
-Pallas kernels receive references to blocks, not ordinary full-array arguments. A grid names logical kernel invocations; BlockSpecs map those invocations to input and output blocks. We use $Z=2X+Y$ so the arithmetic has an independent NumPy reference and the main challenge is correct ownership.
+A Pallas grid assigns work to programs, and BlockSpec maps those programs to array regions. Boundary tiles make the distinction between logical data and padded storage important. Verify ownership before optimizing arithmetic.
+
+## Map every logical element to an owning program
+
+The lesson's five-by-eleven matrix is covered by nine program IDs. Those IDs are categories, not measured magnitudes. Tile outlines and a discrete legend show which program owns each region without implying that a higher ID performs more work.
+
+At an edge, the physical tile extends beyond the logical matrix. This implementation pads the inputs before the kernel, making each block access valid, then crops the result back to the logical shape. A padded slot is storage for the computation, not an extra observation or logical output.
+
+Enumerate coordinates independently and verify coverage of every valid element. Then test dimensions that are not multiples of the tile size; perfectly divisible fixtures can conceal boundary mistakes.
+
+### Program coordinates and partial boundary tiles
+
+**Predict:** Why test an awkward shape in addition to a tile-aligned shape?
+
+![Program coordinates and partial boundary tiles](../../phases/13-kernels/01-pallas-grids-and-blockspecs/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.
+
+### Pause and reason
+
+Why test an awkward shape in addition to a tile-aligned shape?
+
+<details><summary>Compare your reasoning</summary>
+
+It exercises partial boundary tiles and guards. A tile-aligned case never asks the implementation to distinguish padded positions from valid data.
+
+</details>
 
 ## Write the simplest useful contract
 
@@ -199,7 +227,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:38.904670+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:12.424647+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863

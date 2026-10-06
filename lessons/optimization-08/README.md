@@ -16,7 +16,25 @@ Why can the same learning rate crawl along one direction and explode along anoth
 
 ## The idea
 
-The Hessian is the matrix of second derivatives. For a quadratic bowl it is constant, so each principal direction behaves like a separate one-dimensional update. This lets us derive a safe range for a learning rate and understand the effect of uneven feature scales.
+Curvature describes how quickly the gradient changes as we move. A direction with high curvature can overshoot under a learning rate that makes slow progress in a flatter direction. Contours make this imbalance easier to see than loss alone.
+
+## Why one learning rate must respect the steep direction
+
+For the illustrative quadratic $L(x,y)=(x^2+10y^2)/2$, a gradient step multiplies the coordinates by $1-\eta$ and $1-10\eta$. Here $\eta$ is the learning rate. With $\eta=0.1$, the steep coordinate reaches zero in one exact-arithmetic step while the other shrinks by $0.9$.
+
+With $\eta=0.25$, the steep coordinate is multiplied by $-1.5$: it changes sign and grows in magnitude. The flatter coordinate still shrinks, so observing one coordinate could make the update look healthy while the total objective diverges.
+
+Sketch narrow elliptical contours for this quadratic and mark the first two iterates. The saved coordinate plot shows how each direction progresses. Keep the objective coefficients, initial point and rate labels aligned when comparing this calculation with a trajectory; a path from another quadratic would tell a different story.
+
+### Pause and reason
+
+For this quadratic, what condition on a positive learning rate contracts both coordinates?
+
+<details><summary>Compare your reasoning</summary>
+
+Require $\lvert1-10\eta\rvert<1$ and $\lvert1-\eta\rvert<1$. For a positive rate, both hold when $0<\eta<0.2$. At the boundary the steep coordinate can oscillate without shrinking.
+
+</details>
 
 ## Read a bowl through its curvature
 
@@ -152,7 +170,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:12.371124+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:41.053871+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395

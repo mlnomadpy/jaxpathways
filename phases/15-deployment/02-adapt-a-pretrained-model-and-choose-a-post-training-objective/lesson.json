@@ -4,7 +4,7 @@
   "minutes": 125,
   "content": {
     "problem": "A model already learned one task. You now have a small adaptation set and a teacher that supplies probabilities. Should you optimize the observed labels or imitate the teacher? We will actually pretrain, save and reload a tiny model, adapt it both ways, and compare the resulting predictions on an untouched evaluation split. The model is deliberately small so every objective and derivative can be inspected.",
-    "idea": "Post-training changes a learned model using a new objective or dataset. Supervised fine-tuning uses observed targets. Distillation uses teacher predictions as targets; it inherits the teacher’s strengths and errors. Preference learning instead compares alternatives, while reinforcement learning requires a reward and interaction or rollout assumptions. These are different data contracts, not interchangeable labels for an optimizer.",
+    "idea": "Adaptation starts with the behavior you want to change and the evidence you have. Supervised labels and teacher distributions supply different targets. Their objectives can use the same model while asking it to learn different things.",
     "objectives": [
       "Pretrain and reload an artifact with recorded data and checkpoint hashes",
       "Compare supervised adaptation and teacher distillation from the same starting weights",
@@ -12,6 +12,15 @@
       "Report target-task gains and source-task retention without leaking held-out data"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Choose the target before choosing the adaptation method",
+        "body": "A hard target identifies one class. A teacher distribution can assign mass to several alternatives, preserving information about relative preferences. Matching that distribution does not guarantee the teacher is correct for your deployment population.\n\nKeep the evaluation target fixed when comparing adaptation methods. A lower training loss under one objective cannot be compared directly with a differently defined loss under another objective.\n\nThe held-out cross-entropy bars compare the lesson's two procedures under a common scoring rule. Explain that rule and inspect changed examples before choosing a method. This experiment is a bounded adaptation comparison; reward modeling and policy optimization require their own distinct data and update contracts.",
+        "check": {
+          "prompt": "Why not choose the method with the numerically smallest training loss across different objectives?",
+          "answer": "The numbers may have different definitions and scales. Compare behavior under a common held-out evaluation contract relevant to the intended task."
+        }
+      },
       {
         "title": "Define the tasks before choosing an objective",
         "body": "The input has two measured features plus a constant intercept feature. The source task uses one synthetic probability rule; the target task uses another. Source training sees \\(256\\) rows. Adaptation sees only \\(48\\) different rows. The final target report uses \\(512\\) separately generated rows. These are disjoint generated splits with separate keys, not a real benchmark. Binary adaptation labels are sampled from the target probabilities; the teacher supplies the probabilities themselves. That privileged teacher is declared explicitly rather than presented as a generally superior model."

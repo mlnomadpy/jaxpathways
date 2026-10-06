@@ -3646,26 +3646,26 @@
         "readiness": {
           "prompt": "If an image reconstruction is perfect before training, what boundary should you inspect?",
           "answer": "Check whether hidden pixels entered the encoder or were copied into the prediction. A valid objective can still be defeated by leaked inputs.",
-          "lessonId": "pretraining-01"
+          "lessonId": "pretraining-02"
         },
         "milestones": [
           {
             "title": "Masked language modeling: predict hidden tokens",
-            "task": "Masked language modeling predicts selected original tokens from a corrupted input. It differs from causal next-token prediction: allowed context can come from both sides. Our repeated-token fixture makes the correct answer inspectable; this is a small objective and attention experiment, not a BERT reproduction or a language benchmark.",
+            "task": "Trace clean targets, corrupted IDs, attention axes and selected counts. Reproduce unequal-mask loss with a host calculation, derive the full logit gradient, and explain the final probability matrix.",
             "lessonIds": [
               "pretraining-01"
             ]
           },
           {
             "title": "Masked image modeling: reconstruct missing patches",
-            "task": "We split small synthetic images into patches, expose only two patches to a linear encoder/decoder map and train on the other two. This teaches masking, spatial order and reconstruction accounting. It is not a full ViT masked autoencoder; the simple image generator makes independent checks possible.",
+            "task": "Verify every patch on a rectangular RGB input, intervene on hidden pixels, and explain an ambiguous target that no deterministic decoder can reconstruct perfectly. Compare actual hidden targets with predictions.",
             "lessonIds": [
               "pretraining-02"
             ]
           },
           {
             "title": "Contrastive learning: views, positives and negatives",
-            "task": "The lab trains a shared linear encoder with a symmetric cross-view contrastive loss. Each row’s paired view is its positive and other rows are negatives. This resembles the paired objective used in cross-modal retrieval; it is not the full SimCLR denominator, which includes additional same-view negatives.",
+            "task": "Derive a two-pair loss, change temperature without changing ranking, compare encoder gradients with finite differences, and diagnose broken identity or duplicate false negatives from the similarity matrix.",
             "lessonIds": [
               "pretraining-03"
             ]
@@ -3679,7 +3679,7 @@
           "symptom": "A low masked loss does not transfer to the downstream task.",
           "check": "Check target leakage, mask distribution, encoder-versus-projection features and a held-out downstream protocol."
         },
-        "completion": "Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits.",
+        "completion": "Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption.",
         "furtherWork": "Full BERT/ViT masked autoencoders, natural corpora, augmentation studies and downstream probe benchmarks remain extensions. The current labs execute small attention, linear reconstruction and embedding models."
       }
     },
@@ -3857,35 +3857,35 @@
         "milestones": [
           {
             "title": "Supervised fine-tuning with response-only token loss",
-            "task": "Supervised fine-tuning learns from demonstrations. The example uses a tiny next-token table so the alignment is visible: prompt IDs determine answer IDs, followed by an end token. In a pretrained Transformer, the same response-mask bookkeeping surrounds a much richer causal forward pass.",
+            "task": "Write an input/next-target/role table, audit ragged likelihood sums, identify supervised positions in the gradient map, and demonstrate a context distinction the transition model cannot represent.",
             "lessonIds": [
               "posttraining-01"
             ]
           },
           {
             "title": "LoRA: adapt, save and merge low-rank updates",
-            "task": "LoRA parameterizes a weight change as two smaller matrices. It reduces trainable parameter and optimizer-state counts for selected layers; it does not eliminate activation memory or guarantee a latency improvement. Our changed target is deliberately rank one, which makes the adaptation test exact and interpretable.",
+            "task": "Derive and check both adapter-factor gradients, explain asymmetric initialization, verify nonunit merge scaling, and calculate a rank-one capacity limit before interpreting the adaptation curve.",
             "lessonIds": [
               "posttraining-02"
             ]
           },
           {
             "title": "Learn a reward model from pairwise preferences",
-            "task": "The reward model assigns a scalar to response features and fits pairwise comparisons using a logistic preference likelihood. All labels here are synthetic and declared. Training such a model from actual human feedback additionally requires a documented rating protocol, disagreement handling and independent evaluation.",
+            "task": "Derive preference likelihood and its linear gradient, inspect contradictory labels, distinguish offsets from scale, and explain the measured comparison margins before handing off a reward model.",
             "lessonIds": [
               "posttraining-03"
             ]
           },
           {
             "title": "RLHF mechanics: a frozen reward and PPO policy updates",
-            "task": "This is a one-prompt, one-terminal-action preference bandit. It isolates the reward-model → rollout → policy-update loop used in RLHF. Synthetic preferences supply the reward model; no humans or language generations are used. Existing RL lessons cover trajectories and PPO in an environment; real language PPO adds sequence masks, value estimation and rollout infrastructure.",
+            "task": "Identify current, behavior, reference and reward states; work both clipping signs; verify baseline cancellation by enumeration; and compare the trained bandit with its regularized optimum and probability plot.",
             "lessonIds": [
               "posttraining-04"
             ]
           },
           {
             "title": "Direct preference optimization and reference-corrected margins",
-            "task": "DPO compares policy log-probability differences with the same differences under a frozen reference. The lab treats each response as one categorical action to isolate the objective. For language responses, substitute the sum of valid response-token log probabilities, with a consistent tokenizer and mask; arbitrary mean-length normalization changes the objective.",
+            "task": "Work through reference correction and its gradient, reproduce a falling chosen-probability counterexample, and explain why positive margins do not by themselves prove improved response behavior.",
             "lessonIds": [
               "posttraining-05"
             ]
@@ -3899,7 +3899,7 @@
           "symptom": "A PPO ratio is always one during multiple optimizer epochs.",
           "check": "Check whether old log probabilities are incorrectly recomputed from the changing policy."
         },
-        "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.",
+        "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.",
         "furtherWork": "The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work."
       }
     }

@@ -4,7 +4,7 @@
   "minutes": 85,
   "content": {
     "problem": "Four points can give us a useful puzzle: how do we separate the two diagonal pairs in XOR? A single straight line cannot do it. We’ll add a small hidden layer and a nonlinear activation, check the shapes, and train a classifier. Then we’ll test nearby points to see what it has learned beyond the four training examples.",
-    "idea": "A multilayer perceptron composes affine maps with a nonlinear activation. Keep the parameter tree visible so a gradient, an optimizer update, and a prediction can be inspected separately. This is a controlled synthetic experiment, not evidence of useful real-world classification.",
+    "idea": "A multilayer perceptron combines learned linear maps with nonlinear activations. The hidden layer builds features that the output layer can combine. The activation lets the composition represent boundaries that a single linear map cannot.",
     "objectives": [
       "Trace the shapes from observations to logits",
       "Explain why the hidden activation matters",
@@ -12,6 +12,15 @@
       "Separate learning from held-out measurement"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Why hidden layers need nonlinear operations",
+        "body": "XOR gives the same label to opposite corners of a square. One straight separating line cannot isolate both opposite corners from the other two. Hidden units can form intermediate regions that an output layer combines.\n\nRemove every nonlinear activation and the weight matrices simply multiply into one linear map. More matrices alone do not solve this geometry. Biases change offsets but do not remove the limitation.\n\nRead the decision field both at and between the training points. The four observed labels constrain only a tiny part of the plane. A smooth-looking boundary is still an extrapolation. Connect each layer's actual width to the feature vector it produces before interpreting that extrapolation.",
+        "check": {
+          "prompt": "Does fitting all four XOR points establish generalization to another dataset?",
+          "answer": "No. It checks representation and optimization on this teaching fixture. A different population requires its own held-out evaluation."
+        }
+      },
       {
         "title": "Trace the shapes from observations to logits",
         "body": "Each row is one observation with two features. The first weight matrix has shape \\((2, 8)\\), so a batch \\((B, 2)\\) becomes \\((B, 8)\\). A bias vector \\((8,)\\) broadcasts across rows; it does not create eight observations. tanh changes values without changing shape. The second matrix \\((8, 1)\\) produces one logit per row. Squeeze only the final axis to produce \\((B,)\\), preserving the batch dimension even when \\(B\\) is one. A logit is an unrestricted real score; a positive logit predicts class one when the decision threshold is probability \\(0.5\\).",

@@ -4,7 +4,7 @@
   "minutes": 100,
   "content": {
     "problem": "Every device computed a partial gradient. Does every device need the complete result immediately? We will implement an all-reduce and a reduce-scatter on four logical CPU devices, prove they represent the same global gradient, and account for when a later all-gather gives the communication back.",
-    "idea": "All-reduce leaves a complete sum on every participating device. Reduce-scatter leaves each device with a different slice of that sum. The global mathematical answer can stay the same while its placement changes. Communication only decreases for the whole algorithm if subsequent work can use the partitioned result.",
+    "idea": "A collective combines or redistributes values among participants. Track chunk identity and reduction state at each stage to understand what the operation achieves. Communication volume also depends on the assumed algorithm.",
     "runtime": {
       "kind": "virtual-cpu",
       "deviceCount": 4
@@ -15,6 +15,15 @@
       "Account for a subsequent all-gather before claiming a communication saving."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Track reduced chunks through communication",
+        "body": "Reduce-scatter combines contributions and leaves each participant with its assigned portion of the result. An all-gather can then distribute those portions so each holds the full result. Together they can implement the corresponding all-reduce.\n\nDistinguish an original contribution from a chunk whose contributions have already been combined. Sending values and reducing values are different actions, even when arrows look similar.\n\nThe byte bars are modeled payloads under the lesson's assumptions. They do not capture all protocol overhead or establish physical overlap. Use them to predict a tradeoff, then measure the actual topology if network performance is the question.",
+        "check": {
+          "prompt": "Does every participant hold the complete reduced array after reduce-scatter?",
+          "answer": "No. Each holds its reduced portion. Replicating the complete result requires the appropriate gather stage or another collective contract."
+        }
+      },
       {
         "title": "Keep normalization independent of device count",
         "body": "Our regression problem has sixteen observations and eight weights. Each of four devices receives four observations. Inside shard_map, the local function sees that local batch, but its gradient contribution still divides by the global count \\(N=16\\). Summing those contributions produces the derivative of the global mean loss. Dividing by the local count and summing would multiply the gradient by four. The NumPy expression calculates the complete derivative without JAX collectives.",
@@ -137,6 +146,39 @@
         "code": "def completed_samples(fn, *args):\n    fn(*args).block_until_ready()\n    samples = []\n    for _ in range(7):\n        start = perf_counter()\n        fn(*args).block_until_ready()\n        samples.append((perf_counter() - start) * 1e6)\n    return samples\nall_us = completed_samples(all_gradient, x, y, w)\nshard_us = completed_samples(shard_gradient, x, y, w)\ngather_us = completed_samples(gather, gs)\n# Idealized ring payload per rank; not a network measurement.\nranks, gradient_bytes = 4, wh.nbytes\nring_scatter_bytes = (ranks - 1) / ranks * gradient_bytes\nring_all_bytes = 2 * ring_scatter_bytes\nprint('Gradient reference:', reference.tolist())\nprint('Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)')\nprint('Idealized ring bytes per rank:', ring_all_bytes, ring_scatter_bytes)\nprint('Completed CPU median microseconds:', {\n    'all_reduce': float(np.median(all_us)), 'reduce_scatter': float(np.median(shard_us)),\n    'all_gather_only': float(np.median(gather_us))})\n",
         "explanation": "Compare both the numerical global result and the placement needed by its next consumer."
       }
-    ]
+    ],
+    "diagram": {
+      "title": "Reduce-scatter followed by all-gather",
+      "prediction": "Does every participant hold the complete reduced array after reduce-scatter?",
+      "reading": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
+      "alt": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 3.8,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "Stage",
+          "Participant 0",
+          "Participant 1"
+        ],
+        "rows": [
+          [
+            "Contribution",
+            "[1, 2]",
+            "[3, 4]"
+          ],
+          [
+            "Reduce-scatter",
+            "[4]",
+            "[6]"
+          ],
+          [
+            "All-gather",
+            "[4, 6]",
+            "[4, 6]"
+          ]
+        ]
+      }
+    }
   }
 }

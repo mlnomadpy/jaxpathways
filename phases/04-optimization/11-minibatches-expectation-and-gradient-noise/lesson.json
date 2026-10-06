@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "A minibatch may suggest a different update from the full dataset. Is it wrong, or is it a noisy estimate? We will enumerate every possible tiny batch so expectation and variance become quantities you can inspect rather than claims you have to trust.",
-    "idea": "An expectation is a probability-weighted average of possible outcomes. For uniform sampling, the expected single-example gradient equals the mean dataset gradient. A minibatch averages several sampled gradients. At fixed parameters, independent draws reduce the variance of that average. This is a statement about the sampling process, not a promise that every training step decreases the full loss.",
+    "idea": "A minibatch gradient estimates the full-data gradient using fewer examples. Its noise depends on the sampling scheme and batch size. When combining batches, the denominator must still represent the population you intend to average over.",
     "objectives": [
       "Explain an unbiased minibatch gradient and verify how sampling and reduction affect its variance.",
       "Define the population before estimating it",
@@ -16,6 +16,15 @@
       "Separate noise, replay and progress"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Average examples rather than batch averages",
+        "body": "Suppose one batch has two examples with mean loss \\(1\\), and another has one example with loss \\(4\\). Averaging batch means gives \\(2.5\\). The mean over all three examples is \\((2+4)/3=2\\). The first calculation gave the small batch too much weight.\n\nCarry loss sums and example counts through aggregation, then divide once. For token losses, carry valid-token counts instead: examples and tokens are different denominators when lengths vary. The same weighting issue appears when combining gradients across devices.\n\nThe variance plot illustrates the benefit of averaging under its stated sampling assumptions. Correlated examples, sampling without replacement, and nonuniform sampling can change the relationship. Batch size alone does not fully describe the estimator.",
+        "check": {
+          "prompt": "Why might doubling batch size fail to halve observed gradient variance?",
+          "answer": "The usual inverse-size relationship assumes a particular sampling model, often independent samples. Correlation, finite-population effects, changing parameters or too few repeated measurements can alter the observed ratio."
+        }
+      },
       {
         "title": "Define the population before estimating it",
         "body": "Use the per-example loss \\(\\ell(w,y)=\\tfrac12(w-y)^2\\) with targets \\((1,2,3,4)\\). At \\(w=0\\), the per-example gradients are \\((-1,-2,-3,-4)\\). Their mean is \\(-2.5\\), and their population variance is \\(1.25\\): average the squared deviations from the mean, dividing by \\(4\\). This finite training dataset is the population for our sampling experiment, not the population of all future data.",

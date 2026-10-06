@@ -14,7 +14,35 @@ A new artifact is available, but which exact bytes are currently selected, and c
 
 ## The idea
 
-Publishing an artifact and activating it are different operations. A content hash identifies a specific JSON payload, including its state and provenance. A small active pointer chooses which artifact a local consumer should use. Before changing that pointer we verify content integrity and required validation evidence. Rollback selects the previously recorded artifact through the same checks.
+A candidate artifact can exist without serving users. Validation, activation and rollback are separate release transitions. Bind each decision to immutable artifact identity so rejected candidates cannot accidentally change the active system.
+
+## Publishing is different from activating
+
+Imagine candidate B is uploaded while artifact A remains active. If B fails evaluation, the correct transition leaves A active. The presence of B in storage is not permission to select it.
+
+Rollback should select a known compatible artifact together with its processor and configuration. Restoring only weights while leaving an incompatible tokenizer or schema in place can create another failure.
+
+The artifact-selection bars summarize discrete identities; their numeric height is not a quality score. Read them as a sequence of accepted or rejected transitions. A state diagram makes the unchanged active identity on rejection easier to verify.
+
+### Rejected candidates do not become active
+
+**Predict:** Should a rejected candidate change the active artifact pointer?
+
+![Rejected candidates do not become active](../../phases/16-operations/04-changes-rollback-and-artifact-provenance/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.
+
+### Pause and reason
+
+Should a rejected candidate change the active artifact pointer?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The rejection should leave the active release unchanged. Test that invariant directly, including its configuration and processor identities.
+
+</details>
 
 ## A name is not a content identity
 
@@ -547,7 +575,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:20.094770+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:51.357084+00:00. JAX 0.9.2.
 
 ```text
 first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4

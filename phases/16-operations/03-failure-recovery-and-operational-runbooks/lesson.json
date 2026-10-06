@@ -4,13 +4,22 @@
   "minutes": 110,
   "content": {
     "problem": "A restarted job reaches a plausible final loss, but did it continue the same experiment? We will force a worker to fail after an uncheckpointed update, restore its last committed state, and compare every subsequent update with an uninterrupted run. A matching final metric alone will not be accepted as recovery evidence.",
-    "idea": "Recovery is a state transition, not a second invocation with the same seed. A complete state includes parameters, optimizer momentum, random key, completed step and provenance for the code, configuration and dataset. The checkpoint represents a precise boundary before the next sampled minibatch. After restore, the next key split, batch, loss and update must match the original continuation.",
+    "idea": "An operational runbook connects a symptom with evidence, a decision and a verified recovery action. Its purpose is to reduce uncertainty during failure, not merely list restart commands.",
     "objectives": [
       "Rehearse a real worker failure and resume from an atomic complete-state checkpoint.",
       "Verify the next update and every later state against an uninterrupted reference.",
       "Reject corrupted or incompatible recovery artifacts and record a usable runbook."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A runbook should choose the next diagnostic action",
+        "body": "For an interrupted training job, first identify the failure boundary and newest accepted compatible checkpoint. Verify data, configuration and artifact identity before resuming. A restart from a convenient file can silently become a new experiment.\n\nAfter recovery, compare the next data and state transition with the expected continuation. If that comparison fails, preserve the mismatch and investigate the state boundary rather than repeatedly restarting.\n\nThe replayed loss curve checks one part of the fixture. A complete incident record also explains what failed, why the selected recovery point was valid, what work was replayed and which observation confirmed the repair. Keep prevention work separate from the immediate restoration action.",
+        "check": {
+          "prompt": "What makes “restart the job” an incomplete runbook instruction?",
+          "answer": "It does not identify a valid recovery point, compatibility checks or a success criterion. Specify those decisions and the evidence needed to make them."
+        }
+      },
       {
         "title": "Identify the boundary before issuing a retry",
         "body": "The default job checkpoints after even-numbered updates. We inject failure after update \\(3\\), leaving a committed checkpoint at step \\(2\\). The runbook first confirms that the failed child is gone, preserves its events, then reads and validates that checkpoint. Blindly restarting from the beginning would repeat more work; continuing from the progress counter \\(3\\) with checkpoint state \\(2\\) would skip a state transition."

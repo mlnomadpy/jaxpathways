@@ -48,3 +48,13 @@ Every authored lesson has a canonical `content.visual` with a prediction prompt,
 `npm run figures:build` runs each complete example and its figure experiment in a fresh CPU process, then creates SVG, PNG and data/provenance JSON under the lesson’s `outputs/`. `npm run content:build` generates companions. `npm run smoke:cpu` executes scripts and notebook cells, retaining real streams and Matplotlib outputs in `outputs/execution.json`. Run `npm run build` afterward to attach those current results to the reader, notebooks and books. Content hashes and per-cell hashes prevent stale output reuse. `npm run audit:visuals` verifies coverage and updates the whole-course visual audit.
 
 Notebook plotting helpers are self-contained and their source is initially collapsed by compatible readers; plotted outputs remain visible. Matplotlib is pinned in the CPU environment. Browser figures are saved reference results, not a browser Python runtime. Figure runs and full exercise runs have separate timestamps, so timing samples may differ.
+
+## Worked reasoning and mechanism diagrams
+
+The `guided-reasoning` section connects the introduction to a concrete case. Its `check` object contains `prompt` and `answer`; the reader and Markdown hide the answer behind “Compare your reasoning,” and the notebook and EPUB retain the explanation. Use this for reasoning, not an extra completion form.
+
+Optional `content.diagram` supplies `title`, `prediction`, `reading`, `alt`, `scope`, `height` and a structured `panel`. The figure renderer creates `outputs/mechanism.svg` and `outputs/mechanism.png` alongside the existing evidence plot. Place this conceptual or analytic explanation beside the guided section. Never label a source-authored diagram as measured execution.
+
+Mechanism panels support dependency graphs, axis/state tables, clipping geometry, patch layouts, receptive fields, covariance geometry and a conceptual host/device timeline. Graph edges identify endpoints and can specify ports, curves and labels. Explain arrows and verify dimensions against canonical code. Keep numeric JSON configuration canonical: use integers for integral positions and dimensions.
+
+The build copies mechanism assets to the website and EPUB and embeds PNG attachments in downloaded notebooks. Source and renderer hashes govern freshness. `tests/guided-reasoning.test.mjs` checks source/export correspondence, hidden-answer markup, attachment integrity and stale-figure suppression. Independent hand calculations live in `assessments/guided-reasoning-reference.py`.

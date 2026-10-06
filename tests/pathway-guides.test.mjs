@@ -2,8 +2,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { pathwayCoverage, careerPlanMarkdown } from '../src/lib/careers.js';
-import { assessmentContent } from '../src/lib/assessment-content.js';
-import { projectGuide } from '../src/lib/project-guide.js';
+import { assessmentContent } from '../src/lib/server/assessment-content.js';
+import { projectGuide } from '../src/lib/server/project-guide.js';
 const course = JSON.parse(readFileSync(new URL('../public/curriculum.json', import.meta.url)));
 
 test('shared preparation cannot inflate specialist availability', () => {
@@ -73,4 +73,24 @@ test('project guides render real figures, math and course links outside the down
   assert(optimizer.body.includes('/assessments/foundations.html'));
   const audio=projectGuide(projects.find(p=>p.id==='audio-harness'),course);
   assert(audio.body.includes('/project-assets/audio-harness/outputs/error-example.wav'));
+});
+
+test('planned capstones have valid preparation and stay outside runnable availability', () => {
+  const plans = JSON.parse(readFileSync('curriculum/project-plans.json'));
+  const projects = JSON.parse(readFileSync('public/api/v1/projects.json')).projects;
+  const lessonIds = new Set(course.phases.flatMap(phase => phase.lessons.map(lesson => lesson.id)));
+  const trackIds = new Set(course.modalityTracks.map(track => track.id));
+  const ids = plans.map(plan => plan.id);
+  assert.equal(new Set(ids).size, ids.length);
+  for (const plan of plans) {
+    assert.equal(plan.status, 'planned');
+    assert(!projects.some(project => project.id === plan.id), `${plan.id}: plan counted as runnable`);
+    assert(projects.some(project => project.id === plan.harnessId));
+    for (const id of plan.lessonIds) assert(lessonIds.has(id), `${plan.id}: unknown lesson ${id}`);
+    for (const id of plan.trackIds) assert(trackIds.has(id));
+    const content = projectGuide(plan, course, ids);
+    assert(content.body.includes('class="katex"'), `${plan.id}: math not rendered`);
+    assert(content.body.includes('project-plans/'), `${plan.id}: missing sibling plan navigation`);
+    assert(!content.body.includes('href="../'), `${plan.id}: unresolved source link`);
+  }
 });

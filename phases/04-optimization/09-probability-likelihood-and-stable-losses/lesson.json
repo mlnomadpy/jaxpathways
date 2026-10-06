@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "A classifier should tell us how strongly it believes a label, not only which label it chooses. How do we turn that belief into a loss? We will start with a yes-or-no event, derive the penalty for a prediction, and discover why an algebraically correct formula can fail on a computer.",
-    "idea": "For a binary label \\(y\\in\\{0,1\\}\\), let \\(p\\) be the probability of label \\(1\\). The probability assigned to the observed label is \\(p\\) when \\(y=1\\) and \\(1-p\\) when \\(y=0\\). Negative log-likelihood penalizes assigning little probability to what happened. Averaging this penalty gives binary cross-entropy.",
+    "idea": "A classification loss rewards probability assigned to the observed outcome. A logit is an unconstrained score that becomes a probability through a link such as the sigmoid. Stable formulas let us compute the same objective without overflowing or taking the logarithm of a rounded zero.",
     "objectives": [
       "Derive binary cross-entropy from a probability model and compute it safely from logits.",
       "Read likelihood as support for the observed data",
@@ -16,6 +16,15 @@
       "Extend the idea without overstating it"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Connect a logit to the observed label",
+        "body": "For a binary label of one, predicting probability \\(0.5\\) gives loss \\(-\\log(0.5)\\approx0.693\\). Predicting \\(0.9\\) gives about \\(0.105\\). If the observed label is instead zero, that same \\(0.9\\) prediction gives \\(-\\log(0.1)\\approx2.303\\). Confidence helps only when it supports the observed outcome.\n\nAt logit zero, the sigmoid gives \\(0.5\\), so either binary label has the same loss. Moving the logit right helps the positive label and hurts the negative one. Follow the correct label's curve rather than treating a lower curve as universally better.\n\nExtreme logits expose numerical differences between mathematically equivalent formulas. Prefer a stable logit-based loss and verify it against moderate-value hand calculations before exploring extreme cases.",
+        "check": {
+          "prompt": "Can an accurate classifier still produce poorly calibrated probabilities?",
+          "answer": "Yes. Correct top-label decisions do not determine whether predicted probabilities match observed frequencies. Classification accuracy and probability quality require different checks."
+        }
+      },
       {
         "title": "Read likelihood as support for the observed data",
         "body": "The Bernoulli model writes the probability of an observed label as \\(p^y(1-p)^{1-y}\\). If the label is \\(1\\), predictions \\(p=0.8\\) and \\(p=0.2\\) incur losses about \\(0.2231\\) and \\(1.6094\\), respectively. Both can be compared even before applying a classification threshold. For independent observations conditional on their inputs and model parameters, likelihoods multiply. Taking negative logarithms turns the product into a sum; dividing by the sample count gives a mean.",

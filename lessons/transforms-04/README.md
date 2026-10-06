@@ -15,9 +15,25 @@ Your calculation is correct, and now you want to run it many times. What does co
 
 ## The idea
 
-jit transforms a compatible numerical function into a compiled callable. On a first relevant call, JAX traces Python execution with abstract inputs, stages array operations, and obtains a compiled executable. Later compatible calls can reuse it. Python still invokes the callable, but the numerical work can run as a compiled computation.
+Compilation prepares a program that can be reused for compatible calls. The first call can include tracing and compilation as well as execution; later compatible calls can reuse that work. Numerical equality and performance are separate checks.
 
-The worked loss is intentionally small. Its point is to verify correctness and understand measurement, not to guarantee a speedup. On a tiny CPU workload, Python-call and dispatch overhead can be a substantial fraction of the time. On a large accelerator workload, completion of device work matters. Report the actual device and workload before interpreting results.
+## Separate changing data from preparing a program
+
+Suppose you call a compiled function on a float32 vector, then call it on different values with the same shape and dtype. Those new values can flow through the prepared computation. If the next call changes a relevant shape or static choice, JAX may need a different specialization.
+
+Think of the first-call path as preparation followed by execution. A warm-call timing should describe the repeated workload after preparation, and it must wait for device work to finish. Timing only dispatch can make a slow computation look fast.
+
+First compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.
+
+### Pause and reason
+
+Why can a tiny function be slower on its first compiled call?
+
+<details><summary>Compare your reasoning</summary>
+
+The call includes preparation costs that may exceed the work itself. Reuse can amortize those costs, but a speed claim still needs measurements of the intended workload.
+
+</details>
 
 ## Separate the work hidden in one call
 
@@ -112,15 +128,15 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:51.972148+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:19.324667+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.012483832892030478 1.4333054423332214e-05
-eager median / min / max seconds: 2.3312517441809177e-05 2.208305522799492e-05 3.4667085856199265e-05
-compiled median / min / max seconds: 4.104455001652241e-06 3.6249402910470963e-06 4.875008016824722e-06
+First/repeat seconds: 0.013669625390321016 1.570768654346466e-05
+eager median / min / max seconds: 2.2104009985923767e-05 2.11251899600029e-05 3.329198807477951e-05
+compiled median / min / max seconds: 3.7499703466892242e-06 3.5408884286880493e-06 4.792120307683945e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 6.416114047169685e-06
+compiled value-and-grad median seconds: 6.666639819741249e-06
 PASS: transforms-04
 
 ```

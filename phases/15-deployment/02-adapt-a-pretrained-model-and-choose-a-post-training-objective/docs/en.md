@@ -15,7 +15,25 @@ A model already learned one task. You now have a small adaptation set and a teac
 
 ## The idea
 
-Post-training changes a learned model using a new objective or dataset. Supervised fine-tuning uses observed targets. Distillation uses teacher predictions as targets; it inherits the teacher’s strengths and errors. Preference learning instead compares alternatives, while reinforcement learning requires a reward and interaction or rollout assumptions. These are different data contracts, not interchangeable labels for an optimizer.
+Adaptation starts with the behavior you want to change and the evidence you have. Supervised labels and teacher distributions supply different targets. Their objectives can use the same model while asking it to learn different things.
+
+## Choose the target before choosing the adaptation method
+
+A hard target identifies one class. A teacher distribution can assign mass to several alternatives, preserving information about relative preferences. Matching that distribution does not guarantee the teacher is correct for your deployment population.
+
+Keep the evaluation target fixed when comparing adaptation methods. A lower training loss under one objective cannot be compared directly with a differently defined loss under another objective.
+
+The held-out cross-entropy bars compare the lesson's two procedures under a common scoring rule. Explain that rule and inspect changed examples before choosing a method. This experiment is a bounded adaptation comparison; reward modeling and policy optimization require their own distinct data and update contracts.
+
+### Pause and reason
+
+Why not choose the method with the numerically smallest training loss across different objectives?
+
+<details><summary>Compare your reasoning</summary>
+
+The numbers may have different definitions and scales. Compare behavior under a common held-out evaluation contract relevant to the intended task.
+
+</details>
 
 ## Define the tasks before choosing an objective
 
@@ -234,7 +252,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:10.922278+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:43.436992+00:00. JAX 0.9.2.
 
 ```text
 {

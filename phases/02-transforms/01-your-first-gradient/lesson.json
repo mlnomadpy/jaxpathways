@@ -3,7 +3,7 @@
   "id": "first-gradient",
   "minutes": 55,
   "content": {
-    "idea": "A derivative is a local sensitivity: it tells us how much the output changes for a small input change. For \\(f(x)=x^2\\), the slope is \\(2x\\). At \\(x=3\\), that is \\(6\\); increasing the input by \\(0.01\\) should increase the output by about \\(0.06\\). “About” matters because the curve bends.\n\nIn JAX, `jax.grad(f)` creates a function that computes the derivative. Calling that new function at \\(3.0\\) gives the slope there. We’ll compare it with an answer we derived ourselves, then with a finite-difference estimate. These are different checks, and each helps us understand the result.",
+    "idea": "A derivative tells us how an output changes near a particular input. We can understand it before using autodiff: move the input a small amount, estimate the output change from the local slope, then compare that prediction with the function.",
     "code": "import jax\nimport jax.numpy as jnp\ndef f(x):\n    return x ** 2\nderivative = jax.grad(f)\nprint(float(derivative(3.0)))\nassert jnp.allclose(derivative(3.0), 6.)\nassert jnp.allclose(derivative(0.0), 0.)",
     "output": "\\(6.0\\)",
     "exercise": "Foundation · Define \\(f(x)=x^3\\). Derive \\(f\\prime(x)\\), predict the values at \\(-2\\), \\(0\\), and \\(3\\), then verify every prediction with JAX. Explain why the zero at \\(x=0\\) does not establish a minimum.",
@@ -28,6 +28,15 @@
       "Distinguish a stationary point from a minimum and repair scalar-output/input-type errors."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Use a slope to predict a nearby change",
+        "body": "For a separate hand calculation, let \\(f(x)=x^2\\). At \\(x=3\\), the derivative is \\(6\\). Moving to \\(3.01\\) gives a first-order prediction of \\(9+6(0.01)=9.06\\). The exact value is \\(9.0601\\); the small difference comes from curvature.\n\nIn the tangent figure, the tangent agrees with the curve at the selected point and has the same local slope. It need not follow the curve far away. Move the point and watch the slope change; then move only a small distance from that point to judge the linear approximation.\n\nAutodiff computes the derivative of the operations you wrote. It does not choose a meaningful objective for you. A gradient of the wrong loss can be numerically correct, which is why later lessons check both the formula and its derivative.",
+        "check": {
+          "prompt": "Does a positive derivative mean the function value itself is positive?",
+          "answer": "No. The derivative describes local change. For \\(f(x)=x-10\\) at \\(x=0\\), the value is \\(-10\\) while the derivative is \\(1\\)."
+        }
+      },
       {
         "title": "Read a slope before you compute it",
         "body": "Let’s start at \\(x=3\\). If we move right by \\(\\delta=0.01\\), the score changes from \\(9\\) to \\(9.0601\\). That is an increase of \\(0.0601\\). The slope predicts an increase of about \\(6\\times0.01=0.06\\), which is close.\n\nHere \\(\\delta\\) means a small change in the input, and \\(f\\prime(x)\\) means the slope at that input. Expanding the square gives the exact change below. The term \\(\\delta^2\\) is what the straight-line approximation leaves out. As the change gets smaller, that term becomes small compared with the linear term when the slope is nonzero.\n\nBefore running the code, try a negative input. At \\(x=-3\\), moving a little to the right reduces the score. The slope should therefore be negative. At zero, the slope is zero even though moving away in either direction increases the square.",

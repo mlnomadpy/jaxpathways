@@ -4,7 +4,7 @@
   "minutes": 75,
   "content": {
     "problem": "A prompt edit improves ordinary answers but makes the system confidently answer a question its documents cannot support. Let’s build a small regression suite that exposes the failure and save real MLflow traces without calling a paid model.",
-    "idea": "LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.",
+    "idea": "An LLM application combines prompts, retrieved context, model configuration and postprocessing. Version those components and keep a trace that explains a failed case. A model name alone does not identify the behavior of the whole application.",
     "objectives": [
       "Version the application boundary",
       "Define cases before changing the prompt",
@@ -12,6 +12,15 @@
       "Trace enough to diagnose, without retaining everything"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Trace a response through the system that produced it",
+        "body": "If a response is unsupported, first ask whether relevant evidence reached the model, whether the prompt requested grounded behavior and whether the evaluation checks the intended claim. Changing the model cannot necessarily repair a missing retrieval candidate.\n\nLink case IDs to prompt, retriever, model and evaluator versions. Re-run a fixed case set after a change and inspect both repaired cases and regressions. An average pass rate can conceal a newly broken critical case.\n\nThe lesson uses a bounded fixture to teach release logic. Preserve that scope: passing a mocked or non-LLM check does not establish actual model behavior. Qualify the full application with executed traces when replacing the fixture.",
+        "check": {
+          "prompt": "Why retain the retrieved context in an error trace?",
+          "answer": "It distinguishes missing or wrong evidence from generation or instruction-following errors. Without that context, the same final response can support several incompatible diagnoses."
+        }
+      },
       {
         "title": "Version the application boundary",
         "body": "For a text generator, record the model revision, tokenizer, prompt template and decoding settings. For retrieval, add corpus/index versions, chunking and retrieval configuration. For tools, version schemas and implementations and define permission boundaries. MLflow’s prompt registry can store versions; an alias is convenient for development, while an evaluated release should resolve an immutable prompt version. The connected lab actually registers and reloads a prompt version."

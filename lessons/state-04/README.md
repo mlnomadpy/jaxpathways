@@ -15,9 +15,25 @@ A Python branch can choose a path when it knows a value. Inside jit, that value 
 
 ## The idea
 
-lax.cond selects between two branches using a runtime predicate. Both branches must return compatible structures, shapes, and dtypes, because the compiled program needs a consistent result type. Both branch functions are traced; for an ordinary scalar predicate, cond chooses one branch at runtime.
+A data-dependent branch needs a control-flow operation that can represent both alternatives in a transformed program. With a scalar predicate, `lax.cond` selects the result of one branch while requiring compatible result structures from both.
 
-For elementwise selection, `jnp.where` is often clearer. Under transformations such as vmap, cond can be converted into selection, so do not rely on branch choice to suppress side effects. Keep the branches pure and numerically well-defined.
+## Trace both possibilities, execute the selected rule
+
+Consider an absolute-value rule: return the input when it is nonnegative and its negation otherwise. Both branches return the same shape and dtype, even though only one scalar case determines a particular result. The function is continuous at zero, but its mathematical derivative is not uniquely defined there.
+
+The plot of magnitudes shows what the branch computes, not the tracing process. During tracing, Python code in both branch functions can be visited. Avoid using Python side effects as evidence that one numerical branch executed on the device.
+
+After batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.
+
+### Pause and reason
+
+Can one branch return a vector and the other a scalar if your current input only selects the vector?
+
+<details><summary>Compare your reasoning</summary>
+
+Not under the same conditional result contract. Both branches must produce compatible structures, shapes and dtypes so the transformed program has a well-defined result.
+
+</details>
 
 ## Locate the decision boundary
 
@@ -127,7 +143,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:59.701174+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:27.375818+00:00. JAX 0.9.2.
 
 ```text
 3.0

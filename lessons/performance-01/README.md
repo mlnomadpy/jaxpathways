@@ -15,9 +15,35 @@ A first timing suggests a tenfold speedup. Before celebrating, let’s ask when 
 
 ## The idea
 
-An array handle and a completed calculation are different events. JAX may dispatch work asynchronously; block_until_ready waits for the requested result without requiring a NumPy copy. A first call can also include tracing, lowering and compilation. Time first-call latency separately from repeated calls to a warmed function.
+JAX can return an array handle before device work finishes. A benchmark must define what starts the interval and what counts as completion. First-call preparation, warm execution and end-to-end requests answer different performance questions.
 
-This lesson explicitly places a modest matrix workload on CPU. It teaches measurement design and numerical equivalence, not an accelerator speed claim. The JSON report retains every measured sample, the workload, the environment and the synchronization boundary.
+## Time a completed result
+
+If a timer stops as soon as dispatch returns, it may exclude most of the computation. Blocking on the result inside the interval includes completion of the work required to produce that result.
+
+Warm up the intended specialization before measuring repeated execution, and retain startup separately if it matters to the application. Include preprocessing and transfers in a separately named end-to-end measurement when they belong to the request.
+
+The first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.
+
+### Time the completed result
+
+**Predict:** Where should synchronization occur in completed-result latency measurement?
+
+![Time the completed result](../../phases/08-performance/01-benchmark-asynchronous-work-correctly/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.
+
+### Pause and reason
+
+Where should synchronization occur in completed-result latency measurement?
+
+<details><summary>Compare your reasoning</summary>
+
+Before stopping the timer. Synchronizing afterward can omit unfinished work from the reported interval.
+
+</details>
 
 ## Draw the boundary before starting the clock
 
@@ -203,7 +229,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:27.970616+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:59.843355+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -221,17 +247,17 @@ CPU run: 2026-10-06T01:24:27.970616+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.027212874963879585,
+  "first_call_seconds": 0.026257166638970375,
   "warm_samples_seconds": [
-    3.5542063415050507e-05,
-    1.1541880667209625e-05,
-    8.417060598731041e-06,
-    9.082956239581108e-06,
-    8.499948307871819e-06,
-    8.125090971589088e-06,
-    8.041970431804657e-06
+    2.89171002805233e-05,
+    1.2375414371490479e-05,
+    1.2459233403205872e-05,
+    9.000301361083984e-06,
+    8.958857506513596e-06,
+    8.082948625087738e-06,
+    7.541850209236145e-06
   ],
-  "warm_median_seconds": 8.499948307871819e-06,
+  "warm_median_seconds": 9.000301361083984e-06,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -249,25 +275,25 @@ CPU run: 2026-10-06T01:24:27.970616+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.017281959066167474,
+  "first_call_seconds": 0.01668675011023879,
   "warm_samples_seconds": [
-    2.7082860469818115e-05,
-    9.00006853044033e-06,
-    6.542075425386429e-06,
-    9.499955922365189e-06,
-    7.209135219454765e-06,
-    7.58306123316288e-06,
-    8.040806278586388e-06
+    3.054225817322731e-05,
+    1.2833625078201294e-05,
+    9.249895811080933e-06,
+    9.459443390369415e-06,
+    9.417068213224411e-06,
+    7.916707545518875e-06,
+    1.683272421360016e-05
   ],
-  "warm_median_seconds": 8.040806278586388e-06,
+  "warm_median_seconds": 9.459443390369415e-06,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 7.166992872953415e-06
-Complete-call samples: [3.6999816074967384e-05, 2.3250002413988113e-05, 1.4124903827905655e-05]
-Structured samples: [3.1624920666217804e-05, 1.9916798919439316e-05, 1.7666956409811974e-05]
-Changed workload: (96, 32) [2.9959017410874367e-05, 1.3417098671197891e-05, 8.292030543088913e-06, 1.0833144187927246e-05, 1.033279113471508e-05]
-Energy shape and samples: (64,) [2.8125010430812836e-05, 1.3999873772263527e-05, 8.916947990655899e-06, 8.999835699796677e-06, 1.1499971151351929e-05]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.2666918337345123e-05, 8.417060598731041e-06, 8.00006091594696e-06, 9.041046723723412e-06, 8.041039109230042e-06]}
+Handle-only seconds: 9.084120392799377e-06
+Complete-call samples: [1.8999911844730377e-05, 1.2459233403205872e-05, 7.333233952522278e-06]
+Structured samples: [3.0792318284511566e-05, 1.71661376953125e-05, 1.5750061720609665e-05]
+Changed workload: (96, 32) [2.750009298324585e-05, 1.0833144187927246e-05, 7.375143468379974e-06, 9.042210876941681e-06, 1.1791009455919266e-05]
+Energy shape and samples: (64,) [3.9250124245882034e-05, 2.0875129848718643e-05, 1.3624783605337143e-05, 9.167008101940155e-06, 9.33278352022171e-06]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.8332619220018387e-05, 1.2292061001062393e-05, 7.291790097951889e-06, 8.249655365943909e-06, 9.040813893079758e-06]}
 PASS: performance-01
 
 ```

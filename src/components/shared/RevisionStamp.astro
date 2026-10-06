@@ -1,0 +1,10 @@
+---
+import { revisionMarkup } from '../../lib/releases.js';
+interface Props {
+  kind: 'lessons' | 'phases';
+  id: string;
+}
+const { kind, id } = Astro.props;
+---
+
+<Fragment set:html={revisionMarkup(kind, id)} />

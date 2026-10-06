@@ -1,16 +1,29 @@
 {
   "schemaVersion": 1,
   "id": "posttraining-05",
-  "minutes": 75,
+  "minutes": 105,
   "content": {
     "problem": "Can we train on chosen/rejected responses without collecting fresh reward-model rollouts? DPO provides a different training objective. We will work through the reference correction and compare its bookkeeping with the preceding RLHF loop.",
-    "idea": "DPO compares policy log-probability differences with the same differences under a frozen reference. The lab treats each response as one categorical action to isolate the objective. For language responses, substitute the sum of valid response-token log probabilities, with a consistent tokenizer and mask; arbitrary mean-length normalization changes the objective.",
+    "idea": "DPO uses chosen/rejected preferences and a fixed reference to optimize a policy directly. It compares policy log-probability differences with reference differences. This training step does not require an explicit reward-model call or on-policy rollout.",
     "objectives": [
       "Compare chosen and rejected response log probabilities",
       "Subtract the reference preference",
       "Verify the changed-condition exercise and explain the limits of this fixture."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A better relative margin need not raise chosen probability",
+        "body": "Suppose chosen probability falls from \\(0.4\\) to \\(0.3\\) while rejected probability falls from \\(0.2\\) to \\(0.1\\). The chosen-to-rejected ratio rises from \\(2\\) to \\(3\\), even though the chosen probability decreased. Relative preference improvement and absolute likelihood improvement are different claims.\n\nThe reference corrects that log-ratio margin, and beta scales it in the loss. Keep the reference checkpoint and any cached reference probabilities bound to the same examples and preprocessing.\n\nRead the margin plot alongside individual probabilities when diagnosing behavior. A growing training margin does not establish held-out preference quality or generation quality. The categorical fixture teaches the objective; sequence integration also needs token masking and log-probability aggregation checks.",
+        "check": {
+          "prompt": "What extra evidence would you inspect before claiming a DPO update makes chosen responses more likely?",
+          "answer": "Inspect chosen probabilities or sequence log probabilities directly under a fixed measurement contract. A relative margin alone cannot establish that absolute change."
+        }
+      },
+      {
+        "title": "Before coding: compare changes in preference, not raw scores",
+        "body": "Consider a prompt with one chosen and one rejected response. The reference already prefers one of them to some degree. DPO asks how the current policy changes that relative preference. Write four log probabilities: current chosen, current rejected, reference chosen and reference rejected. Take a within-model difference first, then subtract the reference difference.\n\nWhen current and reference models are identical, both differences cancel even if neither response has high probability. The loss starts at \\(\\log2\\). This cancellation is a precise implementation check, not evidence that the initial model is indifferent between the two responses."
+      },
       {
         "title": "Compare chosen and rejected response log probabilities",
         "body": "Both responses belong to the same prompt. Compute their sequence log probabilities under current and reference policies. Exclude prompt and padding tokens consistently. Keep lengths, tokenization and special-token rules visible because they determine the probability of the represented response."
@@ -19,6 +32,15 @@
         "title": "Subtract the reference preference",
         "body": "The reference-corrected margin subtracts what the reference already preferred. At initialization when current policy equals reference, the corrected margin is zero and the loss is \\(\\log2\\), even if the reference assigns unequal response probabilities.",
         "math": "L_{\\mathrm{DPO}}=\\mathbb E\\left[\\operatorname{softplus}\\!\\left(-\\beta\\left[\\log\\frac{\\pi_\\theta(y^+|x)}{\\pi_\\theta(y^-|x)}-\\log\\frac{\\pi_{\\mathrm{ref}}(y^+|x)}{\\pi_{\\mathrm{ref}}(y^-|x)}\\right]\\right)\\right]"
+      },
+      {
+        "title": "Work through a numeric margin and its gradient",
+        "body": "Suppose current chosen/rejected log probabilities are \\(-2\\) and \\(-4\\), while reference values are \\(-3\\) and \\(-4\\). The current gap is \\(2\\), the reference gap is \\(1\\), and the corrected margin is \\(1\\). With \\(\\beta=0.3\\), the loss is \\(\\log(1+e^{-0.3})\\), about \\(0.554\\). Reversing chosen and rejected flips the corrected margin.\n\nLet \\(m\\) denote the corrected margin. Its derivative below is negative for finite \\(m\\), so gradient descent increases the chosen-versus-rejected gap on this pair. The underlying model shares parameters across many responses, so this local pressure does not guarantee every chosen response’s absolute probability rises.",
+        "math": "\\frac{\\partial L}{\\partial m}=-\\beta\\,\\sigma(-\\beta m)"
+      },
+      {
+        "title": "A rising preference ratio can hide falling chosen probability",
+        "body": "Imagine reference probabilities \\([0.4,0.4,0.2]\\) for chosen, rejected and another response. A new policy \\([0.3,0.1,0.6]\\) lowers the chosen probability but lowers the rejected probability even more. The chosen/rejected ratio grows from one to three, so the DPO loss improves for this comparison.\n\nTrack chosen and rejected sequence log probabilities separately, not only the margin. Also evaluate useful task behavior, response length and diversity on held-out prompts. Pairwise training is a relative objective; it does not directly specify the probability allocated to every unpaired response."
       },
       {
         "title": "Keep the algorithm distinction visible",
@@ -31,6 +53,10 @@
       {
         "title": "Evaluate beyond chosen-pair fit",
         "body": "Frozen-pair optimization can overfit or reduce useful response diversity. Retain held-out prompts, independent task metrics and reviewed outputs; inspect slices rather than only average preference accuracy. Synthetic action preferences establish an objective implementation test, not an aligned language model."
+      },
+      {
+        "title": "Carry sequence bookkeeping and reference identity into a real model",
+        "body": "For language responses, add log probabilities over valid answer and end tokens while conditioning on the prompt. Exclude padding and prompt targets consistently. A mean over response length changes the objective: two equally likely tokens have twice the negative log probability of one. Decide which objective you intend rather than introducing normalization as an innocent convenience.\n\nReference caches must bind prompt text, chosen/rejected ordering, tokenizer, chat template, mask and checkpoint revision. A frozen array can still be wrong if its examples were reordered. Split prompt groups before fitting, compare fixed decoding on held-out tasks, and retain the actual reference artifact so a later run can reproduce the correction. This categorical lab supplies objective checks, not the sequence trainer."
       }
     ],
     "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=.2):\n    margin = (policy_logps[chosen]-policy_logps[rejected]) - jax.lax.stop_gradient(reference_logps[chosen]-reference_logps[rejected])\n    return jnp.mean(jax.nn.softplus(-beta*margin))\n\nreference=jax.nn.log_softmax(jnp.array([.2,0.,-.2]))\nchosen=jnp.array([0,0,1]);rejected=jnp.array([1,2,2]);theta=jnp.array([.2,0.,-.2]);history=[]\nloss=lambda theta:dpo_loss(jax.nn.log_softmax(theta),reference,chosen,rejected,.3)\nstep=jax.jit(jax.value_and_grad(loss))\nnp.testing.assert_allclose(loss(theta),np.log(2),atol=1e-6)\nfor _ in range(120):\n    value,g=step(theta);history.append(float(value));theta=theta-.4*g\nassert history[-1]<history[0]*.5\npolicy=jax.nn.log_softmax(theta)\nmargin=np.asarray((policy[chosen]-policy[rejected])-(reference[chosen]-reference[rejected]),np.float64)\nnp.testing.assert_allclose(loss(theta),np.mean(np.logaddexp(0,-.3*margin)),atol=1e-6)\nassert np.all(margin>0)\nnp.testing.assert_allclose(loss(theta+50),loss(theta),atol=1e-6)\nprint('DPO initial/final:',history[0],history[-1],'; reference-corrected margins:',margin)\n",
@@ -42,6 +68,13 @@
         "code": "initial=dpo_loss(reference,reference,chosen,rejected,.3)\nnp.testing.assert_allclose(initial,np.log(2),atol=1e-6)\nuncorrected=jnp.mean(jax.nn.softplus(-.3*(reference[chosen]-reference[rejected])))\nassert not np.isclose(float(initial),float(uncorrected))\nprint('Corrected/unadjusted initial loss:',float(initial),float(uncorrected))",
         "output": "The corrected initial loss is log(2); omitting the reference correction changes it.",
         "explanation": "The initial policy is not uniform. Cancellation, rather than equal response probabilities, makes the corrected margin zero."
+      },
+      {
+        "title": "Improve the ratio while lowering the chosen probability",
+        "prediction": "Can the preference loss fall even if the chosen response becomes less likely?",
+        "code": "example_ref=jnp.log(jnp.array([.4,.4,.2]));example_policy=jnp.log(jnp.array([.3,.1,.6]))\nchoice=jnp.array([0]);reject=jnp.array([1])\nbefore=float(dpo_loss(example_ref,example_ref,choice,reject,.3))\nafter=float(dpo_loss(example_policy,example_ref,choice,reject,.3))\nassert after<before and float(jnp.exp(example_policy[0]))<float(jnp.exp(example_ref[0]))\nnp.testing.assert_allclose(after,np.logaddexp(0.,-.3*np.log(3)),atol=1e-6)\nprint('Loss before/after:',before,after,'; chosen probability: 0.4 -> 0.3')",
+        "output": "The DPO loss decreases while the chosen probability falls from 0.4 to 0.3.",
+        "explanation": "The rejected probability falls further. Monitoring only the margin would miss the shift toward an unpaired response."
       }
     ],
     "exercise": "Swap chosen and rejected IDs after training and verify that the loss rises.",
@@ -54,6 +87,14 @@
         "hint": "The reference is an input to the objective but not an optimization variable.",
         "solution": "reference_grad=jax.grad(dpo_loss,argnums=1)(policy,reference,chosen,rejected,.3)\nnp.testing.assert_array_equal(reference_grad,np.zeros(reference_grad.shape))\nprint('Reference gradient is zero.')",
         "explanation": "Also retain the actual reference checkpoint and tokenizer identity. A detached but reloaded different model is still a changed reference."
+      },
+      {
+        "title": "Derive a one-pair categorical gradient",
+        "difficulty": "Challenge",
+        "prompt": "At a fresh three-action policy, compute the corrected margin and derive the logit gradient for one chosen/rejected pair. Why does the third action have zero direct logit gradient here?",
+        "hint": "The log-softmax normalizer cancels in a log-probability difference. Shared model parameters make real sequence updates less isolated.",
+        "solution": "probe=jnp.array([.6,-.3,.1]);choice=jnp.array([0]);reject=jnp.array([1]);beta=.3\none_pair=lambda logits:dpo_loss(jax.nn.log_softmax(logits),reference,choice,reject,beta)\nmargin_value=float((probe[0]-probe[1])-(reference[0]-reference[1]))\nfactor=-beta/(1+np.exp(beta*margin_value))\nnp.testing.assert_allclose(jax.grad(one_pair)(probe),[factor,-factor,0.],atol=1e-6)\nprint('One-pair logit gradient agrees with independent margin derivative.')",
+        "explanation": "The unpaired logit is absent from this categorical difference, yet its normalized probability can change when the other logits move."
       }
     ],
     "question": "Does this DPO loop require a separately trained reward model and fresh policy rollouts?",
@@ -77,11 +118,117 @@
     "visual": {
       "title": "Direct preference optimization and reference-corrected margins — recorded experiment",
       "kind": "executed",
-      "prediction": "Predict what should change during training and what this curve cannot establish.",
-      "reading": "The line records preference loss before each update, starting at \\(0.693\\) and falling to about \\(0.272\\). It measures fit to the same three synthetic action comparisons. Its numerical scale depends on beta and does not directly compare with reward-model NLL or PPO reward.",
+      "prediction": "What does a positive corrected margin establish, and what does it leave unknown about absolute probabilities?",
+      "reading": "The line records preference loss before each update, starting at \\(0.693\\) and falling to about \\(0.272\\). It measures fit to the same three synthetic action comparisons. Its numerical scale depends on beta and does not directly compare with reward-model NLL or PPO reward.\n\nThe second panel shows final reference-corrected margins for each comparison. All positive bars mean those pairwise ratios improved relative to the reference. The zero-versus-two margin combines the other two gaps. A positive bar does not by itself prove the absolute probability of the chosen response increased; the separate three-action counterexample demonstrates why. Read these as log-ratio differences, not probabilities or human preference scores.",
       "connection": "Positive final corrected margins mean the policy favors each chosen action more strongly relative to the reference. The independent host softplus calculation and reference-gradient check establish objective behavior; separate generation and human review would be needed for a language application.",
-      "alt": "The line records preference loss before each update, starting at \\(0.693\\) and falling to about \\(0.272\\). It measures fit to the same three synthetic action comparisons. Its numerical scale depends on beta and does not directly compare with reward-model NLL or PPO reward.",
-      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+      "alt": "Direct preference optimization and reference-corrected margins — recorded experiment. A measured training curve is accompanied by an audit of reference-corrected preference margins.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'DPO preference loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n\nextra_panel={'kind':'bar','x':[0,1,2],'labels':['0 preferred to 1','0 preferred to 2','1 preferred to 2'],'series':[{'label':'final corrected margin','y':margin.tolist()}],'xlabel':'preference pair','ylabel':'reference-corrected log ratio','title':'Relative preference changes behind the loss'}\nvisual_data={\"panels\":[*visual_data.get(\"panels\",[visual_data]),extra_panel]}\n"
+    },
+    "buildSteps": [
+      {
+        "title": "1. Define the reference-corrected pair objective",
+        "instruction": "Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=.2):\n    margin = (policy_logps[chosen]-policy_logps[rejected]) - jax.lax.stop_gradient(reference_logps[chosen]-reference_logps[rejected])\n    return jnp.mean(jax.nn.softplus(-beta*margin))",
+        "explanation": "The reference correction is detached, while current policy log probabilities remain differentiable."
+      },
+      {
+        "title": "2. Freeze reference probabilities and comparison IDs",
+        "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
+        "code": "reference=jax.nn.log_softmax(jnp.array([.2,0.,-.2]))\nchosen=jnp.array([0,0,1]);rejected=jnp.array([1,2,2]);theta=jnp.array([.2,0.,-.2]);history=[]\nloss=lambda theta:dpo_loss(jax.nn.log_softmax(theta),reference,chosen,rejected,.3)\nstep=jax.jit(jax.value_and_grad(loss))\nnp.testing.assert_allclose(loss(theta),np.log(2),atol=1e-6)",
+        "explanation": "The initial policy equals a nonuniform reference. Predict the corrected margin and initial loss before continuing."
+      },
+      {
+        "title": "3. Fit the policy and test cancellation",
+        "instruction": "Append this block to main.py and run python main.py again. Keep the earlier blocks above it.",
+        "code": "for _ in range(120):\n    value,g=step(theta);history.append(float(value));theta=theta-.4*g\nassert history[-1]<history[0]*.5\npolicy=jax.nn.log_softmax(theta)\nmargin=np.asarray((policy[chosen]-policy[rejected])-(reference[chosen]-reference[rejected]),np.float64)\nnp.testing.assert_allclose(loss(theta),np.mean(np.logaddexp(0,-.3*margin)),atol=1e-6)\nassert np.all(margin>0)\nnp.testing.assert_allclose(loss(theta+50),loss(theta),atol=1e-6)\nprint('DPO initial/final:',history[0],history[-1],'; reference-corrected margins:',margin)",
+        "explanation": "The host stable-softplus calculation checks final margins. Adding a common logit offset preserves the probability distribution and therefore the objective."
+      }
+    ],
+    "takeaways": [
+      "Suppose current chosen/rejected log probabilities are \\(-2\\) and \\(-4\\), while reference values are \\(-3\\) and \\(-4\\). The current gap is \\(2\\), the reference gap is \\(1\\), and the corrected margin is \\(1\\). With \\(\\beta=0.3\\), the loss is \\(\\log(1+e^{-0.3})\\), about \\(0.554\\). Reversing chosen and rejected flips the corrected margin.",
+      "For language responses, add log probabilities over valid answer and end tokens while conditioning on the prompt. Exclude padding and prompt targets consistently. A mean over response length changes the objective: two equally likely tokens have twice the negative log probability of one. Decide which objective you intend rather than introducing normalization as an innocent convenience."
+    ],
+    "diagram": {
+      "title": "DPO corrects a policy margin with a reference",
+      "prediction": "What extra evidence would you inspect before claiming a DPO update makes chosen responses more likely?",
+      "reading": "Both models score the same chosen/rejected pair. Their log-probability differences form a reference-corrected margin, which beta scales before the stable preference loss. The reference is frozen. There is no reward-model call or on-policy rollout in this step.",
+      "alt": "Both models score the same chosen/rejected pair. Their log-probability differences form a reference-corrected margin, which beta scales before the stable preference loss. The reference is frozen. There is no reward-model call or on-policy rollout in this step.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 5.7,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "pairs",
+            "x": 5,
+            "y": 0.8,
+            "label": "Chosen / rejected pair",
+            "tone": "data",
+            "w": 5,
+            "h": 0.85
+          },
+          {
+            "id": "policy",
+            "x": 2.5,
+            "y": 2.6,
+            "label": "Trainable policy\nchosen − rejected log p",
+            "tone": "state",
+            "w": 4.4,
+            "h": 1.1
+          },
+          {
+            "id": "ref",
+            "x": 7.5,
+            "y": 2.6,
+            "label": "Frozen reference\nchosen − rejected log p",
+            "tone": "fixed",
+            "w": 4.4,
+            "h": 1.1
+          },
+          {
+            "id": "margin",
+            "x": 5,
+            "y": 4.5,
+            "label": "Policy difference − reference difference",
+            "tone": "data",
+            "w": 8,
+            "h": 0.85
+          },
+          {
+            "id": "loss",
+            "x": 5,
+            "y": 6.3,
+            "label": "softplus(− beta × margin)",
+            "tone": "result",
+            "w": 6,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "pairs",
+            "to": "policy"
+          },
+          {
+            "from": "pairs",
+            "to": "ref"
+          },
+          {
+            "from": "policy",
+            "to": "margin"
+          },
+          {
+            "from": "ref",
+            "to": "margin"
+          },
+          {
+            "from": "margin",
+            "to": "loss"
+          }
+        ],
+        "height": 7.3,
+        "width": 10
+      }
     }
   }
 }

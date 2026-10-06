@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "4d8596f858b53dc09831246e26a0062ee4821030b0532cb724d743b7520a12f0",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "7c2f67263b6a3becc6c7ba377ece7c8a6a13b33aee384f1fde259b78c473d78c",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T23:48:02.154353+00:00",
+  "generatedAt": "2026-10-06T15:36:43.359441+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +12,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "measured local job seconds: [0.5100209170486778, 0.5225817498285323, 0.5012819999828935]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.08709695830475539, 'load_fraction': 0.043548479152377695, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021774239576188847, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
+  "stdout": "measured local job seconds: [0.4813765827566385, 0.4829662498086691, 0.48102462477982044]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.08049437496811152, 'load_fraction': 0.04024718748405576, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002012359374202788, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
   "data": {
     "panels": [
       {
@@ -29,9 +29,9 @@
           {
             "label": "wall time",
             "y": [
-              0.5100209170486778,
-              0.5225817498285323,
-              0.5012819999828935
+              0.4813765827566385,
+              0.4829662498086691,
+              0.48102462477982044
             ]
           }
         ]
@@ -50,9 +50,9 @@
           {
             "label": "update time",
             "y": [
-              0.00020387396216392517,
-              0.0008528381586074829,
-              0.001451451564207673
+              0.00022587645798921585,
+              0.0007221680134534836,
+              0.0013461676426231861
             ]
           }
         ]

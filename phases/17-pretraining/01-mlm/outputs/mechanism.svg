@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="432pt" viewBox="0 0 576 432" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Clean tokens fork into labels and a corrupted-input path. Only corrupted inputs enter the encoder. Selected logits meet clean targets at the loss. This makes supervision available without leaking the hidden answer directly into the input.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 432 
+L 576 432 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 286.160478 79.671915 
+Q 216.751065 109.499688 149.087894 138.577037 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 154.891971 138.912723 
+L 149.087894 138.577037 
+L 152.838888 134.135187 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 289.839522 79.671915 
+Q 359.248935 109.499688 426.912106 138.577037 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 423.161112 134.135187 
+L 426.912106 138.577037 
+L 421.108029 138.912723 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 145.50012 187.383276 
+Q 145.50012 214.004418 145.50012 238.724903 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 148.10012 233.524903 
+L 145.50012 238.724903 
+L 142.90012 233.524903 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 147.357037 296.620853 
+Q 216.749282 324.49644 284.377854 351.663542 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 280.521798 347.312584 
+L 284.377854 351.663542 
+L 278.583454 352.137811 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 429.206127 186.904168 
+Q 359.250531 269.249244 290.525508 350.145807 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 295.873716 347.866186 
+L 290.525508 350.145807 
+L 291.910736 344.499468 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 148.350118 32.553957 
+L 427.649882 32.553957 
+Q 431.639879 32.553957 431.639879 36.281452 
+L 431.639879 76.218907 
+Q 431.639879 79.946403 427.649882 79.946403 
+L 148.350118 79.946403 
+Q 144.360121 79.946403 144.360121 76.218907 
+L 144.360121 36.281452 
+Q 144.360121 32.553957 148.350118 32.553957 
+z
+" clip-path="url(#p0ffb05e97a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 34.350214 139.053837 
+L 256.650026 139.053837 
+Q 260.640023 139.053837 260.640023 142.781332 
+L 260.640023 182.718787 
+Q 260.640023 186.446283 256.650026 186.446283 
+L 34.350214 186.446283 
+Q 30.360217 186.446283 30.360217 182.718787 
+L 30.360217 142.781332 
+Q 30.360217 139.053837 34.350214 139.053837 
+z
+" clip-path="url(#p0ffb05e97a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 319.349974 139.053837 
+L 541.649786 139.053837 
+Q 545.639783 139.053837 545.639783 142.781332 
+L 545.639783 182.718787 
+Q 545.639783 186.446283 541.649786 186.446283 
+L 319.349974 186.446283 
+Q 315.359977 186.446283 315.359977 182.718787 
+L 315.359977 142.781332 
+Q 315.359977 139.053837 319.349974 139.053837 
+z
+" clip-path="url(#p0ffb05e97a)" style="fill: #f1f3f5; stroke: #536273; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 34.350214 241.559971 
+L 256.650026 241.559971 
+Q 260.640023 241.559971 260.640023 245.287467 
+L 260.640023 293.212413 
+Q 260.640023 296.939909 256.650026 296.939909 
+L 34.350214 296.939909 
+Q 30.360217 296.939909 30.360217 293.212413 
+L 30.360217 245.287467 
+Q 30.360217 241.559971 34.350214 241.559971 
+z
+" clip-path="url(#p0ffb05e97a)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 148.350118 352.053597 
+L 427.649882 352.053597 
+Q 431.639879 352.053597 431.639879 355.781092 
+L 431.639879 395.718547 
+Q 431.639879 399.446043 427.649882 399.446043 
+L 148.350118 399.446043 
+Q 144.360121 399.446043 144.360121 395.718547 
+L 144.360121 355.781092 
+Q 144.360121 352.053597 148.350118 352.053597 
+z
+" clip-path="url(#p0ffb05e97a)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="59.56143" transform="rotate(-0 288 59.56143)">Clean token sequence</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="145.50012" y="166.06131" transform="rotate(-0 145.50012 166.06131)">Corrupt selected inputs</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="430.49988" y="166.06131" transform="rotate(-0 430.49988 166.06131)">Retain clean labels</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(81.74262 265.842502)">Bidirectional encoder</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(95.038245 279.279877)">→ selected logits</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="379.06107" transform="rotate(-0 288 379.06107)">Selected-position loss</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p0ffb05e97a">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="425.99952"/>
+  </clipPath>
+ </defs>
+</svg>

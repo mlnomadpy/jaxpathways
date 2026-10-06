@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-05",
-  "contentHash": "72d85d9b5c4df3c7bd1a45d8812741aa9f5e87b229dcb4b4ca4c076f4bf663a7",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "b898285bf266ce967c8a84c9bae4cc55ca0510daa21c172d6d9c207cb5e8e026",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T00:59:31.409698+00:00",
+  "generatedAt": "2026-10-06T15:41:33.400075+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -70,5 +70,70 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Integer values need scales and zero-points",
+    "prediction": "What happens if you ignore a nonzero zero-point when interpreting quantized values?",
+    "reading": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
+    "alt": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6.4,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "Real activations + weights\nChoose scales, zero-points and ranges",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.7,
+          "label": "Round \u2192 add zero-point \u2192 clamp\nStore quantized codes",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4.4,
+          "label": "Center codes \u2192 products \u2192 wide accumulation\nMatch bias to accumulator units",
+          "tone": "data",
+          "w": 8,
+          "h": 1.05
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 6.1,
+          "label": "Rescale / requantize output\nCompare independent references",
+          "tone": "result",
+          "w": 8,
+          "h": 1.05
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 7,
+      "width": 10
+    }
   }
 }

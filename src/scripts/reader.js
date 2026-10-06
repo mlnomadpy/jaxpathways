@@ -1,3 +1,12 @@
+import { parseValidation } from '../lib/manifests.js';
+import { createJsonResource } from '../lib/http.js';
+
+const loadValidation = createJsonResource('validation.json', {
+  cache: 'no-store',
+  parse: parseValidation,
+});
+
+import { initRevisionNotices } from './release-notices.js';
 import { inlineMath } from '../lib/math.js';
 import { renderLesson } from '../lib/lesson-template.js';
 import {
@@ -60,6 +69,11 @@ function showLesson(phase, lesson, options = {}) {
     location.href = `lesson.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}`;
     return;
   }
+  const staticId = $('#lesson-page')?.dataset.staticLesson;
+  if (staticId && staticId !== lesson.id) {
+    location.href = `lesson-${encodeURIComponent(lesson.id)}.html${courseState.activePath === 'all' ? '' : '?path=' + encodeURIComponent(courseState.activePath)}`;
+    return;
+  }
   const authored = lesson.status === 'authored';
   const allLessons = (
     courseState.curriculum.find((r) => r.id === courseState.activePath)?.phaseIds ||
@@ -69,7 +83,7 @@ function showLesson(phase, lesson, options = {}) {
     .filter((l) => (authored ? l.status === 'authored' : true));
   const index = allLessons.findIndex((l) => l.id === lesson.id);
   const lessonUrl = new URL(location.href),
-    sameLesson = lessonUrl.searchParams.get('lesson') === lesson.id;
+    sameLesson = (staticId || lessonUrl.searchParams.get('lesson')) === lesson.id;
   const requestedHash = sameLesson ? lessonUrl.hash : '';
   const priorSection = courseState.readingState.lessons[lesson.id]?.sectionId;
   const prerequisite =
@@ -161,8 +175,7 @@ function showLesson(phase, lesson, options = {}) {
       saveLessonProgress();
       label();
     };
-    fetch('validation.json', { cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null))
+    loadValidation()
       .then((receipt) => {
         const record = receipt?.lessons.find(
           (l) => l.lessonId === lesson.id && l.contentHash === lesson.contentHash,
@@ -179,6 +192,7 @@ function showLesson(phase, lesson, options = {}) {
       .catch(() => {});
   }
   $('#lesson-body').dataset.lesson = lesson.id;
+  initRevisionNotices($('#lesson-body'));
   if ($('#previous'))
     $('#previous').onclick = () => {
       const found = lessonById(allLessons[index - 1].id);
@@ -199,9 +213,10 @@ function showLesson(phase, lesson, options = {}) {
         : `course.html?phase=${encodeURIComponent(phase.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}#curriculum`;
     };
   const url = new URL(location.href),
-    changingLesson = url.searchParams.get('lesson') !== lesson.id;
+    changingLesson = (staticId || url.searchParams.get('lesson')) !== lesson.id;
   url.hash = requestedHash;
-  url.searchParams.set('lesson', lesson.id);
+  if (staticId) url.searchParams.delete('lesson');
+  else url.searchParams.set('lesson', lesson.id);
   if (changingLesson) url.searchParams.delete('find');
   if (courseState.activePath === 'all') url.searchParams.delete('path');
   if (options.history !== false) {
@@ -386,7 +401,7 @@ function initReaderEvents() {
   window.addEventListener('popstate', () => {
     if (!courseState.course) return;
     const params = new URLSearchParams(location.search),
-      found = lessonById(params.get('lesson'));
+      found = lessonById($('#lesson-page')?.dataset.staticLesson || params.get('lesson'));
     if (!found) return;
     courseState.activePath = courseState.curriculum.some((r) => r.id === params.get('path'))
       ? params.get('path')

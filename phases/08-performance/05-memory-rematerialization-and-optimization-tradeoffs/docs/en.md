@@ -15,7 +15,25 @@ A model runs out of memory during differentiation. Someone suggests checkpointin
 
 ## The idea
 
-Reverse-mode differentiation reuses intermediate values from the forward calculation. Rematerialization lets selected values be recomputed during the backward pass instead of retained. That changes a time–memory tradeoff, while the mathematical derivative should remain the same for this pure deterministic function. Saved autodiff residuals, compiler buffer estimates and measured peak device memory are three different kinds of evidence.
+Reverse-mode differentiation needs information from forward execution. Rematerialization recomputes some of that information instead of retaining it. This exchanges storage for work inside a computation and is distinct from saving a training checkpoint to disk.
+
+## Follow an intermediate from creation to last use
+
+Imagine a backward rule needs an intermediate from the first operation in a chain. One strategy retains it; another reruns enough forward work to reconstruct it. Draw the value's lifetime and mark which computation is repeated.
+
+Saved autodiff entries, estimated bytes and compiled peak memory are different quantities. Fusion, temporary buffers and reuse can change the compiled memory picture even when a source-level list of saved values changes.
+
+Read each plot with its own units. Fewer entries alone do not establish lower peak device memory or faster execution. Use the storage model to form a hypothesis, then inspect compiler information and actual target behavior.
+
+### Pause and reason
+
+Why might fewer saved values leave compiled memory unchanged?
+
+<details><summary>Compare your reasoning</summary>
+
+The compiler may already eliminate or reuse them, while other temporaries dominate peak usage. Source-level counts do not fully determine compiled buffer lifetimes.
+
+</details>
 
 ## Follow one layer backward
 
@@ -200,7 +218,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:24:33.177161+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:05.110057+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -222,7 +240,7 @@ f32[16] output of tanh from <string>:14:20 (layer)
 f32[16] output of tanh from <string>:14:20 (layer)
 f32[16] output of tanh from <string>:14:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[2.191704697906971e-05, 1.3874843716621399e-05, 9.292038157582283e-06, 9.458977729082108e-06, 1.0417075827717781e-05], [1.2415926903486252e-05, 9.58307646214962e-06, 8.458970114588737e-06, 1.0624993592500687e-05, 9.084120392799377e-06]]
+Synchronized gradient samples: [[2.5709159672260284e-05, 2.0499806851148605e-05, 2.533290535211563e-05, 3.2500363886356354e-05, 2.2792257368564606e-05], [2.1459069103002548e-05, 1.4791730791330338e-05, 8.790753781795502e-06, 9.458046406507492e-06, 9.499955922365189e-06]]
 Independent reverse recurrence agrees with both gradients.
 Saved residual descriptions:
 plain 
@@ -243,7 +261,7 @@ f32[16] output of tanh from <string>:63:20 (layer)
 f32[16] output of tanh from <string>:63:20 (layer)
 f32[16] output of tanh from <string>:63:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[2.3250002413988113e-05, 1.850002445280552e-05, 2.1625077351927757e-05, 2.254103310406208e-05, 1.0750023648142815e-05], [2.0541949197649956e-05, 1.0624993592500687e-05, 8.790986612439156e-06, 8.875038474798203e-06, 9.916955605149269e-06]]
+Synchronized gradient samples: [[2.7791131287813187e-05, 1.9917264580726624e-05, 2.2292137145996094e-05, 2.9708724468946457e-05, 1.0666903108358383e-05], [2.2666994482278824e-05, 1.837499439716339e-05, 1.095794141292572e-05, 9.375158697366714e-06, 9.709037840366364e-06]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

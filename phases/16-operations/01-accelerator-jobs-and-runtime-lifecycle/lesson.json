@@ -4,13 +4,22 @@
   "minutes": 90,
   "content": {
     "problem": "A training command starts, but that does not tell us whether its runtime is correct, its initialization finished, or its process will ever exit. We will supervise a real small JAX worker through success, rejected runtime requirements and an intentionally stalled update. The result will contain observed process outcomes rather than a list of assumed job statuses.",
-    "idea": "A job has a configuration, a process lifetime and an output contract. Our supervisor writes an explicit configuration, launches one child process, waits within a bounded deadline and keeps stdout, stderr and the exit code. The worker verifies its backend and device count before compiling its first update. Completion requires both a successful exit and a completed event. This local lifecycle is a foundation for accelerator operations, not evidence that a cloud scheduler or accelerator has been tested.",
+    "idea": "Workload lifecycle states describe what a job can do now. Creation, startup, readiness, execution, completion and failure are different transitions. Observing the process alone does not establish that its useful work is available.",
     "objectives": [
       "Launch and reap a real bounded subprocess with explicit runtime requirements.",
       "Distinguish successful completion, worker failure and supervisor timeout.",
       "Keep configuration and observed runtime evidence with the run artifact."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A running process is not necessarily a ready service",
+        "body": "A process can exist while loading weights, waiting for resources or failing repeated health checks. A ready state should correspond to a concrete capability, such as accepting a validated inference request, rather than elapsed startup time.\n\nAttach each transition to an observed event and define timeouts. If a job is rejected before launch, do not record that as a completed training run. If it terminates, preserve whether useful work completed or a failure interrupted it.\n\nThe lifetime bars compare actual process intervals in this fixture. They do not by themselves show readiness or accelerator utilization. Use the state timeline to explain what each interval includes.",
+        "check": {
+          "prompt": "Why separate startup duration from useful execution duration?",
+          "answer": "They have different causes and operational effects. Provisioning or loading changes may improve startup without changing the numerical workload's speed."
+        }
+      },
       {
         "title": "Separate intent from observation",
         "body": "The configuration requests CPU and at least one device. The started event records what JAX actually discovered. Requesting \\(999\\) devices should fail before training rather than silently run on fewer resources. An exit code of zero alone is insufficient: a worker that exits early without its completed event did not satisfy our job contract. Conversely, the last progress event is not proof of completion."

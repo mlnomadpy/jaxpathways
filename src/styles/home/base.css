@@ -79,51 +79,6 @@ svg {
   margin: auto;
   padding-inline: 5%;
 }
-body > header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-  max-width: 1320px;
-  margin: auto;
-  padding: 24px 5%;
-  border-bottom: 1px solid var(--line);
-}
-.brand {
-  display: inline-flex;
-  align-items: center;
-  gap: 11px;
-  color: var(--atlas);
-  font-size: 22px;
-  font-weight: 700;
-  letter-spacing: -0.045em;
-  white-space: nowrap;
-}
-.brand:before {
-  content: '';
-  width: 39px;
-  height: 39px;
-  flex-shrink: 0;
-  background: url('/assets/pathway-mark.svg') center/contain no-repeat;
-}
-header nav {
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  font-size: 14px;
-}
-header nav a {
-  display: inline-flex;
-  align-items: center;
-  min-height: 44px;
-}
-header nav a:hover {
-  text-decoration: underline;
-  text-underline-offset: 6px;
-}
-.navigation-toggle {
-  display: none;
-}
 .button {
   display: inline-flex;
   align-items: center;
@@ -251,136 +206,52 @@ footer .credit a {
   font-size: 13px;
   text-decoration: underline;
 }
-@media (max-width: 1050px) {
-  header nav {
-    gap: 16px;
-    font-size: 13px;
-  }
-}
-@media (max-width: 1050px) {
-  .brand {
-    font-size: 20px;
-  }
-}
 @media (max-width: 760px) {
   .page-width {
     padding-inline: 6%;
   }
-}
-@media (max-width: 760px) {
-  body > header {
-    padding: 16px 6%;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-}
-@media (max-width: 760px) {
-  .brand {
-    font-size: 20px;
-  }
-}
-@media (max-width: 760px) {
-  .brand:before {
-    width: 33px;
-    height: 33px;
-  }
-}
-@media (max-width: 760px) {
-  .navigation-toggle {
-    display: block;
-    background: transparent;
-    border: 1px solid var(--line);
-    border-radius: 6px;
-    min-height: 44px;
-    padding: 8px 14px;
-    color: var(--atlas);
-    font-size: 14px;
-  }
-}
-@media (max-width: 760px) {
-  header nav {
-    display: flex;
-    flex-wrap: wrap;
-    flex-basis: 100%;
-    font-size: 16px;
-  }
-}
-@media (max-width: 760px) {
-  header:has(.navigation-toggle):not(.navigation-open) nav {
-    display: none;
-  }
-}
-@media (max-width: 760px) {
   header.navigation-open nav {
     display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: 0;
   }
-}
-@media (max-width: 760px) {
-  header nav a {
-    padding: 10px 0;
-    border-bottom: 1px solid var(--line);
-  }
-}
-@media (max-width: 760px) {
   .button {
     font-size: 13px;
     padding: 11px 16px;
   }
-}
-@media (max-width: 760px) {
   .section-heading {
     display: block;
     margin-bottom: 24px;
   }
-}
-@media (max-width: 760px) {
   .section-heading h2 {
     font-size: 33px;
   }
-}
-@media (max-width: 760px) {
   .section-heading p {
     font-size: 16px;
   }
-}
-@media (max-width: 760px) {
   .section-heading > .text-link {
     margin-top: 10px;
   }
-}
-@media (max-width: 760px) {
   footer {
     gap: 12px 24px;
     padding: 24px 0;
   }
-}
-@media (max-width: 760px) {
   footer nav {
     margin-left: 0;
     gap: 18px;
   }
-}
-@media (max-width: 760px) {
   footer .brand {
     flex-basis: 100%;
   }
-}
-@media (max-width: 760px) {
   #home-continue {
     flex-wrap: wrap;
     padding: 18px;
     gap: 12px;
   }
-}
-@media (max-width: 760px) {
   #home-continue > div {
     flex-basis: 100%;
   }
-}
-@media (max-width: 760px) {
   #home-continue h2 {
     font-size: 22px;
   }

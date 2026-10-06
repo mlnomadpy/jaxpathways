@@ -15,7 +15,25 @@ A larger tile reduces the number of kernel invocations, but it also consumes mor
 
 ## The idea
 
-We keep the arithmetic $Z=2X+Y$ fixed and change how data travels through the kernel. An outer Pallas call exposes global references; emit_pipeline copies block windows into local buffers, invokes the arithmetic, and writes results back. The reference run simulates these TPU operations on CPU with race checking enabled.
+Pipelining overlaps stages such as loading, computing and storing by giving work separate buffers and a valid schedule. The key question is when each buffer becomes safe to reuse, not merely how many buffers exist.
+
+## A buffer cannot be reused while a consumer still needs it
+
+Draw time across the page and a separate lane for load, compute and store. Label buffers by identity and mark the last use of each version. Loading new data too early can overwrite values still needed by computation.
+
+Larger tiles may reduce program count while increasing local storage and per-program work. The lesson's bars expose those modeled tradeoffs. Fewer programs alone is not proof of lower runtime.
+
+Keep illustrative overlap separate from measured overlap. The CPU interpretation and race checks validate bounded aspects of the schedule; a device trace and completed measurements are needed to claim TPU performance. Buffer-count changes should be checked against both correctness and the actual target constraints.
+
+### Pause and reason
+
+Why is double buffering not automatically faster?
+
+<details><summary>Compare your reasoning</summary>
+
+It requires useful overlap and enough resources without creating another bottleneck. Correct buffer lifetimes establish validity; measured target behavior establishes any performance benefit.
+
+</details>
 
 ## Keep one numerical operation while changing data movement
 
@@ -280,7 +298,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:48.610526+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:22.098884+00:00. JAX 0.9.2.
 
 ```text
 Actual backend: cpu simulated layout: TPU v5 lite

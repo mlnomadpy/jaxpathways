@@ -15,6 +15,16 @@ function markdownContent(value, key = '') {
 const fence = code => `\`\`\`python\n${code}\n\`\`\``;
 const terminalMarkdown = s => (s.commands||[]).map(c=>`\n\n**${c.label}**\n\n\`\`\`${c.shell}\n${c.code}\n\`\`\`\n\n**Expected:** ${c.expected}`).join('');
 const paragraphs = (heading, body) => `## ${heading}\n\n${body}\n\n`;
+function mechanismMarkdown(lesson, notebook=false) {
+  const d=lesson.content.diagram;
+  if(!d)return '';
+  const hasImage=lesson.visualArtifact?.mechanismImage;
+  const image=notebook?'attachment:mechanism.png':'../figures/'+lesson.id+'-mechanism.svg';
+  return '\n\n### '+d.title+'\n\n**Predict:** '+markdownText(d.prediction)+'\n\n'+(hasImage?'!['+d.title+']('+image+')\n\n':'')+'*'+d.scope+'*\n\n'+markdownText(d.reading);
+}
+function sectionMarkdown(s,lesson,notebook=false) {
+  return s.body+terminalMarkdown(s)+(s.math?'\n\n$$\n'+s.math+'\n$$':'')+(s.formula?'\n\n'+String.fromCharCode(96).repeat(3)+'text\n'+s.formula+'\n'+String.fromCharCode(96).repeat(3):'')+(s.id==='guided-reasoning'?mechanismMarkdown(lesson,notebook):'')+(s.check?'\n\n### Pause and reason\n\n'+s.check.prompt+'\n\n<details><summary>Compare your reasoning</summary>\n\n'+s.check.answer+'\n\n</details>':'');
+}
 export function lessonMarkdown(lesson, phase) {
   const c=markdownContent(lesson.content);
   let out=`# ${lesson.title}\n\nPhase ${phase.number}: ${phase.title} · about ${lesson.minutes} minutes · ${c.runtime?.kind==='virtual-cpu'?`${c.runtime.deviceCount} logical CPU devices`:'CPU'}\n\n`;
@@ -22,7 +32,7 @@ export function lessonMarkdown(lesson, phase) {
   if(c.objectives)out+=paragraphs('What you will be able to do',c.objectives.map(o=>`- ${o}`).join('\n'));
   if(c.problem)out+=paragraphs('The problem',c.problem);
   out+=paragraphs('The idea',c.idea);
-  for(const s of c.sections||[])out+=paragraphs(s.title,s.body+terminalMarkdown(s)+(s.math?`\n\n$$\n${s.math}\n$$`:'')+(s.formula?`\n\n\`\`\`text\n${s.formula}\n\`\`\``:''));
+  for(const s of c.sections||[])out+=paragraphs(s.title,sectionMarkdown(s,lesson));
   for(const step of c.buildSteps||[])out+=paragraphs(step.title,step.instruction+'\n\n'+fence(step.code)+'\n\n'+step.explanation);
   if(c.buildCode)out+=paragraphs('Build a numerical estimate',fence(c.buildCode)+'\n\n'+c.buildOutput);
   out+=paragraphs('Run the example',fence(c.code)+'\n\nExpected: '+c.output);
@@ -45,7 +55,7 @@ export function lessonScript(lesson){
 export function lessonCells(lesson){
   const c=markdownContent(lesson.content);
   const cells=[['markdown',`# ${lesson.title}\n\n${c.runtime?.kind==='virtual-cpu'?`Start a fresh kernel, then Run all: the first cell configures ${c.runtime.deviceCount} logical CPU devices before backend initialization. They share one physical CPU; this is sharding practice, not TPU performance emulation.`:'CPU companion; no accelerator is required.'} TPU execution not validated.\n\n${c.objectives?c.objectives.map(o=>'- '+o).join('\n')+'\n\n':''}${c.problem||''}\n\n## The idea\n\n${c.idea}`]];
-  for(const s of c.sections||[])cells.push(['markdown',`## ${s.title}\n\n${s.body}${terminalMarkdown(s)}${s.math?'\n\n$$\n'+s.math+'\n$$':''}${s.formula?'\n\n```text\n'+s.formula+'\n```':''}`]);
+  for(const s of c.sections||[])cells.push(['markdown','## '+s.title+'\n\n'+sectionMarkdown(s,lesson,true)]);
   for(const step of c.buildSteps||[])cells.push(['markdown',`## ${step.title}\n\n${step.instruction}`],['code',step.code],['markdown',step.explanation]);
   if(c.buildCode)cells.push(['markdown','## Numerical estimate\n\n'+c.buildOutput],['code',c.buildCode]);
   cells.push(['markdown','## Run the example'],['code',c.code],['markdown','Expected: '+c.output]);

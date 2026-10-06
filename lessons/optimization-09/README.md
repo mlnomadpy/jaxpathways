@@ -16,7 +16,25 @@ A classifier should tell us how strongly it believes a label, not only which lab
 
 ## The idea
 
-For a binary label $y\in\{0,1\}$, let $p$ be the probability of label $1$. The probability assigned to the observed label is $p$ when $y=1$ and $1-p$ when $y=0$. Negative log-likelihood penalizes assigning little probability to what happened. Averaging this penalty gives binary cross-entropy.
+A classification loss rewards probability assigned to the observed outcome. A logit is an unconstrained score that becomes a probability through a link such as the sigmoid. Stable formulas let us compute the same objective without overflowing or taking the logarithm of a rounded zero.
+
+## Connect a logit to the observed label
+
+For a binary label of one, predicting probability $0.5$ gives loss $-\log(0.5)\approx0.693$. Predicting $0.9$ gives about $0.105$. If the observed label is instead zero, that same $0.9$ prediction gives $-\log(0.1)\approx2.303$. Confidence helps only when it supports the observed outcome.
+
+At logit zero, the sigmoid gives $0.5$, so either binary label has the same loss. Moving the logit right helps the positive label and hurts the negative one. Follow the correct label's curve rather than treating a lower curve as universally better.
+
+Extreme logits expose numerical differences between mathematically equivalent formulas. Prefer a stable logit-based loss and verify it against moderate-value hand calculations before exploring extreme cases.
+
+### Pause and reason
+
+Can an accurate classifier still produce poorly calibrated probabilities?
+
+<details><summary>Compare your reasoning</summary>
+
+Yes. Correct top-label decisions do not determine whether predicted probabilities match observed frequencies. Classification accuracy and probability quality require different checks.
+
+</details>
 
 ## Read likelihood as support for the observed data
 
@@ -151,7 +169,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:17.233355+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:46.073704+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0

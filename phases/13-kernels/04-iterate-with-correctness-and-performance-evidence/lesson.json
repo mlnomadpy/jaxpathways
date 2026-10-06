@@ -4,7 +4,7 @@
   "minutes": 120,
   "content": {
     "problem": "A custom kernel is useful only if it stays correct when shapes and dtypes change and improves an actual workload. What evidence is enough to keep an optimization, and what should we do when no target hardware is available? We will build a repeatable audit and an executable target-only measurement protocol.",
-    "idea": "Treat each optimization as a hypothesis about a measured bottleneck. Freeze the mathematical and precision contract, test representative boundaries, then compare completed target execution with a strong baseline. This lesson executes the correctness side on CPU simulation and makes target-only evidence impossible to fabricate through fallback.",
+    "idea": "A low-precision kernel can differ from a high-precision calculation because inputs changed representation, arithmetic changed, or the implementation is wrong. Separate these causes with references that answer different questions.",
     "objectives": [
       "Build a representative shape/dtype correctness matrix for an actual Pallas pipeline.",
       "Separate kernel implementation error from input/output precision differences.",
@@ -12,6 +12,15 @@
       "Connect profiling, partitioning, tiling and numerical evidence to an optimization decision."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Use two references to locate a precision gap",
+        "body": "First compare the kernel with an independent computation using the same represented inputs. That isolates implementation behavior under the chosen numeric contract. Then compare the represented-input reference with the original high-precision calculation to estimate representation effects.\n\nIf the first comparison passes while the second shows a gap, changing indexing is unlikely to fix that gap. Investigate the precision policy and whether downstream quality tolerates it.\n\nThe error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.",
+        "check": {
+          "prompt": "Which comparison should you inspect before blaming quantization for a wrong output?",
+          "answer": "Compare against an independent reference on the same represented inputs. A mismatch there may be an implementation error rather than unavoidable representation error."
+        }
+      },
       {
         "title": "Choose cases that challenge the contract",
         "body": "The fixtures include a singleton matrix, one exact tile, a small tail and a larger tail. The same frozen random data is tested in float32 and bfloat16. A benchmark-sized divisible matrix alone would miss many boundary bugs. Every implementation must return the original logical shape; padding is internal work, not extra observations in the output."

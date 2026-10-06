@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="504pt" viewBox="0 0 576 504" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Input enters both branches. The base weight is frozen; A and B are trainable. Both paths return four features before addition. Include \(\alpha/r\) when merging. These are forward-data arrows: gradients update adapter factors but not frozen base parameters.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 504 
+L 576 504 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 286.133081 71.505084 
+Q 211.0515 100.524591 137.742765 128.858882 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 143.530421 129.409363 
+L 137.742765 128.858882 
+L 141.655743 124.559045 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 289.832738 71.580418 
+Q 356.399863 100.525111 421.223975 128.711908 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 417.492037 124.254034 
+L 421.223975 128.711908 
+L 415.418513 129.022734 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 424.799885 187.600086 
+Q 424.799885 204.96454 424.799885 220.428335 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 427.399885 215.228335 
+L 424.799885 220.428335 
+L 422.199885 215.228335 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 424.799885 281.668182 
+Q 424.799885 298.343472 424.799885 313.118105 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 427.399885 307.918105 
+L 424.799885 313.118105 
+L 422.199885 307.918105 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 422.958797 364.831816 
+Q 356.399909 393.099878 291.590439 420.624949 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 297.393037 420.985316 
+L 291.590439 420.624949 
+L 295.360291 416.199091 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 133.936918 187.595032 
+Q 123.300697 320.350141 172.532954 442.048797 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 172.993107 436.253259 
+L 172.532954 442.048797 
+L 168.172615 438.203352 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 176.850094 22.643554 
+L 399.149906 22.643554 
+Q 403.139903 22.643554 403.139903 26.516884 
+L 403.139903 68.016844 
+Q 403.139903 71.890174 399.149906 71.890174 
+L 176.850094 71.890174 
+Q 172.860097 71.890174 172.860097 68.016844 
+L 172.860097 26.516884 
+Q 172.860097 22.643554 176.850094 22.643554 
+z
+" clip-path="url(#p020a822876)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_9">
+    <path d="M 40.050209 129.160118 
+L 228.15005 129.160118 
+Q 232.140047 129.160118 232.140047 133.033448 
+L 232.140047 182.8334 
+Q 232.140047 186.70673 228.15005 186.70673 
+L 40.050209 186.70673 
+Q 36.060212 186.70673 36.060212 182.8334 
+L 36.060212 133.033448 
+Q 36.060212 129.160118 40.050209 129.160118 
+z
+" clip-path="url(#p020a822876)" style="fill: #f1f3f5; stroke: #536273; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_10">
+    <path d="M 330.749964 129.160118 
+L 518.849806 129.160118 
+Q 522.839802 129.160118 522.839802 133.033448 
+L 522.839802 182.8334 
+Q 522.839802 186.70673 518.849806 186.70673 
+L 330.749964 186.70673 
+Q 326.759967 186.70673 326.759967 182.8334 
+L 326.759967 133.033448 
+Q 326.759967 129.160118 330.749964 129.160118 
+z
+" clip-path="url(#p020a822876)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_11">
+    <path d="M 330.749964 223.226694 
+L 518.849806 223.226694 
+Q 522.839802 223.226694 522.839802 227.100024 
+L 522.839802 276.899976 
+Q 522.839802 280.773306 518.849806 280.773306 
+L 330.749964 280.773306 
+Q 326.759967 280.773306 326.759967 276.899976 
+L 326.759967 227.100024 
+Q 326.759967 223.226694 330.749964 223.226694 
+z
+" clip-path="url(#p020a822876)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_12">
+    <path d="M 319.349974 315.909938 
+L 530.249796 315.909938 
+Q 534.239793 315.909938 534.239793 319.783268 
+L 534.239793 361.283228 
+Q 534.239793 365.156558 530.249796 365.156558 
+L 319.349974 365.156558 
+Q 315.359977 365.156558 315.359977 361.283228 
+L 315.359977 319.783268 
+Q 315.359977 315.909938 319.349974 315.909938 
+z
+" clip-path="url(#p020a822876)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_13">
+    <path d="M 176.850094 421.04317 
+L 399.149906 421.04317 
+Q 403.139903 421.04317 403.139903 424.9165 
+L 403.139903 466.41646 
+Q 403.139903 470.28979 399.149906 470.28979 
+L 176.850094 470.28979 
+Q 172.860097 470.28979 172.860097 466.41646 
+L 172.860097 424.9165 
+Q 172.860097 421.04317 176.850094 421.04317 
+z
+" clip-path="url(#p020a822876)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="50.578114" transform="rotate(-0 288 50.578114)">X: batch × 6</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(106.598567 154.525986)">Frozen W</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(117.623567 167.963361)">6 × 4</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(391.551447 154.525986)">Trainable A</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(409.67426 167.963361)">6 × r</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(391.53926 248.592562)">Trainable B</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; fill: #172334" transform="translate(409.67426 262.029937)">r × 4</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="424.799885" y="343.844498" transform="rotate(-0 424.799885 343.844498)">Scale by alpha / r</text>
+   </g>
+   <g id="text_6">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="448.97773" transform="rotate(-0 288 448.97773)">Add: batch × 4</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p020a822876">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="497.99952"/>
+  </clipPath>
+ </defs>
+</svg>

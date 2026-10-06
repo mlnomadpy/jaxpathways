@@ -4,13 +4,22 @@
   "minutes": 95,
   "content": {
     "problem": "A new artifact is available, but which exact bytes are currently selected, and can we return to the previous valid version after a bad change? We will create content-addressed artifacts from an actual trained checkpoint, test a validation gate, atomically change one local selection pointer and rehearse rollback.",
-    "idea": "Publishing an artifact and activating it are different operations. A content hash identifies a specific JSON payload, including its state and provenance. A small active pointer chooses which artifact a local consumer should use. Before changing that pointer we verify content integrity and required validation evidence. Rollback selects the previously recorded artifact through the same checks.",
+    "idea": "A candidate artifact can exist without serving users. Validation, activation and rollback are separate release transitions. Bind each decision to immutable artifact identity so rejected candidates cannot accidentally change the active system.",
     "objectives": [
       "Separate content identity, validation evidence and active selection.",
       "Reject corrupt or failed artifacts before a pointer change.",
       "Rehearse a reversible local artifact selection and document its limits."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Publishing is different from activating",
+        "body": "Imagine candidate B is uploaded while artifact A remains active. If B fails evaluation, the correct transition leaves A active. The presence of B in storage is not permission to select it.\n\nRollback should select a known compatible artifact together with its processor and configuration. Restoring only weights while leaving an incompatible tokenizer or schema in place can create another failure.\n\nThe artifact-selection bars summarize discrete identities; their numeric height is not a quality score. Read them as a sequence of accepted or rejected transitions. A state diagram makes the unchanged active identity on rejection easier to verify.",
+        "check": {
+          "prompt": "Should a rejected candidate change the active artifact pointer?",
+          "answer": "No. The rejection should leave the active release unchanged. Test that invariant directly, including its configuration and processor identities."
+        }
+      },
       {
         "title": "A name is not a content identity",
         "body": "Filenames such as latest or final can be overwritten without revealing that the bytes changed. Our artifact ID is the SHA-256 digest of a canonical JSON encoding with sorted keys and nonfinite values rejected. Reordering dictionary insertion alone does not change that encoding. Changing a parameter, source hash or even a release note produces a different ID. This identity detects changed bytes; it does not prove that the artifact is correct or authorized."
@@ -155,6 +164,97 @@
         "code": "with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:\n    base=Path(folder);run=launch(base/'run')\n    state=json.loads((base/'run'/'checkpoint.json').read_text())\n    store=base/'registry'\n    artifact=dict(worker_hash=run['worker_hash'],config_hash=state['config_hash'],data_hash=state['data_hash'],state=state,validation={'passed':True,'check':'completed CPU fixture and checksum'})\n    version_a=publish(store,artifact)\n    assert not (store/'active.json').exists()\n    activate(store,version_a)\n    version_b=publish(store,dict(artifact,release_note='reviewed metadata revision'))\n    activate(store,version_b)\n    rejected=publish(store,dict(artifact,validation={'passed':False}))\n    before=(store/'active.json').read_bytes()\n    try: activate(store,rejected)\n    except ValueError: rejected_without_change=(store/'active.json').read_bytes()==before\n    else: raise AssertionError('bad release activated')\n    assert rejected_without_change\n    assert rollback(store)==version_a\n    chosen=json.loads((store/'active.json').read_text())\n    assert chosen['current']==version_a\nprint('first / second content IDs:',version_a,version_b)\nprint('failed gate kept selection:',rejected_without_change,'rollback restored first:',chosen['current']==version_a)",
         "explanation": "The artifact contains a checkpoint from an actual successful JAX job. The pointer changes only after its gate passes."
       }
-    ]
+    ],
+    "diagram": {
+      "title": "Rejected candidates do not become active",
+      "prediction": "Should a rejected candidate change the active artifact pointer?",
+      "reading": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+      "alt": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 6.3,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "candidate",
+            "x": 5,
+            "y": 1,
+            "label": "Candidate B published",
+            "tone": "data",
+            "w": 5,
+            "h": 0.85
+          },
+          {
+            "id": "gate",
+            "x": 5,
+            "y": 2.8,
+            "label": "Evaluate immutable B + config",
+            "tone": "state",
+            "w": 6,
+            "h": 0.85
+          },
+          {
+            "id": "pass",
+            "x": 2.7,
+            "y": 4.8,
+            "label": "Gate passes",
+            "tone": "result",
+            "w": 3.5,
+            "h": 0.85
+          },
+          {
+            "id": "fail",
+            "x": 7.3,
+            "y": 4.8,
+            "label": "Gate fails",
+            "tone": "warning",
+            "w": 3.5,
+            "h": 0.85
+          },
+          {
+            "id": "activeb",
+            "x": 2.7,
+            "y": 6.8,
+            "label": "Activate qualified B",
+            "tone": "result",
+            "w": 4,
+            "h": 0.85
+          },
+          {
+            "id": "activea",
+            "x": 7.3,
+            "y": 6.8,
+            "label": "Keep active A",
+            "tone": "fixed",
+            "w": 4,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "candidate",
+            "to": "gate"
+          },
+          {
+            "from": "gate",
+            "to": "pass"
+          },
+          {
+            "from": "gate",
+            "to": "fail"
+          },
+          {
+            "from": "pass",
+            "to": "activeb"
+          },
+          {
+            "from": "fail",
+            "to": "activea"
+          }
+        ],
+        "height": 8,
+        "width": 10
+      }
+    }
   }
 }

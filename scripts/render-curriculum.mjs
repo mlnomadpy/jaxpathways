@@ -55,11 +55,11 @@ for(const phase of course.phases)for(const lesson of phase.lessons){
   mkdirSync(new URL(`lessons/${lesson.id}/`,root),{recursive:true});
   mkdirSync(new URL('public/exercises/',root),{recursive:true});
   const markdown=lessonMarkdown(lesson,phase);
-  writeFileSync(new URL(lesson.artifacts.source,root),markdown.replaceAll(`../figures/${lesson.id}.svg`, '../outputs/figure.svg'));
-  writeFileSync(new URL(`lessons/${lesson.id}/README.md`,root),markdown.replaceAll(`../figures/${lesson.id}.svg`, `../../${lesson.path}/outputs/figure.svg`)); // compatibility for existing source links
+  writeFileSync(new URL(lesson.artifacts.source,root),markdown.replaceAll('../figures/'+lesson.id+'-mechanism.svg', '../outputs/mechanism.svg').replaceAll(`../figures/${lesson.id}.svg`, '../outputs/figure.svg'));
+  writeFileSync(new URL(`lessons/${lesson.id}/README.md`,root),markdown.replaceAll('../figures/'+lesson.id+'-mechanism.svg', '../../'+lesson.path+'/outputs/mechanism.svg').replaceAll(`../figures/${lesson.id}.svg`, `../../${lesson.path}/outputs/figure.svg`)); // compatibility for existing source links
   writeFileSync(new URL('public/'+lesson.artifacts.markdown,root),markdown);
   writeFileSync(new URL('public/'+lesson.artifacts.script,root),lessonScript(lesson));
-  const cell=(type,source,i)=>({cell_type:type,id:`cell-${i}`,metadata:type==='code'&&source.startsWith('# Render the figure')?{jupyter:{source_hidden:true}}:{},source:source.split(/(?<=\n)/),...(type==='code'?{execution_count:null,outputs:[]}: {})});
+  const cell=(type,source,i)=>({cell_type:type,id:`cell-${i}`,metadata:type==='code'&&source.startsWith('# Render the figure')?{jupyter:{source_hidden:true}}:{},...(type==='markdown'&&source.includes('attachment:mechanism.png')?{attachments:{'mechanism.png':{'image/png':readFileSync(new URL(lesson.path+'/outputs/mechanism.png',root)).toString('base64')}}}:{}),source:source.split(/(?<=\n)/),...(type==='code'?{execution_count:null,outputs:[]}: {})});
   const cells=lessonCells(lesson);
   const generatedCells=restoreNotebookOutputs(lesson,cells.map(([t,s],i)=>cell(t,s,i)));
   const executed=generatedCells.filter(c=>c.cell_type==='code').every(c=>c.execution_count!==null);

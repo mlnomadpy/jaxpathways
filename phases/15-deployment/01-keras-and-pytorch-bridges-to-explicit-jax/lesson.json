@@ -4,13 +4,22 @@
   "minutes": 75,
   "content": {
     "problem": "You have a dense layer in PyTorch and the same model idea in Keras. Can you reuse the weights in JAX? We’ll start with one small layer, work out a prediction by hand, and check the weight axes. From there, you’ll learn which parts of a model can transfer directly and which need separate checks.",
-    "idea": "Interoperability has three different jobs: reproduce a model in another framework, share tensor data, or export inference to another runtime. Each has a different contract. Start with a deterministic, asymmetric dense layer: three input features and two outputs expose the transpose that a square matrix can hide. The CPU companion uses NumPy and JAX; the optional lab below executes the real Keras backends.",
+    "idea": "Cross-framework conversion must preserve the meaning of inputs, parameters and outputs. A layout transpose can be necessary, but architecture, preprocessing and arithmetic conventions must agree too. Start by writing the function each framework computes.",
     "objectives": [
       "Map Dense and Linear weight axes and verify a known output.",
       "Separate architecture, weights, non-trainable state, optimizer state and preprocessing.",
       "Run a backend-neutral Keras model and explain the boundaries of tensor exchange and export."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Map the function, not just the weight file",
+        "body": "For a dense layer, one framework may store weights as input-by-output while another stores output-by-input. The transpose can align the intended multiplication. If both dimensions happen to match, an incorrect mapping may still have a legal shape.\n\nUse unequal dimensions and distinguishable values, then compare intermediate results on the same input. Check bias placement, activation and normalization conventions instead of inferring equivalence from a successful load.\n\nThe transpose heatmaps show storage correspondence. They do not demonstrate conversion of an arbitrary Keras, TensorFlow or PyTorch architecture. A supported converter needs an explicit model-family contract, including tokenizer or image/audio processor identity where relevant.",
+        "check": {
+          "prompt": "Why is a square weight matrix a weak first conversion test?",
+          "answer": "The wrong orientation can still have the expected shape. Unequal dimensions and independently known values make layout mistakes easier to detect."
+        }
+      },
       {
         "title": "A parameter file is not a model",
         "body": "Our inputs have shape \\([\\mathrm{batch}, 3]\\). Keras Dense uses a \\([3, 2]\\) kernel; PyTorch Linear stores \\([2, 3]\\) weights and multiplies by their transpose. Bias has shape \\([2]\\). For \\(x=[1, 2, -1]\\), the first output is \\(1+1+1+0.1=3.1\\). Verify a hand-derived row before comparing whole arrays. Convolution kernels have additional layout conventions; do not apply this dense transpose rule to them."

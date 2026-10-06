@@ -14,7 +14,25 @@ A training command starts, but that does not tell us whether its runtime is corr
 
 ## The idea
 
-A job has a configuration, a process lifetime and an output contract. Our supervisor writes an explicit configuration, launches one child process, waits within a bounded deadline and keeps stdout, stderr and the exit code. The worker verifies its backend and device count before compiling its first update. Completion requires both a successful exit and a completed event. This local lifecycle is a foundation for accelerator operations, not evidence that a cloud scheduler or accelerator has been tested.
+Workload lifecycle states describe what a job can do now. Creation, startup, readiness, execution, completion and failure are different transitions. Observing the process alone does not establish that its useful work is available.
+
+## A running process is not necessarily a ready service
+
+A process can exist while loading weights, waiting for resources or failing repeated health checks. A ready state should correspond to a concrete capability, such as accepting a validated inference request, rather than elapsed startup time.
+
+Attach each transition to an observed event and define timeouts. If a job is rejected before launch, do not record that as a completed training run. If it terminates, preserve whether useful work completed or a failure interrupted it.
+
+The lifetime bars compare actual process intervals in this fixture. They do not by themselves show readiness or accelerator utilization. Use the state timeline to explain what each interval includes.
+
+### Pause and reason
+
+Why separate startup duration from useful execution duration?
+
+<details><summary>Compare your reasoning</summary>
+
+They have different causes and operational effects. Provisioning or loading changes may improve startup without changing the numerical workload's speed.
+
+</details>
 
 ## Separate intent from observation
 
@@ -422,7 +440,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:56.438629+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:43:28.211641+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out

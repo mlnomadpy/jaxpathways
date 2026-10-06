@@ -15,7 +15,25 @@ Your dataset has eleven examples, but your model takes batches of four. What hap
 
 ## The idea
 
-An input pipeline defines membership, order, transformation, batching and transfer. Model parameters do not encode those choices. Record stable example IDs alongside data and use a deterministic epoch ordering rule. Then check coverage, alignment and final-batch semantics independently of a model loss.
+An input pipeline decides which examples reach the model and in what order. Preserve example identities so duplication, omission and split leakage remain detectable. Shapes alone cannot tell us whether the intended data was used.
+
+## Preserve identity through shuffling and batching
+
+Imagine IDs A, B, C, D shuffled into C, A, D, B. Membership stays the same while order changes. A batch size of three leaves one example after the first batch. Dropping it, padding it or emitting a smaller batch are different policies.
+
+Padding requires a validity mask so an artificial slot does not become another observation. Dropping requires acknowledging the lost coverage. Fixed shape should not silently choose the statistical meaning of an epoch.
+
+Read the existing sample-ID plot as an ordering check. The height of an ID is not a physical measurement. Compare membership and multiplicities, then inspect exact order where continuation requires it.
+
+### Pause and reason
+
+Does the right epoch length prove every example occurred once?
+
+<details><summary>Compare your reasoning</summary>
+
+No. A duplicate and an omission preserve the count. Check identities and multiplicities against the intended membership.
+
+</details>
 
 ## Preserve identity across every transformation
 
@@ -194,16 +212,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:46.702340+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:16.434983+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.006994874915108085
+Preparation seconds (local observation only): 0.007190666161477566
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 1.629185862839222e-05
+Preparation seconds (local observation only): 1.7624814063310623e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]

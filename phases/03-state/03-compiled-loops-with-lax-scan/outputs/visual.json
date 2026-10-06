@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "state-03",
-  "contentHash": "89905a987038fbdee2bcc4181f8df83ae809a9d6d09c0c041569f54dcefd64ff",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "60432f789105d5535113cf7985a91159e945614a6bd753efda6e8eb15eee46e7",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-05T21:29:24.475366+00:00",
+  "generatedAt": "2026-10-06T15:41:23.201990+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -43,5 +43,141 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Carry moves through time; outputs are collected",
+    "prediction": "What changes if the step emits the old carry instead of the new carry?",
+    "reading": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
+    "alt": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4.8,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "x0",
+          "x": 2,
+          "y": 1,
+          "label": "Input 1",
+          "tone": "data",
+          "w": 2,
+          "h": 0.85
+        },
+        {
+          "id": "x1",
+          "x": 5,
+          "y": 1,
+          "label": "Input 2",
+          "tone": "data",
+          "w": 2,
+          "h": 0.85
+        },
+        {
+          "id": "x2",
+          "x": 8,
+          "y": 1,
+          "label": "Input 3",
+          "tone": "data",
+          "w": 2,
+          "h": 0.85
+        },
+        {
+          "id": "s0",
+          "x": 2,
+          "y": 3,
+          "label": "Step 0\ncarry + input",
+          "tone": "data",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "s1",
+          "x": 5,
+          "y": 3,
+          "label": "Step 1\ncarry + input",
+          "tone": "data",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "s2",
+          "x": 8,
+          "y": 3,
+          "label": "Step 2\ncarry + input",
+          "tone": "data",
+          "w": 2.5,
+          "h": 0.85
+        },
+        {
+          "id": "y0",
+          "x": 2,
+          "y": 5,
+          "label": "Emit 1",
+          "tone": "result",
+          "w": 2,
+          "h": 0.85
+        },
+        {
+          "id": "y1",
+          "x": 5,
+          "y": 5,
+          "label": "Emit 3",
+          "tone": "result",
+          "w": 2,
+          "h": 0.85
+        },
+        {
+          "id": "y2",
+          "x": 8,
+          "y": 5,
+          "label": "Emit 6",
+          "tone": "result",
+          "w": 2,
+          "h": 0.85
+        }
+      ],
+      "edges": [
+        {
+          "from": "x0",
+          "to": "s0"
+        },
+        {
+          "from": "x1",
+          "to": "s1"
+        },
+        {
+          "from": "x2",
+          "to": "s2"
+        },
+        {
+          "from": "s0",
+          "to": "y0"
+        },
+        {
+          "from": "s1",
+          "to": "y1"
+        },
+        {
+          "from": "s2",
+          "to": "y2"
+        },
+        {
+          "from": "s0",
+          "to": "s1",
+          "exit": "right",
+          "enter": "left",
+          "label": "1"
+        },
+        {
+          "from": "s1",
+          "to": "s2",
+          "exit": "right",
+          "enter": "left",
+          "label": "3"
+        }
+      ],
+      "height": 6,
+      "width": 10
+    }
   }
 }

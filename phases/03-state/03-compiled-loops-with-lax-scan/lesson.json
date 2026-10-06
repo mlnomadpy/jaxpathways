@@ -3,7 +3,7 @@
   "id": "state-03",
   "minutes": 65,
   "content": {
-    "idea": "lax.scan expresses a loop as a state transition. Each step receives the carry and one input, then returns a new carry and one output. Scan combines these outputs and returns the final carry. This separates state carried through time from values recorded at each step.\n\nThe carry must keep a consistent structure, shape, and dtype. Unlike a long Python loop traced inside jit, scan represents the repeated computation as a loop operation. It is useful for recurrent models, simulations, and repeated optimization steps.",
+    "idea": "A scan separates the state carried between steps from the outputs collected at each step. This is useful whenever the same rule repeats over time while the state keeps a fixed structure, shape and dtype.",
     "code": "import jax\nimport jax.numpy as jnp\ndef step(carry, increment):\n    next_value = 0.5 * carry + increment\n    return next_value, next_value\nincrements = jnp.array([1., 1., 1., 1.])\nfinal, history = jax.lax.scan(step, jnp.array(0.), increments)\nprint(\"History:\", history)\nprint(\"Final:\", float(final))\nassert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))\nassert jnp.allclose(final, history[-1])",
     "output": "History: \\([1., 1.5, 1.75, 1.875]\\); Final: \\(1.875\\).",
     "exercise": "Make the decay an explicit scalar argument. Differentiate the final value with respect to decay and compare at \\(0.5\\) with the analytic derivative \\(2.75\\).",
@@ -18,6 +18,15 @@
     "explanation": "The carry value changes through time, but its structural and array type properties must remain consistent.",
     "problem": "Suppose a simulator keeps part of its current value and adds a new input at each step. Let’s write out four steps so we know what should happen. Then we’ll express the same loop with scan, compare it with Python, and see how changing the retained fraction affects the final value.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Unroll three steps before compiling the loop",
+        "body": "For a separate hand-worked recurrence, start with carry \\(0\\) and inputs \\([1,2,3]\\). Let each step add its input to the carry and emit the new carry. The successive carries are \\(1,3,6\\); the final carry is \\(6\\), while the stacked outputs are \\([1,3,6]\\).\n\nThose two returned objects answer different questions. Keeping only the final carry discards the intermediate outputs. Keeping outputs does not mean the carry itself grows on each iteration. A fixed carry contract is what makes the repeated computation structured.\n\nTrace one horizontal state edge and one downward output edge in the diagram. When adapting a Python loop, write down which variables belong on each edge before translating the loop to `lax.scan`.",
+        "check": {
+          "prompt": "What changes if the step emits the old carry instead of the new carry?",
+          "answer": "The final carry is still \\(6\\), but outputs become \\([0,1,3]\\). A final-state check alone would miss this off-by-one output convention."
+        }
+      },
       {
         "title": "Separate carry from recorded outputs",
         "body": "Each scan step receives (carry,input) and returns (next_carry,output). Carry is what the next step needs. Output is what you want stacked into a history. They can have different meanings even when this demonstration returns the new state in both positions.\n\nFor decay \\(0.5\\), initial state \\(0\\) and four inputs of \\(1\\), the states are \\(1\\),\\(1.5\\),\\(1.75\\),\\(1.875\\). There are four recorded outputs; the initial state is not automatically part of history. Decide whether a plot should include that initial point before labeling the time axis.",
@@ -120,6 +129,142 @@
       "connection": "The update is \\(c_{t+1}=0.5c_t+1\\). Subtracting it from the fixed point gives \\(2-c_{t+1}=0.5(2-c_t)\\): each step halves the remaining gap. This explains both the upward movement and its slowing pace.\n\nThe shrinking gaps are \\(1\\), \\(0.5\\), \\(0.25\\), and \\(0.125\\). `scan` carries the evolving value forward while collecting this history. One more step would produce \\(1.9375\\); it would not add another full unit or restart from the initial carry.",
       "alt": "The carry approaches a fixed point. The solid line shows the carry after each completed scan step. It starts at step \\(1\\) with value \\(1\\), then rises through \\(1.5\\), \\(1.75\\), and \\(1.875\\). The dashed horizontal line marks the fixed point \\(2\\). The initial carry \\(0\\) is not plotted. Each visible point is the value after applying the recurrence once more, so the first point already includes one update.",
       "code": "visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}"
+    },
+    "diagram": {
+      "title": "Carry moves through time; outputs are collected",
+      "prediction": "What changes if the step emits the old carry instead of the new carry?",
+      "reading": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
+      "alt": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 4.8,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "x0",
+            "x": 2,
+            "y": 1,
+            "label": "Input 1",
+            "tone": "data",
+            "w": 2,
+            "h": 0.85
+          },
+          {
+            "id": "x1",
+            "x": 5,
+            "y": 1,
+            "label": "Input 2",
+            "tone": "data",
+            "w": 2,
+            "h": 0.85
+          },
+          {
+            "id": "x2",
+            "x": 8,
+            "y": 1,
+            "label": "Input 3",
+            "tone": "data",
+            "w": 2,
+            "h": 0.85
+          },
+          {
+            "id": "s0",
+            "x": 2,
+            "y": 3,
+            "label": "Step 0\ncarry + input",
+            "tone": "data",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "s1",
+            "x": 5,
+            "y": 3,
+            "label": "Step 1\ncarry + input",
+            "tone": "data",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "s2",
+            "x": 8,
+            "y": 3,
+            "label": "Step 2\ncarry + input",
+            "tone": "data",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "y0",
+            "x": 2,
+            "y": 5,
+            "label": "Emit 1",
+            "tone": "result",
+            "w": 2,
+            "h": 0.85
+          },
+          {
+            "id": "y1",
+            "x": 5,
+            "y": 5,
+            "label": "Emit 3",
+            "tone": "result",
+            "w": 2,
+            "h": 0.85
+          },
+          {
+            "id": "y2",
+            "x": 8,
+            "y": 5,
+            "label": "Emit 6",
+            "tone": "result",
+            "w": 2,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "x0",
+            "to": "s0"
+          },
+          {
+            "from": "x1",
+            "to": "s1"
+          },
+          {
+            "from": "x2",
+            "to": "s2"
+          },
+          {
+            "from": "s0",
+            "to": "y0"
+          },
+          {
+            "from": "s1",
+            "to": "y1"
+          },
+          {
+            "from": "s2",
+            "to": "y2"
+          },
+          {
+            "from": "s0",
+            "to": "s1",
+            "exit": "right",
+            "enter": "left",
+            "label": "1"
+          },
+          {
+            "from": "s1",
+            "to": "s2",
+            "exit": "right",
+            "enter": "left",
+            "label": "3"
+          }
+        ],
+        "height": 6,
+        "width": 10
+      }
     }
   }
 }

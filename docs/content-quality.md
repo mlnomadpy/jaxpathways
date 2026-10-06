@@ -2,6 +2,10 @@
 
 > Historical counts in the dated findings below are snapshots. Current coverage and priorities are recorded in the [2026-10-06 full audit](full-course-audit-2026-10-06.md), [course expansion plan](course-roadmap-2026-10-06.md) and regenerated [content audit](content-audit.md). The authoring requirements remain applicable.
 
+## Current teaching-depth repair
+
+The [2026-10-06 depth review](teaching-depth-audit-2026-10-06.md) records the shallow patterns in the newest objective lessons and the concrete repairs to all eight pretraining/post-training lessons. Their larger model integrations still remain work to implement. File availability and structural checks must not be presented as course depth.
+
 ## Phase-level quality
 
 A phase must connect individual lessons into learner work. Its canonical `studyGuide` in `curriculum/course.json` must explain the central question, provide a starting diagnostic with reasoning and a repair lesson, group every lesson into ordered build milestones, and ask for transfer to a changed condition. Include an observed failure symptom with a specific diagnostic check, project evidence the learner should retain, and material that remains outside the phase's supported scope.

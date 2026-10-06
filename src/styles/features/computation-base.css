@@ -1,0 +1,89 @@
+.terminal {
+  border: 1px solid var(--line);
+}
+.terminal > div {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+}
+.terminal pre {
+  margin: 0;
+  line-height: 1.7;
+  overflow-x: auto;
+}
+.terminal code span {
+  color: var(--mint);
+}
+.transform {
+  align-self: center;
+  margin: 0;
+  border: 1px solid var(--line);
+  padding: 28px;
+  background: var(--bg);
+}
+figcaption {
+  font-size: 17px;
+  color: var(--muted);
+}
+.graph {
+  padding: 36px 0;
+}
+.node {
+  border: 1px solid var(--line);
+  padding: 17px 10px;
+  text-align: center;
+  font-size: 12px;
+  background: var(--panel);
+}
+.node code {
+  display: block;
+  color: var(--blue);
+  font-size: 22px;
+}
+.node span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-top: 8px;
+}
+.origin {
+  max-width: 240px;
+  margin: auto;
+}
+.origin code {
+  margin-top: 7px;
+}
+.transforms {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.connector {
+  height: 35px;
+  width: 1px;
+  background: var(--blue);
+  margin: auto;
+}
+.result {
+  border-color: var(--blue);
+  max-width: 300px;
+  margin: auto;
+}
+.result code {
+  font-size: 16px;
+}
+.diagram-foot {
+  font-size: 9px;
+  display: flex;
+  justify-content: space-between;
+  color: var(--blue);
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+}
+.transform > p {
+  font-size: 17px;
+  margin-bottom: 0;
+  color: var(--muted);
+}

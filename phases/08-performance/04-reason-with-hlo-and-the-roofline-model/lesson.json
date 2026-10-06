@@ -4,7 +4,7 @@
   "minutes": 95,
   "content": {
     "problem": "A matrix multiplication appears in your Python code, but what reaches the compiler and what might limit its speed? We will inspect a lowered program, calculate an explicit work/traffic model, and compare that model with synchronized CPU measurements without confusing a ceiling with a prediction.",
-    "idea": "Lowering exposes a typed representation of a computation; it is not a record of hardware activity. A roofline model combines a compute budget with a memory-transfer budget. The smaller budget limits the model’s possible throughput. The model is useful only when its operation count, data traffic, hardware assumptions and measured workload refer to the same computation.",
+    "idea": "A roofline compares arithmetic work with data movement under stated compute and bandwidth assumptions. It helps us predict which resource may constrain a workload. It is a model to test against measurements, not a hardware benchmark by itself.",
     "objectives": [
       "Locate matrix multiplication and activation in StableHLO.",
       "Derive the operation and minimum byte counts for a declared matrix contract.",
@@ -12,6 +12,15 @@
       "Explain why measured throughput can fall below either ceiling."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Read a roofline as a conditional bound",
+        "body": "As a separate analytic example, assume \\(100\\) GB/s bandwidth and \\(1000\\) GFLOP/s compute capacity. The ridge is at \\(10\\) FLOP/byte. At intensity \\(2\\) FLOP/byte, the bandwidth-based bound is \\(200\\) GFLOP/s.\n\nThe implementation need not reach that bound. Traffic estimates may omit intermediates, padding or cache effects; the assumed peaks may not apply to the actual dtype and device.\n\nUse the lesson's hypothetical curve to propose a change, such as reducing data movement. Then inspect the resulting computation and measure the same workload. Moving a modeled point rightward does not establish that the implementation became faster.",
+        "check": {
+          "prompt": "Does reaching the compute-limited side guarantee peak throughput?",
+          "answer": "No. It identifies the tighter bound in this model. Other bottlenecks and inefficient execution can keep observed performance far below it."
+        }
+      },
       {
         "title": "Read the contract before the compiler text",
         "body": "Our left matrix has shape \\((32,16)\\), the right matrix \\((16,8)\\), and the result \\((32,8)\\). Their shared dimension is contracted; tanh is then applied elementwise. Lowering with these arrays specializes the computation to compatible input shapes and dtypes.\n\nThe lesson prints compiler cost estimates and checks for the corresponding dot and tanh operations in StableHLO. Compiler text and cost fields can change by backend and version. Read operation meaning and tensor types rather than depending on generated variable names or assuming every operation remains a separate kernel."

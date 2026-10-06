@@ -5,6 +5,7 @@ import '../../styles/base.css';
 import '../../styles/features/reader.css';
 import '../../styles/features/assessment.css';
 import '../../styles/features/math.css';
+import RevisionStamp from '../../components/shared/RevisionStamp.astro';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
@@ -29,6 +30,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
     <a href={siteUrl(`course.html#phase-${phase.id}`)}>Course · {phase.title}</a>
     <p class="edition">Phase {phase.number} · Study guide</p>
     <h1>{guide.question}</h1>
+    <RevisionStamp kind="phases" id={phase.id} />
     <p set:html={inlineMath(guide.why)} />
     <p>
       <strong>Preparation:</strong>{' '}
@@ -55,6 +57,14 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
         See the project
       </a>
     </div>
+    {['welcome', 'networks', 'recovery', 'operations'].includes(phase.id) && (
+      <p>
+        <a href={siteUrl('project-workflow.html')}>
+          Tools, project folders and experiment organization
+        </a>
+        : prepare a run directory and keep its configuration and evidence together.
+      </p>
+    )}
     <nav class="assessment-contents" aria-label="Phase guide sections">
       <a href="#readiness">Check your starting point</a> · <a href="#milestones">Build in stages</a>{' '}
       · <a href="#transfer">Try a changed condition</a> ·{' '}

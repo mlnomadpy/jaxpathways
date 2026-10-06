@@ -112,19 +112,13 @@
     margin: 1.5rem auto;
     padding: 0 1rem;
   }
-}
-@media (max-width: 600px) {
   #assessment article {
     font-size: 18px;
   }
-}
-@media (max-width: 600px) {
   .assessment-actions {
     align-items: stretch;
     flex-direction: column;
   }
-}
-@media (max-width: 600px) {
   #assessment h1 {
     font-size: 2rem;
   }
@@ -151,8 +145,6 @@
   .assessment-contents ol {
     grid-template-columns: 1fr;
   }
-}
-@media (max-width: 600px) {
   .assessment-contents a {
     min-height: 44px;
   }

@@ -15,9 +15,25 @@ Our model has a weight vector and a bias. How do we keep each parameter paired w
 
 ## The idea
 
-A pytree is a nested structure whose leaves contain values. Dictionaries, tuples, and lists are common containers for model parameters. Transformations can operate on these structures without flattening the model into an unreadable vector in your application code.
+A pytree is a nested structure whose leaves hold values such as parameters. JAX can transform the leaves while preserving the structure. This makes a model's parameter groups explicit and lets us compare the gradient tree with the parameters it differentiates.
 
-The gradient pytree mirrors the parameter pytree. `jax.tree.map` can combine corresponding leaves to implement an update. Matching structure matters: a missing dictionary key or mismatched container is a structural error, separate from numerical shape problems.
+## Match leaves by meaning as well as shape
+
+Suppose parameters contain a dense-layer weight matrix and a bias vector. Each gradient leaf describes sensitivity to its corresponding parameter leaf. Match paths such as layer/weight and layer/bias before comparing shapes; two equal-shaped leaves can still be swapped.
+
+Optimizer state is related but need not have exactly the parameter tree's structure. It may contain moment trees plus a scalar step counter or other metadata. A useful diagram aligns matching parameter/gradient paths and then shows the additional optimizer state separately.
+
+When a tree operation fails, inspect structure, leaf paths, shapes and dtypes in that order. Flattening everything immediately may hide the semantic distinction that would explain the error.
+
+### Pause and reason
+
+Two parameter leaves have the same shape. Is swapping their gradients safe?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Shape compatibility does not identify which parameter a derivative belongs to. Preserve tree paths and compare the result with an independently known update.
+
+</details>
 
 ## Identify containers, leaves and structure
 
@@ -138,7 +154,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:56.742174+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:24.219111+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405

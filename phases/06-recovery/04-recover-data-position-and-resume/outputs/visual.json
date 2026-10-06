@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "422ca72562f0e1688b78a5418766e2532081b26ebcf20830586b45d131226844",
-  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "contentHash": "942b85a506208db46b4e406de3dab918967423e403f0c4e0e36af43cb9219243",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "conceptual",
-  "generatedAt": "2026-10-05T22:15:43.616646+00:00",
+  "generatedAt": "2026-10-06T15:41:27.745261+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -23,5 +23,48 @@
       "Same next batch \u2192 same transition"
     ],
     "layout": "merge"
+  },
+  "diagram": {
+    "title": "One checkpoint, one completed-step boundary",
+    "prediction": "Why reject a resume even when its first loss nearly matches the reference?",
+    "reading": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
+    "alt": "Read down the middle column: all state describes the same completed update. Across each row is its next use. An older cursor repeats data and a newer cursor skips it. The table shows logical state, not wall-clock timing.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 5,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "State",
+        "Accepted boundary",
+        "Next use"
+      ],
+      "rows": [
+        [
+          "Parameters",
+          "after update t",
+          "forward at t + 1"
+        ],
+        [
+          "Optimizer",
+          "after update t",
+          "next update"
+        ],
+        [
+          "Random key",
+          "next unused key",
+          "next stochastic input"
+        ],
+        [
+          "Iterator",
+          "next unconsumed batch",
+          "batch for t + 1"
+        ],
+        [
+          "Step counter",
+          "t completed",
+          "schedule convention"
+        ]
+      ]
+    }
   }
 }

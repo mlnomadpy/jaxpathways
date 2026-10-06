@@ -1,6 +1,6 @@
 # Model lifecycle capstones
 
-Status: **seven planned project specifications**, 2026-10-06. The existing course still has 19 registered executable projects. These plans are additional work; no new large model, score, cloud run or public release is claimed.
+Status: **ten planned project specifications**, 2026-10-06. The existing course still has 19 registered executable projects. These plans are additional work; no new large model, score, cloud run or public release is claimed.
 
 Every capstone starts from an existing harness and follows a complete model-development cycle: task/data contract → architecture and input representation → pretraining → task-specific adaptation → evaluation → precision/conversion → service qualification → Hugging Face publication → operation. The model's task determines its objectives. Masked language modeling is one route, not a universal first phase.
 
@@ -15,6 +15,9 @@ Every capstone starts from an existing harness and follows a complete model-deve
 | [Audio understanding model, approximately 300M](../projects/audio-model-300m/README.md) | Acoustic representation learning → speech recognition or sound-event adaptation → task/domain robustness | A recognizer or event model with a waveform-to-output contract |
 | [Audio generation model](../projects/audio-generation-model/README.md) | Codec/representation qualification → generative sequence or denoising training → controlled conditioning → waveform evaluation | A bounded text/condition-to-audio system with a complete decoder |
 | [Multimodal model](../projects/multimodal-model/README.md) | Qualified encoders/decoder → connector alignment → grounded instruction tuning → optional preference adaptation | A grounded image/audio-to-text model; cross-modal retrieval remains a distinct sibling outcome |
+| [CLIP image–text model](../projects/clip-model/README.md) | Paired softmax pretraining → domain continuation → curated pairs/adaptation → zero-shot and bidirectional retrieval | Qualified dual encoders, processors and a reproducible retrieval handoff |
+| [SigLIP image–text model](../projects/siglip-model/README.md) | Pairwise sigmoid oracle → negative/reduction audit → controlled pretraining and adaptation → CLIP comparison | A separately qualified sigmoid-trained dual encoder, including scale and bias |
+| [Retrieval system](../projects/retrieval-system/README.md) | Corpus/qrels → exact and lexical baselines → ANN → hybrid/reranking → service and index migration | A measured text or cross-modal search service with compatible model/index releases |
 
 For the generative and multimodal projects, approximately 300M is an initial **component-budget hypothesis**, not a claim about the whole pipeline. Report total, trainable, frozen and active parameter counts, plus auxiliary encoders/codecs/decoders. A 300M denoiser plus a large text encoder is not a 300M deployment. Smaller, measured pilots precede any final size choice.
 
@@ -55,6 +58,14 @@ These projects apply the existing 61 planned lesson units, with required project
 | Multimodal connector and grounded SFT | MULTI-3, ADAPT-1, AUDIO/VISION | Swapped/absent modality ablations, modality masks and grounded-answer evidence |
 | Portable packaging and cold Hub loading | BRIDGE, SERVE, OPS | Downloaded immutable revision reproduces canaries and advertised consumer behavior |
 | Service telemetry and rollback | SERVE/OPS | Correlated incident trace/metrics and restoration of a compatible pipeline |
+
+## Alignment and retrieval integration tutorials
+
+The CLIP and SigLIP projects extend MULTI-1 with distinct objective derivations, duplicate-positive handling, dense/chunked/distributed gradient checks and controlled real-image experiments. MULTI-2 supplies cross-domain and later audio–text transfer. The retrieval project deepens RAG-1 with exact versus approximate ranking, relevance judgments, hybrid search, reranking, deletion and index migration. These are required project tutorials within the existing roadmap, not additional authored lesson entries.
+
+Teach CLIP's symmetric softmax baseline before the SigLIP comparison. Reuse identical data, processors, towers and development budgets where the experiment calls for control. Then carry qualified encoder artifacts into retrieval. Define a common score/embedding contract, but preserve each model's normalization, scale, bias and input semantics.
+
+The [public plan registry](../curriculum/project-plans.json) makes these three new specifications discoverable from Projects and the relevant modality guides. The other seven lifecycle specifications remain repository planning documents. All ten remain outside the executable project registry.
 
 ## Implementation sequence
 

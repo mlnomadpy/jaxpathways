@@ -15,7 +15,25 @@ A model call looks fast in isolation, yet users may wait when requests arrive to
 
 ## The idea
 
-A service can spend time waiting for a worker, collecting a batch and executing inference. Batching amortizes some fixed work but can add waiting and memory. Capacity planning needs a declared workload, timed boundary and arrival process. Our local CPU timings measure only resident-input inference; the queue experiment adds a hypothetical arrival schedule, not an observed network workload.
+Inference capacity depends on arrivals, queueing, batching, service time and response work. A fast model call is one component. Define the request boundary before estimating throughput or deciding when to add capacity.
+
+## A request spends time before and after computation
+
+A request may wait for a batch, wait behind existing work, execute and then be encoded for response. Larger batches can improve work per call while increasing the first waiting request's latency. These objectives can conflict.
+
+Draw arrival, enqueue, dispatch and completion on one timeline. Then measure or model each interval with its source stated. Tail latency depends on the arrival pattern and concurrency, not just the mean of isolated calls.
+
+This lesson combines measured CPU batch computation with a separately simulated queue. Keep those panels distinct. A queue simulation explores stated assumptions; it is not an observed autoscaling system or a production traffic measurement.
+
+### Pause and reason
+
+Can higher batch throughput coexist with worse user latency?
+
+<details><summary>Compare your reasoning</summary>
+
+Yes. Requests can wait longer to form a batch or reach service. Report both completed throughput and the declared end-to-end latency distribution.
+
+</details>
 
 ## Choose the clock boundary first
 
@@ -227,19 +245,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:24.200122+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:56.607688+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 28.478209162130952, 'p50_ms': 0.009145471267402172, 'p95_ms': 0.021318742074072358, 'steady_examples_per_second': 109343.73645285709}
-{'batch': 8, 'first_call_ms': 17.50795799307525, 'p50_ms': 0.010082963854074478, 'p95_ms': 0.03023103345185517, 'steady_examples_per_second': 793417.5026093381}
-{'batch': 32, 'first_call_ms': 16.52891607955098, 'p50_ms': 0.014791847206652164, 'p95_ms': 0.029200280550867316, 'steady_examples_per_second': 2163353.8768308135}
-measured batch-one service proxy (ms): 0.009145471267402172
-simulated last stable/overloaded response (ms): 0.009145471267402172 0.22497859317809343
-{'batch': 1, 'first_call_ms': 18.479582853615284, 'p50_ms': 0.008729053661227226, 'p95_ms': 0.011129444465041155, 'steady_examples_per_second': 114559.95561601451}
-{'batch': 8, 'first_call_ms': 17.21745915710926, 'p50_ms': 0.014874967746436596, 'p95_ms': 0.02981633879244326, 'steady_examples_per_second': 537816.2922011348}
-{'batch': 32, 'first_call_ms': 17.926374915987253, 'p50_ms': 0.015020486898720264, 'p95_ms': 0.02467527519911527, 'steady_examples_per_second': 2130423.615144352}
-measured batch-one service proxy (ms): 0.008729053661227226
-simulated last stable/overloaded response (ms): 0.008729053661227226 0.21473472006618977
+{'batch': 1, 'first_call_ms': 31.033499632030725, 'p50_ms': 0.009125098586082458, 'p95_ms': 0.010269298218190665, 'steady_examples_per_second': 109587.85711369668}
+{'batch': 8, 'first_call_ms': 19.89674987271428, 'p50_ms': 0.010124873369932175, 'p95_ms': 0.025049666874110685, 'steady_examples_per_second': 790133.3387297061}
+{'batch': 32, 'first_call_ms': 19.11341631785035, 'p50_ms': 0.0149579718708992, 'p95_ms': 0.02745192032307386, 'steady_examples_per_second': 2139327.4620509306}
+measured batch-one service proxy (ms): 0.009125098586082458
+simulated last stable/overloaded response (ms): 0.009125098586082458 0.22447742521762848
+{'batch': 1, 'first_call_ms': 19.517916720360518, 'p50_ms': 0.009874347597360611, 'p95_ms': 0.050065177492797375, 'steady_examples_per_second': 101272.5134638057}
+{'batch': 8, 'first_call_ms': 18.403999973088503, 'p50_ms': 0.013228971511125565, 'p95_ms': 0.026662135496735566, 'steady_examples_per_second': 604733.3304234573}
+{'batch': 32, 'first_call_ms': 18.77100020647049, 'p50_ms': 0.014499993994832039, 'p95_ms': 0.01635991502553224, 'steady_examples_per_second': 2206897.465709652}
+measured batch-one service proxy (ms): 0.009874347597360611
+simulated last stable/overloaded response (ms): 0.009874347597360611 0.24290895089507103
 hypothetical planned replicas: 3
 PASS: deployment-04
 

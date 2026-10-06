@@ -4,13 +4,22 @@
   "minutes": 90,
   "content": {
     "problem": "You copied a checkpoint and the new model runs, but its answers differ. Is the weight mapping wrong, or does the architecture compute a different function? We will load actual PyTorch tensors into a Flax NNX model and stop at the first layer whose values diverge.",
-    "idea": "Numerical parity is an architecture audit, not a file-format check. Match the input contract and every operation, compare intermediate activations with explicit error budgets, then verify gradients and reloaded-artifact outputs. This lab converts a dense–LayerNorm–exact-GELU–dense network on CPU; it is not a universal checkpoint converter.",
+    "idea": "When a converted model disagrees with its reference, compare aligned intermediate activations on identical inputs. The earliest divergent boundary usually gives a more useful diagnosis than the final output alone.",
     "objectives": [
       "Map named PyTorch tensors into Flax NNX parameters with complete key, shape and dtype checks.",
       "Locate the first mismatching operation using absolute and relative errors.",
       "Verify input gradients and reload the converted artifact independently."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Find the earliest disagreement",
+        "body": "Suppose the first dense output agrees but normalized activations do not. Inspect the normalization axis, epsilon and parameter mapping before changing the final layer. A later output difference may only be a consequence of the earlier mismatch.\n\nRecord absolute error and an appropriate relative measure. Near-zero references can make relative error large even when absolute error is small, so tolerances need scale and dtype context.\n\nThe layer-error plot identifies a location to investigate, not a universal threshold for all architectures. Use several inputs, including boundary cases, and compare the full preprocessing-to-output contract. Matching one fixture does not establish arbitrary checkpoint compatibility.",
+        "check": {
+          "prompt": "Why can only comparing final probabilities hide useful information?",
+          "answer": "Different intermediate errors can cancel or be compressed by the final nonlinearity. Layerwise comparisons locate where the intended computation first changed."
+        }
+      },
       {
         "title": "Write the architecture contract before mapping weights",
         "body": "Our input has shape \\((B,3)\\), the hidden width is \\(5\\), and the output width is \\(2\\). PyTorch Linear stores output-by-input weights, while Flax Linear uses input-by-output kernels, so transpose those two arrays. LayerNorm scale and bias stay one-dimensional and do not transpose. Require every expected key exactly once; ignoring unknown or missing parameters can silently leave random weights in the target."

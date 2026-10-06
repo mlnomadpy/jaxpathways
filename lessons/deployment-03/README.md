@@ -14,7 +14,25 @@ Your function works in the training process. Let’s make sure it also works aft
 
 ## The idea
 
-A serving artifact has an interface: names, shapes, dtypes, preprocessing and output meaning. Serialization captures a staged computation; it does not provide an HTTP server, input validation or an edge runtime. This lesson verifies a local JAX export round trip on CPU. Use trusted artifacts and a compatible runtime; this is not a claim of arbitrary version or hardware portability.
+Export packages a computation for a supported runtime. The consumer still needs input validation, preprocessing, output meaning and compatibility information. Separate the artifact boundary from the surrounding service.
+
+## A serialized computation still needs an interface
+
+The lesson exports a fixed float32 input of shape $(1,3)$ to an output of shape $(1,2)$. A Python function may accept a larger batch while that particular exported signature does not. The consumer must follow the artifact's declared contract.
+
+Serialize, load the file again and call the restored computation on new inputs. Comparing only the original in-memory function does not test the exported bytes. Keep artifact hash, environment and tolerance with the result.
+
+If preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.
+
+### Pause and reason
+
+What should happen to a request with the wrong feature count?
+
+<details><summary>Compare your reasoning</summary>
+
+Reject it at the interface with a clear explanation before inference. Silently reshaping may alter example meaning and does not make the request compatible with the exported signature.
+
+</details>
 
 ## Freeze the inference boundary
 
@@ -92,7 +110,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:20.621105+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:53.010987+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172

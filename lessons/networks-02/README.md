@@ -15,7 +15,25 @@ A model library can organize weights for us, but we still want to see what is be
 
 ## The idea
 
-NNX represents modules as object graphs with typed variables. Param marks trainable arrays; an ordinary Variable can hold other state. The graph also contains static Python structure such as layer widths. Use NNX transforms for these mutable graph objects, or explicitly split graph definition and array state when a pure function is needed.
+A model has a computation structure and state values. Some state is trainable; other state may record statistics or randomness. Flax NNX helps manage these objects, but we still need to understand which identities are shared and which values an update changes.
+
+## Distinguish shared structure from changing values
+
+Imagine two attributes referring to the same layer object. They share one parameter set. Drawing two independent weight boxes would misrepresent the computation, even if the printed values initially match.
+
+Separating graph structure and state lets us transform the numerical state while preserving the intended relationships. Compare paths and values before and after splitting, merging or cloning; copying a Python reference does not create independent model state.
+
+The existing merge figure is a map of these roles. Use the actual NNX operations in the lesson to test the map, especially when a model has state beyond parameters. Evaluation should follow its declared state rules rather than silently repeating training updates.
+
+### Pause and reason
+
+What should a diagram show when two attributes use the same layer?
+
+<details><summary>Compare your reasoning</summary>
+
+One shared parameter identity with two uses. Show independent copies only after an explicit operation and identity/value checks establish independence.
+
+</details>
 
 ## Move the explicit equations into a module
 
@@ -164,7 +182,7 @@ The code makes that independence visible through a check: after a recorded call 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:35.723749+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:04.873666+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2

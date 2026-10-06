@@ -16,11 +16,27 @@ Let’s build a regression prediction one row at a time. Each feature gets a wei
 
 ## The idea
 
-Put each observation in a row and each feature in a column. If we have $n$ observations and $d$ features, the data matrix is $X\in\mathbb{R}^{n\times d}$. The weight vector $w\in\mathbb{R}^{d}$ gives one weight to each feature. Multiplying them gives $Xw\in\mathbb{R}^{n}$: one prediction per observation. In Python, we write that multiplication as `X @ w`.
+Represent observations as rows and features as columns. The matrix $X\in\mathbb{R}^{n\times d}$ contains $n$ observations with $d$ features each, and $w\in\mathbb{R}^{d}$ assigns a weight to each feature. Multiplying gives one weighted sum per observation; in Python, this is `X @ w`.
 
-A scalar bias $b$ shifts every prediction, so the model is $\hat y=Xw+b\mathbf{1}$, where $\mathbf{1}$ is a vector of ones. We compare each prediction $\hat y_i$ with its matching target $y_i$, square the difference, and average. The loss is one scalar, $L=\frac{1}{n}\sum_{i=1}^{n}(\hat y_i-y_i)^2$.
+A scalar bias shifts every prediction, giving $\hat y=Xw+b\mathbf{1}$, where $\mathbf{1}$ is the vector of ones. Predictions and targets should both have shape $(n,)$. Subtract them element by element, square the residuals and average to obtain one scalar mean squared loss. A mistaken $(n,n)$ residual matrix compares every prediction with every target, changing the problem even though its mean is still a scalar.
 
-Now check the array shapes. Both predictions and targets should have shape $(n,)$. A target column with shape $(n,1)$ can broadcast against predictions of shape $(n,)$ to create an $(n,n)$ matrix. That compares every target with every prediction, rather than pairing the rows. Checking the shapes at this boundary helps us keep the code aligned with the math.
+## Calculate one complete loss by hand
+
+Use a small worked case: $X=[[1,2],[3,0]]$, $w=[2,-1]$, and $b=1$. The predictions are $1(2)+2(-1)+1=1$ and $3(2)+0(-1)+1=7$. With targets $[2,5]$, the residuals are $[-1,2]$, their squares are $[1,4]$, and the mean squared loss is $2.5$.
+
+Notice where each axis goes. The feature axis disappears in the dot product; the observation axis remains until the final average. In general, $X$ has shape $(n,d)$, $w$ has shape $(d,)$, and predictions and targets both have shape $(n,)$.
+
+The prediction plot shows the effect of changing bias: every point moves by the same amount. Changing a weight instead affects an observation in proportion to its corresponding feature. Compare those two interventions before treating all parameter updates as interchangeable.
+
+### Pause and reason
+
+If you duplicate every observation and target, does mean squared loss double?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Both the squared-error sum and the observation count double, leaving the mean unchanged. A summed loss would double, and its gradient scale would change too.
+
+</details>
 
 ## Map one row to one prediction
 
@@ -155,7 +171,7 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:02.754766+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:30.489716+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]

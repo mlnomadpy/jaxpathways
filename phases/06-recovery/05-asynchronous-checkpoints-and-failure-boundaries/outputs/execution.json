@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-05",
-  "contentHash": "72a46547743e115bedfa6f828a4f5cd358fa0f11029e89b0cfb019b23f215d8b",
-  "executedAt": "2026-10-06T01:24:03.739531+00:00",
+  "contentHash": "e4d4f872279187ef0b03cafe4f3451459e9bacfa02ca9dda5bf0144248af6c52",
+  "executedAt": "2026-10-06T15:40:34.415758+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-wa0buu8h\n{\n  \"save_call_seconds\": 0.002576791914179921,\n  \"remaining_work_and_wait_seconds\": 0.014356916071847081,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-1086q1h7\n{\n  \"save_call_seconds\": 0.0014767078682780266,\n  \"remaining_work_and_wait_seconds\": 0.010046958923339844,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
+  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-hm5vba4z\n{\n  \"save_call_seconds\": 0.002465624827891588,\n  \"remaining_work_and_wait_seconds\": 0.013811375014483929,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-b9_4mz0x\n{\n  \"save_call_seconds\": 0.0015274579636752605,\n  \"remaining_work_and_wait_seconds\": 0.007230333983898163,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
   "notebookCells": [
     {
       "sourceHash": "100141bc9228106257f49beac8294e147442a0417970acd1215d94a49ff0082e",
@@ -28,10 +28,10 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-qf610jnd\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-am4kv49u\n",
             "{\n",
-            "  \"save_call_seconds\": 0.002501332899555564,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.013886958127841353,\n",
+            "  \"save_call_seconds\": 0.002474665641784668,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.014171916991472244,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",
@@ -47,10 +47,10 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-2nmmythv\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-5l0hbh77\n",
             "{\n",
-            "  \"save_call_seconds\": 0.0013120840303599834,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.007473374949768186,\n",
+            "  \"save_call_seconds\": 0.001419666688889265,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.007529875263571739,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",
@@ -64,7 +64,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",

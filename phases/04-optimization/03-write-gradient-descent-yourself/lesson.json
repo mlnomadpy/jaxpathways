@@ -4,7 +4,7 @@
   "minutes": 80,
   "content": {
     "problem": "You now have a loss and a gradient. Let’s use them to move a weight toward a better value. We’ll calculate the first two updates ourselves, turn the update into a loop, and try a step size that is too large. Watching the whole path will tell us more than looking only at the final loss.",
-    "idea": "For the loss \\((w-2)^2\\), the gradient is \\(2(w-2)\\). Gradient descent subtracts learning_rate times that gradient. The error after one step is multiplied by \\(1-2\\eta\\). For this particular quadratic, learning rates strictly between \\(0\\) and \\(1\\) contract the error.\n\nThis bound is specific to the curvature of this loss. Do not reuse it as a universal rule. lax.scan carries the current parameter and records a loss at each step; the loop stays compatible with JAX transformations.",
+    "idea": "Gradient descent subtracts a scaled gradient from the current parameters. The gradient points toward local increase; its negative gives a local descent direction. A sufficiently large step can cross the useful local region and increase the loss instead.",
     "code": "import jax\nimport jax.numpy as jnp\ndef loss(w):\n    return (w - 2.) ** 2\ndef train(initial, rate, steps):\n    def step(w, _):\n        next_w = w - rate * jax.grad(loss)(w)\n        return next_w, loss(next_w)\n    return jax.lax.scan(step, jnp.array(initial), None, length=steps)\nfinal, history = train(0., 0.1, 60)\nprint(\"Final weight:\", float(final))\nprint(\"Final loss:\", float(history[-1]))\nassert jnp.allclose(final, 2., atol=1e-4)\nassert history[-1] < 1e-8\nassert jnp.all(jnp.diff(history) <= 1e-7)",
     "output": "The weight approaches \\(2.0\\) and the final loss is below \\(10^{-8}\\).",
     "exercise": "Run ten steps with learning rate \\(1.1\\). Predict whether the error contracts before executing; show evidence of divergence.",
@@ -19,6 +19,15 @@
     "explanation": "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
     "diagnosis": "Record the loss trajectory and parameter values. An alternating, growing error here follows from the update equation; changing the PRNG seed cannot fix it.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "The sign tells you which way to step",
+        "body": "Take \\(L(w)=(w-3)^2\\), starting from \\(w=0\\). The derivative is \\(-6\\). With learning rate \\(0.1\\), the update gives \\(w=0.6\\), and the loss falls from \\(9\\) to \\(5.76\\). The negative derivative produces a positive parameter change because we subtract it.\n\nWith learning rate \\(1.1\\), the first update jumps to \\(6.6\\). The new loss is \\(12.96\\), larger than the starting loss. The derivative was correct in both cases; the step length changed the outcome.\n\nWhen the loss plot rises, inspect the parameter trajectory and update norm before changing the derivative implementation. Loss hides the side of the minimum on which the parameter lies. A signed trajectory exposes overshoot.",
+        "check": {
+          "prompt": "Does a correct gradient guarantee that any positive learning rate reduces the loss?",
+          "answer": "No. The gradient describes local behavior. Step-size stability depends on the objective's curvature and the update rule; the worked large-step case increases the loss despite the correct derivative."
+        }
+      },
       {
         "title": "Derive one update before writing the loop",
         "body": "Starting at \\(w=0\\), our gradient is \\(-4\\). Subtracting \\(0.1\\) times \\(-4\\) gives \\(w=0.4\\), whose loss is \\(2.56\\). A second step gives \\(w=0.72\\) and loss \\(1.6384\\). These two hand-computed steps check the sign, learning rate, and whether your history records loss before or after the update.\n\nDefine the error \\(e=w-2\\). The next error is \\((1-2\\eta)e\\). This recurrence explains the whole trajectory for this quadratic. An optimizer update must follow the negative gradient; adding it moves away from the minimum. The subscript \\(k\\) counts updates. The symbol \\(\\eta\\) is the learning rate, and \\(e_k=w_k-2\\) is the remaining error. Focus on the multiplier \\(1-2\\eta\\): its magnitude tells us whether this particular error shrinks.",

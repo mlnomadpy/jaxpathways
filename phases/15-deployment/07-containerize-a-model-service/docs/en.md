@@ -15,7 +15,25 @@ Your model works in a notebook, but another machine has a different interpreter,
 
 ## The idea
 
-A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.
+Containerization packages a runtime environment; a running container executes a process; a model artifact supplies versioned numerical content. Keeping these identities separate makes deployment and debugging reproducible.
+
+## An image, a process and an artifact have different identities
+
+A container image can start successfully while loading the wrong model path or configuration. Conversely, a valid model artifact can fail because the runtime lacks a compatible dependency. Record the image identity and model/configuration identities together.
+
+Trace the build context into the image, then configuration and artifact mounts into the running process. Mark the request boundary where decoding, validation, inference and response encoding happen. A readiness signal should reflect the actual service contract, not merely process existence.
+
+The current subprocess experiment demonstrates a process boundary. It is not evidence that a Docker build or container benchmark ran. Use that distinction when extending the lesson to your own container execution and keep the resulting receipt.
+
+### Pause and reason
+
+Does pinning a container image automatically pin a model loaded from a mutable path?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The external artifact can change independently. Pin and verify its identity as part of the release configuration.
+
+</details>
 
 ## Separate training from inference
 
@@ -125,7 +143,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:22.985853+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:55.362647+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3

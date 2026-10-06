@@ -15,7 +15,25 @@ An interpreted kernel can be numerically correct and still violate a TPU layout 
 
 ## The idea
 
-The numerical contract is $Y_{ij}=\max(X_{ij}+b_j,0)$. A matrix tile and a column-bias window enter the kernel, and one output tile is written. CPU interpretation checks this behavior. The same target branch launches Pallas without interpretation only when actual TPU inputs and backend are present.
+Once a tile's inputs are identified, a kernel performs local arithmetic and writes the corresponding outputs. Bias broadcasting, activation and dtype rules must preserve the declared shape and value contract.
+
+## Separate tile ownership from the local arithmetic
+
+Take one illustrative row $[-2,1]$ and feature bias $[1,-3]$. Addition gives $[-1,-2]$, and ReLU gives $[0,0]$. A bias indexed by row instead of feature can preserve output shape while computing the wrong result.
+
+Trace loads into the tile, the exact broadcast axis, activation and stores. Keep boundary guards visible beside the arithmetic rather than assuming a correct formula guarantees correct indexing.
+
+The activation plot checks the resulting values. Compare against an independent array implementation on awkward dimensions and negative/positive inputs. CPU interpretation helps test semantics; it does not qualify TPU throughput or prove a particular memory schedule.
+
+### Pause and reason
+
+What can a value reference detect that an output-shape assertion cannot?
+
+<details><summary>Compare your reasoning</summary>
+
+Wrong broadcast axes, incorrect activation order or indexing errors that retain the expected shape. Use distinguishable values so those errors cannot cancel.
+
+</details>
 
 ## Map each operand according to its meaning
 
@@ -207,7 +225,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:41.864668+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:15.201552+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0

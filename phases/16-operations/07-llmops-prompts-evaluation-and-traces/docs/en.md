@@ -15,7 +15,25 @@ A prompt edit improves ordinary answers but makes the system confidently answer 
 
 ## The idea
 
-LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.
+An LLM application combines prompts, retrieved context, model configuration and postprocessing. Version those components and keep a trace that explains a failed case. A model name alone does not identify the behavior of the whole application.
+
+## Trace a response through the system that produced it
+
+If a response is unsupported, first ask whether relevant evidence reached the model, whether the prompt requested grounded behavior and whether the evaluation checks the intended claim. Changing the model cannot necessarily repair a missing retrieval candidate.
+
+Link case IDs to prompt, retriever, model and evaluator versions. Re-run a fixed case set after a change and inspect both repaired cases and regressions. An average pass rate can conceal a newly broken critical case.
+
+The lesson uses a bounded fixture to teach release logic. Preserve that scope: passing a mocked or non-LLM check does not establish actual model behavior. Qualify the full application with executed traces when replacing the fixture.
+
+### Pause and reason
+
+Why retain the retrieved context in an error trace?
+
+<details><summary>Compare your reasoning</summary>
+
+It distinguishes missing or wrong evidence from generation or instruction-following errors. Without that context, the same final response can support several incompatible diagnoses.
+
+</details>
 
 ## Version the application boundary
 
@@ -189,7 +207,7 @@ visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:27:33.121707+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:44:04.497230+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]

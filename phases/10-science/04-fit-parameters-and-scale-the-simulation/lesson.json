@@ -4,7 +4,7 @@
   "minutes": 115,
   "content": {
     "problem": "Suppose we can observe cooling trajectories but do not know the rate. Can we recover it without confusing optimizer success with a trustworthy physical inference? We will fit a positive rate, test new initial conditions, examine non-identifiability, and measure a batched CPU workload with explicit timing boundaries.",
-    "idea": "The unknown rate becomes a trainable parameter, and the differentiable simulator becomes the prediction function. We fit \\(k=e^\\theta\\), where \\(\\theta\\) is unrestricted. A good fit must survive independent data generation, held-out conditions and a changed numerical grid. Synthetic recovery is a controlled validation exercise; real instruments add noise, model mismatch and uncertain initial conditions.",
+    "idea": "An inverse problem uses observations to infer parameters of a forward model. A small fitting error is meaningful only if the observations contain information about those parameters and the forward model matches the observation process.",
     "objectives": [
       "Fit a constrained physical parameter through an executed simulator.",
       "Separate training fit, held-out prediction and solver refinement.",
@@ -12,6 +12,15 @@
       "Measure synchronized batched CPU execution without claiming accelerator scaling."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Ask whether observations identify the parameter",
+        "body": "For exponential decay \\(y(t)=y_0e^{-at}\\), an observation only at \\(t=0\\) equals \\(y_0\\) for every rate \\(a\\). No optimizer can recover the rate from that observation alone. Later observations supply rate information, provided their noise and timing are understood.\n\nThe fitting loop changes the parameter, runs the solver at the declared observation times and compares with the data. Keep those times fixed when comparing candidate parameters. Solver error can otherwise be mistaken for a physical parameter effect.\n\nRead the fitted trajectory alongside the residuals and objective history. A decreasing objective shows progress on that objective; it does not establish uniqueness or uncertainty. Test a changed observation schedule to see which part of the result is supported by data.",
+        "check": {
+          "prompt": "Can zero fitting error imply that the parameter is uniquely identified?",
+          "answer": "No. Several parameter settings can fit the same insufficient observations. Examine identifiability and changed observation conditions, not only residual size."
+        }
+      },
       {
         "title": "Choose data that can reveal the parameter",
         "body": "We generate observations from the exponential at forty-one times for initial values \\(0.7\\), \\(1.5\\) and \\(2.3\\). The analytic generator is independent of RK4, avoiding a perfect fit caused merely by using exactly the same numerical algorithm twice. The data are noiseless and synthetic. Their provenance and split must remain explicit in any report."

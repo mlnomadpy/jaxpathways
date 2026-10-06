@@ -14,7 +14,8 @@ export async function bootCourse(initialize, errorTarget) {
       const message = document.createElement('p');
       message.textContent = 'The course could not load. Refresh this page to try again.';
       message.setAttribute('role', 'alert');
-      target.replaceChildren(message);
+      if (document.querySelector('#lesson-page[data-static-lesson]')) target.prepend(message);
+      else target.replaceChildren(message);
     }
   }
 }

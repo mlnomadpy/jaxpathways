@@ -14,7 +14,25 @@ A learner agent reaches a goal, but its reported reward keeps increasing afterwa
 
 ## The idea
 
-Think of a corridor with positions $0,1,2,3$. Position $3$ is the goal. Action $0$ moves left and action $1$ moves right; the left boundary stops movement. Each active non-goal transition costs $0.01$, while entering the goal pays $1$. An episode begins uniformly at position $0$ or $1$, and stops after at most $8$ actions. The policy chooses actions; the environment defines what those actions mean.
+A functional environment receives state and action and returns the next state, reward and termination information. Define exactly which transition earns reward and what later terminal padding means. This keeps rollouts and return calculations consistent.
+
+## Reward belongs to a transition
+
+Suppose entering the goal earns one reward. The transition into the goal counts once. Later padded steps in the terminal state should not repeatedly earn the same reward unless that is explicitly the task's intended reward rule.
+
+Draw separate arrows for an ordinary move, a goal-reaching move and terminal padding. A timeout is another condition whose treatment must be specified; it is not automatically the same learning signal as reaching a terminal goal.
+
+The reward trace shows one event followed by absorbing padding. Read the event's time index against the transition convention. Then test actions after termination to ensure padding does not introduce extra rewards or unintended state changes.
+
+### Pause and reason
+
+Why can checking only the final state miss a reward bug?
+
+<details><summary>Compare your reasoning</summary>
+
+A rollout can end in the correct goal while counting its reward repeatedly during padding. Check transition rewards and accumulated return as well as final state.
+
+</details>
 
 ## State contains what the next transition needs
 
@@ -178,7 +196,7 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:21.918097+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:41:57.169402+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]

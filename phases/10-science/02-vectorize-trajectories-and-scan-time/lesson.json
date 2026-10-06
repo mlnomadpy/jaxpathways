@@ -4,7 +4,7 @@
   "minutes": 100,
   "content": {
     "problem": "You need to simulate a collection of experimental starts, not just one. Which dimension represents independent experiments, and which represents sequential time? We will build both compositions explicitly and verify that their axes and physical predictions agree.",
-    "idea": "Time steps depend on their predecessors, so scan handles that dependency. Different initial conditions can evolve independently under the same rate, so vmap handles that batch. These transformations describe different kinds of structure. Neither is a promise that the program will run faster on a particular device.",
+    "idea": "A simulation ensemble repeats one rule across independent systems and across time. Vectorization handles the independent systems; recurrence handles each system's evolving state. Name those axes before composing transforms.",
     "objectives": [
       "Construct and verify a fourth-order fixed-step transition.",
       "Distinguish batch-major from time-major trajectory layouts.",
@@ -12,6 +12,15 @@
       "Separate independent ensembles from interacting states."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "There are two different axes of repetition",
+        "body": "Picture a grid with time running left to right and one independent trajectory per row. State arrows connect adjacent times within a row. No state arrow crosses into another trajectory unless the physical model explicitly couples them.\n\nInitial conditions can vary by trajectory while a physical parameter stays shared, or both may vary. That is an argument-mapping choice, not merely a shape convenience. Record it before applying vectorization.\n\nThe trajectory plot shows outputs of that grid. Preserve the returned time/batch axis order when plotting; an accidental transpose can connect different systems instead of successive times. Compare one row with an independently run single trajectory.",
+        "check": {
+          "prompt": "What should happen if you permute independent initial conditions?",
+          "answer": "The trajectories should undergo the same permutation, with each trajectory's time evolution unchanged. This checks independence and axis handling."
+        }
+      },
       {
         "title": "Improve one step before multiplying trajectories",
         "body": "Forward Euler samples the slope only at the start of the interval. Classical RK4 samples a start slope, two midpoint slopes and an endpoint slope, then combines them with weights \\(1,2,2,1\\). The intermediate states are trial values, not four extra saved observations. For our linear equation the full step is multiplication by a fourth-degree approximation to \\(e^{-kh}\\). This makes an independent algebraic oracle possible.",
@@ -134,6 +143,140 @@
       "Use physical structure as a second check",
       "Choose saved outputs deliberately"
     ],
-    "output": "Shape (3, 41); endpoints approximately [0.12329849, 0.24659697, 0.49319394]. Both compositions agree."
+    "output": "Shape (3, 41); endpoints approximately [0.12329849, 0.24659697, 0.49319394]. Both compositions agree.",
+    "diagram": {
+      "title": "Vectorize across systems; scan through time",
+      "prediction": "What should happen if you permute independent initial conditions?",
+      "reading": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
+      "alt": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 5,
+      "panel": {
+        "kind": "graph",
+        "nodes": [
+          {
+            "id": "00",
+            "x": 2,
+            "y": 1.2,
+            "label": "Trajectory 0\nstate at t=0",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "01",
+            "x": 5,
+            "y": 1.2,
+            "label": "Trajectory 0\nstate at t=1",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "02",
+            "x": 8,
+            "y": 1.2,
+            "label": "Trajectory 0\nstate at t=2",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "10",
+            "x": 2,
+            "y": 3.2,
+            "label": "Trajectory 1\nstate at t=0",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "11",
+            "x": 5,
+            "y": 3.2,
+            "label": "Trajectory 1\nstate at t=1",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "12",
+            "x": 8,
+            "y": 3.2,
+            "label": "Trajectory 1\nstate at t=2",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "20",
+            "x": 2,
+            "y": 5.2,
+            "label": "Trajectory 2\nstate at t=0",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "21",
+            "x": 5,
+            "y": 5.2,
+            "label": "Trajectory 2\nstate at t=1",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          },
+          {
+            "id": "22",
+            "x": 8,
+            "y": 5.2,
+            "label": "Trajectory 2\nstate at t=2",
+            "tone": "state",
+            "w": 2.5,
+            "h": 0.85
+          }
+        ],
+        "edges": [
+          {
+            "from": "00",
+            "to": "01",
+            "exit": "right",
+            "enter": "left"
+          },
+          {
+            "from": "01",
+            "to": "02",
+            "exit": "right",
+            "enter": "left"
+          },
+          {
+            "from": "10",
+            "to": "11",
+            "exit": "right",
+            "enter": "left"
+          },
+          {
+            "from": "11",
+            "to": "12",
+            "exit": "right",
+            "enter": "left"
+          },
+          {
+            "from": "20",
+            "to": "21",
+            "exit": "right",
+            "enter": "left"
+          },
+          {
+            "from": "21",
+            "to": "22",
+            "exit": "right",
+            "enter": "left"
+          }
+        ],
+        "height": 6.4,
+        "width": 10
+      }
+    }
   }
 }

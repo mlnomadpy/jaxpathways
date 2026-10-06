@@ -39,14 +39,10 @@
   .lesson-link > span:first-child {
     min-width: 0;
   }
-}
-@media (max-width: 760px) {
   .lesson-number {
     display: block;
     margin-bottom: 3px;
   }
-}
-@media (max-width: 760px) {
   .lesson-link .badge {
     font-size: 11px;
     margin-left: 10px;

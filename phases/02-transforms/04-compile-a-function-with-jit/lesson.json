@@ -3,7 +3,7 @@
   "id": "transforms-04",
   "minutes": 55,
   "content": {
-    "idea": "jit transforms a compatible numerical function into a compiled callable. On a first relevant call, JAX traces Python execution with abstract inputs, stages array operations, and obtains a compiled executable. Later compatible calls can reuse it. Python still invokes the callable, but the numerical work can run as a compiled computation.\n\nThe worked loss is intentionally small. Its point is to verify correctness and understand measurement, not to guarantee a speedup. On a tiny CPU workload, Python-call and dispatch overhead can be a substantial fraction of the time. On a large accelerator workload, completion of device work matters. Report the actual device and workload before interpreting results.",
+    "idea": "Compilation prepares a program that can be reused for compatible calls. The first call can include tracing and compilation as well as execution; later compatible calls can reuse that work. Numerical equality and performance are separate checks.",
     "code": "import time\nimport jax\nimport jax.numpy as jnp\ndef loss(w, x, y):\n    return jnp.mean((x @ w - y) ** 2)\nx = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.\nw = jnp.array([1., 2., -1.])\ny = jnp.ones(4)\ncompiled = jax.jit(loss)\nt0 = time.perf_counter()\nfirst = compiled(w, x, y).block_until_ready()\nfirst_seconds = time.perf_counter() - t0\nt0 = time.perf_counter()\nsecond = compiled(w, x, y).block_until_ready()\nrepeat_seconds = time.perf_counter() - t0\nprint(\"Loss:\", float(second))\nprint(\"First/repeat seconds:\", first_seconds, repeat_seconds)\nassert jnp.allclose(first, loss(w, x, y))\nassert jnp.allclose(second, first)",
     "output": "Loss ≈ \\(0.46\\). Timings depend on the device, process, and workload; no speed threshold is required.",
     "exercise": "Foundation · Compile `value_and_grad(loss)`, check the loss and gradient against both the eager transform and the manual matrix formula, and explain how you would synchronize a benchmark of its two outputs.",
@@ -24,6 +24,15 @@
     ],
     "problem": "Your calculation is correct, and now you want to run it many times. What does compilation actually change? We’ll compare the original function with its jitted version, separate the first call from later calls, and wait for the result before stopping the timer. A small CPU example is enough to learn a fair comparison; a speedup is not guaranteed.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate changing data from preparing a program",
+        "body": "Suppose you call a compiled function on a float32 vector, then call it on different values with the same shape and dtype. Those new values can flow through the prepared computation. If the next call changes a relevant shape or static choice, JAX may need a different specialization.\n\nThink of the first-call path as preparation followed by execution. A warm-call timing should describe the repeated workload after preparation, and it must wait for device work to finish. Timing only dispatch can make a slow computation look fast.\n\nFirst compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.",
+        "check": {
+          "prompt": "Why can a tiny function be slower on its first compiled call?",
+          "answer": "The call includes preparation costs that may exceed the work itself. Reuse can amortize those costs, but a speed claim still needs measurements of the intended workload."
+        }
+      },
       {
         "title": "Separate the work hidden in one call",
         "body": "The first call can involve tracing, lowering, compilation, dispatch, and execution. Calling the same compiled function on compatible inputs can avoid much of the setup, but still involves a Python invocation, dispatch, and execution. A persistent cache or earlier compilation can also affect what first means.\n\nDefine the scope: first call to this callable in this process with these input shapes/dtypes. Do not label it cold-machine startup, pure compilation time, or kernel execution time unless your experiment actually isolates those quantities.",

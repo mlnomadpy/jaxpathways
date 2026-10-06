@@ -4,7 +4,7 @@
   "minutes": 90,
   "content": {
     "problem": "A sensor model says that a future reading has mean \\(2\\) and standard deviation \\(3\\). What should a finite collection of simulated readings look like, and how can we check our simulator? We will compare independent formulas with JAX samples, then deliberately underflow a likelihood calculation. This is the numerical foundation for the Bayesian model in the next lesson.",
-    "idea": "A probability distribution describes possible outcomes and their relative plausibility. Sampling produces individual outcomes; a density evaluates a candidate outcome. For a continuous distribution, density is not the probability of exactly that point. Probability comes from integrating density over an interval. We work in float32 on CPU and keep random keys explicit so an experiment can be replayed.",
+    "idea": "A distribution describes variability in outcomes. Averaging independent observations can reduce uncertainty in their mean without removing the spread of individual outcomes. Keep these two uncertainties on separate labels and scales.",
     "objectives": [
       "Distinguish samples, density, variance and standard error",
       "Check normal moments against independent analytic expectations",
@@ -12,6 +12,15 @@
       "Demonstrate both key replay and independent split-key draws"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "A precise mean does not make individual outcomes predictable",
+        "body": "Suppose observations have standard deviation \\(2\\). For \\(100\\) independent observations from the same distribution, the sample mean's standard deviation is \\(2/\\sqrt{100}=0.2\\). A new individual observation still has standard deviation \\(2\\).\n\nThe standard-error curve is calculated under its sampling assumptions; it is not itself a collection of measured repeated experiments. Correlated observations can reduce the amount of independent information in a batch.\n\nWhen interpreting a narrow interval, ask what random quantity the interval describes: a mean, a latent parameter or a new observation. More data can make an estimated average precise while the underlying process remains noisy.",
+        "check": {
+          "prompt": "Does a tenfold smaller standard error mean future individual observations are ten times less variable?",
+          "answer": "No. Standard error concerns the estimator of the mean. The observation distribution can retain the same variability."
+        }
+      },
       {
         "title": "Start with units, not an API",
         "body": "A standard deviation has the same units as a sensor reading. Variance has squared units. To change a standard-normal draw \\(z\\) into a reading, multiply by the standard deviation and add the mean: \\(x=2+3z\\). The expected variance is \\(9\\), not \\(3\\). This is why the scale parameter in our log-density divides the residual before squaring. We assume a strictly positive finite scale; validation belongs at a public input boundary.",

@@ -1,5 +1,6 @@
 ---
 import manifest from '../../../curriculum/modality-tracks.json';
+import projectPlans from '../../../curriculum/project-plans.json';
 import { course } from '../../lib/course-data.js';
 import { siteUrl } from '../../lib/urls.js';
 import SiteLayout from '../../layouts/SiteLayout.astro';
@@ -12,6 +13,7 @@ export function getStaticPaths() {
 }
 const { track } = Astro.props;
 const lessons = course.phases.flatMap((phase) => phase.lessons);
+const nextProjects = projectPlans.filter((project) => project.trackIds.includes(track.id));
 ---
 
 <SiteLayout title={`${track.title} — JAX Pathways`} description={track.summary} active="projects">
@@ -157,6 +159,23 @@ const lessons = course.phases.flatMap((phase) => phase.lessons);
         </p>
       ))}
     </section>
+    {nextProjects.length > 0 && (
+      <section class="track-stage" aria-labelledby="planned-projects-heading">
+        <h2 id="planned-projects-heading">Planned extensions</h2>
+        <p>
+          These project specifications build on this track. Their workspaces and checks are not
+          available yet.
+        </p>
+        <ul>
+          {nextProjects.map((project) => (
+            <li>
+              <a href={siteUrl(`project-plans/${project.id}.html`)}>{project.title}</a> —{' '}
+              {project.summary}
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
     <SiteFooter />
   </main>
   <script>

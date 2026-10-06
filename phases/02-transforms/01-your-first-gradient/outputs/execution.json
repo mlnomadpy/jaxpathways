@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "first-gradient",
-  "contentHash": "5fb2611e440319b86af9868d6f4d9ae38c271839f88b8003036f19003c7146d7",
-  "executedAt": "2026-10-06T01:22:46.841500+00:00",
+  "contentHash": "24a03d3e0e65d3d97935cb696266158a2bff60fd43e1ebc4d3b19545b9e9ee97",
+  "executedAt": "2026-10-06T15:39:13.871361+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -42,7 +42,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",

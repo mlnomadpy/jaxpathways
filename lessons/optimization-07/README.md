@@ -16,7 +16,25 @@ One model input can affect several outputs. How does a small input change move t
 
 ## The idea
 
-A derivative is a local sensitivity. For a vector function, collect the output-by-input sensitivities into a Jacobian. Forward mode applies it to an input direction. Reverse mode applies its transpose to output sensitivities. The chain rule connects these local calculations through a larger program.
+A Jacobian collects how each output responds to each input. We often need its action on a direction rather than the full matrix. Forward products move input perturbations to output perturbations; reverse products bring output sensitivities back to inputs.
+
+## Follow one direction through a Jacobian
+
+Take $J=[[4,1],[3,2]]$ and input direction $v=[1,-1]$. Multiplication gives $Jv=[3,1]$. This predicts the first-order output change when we move a small distance along that direction.
+
+For output sensitivity $u=[2,-1]$, the reverse product is $J^Tu=[5,0]$. These vectors live in different spaces even though both happen to have two entries in this example. Use unequal input/output dimensions in a follow-up test so equal lengths cannot hide a transpose mistake.
+
+There is a useful independent agreement: $u^T(Jv)=5$ and $(J^Tu)^Tv=5$. This checks the relationship between forward and reverse products without requiring you to inspect every Jacobian entry.
+
+### Pause and reason
+
+Why should we label the input and output spaces even for a square Jacobian?
+
+<details><summary>Compare your reasoning</summary>
+
+Equal dimensions can hide an incorrect orientation. The labels explain whether a vector is an input direction or output sensitivity and therefore which product is meaningful.
+
+</details>
 
 ## Build a Jacobian one entry at a time
 
@@ -150,7 +168,7 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:06.753454+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:34.905936+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]

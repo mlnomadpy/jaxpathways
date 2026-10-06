@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-02",
-  "contentHash": "92dd32f28241f220d68a8f64ed53b6ce4369bec0bdbe548bb0dde2bc33beb1c2",
-  "executedAt": "2026-10-06T01:25:41.864668+00:00",
+  "contentHash": "57702cb16db423f260e43cf05eae286625eedabd83511e0c9ba6e361220fc75a",
+  "executedAt": "2026-10-06T15:42:15.201552+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -61,7 +61,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",

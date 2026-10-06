@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "bd0f537bbd6b41b858ac0d0c54ecbad9b7acdab954805f6adf59b5b5f5c314f4",
-  "executedAt": "2026-10-06T01:22:51.972148+00:00",
+  "contentHash": "ed1da0697530400a9ef0bb7b004f5a0948b32b35f1ea1e6045ef946f7c8ad4b3",
+  "executedAt": "2026-10-06T15:39:19.324667+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.012483832892030478 1.4333054423332214e-05\neager median / min / max seconds: 2.3312517441809177e-05 2.208305522799492e-05 3.4667085856199265e-05\ncompiled median / min / max seconds: 4.104455001652241e-06 3.6249402910470963e-06 4.875008016824722e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 6.416114047169685e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.013669625390321016 1.570768654346466e-05\neager median / min / max seconds: 2.2104009985923767e-05 2.11251899600029e-05 3.329198807477951e-05\ncompiled median / min / max seconds: 3.7499703466892242e-06 3.5408884286880493e-06 4.792120307683945e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 6.666639819741249e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "887c25e29a1fd7bb821944ce3e64d076b8421e3f4258ce22146aff65e075e56e",
@@ -21,7 +21,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.012712707975879312 1.3875076547265053e-05\n"
+            "First/repeat seconds: 0.013690750114619732 1.5750061720609665e-05\n"
           ]
         }
       ]
@@ -31,7 +31,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "b5bbc0ad49ae5e736c3f79810f2aaee92736187bd6c2b193d9fa20410b4e8439",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",
@@ -56,8 +56,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 2.277048770338297e-05 2.1458137780427933e-05 3.5665929317474365e-05\n",
-            "compiled median / min / max seconds: 3.6660348996520042e-06 3.4170225262641907e-06 4.958128556609154e-06\n",
+            "eager median / min / max seconds: 2.4270499125123024e-05 2.254219725728035e-05 3.912486135959625e-05\n",
+            "compiled median / min / max seconds: 4.124827682971954e-06 3.7918798625469208e-06 5.459412932395935e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
@@ -90,7 +90,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 7.020542398095131e-06\n"
+            "compiled value-and-grad median seconds: 6.95791095495224e-06\n"
           ]
         }
       ]

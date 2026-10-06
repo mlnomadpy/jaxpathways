@@ -16,9 +16,25 @@ An optimizer helps turn gradients into parameter changes. Before introducing a m
 
 ## The idea
 
-An Optax optimizer is a gradient transformation. Initialize its state from the parameter pytree. Each update consumes gradients, previous state, and optionally parameters, then returns updates and new state. Apply those updates to obtain new parameters.
+An optimizer transforms gradients into parameter updates and may retain state between steps. Optax makes that state explicit: initialize it, pass it into each update, and keep the returned state together with the new parameters.
 
-For plain SGD, this reproduces subtracting learning_rate times the gradient. Momentum and Adam introduce additional state. Always carry the returned state into the next step; reinitializing it on every step changes the algorithm.
+## The optimizer has memory of earlier gradients
+
+For plain gradient descent without extra state, the current parameters and gradient can determine the next update. For momentum or Adam, earlier gradients also matter through stored accumulators. Two runs at the same parameters can therefore take different next steps if their optimizer states differ.
+
+Follow the update cycle in order: calculate the loss and gradients from current parameters, ask the optimizer for updates and new state, then apply those updates to the parameters. Keeping only one returned object breaks the cycle.
+
+The fitted-line figure shows that the example recovered a useful prediction rule. It does not by itself prove correct state continuation. Save a mid-run state and compare the next update with an uninterrupted run to test that separate capability.
+
+### Pause and reason
+
+You restore weights but initialize Adam from scratch. Is that an exact continuation?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The moment estimates and step counter have changed, so subsequent updates can differ. This may be a deliberate new optimization run, but it is not an exact resume.
+
+</details>
 
 ## Distinguish gradients, updates, and parameters
 
@@ -158,7 +174,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:24.831461+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:53.791812+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}

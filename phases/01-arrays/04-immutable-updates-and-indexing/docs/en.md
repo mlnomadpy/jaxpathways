@@ -15,9 +15,25 @@ You want to replace a few array entries, but JAX rejects the NumPy-style assignm
 
 ## The idea
 
-x.at[index].`set(value)` returns a value with selected entries replaced. x.at[index].`add(value)` returns a value with contributions added at selected positions. The original array value is unchanged. If you need to keep the result, assign or return it; calling the operation and ignoring the result does not update $x$.
+An indexed update in JAX returns an array value. This makes the relationship between old and new state explicit: the caller chooses which result to keep. The programming model describes values; compiler decisions about physical memory reuse are a separate issue.
 
-This is the observable functional contract. It does not prove that every expression allocates a fresh physical buffer. Compilers can reuse storage when safe, and later performance features can make ownership more explicit. Reason about values here; measure storage or performance separately when that becomes the question.
+## Separate a new value from a new physical buffer
+
+Start with $[2,4,6]$. Setting the middle entry to $10$ produces $[2,10,6]$. Adding $10$ at that position produces $[2,14,6]$. Both operations begin from the same original values; the second is not automatically applied to the result of the first.
+
+Draw two arrows from the original array, one labeled set and one labeled add. If you want sequential updates, explicitly feed the first result into the second operation. This is the same state-flow idea we will use in optimization and recurrent loops.
+
+Do not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.
+
+### Pause and reason
+
+You call an indexed update but keep using the original variable. Why might later predictions be unchanged?
+
+<details><summary>Compare your reasoning</summary>
+
+The returned updated value was discarded. Assign or pass that result into the next computation; do not expect the original array value to mutate.
+
+</details>
 
 ## A Python name and an array value are different
 
@@ -92,7 +108,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:22:45.188676+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:39:12.059388+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]

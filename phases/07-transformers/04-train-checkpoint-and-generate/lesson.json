@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "Let’s connect the pieces into a tiny next-token model. We’ll use a repeating three-character sequence, so the targets and expected continuations are easy to inspect. You’ll train, save, resume one matching step, and generate tokens. Success on this controlled sequence does not demonstrate general language ability.",
-    "idea": "We use a three-character periodic corpus and a context of four tokens. This is a deterministic CPU integration exercise, not a pretrained model, useful language system, or generalization benchmark. The held-out string follows the same periodic rule and repeats contexts already represented in training.\n\nThe objective connects integer IDs → embeddings and positions → causal Transformer block → vocabulary logits → cross entropy. A correct causal mask and shifted targets are required before a low training loss means anything.",
+    "idea": "Training provides known shifted targets. Generation predicts a next-token distribution and applies a decoding rule, then feeds the chosen token back as context. These two procedures use the model for different jobs.",
     "objectives": [
       "Assemble the token-to-logit contract",
       "Separate a learning experiment from a benchmark",
@@ -16,6 +16,15 @@
       "Use failures to test the experiment boundary"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Separate teacher-forced targets from generated context",
+        "body": "For probabilities \\(0.6,0.3,0.1\\), greedy decoding selects the first token. Sampling may select another nonzero-probability token. That different choice changes the context and therefore the distribution at the following step.\n\nRead each row of the probability figure before interpreting the generated string. Confidence on the fixture's target shows behavior on this small task; it does not establish broad language ability.\n\nKeep tokenizer identity, context limit and termination rules with the checkpoint. Correct weights with a changed token-to-ID mapping define a different system. The text harness adds explicit cache behavior later; do not infer that this lesson's simple generation loop already implements it.",
+        "check": {
+          "prompt": "Why can two decoding policies produce different later distributions from identical weights?",
+          "answer": "They can choose different earlier tokens, giving the model different later contexts. That is an expected consequence of decoding, not necessarily a numerical mismatch."
+        }
+      },
       {
         "title": "Assemble the token-to-logit contract",
         "body": "Each token ID indexes one row of a \\((3, 8)\\) embedding table. Add a position row, apply the single-head causal block, normalize and project to three vocabulary logits. vmap applies this per-sequence function over the batch. The loss averages token cross entropy over both example and position axes.\n\nFor a uniform three-class prediction, negative log probability is `log(3)`, about \\(1.0986\\), regardless of the target class. Zeroing the head provides a known check of that objective. This reduction assumes all positions are valid; padding and packing would require the masks and eligible-token reduction taught in the preceding lesson.",

@@ -1,0 +1,87 @@
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--ui);
+}
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--ui);
+  color: var(--atlas);
+  font-weight: 700;
+}
+h1 {
+  line-height: 1.02;
+}
+header {
+  background: var(--bg);
+  border-bottom: 0;
+  padding-block: 25px;
+}
+header .brand,
+.brand {
+  font-family: var(--ui);
+  font-size: 21px;
+  letter-spacing: -0.055em;
+  color: var(--atlas);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+}
+.brand:before {
+  content: '';
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: url('/assets/pathway-mark.svg') center/contain no-repeat;
+  border-radius: 0;
+  margin: 0;
+}
+header nav {
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  font-size: 14px;
+  gap: 8px 26px;
+}
+header nav a {
+  padding-block: 8px;
+  border-bottom: 2px solid transparent;
+}
+header nav a:hover,
+header nav a[aria-current='page'] {
+  color: var(--blue);
+  border-color: var(--blue);
+}
+button,
+.button {
+  border-radius: 6px;
+  box-shadow: none;
+  border-color: var(--line);
+  color: var(--atlas);
+  font-family: var(--ui);
+}
+button:hover,
+.button:hover {
+  background: #e3ddf5;
+  border-color: var(--blue);
+  color: var(--atlas);
+}
+.primary,
+.button.primary {
+  background: var(--atlas);
+  color: #fff;
+  border-color: var(--atlas);
+}
+.primary:hover,
+.button.primary:hover {
+  background: #493193;
+  color: #fff;
+}
+:focus-visible {
+  outline: 3px solid #8060df;
+  outline-offset: 4px;
+}
+.edition {
+  color: var(--muted);
+}

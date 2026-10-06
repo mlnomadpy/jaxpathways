@@ -15,7 +15,25 @@ Four points can give us a useful puzzle: how do we separate the two diagonal pai
 
 ## The idea
 
-A multilayer perceptron composes affine maps with a nonlinear activation. Keep the parameter tree visible so a gradient, an optimizer update, and a prediction can be inspected separately. This is a controlled synthetic experiment, not evidence of useful real-world classification.
+A multilayer perceptron combines learned linear maps with nonlinear activations. The hidden layer builds features that the output layer can combine. The activation lets the composition represent boundaries that a single linear map cannot.
+
+## Why hidden layers need nonlinear operations
+
+XOR gives the same label to opposite corners of a square. One straight separating line cannot isolate both opposite corners from the other two. Hidden units can form intermediate regions that an output layer combines.
+
+Remove every nonlinear activation and the weight matrices simply multiply into one linear map. More matrices alone do not solve this geometry. Biases change offsets but do not remove the limitation.
+
+Read the decision field both at and between the training points. The four observed labels constrain only a tiny part of the plane. A smooth-looking boundary is still an extrapolation. Connect each layer's actual width to the feature vector it produces before interpreting that extrapolation.
+
+### Pause and reason
+
+Does fitting all four XOR points establish generalization to another dataset?
+
+<details><summary>Compare your reasoning</summary>
+
+No. It checks representation and optimization on this teaching fixture. A different population requires its own held-out evaluation.
+
+</details>
 
 ## Trace the shapes from observations to logits
 
@@ -185,7 +203,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:23:32.907173+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:40:01.938802+00:00. JAX 0.9.2.
 
 ```text
 Training loss: 0.7047799825668335 -> 0.0015878621488809586 held-out accuracy: 1.0

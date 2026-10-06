@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { Marked } from 'marked';
-import { escapeHtml } from './html.js';
-import { renderMath } from './math.js';
+import { escapeHtml } from '../html.js';
+import { renderMath } from '../math.js';
 
 /** Render repository-owned Markdown; raw HTML is rejected to keep the content contract. */
 export function assessmentContent(sourcePath, resolveLink = (href) => href) {

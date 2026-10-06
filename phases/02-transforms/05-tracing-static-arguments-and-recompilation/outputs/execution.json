@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-05",
-  "contentHash": "918fb81dcd3b89b053f8dc01ce3bb1a6efe60dc1a5dc281967c9f685818e1f08",
-  "executedAt": "2026-10-06T01:22:53.383842+00:00",
+  "contentHash": "584d8f6c4ede887d5572ae498e374e1e9228cbeff4b1bfbf602228a924ca56a2",
+  "executedAt": "2026-10-06T15:39:20.759735+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -27,7 +27,7 @@
       ]
     },
     {
-      "sourceHash": "81d321ae3c30a062a14c8a5a0435e23376fbc1b08a01d79840fe962e020e4428",
+      "sourceHash": "d5b15b013eef8f2b1ca50d6f7664f88c05b0f95b5376df5b55d042374dcbccc5",
       "outputs": [
         {
           "output_type": "display_data",

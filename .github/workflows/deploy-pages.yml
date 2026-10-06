@@ -24,7 +24,7 @@ jobs:
           build-cmd: npm run build && npm run check
         env:
           BASE_PATH: /jaxpathways
-          SITE_URL: https://mlnomadpy.github.io
+          SITE_URL: https://www.tahabouhsine.com
   deploy:
     needs: build
     runs-on: ubuntu-latest

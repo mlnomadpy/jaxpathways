@@ -14,7 +14,25 @@ A single training run looks excellent. Would another random seed learn the same 
 
 ## The idea
 
-There are two sources of randomness: the training procedure produces a policy, then evaluation samples episodes from that frozen policy. Five evaluations of one trained policy do not equal five independent training runs. We train $5$ agents, evaluate each on $4$ reserved streams of $512$ episodes, and report one mean per trained agent. The exact corridor expectation lets us identify sampling error without trusting a smooth graph.
+A policy's result can vary because training produced a different policy and because evaluation sampled different episodes. A useful comparison records both sources instead of pooling every episode as though it came from one independent training run.
+
+## Separate training randomness from evaluation randomness
+
+Train several agents with distinct training seeds. Evaluate each on a declared set of held-out conditions. First summarize within-agent episode variability; then compare the results across independently trained agents.
+
+When methods share evaluation conditions, paired comparisons can make differences easier to interpret. Preserve that pairing rather than mixing episode identities. A large number of episodes from one trained agent does not replace multiple training seeds.
+
+The mean-return bars summarize the fixture. Inspect individual seed results before trusting a small average difference. If you add an uncertainty interval, state its unit of resampling and method rather than attaching an unexplained error bar.
+
+### Pause and reason
+
+Do a thousand episodes from one trained policy establish training-seed robustness?
+
+<details><summary>Compare your reasoning</summary>
+
+No. They improve knowledge of that policy's evaluation behavior. Training variability needs independently trained policies.
+
+</details>
 
 ## Write the protocol before inspecting results
 
@@ -396,7 +414,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:25:36.393760+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:10.282294+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]

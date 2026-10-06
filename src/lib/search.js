@@ -1,5 +1,11 @@
+// @ts-check
+
+/** @param {import('../types/course').Lesson} lesson
+ * @param {string} query
+ */
 function searchLesson(lesson, query) {
   if (!query) return { matched: true, excerpt: '' };
+  /** @type {Partial<import('../types/course').LessonContent>} */
   const c = lesson.content || {};
   const chunks = [
     lesson.title,
@@ -12,7 +18,8 @@ function searchLesson(lesson, query) {
     c.diagnosis,
     ...(c.practice || []).flatMap((p) => [p.title, p.prompt, p.explanation]),
     ...(c.references || []).map((r) => r.title),
-  ].filter(Boolean);
+  ].filter((chunk) => typeof chunk === 'string');
+  /** @type {Record<string, string>} */
   const aliases = {
     prng: 'random',
     rng: 'random',

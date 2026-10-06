@@ -15,7 +15,25 @@ Sometimes you know a stable formula for a derivative, or need to control what a 
 
 ## The idea
 
-A custom derivative is a mathematical contract attached to a primal function. The primal still computes its original value. The rule must describe its true local derivative, with correct shapes and linear dependence on tangent or cotangent seeds. We use softplus and log-sum-exp because their stable derivatives have compact independent formulas.
+A custom derivative rule changes how differentiation treats a function. It must preserve the intended derivative while respecting transformation requirements. Stability of the primal computation and correctness of the derivative need separate checks.
+
+## A custom rule is a mathematical contract
+
+Start from a known analytic function and derive its slope. Compare the custom rule with that result over ordinary and extreme inputs, then examine the second derivative if higher-order use is intended.
+
+A forward rule must be linear in its tangent input; a reverse rule must be linear in its incoming cotangent. Inserting an arbitrary nonlinear operation on that sensitivity can produce a rule that no longer represents a derivative.
+
+The slope and curvature curves show more than a successful first gradient at one point. Follow their behavior near numerically difficult regions and use finite differences only where that independent approximation is reliable.
+
+### Pause and reason
+
+Why check more than one tangent magnitude or cotangent value?
+
+<details><summary>Compare your reasoning</summary>
+
+It can expose a rule that is incorrectly nonlinear in the sensitivity input. Matching a single derivative call can hide that contract violation.
+
+</details>
 
 ## Keep the primal stable before customizing its derivative
 
@@ -224,7 +242,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:04.985437+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:37.396736+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]

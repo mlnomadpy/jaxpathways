@@ -7,7 +7,7 @@
       "kind": "cpu"
     },
     "problem": "A first timing suggests a tenfold speedup. Before celebrating, let’s ask when the timer started and stopped. We’ll separate the first call from warm calls, wait for JAX to finish, and compare numerical results. By the end, you’ll have a timing report another learner can reproduce.",
-    "idea": "An array handle and a completed calculation are different events. JAX may dispatch work asynchronously; block_until_ready waits for the requested result without requiring a NumPy copy. A first call can also include tracing, lowering and compilation. Time first-call latency separately from repeated calls to a warmed function.\n\nThis lesson explicitly places a modest matrix workload on CPU. It teaches measurement design and numerical equivalence, not an accelerator speed claim. The JSON report retains every measured sample, the workload, the environment and the synchronization boundary.",
+    "idea": "JAX can return an array handle before device work finishes. A benchmark must define what starts the interval and what counts as completion. First-call preparation, warm execution and end-to-end requests answer different performance questions.",
     "objectives": [
       "Draw the interval a timing actually measures.",
       "Exclude initial placement from a device-resident benchmark.",
@@ -15,6 +15,15 @@
       "Produce a report containing first-call and warmed sample distributions."
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Time a completed result",
+        "body": "If a timer stops as soon as dispatch returns, it may exclude most of the computation. Blocking on the result inside the interval includes completion of the work required to produce that result.\n\nWarm up the intended specialization before measuring repeated execution, and retain startup separately if it matters to the application. Include preprocessing and transfers in a separately named end-to-end measurement when they belong to the request.\n\nThe first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.",
+        "check": {
+          "prompt": "Where should synchronization occur in completed-result latency measurement?",
+          "answer": "Before stopping the timer. Synchronizing afterward can omit unfinished work from the reported interval."
+        }
+      },
       {
         "title": "Draw the boundary before starting the clock",
         "body": "For our workload, the input has shape \\((64, 32)\\), the weights have shape \\((32, 16)\\), and the result has shape \\((64, 16)\\). Matrix multiplication contracts the feature dimension, then tanh transforms each prediction. The timer starts after both input arrays are placed on CPU and ready. It stops after the output is ready.\n\nThat interval includes Python dispatch, execution and the final wait. It is not an isolated kernel duration. Data generation, initial placement and output conversion to NumPy are outside it. A serving request or data-loading benchmark would deliberately include different boundaries; specify which question your measurement answers.",
@@ -123,6 +132,17 @@
       "connection": "The first measurement includes work needed to prepare this specialization, including tracing and compilation. Compatible warm calls reuse it. Each measurement waits for the result, so it includes completed computation rather than only the time needed to dispatch work. Inputs are already placed before this measured boundary.\n\nThe warm line shows variation between individual samples. An isolated higher point is a slower sample, not proof of recompilation or a changing model. Read the recorded median alongside the full sample list, and rerun before comparing implementations. These measurements describe this small CPU workload; they do not establish accelerator speed or end-to-end request latency.",
       "alt": "Separate the first call from warm measurements. The upper panel measures the first synchronized call. The lower panel measures repeated warm calls, with sample number on the horizontal axis. Both report seconds, but they have independent vertical scales. Compare the tick values and any scientific-notation multiplier, not the physical heights of the panels. The recorded first call is much longer than the warm calls. For orientation, \\(10^{-2}\\) seconds is \\(10\\) milliseconds, while \\(10^{-5}\\) seconds is \\(10\\) microseconds. A multiplier printed beside an axis applies to all its tick labels; overlooking it can hide a difference of orders of magnitude.",
       "code": "visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call', 'labels': ['first'], 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': [first_call_seconds]}]}, {'kind': 'line', 'title': 'Warm calls', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm sample', 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': samples}]}]}"
+    },
+    "diagram": {
+      "title": "Time the completed result",
+      "prediction": "Where should synchronization occur in completed-result latency measurement?",
+      "reading": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
+      "alt": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 3.8,
+      "panel": {
+        "kind": "timeline"
+      }
     }
   }
 }

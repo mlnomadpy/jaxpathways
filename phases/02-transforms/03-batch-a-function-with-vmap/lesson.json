@@ -3,7 +3,7 @@
   "id": "transforms-03",
   "minutes": 60,
   "content": {
-    "idea": "vmap transforms a function by mapping designated input axes and collecting an output axis. Start with \\(\\hat y=w^\\mathsf{T}x\\). Both inputs to the single-example function have shape \\((D,)\\), and the result is scalar. A data batch has shape \\((B, D)\\). With `in_axes=(None, 0)`, the weight remains shared while axis \\(0\\) of the data supplies one example. The batched output has shape \\((B,)\\).\n\nThe mental model is a loop over examples, but JAX applies batching rules to the operations rather than requiring you to write that loop. It is a transformation, not a claim of multiple devices, independent processes, or automatic speedup. Start with shape and value correctness before asking about performance.",
+    "idea": "Vectorization lets us describe one example clearly and then apply that rule across an axis. The crucial decision is which arguments vary by example and which are shared. `vmap` expresses that decision; it does not require us to write a Python loop or assign hardware threads.",
     "code": "import jax\nimport jax.numpy as jnp\ndef predict(weight, x):\n    return jnp.dot(weight, x)\nweight = jnp.array([2., -1.])\nbatch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])\nbatched = jax.vmap(predict, in_axes=(None, 0))\nprint(batched(weight, batch))\nassert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))",
     "output": "[\\(1\\). \\(1\\). \\(8\\).]",
     "exercise": "Foundation · Compute each prediction gradient with respect to the shared weight. Predict the shape and the derivative of the dot product, then verify against the input batch.",
@@ -24,6 +24,15 @@
     ],
     "problem": "You have a prediction function that works for one example. Now you need it for a batch. Rather than keep two versions of the model in sync, we’ll tell JAX which input axis contains examples. You’ll compare vmap with a short Python loop and learn which inputs stay shared.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Map examples without changing the single-example rule",
+        "body": "Imagine three observations that use one common weight vector. Each row enters the same dot-product rule, producing one scalar, and the three scalars are stacked. Mapping the observation axis while keeping weights shared means the model is the same for every observation.\n\nNow imagine three different weight vectors, one per observation. Mapping both arguments would answer a different question: three input/model pairs rather than one model applied to a batch. Neither choice is automatically wrong, but only one matches the intended task.\n\nThe existing output bars show the lesson's three results, \\(1,1,8\\). Their heights check the values; the axis diagram explains how the rows produced them. Compare against an explicit stack of single-row calls, then permute the rows and predict the same permutation of outputs.",
+        "check": {
+          "prompt": "What should happen if you duplicate an input row while keeping the same shared weights?",
+          "answer": "The duplicated row should produce the same deterministic output. If it does not, inspect argument mapping and any state/randomness before blaming batching itself."
+        }
+      },
       {
         "title": "Write down the axis contract",
         "body": "There are three independent questions: which dimension represents examples, which inputs should be repeated unchanged, and where should the collected output axis go? \\(B\\) and \\(D\\) are labels for your reasoning, not named dimensions enforced by JAX.\n\nFor the worked example, shared weight is \\((2,)\\), data is \\((3, 2)\\), and predictions are \\((3,)\\). The first row \\([1, 1]\\) produces \\(2\\cdot1-1\\cdot1=1\\). The second row \\([2, 3]\\) also produces \\(1\\). The third \\([4, 0]\\) produces \\(8\\). Calculate those values before reading the batched call.",
@@ -109,6 +118,44 @@
       "connection": "`vmap` applies the single-example dot product across the batch and keeps one answer per row. Equal heights for the first two bars do not mean those inputs were equal; different inputs can have the same dot product.\n\nThere are three outputs because there are three observations. Summing across the whole batch would instead collapse these answers into one scalar. The figure verifies what vectorization computes; the bar heights say nothing about how long it takes.",
       "alt": "Vectorization keeps one result per row. Each bar belongs to one input row, and its height is that row’s scalar prediction. Reading left to right gives \\(1\\), \\(1\\), and \\(8\\). The horizontal positions are row labels, not successive training steps. The same weights \\((2,-1)\\) are used for every row. The first input \\((1,1)\\) gives \\(2-1=1\\); the second \\((2,3)\\) gives \\(4-3=1\\); the third \\((4,0)\\) gives \\(8-0=8\\).",
       "code": "visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}"
+    },
+    "diagram": {
+      "title": "Mapped rows and shared weights",
+      "prediction": "What should happen if you duplicate an input row while keeping the same shared weights?",
+      "reading": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
+      "alt": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 4,
+      "panel": {
+        "kind": "table",
+        "headers": [
+          "Mapped input",
+          "Shared argument",
+          "Single-example result"
+        ],
+        "rows": [
+          [
+            "row 0",
+            "same weights",
+            "1"
+          ],
+          [
+            "row 1",
+            "same weights",
+            "1"
+          ],
+          [
+            "row 2",
+            "same weights",
+            "8"
+          ],
+          [
+            "in_axes = 0",
+            "in_axes = None",
+            "stack → [1, 1, 8]"
+          ]
+        ]
+      }
     }
   }
 }

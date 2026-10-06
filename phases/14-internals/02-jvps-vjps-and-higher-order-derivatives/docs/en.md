@@ -14,7 +14,35 @@ A large model may have millions of inputs or outputs, but you often need only on
 
 ## The idea
 
-A derivative is a local linear map. A JVP pushes an input perturbation $v$ through that map; a VJP pulls an output weighting $u$ back to the inputs. We will make the full Jacobian only for a tiny reference problem, then use its algebra to check the products and a Hessian-vector product.
+A JVP asks how an input direction changes outputs. A VJP asks how an output sensitivity pulls back to inputs. Both use the same local derivative, but their vectors belong to different spaces.
+
+## Forward and reverse products answer complementary questions
+
+For a map from three inputs to two outputs, the Jacobian has shape $(2,3)$. A JVP consumes a three-component direction and returns two components. A VJP consumes a two-component cotangent and returns three.
+
+Check the adjoint relation $u^T(Jv)=(J^Tu)^Tv$ using independent dot products. It connects both directions without requiring the full Jacobian to be materialized.
+
+When reading product bars, name the vector's space before interpreting its coordinates. A square example can hide a transpose mistake because both vectors have the same length. Add an unequal-dimension case to expose that ambiguity.
+
+### JVP and VJP use different vector spaces
+
+**Predict:** Does a VJP simply return the same vector as a JVP?
+
+![JVP and VJP use different vector spaces](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.
+
+### Pause and reason
+
+Does a VJP simply return the same vector as a JVP?
+
+<details><summary>Compare your reasoning</summary>
+
+No. They apply the derivative in different directions and can have different result dimensions. Their relationship is the adjoint identity, not equality of vectors.
+
+</details>
 
 ## Separate the point from the direction
 
@@ -182,7 +210,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T01:26:01.713639+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T15:42:33.972571+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]

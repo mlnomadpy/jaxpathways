@@ -1,0 +1,891 @@
+{
+  "lessons": [
+    {
+      "id": "welcome-01",
+      "path": "phases/00-welcome/01-set-up-your-learning-workspace/lesson.json",
+      "previousSourceSha256": "5d333f3533d399e3f456d2a109d58431c889c4a2bb01df88c1c906c93e9ffc38",
+      "newSection": "Follow a file from saving to running",
+      "currentSourceSha256": "dd7809a3a628dec33d6e58c97ed6aef2226b638c34373dac66ff3128ea6fb6ee",
+      "mechanismDiagram": "Where the first result comes from",
+      "revisedTeachingWords": 230
+    },
+    {
+      "id": "welcome-02",
+      "path": "phases/00-welcome/02-meet-your-arrays-and-devices/lesson.json",
+      "previousSourceSha256": "6f4a3ef02404add0f31618d6bb6f92d90f075552baec84de467bd83de3073377",
+      "newSection": "Read one array two ways",
+      "currentSourceSha256": "d9f07005feeab1b0ab22020e2c16367b41fdd5ece9857af0fe2ecd7c113a0854",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 226
+    },
+    {
+      "id": "welcome-cpu",
+      "path": "phases/00-welcome/03-virtual-cpu-devices/lesson.json",
+      "previousSourceSha256": "157ef3456b3fb3031c9c6604ca718a5c97adc93b0fe895cbc0474ca1d2436f90",
+      "newSection": "Distinguish ownership from extra computing power",
+      "currentSourceSha256": "f941360fc4859ebf371ba6ea7f902456b43a29a923f5432510cdf630211f1c23",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 196
+    },
+    {
+      "id": "welcome-03",
+      "path": "phases/00-welcome/03-move-your-experiment-to-a-tpu/lesson.json",
+      "previousSourceSha256": "d87852b9626f3bd7b5848cfb0413ba649ad9e4dbdff73d01bb801566a6f188e9",
+      "newSection": "Check arithmetic and placement separately",
+      "currentSourceSha256": "a9be84e1f835891d97f87519000d50e8629f38581740df74cc424a608a589158",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 189
+    },
+    {
+      "id": "arrays-01",
+      "path": "phases/01-arrays/01-from-numpy-to-jax-numpy/lesson.json",
+      "previousSourceSha256": "cc53242ed788bf98208bfaf8721c8adb71cd07995b8ea95748a6c9382abf78e4",
+      "newSection": "Why held-out data should not center itself",
+      "currentSourceSha256": "ad9d4601b738f3cccff5c5715fc8f2e0d04f6435c97fa1cf91906d2dd6d41cec",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 216
+    },
+    {
+      "id": "arrays-02",
+      "path": "phases/01-arrays/02-shapes-broadcasting-and-dtypes/lesson.json",
+      "previousSourceSha256": "52981861810133c1e0c9f481fc1cc1fe2c708805e76e7df6f19b6d7ce0fd63c9",
+      "newSection": "Catch the scalar that hides a shape mistake",
+      "currentSourceSha256": "7b572735c094ff4959e574b81f24d6b9a02c34fc25ee524db00a3093991eb2c2",
+      "mechanismDiagram": "Align axes before reducing",
+      "revisedTeachingWords": 205
+    },
+    {
+      "id": "arrays-03",
+      "path": "phases/01-arrays/03-pure-functions-and-explicit-inputs/lesson.json",
+      "previousSourceSha256": "71f7cf2ef13a3e32781f4c8adbed07c402be1db00ee472754721c6c891d919aa",
+      "newSection": "Make a repeated call explainable",
+      "currentSourceSha256": "2638e4c2c7cc1fd7be332b3d0ee9996f433e153e4e244f73bddbcd53f2de5c50",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 217
+    },
+    {
+      "id": "arrays-04",
+      "path": "phases/01-arrays/04-immutable-updates-and-indexing/lesson.json",
+      "previousSourceSha256": "aff72d0c7a1906104c26c4752ed0185a5b778d1267b438a63f238e95ca173ce5",
+      "newSection": "Separate a new value from a new physical buffer",
+      "currentSourceSha256": "cd9dac25324a9acd627b4db6952cdd6c977c428c3f974f276cb01fdf6bcd3116",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 199
+    },
+    {
+      "id": "first-gradient",
+      "path": "phases/02-transforms/01-your-first-gradient/lesson.json",
+      "previousSourceSha256": "b4dbbe203acf80605318e12b9e7a0614c4f3f6226df05437db155438d65097a2",
+      "newSection": "Use a slope to predict a nearby change",
+      "currentSourceSha256": "15d6095e4aeaecde14f75628f80887a2c7f7f8c07246fe3cc6b4d6749946cdd7",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 193
+    },
+    {
+      "id": "transforms-02",
+      "path": "phases/02-transforms/02-losses-and-value-and-grad/lesson.json",
+      "previousSourceSha256": "5084afabe2a4645c546b001b121e921475c9b1925bd7e5c95dade78c4526ea97",
+      "newSection": "Read the value and derivative at the same point",
+      "currentSourceSha256": "17512dd1de98fb1768afb43388ef559a7a0d66826528032f967c82eddba4d991",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 206
+    },
+    {
+      "id": "transforms-03",
+      "path": "phases/02-transforms/03-batch-a-function-with-vmap/lesson.json",
+      "previousSourceSha256": "e6292fe5e9bb0e3585194b2cd34923fcae7ce58b2b8c6f19dbd8cfcbf4c2c0a9",
+      "newSection": "Map examples without changing the single-example rule",
+      "currentSourceSha256": "1ddf4ad5e4fc0b706ff06776cedc093b9271918cab7a022902624d16e889b198",
+      "mechanismDiagram": "Mapped rows and shared weights",
+      "revisedTeachingWords": 209
+    },
+    {
+      "id": "transforms-04",
+      "path": "phases/02-transforms/04-compile-a-function-with-jit/lesson.json",
+      "previousSourceSha256": "1ee29d1881b41f02f80643fa47d0e5aa8912edcdcad81f895555d0beaaf3bb20",
+      "newSection": "Separate changing data from preparing a program",
+      "currentSourceSha256": "3bd3c49618e7408f81db87630ea50dac81670010d7f958fd32e0032dc32c1dc5",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 197
+    },
+    {
+      "id": "transforms-05",
+      "path": "phases/02-transforms/05-tracing-static-arguments-and-recompilation/lesson.json",
+      "previousSourceSha256": "6abd7a3ae9af1069c3bb178b8ddd8a6b0c002aac17405147bffba64795959b6e",
+      "newSection": "Build a call ledger before diagnosing recompilation",
+      "currentSourceSha256": "4f5a90fdcbd338a97ae7ef5c6e6ab9416de6df7df185a5bb26dc4668ae3bafde",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 225
+    },
+    {
+      "id": "state-01",
+      "path": "phases/03-state/01-random-keys-without-surprises/lesson.json",
+      "previousSourceSha256": "30ae64d82689c58dfc5a19d88c1e6eb2cd95d4ef3edcd90bba8d6889ccd6a257",
+      "newSection": "A key is an input, not a moving cursor",
+      "currentSourceSha256": "ddfd0a0f3ae40b17c0c57df2f774c186eab4641b8a2d16ecb62678fa8ba06c8d",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 199
+    },
+    {
+      "id": "state-02",
+      "path": "phases/03-state/02-pytrees-and-structured-parameters/lesson.json",
+      "previousSourceSha256": "0f0f7c608c7263b2371cbc0ce7788987175a24f3ddbc54e0596862fdadf15c30",
+      "newSection": "Match leaves by meaning as well as shape",
+      "currentSourceSha256": "34e490ad2564c6506a5a752fb398e9d3a30315a3df80421ac08b43e8b6a4d01b",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 184
+    },
+    {
+      "id": "state-03",
+      "path": "phases/03-state/03-compiled-loops-with-lax-scan/lesson.json",
+      "previousSourceSha256": "4a1fff35ac723733d51e8a2198667c65d0a3f7ad4c2464351ba592e87ba82260",
+      "newSection": "Unroll three steps before compiling the loop",
+      "currentSourceSha256": "eac2c11d21f67b174436cb5f8226ae4410279d7a476342d0a65c8fc5e215f666",
+      "mechanismDiagram": "Carry moves through time; outputs are collected",
+      "revisedTeachingWords": 182
+    },
+    {
+      "id": "state-04",
+      "path": "phases/03-state/04-branches-with-lax-cond/lesson.json",
+      "previousSourceSha256": "55859cbdb5398a44de084afef559eae8ac2872f79f68e3f36c7db3c10d478ac4",
+      "newSection": "Trace both possibilities, execute the selected rule",
+      "currentSourceSha256": "ee03c1d779c5022d144f21572832f46abde575dae27eb11f30f5ff1eff218378",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 197
+    },
+    {
+      "id": "optimization-05",
+      "path": "phases/04-optimization/05-vectors-norms-and-projections/lesson.json",
+      "previousSourceSha256": "d9983cc5b674d2d406862f2c8af1dc206d8115fd66f6a5f4c278ef4f7cc6ed9e",
+      "newSection": "A projection explains what remains",
+      "currentSourceSha256": "1b3e63c160540a3df96007532e3b7b95eda8e98455f7d914caafbc8f5c842a0b",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 174
+    },
+    {
+      "id": "optimization-01",
+      "path": "phases/04-optimization/01-linear-algebra-and-loss-intuition/lesson.json",
+      "previousSourceSha256": "b0cd2c98d89ac5c2afd93e6302c966b3100bc6a9b2e7678ab50c0f4760be3759",
+      "newSection": "Calculate one complete loss by hand",
+      "currentSourceSha256": "ae06595ed60aa70a3fb7143a3976fcf4a5835ba0f0d694ba8e6b40225937efdc",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 254
+    },
+    {
+      "id": "optimization-06",
+      "path": "phases/04-optimization/06-least-squares-rank-and-conditioning/lesson.json",
+      "previousSourceSha256": "2272e48189a9846eb32e65d445827bd973ac50eb81e48f29821125ea7a5d97bd",
+      "newSection": "A good fit can hide uncertain parameters",
+      "currentSourceSha256": "513d0d7c954972dd97217623b1b3707a90c40fdab1e3be10e78269cb8dbd5afd",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 202
+    },
+    {
+      "id": "optimization-07",
+      "path": "phases/04-optimization/07-chain-rule-jacobians-and-directional-derivatives/lesson.json",
+      "previousSourceSha256": "7e7fd638b2842fb40901cf3af9e630d24ee1388d06f2205b148aa47801d33b99",
+      "newSection": "Follow one direction through a Jacobian",
+      "currentSourceSha256": "cb621007f629c0aebceaf007baeddf05b47468ced0d89bcba55066f9b5279915",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 171
+    },
+    {
+      "id": "optimization-02",
+      "path": "phases/04-optimization/02-gradient-checking-and-numerical-accuracy/lesson.json",
+      "previousSourceSha256": "e16e5e8c19020eace327805a36f615e20218fc80eabac374686efcbe7afcbc98",
+      "newSection": "Explain why a smaller perturbation can be worse",
+      "currentSourceSha256": "9a2530f81fd576e3a2efb028b60c40c4cf05d3abd8fb573eac8ac14f3d18f636",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 221
+    },
+    {
+      "id": "optimization-08",
+      "path": "phases/04-optimization/08-curvature-hessians-and-learning-rates/lesson.json",
+      "previousSourceSha256": "c59d0096512eb3a3a44deefbd8c3a93875bd002b05dbe8a7a81a8f718b8cc153",
+      "newSection": "Why one learning rate must respect the steep direction",
+      "currentSourceSha256": "e03688ebad13a26ecab0580f20954dfdb299f3bb81192615c429dfecbde6801a",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 197
+    },
+    {
+      "id": "optimization-03",
+      "path": "phases/04-optimization/03-write-gradient-descent-yourself/lesson.json",
+      "previousSourceSha256": "b2e234cbe9d4550dd3bcff02dc780cf2b87e99de6b17a8d69989e08e243a8427",
+      "newSection": "The sign tells you which way to step",
+      "currentSourceSha256": "27659cb7e5618d46fe793b0c3f1299c4803c577ae07f776553a038fff72a1e09",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 183
+    },
+    {
+      "id": "optimization-09",
+      "path": "phases/04-optimization/09-probability-likelihood-and-stable-losses/lesson.json",
+      "previousSourceSha256": "5eeed6f8247951dce7230fceee8252d99523315c8411173634c4bda846724608",
+      "newSection": "Connect a logit to the observed label",
+      "currentSourceSha256": "1f90b89ad96ef21fbb14490b3c7dc0272a6fa36da183fe93913f469184d50c3e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 181
+    },
+    {
+      "id": "optimization-10",
+      "path": "phases/04-optimization/10-regularization-and-validation/lesson.json",
+      "previousSourceSha256": "319c5afb1e8489b75f390a81f8438036018e6bbe3e8a2f6dab26974a70cf4e11",
+      "newSection": "Give each split one job",
+      "currentSourceSha256": "0f63093a5861d4beb112e083bdb21ce76d579f57cfffe15935c6d6273a5015c4",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 206
+    },
+    {
+      "id": "optimization-11",
+      "path": "phases/04-optimization/11-minibatches-expectation-and-gradient-noise/lesson.json",
+      "previousSourceSha256": "e3be56d23b45887a8a95a786994144ddaf3e3a246f56f4d68bd5f66ede5e3513",
+      "newSection": "Average examples rather than batch averages",
+      "currentSourceSha256": "40f9f2e9ebc3656455cff27ffe701e380f7be03f28760d45fedadc4c622871d7",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 185
+    },
+    {
+      "id": "optimization-04",
+      "path": "phases/04-optimization/04-optimize-with-optax/lesson.json",
+      "previousSourceSha256": "9eeb0b25d4131108d5a6f1d58e05d0df8418108a5e05dce9080349af14ea73f1",
+      "newSection": "The optimizer has memory of earlier gradients",
+      "currentSourceSha256": "57576880137307946422778e627332ec5cd8e2a72e9ecf37e01a470861475b87",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 198
+    },
+    {
+      "id": "optimization-12",
+      "path": "phases/04-optimization/12-adam-clipping-and-learning-rate-schedules/lesson.json",
+      "previousSourceSha256": "ac688fcbfc0067bc036bb6a62cb70b5b0dfe54ab6f456415dd56254b8ff70aa9",
+      "newSection": "Clipping changes a vector; a schedule changes a clocked scale",
+      "currentSourceSha256": "4978248dc46c1400322d63672beb9e1a0ef129fca7a7aa93105dec1614ad3d95",
+      "mechanismDiagram": "A norm ball and a coordinate box",
+      "revisedTeachingWords": 199
+    },
+    {
+      "id": "networks-01",
+      "path": "phases/05-networks/01-build-a-tiny-multilayer-perceptron/lesson.json",
+      "previousSourceSha256": "a2d07f2278bd96f5502050a37a87c23827fd8eabf9f1ce2e4820f4c9f04fe863",
+      "newSection": "Why hidden layers need nonlinear operations",
+      "currentSourceSha256": "1f68866be730007f21165af463884d7e9da5d1f7d60513d0e82e43b0fd0a4b56",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 174
+    },
+    {
+      "id": "networks-02",
+      "path": "phases/05-networks/02-model-and-state-with-flax-nnx/lesson.json",
+      "previousSourceSha256": "2fb443f4da0741665a1a9ab2abe69ee091a606df2a0d2604183a3356372fd6fd",
+      "newSection": "Distinguish shared structure from changing values",
+      "currentSourceSha256": "50de509e2ea5f24453d5b714ecccd8c3d92089a6130c190a32d01c705a3657c2",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 184
+    },
+    {
+      "id": "networks-03",
+      "path": "phases/05-networks/03-a-compiled-train-and-evaluation-step/lesson.json",
+      "previousSourceSha256": "3458746e8b267070dda1025e828f608e85e84d4528bf2759b7a6c720b8795632",
+      "newSection": "Evaluation observes a frozen model",
+      "currentSourceSha256": "f30cc1df78746e34d64b6a1196d03834d3b9e9f5dcdc8cda2b78c1793f3ff30c",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 174
+    },
+    {
+      "id": "networks-04",
+      "path": "phases/05-networks/04-train-a-cnn-on-a-small-dataset/lesson.json",
+      "previousSourceSha256": "acd2d936064b2e5f03aa4ca03f22ed3cafd74d6232badcc6ff11a0404435c310",
+      "newSection": "Trace one convolution output",
+      "currentSourceSha256": "0600a544d445fd9e856bf6cc3e3e00488c251197753658215ab8af21e39434cf",
+      "mechanismDiagram": "Pixels behind one convolution output",
+      "revisedTeachingWords": 175
+    },
+    {
+      "id": "networks-05",
+      "path": "phases/05-networks/05-debug-unstable-learning/lesson.json",
+      "previousSourceSha256": "cb7a81701e53e54b5274194b90bf1dc5aa8e2f4bbb2214dc6af89c6f2ede0502",
+      "newSection": "Locate the first broken boundary",
+      "currentSourceSha256": "2c6fb7907059415aa4ea03790901b6d1b12ec51bb7bb02e8ffc32496b47d91be",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 184
+    },
+    {
+      "id": "recovery-01",
+      "path": "phases/06-recovery/01-design-an-input-pipeline/lesson.json",
+      "previousSourceSha256": "c31047e46573c7eb878d63c9832d14914767f5f7223133674e7a184e22d9eeef",
+      "newSection": "Preserve identity through shuffling and batching",
+      "currentSourceSha256": "c39d242aac5e8d0b24ab1f7c9114006ee9652d34e3855ef766efa3a99388b16a",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 168
+    },
+    {
+      "id": "recovery-02",
+      "path": "phases/06-recovery/02-load-batch-and-prefetch-with-grain/lesson.json",
+      "previousSourceSha256": "013ef973eef6a66471d9954f247ab54536cb3166c585e8318335e1fb182d94de",
+      "newSection": "Restore the next batch by identity",
+      "currentSourceSha256": "9daea479d66dd4bdc011fb260200a78f276c4d91558b4edc1b00a5cb3dfada4d",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 173
+    },
+    {
+      "id": "recovery-03",
+      "path": "phases/06-recovery/03-save-model-optimizer-and-random-state/lesson.json",
+      "previousSourceSha256": "07b81ae2622d43df763eba2fcf9d7478979f5a25aad1740e922d6b7d8a518575",
+      "newSection": "Save the inputs to the next update",
+      "currentSourceSha256": "5b74192d3d18eca66e7f2213deb542c903e3068ae6499f3c022490e966c882f7",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 168
+    },
+    {
+      "id": "recovery-04",
+      "path": "phases/06-recovery/04-recover-data-position-and-resume/lesson.json",
+      "previousSourceSha256": "0dbe7f91adb7f28f38e76f23ce80937f5c92481a909f5ea88dbf294d9856720d",
+      "newSection": "Align model time with data time",
+      "currentSourceSha256": "553cb63f6bbe5a5dc12d580ab4604bbf17682081573a7cada90f3142539094f5",
+      "mechanismDiagram": "One checkpoint, one completed-step boundary",
+      "revisedTeachingWords": 164
+    },
+    {
+      "id": "recovery-05",
+      "path": "phases/06-recovery/05-asynchronous-checkpoints-and-failure-boundaries/lesson.json",
+      "previousSourceSha256": "e696f4d4f75a18e1318f61d89abd7f86df73a94ac26bb2ccf443a4b46d1d4ca6",
+      "newSection": "Distinguish a save request from a recovery point",
+      "currentSourceSha256": "02b740100a70280a10aa5cb17015e06dd1d1adc847e93ae62835b6e2d3a246d4",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 172
+    },
+    {
+      "id": "recovery-06",
+      "path": "phases/06-recovery/06-track-experiments-and-lineage-with-mlflow/lesson.json",
+      "previousSourceSha256": "5fec8531bfb8f529bbf94c97287e1837cea1563e24e7141f671f91cd8561470c",
+      "newSection": "Make every metric point traceable",
+      "currentSourceSha256": "271533a32fb57b5f70e73d89b6b69648d859b77ad885cbba61d3221479efbf55",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 179
+    },
+    {
+      "id": "transformers-01",
+      "path": "phases/07-transformers/01-attention-from-small-pieces/lesson.json",
+      "previousSourceSha256": "fea7652de7631ad5d972714b874680e27026927fa3d1092f229010ab9cef0caf",
+      "newSection": "Calculate one weighted value mixture",
+      "currentSourceSha256": "a24f61d697081a2960b8bd1c8b946485f9e8664e0e9367629181a63813e898cd",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 169
+    },
+    {
+      "id": "transformers-02",
+      "path": "phases/07-transformers/02-masking-tokenization-and-sequence-packing/lesson.json",
+      "previousSourceSha256": "016fcf1491d0a4b922fc880a02bca713d76bfec2a2eadefeee016eac4f8d88d8",
+      "newSection": "Keep context eligibility separate from scored targets",
+      "currentSourceSha256": "f88a23c40ca8f3de4a7e3f84353c333735e266d8dfba37eea435ff814df9bbd5",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 173
+    },
+    {
+      "id": "transformers-03",
+      "path": "phases/07-transformers/03-a-transformer-block-and-mixed-precision/lesson.json",
+      "previousSourceSha256": "f8e9d0b0547129356969a6a8cf43825677c51fe6f462aa67d6491ce63b6fa3e6",
+      "newSection": "Follow the residual stream through the actual block",
+      "currentSourceSha256": "83c9375610810c4e734cbff64ce56f428fab8f58a1517cd7a6a066c13ce6f32c",
+      "mechanismDiagram": "The actual single-head pre-LN block",
+      "revisedTeachingWords": 176
+    },
+    {
+      "id": "transformers-04",
+      "path": "phases/07-transformers/04-train-checkpoint-and-generate/lesson.json",
+      "previousSourceSha256": "27881507390c540891ce91762ee45146dafebf91a00540e9c1c8b644d0f8ff2f",
+      "newSection": "Separate teacher-forced targets from generated context",
+      "currentSourceSha256": "c2072ef6707ec6cd4468e75e56802aa24290705b2a74805134af0ac0504e570b",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 169
+    },
+    {
+      "id": "performance-01",
+      "path": "phases/08-performance/01-benchmark-asynchronous-work-correctly/lesson.json",
+      "previousSourceSha256": "b89032e3fde522f8894c888c910a805b308cdfca7d29b2ca82ae22b90552d716",
+      "newSection": "Time a completed result",
+      "currentSourceSha256": "a20a62b2a1e73d0c5c51e7acdd883937623ce17b69635f539461becb8d501d59",
+      "mechanismDiagram": "Time the completed result",
+      "revisedTeachingWords": 162
+    },
+    {
+      "id": "performance-02",
+      "path": "phases/08-performance/02-diagnose-recompilation-and-host-synchronization/lesson.json",
+      "previousSourceSha256": "3a49a39a17882bfa801f056aca3917c3bf78c412140829012fc0abbcd51a685c",
+      "newSection": "Distinguish new tracing from host waiting",
+      "currentSourceSha256": "c2ea1afc14d4f985d958b31ffa32afcf54c127bde77bae84c1b81f6f5176044e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 160
+    },
+    {
+      "id": "performance-03",
+      "path": "phases/08-performance/03-read-an-xprof-trace/lesson.json",
+      "previousSourceSha256": "8c43725484f7a132449bf2182932ff1c76554b3ba717d7c7987760c2848a9449",
+      "newSection": "Do not add nested durations twice",
+      "currentSourceSha256": "ff921d587400866c0e685d166e2ab5460e76085d353453732ca07ab1f1dea945",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 165
+    },
+    {
+      "id": "performance-04",
+      "path": "phases/08-performance/04-reason-with-hlo-and-the-roofline-model/lesson.json",
+      "previousSourceSha256": "b0e04d16aaabd41aab5c7bc5c5a5f25657ab1c75a130cedc5e5a074ef4bd5cb4",
+      "newSection": "Read a roofline as a conditional bound",
+      "currentSourceSha256": "02e94e52eb8a938e75ca1e5c3a096ac4c5a18dce664b2214a8a1190baeeebfe2",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 162
+    },
+    {
+      "id": "performance-05",
+      "path": "phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/lesson.json",
+      "previousSourceSha256": "aa9bec27f0e505ebd4f14aa7942f7aab91de9316732ed5daf39b680fd980241a",
+      "newSection": "Follow an intermediate from creation to last use",
+      "currentSourceSha256": "161e1e3ccdfa26b39de4def22eed35522921fbf03ff8713d58e598664ee4a5c3",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 171
+    },
+    {
+      "id": "distributed-01",
+      "path": "phases/09-distributed/01-arrays-meshes-and-sharding/lesson.json",
+      "previousSourceSha256": "5bb9771594a6e0c17ec86b7f65d8a4da9695e70f609cc97dd272d125b6d818a4",
+      "newSection": "Compare the global array with each local piece",
+      "currentSourceSha256": "71122d4a0d5bed211e3d735f8b57ea915de83d2b0b7ecc01f2f72fa218f5e543",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 150
+    },
+    {
+      "id": "distributed-02",
+      "path": "phases/09-distributed/02-a-sharded-training-step/lesson.json",
+      "previousSourceSha256": "d9928126b9c9b57b4829ee0f99dd799d8cf6bb3ed7999df89f5997c1f5981981",
+      "newSection": "Derive the global denominator",
+      "currentSourceSha256": "d1829be85b827e60ec8209a2147eb1b7e4d3839e55014e0fa13f234c74d419d5",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 148
+    },
+    {
+      "id": "distributed-03",
+      "path": "phases/09-distributed/03-communication-efficient-algorithms/lesson.json",
+      "previousSourceSha256": "f3ae545211ff0e27de22e7129b9c4673e8a1bf428622ffa469cabe75729dbe83",
+      "newSection": "Track reduced chunks through communication",
+      "currentSourceSha256": "a55e0670162ab410727263810d17a7f4226ce0a3718b04f83fbd4c2984371a53",
+      "mechanismDiagram": "Reduce-scatter followed by all-gather",
+      "revisedTeachingWords": 158
+    },
+    {
+      "id": "distributed-04",
+      "path": "phases/09-distributed/04-resilient-distributed-training/lesson.json",
+      "previousSourceSha256": "172332c619a2bfa502fa05d099492ad17aa7d3ab8fbef8fd50830d26c1e4a977",
+      "newSection": "Agree on one global recovery boundary",
+      "currentSourceSha256": "af7445a40dd10c7c982f241d688bf12207d66558b0b460bff0e4eda25ff3e374",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 147
+    },
+    {
+      "id": "science-01",
+      "path": "phases/10-science/01-a-functional-physical-simulation/lesson.json",
+      "previousSourceSha256": "1acca96787879d04fc63ba9cb89395070306d1bdfbd8543a58962cacdcf99068",
+      "newSection": "Separate a correct program from an accurate solver",
+      "currentSourceSha256": "747bcbc01fb3f04a269d45e17ff0015d0a65b86fe04415ef2afd85a73a08248f",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 168
+    },
+    {
+      "id": "science-02",
+      "path": "phases/10-science/02-vectorize-trajectories-and-scan-time/lesson.json",
+      "previousSourceSha256": "e0572e5e56b0e06be404309a53ea7d2838b7c43dc14d9d4cceaa457a1c214963",
+      "newSection": "There are two different axes of repetition",
+      "currentSourceSha256": "12cc01238035e554fb06677c96e76e7fc27de56705b5589cb7bc45584307a076",
+      "mechanismDiagram": "Vectorize across systems; scan through time",
+      "revisedTeachingWords": 161
+    },
+    {
+      "id": "science-03",
+      "path": "phases/10-science/03-differentiate-through-a-solver/lesson.json",
+      "previousSourceSha256": "9d49361402ccb8d4cfdcdf740353d9835b6a781f49eb554fe8bb360729803759",
+      "newSection": "Differentiate the computation you actually executed",
+      "currentSourceSha256": "cdd4f62f7bbb79f516bddd39d12ced26f7873f18260c881e1ef156ab0cd793f1",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 155
+    },
+    {
+      "id": "science-04",
+      "path": "phases/10-science/04-fit-parameters-and-scale-the-simulation/lesson.json",
+      "previousSourceSha256": "719ca4f2d0bc648deabd70b59ab78e91640eac4decf9bee5ab805b624a8eb9fb",
+      "newSection": "Ask whether observations identify the parameter",
+      "currentSourceSha256": "9e9f7a5249d2a6e1b2743d9f443b19aedf0803e11475602a3e6b72b74289e67e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 182
+    },
+    {
+      "id": "probability-01",
+      "path": "phases/11-probability/01-distributions-and-sampling/lesson.json",
+      "previousSourceSha256": "091c6fcebe896f3a5bdd92a1bddfebb004ccc962a8776d3d8be5defebf1f9fca",
+      "newSection": "A precise mean does not make individual outcomes predictable",
+      "currentSourceSha256": "bd8bf10785361a9a96e51af95c94e2a27490dca4292b8350d65e02fb16265707",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 159
+    },
+    {
+      "id": "probability-02",
+      "path": "phases/11-probability/02-build-a-bayesian-regression/lesson.json",
+      "previousSourceSha256": "982f878bca1c0b43d693796d1e8a20a40acfd166e9cfbf1e587abfb77bc6e5c4",
+      "newSection": "Separate uncertainty about the function from observation noise",
+      "currentSourceSha256": "e5e3f9107e9db7597b2996abe40eca065f56b75cb9fc8647d6d4fefa7a324bde",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 164
+    },
+    {
+      "id": "probability-03",
+      "path": "phases/11-probability/03-hamiltonian-monte-carlo-and-sampler-diagnostics/lesson.json",
+      "previousSourceSha256": "8230d0879df76ecee181db84dbc8b3119f6837fbf097b6ea422ca24d2f9969e1",
+      "newSection": "A moving chain is not automatically a well-mixed chain",
+      "currentSourceSha256": "5745545beb11bcabab4aa75fa0bcb732639374ba33183e6f5991fbbd9666a479",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 194
+    },
+    {
+      "id": "probability-04",
+      "path": "phases/11-probability/04-variational-inference-and-model-checking/lesson.json",
+      "previousSourceSha256": "141281fbdc1a8dd2ab1299172696fe331c22993831f3e3c783306c0d859a2b5f",
+      "newSection": "Missing covariance can hide uncertainty",
+      "currentSourceSha256": "a9e2f61274e5f31c6e41b5b8a696bc0aacd6148a1dd2bdcbb7498b063d9b2763",
+      "mechanismDiagram": "The covariance changes uncertainty in a sum",
+      "revisedTeachingWords": 163
+    },
+    {
+      "id": "rl-01",
+      "path": "phases/12-rl/01-write-a-functional-environment/lesson.json",
+      "previousSourceSha256": "c637ff2ef4726efebeaf46b18620369a719a10bde5c6a5a90190c750eafd2ee6",
+      "newSection": "Reward belongs to a transition",
+      "currentSourceSha256": "b6e3ffa4221f0da993333466366e41926e21e4ba8877ac3b6ba5f7df015016f9",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 181
+    },
+    {
+      "id": "rl-02",
+      "path": "phases/12-rl/02-batch-environments-and-scan-rollouts/lesson.json",
+      "previousSourceSha256": "90adffa29101ec0b53e48033bce2c3ae50e53b6d3b56465676c7b2dde7a19d28",
+      "newSection": "Keep the array shape fixed while activity changes",
+      "currentSourceSha256": "68f0efa37b2e47da1587117234ac95553b140fcb735cf1d8b0b4e81a6e4a859d",
+      "mechanismDiagram": "A terminal transition still counts",
+      "revisedTeachingWords": 166
+    },
+    {
+      "id": "rl-03",
+      "path": "phases/12-rl/03-policy-gradients-and-ppo/lesson.json",
+      "previousSourceSha256": "20c7ac9688b40891c101641f35c9f38e5867c8cf24c88d00018361ef76a165e1",
+      "newSection": "The clipped objective depends on the advantage sign",
+      "currentSourceSha256": "daf6f631921c4d84596e3468b7c110372f1a3cfce2362537579d22d6c231e14c",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 188
+    },
+    {
+      "id": "rl-04",
+      "path": "phases/12-rl/04-evaluate-agents-across-seeds/lesson.json",
+      "previousSourceSha256": "617d00e7715210c23c53a077e36db6349a7b43194b6b7c702a86dffb03c84002",
+      "newSection": "Separate training randomness from evaluation randomness",
+      "currentSourceSha256": "08b7a150c7d46d506d505eca531c1a86b8d1166bb84a69fb03e891b079f69e31",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 164
+    },
+    {
+      "id": "kernels-01",
+      "path": "phases/13-kernels/01-pallas-grids-and-blockspecs/lesson.json",
+      "previousSourceSha256": "2cfdc416c0e1d8675cef2d5a927bf9cc39ab3d8172dce8f98d137db6fcc80615",
+      "newSection": "Map every logical element to an owning program",
+      "currentSourceSha256": "97b3133ea2ef97c071f13fe2c37030079a7c10337a83906997e71a34cf0c930f",
+      "mechanismDiagram": "Program coordinates and partial boundary tiles",
+      "revisedTeachingWords": 178
+    },
+    {
+      "id": "kernels-02",
+      "path": "phases/13-kernels/02-a-first-tpu-kernel/lesson.json",
+      "previousSourceSha256": "c65fa625441891c4e508b6f67413e03b3777fa1131bb8435ab4297fcd559374a",
+      "newSection": "Separate tile ownership from the local arithmetic",
+      "currentSourceSha256": "5f80f0234aa6ffead00a92c27eab22e934cc87111f20b4afed0127cb1ab4e0ae",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 160
+    },
+    {
+      "id": "kernels-03",
+      "path": "phases/13-kernels/03-tiling-memory-and-pipelining/lesson.json",
+      "previousSourceSha256": "6163d7cee606a1b169e1a9629a33773a74ce62eed6c190df28c1b02ab69a5274",
+      "newSection": "A buffer cannot be reused while a consumer still needs it",
+      "currentSourceSha256": "e9bcdf6bc0addb2f0efc12cda55d0fc72a7be9c608593d752523a004dfe8e96c",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 176
+    },
+    {
+      "id": "kernels-04",
+      "path": "phases/13-kernels/04-iterate-with-correctness-and-performance-evidence/lesson.json",
+      "previousSourceSha256": "6c20d484e1afee1a3b9b049b84bf0262e3573fc7ff409d04b4f60f13d31622b1",
+      "newSection": "Use two references to locate a precision gap",
+      "currentSourceSha256": "6592476837324b89ba10ba0d220cb694e5fc5b8e070bb74b216c6595caf4e7ac",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 163
+    },
+    {
+      "id": "internals-01",
+      "path": "phases/14-internals/01-read-your-first-jaxpr/lesson.json",
+      "previousSourceSha256": "418a3d0ed6170f9d173379032e3d118f3a5a22e4dee74475b5e9b9bf2b1dfee8",
+      "newSection": "Read a jaxpr as a typed computation",
+      "currentSourceSha256": "e3afd5c383174736008a7ed4faaef12cab71a93df6b6e15efb2253538a5569c0",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 173
+    },
+    {
+      "id": "internals-02",
+      "path": "phases/14-internals/02-jvps-vjps-and-higher-order-derivatives/lesson.json",
+      "previousSourceSha256": "c2ba95a86bdc949a6e418c43634b67b4a447786fd713ba15e9ba148f9766d2bf",
+      "newSection": "Forward and reverse products answer complementary questions",
+      "currentSourceSha256": "2771a2bc077a83c52755578baa5606eee04322cc15cb5f3a85ce010b0bcf8917",
+      "mechanismDiagram": "JVP and VJP use different vector spaces",
+      "revisedTeachingWords": 157
+    },
+    {
+      "id": "internals-03",
+      "path": "phases/14-internals/03-custom-derivative-rules/lesson.json",
+      "previousSourceSha256": "7612ff33b92c5e73321ec8b1e0623a8e0beb0311bf5f1c05f5bfaefbad032343",
+      "newSection": "A custom rule is a mathematical contract",
+      "currentSourceSha256": "f6e03a0321e98c4eb99cd7541b2112811f7611060f8129fa9f9f33e7f12f3257",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 169
+    },
+    {
+      "id": "internals-04",
+      "path": "phases/14-internals/04-lowering-compilation-and-a-tiny-transformation/lesson.json",
+      "previousSourceSha256": "d09795f93775ca4992e2b3fc44a2f8ad54cbb8ab977a5539e8963d428ac63435",
+      "newSection": "Locate your transformation in the compilation pipeline",
+      "currentSourceSha256": "1e97247a7e39ca67e0a1437c309a638ff4c5d14a46ffb5f63536f6ae440215fe",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 157
+    },
+    {
+      "id": "deployment-02",
+      "path": "phases/15-deployment/02-adapt-a-pretrained-model-and-choose-a-post-training-objective/lesson.json",
+      "previousSourceSha256": "3f3bb2f0c207b6727b224646015113e5b5be384cfac18e5bed6194f73c5b7c7d",
+      "newSection": "Choose the target before choosing the adaptation method",
+      "currentSourceSha256": "f0b9e7074d11c609a455a410575dd07387d99b804c6fb7076caa52e1aa1a366e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 178
+    },
+    {
+      "id": "deployment-01",
+      "path": "phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/lesson.json",
+      "previousSourceSha256": "a9f7847825cc0c0d727baa82b1f2afaa797308b29de80baccf9c38f467c6b9be",
+      "newSection": "Map the function, not just the weight file",
+      "currentSourceSha256": "c4a7d63c574a7cfa7bce5405687f3c6ea2000737be6ad17870bfa4c6c63d7c1e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 167
+    },
+    {
+      "id": "deployment-08",
+      "path": "phases/15-deployment/08-pytorch-to-flax-numerical-parity/lesson.json",
+      "previousSourceSha256": "67c0015866b7436a6f7f654eb5000d7c20803189acd64743e3a85fa2f439b8da",
+      "newSection": "Find the earliest disagreement",
+      "currentSourceSha256": "251c830052e4efa3718b79a738bf6d9598fb139db0e1fe373e3ceb1d0f9d6fa3",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 161
+    },
+    {
+      "id": "deployment-03",
+      "path": "phases/15-deployment/03-export-and-serve-a-trained-computation/lesson.json",
+      "previousSourceSha256": "1a8143eb301db5b22d7a190cdd9b41684c65b3fbc73ea4871eac71382d2c5f80",
+      "newSection": "A serialized computation still needs an interface",
+      "currentSourceSha256": "012bd41d66f2578ad4239e0ee85fa3a94ccfe267764a7c43b4e1d1bb917f79e4",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 180
+    },
+    {
+      "id": "deployment-05",
+      "path": "phases/15-deployment/05-weight-activation-and-accumulation-precision/lesson.json",
+      "previousSourceSha256": "1e96f71c23eb94938e43c122a71f51cad69d620cc34730e16c6764958b90a0aa",
+      "newSection": "Follow the units through integer arithmetic",
+      "currentSourceSha256": "6fba2cf58c29ea8ed45fd7db64e8de56119965a006ffb8594e979c6e920a2b84",
+      "mechanismDiagram": "Integer values need scales and zero-points",
+      "revisedTeachingWords": 165
+    },
+    {
+      "id": "deployment-07",
+      "path": "phases/15-deployment/07-containerize-a-model-service/lesson.json",
+      "previousSourceSha256": "35c0f7a26d657d95875ee2ddac7186617137ef37fb1e11df347a6eedc85d174f",
+      "newSection": "An image, a process and an artifact have different identities",
+      "currentSourceSha256": "36765e60b8a719a1a107e7b65b4a46e946ed4fd78f5e36cdad041ff12c3f9231",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 173
+    },
+    {
+      "id": "deployment-04",
+      "path": "phases/15-deployment/04-inference-capacity-batching-and-autoscaling/lesson.json",
+      "previousSourceSha256": "0e8302bd75dabdd46ed5b3b7dad066ac5a96d7611f67ea5d4383d65a95473a38",
+      "newSection": "A request spends time before and after computation",
+      "currentSourceSha256": "2fe117ca9561be1d728824a7d7f2c32dbc64038c276f4697d01235eee4697f2d",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 168
+    },
+    {
+      "id": "deployment-06",
+      "path": "phases/15-deployment/06-edge-ai-conversion-and-device-validation/lesson.json",
+      "previousSourceSha256": "a3c123a18e06c924bc44eaaf17a37f816fe800b4b118c088f7620fdd4c15342f",
+      "newSection": "Measure the device path the user actually experiences",
+      "currentSourceSha256": "a8069b7b36f1f5c920e8697594a9cd62be1299c36b0d883e207def8e56846aa4",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 179
+    },
+    {
+      "id": "operations-01",
+      "path": "phases/16-operations/01-accelerator-jobs-and-runtime-lifecycle/lesson.json",
+      "previousSourceSha256": "32f11428acd695f1e2ae345c255758cbaa6f3e6bd1d8a52a02789258258a9de5",
+      "newSection": "A running process is not necessarily a ready service",
+      "currentSourceSha256": "a81912ec799eef00ca5f781485d59bc80ce2bf19a32d12d2ce89aaf76dec664a",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 166
+    },
+    {
+      "id": "operations-02",
+      "path": "phases/16-operations/02-health-logs-and-workload-observability/lesson.json",
+      "previousSourceSha256": "6e48743eacdf3ec2b23d1081984f26e8492bffdd2f5dbdf1dbb34dab425a04c3",
+      "newSection": "Keep observed progress separate from recoverable progress",
+      "currentSourceSha256": "4ee63d95a798cb714f853259342a8f46a5ea31af4c858fdbadaa57f4a885a96b",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 178
+    },
+    {
+      "id": "operations-03",
+      "path": "phases/16-operations/03-failure-recovery-and-operational-runbooks/lesson.json",
+      "previousSourceSha256": "2c91b4399a889a8c36f3f8cd8ba887b8c0142b47878eff176375e9ab515013f3",
+      "newSection": "A runbook should choose the next diagnostic action",
+      "currentSourceSha256": "74f82c209e510c749f6f4c2b1fbc6d89bed58843bbb970275391040d3e124f50",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 169
+    },
+    {
+      "id": "operations-04",
+      "path": "phases/16-operations/04-changes-rollback-and-artifact-provenance/lesson.json",
+      "previousSourceSha256": "ca1475e2b661dd9029c424cc110bdb8ff203ad555e45b73ae4b8383568a7eb1c",
+      "newSection": "Publishing is different from activating",
+      "currentSourceSha256": "2a3a8fab0c1f3c6ebbebfa56e4538d734cb02d3fa4937c7eb45bbae1735e0def",
+      "mechanismDiagram": "Rejected candidates do not become active",
+      "revisedTeachingWords": 158
+    },
+    {
+      "id": "operations-05",
+      "path": "phases/16-operations/05-capacity-utilization-and-operating-cost/lesson.json",
+      "previousSourceSha256": "cbad0f24baa6923f597e54a4d645316e9cb9ebffd2d4166257f3c66e2f928ff7",
+      "newSection": "Account for billed time as well as useful work",
+      "currentSourceSha256": "2d50c18d039c168d0abee7bb8a039dc6fa5996f76ed6f0954ca4307f2ac31ae1",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 177
+    },
+    {
+      "id": "operations-06",
+      "path": "phases/16-operations/06-mlops-data-contracts-and-release-pipelines/lesson.json",
+      "previousSourceSha256": "dfbbea42a3adb9088b7396073f07bc0b3347e1b662093381a1e272dbd145f2ac",
+      "newSection": "A passing average can hide a failing slice",
+      "currentSourceSha256": "5eb1c1ea1664c4c8afec52f73ac19e96d11fdf0fa73f101c5a796c1f33572041",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 172
+    },
+    {
+      "id": "operations-07",
+      "path": "phases/16-operations/07-llmops-prompts-evaluation-and-traces/lesson.json",
+      "previousSourceSha256": "a041fc19d3f10f44adb1e6952e3c122cdba7b93f598f1cb0128a153e892d0650",
+      "newSection": "Trace a response through the system that produced it",
+      "currentSourceSha256": "c226b01c3cd9b45d4c9155222987dcbf8d9d7569ccd5591f9dc1b7779ea5127b",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 177
+    },
+    {
+      "id": "operations-08",
+      "path": "phases/16-operations/08-modelops-ownership-approval-and-retirement/lesson.json",
+      "previousSourceSha256": "14285c1ba094a469002cfeed0f9af4f3b752cd5ed39bdb1a22ba9ed78d3bdc0a",
+      "newSection": "Approval applies to a specific release",
+      "currentSourceSha256": "ab161aabfcd947fac4e640233797b990d9a922a05a845c0b97ea33b4efa9a403",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 183
+    },
+    {
+      "id": "pretraining-01",
+      "path": "phases/17-pretraining/01-mlm/lesson.json",
+      "previousSourceSha256": "8721452afee5cf7a89dd085eaf3c97457c93c4e695509a46e1ef969d356277ed",
+      "newSection": "Hide the input without hiding the teaching target",
+      "currentSourceSha256": "a82d2559a8596eb59ff4ae9214be405568a07445578032996d04cb77eed02fda",
+      "mechanismDiagram": "Keep clean targets out of encoder inputs",
+      "revisedTeachingWords": 204
+    },
+    {
+      "id": "pretraining-02",
+      "path": "phases/17-pretraining/02-mim/lesson.json",
+      "previousSourceSha256": "19ab7448abc67abd55d181e6100c42ce6ffef7c8177a76309c6f7c59109d8550",
+      "newSection": "Keep hidden patches in their spatial positions",
+      "currentSourceSha256": "e3944e006aa3dcef51fe282228d26226a4f0dd043e4d844d7787060c4a779bc1",
+      "mechanismDiagram": "Visible patches and hidden targets",
+      "revisedTeachingWords": 178
+    },
+    {
+      "id": "pretraining-03",
+      "path": "phases/17-pretraining/03-contrastive/lesson.json",
+      "previousSourceSha256": "bf55b681f7ee8380555a9f10cbb1c71aa3c99fbd22589abc498d6e1295e7d635",
+      "newSection": "Define positive pairs before building the score matrix",
+      "currentSourceSha256": "081cfc78e6684c180de7c1ae0d3701f6ded319eedaabc61184e10617e088148e",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 167
+    },
+    {
+      "id": "posttraining-01",
+      "path": "phases/18-posttraining/01-sft/lesson.json",
+      "previousSourceSha256": "4fc30af62a38c3c53a2be082249cab32350fc8d13b6b84fc14ddffc60bd397b1",
+      "newSection": "Shift the supervision with the target",
+      "currentSourceSha256": "1f1e0bfadc7679c13796303a3c7dd29ad3670af097647256ec73326d3ee14e0c",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 161
+    },
+    {
+      "id": "posttraining-02",
+      "path": "phases/18-posttraining/02-lora/lesson.json",
+      "previousSourceSha256": "b17be61c9a54e8809d057031bd29bf0ca2540438381653c383493033eefb0714",
+      "newSection": "Separate the frozen path from the low-rank correction",
+      "currentSourceSha256": "b3c14a0983db1420f446f416bdc89787c69e00abea83d65887bc0526310b5407",
+      "mechanismDiagram": "Frozen base plus a low-rank correction",
+      "revisedTeachingWords": 186
+    },
+    {
+      "id": "posttraining-03",
+      "path": "phases/18-posttraining/03-reward/lesson.json",
+      "previousSourceSha256": "1071f7098237e5fb8824d5158885917d4d895b108ceda84085116c8ac6b3752b",
+      "newSection": "A preference compares scores rather than calibrating utility",
+      "currentSourceSha256": "88513c562f4dbe2c7f650427044c2cece4145823176d75f6265acb210d54ec9c",
+      "mechanismDiagram": null,
+      "revisedTeachingWords": 181
+    },
+    {
+      "id": "posttraining-04",
+      "path": "phases/18-posttraining/04-rlhf/lesson.json",
+      "previousSourceSha256": "3879d46bebf6d2fdf9949dc1fa83eaaf96455396c5bd3f783a04b1e1369cfb22",
+      "newSection": "Keep the four policy-and-reward roles distinct",
+      "currentSourceSha256": "7ff776de90e5df1e2c8f9ff0ee3f493a9bde401a7cace24b9ae5eb9c8865a8ac",
+      "mechanismDiagram": "Different objects have different update lifetimes",
+      "revisedTeachingWords": 184
+    },
+    {
+      "id": "posttraining-05",
+      "path": "phases/18-posttraining/05-dpo/lesson.json",
+      "previousSourceSha256": "79d0ccdce2d241d34d138c2117d9abb4cbce1d323eced69378017946dd956a15",
+      "newSection": "A better relative margin need not raise chosen probability",
+      "currentSourceSha256": "b0b84f06d16ebbf203d8c2534933dcd096f6e9f56cdf69e247728b69d14c0817",
+      "mechanismDiagram": "DPO corrects a policy margin with a reference",
+      "revisedTeachingWords": 180
+    }
+  ],
+  "scope": "Introductions, worked reasoning and formative explanations across 97 lessons; 22 additional conceptual/analytic diagrams across 19 phases.",
+  "validation": {
+    "cpuLessons": 97,
+    "cpuExecutions": 194,
+    "mechanismDiagrams": 22,
+    "phasesWithDiagrams": 19,
+    "independentArithmeticChecks": 26,
+    "testsPassed": 62,
+    "staticPages": 68,
+    "localReferences": 2998,
+    "sourceHashesCurrent": true,
+    "liveBrowserInteractionVerified": false,
+    "localPreviewHttpStatus": 200
+  }
+}

@@ -4,7 +4,7 @@
   "minutes": 125,
   "content": {
     "problem": "A variational optimizer finishes with a stable objective, and its posterior mean agrees with a reference. Can its uncertainty still be wrong? We will optimize a diagonal Gaussian against a correlated exact target, then check a prediction under a deliberately misspecified observation model. These are two different failure sources: an inference approximation and a model assumption.",
-    "idea": "Variational inference chooses a tractable family \\(q\\) and adjusts it to approximate a posterior \\(p\\). Our objective is \\(\\operatorname{KL}(q\\Vert p)\\), available exactly for this Gaussian fixture. In a general model the evidence lower bound, or ELBO, replaces the unknown posterior normalization. A successful optimizer can only find distributions inside its chosen family.",
+    "idea": "Variational inference fits a tractable approximation to a posterior. The approximation family limits what dependencies it can represent. A good mean estimate can coexist with a poor uncertainty estimate.",
     "objectives": [
       "Derive the diagonal Gaussian variational optimum for a correlated target",
       "Separate optimization error from variational-family error",
@@ -12,6 +12,15 @@
       "Diagnose mean-function mismatch using predictive residuals"
     ],
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Missing covariance can hide uncertainty",
+        "body": "Consider two variables, each with variance \\(1\\), and covariance \\(0.8\\). Their sum has variance \\(1+1+2(0.8)=3.6\\). A diagonal approximation with the same marginal variances but zero covariance would give variance \\(2\\) for the sum.\n\nThis isolates the effect of ignoring covariance; an actual fitted approximation can also change the marginal variances. Draw covariance ellipses from the real matrices rather than sketching arbitrary shapes.\n\nThe lesson's variance comparison asks which downstream quantities are sensitive to the approximation. Check projections such as sums and differences, not only coordinate means. A different approximation family or objective can behave differently, so avoid treating one fixture as a universal direction of error.",
+        "check": {
+          "prompt": "Can matching each coordinate's mean prove a correct distribution for their sum?",
+          "answer": "No. The sum depends on variances and covariances too. Compare the relevant projected distribution or moments."
+        }
+      },
       {
         "title": "Name the approximation and the KL direction",
         "body": "The target covariance has unit marginal variances and correlation \\(0.8\\). Our variational family has a location \\(a\\) and diagonal covariance \\(D\\). It cannot tilt its uncertainty ellipse. The KL direction matters: minimizing \\(\\operatorname{KL}(q\\Vert p)\\) penalizes placing probability where the target density is low. For this Gaussian target, optimizing over diagonal \\(D\\) gives \\(a=m\\) and \\(D_{ii}=1/P_{ii}\\), where \\(P=\\Sigma^{-1}\\). Those are conditional-variance quantities, not the target marginal variances.",
@@ -129,6 +138,17 @@
         "code": "x=jnp.linspace(-2,2,9)\nlinear_mean=jnp.zeros_like(x)\nnoise_scale=.25\ncurved_targets=x**2-1.\nstandardized_residual=(curved_targets-linear_mean)/noise_scale\ncoverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)\nassert coverage<.4\nassert standardized_residual[0]>10\nprint('synthetic nominal-95% interval coverage:',float(coverage))\nprint('standardized residuals:',standardized_residual)",
         "explanation": "This is a deterministic stress fixture with nine targets, not an estimate of population coverage. It isolates a mean-function mismatch that more posterior draws cannot repair."
       }
-    ]
+    ],
+    "diagram": {
+      "title": "The covariance changes uncertainty in a sum",
+      "prediction": "Can matching each coordinate's mean prove a correct distribution for their sum?",
+      "reading": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
+      "alt": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
+      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "height": 5.8,
+      "panel": {
+        "kind": "covariance"
+      }
+    }
   }
 }

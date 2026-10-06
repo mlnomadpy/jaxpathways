@@ -3,7 +3,7 @@
   "id": "state-04",
   "minutes": 60,
   "content": {
-    "idea": "lax.cond selects between two branches using a runtime predicate. Both branches must return compatible structures, shapes, and dtypes, because the compiled program needs a consistent result type. Both branch functions are traced; for an ordinary scalar predicate, cond chooses one branch at runtime.\n\nFor elementwise selection, `jnp.where` is often clearer. Under transformations such as vmap, cond can be converted into selection, so do not rely on branch choice to suppress side effects. Keep the branches pure and numerically well-defined.",
+    "idea": "A data-dependent branch needs a control-flow operation that can represent both alternatives in a transformed program. With a scalar predicate, `lax.cond` selects the result of one branch while requiring compatible result structures from both.",
     "code": "import jax\nimport jax.numpy as jnp\n@jax.jit\ndef magnitude(x):\n    return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)\nprint(float(magnitude(-3.)))\nassert jnp.allclose(magnitude(-3.), 3.)\nassert jnp.allclose(magnitude(2.), 2.)",
     "output": "\\(3.0\\)",
     "exercise": "Write a compiled function that applies \\(2x\\) when \\(x\\) is positive and \\(x-2\\) otherwise. Check positive, negative, and zero inputs.",
@@ -18,6 +18,15 @@
     "explanation": "Compiled control flow requires compatible output structures and array types across branches.",
     "problem": "A Python branch can choose a path when it knows a value. Inside jit, that value may not be available yet. We’ll use lax.cond to make the choice at runtime, check what both branches must return, and compare a single decision with elementwise selection.",
     "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Trace both possibilities, execute the selected rule",
+        "body": "Consider an absolute-value rule: return the input when it is nonnegative and its negation otherwise. Both branches return the same shape and dtype, even though only one scalar case determines a particular result. The function is continuous at zero, but its mathematical derivative is not uniquely defined there.\n\nThe plot of magnitudes shows what the branch computes, not the tracing process. During tracing, Python code in both branch functions can be visited. Avoid using Python side effects as evidence that one numerical branch executed on the device.\n\nAfter batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.",
+        "check": {
+          "prompt": "Can one branch return a vector and the other a scalar if your current input only selects the vector?",
+          "answer": "Not under the same conditional result contract. Both branches must produce compatible structures, shapes and dtypes so the transformed program has a well-defined result."
+        }
+      },
       {
         "title": "Locate the decision boundary",
         "body": "The predicate \\(x\\ge0\\) is numerical data when \\(x\\) is a traced argument. A Python if must choose a branch while tracing, before that runtime value is available. lax.cond represents the choice inside the staged computation instead.\n\nIts arguments are a scalar Boolean predicate, two pure branch functions and an operand. Each branch receives that operand; each must return the same kind of result. Read the contract as an ordinary state transition with two possible implementations, not as a magic exception to tracing.",
