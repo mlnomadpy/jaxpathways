@@ -29,7 +29,7 @@ async function page(name, query = '', records = {}) {
   };
   for(const [key,value] of Object.entries(records))window.localStorage.setItem(key,JSON.stringify(value));
   Object.assign(courseState,{standalone:false,course:null,curriculum:[],activePath:'all',courseQuery:'',courseHardware:'all',completed:false,readingState:{version:1,lessons:{}},readingFrame:0,lessonProgress:{version:1,lessons:{}}});
-  return {window,requests,$:selector=>window.document.querySelector(selector),all:selector=>[...window.document.querySelectorAll(selector)],close:()=>window.happyDOM.abort()};
+  return {window,requests,$:selector=>window.document.querySelector(selector),all:selector=>[...window.document.querySelectorAll(selector)],close:()=>window.happyDOM.close()};
 }
 
 test('home retains saved reading position, copies exact tutor text and controls keyboard navigation',async()=>{
@@ -72,6 +72,8 @@ test('every authored lesson renders, and checkpoint progress stays separate from
       assert(p.$('#lesson-checkpoint'));assert(p.$('.copy-snippet'));assert(p.$('#reader-toc').children.length>0);
       const equations=p.all('#lesson-body annotation[encoding="application/x-tex"]').map(node=>node.textContent);
       for(const section of lesson.content.sections||[])if(section.math)assert(equations.includes(section.math),`reader omitted equation in ${lesson.id}`);
+      // Let pending reader tasks settle before replacing the next full chapter.
+      await new Promise(setImmediate);
     }
     const phase=courseState.course.phases[0],lesson=phase.lessons[0];showLesson(phase,lesson);
     p.$(`input[name="answer"][value="${lesson.content.answer}"]`).checked=true;

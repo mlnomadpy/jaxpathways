@@ -12,7 +12,7 @@ for(const location of locations){
  const url=new URL(location);assert.equal(url.origin,site);assert(url.pathname.startsWith(base));
  const file=url.pathname.slice(base.length)||'index.html';assert(fs.existsSync('dist/'+file),`sitemap target missing: ${file}`);
  const w=read(file);assert.equal(w.document.querySelector('link[rel="canonical"]')?.href,location,`canonical mismatch: ${file}`);
- assert(!w.document.querySelector('meta[name="robots"]')?.content.includes('noindex'),`noindex page in sitemap: ${file}`);await w.happyDOM.abort();
+ assert(!w.document.querySelector('meta[name="robots"]')?.content.includes('noindex'),`noindex page in sitemap: ${file}`);await w.happyDOM.close();
 }
 let checked=0;
 for(const phase of course.phases)for(const lesson of phase.lessons.filter(l=>l.status==='authored')){
@@ -27,7 +27,7 @@ for(const phase of course.phases)for(const lesson of phase.lessons.filter(l=>l.s
  const schema=JSON.parse(doc.querySelector('script[type="application/ld+json"]').textContent);
  assert.equal(schema['@type'],'LearningResource');assert.equal(schema.name,lesson.title);
  const canonical=site+base+file;assert(locations.includes(canonical));assert.equal(doc.querySelector('meta[property="og:url"]').content,canonical);
- await w.happyDOM.abort();checked++;
+ await w.happyDOM.close();checked++;
 }
 assert(fs.readFileSync('dist/robots.txt','utf8').includes(site+base+'sitemap.xml'));
 assert(!locations.some(url=>/\/(lesson|notebook|project|organizer)\.html/.test(url)));

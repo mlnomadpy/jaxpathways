@@ -16,6 +16,11 @@ function documentFor(file){
  const window=new Window({settings:{disableJavaScriptEvaluation:true,disableCSSFileLoading:true,disableJavaScriptFileLoading:true}});
  window.document.write(fs.readFileSync('dist/'+file,'utf8'));documentCache.set(file,window);return window.document;
 }
+// Release parsed page trees as we go; caching every chapter exceeds small CI heaps.
+async function releaseDocuments(){
+ await Promise.all([...documentCache.values()].map(window=>window.happyDOM.close()));
+ documentCache.clear();
+}
 let checked=0;
 function checkLink(raw,from){
  if(!raw||/^(?:https?:|mailto:|data:|tel:)/.test(raw))return;
@@ -35,8 +40,10 @@ for(const file of files){
  const document=documentFor(file),ids=new Set();
  for(const node of document.querySelectorAll('[id]')){assert(!ids.has(node.id),`duplicate id ${node.id} in ${file}`);ids.add(node.id);}
  assert(document.title.trim(),`missing title: ${file}`);
+ if(!file.startsWith('downloads/'))assert(document.querySelector('header nav a[href$="projects.html"]'),'Projects navigation missing: '+file);
  for(const node of document.querySelectorAll('[href],[src],[srcset]'))for(const attr of ['href','src','srcset']){const raw=node.getAttribute(attr);if(raw)checkLink(raw,file);}
  for(const node of document.querySelectorAll('[aria-labelledby],[aria-describedby],[aria-controls]'))for(const attr of ['aria-labelledby','aria-describedby','aria-controls'])for(const id of (node.getAttribute(attr)||'').split(/\s+/).filter(Boolean))assert(ids.has(id),`missing accessibility target ${id} in ${file}`);
+ await releaseDocuments();
 }
 for(const file of fs.readdirSync('dist/_astro').filter(file=>file.endsWith('.css'))){
  const css=fs.readFileSync('dist/_astro/'+file,'utf8');
@@ -44,15 +51,15 @@ for(const file of fs.readdirSync('dist/_astro').filter(file=>file.endsWith('.css
 }
 assert.equal(documentFor('course.html').querySelectorAll('.lesson-link').length,course.phases.flatMap(p=>p.lessons).length);
 assert.deepEqual([...documentFor('projects.html').querySelectorAll('[data-project-id]')].map(node=>node.dataset.projectId).sort(),projectRegistry.map(project=>project.id).sort(),'Projects must include every canonical project exactly once');
-for(const file of files.filter(file=>!file.startsWith('downloads/')))assert(documentFor(file).querySelector('header nav a[href$="projects.html"]'),'Projects navigation missing: '+file);
 assert.equal(documentFor('careers.html').querySelectorAll('.role-card').length,course.roles.length);
 assert.equal(documentFor('index.html').querySelectorAll('.lesson-preview li').length,6);
+await releaseDocuments();
 assert.equal(documentFor('downloads/jax-foundations.html').querySelectorAll('article').length,course.phases.flatMap(phase=>phase.lessons).filter(lesson=>lesson.status==='authored').length);
 const printedMath=[...documentFor('downloads/jax-foundations.html').querySelectorAll('annotation[encoding="application/x-tex"]')].map(node=>node.textContent);
 for(const phase of course.phases)for(const lesson of phase.lessons)for(const section of lesson.content?.sections||[])if(section.math)assert(printedMath.includes(section.math),`printable book omitted equation in ${lesson.id}`);
 for(const file of fs.readdirSync('public',{recursive:true}))assert(!/\.(html|js|css)$/.test(file),`authored code/HTML escaped Astro build in public: ${file}`);
 for(const name of ['style.css','design.css','identity.css','refinements.css','experience.css','app.js'])assert(!fs.existsSync(path.join('dist',name)),`legacy source shipped: ${name}`);
-await Promise.all([...documentCache.values()].map(window=>window.happyDOM.abort()));
+await releaseDocuments();
 console.log(`PASS: ${files.length} Astro pages, ${checked} local references, accessibility IDs, static catalogs and clean public boundary at ${base}`);
 
 for(const phase of course.phases){
@@ -62,5 +69,6 @@ for(const phase of course.phases){
  for(const lesson of phase.lessons)assert([...doc.querySelectorAll('a')].some(a=>a.getAttribute('href')===base+'lesson.html?lesson='+lesson.id),phase.id+': lesson omitted from guide');
  for(const value of [g.completion,g.furtherWork,g.transfer.approach])assert(doc.body.textContent.includes(value),phase.id+': missing phase evidence or limits');
  assert.equal(doc.querySelectorAll('input,select,textarea').length,0,phase.id+': study guide should not require form entry');
+ await releaseDocuments();
 }
 console.log(`PASS: ${course.phases.length} phase guides preserve lesson coverage, evidence and further-work boundaries.`);
