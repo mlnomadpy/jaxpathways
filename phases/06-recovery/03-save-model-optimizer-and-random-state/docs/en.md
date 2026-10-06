@@ -290,7 +290,7 @@ Read the diagram as a checklist of coupled state. A file existing on disk only d
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:26.587451+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:58:22.672507+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3

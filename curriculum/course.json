@@ -3214,7 +3214,7 @@
               "deployment-01",
               "deployment-08"
             ],
-            "task": "Adapt the model under a fixed held-out protocol before freezing its release. Compare framework layouts, preprocessing and state with independent predictions. Convert the actual PyTorch model to Flax and locate an injected operation mismatch numerically."
+            "task": "Adapt the model under a fixed held-out protocol before freezing its release. Compare framework layouts, preprocessing and state with independent predictions. Convert the actual PyTorch model to Flax and locate an injected operation mismatch numerically. Keep a candidate decision table, feature/parameter mapping table, and the first divergent operation from a deliberately broken conversion."
           },
           {
             "title": "Freeze the artifact and numeric policy",
@@ -3222,7 +3222,7 @@
               "deployment-03",
               "deployment-05"
             ],
-            "task": "Export and load in a fresh process, reject malformed inputs, then track weight, activation, accumulator, bias and output formats. Separate clipping from rounding and retain held-out conversion checks."
+            "task": "Export and load in a fresh process, reject malformed inputs, then track weight, activation, accumulator, bias and output formats. Separate clipping from rounding and retain held-out conversion checks. Include a fresh-interpreter export receipt, raw-request rejection cases, clipping counts and actual versus ideal packed byte counts."
           },
           {
             "title": "Deliver to a stated runtime",
@@ -3231,7 +3231,7 @@
               "deployment-04",
               "deployment-06"
             ],
-            "task": "Package and qualify the selected service, relate queue assumptions to measured service work, then examine the additional conversion and device budgets for an edge target. Leave actual device fields unmeasured until tested."
+            "task": "Package and qualify the selected service, relate queue assumptions to measured service work, then examine the additional conversion and device budgets for an edge target. Leave actual device fields unmeasured until tested. Keep separate artifact, process, image and device receipts. Explain an interpolated percentile and a burst deadline failure before choosing a capacity intervention."
           }
         ],
         "transfer": {
@@ -3242,7 +3242,7 @@
           "symptom": "A smaller model file produces no lower request latency.",
           "check": "Inspect load-time expansion, fallback operators, transfers and preprocessing on the named runtime. File size is not a kernel or latency measurement."
         },
-        "completion": "Use deployment-audit and engineering-release. Keep source/export parity, a complete precision policy, fresh-process/container checks and separate local versus device receipts.",
+        "completion": "Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.",
         "furtherWork": "Actual edge-device delegates, thermal/energy budgets, packed low-bit kernels and production serving loads remain unqualified. The revised sequence moves adaptation before export and containerization before service capacity planning."
       }
     },

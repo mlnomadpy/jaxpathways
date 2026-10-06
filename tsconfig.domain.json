@@ -19,6 +19,9 @@
     "src/lib/schedule.js",
     "src/lib/search.js",
     "src/lib/runtime.js",
+    "src/scripts/choices.js",
+    "src/scripts/browser-actions.js",
+    "src/lib/views/project.js",
     "src/types/**/*.ts"
   ]
 }

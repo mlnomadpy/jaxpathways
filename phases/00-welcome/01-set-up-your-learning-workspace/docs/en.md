@@ -269,7 +269,7 @@ If your result is missing, walk backward through the boxes: did Python run the s
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:03.029200+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:55:40.903426+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3

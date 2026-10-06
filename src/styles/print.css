@@ -1,6 +1,10 @@
+* {
+  box-sizing: border-box;
+}
 body {
   max-width: 760px;
   margin: 3rem auto;
+  overflow-wrap: anywhere;
   padding: 0 1.5rem;
   font:
     18px/1.7 Georgia,
@@ -34,5 +38,31 @@ a {
   body {
     margin: 0;
     max-width: none;
+  }
+}
+
+img,
+svg {
+  max-width: 100%;
+  height: auto;
+}
+pre {
+  max-width: 100%;
+  overflow-x: auto;
+}
+code {
+  overflow-wrap: anywhere;
+}
+figure {
+  margin-inline: 0;
+}
+@media (max-width: 600px) {
+  body {
+    margin-block: 24px;
+    padding-inline: 20px;
+    font-size: 17px;
+  }
+  h1 {
+    font-size: 30px;
   }
 }

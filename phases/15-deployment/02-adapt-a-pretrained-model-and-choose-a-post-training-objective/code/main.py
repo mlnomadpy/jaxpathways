@@ -169,4 +169,19 @@ probe=np.array([-.4,.2,.3])
 z=host_X@probe
 expected=np.mean(np.logaddexp(0,z)-np.asarray(soft_targets)*z)
 np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol=1e-6)
+
+# Reference practice: Choose under a declared retention constraint
+retention_budget = .3
+eligible = []
+for name in ('supervised', 'teacher'):
+    delta = metrics[name]['source_cross_entropy'] - metrics['pretrained']['source_cross_entropy']
+    improved = metrics[name]['held_cross_entropy'] < metrics['pretrained']['held_cross_entropy']
+    accepted_candidate = improved and delta <= retention_budget
+    print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)
+    if accepted_candidate: eligible.append(name)
+selected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'
+assert selected == 'pretrained' or selected in eligible
+assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)
+print('Candidate selected under the declared fixture budget:', selected)
+
 print("PASS: deployment-02")

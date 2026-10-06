@@ -37,6 +37,7 @@
   background: var(--panel);
 }
 .lesson-checkpoint fieldset {
+  min-width: 0;
   border: 0;
   padding: 0;
   margin: 15px 0;
@@ -56,9 +57,13 @@
   cursor: pointer;
   font-size: 15px;
 }
-.lesson-checkpoint input {
-  margin-top: 6px;
-  accent-color: var(--mint);
+.lesson-checkpoint label > span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lesson-checkpoint input[type='radio'] {
+  margin-top: 3px;
 }
 .lesson-nav {
   display: flex;
@@ -132,11 +137,7 @@
 .reader h2 {
   margin: 40px 0 18px;
 }
-.reader pre {
-  border: 1px solid var(--line);
-  overflow-x: auto;
-}
-.reader #lesson-body a {
+.reader #lesson-body a:not(.button) {
   color: var(--blue);
   text-decoration: underline;
 }
@@ -215,8 +216,17 @@
   border-top: 1px solid var(--line, #303542);
   padding-top: 12px;
 }
-.lesson-equation {
-  border-left: 3px solid var(--accent, #929afa);
+.reader .lesson-equation {
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  font: 14px/1.7 var(--mono);
+  white-space: pre;
 }
 .reader-outline {
   max-height: calc(100vh - 50px);
@@ -263,6 +273,7 @@
   font-size: 13px;
 }
 .reader #lesson-body {
+  overflow-wrap: anywhere;
   font:
     18px/1.8 Georgia,
     serif;
@@ -289,18 +300,10 @@
   letter-spacing: 0;
   margin-top: 24px;
 }
-.reader pre {
-  background: #f3f6fc;
-  border-color: #e0e6f0;
-  border-radius: 8px;
-  font-size: 13px;
-  line-height: 1.8;
-  padding: 20px;
-}
 .reader .lesson-status {
-  font: 13px/1.5 var(--ui) !important;
-  color: var(--mint) !important;
-  margin-top: 18px !important;
+  font: 14px/1.6 var(--ui);
+  color: var(--mint);
+  margin-top: 18px;
 }
 .reader #lesson-body .edition {
   font-family: var(--ui);
@@ -346,11 +349,6 @@
 }
 .reader .lesson-checkpoint label {
   font: 16px/1.6 var(--ui);
-  padding: 12px;
-  background: #fff;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  margin: 8px 0;
 }
 .reader .lesson-checkpoint legend {
   font: 13px var(--ui);
@@ -451,9 +449,6 @@
   .reader h2 {
     font-size: 24px;
   }
-  .reader pre {
-    padding: 16px;
-  }
   .reader .lesson-artifacts .button {
     font-size: 12px;
   }
@@ -511,45 +506,6 @@
 .runtime-note p {
   margin: 5px 0 0;
 }
-.reader .code-panel {
-  border: 1px solid #d9e1ee;
-  overflow: hidden;
-  margin: 20px 0;
-}
-.code-panel-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 8px 14px;
-  border-bottom: 1px solid #d9e1ee;
-  font: 12px/1.5 var(--ui);
-  color: var(--muted);
-}
-.code-panel-heading button {
-  min-height: 36px;
-  padding: 7px 10px;
-  border: 0;
-  background: #fff;
-  font: 12px var(--ui);
-  color: var(--blue);
-}
-.reader .code-panel pre {
-  margin: 0;
-  border: 0;
-  border-radius: 0;
-  overflow-x: auto;
-  max-width: 100%;
-}
-.reader .code-panel .copy-feedback {
-  font: 12px/1.5 var(--ui);
-  margin: 0;
-  padding: 0 14px;
-}
-.reader .code-panel .copy-feedback:not(:empty) {
-  padding-block: 8px;
-  border-top: 1px solid var(--line);
-}
 .reader .build-step h2 {
   display: flex;
   align-items: baseline;
@@ -589,12 +545,6 @@
   scroll-margin-top: 24px;
 }
 @media (max-width: 760px) {
-  .reader .code-panel-heading button {
-    min-height: 44px;
-  }
-  .reader .code-panel-heading {
-    padding: 4px 12px;
-  }
   .reader .lesson-nav {
     grid-template-columns: 1fr;
   }
@@ -678,7 +628,7 @@
 .reader #lesson-body a.button.primary:visited,
 .reader #lesson-body a.button.primary:hover,
 .reader #lesson-body a.button.primary:focus {
-  color: #fff !important;
+  color: #fff;
   background: var(--blue);
 }
 .reader #lesson-body .practice-drawer {
@@ -709,30 +659,10 @@
   border-color: var(--blue);
 }
 .reader .practice-drawer pre {
-  font-size: 12px;
+  font-size: 13px;
 }
 .reader .practice-drawer p {
   font-size: 14px;
-}
-.reader .code-panel-heading > span {
-  overflow-wrap: anywhere;
-  min-width: 0;
-}
-.reader .code-panel-heading button {
-  flex-shrink: 0;
-}
-.reader .syntax-comment {
-  color: #61708a;
-}
-.reader .syntax-keyword {
-  color: #55339c;
-  font-weight: 600;
-}
-.reader .syntax-string {
-  color: #20644d;
-}
-.reader .syntax-number {
-  color: #914423;
 }
 .reader .toc-group {
   display: flex;
@@ -849,9 +779,6 @@
 .reader {
   background: var(--bg);
 }
-.reader header {
-  border-bottom: 1px solid var(--line);
-}
 .reader-layout {
   max-width: 1500px;
   grid-template-columns: 205px minmax(0, 740px) 175px;
@@ -894,14 +821,6 @@
 .prediction-prompt {
   background: #f2eef9;
   border-color: var(--line);
-}
-.reader .code-panel {
-  background: #f6f3fc;
-  border-color: #d8cfe9;
-  border-radius: 7px;
-}
-.reader .code-panel pre {
-  background: #f6f3fc;
 }
 .reader .concept-flow,
 .reader .gradient-figure,
@@ -948,10 +867,6 @@
   .reader #lesson-body {
     font-size: 17px;
   }
-  .reader .code-panel pre {
-    padding: 14px;
-    font-size: 12px;
-  }
 }
 .reader .concept-mechanism {
   background: #f2eef9;
@@ -967,103 +882,9 @@
   border-left-color: var(--atlas);
   color: var(--atlas);
 }
-body pre:not(.lesson-equation),
-.reader .code-panel,
-.reader .code-panel pre {
-  background: #28213e;
-  color: #f0ebfa;
-  border-color: #4b405f;
-}
-.reader .code-panel-heading {
-  background: #352b4f;
-  color: #d9ccec;
-  border-color: #50445f;
-}
-.reader .code-panel-heading button {
-  background: #49385f;
-  color: #f7f2ff;
-  border-color: #68597f;
-}
-body .syntax-keyword,
-.reader .syntax-keyword {
-  color: #deb7ff;
-  font-weight: 600;
-}
-body .syntax-string,
-.reader .syntax-string {
-  color: #a8dec6;
-}
-body .syntax-number,
-.reader .syntax-number {
-  color: #ffc09c;
-}
-body .syntax-comment,
-.reader .syntax-comment {
-  color: #b6aec9;
-}
-body .syntax-function,
-body .syntax-builtin {
-  color: #a0d8ef;
-}
-body .syntax-option {
-  color: #deb7ff;
-}
-body .syntax-variable {
-  color: #ffc09c;
-}
-.reader .code-panel .copy-feedback {
-  color: #a8dec6;
-}
-body pre code .syntax-keyword {
-  color: #deb7ff;
-}
-body pre code .syntax-string {
-  color: #a8dec6;
-}
-body pre code .syntax-number {
-  color: #ffc09c;
-}
-body pre code .syntax-comment {
-  color: #b6aec9;
-}
-body pre code .syntax-function,
-body pre code .syntax-builtin {
-  color: #a0d8ef;
-}
-body pre code .syntax-option {
-  color: #deb7ff;
-}
-body pre code .syntax-variable {
-  color: #ffc09c;
-}
-.reader .code-panel pre {
-  font-size: 14px;
-  line-height: 1.8;
-}
 .gradient-figure figcaption {
   font: 600 17px/1.6 var(--ui);
   color: var(--atlas);
-}
-.resource-code .code-panel-heading {
-  background: #352b4f;
-  color: #d9ccec;
-  padding: 10px 16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 16px;
-  border-color: #50445f;
-}
-.resource-code .code-panel-heading button {
-  background: #49385f;
-  color: #f7f2ff;
-  border-color: #68597f;
-  min-height: 36px;
-}
-@media (max-width: 760px) {
-  .resource-code .code-panel-heading {
-    padding: 10px 12px;
-  }
 }
 .reader #lesson-body {
   padding-bottom: 44px;
@@ -1132,27 +953,6 @@ body pre code .syntax-variable {
   scroll-margin-top: 24px;
   scroll-margin-bottom: 100px;
 }
-.learner-workspace #lesson-progress-summary {
-  padding: 28px;
-  background: var(--atlas);
-  color: white;
-  border-radius: var(--learning-radius);
-}
-.learner-workspace #lesson-progress-summary h3 {
-  font: 600 30px/1.2 var(--ui);
-  color: white;
-}
-.learner-workspace #lesson-progress-summary p,
-.learner-workspace #lesson-progress-summary .edition,
-.learner-workspace #lesson-progress-summary > a:not(.button) {
-  color: #e1d8f8;
-  font-size: 14px;
-}
-.learner-workspace #lesson-progress-summary .primary {
-  background: #fff;
-  color: var(--atlas);
-  font-size: 15px;
-}
 @media (max-width: 760px) {
   .reader-layout {
     display: flex;
@@ -1209,26 +1009,14 @@ body pre code .syntax-variable {
   #activity-position {
     text-align: center;
   }
-  .reader pre {
-    font-size: 13px !important;
-  }
   .reader-footer {
     padding-bottom: 30px;
-  }
-  .learner-workspace #lesson-progress-summary {
-    padding: 24px;
-  }
-  .learner-workspace #lesson-progress-summary h3 {
-    font-size: 29px;
   }
 }
 .reader #lesson-body .before-start > summary {
   padding: 6px 0;
 }
 @media (max-width: 760px) {
-  .learner-workspace #lesson-progress-summary p {
-    line-height: 1.6;
-  }
   #activity-bar .button {
     font-size: 12px;
   }

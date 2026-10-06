@@ -1,0 +1,1554 @@
+[
+  {
+    "path": "lesson-arrays-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 11,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-06.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 12,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-07.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-08.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 11,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 21,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 20,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-06.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-07.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-08.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-06.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-07.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-08.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-09.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-10.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-11.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-12.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 20,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 16,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-06.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 16,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 24,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-04.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-05.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-01.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-02.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-03.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-cpu.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-arrays-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 11,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-06.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 12,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-07.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-deployment-08.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 11,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-distributed-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 21,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-internals-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-kernels-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-networks-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 20,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-06.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-07.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-operations-08.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-06.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-07.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-08.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-09.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-10.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-11.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-optimization-12.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 20,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 16,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-performance-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-posttraining-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-pretraining-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-probability-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 15,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-recovery-06.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 16,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-rl-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-science-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-state-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transformers-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 24,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-04.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-transforms-05.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 13,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-01.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-02.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 19,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-03.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 17,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  },
+  {
+    "path": "lesson-welcome-cpu.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 18,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13
+  }
+]

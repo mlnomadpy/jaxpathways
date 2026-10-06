@@ -149,7 +149,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:22.637768+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:25.390494+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True

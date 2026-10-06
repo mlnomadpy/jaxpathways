@@ -1,6 +1,6 @@
 # Inference capacity, batching, and autoscaling
 
-Phase 15: Deployment, interoperability & edge AI · about 115 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 ## What you will be able to do
 
@@ -66,6 +66,22 @@ With regularly spaced arrivals separated by $\delta$, filling a batch of $B$ fro
 ## Plan replicas with headroom, then test the plan
 
 For a measured effective capacity $q$ requests per second per replica and target utilization $u$, a first estimate is $R=\lceil\lambda/(u q)\rceil$. This assumes compatible units, balanced routing and an actual capacity measurement for the workload. Autoscaling also has observation windows, startup time, warming and cooldown; it cannot erase a burst that arrives before new capacity is ready. Keep the formula labeled as a planning assumption until a load test includes the real request boundary, concurrency limits, failures and startup behavior.
+
+## A percentile is a sample summary, not a latency promise
+
+Sort twenty observed request times. If nineteen are $1$ millisecond and one is $100$ milliseconds, NumPy's default linear percentile interpolation reports p95 as $5.95$ milliseconds. The maximum remains $100$. The interpolated value need not be an observed request time.
+
+That summary does not guarantee that future requests will stay below p95, and a small sample gives weak evidence about rare slow requests. State the sample size and percentile method, retain the full samples, and repeat the run under the intended workload. Do not average percentiles from separate workers; combine request samples or use an aggregation method appropriate to the monitoring system.
+
+### Pause and reason
+
+Would reporting only p95 reveal the actual worst observed request in this example?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The worst observed request is $100$ milliseconds, while interpolated p95 is $5.95$. Report the distribution and maximum alongside the requested percentile when those distinctions matter.
+
+</details>
 
 ## 1. Define and check the inference workload
 
@@ -245,20 +261,22 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:56.607688+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:41.017169+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 31.033499632030725, 'p50_ms': 0.009125098586082458, 'p95_ms': 0.010269298218190665, 'steady_examples_per_second': 109587.85711369668}
-{'batch': 8, 'first_call_ms': 19.89674987271428, 'p50_ms': 0.010124873369932175, 'p95_ms': 0.025049666874110685, 'steady_examples_per_second': 790133.3387297061}
-{'batch': 32, 'first_call_ms': 19.11341631785035, 'p50_ms': 0.0149579718708992, 'p95_ms': 0.02745192032307386, 'steady_examples_per_second': 2139327.4620509306}
-measured batch-one service proxy (ms): 0.009125098586082458
-simulated last stable/overloaded response (ms): 0.009125098586082458 0.22447742521762848
-{'batch': 1, 'first_call_ms': 19.517916720360518, 'p50_ms': 0.009874347597360611, 'p95_ms': 0.050065177492797375, 'steady_examples_per_second': 101272.5134638057}
-{'batch': 8, 'first_call_ms': 18.403999973088503, 'p50_ms': 0.013228971511125565, 'p95_ms': 0.026662135496735566, 'steady_examples_per_second': 604733.3304234573}
-{'batch': 32, 'first_call_ms': 18.77100020647049, 'p50_ms': 0.014499993994832039, 'p95_ms': 0.01635991502553224, 'steady_examples_per_second': 2206897.465709652}
-measured batch-one service proxy (ms): 0.009874347597360611
-simulated last stable/overloaded response (ms): 0.009874347597360611 0.24290895089507103
+{'batch': 1, 'first_call_ms': 46.820917166769505, 'p50_ms': 0.013270881026983261, 'p95_ms': 0.016752257943153354, 'steady_examples_per_second': 75352.94740166322}
+{'batch': 8, 'first_call_ms': 28.231916949152946, 'p50_ms': 0.012583797797560692, 'p95_ms': 0.036734645254909964, 'steady_examples_per_second': 635738.1236331342}
+{'batch': 32, 'first_call_ms': 26.154874823987484, 'p50_ms': 0.021042069420218468, 'p95_ms': 0.03922067116945981, 'steady_examples_per_second': 1520762.9706445367}
+measured batch-one service proxy (ms): 0.013270881026983261
+simulated last stable/overloaded response (ms): 0.013270881026983261 0.3264636732637882
+{'batch': 1, 'first_call_ms': 30.73883382603526, 'p50_ms': 0.014354009181261063, 'p95_ms': 0.029889517463743676, 'steady_examples_per_second': 69666.94721816707}
+{'batch': 8, 'first_call_ms': 26.39766689389944, 'p50_ms': 0.013395678251981735, 'p95_ms': 0.04393064882606267, 'steady_examples_per_second': 597207.5358570585}
+{'batch': 32, 'first_call_ms': 28.6338753066957, 'p50_ms': 0.020395498722791672, 'p95_ms': 0.027043488807976242, 'steady_examples_per_second': 1568973.6463389576}
+measured batch-one service proxy (ms): 0.014354009181261063
+simulated last stable/overloaded response (ms): 0.014354009181261063 0.35310862585902214
 hypothetical planned replicas: 3
+Analytic sample p95 / max (ms): 5.95000000000007 100.0
+Requests beyond the declared deadline: 2
 PASS: deployment-04
 
 ```
@@ -292,6 +310,23 @@ assert collection_wait.mean()==7.
 **Expected:** The first waits fourteen milliseconds; mean collection delay is seven milliseconds.
 
 A throughput improvement can be overwhelmed by waiting for a batch at low arrival rates.
+
+## Inspect the interpolation behind p95
+
+**Predict before running:** With nineteen $1$-millisecond samples and one $100$-millisecond sample, must p95 equal an observed sample?
+
+```python
+illustrative_ms=np.array([1.]*19+[100.])
+interpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))
+np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)
+assert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.
+print('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())
+
+```
+
+**Expected:** The interpolated p95 is $5.95$ milliseconds and the maximum is $100$ milliseconds.
+
+These deliberately constructed values explain the percentile calculation. They are not measurements of the course model or an accelerator. The timed figure retains its actual measured samples.
 
 ## Make it yours
 
@@ -356,6 +391,33 @@ for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
 ```
 
 Validating assumptions prevents a simulation from silently supporting a false capacity story.
+
+</details>
+
+## Measure the margin below a response deadline
+
+**Transfer / diagnosis**
+
+For five simultaneous requests and a $2$-millisecond serial service, count responses that exceed a $6$-millisecond deadline. Explain why adding a faster model alone is not the only intervention.
+
+<details><summary>Hint</summary>
+
+Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+_,_,deadline_latencies=simulate_queue(np.zeros(5),2.)
+np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
+missed_deadlines=int(np.count_nonzero(deadline_latencies>6.))
+assert missed_deadlines==2
+print('Requests beyond the declared deadline:',missed_deadlines)
+
+```
+
+Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler.
 
 </details>
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-08",
-  "contentHash": "2f17e3945f2a775a9f49ba8e339cbd0893249c35a489caef94c726b8d584dc4c",
+  "contentHash": "cc8128787affd19f9ca585a9df6c22360484adcd75b6dcbda2e0d0cfc36187e3",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:36:25.398281+00:00",
+  "generatedAt": "2026-10-06T21:55:46.265243+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -43,5 +43,48 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Small errors need a scale-aware budget",
+    "prediction": "Why can a larger absolute difference pass at a larger reference value?",
+    "reading": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
+    "alt": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4.2,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Reference",
+        "Actual",
+        "Allowed error",
+        "Decision"
+      ],
+      "rows": [
+        [
+          "0",
+          "0.000001",
+          "0.000002",
+          "pass"
+        ],
+        [
+          "0",
+          "0.000003",
+          "0.000002",
+          "fail"
+        ],
+        [
+          "100",
+          "100.001",
+          "0.002002",
+          "pass"
+        ]
+      ],
+      "widths": [
+        0.2,
+        0.25,
+        0.3,
+        0.25
+      ]
+    }
   }
 }

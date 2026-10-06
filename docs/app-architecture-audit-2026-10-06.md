@@ -2,6 +2,8 @@
 
 Audited on October 6, 2026. Scope: Astro pages and shared components, browser entry points and controllers, domain libraries, CSS organization, storage contracts, content rendering, and existing verification tools. Existing workspace changes were preserved. This is a source and automated behavior audit; a rendered-browser accessibility or visual audit was not completed because the local preview server could not start in this environment.
 
+The eight upgrade areas below have since been implemented. See [the implementation report](app-architecture-upgrades-2026-10-06.md) for current boundaries, verification and remaining incremental limits.
+
 ## Assessment
 
 The app has a sound static Astro foundation and an acyclic JavaScript dependency graph. Page entry points are small, domain calculations have dedicated libraries, and build-time content is shared through `course-data.js`. Reuse is weakest in interactive controllers and the CSS cascade. The app does not need a framework rewrite: clearer feature boundaries and shared browser actions offer more immediate value.
@@ -18,7 +20,7 @@ The app has a sound static Astro foundation and an acyclic JavaScript dependency
 | Medium | Four guide pages duplicated section navigation markup. | Added typed `GuideContents.astro`, reused for assessments, project guides, project plans and the workflow guide. The existing navigation class, section anchors and HTML labels remain compatible. Labels must come from the trusted Markdown renderer, not user input. |
 | Medium | Repeated `initExperience` calls could create new observers and choice adapters for the same document. A global click listener inferred notebook behavior from button text. | Initialization now uses a document-scoped `WeakSet`. Removed the text-dependent listener; notebook edit actions already open their own panel. |
 
-## Remaining work, in recommended order
+## Upgrade recommendations from the original audit
 
 1. **Split notebook evidence editing from backup restore.** `workspace.js` remains approximately 512 lines. Its nested handlers share mutable `state`, `pendingExtras`, `editingId` and `removed`. Extract backup UI behind explicit `getBackup` and `applyBackup` callbacks, then evidence editing behind a notebook-state contract. Keep restore validation, preview/cancel, storage rollback and retry behavior covered before moving them.
 2. **Separate route views from route interactions.** `paths.js` combines career and pathway rendering, local storage, history and selection logic. Large HTML strings make view structure difficult to review. Extract pure view functions first, with explicit course/role/route inputs; then split career and pathway controllers. Remove its import of `catalog.js` by giving navigation a smaller boundary. Preserve focus restoration, browser history and starting-point calculations.

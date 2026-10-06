@@ -4,7 +4,7 @@
   margin: 20px 0 0;
 }
 .lessons li {
-  border-top: 1px solid #30394e80;
+  border-top: 1px solid var(--line);
 }
 .lesson-link {
   display: flex;
@@ -53,4 +53,25 @@
   color: var(--muted);
   font: 12px/1.5 var(--ui);
   margin-top: 4px;
+}
+
+.lesson-link .lesson-label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  min-width: 0;
+}
+.lesson-label .lesson-number {
+  margin: 0;
+  white-space: nowrap;
+  align-self: baseline;
+}
+.lesson-label .lesson-runtime {
+  grid-column: 2;
+  margin-top: 0;
+}
+.lesson-link:hover .lesson-title,
+.lesson-link:focus-visible .lesson-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }

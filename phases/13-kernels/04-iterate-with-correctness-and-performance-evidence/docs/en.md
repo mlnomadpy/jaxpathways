@@ -352,7 +352,7 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:30.333568+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:01:41.100640+00:00. JAX 0.9.2.
 
 ```text
 Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]

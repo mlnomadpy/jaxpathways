@@ -4,6 +4,8 @@
 
 ## Current teaching-depth repair
 
+The [deployment teaching revision](deployment-teaching-revision-2026-10-06.md) deepens all eight deployment and interoperability lessons with staged builds, numerical reasoning, changed-condition exercises and four additional conceptual figures. The phase culminates in a reproducible release dossier; actual container, accelerator and device qualification remain separate work.
+
 The [2026-10-06 depth review](teaching-depth-audit-2026-10-06.md) records the shallow patterns in the newest objective lessons and the concrete repairs to all eight pretraining/post-training lessons. Their larger model integrations still remain work to implement. File availability and structural checks must not be presented as course depth.
 
 ## Phase-level quality

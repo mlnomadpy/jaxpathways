@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-01",
-  "contentHash": "0cbfd792db530a08a82efc3b9f98672db62d905df0c5072e295e7a8e10a115b3",
-  "executedAt": "2026-10-06T15:42:44.617912+00:00",
+  "contentHash": "6955daf57909125b3d83634be3a2428363c807591217f0b460e2be0155a01b0e",
+  "executedAt": "2026-10-06T22:02:14.832395+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,8 +11,29 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Matched dense outputs: [[ 3.1  -0.45]\n [-4.9   4.55]]\nEqual shapes, unequal outputs\nChanged batch verified\nPASS: deployment-01\n",
+  "stdout": "Matched dense outputs: [[ 3.1  -0.45]\n [-4.9   4.55]]\nMatched dense outputs: [[ 3.1  -0.45]\n [-4.9   4.55]]\nEqual shapes, unequal outputs\nFeature order failed, then matched after aligning kernel rows.\nChanged batch verified\nTwo-layer reference scores: [ 6.5  -4.25]\nPASS: deployment-01\n",
   "notebookCells": [
+    {
+      "sourceHash": "ad8c2637b668afd60052aceec94acc227cd568a132156ead430887cab8b61023",
+      "outputs": []
+    },
+    {
+      "sourceHash": "6e6f08bf447d49f674e676411da547c603de5dd0fc769e1a4d4704379892659d",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ea440296872f7ed21698d84ec65c693f3ba9c0942723834d600b0de285c54394",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Matched dense outputs: [[ 3.1  -0.45]\n",
+            " [-4.9   4.55]]\n"
+          ]
+        }
+      ]
+    },
     {
       "sourceHash": "40a2465874287385cf1f70df683b8f6dd4cf4afdb38d0c2a4b31c8fb42cf56dd",
       "outputs": [
@@ -58,6 +79,18 @@
       ]
     },
     {
+      "sourceHash": "f9fa3a44e5e547b08cd09a7619408e208d65fa3816d6a4b5f8438343ffa08619",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Feature order failed, then matched after aligning kernel rows.\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
       "outputs": []
     },
@@ -80,6 +113,22 @@
     {
       "sourceHash": "dfa36dffbc3fb6aaae9bbb9122e7aadc3a46beeef683f628b8594f463406a805",
       "outputs": []
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "2705d5b25b1365b0feb9d1b9d3073cf235bc26bd233ff53af8046b88354c118f",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Two-layer reference scores: [ 6.5  -4.25]\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

@@ -204,7 +204,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:44:30.572108+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:04:59.679256+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]

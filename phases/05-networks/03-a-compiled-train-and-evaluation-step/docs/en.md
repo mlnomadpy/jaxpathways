@@ -210,7 +210,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:09.255275+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:57:54.545104+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0

@@ -1,6 +1,6 @@
 # Deploy at the edge: conversion, budgets and device checks
 
-Phase 15: Deployment, interoperability & edge AI · about 75 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 ## What you will be able to do
 
@@ -24,6 +24,16 @@ A converted operator may run on the intended accelerator while another falls bac
 Memory also has several parts: weights, activations, temporary workspace and runtime overhead. A smaller weight file does not guarantee the whole request fits the device's working-memory budget.
 
 The CPU request trace is a useful reference for the interface. It cannot establish phone, browser, NPU or TPU performance. Repeat the same correctness cases on the named target, then measure cold and warm behavior with its runtime and power/thermal conditions recorded when relevant.
+
+### Model speed is one part of request speed
+
+**Predict:** If inference becomes twice as fast, does the whole request become twice as fast?
+
+![Model speed is one part of request speed](../../phases/15-deployment/06-edge-ai-conversion-and-device-validation/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Read the two columns as a hypothetical serial request before and after halving only inference. Preprocessing and transfer/response work remain unchanged. Add down each column: the total moves from $24$ to $20$ milliseconds, a $1.2$-fold improvement. These times are analytic teaching values; the separate plot contains actual local CPU request measurements.
 
 ### Pause and reason
 
@@ -70,6 +80,111 @@ The timer includes JSON decoding, normalization, host/device placement, inferenc
 
 Choose quality, memory, startup and latency thresholds before comparing candidates. Record runtime/delegate logs and partitioning so unsupported operators cannot quietly fall back to CPU. Compare float32, FP16 and calibrated INT8 where that device supports them. Retain the original artifact, hashes, versions, input/output metadata, calibration provenance and failed cases. A conversion failure, regression on rare inputs or memory-budget failure is a result to diagnose. Leave device fields unmeasured until tested on the named hardware.
 
+## Declare the raw sensor contract before normalizing
+
+This exercise uses one row of three numeric sensor values in the range $[0,255]$. Numeric strings, booleans, missing values, extra fields and out-of-range readings are rejected. That is a deliberately chosen protocol for this fixture, not a rule for every sensor. If a physical device uses a different unit or range, change and version the contract before changing the model.
+
+Check the raw values before converting them to an array. Otherwise a convenient cast may turn a string or boolean into a plausible number, hiding a caller's mistake. After validation, divide by $255$ exactly once. Keep that conversion with the model release so the desktop reference and device application see the same numeric inputs.
+
+## Spend a latency budget across the whole request
+
+Suppose decoding and preprocessing take $12$ milliseconds, transfers and response handling take $4$, and inference takes $8$. The request takes $24$ milliseconds if these stages run serially. Halving inference time reduces the total to $20$, not $12$. The model sped up by a factor of two; the request sped up by only $24/20=1.2$.
+
+These are illustrative stage times, not observations from the course device. On a real target, instrument the same request boundary, check whether stages overlap, and record warmup, temperature, power mode and operator fallback. If transfers dominate, a smaller model may help less than reducing transfers. Compare those hypotheses with traces before choosing an intervention.
+
+$$
+\mathrm{speedup}=\frac{t_{\mathrm{other}}+t_{\mathrm{model}}}{t_{\mathrm{other}}+t_{\mathrm{model}}/s}
+$$
+
+## Keep a known inference function
+
+Create main.py in your lesson workspace and run it with the active course Python environment. Define the fixed dense model and check the parameter shapes without invoking the compiled function.
+
+```python
+import json
+import time
+import numpy as np
+import jax
+import jax.numpy as jnp
+weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)
+bias = jnp.array([.1, -.2], jnp.float32)
+@jax.jit
+def infer(features):
+    return features @ weights + bias
+
+assert weights.shape == (3, 2) and bias.shape == (2,)
+
+```
+
+A row has three sensor features and the result has two scores. Leave the compiled function uncalled so the later first-request measurement can include initialization.
+
+## Build the raw-request boundary
+
+Append this block to the same main.py and rerun the whole file. Validate the raw JSON protocol, normalize once, wait for inference, and encode the result.
+
+```python
+payload = json.dumps({"features": [[255., 128., 0.]]})
+def validate_sensor_payload(payload):
+    document = json.loads(payload)
+    if not isinstance(document, dict) or set(document) != {'features'}:
+        raise ValueError('expected features object')
+    rows = document['features']
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
+        raise ValueError('expected one row of three sensor values')
+    if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
+        raise ValueError('expected numeric sensor values in the range 0 through 255')
+    return np.asarray(rows, dtype=np.float32)
+def request(payload):
+    decoded = validate_sensor_payload(payload)
+    features = decoded / 255.
+    output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
+    return json.dumps({"scores": output.tolist()})
+
+np.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])
+
+```
+
+This probe checks decoding and raw values without running inference. Keep normalization inside request so it happens exactly once.
+
+## Measure cold and warm requests separately
+
+Append this block to the same main.py and rerun the whole file. Time the first request, then retain every warm observation.
+
+```python
+start = time.perf_counter()
+first_response = request(payload)
+first_ms = (time.perf_counter() - start) * 1000
+samples = []
+for _ in range(30):
+    start = time.perf_counter()
+    response = request(payload)
+    samples.append((time.perf_counter() - start) * 1000)
+
+```
+
+The first request can include compilation and initialization. The line plot contains only the subsequent warm requests; do not describe its first point as the cold request.
+
+## Validate outputs and describe measurement scope
+
+Append this block to the same main.py and rerun the whole file. Compare the response with independent NumPy arithmetic and write an honest measurement report.
+
+```python
+expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
+np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
+report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
+          "first_request_ms": first_ms, "warm_samples_ms": samples,
+          "p50_ms": float(np.percentile(samples, 50)), "p95_ms": float(np.percentile(samples, 95)),
+          "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
+          "edge_device_validated": False}
+assert len(samples) == 30 and all(t >= 0 for t in samples)
+print(json.dumps(report, indent=2))
+
+np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)
+
+```
+
+The report records local CPU timings and explicitly leaves edge-device qualification false. Carry the same protocol to a named device before replacing that field.
+
 ## Run the example
 
 ```python
@@ -84,10 +199,18 @@ bias = jnp.array([.1, -.2], jnp.float32)
 def infer(features):
     return features @ weights + bias
 payload = json.dumps({"features": [[255., 128., 0.]]})
+def validate_sensor_payload(payload):
+    document = json.loads(payload)
+    if not isinstance(document, dict) or set(document) != {'features'}:
+        raise ValueError('expected features object')
+    rows = document['features']
+    if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
+        raise ValueError('expected one row of three sensor values')
+    if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
+        raise ValueError('expected numeric sensor values in the range 0 through 255')
+    return np.asarray(rows, dtype=np.float32)
 def request(payload):
-    decoded = np.asarray(json.loads(payload)["features"], dtype=np.float32)
-    if decoded.shape != (1, 3) or not np.isfinite(decoded).all():
-        raise ValueError("expected finite [1, 3] sensor features")
+    decoded = validate_sensor_payload(payload)
     features = decoded / 255.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
     return json.dumps({"scores": output.tolist()})
@@ -139,53 +262,96 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:57.642444+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:42.715391+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 11.552124749869108,
+  "first_request_ms": 20.18283260986209,
   "warm_samples_ms": [
-    0.17729075625538826,
-    0.05508400499820709,
-    0.04258379340171814,
-    0.03758305683732033,
-    0.0355415977537632,
-    0.03291713073849678,
-    0.032333191484212875,
-    0.03045797348022461,
-    0.030416063964366913,
-    0.03020884469151497,
-    0.029957853257656097,
-    0.028875190764665604,
-    0.02800021320581436,
-    0.027624890208244324,
-    0.0278339721262455,
-    0.027957838028669357,
-    0.027416739612817764,
-    0.027624890208244324,
-    0.027417205274105072,
-    0.027792062610387802,
-    0.027250032871961594,
-    0.026999972760677338,
-    0.02750009298324585,
-    0.027792062610387802,
-    0.027082860469818115,
-    0.027957838028669357,
-    0.026916153728961945,
-    0.02695806324481964,
-    0.026667024940252304,
-    0.02674991264939308
+    0.21029217168688774,
+    0.10095816105604172,
+    0.07508276030421257,
+    0.06554089486598969,
+    0.060750171542167664,
+    0.05958369001746178,
+    0.0550001859664917,
+    0.05270913243293762,
+    0.05075009539723396,
+    0.05154171958565712,
+    0.06295787170529366,
+    0.04854192957282066,
+    0.048708170652389526,
+    0.0477498397231102,
+    0.04737498238682747,
+    0.04583410918712616,
+    0.04787510260939598,
+    0.0466248020529747,
+    0.046041328459978104,
+    0.04654191434383392,
+    0.05208281800150871,
+    0.04658382385969162,
+    0.046416185796260834,
+    0.0466248020529747,
+    0.04566740244626999,
+    0.04958314821124077,
+    0.04570791497826576,
+    0.04470907151699066,
+    0.04558311775326729,
+    0.0511673279106617
   ],
-  "p50_ms": 0.027895905077457428,
-  "p95_ms": 0.04945890977978703,
+  "p50_ms": 0.048625050112605095,
+  "p95_ms": 0.08931423071771853,
+  "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
+  "edge_device_validated": false
+}
+{
+  "runtime": "JAX CPU instructional proxy",
+  "jax": "0.9.2",
+  "first_request_ms": 15.56816603988409,
+  "warm_samples_ms": [
+    0.2598748542368412,
+    0.09929109364748001,
+    0.14829076826572418,
+    0.23362459614872932,
+    0.09187497198581696,
+    0.15691714361310005,
+    0.11033285409212112,
+    0.059959013015031815,
+    0.052208080887794495,
+    0.04908395931124687,
+    0.045999884605407715,
+    0.04508392885327339,
+    0.04650000482797623,
+    0.04529207944869995,
+    0.044790562242269516,
+    0.045042019337415695,
+    0.04241708666086197,
+    0.04112487658858299,
+    0.04141731187701225,
+    0.04041614010930061,
+    0.04187505692243576,
+    0.040499959141016006,
+    0.041250139474868774,
+    0.04045804962515831,
+    0.0411253422498703,
+    0.04016701132059097,
+    0.039624981582164764,
+    0.04029087722301483,
+    0.03937492147088051,
+    0.039250124245882034
+  ],
+  "p50_ms": 0.044916290789842606,
+  "p95_ms": 0.19910624250769593,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 Preprocessing mismatch max error 380.5019836425781
+Seven malformed or out-of-domain requests rejected; zero input returns the bias.
 Changed end-to-end request verified
 Not device-validated; missing: device, runtime_version, delegate, quality_metric, p95_ms, peak_memory_bytes, cold_start_ms, fallback_operators
+Illustrative request before/after/lower-bound (ms): 24.0 20.0 16.0
 PASS: deployment-06
 
 ```
@@ -206,6 +372,25 @@ print("Preprocessing mismatch max error", float(np.max(np.abs(wrong-right))))
 **Expected:** The mismatch is large despite identical weights.
 
 Conversion checks must start at the raw input boundary when preprocessing is part of the product.
+
+## Reject raw inputs before normalization hides their meaning
+
+**Predict before running:** Would an array cast distinguish a numeric string, a boolean and a legitimate sensor reading?
+
+```python
+invalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]
+for invalid in invalid_payloads:
+    try: request(json.dumps(invalid))
+    except ValueError: pass
+    else: raise AssertionError('invalid sensor payload accepted')
+np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)
+print('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')
+
+```
+
+**Expected:** All seven invalid payloads fail. A valid zero-valued row produces the two bias scores.
+
+The zero-input oracle checks that preprocessing does not add a hidden offset. Rejection tests check input meaning before the model sees an apparently valid float array.
 
 ## Make it yours
 
@@ -248,6 +433,34 @@ print("Not device-validated; missing:", ", ".join(missing))
 ```
 
 Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used.
+
+</details>
+
+## Decide whether a model speedup meets the request budget
+
+**Transfer / diagnosis**
+
+Use the illustrative serial times above. A $19$-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?
+
+<details><summary>Hint</summary>
+
+Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+fixed_ms=12.+4.;model_ms=8.;deadline_ms=19.
+before_ms=fixed_ms+model_ms
+after_ms=fixed_ms+model_ms/2
+np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
+assert after_ms>deadline_ms and fixed_ms==16.
+print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)
+
+```
+
+Halving model time leaves a $20$-millisecond request, so it misses the stated deadline. The serial fixed work gives a $16$-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision.
 
 </details>
 

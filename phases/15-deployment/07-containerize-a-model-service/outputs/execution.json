@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "41770525a288327fbdc3e93336829c05ccbe8184718d125fead9c7c326b267d4",
-  "executedAt": "2026-10-06T15:42:55.362647+00:00",
+  "contentHash": "91b472b54818502bb67be430fcc616efccc25be2bb814fb29dad250b5647097e",
+  "executedAt": "2026-10-06T22:02:38.887896+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,10 +11,31 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nChanged artifact requires a new recorded digest.\nNonfinite input rejected before output.\nPASS: deployment-07\n",
+  "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nFresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nMatching digest did not bypass model validation.\nChanged artifact requires a new recorded digest.\nNonfinite input rejected before output.\nNew artifact loads, but the old behavioral expectation no longer passes.\nPASS: deployment-07\n",
   "notebookCells": [
     {
-      "sourceHash": "822c788a3f190ac99e4ff5f3511a0aced171bd835c6ba3022d45c7e2e87e0688",
+      "sourceHash": "85fe38846825ded9861bda0a84a2aa4d9dc8f865e5948949b855fe0f41ffb238",
+      "outputs": []
+    },
+    {
+      "sourceHash": "35fc85d49d57a42f569bdcd4e4c590c7065c77cc12581eb3d9c5c685f5692156",
+      "outputs": []
+    },
+    {
+      "sourceHash": "1244bddbccc03baf03f57f49c33ec961e2ef0c9b4d4379e643aa4934c1c9fca8",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Fresh-process valid requests: 2 rejected boundaries: 3\n",
+            "This companion tests the process/artifact contract. Run the Docker lab for container evidence.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "a3f4447527fdba61a02c8933be3278282e640b24e391f5921f704dcf564f3250",
       "outputs": [
         {
           "output_type": "stream",
@@ -58,6 +79,18 @@
       ]
     },
     {
+      "sourceHash": "efb0be9d3f39b223e70382ccc76df6603e7aca7276bf44bf40c6a82b604d602f",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Matching digest did not bypass model validation.\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
       "outputs": []
     },
@@ -85,6 +118,22 @@
           "name": "stdout",
           "text": [
             "Nonfinite input rejected before output.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "d7ac144de5f3a3926bc007145e645f50fcc0db948263d22d02d90b09e98fb5ed",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "New artifact loads, but the old behavioral expectation no longer passes.\n"
           ]
         }
       ]

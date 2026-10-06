@@ -1,0 +1,101 @@
+/* Page rhythm and small primitives shared by the live page templates. */
+main > :where(section[id]) {
+  padding-block: 48px;
+  border-bottom: 1px solid var(--line);
+}
+.intro {
+  font-size: 20px;
+  line-height: 1.6;
+  max-width: 60ch;
+  margin-block: 24px;
+  color: var(--muted);
+}
+.section-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 32px;
+  margin-bottom: 28px;
+}
+.section-head > p {
+  margin: 0;
+  max-width: 45ch;
+  font-size: 16px;
+  color: var(--muted);
+}
+.section-head .edition {
+  margin-bottom: 12px;
+}
+.badge {
+  font: 12px/1.5 var(--ui);
+  color: var(--muted);
+}
+.inline-phase {
+  display: inline;
+  color: var(--blue);
+  font: 14px/1.6 var(--ui);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  margin-right: 8px;
+}
+.run-command {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  min-width: 0;
+}
+.run-command code {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: 14px;
+}
+.run-command button {
+  font-size: 13px;
+}
+.search-excerpt {
+  font: 14px/1.6 var(--ui);
+  color: var(--muted);
+  padding-bottom: 14px;
+  margin: 0 0 0 46px;
+  max-width: 78ch;
+  overflow-wrap: anywhere;
+}
+.search-excerpt a {
+  display: block;
+  min-height: 36px;
+}
+.search-excerpt a:hover {
+  text-decoration: underline;
+}
+.milestone-availability {
+  font: 14px/1.6 var(--ui);
+  color: var(--mint);
+  border-left: 2px solid var(--mint);
+  padding-left: 12px;
+}
+figcaption {
+  font: 14px/1.6 var(--ui);
+  color: var(--muted);
+}
+@media (max-width: 760px) {
+  main > :where(section[id]) {
+    padding-block: 32px;
+  }
+  .intro {
+    font-size: 18px;
+  }
+  .section-head {
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .search-excerpt {
+    margin-left: 0;
+  }
+}

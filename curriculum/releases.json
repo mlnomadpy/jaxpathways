@@ -1,5 +1,17 @@
 [
   {
+    "version": "0.3.0",
+    "date": "2026-10-06",
+    "title": "Deeper deployment lessons and reproducible release checks",
+    "summary": "Eight deployment and interoperability lessons now connect staged builds, numerical reasoning and changed-condition practice to one release dossier.",
+    "changes": [
+      "Added staged builds to framework bridging, PyTorch-to-Flax parity, export, precision, containerization and edge deployment, completing the eight-lesson phase.",
+      "Added feature-order and activation checks, retention gates, elementwise error budgets, nonuniform gradient parity, and fresh-interpreter export validation.",
+      "Expanded raw-request and artifact validation, packed-weight storage accounting, percentile interpretation and request deadline exercises.",
+      "Added four explained conceptual figures and strengthened the phase completion evidence; CPU, container and device results retain separate scopes."
+    ]
+  },
+  {
     "version": "0.2.0",
     "date": "2026-10-06",
     "title": "Clearer lessons, visible revisions and searchable chapters",

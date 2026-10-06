@@ -1,5 +1,53 @@
 """Choose weight, activation and accumulation precision: worked experiments and reference solutions. CPU checks."""
 
+# Write the full-precision reference
+import numpy as np
+import jax.numpy as jnp
+x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
+w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
+reference = x @ w
+
+np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)
+
+
+# Round inputs and weights, then accumulate explicitly
+def mixed_forward(x, w, dtype):
+    # Demonstrate rounding inputs/weights with explicit float32 accumulation.
+    a = jnp.asarray(x, dtype).astype(jnp.float32)
+    b = jnp.asarray(w, dtype).astype(jnp.float32)
+    return np.asarray(a @ b)
+for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
+    y = mixed_forward(x, w, dtype)
+    error = float(np.max(np.abs(y-reference)))
+    assert np.isfinite(y).all() and error < .05
+    print(str(dtype), "max absolute error", error)
+
+
+# Construct signed integer codes and channel scales
+def quantize_weights(weights, bits):
+    if bits not in (4, 8):
+        raise ValueError("use signed 4 or 8 bit symmetric quantization")
+    limit = 2 ** (bits - 1) - 1
+    maxima = np.max(np.abs(weights), axis=0, keepdims=True)
+    scale = np.where(maxima == 0, 1., maxima / limit).astype(np.float32)
+    q = np.clip(np.rint(weights / scale), -limit, limit).astype(np.int8)
+    return q, scale
+
+zero_codes, zero_scales = quantize_weights(np.zeros((3,2),np.float32), 8)
+np.testing.assert_array_equal(zero_codes, np.zeros((3,2),np.int8))
+np.testing.assert_array_equal(zero_scales, np.ones((1,2),np.float32))
+
+
+# Check reconstructed outputs against a bound
+for bits in (8, 4):
+    q, scale = quantize_weights(w, bits)
+    reconstructed = q.astype(np.float32) * scale
+    assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)
+    # Independent error bound: |x deltaW| <= |x| |deltaW|.
+    error = np.abs(x @ reconstructed-reference)
+    bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)
+    assert np.all(error <= bound + 1e-6)
+    print("W%dA32 simulated output error" % bits, float(error.max()))
 
 
 import numpy as np
@@ -146,6 +194,18 @@ print('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())
 print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())
 
 
+# Experiment: Give small and large output channels different grids
+heterogeneous = np.array([[.01, 10.], [-.02, -5.], [.03, 2.]], np.float32)
+channel_codes, channel_scales = quantize_weights(heterogeneous, 8)
+per_channel = channel_codes.astype(np.float32) * channel_scales
+shared_scale = np.max(np.abs(heterogeneous)) / 127
+shared = np.clip(np.rint(heterogeneous/shared_scale), -127, 127).astype(np.int8).astype(np.float32)*shared_scale
+assert np.all(shared[:,0] == 0)
+assert np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])) < .001
+np.testing.assert_allclose(shared[:,0], [0.,0.,0.], atol=0)
+print('Small-channel max error; shared / per-channel:', np.max(np.abs(shared[:,0]-heterogeneous[:,0])), np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])))
+
+
 # Reference solution. Try the exercise before reading this.
 with_zero = np.column_stack((w, np.zeros(3, np.float32)))
 q, scale = quantize_weights(with_zero, 8)
@@ -180,4 +240,13 @@ for bad_scale in (0., -1., float('nan')):
     except ValueError: pass
     else: raise AssertionError('invalid scale accepted')
 print('Code-origin invariance and bias-only zero input verified.')
+
+# Reference practice: Account for actual low-bit storage
+q4, s4 = quantize_weights(w, 4)
+float_weight_bytes = w.nbytes
+simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes
+ideal_packed_weight_and_scale_bytes = (w.size + 1)//2 + s4.nbytes
+assert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes) == (24,14,11)
+print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)
+
 print("PASS: deployment-05")

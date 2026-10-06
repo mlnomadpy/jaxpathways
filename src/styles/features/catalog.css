@@ -1,236 +1,15 @@
-.course-parts {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 28px;
-}
-.course-parts article {
-  border-top: 2px solid var(--blue);
-  padding-top: 18px;
-}
-.course-parts article > span {
-  font:
-    12px ui-monospace,
-    monospace;
-  color: var(--blue);
-}
-.course-parts h3 {
-  font-size: 17px;
-  margin-top: 16px;
-}
-.course-parts p {
-  font-size: 15px;
-  color: var(--muted);
-}
-.phase-grid {
-  align-items: start;
-}
-.phase-card:last-child {
-  border: 1px solid var(--line);
-}
-.phase-card summary {
-  padding: 22px 18px;
-  font-size: 14px;
-  line-height: 1.5;
-  gap: 12px;
-  min-height: 95px;
-}
-.phase-card summary .num {
-  color: var(--blue);
-  font-size: 22px;
-}
-.phase-card summary small {
-  display: block;
-  font-size: 10px;
-}
-.phase-card summary .badge {
-  flex-shrink: 0;
-}
-@media (max-width: 1000px) {
-  .phase-grid {
-    grid-template-columns: 1fr;
-  }
-  .course-parts {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-@media (max-width: 760px) {
-  .phase-card summary {
-    padding: 18px 12px;
-  }
-  .course-parts {
-    gap: 20px;
-  }
-  .course-parts h3 {
-    font-size: 15px;
-  }
-}
-.phase-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 10px;
-}
-.phase-card {
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  overflow: hidden;
-}
-.phase-card > summary {
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  padding: 21px 24px;
-  cursor: pointer;
-}
-.phase-card > summary:after {
-  content: '+';
-  margin-left: 10px;
-  color: var(--muted);
-  font-size: 22px;
-}
-.phase-card[open] > summary:after {
-  content: '−';
-}
-.phase-card .num {
-  font-size: 14px;
-  min-width: 26px;
-}
-.phase-card summary > span:nth-child(2) {
-  flex: 1;
-  font-size: 17px;
-  font-weight: 600;
-}
-.phase-card summary small {
-  font: 12px var(--ui);
-  color: var(--muted);
-  margin-top: 4px;
-}
-#progress {
-  font: 12px/1.6 var(--ui);
-  color: var(--muted);
-  max-width: 220px;
-}
-@media (max-width: 760px) {
-  .phase-card > summary {
-    padding: 18px 16px;
-    gap: 12px;
-  }
-  .phase-card summary > span:nth-child(2) {
-    font-size: 15px;
-  }
-  .phase-card .badge {
-    font-size: 11px;
-  }
-  .phase-card .num {
-    min-width: 20px;
-  }
-  #progress {
-    max-width: none;
-  }
-}
-.phase-card > summary:before {
-  content: none;
-}
-.availability-controls {
-  display: flex;
-  align-items: flex-start;
-  gap: 24px;
-  margin: 20px 0;
-  font: 14px/1.6 var(--ui);
-}
-.availability-controls label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  color: var(--ink);
-  white-space: nowrap;
-  min-height: 44px;
-}
-.availability-controls input {
-  width: 18px;
-  height: 18px;
-  accent-color: var(--blue);
-}
-.availability-controls > span {
-  max-width: 580px;
-  color: var(--muted);
-  padding-top: 10px;
-}
-@media (max-width: 760px) {
-  .availability-controls {
-    flex-direction: column;
-    gap: 0;
-  }
-  .availability-controls > span {
-    padding-top: 0;
-  }
-  .phase-card > summary {
-    flex-wrap: wrap;
-  }
-  .phase-card > summary > .badge {
-    margin-left: 32px;
-    flex-basis: calc(100% - 45px);
-  }
-  .phase-card > summary:after {
-    position: absolute;
-    right: 16px;
-    top: 18px;
-  }
-  .phase-card > summary {
-    position: relative;
-    padding-right: 44px;
-  }
-}
-.phase-card > summary::before,
-.phase-card[open] > summary::before {
-  content: none !important;
-  display: none !important;
-}
-.course-entry {
-  display: flex;
-  align-items: center;
-  gap: 32px;
-  justify-content: space-between;
-  padding: 44px 0;
-}
-.course-entry p {
-  max-width: 660px;
-}
-.course-entry > a {
-  flex-shrink: 0;
-}
-@media (max-width: 760px) {
-  .course-entry {
-    display: block;
-  }
-}
-.phase-card[hidden] {
-  display: none !important;
-}
-.atlas-home .course-entry {
-  border-bottom: 0;
-  padding: 50px 0;
-  background: none;
-}
-.phase-card {
-  box-shadow: none;
-  border-color: var(--line);
-}
-.phase-card .num {
-  color: var(--atlas);
-}
-@media (max-width: 760px) {
-  .atlas-home .course-entry {
-    padding: 36px 0;
-  }
-}
+/* Course cards style only their own summary, never nested lesson disclosures. */
 .course-page .page-intro {
-  padding-top: 30px;
+  padding-top: 32px;
+  padding-bottom: 16px;
+}
+.course-page .page-intro h1 {
+  font-size: clamp(36px, 4.2vw, 56px);
 }
 .course-page .page-intro .intro {
-  font-size: 17px;
+  font-size: 18px;
   margin: 14px 0 8px;
-  max-width: 70ch;
+  max-width: var(--prose-width);
 }
 .catalog-counts {
   font: 13px/1.5 var(--ui);
@@ -241,251 +20,260 @@
   padding-top: 12px;
   border: 0;
 }
-.course-page .curriculum-tools {
-  background: #fff;
-  padding: 20px;
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  gap: 20px;
-}
-.course-page .curriculum-tools select,
-.course-page .curriculum-tools input {
-  margin-top: 8px;
-}
-.course-page .availability-controls {
-  margin-block: 14px;
-  font-size: 13px;
-}
-.course-page #course-view-status {
-  margin: 16px 0;
-}
-.course-page #empty {
-  background: #fff;
-  padding: 24px;
-  border: 1px dashed var(--line);
-  border-radius: 10px;
-  color: var(--ink);
-  max-width: 75ch;
-}
-#reset-course-filters {
-  margin: 12px;
-  min-height: 44px;
-}
-@media (max-width: 760px) {
-  .course-page .curriculum-tools {
-    padding: 16px;
-  }
-}
-.course-page .page-intro h1 {
-  font-size: clamp(36px, 4.2vw, 56px);
-}
 .course-access {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   gap: 24px;
+  margin-bottom: 24px;
+}
+.course-access > div {
+  min-width: 0;
 }
 .course-access p {
   margin: 8px 0;
   font-size: 15px;
+  max-width: 65ch;
 }
 .course-access #progress {
   font-size: 14px;
+  color: var(--muted);
 }
-.course-jumps {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  margin-block: 22px;
+#progress:empty {
+  display: none;
 }
-.course-jumps button {
-  font-size: 14px;
-  background: transparent;
-  padding: 8px 14px;
-  border-color: var(--line);
+.course-access .actions {
+  margin: 0;
+  gap: 12px 20px;
+  align-items: center;
+}
+.course-access .actions > a:not(.button) {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-size: 15px;
+  text-decoration: underline;
+}
+.course-access > .button {
+  flex-shrink: 0;
+}
+#course-view-status {
+  margin: 20px 0;
+  font: 14px/1.6 var(--ui);
+  color: var(--muted);
+}
+.course-page .path-summary {
+  margin: 24px 0;
+  padding: 24px;
+  border: 1px solid var(--line);
+  border-radius: var(--learning-radius);
+  background: var(--panel);
+}
+.path-summary p {
+  font-size: 15px;
 }
 .course-page .phase-grid {
-  display: block;
-  position: relative;
-  margin-left: 16px;
+  display: grid;
+  gap: 16px;
+  margin-left: 10px;
+  padding-left: 28px;
   border-left: 2px solid #b6a7d5;
-  padding-left: 30px;
 }
-.course-page .phase-card {
+.phase-card {
   position: relative;
-  margin: 0 0 14px;
-  background: white;
+  min-width: 0;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: var(--learning-radius);
 }
-.course-page .phase-card:before {
+.phase-card::before {
   content: '';
   position: absolute;
-  left: -41px;
+  left: -37px;
   top: 31px;
   width: 16px;
   height: 16px;
-  background: var(--bg);
   border: 2px solid var(--atlas);
   border-radius: 50%;
+  background: var(--bg);
 }
-.course-page .phase-card[open]:before {
+.phase-card[open]::before {
   background: var(--atlas);
 }
-.course-page .phase-card summary {
-  padding: 24px;
+.phase-card > summary {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
   gap: 16px;
+  padding: 24px;
+  border-radius: var(--learning-radius);
   font: 600 18px/1.5 var(--ui);
 }
-.course-page .phase-card summary .num {
+.phase-card > summary:hover {
+  background: var(--surface-soft);
+}
+.phase-card > summary::before {
+  content: none;
+}
+.phase-card > summary::after {
+  content: '+';
+  color: var(--muted);
+  font: 600 22px/1 var(--ui);
+}
+.phase-card[open] > summary::after {
+  content: '−';
+}
+.phase-card > summary .num {
+  min-width: 26px;
   font-size: 22px;
   color: var(--atlas);
 }
-.course-page .phase-card summary small {
-  font-size: 14px;
-  font-weight: 400;
-  margin-top: 4px;
+.phase-card .phase-title {
+  margin: 0;
+  color: var(--atlas);
+  font: inherit;
+  letter-spacing: normal;
 }
-.course-page .phase-card summary .badge {
-  font-size: 13px;
-  font-weight: 400;
+.phase-card > summary small {
+  display: block;
+  margin-top: 4px;
+  font: 14px/1.5 var(--ui);
+  color: var(--muted);
+}
+.phase-card > summary .badge {
+  font: 13px/1.5 var(--ui);
+  color: var(--muted);
+}
+.phase-card .route-details {
+  padding: 20px 24px 24px;
+  border-top: 1px solid var(--line);
+}
+.route-details p {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 12px 0;
+}
+.route-details a {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.phase-hardware {
+  padding: 0;
+  border: 0;
+  margin: 4px 0 12px;
+}
+.phase-hardware > summary {
+  font: 14px/1.6 var(--ui);
+  padding: 10px 0;
+}
+.phase-hardware p {
+  font: 14px/1.6 var(--ui);
+}
+.course-page .lesson-link {
+  font-size: 16px;
+  padding: 16px 0;
+  text-decoration: none;
+}
+.course-page .lesson-link .badge {
+  font: 13px/1.5 var(--ui);
+}
+.course-page .lesson-runtime {
+  font: 13px/1.5 var(--ui);
+  color: var(--muted);
+}
+.phase-project {
+  padding: 20px;
+  margin-top: 24px;
+  background: var(--nav-surface);
+  border-radius: 8px;
+}
+.phase-project h3 {
+  font-size: 18px;
+  line-height: 1.5;
+}
+.phase-project .edition {
+  margin-bottom: 8px;
+  font-size: 12px;
+}
+.phase-project p {
+  font-size: 14px;
+}
+.course-jump-disclosure {
+  margin: 24px 0 12px;
+  padding: 0;
+  border: 0;
+}
+.course-jump-disclosure > summary {
+  padding: 10px 0;
+}
+.course-jumps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 12px 0;
+}
+.course-jumps button {
+  padding: 10px 14px;
+}
+.availability-controls {
+  margin: 24px 0 16px;
 }
 .roadmap-toggle {
   display: flex;
   align-items: center;
   gap: 12px;
   min-height: 44px;
-  font-size: 14px;
+  font: 14px/1.5 var(--ui);
+  cursor: pointer;
 }
-.roadmap-toggle input {
-  accent-color: var(--atlas);
+.course-page #empty {
+  padding: 24px;
+  border: 1px dashed var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  max-width: 75ch;
 }
-@media (max-width: 760px) {
+@media (max-width: 900px) {
   .course-access {
     align-items: flex-start;
     flex-direction: column;
     gap: 12px;
   }
-  .course-page .phase-grid {
-    margin-left: 10px;
-    padding-left: 20px;
+}
+@media (max-width: 760px) {
+  .course-page .page-intro {
+    padding-top: 24px;
   }
-  .course-page .phase-card:before {
-    left: -31px;
+  .course-page .phase-grid {
+    margin-left: 8px;
+    padding-left: 18px;
+  }
+  .phase-card::before {
+    left: -27px;
     top: 27px;
   }
-  .course-page .phase-card summary {
+  .phase-card > summary {
+    grid-template-columns: auto minmax(0, 1fr) auto;
     padding: 18px 16px;
-    gap: 12px;
-    flex-wrap: wrap;
+    gap: 8px 12px;
     font-size: 17px;
   }
-  .course-page .phase-card summary .badge {
-    flex-basis: 100%;
-    padding-left: 34px;
+  .phase-card > summary .badge {
+    grid-column: 2;
+    grid-row: 2;
+    font-size: 12px;
   }
-  .course-jumps {
-    gap: 8px;
-    margin-block: 18px;
+  .phase-card > summary::after {
+    grid-column: 3;
+    grid-row: 1;
   }
-  .course-jumps button {
-    padding: 10px 12px;
+  .phase-card > summary .num {
+    min-width: 22px;
+    font-size: 19px;
   }
-  .course-page .page-intro h1 {
-    font-size: 36px;
+  .phase-card .route-details {
+    padding: 16px;
   }
-}
-.course-jump-disclosure {
-  padding: 10px 0;
-  margin: 10px 0;
-  border: 0;
-}
-.course-jump-disclosure > summary {
-  font: 15px/1.5 var(--ui);
-  cursor: pointer;
-  padding: 10px 0;
-}
-.course-jump-disclosure .course-jumps {
-  margin: 12px 0;
-}
-.course-page #course-view-status {
-  font-size: 14px;
-}
-.course-access .actions {
-  margin: 0;
-  gap: 20px;
-}
-.course-access > div:first-child > p:last-child {
-  display: none;
-}
-.course-access .actions > a:not(.button) {
-  font-size: 15px;
-  text-decoration: underline;
-  min-height: 44px;
-  display: inline-flex;
-  align-items: center;
-}
-.course-page #course-view-status {
-  margin-block: 18px;
-}
-.course-page .course-access {
-  margin-bottom: 16px;
-}
-.course-page .page-intro {
-  padding-bottom: 12px;
-}
-.course-page .availability-controls {
-  margin-top: 24px;
-}
-@media (max-width: 760px) {
-  .course-access .actions {
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .course-page .page-intro .intro {
-    margin-block: 12px;
-  }
-  .course-page .page-intro {
-    padding-bottom: 6px;
-  }
-  .course-page .catalog-counts {
-    margin-bottom: 10px;
-  }
-}
-.course-page .phase-title {
-  font: inherit;
-  letter-spacing: normal;
-  margin: 0;
-  color: var(--atlas);
-}
-.course-page .phase-hardware {
-  padding: 0;
-  border: 0;
-  margin: 4px 0 12px;
-}
-.course-page .phase-hardware > summary {
-  font: 14px/1.6 var(--ui);
-  padding: 10px 0;
-  min-height: 44px;
-  cursor: pointer;
-}
-.course-page .phase-hardware p {
-  font: 14px/1.6 var(--ui);
-  color: var(--muted);
-}
-
-.course-page .lesson-link {
-  font-size: 16px;
-  padding: 16px 0;
-}
-.course-page .lesson-link .badge {
-  font: 13px/1.5 var(--ui);
-}
-.course-page .lesson-runtime {
-  font: 13px var(--ui);
-  color: var(--muted);
-}
-@media (max-width: 760px) {
   .course-page .lesson-link {
     flex-wrap: wrap;
     gap: 8px;
@@ -494,36 +282,6 @@
     flex-basis: 100%;
   }
   .course-page .lesson-link .badge {
-    padding-left: 42px;
-    font-size: 13px;
+    margin: 0;
   }
-}
-.phase-project {
-  border-top: 1px solid var(--blue);
-  padding-top: 20px;
-}
-.phase-project .edition {
-  font-size: 10px;
-  color: var(--blue);
-}
-.phase-project h3 {
-  line-height: 1.5;
-}
-.phase-project p {
-  font-size: 13px;
-}
-.phase-project {
-  border: 0;
-  border-radius: 8px;
-  padding: 20px;
-  margin-top: 18px;
-}
-.phase-project h3 {
-  font-size: 18px;
-}
-.phase-project .edition {
-  margin-bottom: 8px;
-}
-.phase-project {
-  background: #e5ddf5;
 }

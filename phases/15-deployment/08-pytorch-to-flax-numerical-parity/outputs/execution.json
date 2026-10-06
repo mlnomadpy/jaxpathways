@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-08",
-  "contentHash": "2f17e3945f2a775a9f49ba8e339cbd0893249c35a489caef94c726b8d584dc4c",
-  "executedAt": "2026-10-06T15:42:51.932518+00:00",
+  "contentHash": "cc8128787affd19f9ca585a9df6c22360484adcd75b6dcbda2e0d0cfc36187e3",
+  "executedAt": "2026-10-06T22:02:30.805842+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,8 +11,37 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}\nWrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.\nPer-layer wrong-epsilon report: {'hidden': {'max_abs': 2.384185791015625e-07, 'relative_l2': 3.5662515782829134e-08, 'passed': True}, 'norm': {'max_abs': 0.046508073806762695, 'relative_l2': 0.018277932316979384, 'passed': False}, 'activation': {'max_abs': 0.05144989490509033, 'relative_l2': 0.022399576976497533, 'passed': False}, 'output': {'max_abs': 0.011958837509155273, 'relative_l2': 0.013684121610437203, 'passed': False}}\nNear-zero acceptance and rejection verified.\nWrong source layout rejected\nPASS: deployment-08\n",
+  "stdout": "Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}\nWrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.\nMaximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}\nWrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.\nPer-layer wrong-epsilon report: {'hidden': {'max_abs': 2.384185791015625e-07, 'relative_l2': 3.5662515782829134e-08, 'passed': True}, 'norm': {'max_abs': 0.046508073806762695, 'relative_l2': 0.018277932316979384, 'passed': False}, 'activation': {'max_abs': 0.05144989490509033, 'relative_l2': 0.022399576976497533, 'passed': False}, 'output': {'max_abs': 0.011958837509155273, 'relative_l2': 0.013684121610437203, 'passed': False}}\nNear-zero, excessive near-zero, large-value: True False True\nNear-zero acceptance and rejection verified.\nWrong source layout rejected\nNonuniform cotangent input-gradient parity: {'max_abs': 2.086162567138672e-07, 'relative_l2': 4.910744924550249e-07, 'passed': True}\nPASS: deployment-08\n",
   "notebookCells": [
+    {
+      "sourceHash": "fb090cee3bb40ed4f79450ddbd8e6785f13f190d652f304defeec81aebcf9556",
+      "outputs": []
+    },
+    {
+      "sourceHash": "29ee9b69ae5b45109dff883055b6361b9a41704a42edef766c4b530b41a5a0ad",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ebadaa31520c41bc4e7c2eb86f70ad9680f52fa6348e221ee736cf03d21c0c2b",
+      "outputs": []
+    },
+    {
+      "sourceHash": "f7c6fd1cfe7c2102f944fe2d103820a766e63637ae3552a4fa87c3312334de4f",
+      "outputs": []
+    },
+    {
+      "sourceHash": "76992cae07d79a5fe2d6cc69b5a1fa263e5d80094125a844c3aded1501cbafe1",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}\n",
+            "Wrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.\n"
+          ]
+        }
+      ]
+    },
     {
       "sourceHash": "687085536238e681f1fe4079a10efc36ac03b08de1d23cbe23966732401e7549",
       "outputs": [
@@ -58,6 +87,18 @@
       ]
     },
     {
+      "sourceHash": "06492b54a02aac6290ded8f5de256438717bcf1124bb4cad5fa463916923a2b2",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Near-zero, excessive near-zero, large-value: True False True\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
       "outputs": []
     },
@@ -85,6 +126,22 @@
           "name": "stdout",
           "text": [
             "Wrong source layout rejected\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "934e2d957378dbed0d4aaa33d5c7a23278de8bc6cd591fb7ee729c7636e398a2",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Nonuniform cotangent input-gradient parity: {'max_abs': 2.086162567138672e-07, 'relative_l2': 4.910744924550249e-07, 'passed': True}\n"
           ]
         }
       ]

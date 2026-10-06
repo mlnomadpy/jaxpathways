@@ -42,6 +42,8 @@ The deployment precision lesson already contains two experiments, worked quantiz
 
 ## Next repairs, in order
 
+Follow-up: the [deployment teaching revision](deployment-teaching-revision-2026-10-06.md) adds staged construction, semantic mapping checks, fresh-interpreter export, precision accounting, request validation and deadline reasoning across all eight deployment lessons. The larger model-family conversion and named target-runtime work described below remains outstanding.
+
 1. **Deployment and cross-framework conversion:** teach a full input-to-output architecture mapping, layerwise numerical errors, calibration choices and actual export/runtime tests. Distinguish a dense-layer parity demonstration from a supported model-family converter. Require changed layouts, normalization, padding and precision cases.
 2. **A real-data text lifecycle:** connect corpus/source splits, tokenizer training, causal and masked objectives, durable resume, domain adaptation and held-out evaluation. A small permitted corpus with fixed source revisions must precede a 300M model recipe.
 3. **Natural-image representation learning:** connect image–caption inspection to dual encoders, multi-positive labels, CLIP/SigLIP objective checks and fixed-pool retrieval. A roadmap page stays planned until starter, reference, checks and executed evidence exist.

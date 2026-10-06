@@ -108,7 +108,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:12.059388+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:05.802176+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]

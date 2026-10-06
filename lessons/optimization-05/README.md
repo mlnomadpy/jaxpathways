@@ -154,7 +154,7 @@ visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:28.720073+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:35.320086+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]

@@ -28,15 +28,15 @@ Review: [Move models between JAX, Keras, TensorFlow and PyTorch](01-keras-and-py
 
 ### Build in stages
 
-1. **Choose the model and preserve its meaning.** Adapt the model under a fixed held-out protocol before freezing its release. Compare framework layouts, preprocessing and state with independent predictions. Convert the actual PyTorch model to Flax and locate an injected operation mismatch numerically.
+1. **Choose the model and preserve its meaning.** Adapt the model under a fixed held-out protocol before freezing its release. Compare framework layouts, preprocessing and state with independent predictions. Convert the actual PyTorch model to Flax and locate an injected operation mismatch numerically. Keep a candidate decision table, feature/parameter mapping table, and the first divergent operation from a deliberately broken conversion.
 
    Lessons: [Adapt a pretrained model and choose a post-training objective](02-adapt-a-pretrained-model-and-choose-a-post-training-objective/docs/en.md) · [Move models between JAX, Keras, TensorFlow and PyTorch](01-keras-and-pytorch-bridges-to-explicit-jax/docs/en.md) · [Convert PyTorch weights to Flax and locate numerical errors](08-pytorch-to-flax-numerical-parity/docs/en.md).
 
-2. **Freeze the artifact and numeric policy.** Export and load in a fresh process, reject malformed inputs, then track weight, activation, accumulator, bias and output formats. Separate clipping from rounding and retain held-out conversion checks.
+2. **Freeze the artifact and numeric policy.** Export and load in a fresh process, reject malformed inputs, then track weight, activation, accumulator, bias and output formats. Separate clipping from rounding and retain held-out conversion checks. Include a fresh-interpreter export receipt, raw-request rejection cases, clipping counts and actual versus ideal packed byte counts.
 
    Lessons: [Export a computation and verify its serving contract](03-export-and-serve-a-trained-computation/docs/en.md) · [Choose weight, activation and accumulation precision](05-weight-activation-and-accumulation-precision/docs/en.md).
 
-3. **Deliver to a stated runtime.** Package and qualify the selected service, relate queue assumptions to measured service work, then examine the additional conversion and device budgets for an edge target. Leave actual device fields unmeasured until tested.
+3. **Deliver to a stated runtime.** Package and qualify the selected service, relate queue assumptions to measured service work, then examine the additional conversion and device budgets for an edge target. Leave actual device fields unmeasured until tested. Keep separate artifact, process, image and device receipts. Explain an interpolated percentile and a burst deadline failure before choosing a capacity intervention.
 
    Lessons: [Containerize a model service and verify its boundary](07-containerize-a-model-service/docs/en.md) · [Inference capacity, batching, and autoscaling](04-inference-capacity-batching-and-autoscaling/docs/en.md) · [Deploy at the edge: conversion, budgets and device checks](06-edge-ai-conversion-and-device-validation/docs/en.md).
 
@@ -56,7 +56,7 @@ Verify raw preprocessing first; count values outside the frozen calibration rang
 
 ### Decide what is ready
 
-Use deployment-audit and engineering-release. Keep source/export parity, a complete precision policy, fresh-process/container checks and separate local versus device receipts.
+Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.
 
 ### Further work
 

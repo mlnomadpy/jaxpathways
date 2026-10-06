@@ -488,15 +488,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:43:34.293950+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:03:25.491955+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00036583421751856804, 'update_examples_per_s': 262413.94435753534, 'job_examples_per_s': 190.10257051228302, 'update_duty_fraction': 0.000724437761787807}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00013270927593111992, 'update_examples_per_s': 301410.7319880277, 'job_examples_per_s': 78.76784121464831, 'update_duty_fraction': 0.0002613305793563351}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00047399988397955894, 'update_examples_per_s': 202531.69514307298, 'job_examples_per_s': 166.37048796195725, 'update_duty_fraction': 0.0008214540832457328}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00015625124797224998, 'update_examples_per_s': 255997.9553385964, 'job_examples_per_s': 79.03260797159444, 'update_duty_fraction': 0.0003087235906515806}
-examples / synchronized seconds: 96 0.00047399988397955894
-measured update duty fraction, not hardware utilization: 0.0008214540832457328
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005084993317723274, 'update_examples_per_s': 188790.80856488223, 'job_examples_per_s': 130.30102929577706, 'update_duty_fraction': 0.0006901873575640531}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00024400139227509499, 'update_examples_per_s': 163933.49081755534, 'job_examples_per_s': 55.12273998358011, 'update_duty_fraction': 0.00033625063255028983}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005049984902143478, 'update_examples_per_s': 190099.57823686278, 'job_examples_per_s': 129.9423861150849, 'update_duty_fraction': 0.0006835490500309136}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00019966531544923782, 'update_examples_per_s': 200335.24555830756, 'job_examples_per_s': 54.271608018919984, 'update_duty_fraction': 0.0002709039433758761}
+examples / synchronized seconds: 96 0.0005049984902143478
+measured update duty fraction, not hardware utilization: 0.0006835490500309136
 PASS: operations-02
 
 ```

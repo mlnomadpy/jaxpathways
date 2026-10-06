@@ -220,7 +220,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:41:01.041439+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:59:20.500901+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -336,8 +336,8 @@ CPU run: 2026-10-06T15:41:01.041439+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 7.3291826993227e-05
-Final-only wait seconds: 1.8584076315164566e-05
+Per-step host reads seconds: 0.00011470820754766464
+Final-only wait seconds: 3.60831618309021e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure

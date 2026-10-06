@@ -200,7 +200,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:23.091145+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:58:17.292717+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]

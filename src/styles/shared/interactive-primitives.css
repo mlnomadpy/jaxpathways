@@ -1,69 +1,23 @@
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--ui);
-}
-h1,
-h2,
-h3,
-h4 {
-  font-family: var(--ui);
-  color: var(--atlas);
-  font-weight: 700;
-}
-h1 {
-  line-height: 1.02;
-}
-header {
-  background: var(--bg);
-  border-bottom: 0;
-  padding-block: 25px;
-}
-header .brand,
-.brand {
-  font-family: var(--ui);
-  font-size: 21px;
-  letter-spacing: -0.055em;
-  color: var(--atlas);
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-}
-.brand:before {
-  content: '';
-  display: inline-block;
-  width: 40px;
-  height: 40px;
-  background: url('/assets/pathway-mark.svg') center/contain no-repeat;
-  border-radius: 0;
-  margin: 0;
-}
-header nav {
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  font-size: 14px;
-  gap: 8px 26px;
-}
-header nav a {
-  padding-block: 8px;
-  border-bottom: 2px solid transparent;
-}
-header nav a:hover,
-header nav a[aria-current='page'] {
-  color: var(--blue);
-  border-color: var(--blue);
-}
 button,
 .button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 44px;
+  max-width: 100%;
+  padding: 11px 17px;
+  border: 1px solid var(--line);
   border-radius: 6px;
-  box-shadow: none;
-  border-color: var(--line);
+  background: var(--panel);
   color: var(--atlas);
-  font-family: var(--ui);
+  font: 600 14px/1.4 var(--ui);
+  text-align: center;
+  cursor: pointer;
 }
 button:hover,
 .button:hover {
-  background: #e3ddf5;
+  background: var(--nav-surface);
   border-color: var(--blue);
   color: var(--atlas);
 }
@@ -75,13 +29,35 @@ button:hover,
 }
 .primary:hover,
 .button.primary:hover {
-  background: #493193;
+  background: var(--blue);
   color: #fff;
 }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
 :focus-visible {
-  outline: 3px solid #8060df;
+  outline: 3px solid var(--focus);
   outline-offset: 4px;
 }
-.edition {
-  color: var(--muted);
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 28px 0 20px;
+}
+.hero {
+  display: grid;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  text-decoration: underline;
+  font: 15px/1.5 var(--ui);
+}
+.branch-glyph {
+  font-size: 48px;
+  color: var(--accent);
 }

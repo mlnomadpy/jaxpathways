@@ -12,7 +12,7 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-06T15:44:30.820137+00:00",
+  "validatedAt": "2026-10-06T22:05:00.171716+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {
@@ -747,7 +747,7 @@
     },
     {
       "lessonId": "deployment-02",
-      "contentHash": "2fef52f3ad2123fb77d565a8cf2497b80ffc0006b0d5f45d433432bcec90a825",
+      "contentHash": "d705098a262938df53b1f2ad6cc1db2d2bd650198bb8603751b0bd93f6004897",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -757,7 +757,7 @@
     },
     {
       "lessonId": "deployment-01",
-      "contentHash": "0cbfd792db530a08a82efc3b9f98672db62d905df0c5072e295e7a8e10a115b3",
+      "contentHash": "6955daf57909125b3d83634be3a2428363c807591217f0b460e2be0155a01b0e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -767,7 +767,7 @@
     },
     {
       "lessonId": "deployment-08",
-      "contentHash": "2f17e3945f2a775a9f49ba8e339cbd0893249c35a489caef94c726b8d584dc4c",
+      "contentHash": "cc8128787affd19f9ca585a9df6c22360484adcd75b6dcbda2e0d0cfc36187e3",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -777,7 +777,7 @@
     },
     {
       "lessonId": "deployment-03",
-      "contentHash": "98f0bccb9822563004b7804a51ae6dfb9a40f3f9d37ec63ca65f2931db682bee",
+      "contentHash": "c9f753036b5befc454e0436038cf75b39cc9352a5db8b646cd3d51abbf64b494",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -787,7 +787,7 @@
     },
     {
       "lessonId": "deployment-05",
-      "contentHash": "b898285bf266ce967c8a84c9bae4cc55ca0510daa21c172d6d9c207cb5e8e026",
+      "contentHash": "66c77f5ec56cc20c5da980281bb7fd423eedb2e47cb0887dc1fe1ad69e208eec",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -797,7 +797,7 @@
     },
     {
       "lessonId": "deployment-07",
-      "contentHash": "41770525a288327fbdc3e93336829c05ccbe8184718d125fead9c7c326b267d4",
+      "contentHash": "91b472b54818502bb67be430fcc616efccc25be2bb814fb29dad250b5647097e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -807,7 +807,7 @@
     },
     {
       "lessonId": "deployment-04",
-      "contentHash": "8069448f4dbedbad76572212138a2b3d88d47dd36758eedb014f0bd704797c73",
+      "contentHash": "e738106b07247692e0cbe6ba3d25649950423872b8fc3deae653555046735c46",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -817,7 +817,7 @@
     },
     {
       "lessonId": "deployment-06",
-      "contentHash": "b7e59c30c1a3cfee9effebced9e1f6a5bb4f381487ad8fd9685e9806a0bc3815",
+      "contentHash": "f63f0b44e6860f52424cc8e319a5b304387172c1b971ab06f7f2918f7ffa8d8a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {

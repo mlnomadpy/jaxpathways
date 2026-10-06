@@ -1,16 +1,26 @@
-const adapters = new WeakMap();
+// @ts-check
+import { createRadioOption } from '../components/ui/radio-group.js';
 
-export function enhanceChoices(root = document) {
-  const selects = root.querySelectorAll('select[data-choices]');
+/** @type {WeakMap<HTMLSelectElement, () => void>} */
+const adapters = new WeakMap();
+/** @param {HTMLOptionElement} option */
+const optionLabel = (option) => option.getAttribute('label') ?? option.textContent ?? '';
+
+/** @param {Document | Element} [root] */
+export /** @param {HTMLSelectElement} select */
+function enhanceChoices(root = document) {
+  const selects = root.querySelectorAll('select');
   for (const select of selects) enhanceChoice(select);
 }
 
+/** @param {HTMLSelectElement} select */
 export function refreshChoices(select) {
   adapters.get(select)?.();
 }
 
+/** @param {HTMLSelectElement} select */
 function enhanceChoice(select) {
-  if (!select.dataset.choices || adapters.has(select)) return;
+  if (!select.id || !select.dataset.choices || adapters.has(select)) return;
   const label = select.closest('label');
   const title = select.dataset.choiceLabel;
   if (!title) return;
@@ -29,12 +39,15 @@ function enhanceChoice(select) {
   legend.textContent = title;
   fieldset.append(legend);
   const choices = document.createElement('div');
-  choices.className = 'choice-options';
+  choices.className = 'choice-options ui-radio-group';
+  choices.dataset.variant = select.dataset.choices === 'disclosure' ? 'list' : 'segmented';
   fieldset.append(choices);
   select.after(fieldset);
   const long = select.dataset.choices === 'disclosure';
-  let disclosure = null,
-    summary = null;
+  /** @type {HTMLDetailsElement | null} */
+  let disclosure = null;
+  /** @type {HTMLElement | null} */
+  let summary = null;
   if (long) {
     disclosure = document.createElement('details');
     disclosure.className = 'context-choices';
@@ -45,28 +58,38 @@ function enhanceChoice(select) {
   const sync = () => {
     for (const radio of choices.querySelectorAll('input')) {
       radio.checked = radio.value === select.value;
-      radio.closest('label').classList.toggle('selected', radio.checked);
+      radio.closest('label')?.classList.toggle('selected', radio.checked);
     }
-    if (summary)
-      summary.textContent = `${title}: ${select.selectedOptions[0]?.textContent || 'None'}`;
+    if (summary) {
+      const selected = [...select.options].find((option) => option.value === select.value);
+      summary.textContent = `${title}: ${selected ? optionLabel(selected) : 'None'}`;
+    }
   };
   const render = () => {
     const signature = [...select.options]
-      .map((o) => JSON.stringify([o.value, o.textContent, o.disabled, select.disabled]))
+      .map((o) =>
+        JSON.stringify([
+          o.value,
+          optionLabel(o),
+          o.disabled,
+          o.closest('optgroup')?.disabled,
+          select.disabled,
+          select.required,
+        ]),
+      )
       .join('\u0001');
     if (choices.dataset.signature !== signature) {
       choices.dataset.signature = signature;
       choices.replaceChildren();
       for (const option of select.options) {
-        const item = document.createElement('label'),
-          radio = document.createElement('input'),
-          text = document.createElement('span');
-        radio.type = 'radio';
-        radio.name = 'choice-' + select.id;
-        radio.value = option.value;
-        radio.disabled = select.disabled || option.disabled;
-        text.textContent = option.textContent;
-        item.append(radio, text);
+        const { label: item, input: radio } = createRadioOption(select.ownerDocument, {
+          name: 'choice-' + select.id,
+          value: option.value,
+          label: optionLabel(option),
+          disabled:
+            select.disabled || option.disabled || Boolean(option.closest('optgroup')?.disabled),
+          required: select.required,
+        });
         choices.append(item);
         radio.addEventListener('change', () => {
           select.value = radio.value;
@@ -84,7 +107,7 @@ function enhanceChoice(select) {
     subtree: true,
     characterData: true,
     attributes: true,
-    attributeFilter: ['disabled', 'label', 'value', 'selected'],
+    attributeFilter: ['disabled', 'label', 'value', 'selected', 'required'],
   });
   adapters.set(select, render);
   render();

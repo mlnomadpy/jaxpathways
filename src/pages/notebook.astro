@@ -2,13 +2,11 @@
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/workspace.css';
-import '../styles/features/paths.css';
-import '../styles/features/project.css';
-import '../styles/features/reader.css';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
 import { siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
+import ChoiceField from '../components/ui/ChoiceField.astro';
 ---
 
 <SiteLayout {...pages.notebook}>
@@ -54,44 +52,22 @@ import pages from '../data/pages.json';
           <details class="artifact-context-picker">
             <summary>Change the lesson or project association</summary>
             <div class="artifact-context-fields">
-              <label for="evidence-route">
-                <span class="field-caption">Pathway</span>
-                <select
-                  data-choices="disclosure"
-                  data-choice-label="Pathway"
-                  id="evidence-route"
-                ></select>
-              </label>
-              <label for="evidence-lesson">
-                <span class="field-caption">
+              <ChoiceField id="evidence-route" label="Pathway" variant="list" />
+              <ChoiceField id="evidence-lesson" label="Lesson" variant="list">
+                <span slot="label">
                   Related lesson <span class="soft">(optional)</span>
                 </span>
-                <select
-                  data-choices="disclosure"
-                  data-choice-label="Lesson"
-                  id="evidence-lesson"
-                ></select>
-              </label>
-              <label for="evidence-project">
-                <span class="field-caption">
+              </ChoiceField>
+              <ChoiceField id="evidence-project" label="Project" variant="list">
+                <span slot="label">
                   Related project <span class="soft">(optional)</span>
                 </span>
-                <select
-                  data-choices="disclosure"
-                  data-choice-label="Project"
-                  id="evidence-project"
-                ></select>
-              </label>
-              <label for="evidence-stage">
-                <span class="field-caption">
+              </ChoiceField>
+              <ChoiceField id="evidence-stage" label="Stage" variant="list">
+                <span slot="label">
                   Project stage <span class="soft">(optional)</span>
                 </span>
-                <select
-                  data-choices="disclosure"
-                  data-choice-label="Stage"
-                  id="evidence-stage"
-                ></select>
-              </label>
+              </ChoiceField>
             </div>
           </details>
           <label for="evidence-title">
@@ -148,15 +124,13 @@ import pages from '../data/pages.json';
         <select id="evidence-filter-route" data-internal hidden>
           <option value="">All paths</option>
         </select>
-        <label>
-          Show saved work
-          <select data-choices="inline" data-choice-label="Artifact type" id="evidence-filter-type">
-            <option value="">All work</option>
-            <option value="lesson">Lessons</option>
-            <option value="project">Projects</option>
-            <option value="general">Other experiments</option>
-          </select>
-        </label>
+        <ChoiceField id="evidence-filter-type" label="Artifact type" variant="segmented">
+          <span slot="label">Show saved work</span>
+          <option value="">All work</option>
+          <option value="lesson">Lessons</option>
+          <option value="project">Projects</option>
+          <option value="general">Other experiments</option>
+        </ChoiceField>
       </div>
       <p id="evidence-results" role="status"></p>
       <div id="evidence-list"></div>

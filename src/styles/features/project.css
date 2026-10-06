@@ -1,198 +1,115 @@
-#copy-status {
-  margin: 0;
-  padding: 0 17px;
-  font-size: 12px;
-  color: var(--mint);
-}
-.project-stages {
-  list-style: none;
-  counter-reset: stage;
-  padding: 0;
-  max-width: 850px;
-}
-.project-stages li {
-  counter-increment: stage;
-  border-top: 1px solid var(--line);
-  padding: 28px 0;
-}
-.project-stages h2 {
-  font-size: 24px;
-}
-.project-stages h2:before {
-  content: counter(stage, decimal-leading-zero) ' / ';
-  color: var(--mint);
-  font-size: 15px;
-}
-.project-stages pre {
-  background: var(--panel);
-  padding: 16px;
-  font-size: 12px;
-  overflow: auto;
-}
-.project-stages label {
-  display: flex;
-  gap: 12px;
-  font-size: 15px;
-}
-.project-stages input {
-  accent-color: var(--mint);
-}
-#project-status {
-  color: var(--mint);
-}
-.project-preview {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 70px;
-  align-items: center;
-  padding: 46px;
-  background: var(--panel);
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  margin: 46px 0 0;
-}
-.project-preview p:not(.edition) {
-  max-width: 510px;
-  color: var(--muted);
-}
-.project-preview ol {
-  padding: 0;
-  counter-reset: build;
-  margin: 0;
-}
-.project-preview li {
-  counter-increment: build;
-  padding: 14px 0;
-  gap: 14px;
-  align-items: center;
-  font-size: 15px;
-}
-.project-preview li:before {
-  border-radius: 50%;
-  background: #eaf0ff;
-  color: var(--blue);
-  width: 28px;
-  height: 28px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-  font-size: 13px;
-  font-weight: 600;
-}
-@media (max-width: 760px) {
-  .project-preview {
-    grid-template-columns: 1fr;
-    gap: 20px;
-    padding: 25px;
-    margin-top: 32px;
-  }
-  .project-preview li {
-    font-size: 14px;
-    padding: 10px 0;
-  }
-}
-.project-preview ol {
-  list-style: decimal;
-  padding-left: 32px;
-}
-.project-preview li {
-  display: list-item;
-  padding-left: 8px;
-}
-.project-preview li:before {
-  content: none;
-}
-.project-preview li::marker {
-  font-weight: 600;
-  color: var(--blue);
-}
 #project {
   min-width: 0;
-}
-#project pre {
-  max-width: 100%;
-  white-space: pre-wrap;
-  overflow-wrap: anywhere;
-  overflow-x: auto;
-}
-#project p code {
-  overflow-wrap: anywhere;
-}
-#project h1 {
-  font-size: clamp(32px, 5vw, 58px);
-}
-#project .project-stages {
-  max-width: 100%;
-  min-width: 0;
-}
-#project {
   max-width: 980px;
-  margin: 0 auto;
-  padding-block: 44px;
+  margin-inline: auto;
+  padding-block: 40px;
+  border: 0;
 }
 #project > h1 {
   font-size: clamp(32px, 4.5vw, 52px);
-  max-width: 900px;
+  line-height: 1.1;
+  margin-top: 20px;
 }
 #project h2 {
   font-size: 26px;
   line-height: 1.3;
 }
-#project details {
-  margin-block: 14px;
+#project > p,
+.project-setup > p,
+.project-stages > li > p {
+  max-width: var(--prose-width);
 }
-#project details summary {
+#project p code {
+  overflow-wrap: anywhere;
+}
+#project details {
+  margin-block: 16px;
+}
+#project details > summary {
   min-height: 44px;
   font-size: 15px;
 }
 .project-setup {
-  padding: 24px 0 !important;
-  border-bottom: 1px solid var(--line);
+  border-block: 1px solid var(--line);
 }
-.project-setup select {
-  max-width: 300px;
+.project-setup > summary {
+  font-weight: 600;
+}
+.project-setup[open] {
+  padding-bottom: 20px;
 }
 .project-setup h3 {
-  margin-top: 20px;
+  margin-top: 24px;
 }
 .project-command {
-  background: #f2f5fb;
-  border: 1px solid var(--line);
+  min-width: 0;
+  margin-block: 20px;
+  border: 1px solid #50445f;
   border-radius: 8px;
-  margin: 18px 0;
   overflow: hidden;
+  background: var(--code-bg);
+  color: var(--code-ink);
 }
 .project-command > div {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  border-bottom: 1px solid var(--line);
   padding: 8px 14px;
-  font-size: 13px;
+  background: #352b4f;
+  color: #d9ccec;
+  border-bottom: 1px solid #50445f;
+  font: 13px/1.5 var(--ui);
 }
-.project-command button {
+.project-command .copy-command {
   font-size: 12px;
-  min-height: 44px;
   padding: 8px 12px;
+  background: #49385f;
+  color: #f7f2ff;
+  border-color: #68597f;
+  flex-shrink: 0;
+}
+.project-command .copy-command:hover {
+  background: #5b4676;
 }
 #project .project-command pre {
+  max-width: 100%;
   margin: 0;
   padding: 16px;
-  font-size: 13px;
+  background: var(--code-bg);
+  color: var(--code-ink);
+  font: 14px/1.8 var(--mono);
   white-space: pre;
   overflow-x: auto;
 }
+.project-command .copy-status {
+  color: #a8dec6;
+}
 .project-stages {
-  padding-left: 26px;
+  list-style: none;
+  counter-reset: stage;
+  padding: 0;
+  margin: 28px 0;
 }
 .project-stages > li {
-  padding-block: 26px;
-  border-bottom: 1px solid var(--line);
+  counter-increment: stage;
+  padding-block: 28px;
+  border-top: 1px solid var(--line);
+  min-width: 0;
+  scroll-margin-top: 24px;
+  scroll-margin-bottom: 100px;
 }
-.project-stages > li::marker {
-  color: var(--blue);
-  font-weight: 700;
+.project-stages > li > h2 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+}
+.project-stages > li > h2::before {
+  content: counter(stage, decimal-leading-zero);
+  color: var(--mint);
+  font: 600 15px/1.5 var(--ui);
+  letter-spacing: normal;
+  flex-shrink: 0;
 }
 .expected-output {
   background: #edf6f1;
@@ -200,135 +117,45 @@
   padding: 16px;
   font-size: 14px;
 }
-.stage-check {
+.project-stages .stage-check {
   display: flex;
   align-items: flex-start;
   gap: 12px;
   font: 15px/1.6 var(--ui);
   color: var(--ink);
+  cursor: pointer;
 }
 .stage-check input {
-  width: 20px;
-  height: 20px;
-  margin-top: 4px;
-  flex-shrink: 0;
+  margin-top: 3px;
 }
-@media (max-width: 760px) {
-  .project-command > div {
-    flex-wrap: wrap;
-  }
-  #project {
-    padding-top: 28px;
-  }
-  .project-stages {
-    padding-left: 22px;
-  }
-}
-.project-stages > li[id] {
-  scroll-margin-top: 2rem;
-}
-.atlas-home .project-preview {
-  border: 0;
-  border-radius: 0 0 28px 28px;
-  background: var(--atlas);
-  color: #fff;
-  margin: 0 -1%;
-  padding: 48px 4%;
-  gap: 8%;
-}
-.atlas-home .project-preview h2 {
-  color: #fff;
-  font-size: 38px;
-}
-.atlas-home .project-preview p:not(.edition) {
-  color: #e0d8f4;
-  max-width: 42ch;
-}
-.atlas-home .project-preview .edition {
-  color: #c8b8ef;
-}
-.atlas-home .project-preview .button {
-  background: #fff;
-  color: var(--atlas);
-  border: 0;
-  margin-right: 16px;
-}
-.atlas-home .project-preview > a,
-.atlas-home .project-preview div > a:not(.button) {
-  color: #fff;
-  font-size: 13px;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.atlas-home .project-preview li {
-  color: #f2edf9;
-  border-bottom: 1px solid #65528e;
-  padding: 18px 0;
-}
-.atlas-home .project-preview li::marker {
-  color: #d8bcfd;
-}
-.project-command {
-  box-shadow: none;
-  border-color: var(--line);
-}
-@media (max-width: 760px) {
-  .atlas-home .project-preview {
-    margin-inline: -6.82%;
-    border-radius: 0;
-    gap: 20px;
-  }
-  .atlas-home .project-preview li {
-    font-size: 14px;
-  }
-}
-.project-command pre {
-  background: #28213e;
-  color: #f0ebfa;
-  border-color: #4b405f;
-}
-.project-command > div {
-  background: #352b4f;
-  color: #d9ccec;
-  border-color: #50445f;
-}
-.project-command .copy-command {
-  background: #49385f;
-  color: #f7f2ff;
-  border-color: #68597f;
-}
-.project-command pre {
-  font-size: 14px;
-  line-height: 1.8;
-}
-#project > p,
-.project-setup > p,
-.project-stages > li > p {
-  max-width: 70ch;
-}
-.project-stages li[id] {
-  scroll-margin-top: 24px;
-  scroll-margin-bottom: 100px;
+#project-status {
+  color: var(--mint);
 }
 .project-stage-links {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin: 24px 0;
+  margin-block: 20px;
 }
 .project-stage-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
   font: 14px/1.5 var(--ui);
   padding: 12px 16px;
-  background: #fff;
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 6px;
 }
+.project-stage-links a:hover {
+  background: var(--nav-surface);
+}
 @media (max-width: 760px) {
-  .atlas-home .project-preview {
-    padding: 30px 24px;
+  #project {
+    padding-top: 28px;
   }
-  .atlas-home .project-preview h2 {
-    font-size: 31px;
+  .project-command > div {
+    flex-wrap: wrap;
   }
   .project-stage-links {
     flex-direction: column;
@@ -338,25 +165,4 @@
   .project-stage-links {
     display: none !important;
   }
-}
-.project-setup > summary {
-  font: 600 17px/1.6 var(--ui);
-  padding: 16px 0;
-  min-height: 44px;
-  cursor: pointer;
-}
-.project-setup {
-  border-block: 1px solid var(--line);
-  margin: 24px 0;
-}
-.project-setup[open] {
-  padding-bottom: 20px;
-}
-.project-stage-links {
-  margin-top: 20px;
-}
-.project-practice {
-  margin: 1.5rem 0;
-  padding: 1.25rem 0;
-  border-block: 1px solid #dbe2e9;
 }

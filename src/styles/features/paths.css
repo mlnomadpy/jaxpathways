@@ -15,15 +15,6 @@
 .route-meta {
   color: var(--blue);
 }
-.route-details p {
-  font-size: 15px;
-  color: var(--muted);
-  margin: 6px 0;
-}
-.route-details a {
-  color: var(--blue);
-  font-size: 13px;
-}
 @media (max-width: 1000px) {
   .path-layout {
     grid-template-columns: 220px 1fr;
@@ -38,29 +29,11 @@
     grid-template-columns: 1fr;
   }
 }
-.phase-card .route-details {
-  padding: 0 18px 18px;
-}
-.path-summary {
-  margin: 25px 0;
-}
-.path-summary > p {
-  font-size: 15px;
-  color: var(--muted);
-}
 .phase-chip {
   font-size: 10px;
   margin: 3px;
   padding: 8px;
   text-align: left;
-}
-@media (max-width: 760px) {
-  .phase-card .route-details {
-    padding: 0 12px 18px;
-  }
-  .path-summary {
-    padding: 18px;
-  }
 }
 .domain-map {
   grid-template-columns: 240px 1fr;
@@ -497,19 +470,6 @@
   font: 13px/1.5 var(--ui);
   color: var(--muted);
 }
-.route-details {
-  padding: 0 24px 24px;
-  border-top: 1px solid var(--line);
-}
-.path-summary {
-  background: #edf2ff;
-  border: 1px solid #c6d3f2;
-  border-radius: 10px;
-  padding: 24px;
-}
-.path-summary p {
-  font-size: 15px;
-}
 .roles-grid {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 18px;
@@ -567,9 +527,6 @@
   .role-detail h3 {
     font-size: 25px;
   }
-  .route-details {
-    padding: 0 16px 16px;
-  }
   .path-layout {
     grid-template-columns: 1fr;
   }
@@ -621,132 +578,15 @@
 .phase-chip {
   min-height: 44px;
 }
-.atlas-home .domain-cards {
-  gap: 0;
-  grid-template-columns: 1fr 1fr;
-}
-.atlas-home .domain-card {
-  border: 0;
-  border-top: 1px solid #d9d0e8;
-  border-radius: 0;
-  background: none;
-  padding: 30px 0 30px 34px;
-  position: relative;
-}
-.atlas-home .domain-card:nth-child(odd) {
-  padding-right: 36px;
-}
-.atlas-home .domain-card:nth-child(even) {
-  padding-left: 60px;
-}
-.atlas-home .domain-card:before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 35px;
-  width: 20px;
-  height: 34px;
-  border: 2px solid var(--accent);
-  border-right: 0;
-  border-radius: 20px 0 0 20px;
-}
-.atlas-home .domain-card:nth-child(even):before {
-  left: 26px;
-}
-.atlas-home .domain-card h3 {
-  letter-spacing: -0.045em;
-}
-.atlas-home .domain-description {
-  max-width: 48ch;
-}
-.atlas-home .domain-availability {
-  font-size: 13px;
-  color: var(--muted);
-  order: 6;
-  margin-top: 15px;
-}
-.atlas-home .domain-availability summary {
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px 0;
-  color: var(--blue);
-}
-.atlas-home .domain-availability p {
-  font-size: 12px !important;
-}
-.atlas-home .domain-card ul {
-  gap: 0;
-  margin: 12px 0;
-}
-.atlas-home .domain-card li {
-  background: none;
-  border-radius: 0;
-  padding: 3px 8px 3px 0;
-  color: var(--muted);
-  font-size: 12px;
-}
-.atlas-home .domain-card li:not(:last-child):after {
-  content: '/';
-  margin-left: 8px;
-  color: #b0a3ca;
-}
-.atlas-home .domain-careers {
-  margin-top: 12px;
-}
-.atlas-home .career-link {
-  color: var(--atlas);
-}
-.atlas-home .domain-links {
-  gap: 18px;
-  margin-top: 10px;
-}
-.atlas-home .domain-links button {
-  padding: 5px 0;
-  border: 0;
-  border-radius: 0;
-  border-bottom: 1px solid var(--blue);
-  background: none;
-  font-size: 13px;
-  min-height: 44px;
-}
-.atlas-home .career-picker {
-  margin-top: 0;
-  border-top: 1px solid var(--line);
-}
-.atlas-home .career-picker h3 {
-  font-size: 28px;
-}
-.role-card,
-.path-summary {
+.role-card {
   box-shadow: none;
   border-color: var(--line);
 }
 .role-card h3 {
   color: var(--atlas);
 }
-.path-summary,
 .roles-start {
   background: #e5ddf5;
-}
-@media (max-width: 760px) {
-  .atlas-home .domain-cards {
-    grid-template-columns: 1fr;
-  }
-  .atlas-home .domain-card,
-  .atlas-home .domain-card:nth-child(odd),
-  .atlas-home .domain-card:nth-child(even) {
-    padding: 26px 0 26px 32px;
-  }
-  .atlas-home .domain-card:before,
-  .atlas-home .domain-card:nth-child(even):before {
-    left: 0;
-    top: 30px;
-    width: 18px;
-    height: 30px;
-  }
-}
-.atlas-home .domain-availability {
-  border-left-color: var(--line);
 }
 .career-open .page-intro,
 .career-open #roles > .section-head,
@@ -845,22 +685,6 @@
   .career-open .career-milestones > li:before {
     left: -32px;
   }
-}
-.atlas-home .domain-card h3 {
-  font-size: 27px;
-}
-.atlas-home .domain-card .availability-label {
-  font-size: 14px;
-  color: var(--blue);
-  margin: 18px 0;
-}
-.course-page .route-details {
-  padding: 0 24px 20px;
-}
-.course-page .path-summary {
-  background: #fff;
-  padding: 24px;
-  border-radius: var(--learning-radius);
 }
 .paths-page .page-intro {
   padding-top: 32px;
@@ -1047,19 +871,6 @@
   }
 }
 @media (max-width: 760px) {
-  .atlas-home .domain-card:nth-child(n) {
-    padding: 24px 0 24px 28px;
-  }
-  .atlas-home .domain-card:nth-child(n):before {
-    left: 0;
-    top: 29px;
-  }
-  .atlas-home .domain-card h3 {
-    font-size: 24px;
-  }
-  .course-page .route-details {
-    padding: 0 16px 18px;
-  }
   .path-foundation {
     flex-direction: column;
     align-items: flex-start;
@@ -1159,22 +970,5 @@
   }
   .careers-page .role-card {
     padding: 24px;
-  }
-}
-.learner-home-grid .path-summary {
-  margin: 0;
-  padding: 2rem;
-  border: 1px solid var(--line, #dbe2e9);
-  border-radius: 8px;
-  background: #f4f7fc;
-}
-.workspace-route .saved-career {
-  padding: 1rem 0 0;
-  border-top: 1px solid #dbe2e9;
-  margin-top: 1.5rem;
-}
-@media (max-width: 680px) {
-  .learner-home-grid .path-summary {
-    padding: 1.25rem;
   }
 }

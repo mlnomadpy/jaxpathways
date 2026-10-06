@@ -194,7 +194,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:06.296443+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:55:53.169773+00:00. JAX 0.9.2.
 
 ```text
 {

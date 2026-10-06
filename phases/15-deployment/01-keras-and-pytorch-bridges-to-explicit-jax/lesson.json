@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "deployment-01",
-  "minutes": 75,
+  "minutes": 110,
   "content": {
     "problem": "You have a dense layer in PyTorch and the same model idea in Keras. Can you reuse the weights in JAX? We’ll start with one small layer, work out a prediction by hand, and check the weight axes. From there, you’ll learn which parts of a model can transfer directly and which need separate checks.",
     "idea": "Cross-framework conversion must preserve the meaning of inputs, parameters and outputs. A layout transpose can be necessary, but architecture, preprocessing and arithmetic conventions must agree too. Start by writing the function each framework computes.",
@@ -58,6 +58,18 @@
         "title": "Write the same dense layer in both layouts",
         "body": "We’ll call the input matrix \\(X\\), the Keras-style kernel \\(W\\), and the PyTorch-style weight \\(W_{\\mathrm{torch}}\\). The math agrees when \\(W=W_{\\mathrm{torch}}^\\mathsf{T}\\). The transpose changes how weights are arranged, not what the layer means. Bias \\(b\\) is added to every output row. Check the known first row before trying a larger model.",
         "math": "Y=XW+b=XW_{\\mathrm{torch}}^\\mathsf{T}+b"
+      },
+      {
+        "title": "A valid shape can still mean the wrong feature",
+        "body": "Imagine that the source reads temperature, pressure and humidity in that order. The target reads humidity, pressure and temperature. Both receive three numbers, so a shape assertion passes. But the first coefficient now multiplies the wrong measurement. Write down feature names and units next to each input column before mapping a weight tensor.\n\nFor the worked first row, the two scores are \\(1+1+1+0.1=3.1\\) and \\(-2+2-0.25-0.2=-0.45\\). Swapping the first and last features gives \\(-0.9\\) and \\(4.05\\). These large differences are not floating-point noise. Follow the first mismatch: raw values, normalized values, first layer, activation, then output labels. This order prevents you from adjusting a numerical tolerance to conceal a different function.",
+        "check": {
+          "prompt": "If the target swaps input features and also swaps the matching rows of its kernel, should its output change?",
+          "answer": "No. Both changes restore each feature–coefficient pairing. Swapping only the values or only the rows changes the function. This is a semantic alignment check, separate from changing the storage layout from input-by-output to output-by-input."
+        }
+      },
+      {
+        "title": "Use a small bridge before a complete model",
+        "body": "Keep the dense example as a test you can reason through by hand. Then add one operation at a time: a nonlinearity, normalization, and a second layer. Record an intermediate tensor at each boundary. For a convolution, declare both image layout and kernel layout; for attention, declare token order, head order, masks, and how query, key and value weights are packed.\n\nThe optional Keras lab runs real backends in separate processes. The default companion below uses NumPy and JAX to expose the mapping arithmetic, so its success alone does not certify TensorFlow, PyTorch, or a complete pretrained checkpoint. Carry a table of source names, target names, shapes, axis permutations and test inputs into the model-specific conversion lesson."
       }
     ],
     "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n# Same dense layer, different parameter layouts.\nx = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)\nkeras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)\nbias = np.array([.1, -.2], np.float32)\ntorch_weight = keras_kernel.T.copy()  # torch Linear: output, input\nparams = {\"kernel\": jnp.asarray(torch_weight.T), \"bias\": jnp.asarray(bias)}\ndef predict(params, inputs):\n    return inputs @ params[\"kernel\"] + params[\"bias\"]\nactual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))\n# A hand-computed first row detects a shared layout mistake.\nnp.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)\nnp.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)\nprint(\"Matched dense outputs:\", actual)\n",
@@ -69,6 +81,13 @@
         "code": "square = np.array([[1., 2.], [3., 4.]], np.float32)\nz = np.array([[2., -1.]], np.float32)\nassert (z @ square).shape == (z @ square.T).shape\nassert not np.allclose(z @ square, z @ square.T)\nprint(\"Equal shapes, unequal outputs\")\n",
         "output": "Both outputs have the same shape but different values.",
         "explanation": "Check asymmetric values and independently known outputs, not just tensor dimensions."
+      },
+      {
+        "title": "Reorder features without changing tensor dimensions",
+        "prediction": "Predict both scores if the first and last input features are exchanged while the weights stay fixed.",
+        "code": "permutation = [2, 1, 0]\nreordered = x[:, permutation]\nwrong_order = np.asarray(predict(params, reordered))\nnp.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)\nassert not np.allclose(wrong_order, actual)\nrepaired_params = {'kernel': params['kernel'][permutation, :], 'bias': params['bias']}\nnp.testing.assert_allclose(predict(repaired_params, reordered), actual, atol=1e-6)\nprint('Feature order failed, then matched after aligning kernel rows.')\n",
+        "output": "The wrong first row is \\([-0.9,4.05]\\); permuting the kernel rows restores both original observations.",
+        "explanation": "The repair changes the pairing of features and coefficients. It does not change the model represented by those pairings. Repeat with asymmetric feature values; repeated values can hide a wrong order."
       }
     ],
     "exercise": "Add a batch with four rows and preserve the same parameters. Verify each row independently using a feature-by-feature sum.",
@@ -81,6 +100,14 @@
         "hint": "Compute both predictions from the same raw input: once with the source normalization and once without it. Matching weights cannot cancel an input-scale mismatch.",
         "solution": "pixels = np.array([[255., 128., 0.]], np.float32)\nsource = predict(params, pixels / 255.)\nwrong = predict(params, pixels)\nassert not np.allclose(source, wrong)\nnp.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)\n",
         "explanation": "Input normalization belongs in the deployment contract. Matching weights cannot compensate for a different input distribution."
+      },
+      {
+        "title": "Map a second layer and locate an omitted activation",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Extend the dense mapping with ReLU and a second dense layer. Use independently computed final scores to catch a converter that forgets ReLU. Then show why an all-positive probe would be a weak test.",
+        "hint": "Compute both first-layer rows by hand, replace negative entries by zero, and apply the new output weights.",
+        "solution": "second_kernel = np.array([[2.], [-1.]], np.float32)\nsecond_bias = np.array([.3], np.float32)\nhidden = np.maximum(np.asarray(predict(params, x)), 0.)\nbridged_scores = hidden @ second_kernel + second_bias\nnp.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)\nomitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias\nassert not np.allclose(omitted_relu, bridged_scores)\npositive_probe = np.array([[1., 2.]], np.float32)\nnp.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)\nprint('Two-layer reference scores:', bridged_scores[:, 0])\n",
+        "explanation": "The first dense layer agrees, but the activation is the first divergent boundary. The final reference scores are \\(6.5\\) and \\(-4.25\\). A probe containing only positive hidden values would make an omitted ReLU invisible."
       }
     ],
     "question": "The Dense predictions match after transposing weights. What has been established?",
@@ -117,6 +144,26 @@
       "connection": "With the first convention, a row batch computes \\(XW+b\\). With the transposed storage convention, the equivalent calculation uses \\(X\\widetilde W^{\\mathsf T}+b\\), where \\(\\widetilde W=W^{\\mathsf T}\\). Transposing storage without adapting the computation would change the meaning or produce a shape error.\n\nThe picture explains this layout contract using an explicit numerical reference. It does not demonstrate that every layer or serialized model can be transferred between frameworks by one transpose. Check activations, bias, preprocessing, and layer-specific conventions against an independent output reference as well.",
       "alt": "A transpose changes storage layout, not the intended model. The upper matrix has input features as rows and output features as columns. The lower matrix swaps those axes. The cell values are weights, and the two panels contain the same six numbers in transposed positions. Track the weight \\(-1\\): it moves from input \\(2\\), output \\(0\\) in the upper panel to output \\(0\\), input \\(2\\) in the lower panel. It still connects the same input feature to the same output feature. The layout changes from shape \\((3,2)\\) to \\((2,3)\\).",
       "code": "visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input × output layout', 'values': keras_kernel.tolist(), 'rows': ['input 0', 'input 1', 'input 2'], 'columns': ['output 0', 'output 1'], 'unit': 'weight'}, {'kind': 'heatmap', 'title': 'Output × input layout', 'values': torch_weight.tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1', 'input 2'], 'unit': 'weight'}]}"
-    }
+    },
+    "buildSteps": [
+      {
+        "title": "Write the source function and its known input",
+        "instruction": "Create main.py in your lesson workspace and run it with the active course Python environment. Keep feature order fixed while you name the input, kernel and bias.",
+        "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n# Same dense layer, different parameter layouts.\nx = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)\nkeras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)\nbias = np.array([.1, -.2], np.float32)\n\nnp.testing.assert_allclose(x[0] @ keras_kernel + bias, [3.1, -.45], atol=1e-6)\n",
+        "explanation": "The arrays define a batch of shape \\((2,3)\\), a kernel of shape \\((3,2)\\), and a bias of shape \\((2,)\\). The first known output is \\([3.1,-0.45]\\)."
+      },
+      {
+        "title": "Map the stored tensor into explicit JAX parameters",
+        "instruction": "Append this block to the same main.py and rerun the whole file. Transpose the stored PyTorch-style weights back into input-by-output order, then define the pure prediction function.",
+        "code": "torch_weight = keras_kernel.T.copy()  # torch Linear: output, input\nparams = {\"kernel\": jnp.asarray(torch_weight.T), \"bias\": jnp.asarray(bias)}\ndef predict(params, inputs):\n    return inputs @ params[\"kernel\"] + params[\"bias\"]\n\nnp.testing.assert_allclose(predict(params, jnp.zeros((2,3))), np.tile(bias,(2,1)), atol=1e-6)\n",
+        "explanation": "The zero-input check returns the bias twice. If it does not, inspect bias broadcasting before comparing full predictions."
+      },
+      {
+        "title": "Verify values before extending the architecture",
+        "instruction": "Append this block to the same main.py and rerun the whole file. Run both independent checks and inspect the two output rows.",
+        "code": "actual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))\n# A hand-computed first row detects a shared layout mistake.\nnp.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)\nnp.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)\nprint(\"Matched dense outputs:\", actual)\n",
+        "explanation": "The first assertion checks hand arithmetic; the second compares the entire batch with the source-layout calculation. Continue with the feature-order and second-layer experiments below."
+      }
+    ]
   }
 }

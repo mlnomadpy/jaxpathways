@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "recovery-05",
   "contentHash": "e4d4f872279187ef0b03cafe4f3451459e9bacfa02ca9dda5bf0144248af6c52",
-  "executedAt": "2026-10-06T15:40:34.415758+00:00",
+  "executedAt": "2026-10-06T21:58:35.086217+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-hm5vba4z\n{\n  \"save_call_seconds\": 0.002465624827891588,\n  \"remaining_work_and_wait_seconds\": 0.013811375014483929,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-b9_4mz0x\n{\n  \"save_call_seconds\": 0.0015274579636752605,\n  \"remaining_work_and_wait_seconds\": 0.007230333983898163,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
+  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-1je36zxa\n{\n  \"save_call_seconds\": 0.003674041945487261,\n  \"remaining_work_and_wait_seconds\": 0.015921541023999453,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-f77j580e\n{\n  \"save_call_seconds\": 0.0021070423536002636,\n  \"remaining_work_and_wait_seconds\": 0.009633165784180164,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
   "notebookCells": [
     {
       "sourceHash": "100141bc9228106257f49beac8294e147442a0417970acd1215d94a49ff0082e",
@@ -28,10 +28,10 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-am4kv49u\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-l3xp70zv\n",
             "{\n",
-            "  \"save_call_seconds\": 0.002474665641784668,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.014171916991472244,\n",
+            "  \"save_call_seconds\": 0.0034888749942183495,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.01657099975273013,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",
@@ -47,10 +47,10 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-5l0hbh77\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-d_0xgpu4\n",
             "{\n",
-            "  \"save_call_seconds\": 0.001419666688889265,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.007529875263571739,\n",
+            "  \"save_call_seconds\": 0.0024218750186264515,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.00866912491619587,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",

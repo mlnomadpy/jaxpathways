@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "distributed-03",
   "contentHash": "2a06a6e0411ef12e8a90496f23ec665ac2c195e509c6cd63d6dc41c51119c299",
-  "executedAt": "2026-10-06T15:41:08.661272+00:00",
+  "executedAt": "2026-10-06T21:59:34.626976+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 4,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 77.04179733991623, 'reduce_scatter': 66.74975156784058, 'all_gather_only': 70.54116576910019}\nGradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 75.20802319049835, 'reduce_scatter': 68.66687908768654, 'all_gather_only': 64.79118019342422}\nSharded momentum matches the independent elementwise update.\nJoint permutation preserves the gradient; label-only reversal does not.\nIdealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]\nPASS: distributed-03\n",
+  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 102.49996557831764, 'reduce_scatter': 99.54068809747696, 'all_gather_only': 87.58297190070152}\nGradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 98.66617619991302, 'reduce_scatter': 112.24998161196709, 'all_gather_only': 91.99976921081543}\nSharded momentum matches the independent elementwise update.\nJoint permutation preserves the gradient; label-only reversal does not.\nIdealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]\nPASS: distributed-03\n",
   "notebookCells": [
     {
       "sourceHash": "1f9555bde7cd442347546c829bd2223b399bc0c49b9dba589046fbda1a34fda7",
@@ -47,7 +47,7 @@
             "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\n",
             "Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\n",
             "Idealized ring bytes per rank: 48.0 24.0\n",
-            "Completed CPU median microseconds: {'all_reduce': 80.5417075753212, 'reduce_scatter': 74.99987259507179, 'all_gather_only': 70.87504491209984}\n"
+            "Completed CPU median microseconds: {'all_reduce': 106.75005614757538, 'reduce_scatter': 101.7088070511818, 'all_gather_only': 95.45916691422462}\n"
           ]
         }
       ]
@@ -62,7 +62,7 @@
             "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\n",
             "Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\n",
             "Idealized ring bytes per rank: 48.0 24.0\n",
-            "Completed CPU median microseconds: {'all_reduce': 77.95775309205055, 'reduce_scatter': 73.3332708477974, 'all_gather_only': 54.084230214357376}\n"
+            "Completed CPU median microseconds: {'all_reduce': 124.08290058374405, 'reduce_scatter': 107.20780119299889, 'all_gather_only': 115.83324521780014}\n"
           ]
         }
       ]

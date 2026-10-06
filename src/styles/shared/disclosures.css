@@ -1,0 +1,25 @@
+/* Low-specificity defaults: feature disclosures own their layout and density. */
+:where(details) {
+  border-top: 1px solid var(--line);
+}
+:where(summary) {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 44px;
+  padding: 16px 0;
+  font: 15px/1.5 var(--ui);
+  cursor: pointer;
+  list-style: none;
+}
+:where(summary)::-webkit-details-marker {
+  display: none;
+}
+:where(summary)::before {
+  content: '+';
+  flex: 0 0 1ch;
+  color: var(--blue);
+}
+:where(details[open] > summary)::before {
+  content: '−';
+}

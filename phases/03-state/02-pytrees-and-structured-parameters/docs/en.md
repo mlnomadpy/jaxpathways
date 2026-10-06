@@ -154,7 +154,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:24.219111+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:27.920768+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405

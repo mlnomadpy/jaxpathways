@@ -49,9 +49,6 @@
 .resources-page main {
   max-width: 1200px;
 }
-.resources-page header nav {
-  flex-wrap: wrap;
-}
 .resources-intro {
   padding: 58px 0 30px;
 }
@@ -204,7 +201,8 @@
   max-width: 100%;
   min-width: 0;
   overflow-x: auto;
-  background: #f3f6fc;
+  background: var(--code-bg);
+  color: var(--code-ink);
   border: 1px solid #d9e1ee;
   border-radius: 8px;
   padding: 18px;
@@ -253,11 +251,6 @@
 }
 .resources-page #resource-copy-status:empty {
   display: none;
-}
-.resources-page nav [aria-current='page'] {
-  color: var(--blue);
-  text-decoration: underline;
-  text-underline-offset: 5px;
 }
 @media (max-width: 760px) {
   .resources-intro {

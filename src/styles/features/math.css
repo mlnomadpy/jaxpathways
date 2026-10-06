@@ -36,3 +36,14 @@
     font-size: 0.9em;
   }
 }
+
+/* Keep the visually hidden MathML accessible without contributing to page overflow. */
+.katex .katex-mathml {
+  overflow: hidden;
+}
+.lesson-checkpoint label > span .katex {
+  display: inline-block;
+  max-width: 100%;
+  overflow-x: auto;
+  vertical-align: middle;
+}

@@ -23,7 +23,9 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       ]
         .map((selector) => {
           const select = $(selector);
-          return select.value ? select.selectedOptions[0]?.textContent : '';
+          return select.value
+            ? [...select.options].find((option) => option.value === select.value)?.textContent
+            : '';
         })
         .filter(Boolean)
         .join(' / ');

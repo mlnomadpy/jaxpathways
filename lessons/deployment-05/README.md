@@ -1,6 +1,6 @@
 # Choose weight, activation and accumulation precision
 
-Phase 15: Deployment, interoperability & edge AI · about 75 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 ## What you will be able to do
 
@@ -86,6 +86,100 @@ Let an activation code be $q_x$, its zero point $z_x$, and its positive scale $s
 $$
 a_j=\sum_i(q_{x,i}-z_x)q_{w,ij}+\operatorname{round}\!\left(\frac{b_j}{s_xs_{w,j}}\right),\qquad q_{y,j}=\operatorname{clip}\!\left(\operatorname{round}\!\left(\frac{s_xs_{w,j}}{s_y}a_j\right)+z_y,-128,127\right)
 $$
+
+## Distinguish storage savings from an error budget
+
+For a dense matrix with $K$ input features and $N$ output features, FP32 weights occupy $4KN$ bytes before container metadata. Ideally packed four-bit weights occupy $\lceil KN/2\rceil$ bytes, but each output channel may also need a floating-point scale. If scales are FP32, add $4N$ bytes. Biases, alignment and runtime workspace are additional terms.
+
+For this tiny $(3,2)$ matrix, FP32 needs $24$ weight bytes. A packed four-bit representation plus two FP32 scales would need $3+8=11$ bytes before other metadata. The teaching implementation stores its codes in int8 arrays, so it uses $6+8=14$ bytes instead. Report the representation you actually measured. Neither byte count says which kernel will execute or how long a request will take.
+
+## Follow rounding error through the next multiplication
+
+A weight value rounded to its nearest grid point has error at most half a scale when it is within the represented range. To see why that does not directly bound the output by half a scale, write the output error as a sum of input-weight error products. Large inputs can amplify small weight errors; cancellation may reduce the observed error but should not be assumed in the bound.
+
+For input $[2,-1,0.5]$ and weight errors $[0.1,-0.1,0.1]$, the signed output error is $0.35$. The sum of absolute products is also $0.35$, so the bound can be attained. Activation clipping is different: a value outside the represented range can lose much more than half a scale. Keep a clipping count alongside your rounding and task-quality measurements.
+
+$$
+|\Delta y_j|=\left|\sum_i x_i\Delta W_{ij}\right|\leq\sum_i |x_i|\,|\Delta W_{ij}|
+$$
+
+## Write the full-precision reference
+
+Create main.py in your lesson workspace and run it with the active course Python environment. Keep the input and kernel in FP32 and establish an independently computed dot product.
+
+```python
+import numpy as np
+import jax.numpy as jnp
+x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
+w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
+reference = x @ w
+
+np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)
+
+```
+
+The top-left output is $-1.437$. This anchors the error comparison to a named value before introducing a lower-precision policy.
+
+## Round inputs and weights, then accumulate explicitly
+
+Append this block to the same main.py and rerun the whole file. Compare FP32, FP16 and BF16 representations while returning to FP32 before multiplication.
+
+```python
+def mixed_forward(x, w, dtype):
+    # Demonstrate rounding inputs/weights with explicit float32 accumulation.
+    a = jnp.asarray(x, dtype).astype(jnp.float32)
+    b = jnp.asarray(w, dtype).astype(jnp.float32)
+    return np.asarray(a @ b)
+for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
+    y = mixed_forward(x, w, dtype)
+    error = float(np.max(np.abs(y-reference)))
+    assert np.isfinite(y).all() and error < .05
+    print(str(dtype), "max absolute error", error)
+
+```
+
+The printed errors isolate the consequence of representational rounding in this example. This does not benchmark a native low-precision matrix kernel.
+
+## Construct signed integer codes and channel scales
+
+Append this block to the same main.py and rerun the whole file. Quantize per output channel and inspect the all-zero-channel case.
+
+```python
+def quantize_weights(weights, bits):
+    if bits not in (4, 8):
+        raise ValueError("use signed 4 or 8 bit symmetric quantization")
+    limit = 2 ** (bits - 1) - 1
+    maxima = np.max(np.abs(weights), axis=0, keepdims=True)
+    scale = np.where(maxima == 0, 1., maxima / limit).astype(np.float32)
+    q = np.clip(np.rint(weights / scale), -limit, limit).astype(np.int8)
+    return q, scale
+
+zero_codes, zero_scales = quantize_weights(np.zeros((3,2),np.float32), 8)
+np.testing.assert_array_equal(zero_codes, np.zeros((3,2),np.int8))
+np.testing.assert_array_equal(zero_scales, np.ones((1,2),np.float32))
+
+```
+
+An all-zero channel uses scale $1$ and zero codes, so reconstruction stays zero without division by zero.
+
+## Check reconstructed outputs against a bound
+
+Append this block to the same main.py and rerun the whole file. Reconstruct the weights, then compare observed output errors with the independent absolute-product bound.
+
+```python
+for bits in (8, 4):
+    q, scale = quantize_weights(w, bits)
+    reconstructed = q.astype(np.float32) * scale
+    assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)
+    # Independent error bound: |x deltaW| <= |x| |deltaW|.
+    error = np.abs(x @ reconstructed-reference)
+    bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)
+    assert np.all(error <= bound + 1e-6)
+    print("W%dA32 simulated output error" % bits, float(error.max()))
+
+```
+
+Every error must fit its stated bound. Move on to activation clipping and the affine integer experiment before calling the policy W8A8.
 
 ## Run the example
 
@@ -212,9 +306,14 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:54.155485+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:36.449777+00:00. JAX 0.9.2.
 
 ```text
+<class 'jax.numpy.float32'> max absolute error 0.0
+<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125
+<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047
+W8A32 simulated output error 0.008031368255615234
+W4A32 simulated output error 0.14571428298950195
 <class 'jax.numpy.float32'> max absolute error 0.0
 <class 'jax.numpy.float16'> max absolute error 0.0010547637939453125
 <class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047
@@ -225,9 +324,11 @@ Correct / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0
 Clipped values: 1 reconstructed: [0.19685039 0.8976378  1.        ]
 Affine accumulators: [[5, 15]] output codes: [[2, 7]]
 Correct / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]
+Small-channel max error; shared / per-channel: 0.03 7.874053e-05
 Zero channel handled
 W8A8 fixture error 0.00742650032043457
 Code-origin invariance and bias-only zero input verified.
+Weight-plus-scale subtotals: 24 14 11
 PASS: deployment-05
 
 ```
@@ -301,6 +402,27 @@ print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.to
 **Expected:** Accumulators [[5, 15]], output codes [[2, 7]], correct outputs [[0.625, 0.9375]]. Omitting the input zero point gives [[-0.125, 0.5625]]. The narrow output grid clips both outputs to [[0.52734375, 0.52734375]].
 
 The first grid represents both values exactly. With scale $1/256$, the highest output is $(127+8)/256=0.52734375$, so both values saturate. A half-step rounding bound applies only without clipping. This is a NumPy arithmetic audit, not a native INT8 kernel or bit-exact LiteRT implementation: real runtimes specify operator layouts, multiplier approximations and rounding rules separately.
+
+## Give small and large output channels different grids
+
+**Predict before running:** If one output channel has weights near $0.01$ and another near $10$, what happens to the small channel under one shared INT8 scale?
+
+```python
+heterogeneous = np.array([[.01, 10.], [-.02, -5.], [.03, 2.]], np.float32)
+channel_codes, channel_scales = quantize_weights(heterogeneous, 8)
+per_channel = channel_codes.astype(np.float32) * channel_scales
+shared_scale = np.max(np.abs(heterogeneous)) / 127
+shared = np.clip(np.rint(heterogeneous/shared_scale), -127, 127).astype(np.int8).astype(np.float32)*shared_scale
+assert np.all(shared[:,0] == 0)
+assert np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])) < .001
+np.testing.assert_allclose(shared[:,0], [0.,0.,0.], atol=0)
+print('Small-channel max error; shared / per-channel:', np.max(np.abs(shared[:,0]-heterogeneous[:,0])), np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])))
+
+```
+
+**Expected:** The shared scale rounds the entire small channel to zero. Its error is $0.03$; the per-channel error stays below $0.001$.
+
+The global maximum determines a coarse grid for every channel. A per-channel grid protects the small channel here, at the cost of additional scale metadata and a runtime contract that must support the chosen axis.
 
 ## Make it yours
 
@@ -381,6 +503,34 @@ print('Code-origin invariance and bias-only zero input verified.')
 ```
 
 Integer codes are coordinates on a grid. Changing the coordinate origin consistently preserves represented values. The zero-input check exposes a missing zero-point correction or bias in the wrong accumulator units.
+
+</details>
+
+## Account for actual low-bit storage
+
+**Transfer / diagnosis**
+
+Calculate FP32 storage, ideal packed four-bit storage, and the actual int8-backed four-bit simulation for the fixture. Include per-output-channel FP32 scales; keep biases and runtime workspace explicitly outside this subtotal.
+
+<details><summary>Hint</summary>
+
+Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is not implemented by astype(int8).
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+q4, s4 = quantize_weights(w, 4)
+float_weight_bytes = w.nbytes
+simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes
+ideal_packed_weight_and_scale_bytes = (w.size + 1)//2 + s4.nbytes
+assert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes) == (24,14,11)
+print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)
+
+```
+
+The simulation uses $14$ bytes for its codes and scales, not the ideally packed $11$. Tiny tensors emphasize metadata overhead; large models also need block/group metadata, alignment, biases and working memory.
 
 </details>
 

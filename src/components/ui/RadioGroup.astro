@@ -1,0 +1,6 @@
+---
+import { renderRadioGroup, type RadioGroupProps } from './radio-group.js';
+interface Props extends RadioGroupProps {}
+---
+
+<Fragment set:html={renderRadioGroup(Astro.props)} />

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "deployment-04",
-  "minutes": 115,
+  "minutes": 130,
   "content": {
     "problem": "A model call looks fast in isolation, yet users may wait when requests arrive together. We will measure actual completed inference at several batch sizes, then use those observations in a clearly labeled queue simulation. The aim is to connect milliseconds per batch, examples per second and response latency without confusing a local benchmark with a deployed service.",
     "idea": "Inference capacity depends on arrivals, queueing, batching, service time and response work. A fast model call is one component. Define the request boundary before estimating throughput or deciding when to add capacity.",
@@ -46,6 +46,14 @@
       {
         "title": "Plan replicas with headroom, then test the plan",
         "body": "For a measured effective capacity \\(q\\) requests per second per replica and target utilization \\(u\\), a first estimate is \\(R=\\lceil\\lambda/(u q)\\rceil\\). This assumes compatible units, balanced routing and an actual capacity measurement for the workload. Autoscaling also has observation windows, startup time, warming and cooldown; it cannot erase a burst that arrives before new capacity is ready. Keep the formula labeled as a planning assumption until a load test includes the real request boundary, concurrency limits, failures and startup behavior."
+      },
+      {
+        "title": "A percentile is a sample summary, not a latency promise",
+        "body": "Sort twenty observed request times. If nineteen are \\(1\\) millisecond and one is \\(100\\) milliseconds, NumPy's default linear percentile interpolation reports p95 as \\(5.95\\) milliseconds. The maximum remains \\(100\\). The interpolated value need not be an observed request time.\n\nThat summary does not guarantee that future requests will stay below p95, and a small sample gives weak evidence about rare slow requests. State the sample size and percentile method, retain the full samples, and repeat the run under the intended workload. Do not average percentiles from separate workers; combine request samples or use an aggregation method appropriate to the monitoring system.",
+        "check": {
+          "prompt": "Would reporting only p95 reveal the actual worst observed request in this example?",
+          "answer": "No. The worst observed request is \\(100\\) milliseconds, while interpolated p95 is \\(5.95\\). Report the distribution and maximum alongside the requested percentile when those distinctions matter."
+        }
       }
     ],
     "output": "The program prints first-call, warm p50/p95 and examples-per-second measurements for each batch size. Absolute timings are host-dependent. The independent queue example yields response times of 2, 3 and 2 milliseconds.",
@@ -74,6 +82,13 @@
         "code": "batch=8;spacing_ms=2.\ncollection_wait=(batch-1-np.arange(batch))*spacing_ms\nassert collection_wait[0]==14.\nassert collection_wait.mean()==7.",
         "output": "The first waits fourteen milliseconds; mean collection delay is seven milliseconds.",
         "explanation": "A throughput improvement can be overwhelmed by waiting for a batch at low arrival rates."
+      },
+      {
+        "title": "Inspect the interpolation behind p95",
+        "prediction": "With nineteen \\(1\\)-millisecond samples and one \\(100\\)-millisecond sample, must p95 equal an observed sample?",
+        "code": "illustrative_ms=np.array([1.]*19+[100.])\ninterpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))\nnp.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)\nassert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.\nprint('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())\n",
+        "output": "The interpolated p95 is \\(5.95\\) milliseconds and the maximum is \\(100\\) milliseconds.",
+        "explanation": "These deliberately constructed values explain the percentile calculation. They are not measurements of the course model or an accelerator. The timed figure retains its actual measured samples."
       }
     ],
     "practice": [
@@ -92,6 +107,14 @@
         "hint": "Public simulation inputs need finite, ordered values and positive service time.",
         "solution": "for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:\n    try:\n        simulate_queue(arrivals,duration)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid timeline was accepted\")",
         "explanation": "Validating assumptions prevents a simulation from silently supporting a false capacity story."
+      },
+      {
+        "title": "Measure the margin below a response deadline",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "For five simultaneous requests and a \\(2\\)-millisecond serial service, count responses that exceed a \\(6\\)-millisecond deadline. Explain why adding a faster model alone is not the only intervention.",
+        "hint": "Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.",
+        "solution": "_,_,deadline_latencies=simulate_queue(np.zeros(5),2.)\nnp.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])\nmissed_deadlines=int(np.count_nonzero(deadline_latencies>6.))\nassert missed_deadlines==2\nprint('Requests beyond the declared deadline:',missed_deadlines)\n",
+        "explanation": "Two responses miss the deadline in this serial simulation. Admission control, batching policy or additional workers could change the queue, but each requires a new model or measurement. The example does not execute a real autoscaler."
       }
     ],
     "takeaways": [

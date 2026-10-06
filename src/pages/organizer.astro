@@ -6,6 +6,7 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
 import { siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
+import ChoiceField from '../components/ui/ChoiceField.astro';
 ---
 
 <SiteLayout {...pages.organizer}>
@@ -20,28 +21,19 @@ import pages from '../data/pages.json';
     </div>
     <section id="club">
       <div class="club-controls">
-        <label for="club-route">
-          Pathway
-          <select data-choices="disclosure" data-choice-label="Pathway" id="club-route"></select>
-        </label>
-        <label for="club-weeks">
-          Schedule
-          <select data-choices="inline" data-choice-label="Schedule" id="club-weeks">
-            <option value="4">4 weeks</option>
-            <option value="8">8 weeks</option>
-          </select>
-        </label>
-        <label for="club-budget">
-          Lesson time each week
-          <select data-choices="inline" data-choice-label="Lesson time each week" id="club-budget">
-            <option value="120">2 hours</option>
-            <option value="180" selected>
-              3 hours
-            </option>
-            <option value="240">4 hours</option>
-            <option value="360">6 hours</option>
-          </select>
-        </label>
+        <ChoiceField id="club-route" label="Pathway" variant="list" />
+        <ChoiceField id="club-weeks" label="Schedule" variant="segmented">
+          <option value="4">4 weeks</option>
+          <option value="8">8 weeks</option>
+        </ChoiceField>
+        <ChoiceField id="club-budget" label="Lesson time each week" variant="segmented">
+          <option value="120">2 hours</option>
+          <option value="180" selected>
+            3 hours
+          </option>
+          <option value="240">4 hours</option>
+          <option value="360">6 hours</option>
+        </ChoiceField>
         <button id="club-download">Download facilitator plan</button>
       </div>
       <div id="club-summary" role="status" aria-live="polite"></div>

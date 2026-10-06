@@ -1,6 +1,6 @@
 # Adapt a pretrained model and choose a post-training objective
 
-Phase 15: Deployment, interoperability & edge AI · about 125 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 ## What you will be able to do
 
@@ -62,6 +62,26 @@ A pairwise preference objective asks which of two responses is preferred; its su
 ## Carry the contract to a real pretrained model
 
 Choose an actual model checkpoint under its license, record repository and exact revision, tokenizer or feature preprocessing, architecture configuration, file hashes and base precision. First verify a golden inference example before changing weights. Build disjoint training, validation and final evaluation sets, with no overlap from teacher-generation or calibration data. Start with a small controlled adapter or declared trainable parameter subset; record what remains frozen and save adapter/base identities together. Define the task and source-retention criteria before optimization. Recheck export, precision and target-runtime parity after adaptation. This extension is an execution plan, not a claim that a large external model ran in this CPU lesson.
+
+## Turn task tradeoffs into a release decision
+
+A lower target loss can be useful while still causing an unacceptable regression on an older task. Decide how much source-task degradation is allowed before inspecting the candidate results. Let $L_s$ denote source evaluation loss and let $\Delta_s=L_s(\mathrm{candidate})-L_s(\mathrm{base})$. Positive $\Delta_s$ means worse retention. A retention budget is a product decision expressed in the same loss units, not a universal constant.
+
+In this synthetic exercise the source evaluation reuses the source inputs, so it is only a retention proxy. A real release needs a separate held-out source set as well as a held-out target set. Record every candidate, including candidates rejected by the gate. If none satisfies the predeclared budget, keep the base or change the training recipe; do not quietly relax the budget after seeing the answer.
+
+$$
+\mathrm{accept}(m)=\left[L_t(m)<L_t(m_0)\right]\land\left[L_s(m)-L_s(m_0)\leq\delta\right]
+$$
+
+### Pause and reason
+
+Can the candidate with the lowest target loss fail this gate?
+
+<details><summary>Compare your reasoning</summary>
+
+Yes. The gate requires both improvement on the target criterion and a source regression no larger than the chosen budget $\delta$. Report both quantities and the reason for rejection.
+
+</details>
 
 ## 1. Pretrain a small model and retain its source data identity
 
@@ -252,7 +272,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:43.436992+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:12.359932+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -293,6 +313,9 @@ checkpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b
 checkpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c
 wrong-teacher held loss: 1.3151594400405884
 source retention losses: [0.5451400876045227, 0.7904530763626099, 1.0046310424804688]
+supervised source loss increase 0.24531298875808716 passes declared gate True
+teacher source loss increase 0.45949095487594604 passes declared gate False
+Candidate selected under the declared fixture budget: supervised
 PASS: deployment-02
 
 ```
@@ -386,6 +409,40 @@ np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),ex
 ```
 
 Independent algebra checks normalization and reduction as well as stability.
+
+</details>
+
+## Choose under a declared retention constraint
+
+**Transfer / diagnosis**
+
+Before running, choose a source-loss increase budget of $0.3$ nats for this fixture. Evaluate both adapted candidates against the same target and source criteria; retain the base if neither qualifies.
+
+<details><summary>Hint</summary>
+
+Compare each source loss with the base source loss. Do not compare the two training objectives with each other.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+retention_budget = .3
+eligible = []
+for name in ('supervised', 'teacher'):
+    delta = metrics[name]['source_cross_entropy'] - metrics['pretrained']['source_cross_entropy']
+    improved = metrics[name]['held_cross_entropy'] < metrics['pretrained']['held_cross_entropy']
+    accepted_candidate = improved and delta <= retention_budget
+    print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)
+    if accepted_candidate: eligible.append(name)
+selected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'
+assert selected == 'pretrained' or selected in eligible
+assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)
+print('Candidate selected under the declared fixture budget:', selected)
+
+```
+
+The gate separates optimization from acceptance. Its conclusion applies to these seeded data and this declared budget; selecting a candidate is not evidence of generalization to a natural dataset.
 
 </details>
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "deployment-02",
-  "minutes": 125,
+  "minutes": 130,
   "content": {
     "problem": "A model already learned one task. You now have a small adaptation set and a teacher that supplies probabilities. Should you optimize the observed labels or imitate the teacher? We will actually pretrain, save and reload a tiny model, adapt it both ways, and compare the resulting predictions on an untouched evaluation split. The model is deliberately small so every objective and derivative can be inspected.",
     "idea": "Adaptation starts with the behavior you want to change and the evidence you have. Supervised labels and teacher distributions supply different targets. Their objectives can use the same model while asking it to learn different things.",
@@ -45,6 +45,15 @@
       {
         "title": "Carry the contract to a real pretrained model",
         "body": "Choose an actual model checkpoint under its license, record repository and exact revision, tokenizer or feature preprocessing, architecture configuration, file hashes and base precision. First verify a golden inference example before changing weights. Build disjoint training, validation and final evaluation sets, with no overlap from teacher-generation or calibration data. Start with a small controlled adapter or declared trainable parameter subset; record what remains frozen and save adapter/base identities together. Define the task and source-retention criteria before optimization. Recheck export, precision and target-runtime parity after adaptation. This extension is an execution plan, not a claim that a large external model ran in this CPU lesson."
+      },
+      {
+        "title": "Turn task tradeoffs into a release decision",
+        "body": "A lower target loss can be useful while still causing an unacceptable regression on an older task. Decide how much source-task degradation is allowed before inspecting the candidate results. Let \\(L_s\\) denote source evaluation loss and let \\(\\Delta_s=L_s(\\mathrm{candidate})-L_s(\\mathrm{base})\\). Positive \\(\\Delta_s\\) means worse retention. A retention budget is a product decision expressed in the same loss units, not a universal constant.\n\nIn this synthetic exercise the source evaluation reuses the source inputs, so it is only a retention proxy. A real release needs a separate held-out source set as well as a held-out target set. Record every candidate, including candidates rejected by the gate. If none satisfies the predeclared budget, keep the base or change the training recipe; do not quietly relax the budget after seeing the answer.",
+        "math": "\\mathrm{accept}(m)=\\left[L_t(m)<L_t(m_0)\\right]\\land\\left[L_s(m)-L_s(m_0)\\leq\\delta\\right]",
+        "check": {
+          "prompt": "Can the candidate with the lowest target loss fail this gate?",
+          "answer": "Yes. The gate requires both improvement on the target criterion and a source regression no larger than the chosen budget \\(\\delta\\). Report both quantities and the reason for rejection."
+        }
       }
     ],
     "output": "Both adapted branches reduce the common held-out target cross-entropy relative to the reloaded source model. The printed table also reports probability error and source-task retention; inspect all three quantities.",
@@ -91,6 +100,14 @@
         "hint": "Use the same logits, reduction and targets; this check does not call the JAX loss as its oracle.",
         "solution": "probe=np.array([-.4,.2,.3])\nz=host_X@probe\nexpected=np.mean(np.logaddexp(0,z)-np.asarray(soft_targets)*z)\nnp.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol=1e-6)",
         "explanation": "Independent algebra checks normalization and reduction as well as stability."
+      },
+      {
+        "title": "Choose under a declared retention constraint",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Before running, choose a source-loss increase budget of \\(0.3\\) nats for this fixture. Evaluate both adapted candidates against the same target and source criteria; retain the base if neither qualifies.",
+        "hint": "Compare each source loss with the base source loss. Do not compare the two training objectives with each other.",
+        "solution": "retention_budget = .3\neligible = []\nfor name in ('supervised', 'teacher'):\n    delta = metrics[name]['source_cross_entropy'] - metrics['pretrained']['source_cross_entropy']\n    improved = metrics[name]['held_cross_entropy'] < metrics['pretrained']['held_cross_entropy']\n    accepted_candidate = improved and delta <= retention_budget\n    print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)\n    if accepted_candidate: eligible.append(name)\nselected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'\nassert selected == 'pretrained' or selected in eligible\nassert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)\nprint('Candidate selected under the declared fixture budget:', selected)\n",
+        "explanation": "The gate separates optimization from acceptance. Its conclusion applies to these seeded data and this declared budget; selecting a candidate is not evidence of generalization to a natural dataset."
       }
     ],
     "takeaways": [

@@ -179,7 +179,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:43.722005+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:58:50.075165+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]

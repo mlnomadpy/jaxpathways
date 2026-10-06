@@ -1,111 +1,71 @@
-body {
-  font: 16px/1.65 var(--ui);
-}
 h1,
 h2,
 h3,
-h4,
-button,
-input,
-select,
-.brand,
-nav,
-.edition,
-.button,
-.map-label,
-.diagram-foot,
-.node,
-.terminal > div,
-summary,
-.badge {
+h4 {
   font-family: var(--ui);
-}
-h1,
-h2,
-h3 {
-  color: var(--ink);
-  letter-spacing: -0.045em;
+  color: var(--atlas);
+  font-weight: 700;
+  margin: 0;
 }
 h1 {
-  font-weight: 700;
-  font-size: clamp(38px, 4.7vw, 64px);
+  font-size: clamp(36px, 4.7vw, 64px);
+  line-height: 1.06;
+  letter-spacing: -0.045em;
 }
 h2 {
-  font-size: 32px;
-  line-height: 1.18;
+  font-size: clamp(27px, 3vw, 32px);
+  line-height: 1.2;
+  letter-spacing: -0.035em;
 }
 h3 {
   font-size: 21px;
   line-height: 1.3;
   letter-spacing: -0.025em;
 }
+h4 {
+  line-height: 1.4;
+}
 code,
 pre {
-  font-family: 'SFMono-Regular', Consolas, monospace;
+  font-family: var(--mono);
 }
-header {
-  max-width: none;
-  padding: 20px max(5%, calc((100vw - 1240px) / 2));
+p code,
+li code {
+  overflow-wrap: anywhere;
 }
-header nav {
-  align-items: center;
-  flex-wrap: wrap;
-}
-.brand {
-  font-size: 19px;
-  letter-spacing: -0.04em;
-  white-space: nowrap;
-  color: var(--ink);
-}
-.brand:before {
-  place-items: center;
-  color: #fff;
-  margin-right: 10px;
-  font-size: 22px;
-  font-weight: 700;
-}
-main {
-  max-width: 1380px;
+pre code {
+  color: inherit;
+  overflow-wrap: normal;
 }
 .edition {
-  font-size: 13px;
-  margin-bottom: 18px;
-  letter-spacing: 0;
+  font: 13px/1.5 var(--ui);
+  color: var(--muted);
+  margin: 0 0 18px;
+}
+.edition span {
+  display: block;
+  margin-top: 4px;
 }
 .soft {
   font-size: 14px;
   color: var(--muted);
 }
-button,
-.button {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 11px 17px;
-  background: var(--panel);
-  font-weight: 600;
-  text-align: left;
+.page-intro {
+  padding: 48px 0 24px;
 }
-.primary {
-  background: var(--blue);
-  color: white;
-  border-color: var(--blue);
+.page-intro h1 {
+  margin-top: 20px;
+  font-size: clamp(36px, 4.5vw, 62px);
 }
-.primary:hover {
-  background: #2745ab;
-  color: #fff;
-  border-color: #2745ab;
+.page-intro > a {
+  font: 14px/1.5 var(--ui);
+  color: var(--muted);
 }
-.actions {
-  gap: 12px;
-  margin: 28px 0 20px;
+.page-intro > p:not(.edition) {
+  max-width: var(--prose-width);
 }
-a:focus-visible,
-button:focus-visible,
-summary:focus-visible,
-input:focus-visible,
-select:focus-visible {
-  outline: 3px solid var(--blue);
-  outline-offset: 4px;
+@media (max-width: 760px) {
+  .page-intro {
+    padding-top: 24px;
+  }
 }

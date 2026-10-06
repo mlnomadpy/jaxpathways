@@ -207,7 +207,7 @@ visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:44:04.497230+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:04:15.296960+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]

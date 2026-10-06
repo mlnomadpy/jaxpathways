@@ -1,7 +1,7 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.3.0",
   "scripts": {
     "dev": "npm run content:build && astro dev",
     "check": "npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm test && python3 scripts/check-distribution.py && npm run check:site",

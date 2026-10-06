@@ -128,15 +128,15 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:19.324667+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:19.298722+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.013669625390321016 1.570768654346466e-05
-eager median / min / max seconds: 2.2104009985923767e-05 2.11251899600029e-05 3.329198807477951e-05
-compiled median / min / max seconds: 3.7499703466892242e-06 3.5408884286880493e-06 4.792120307683945e-06
+First/repeat seconds: 0.023624374996870756 2.39592045545578e-05
+eager median / min / max seconds: 3.9103906601667404e-05 3.7457793951034546e-05 6.258394569158554e-05
+compiled median / min / max seconds: 6.333226338028908e-06 5.958136171102524e-06 8.458271622657776e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 6.666639819741249e-06
+compiled value-and-grad median seconds: 1.1312542483210564e-05
 PASS: transforms-04
 
 ```

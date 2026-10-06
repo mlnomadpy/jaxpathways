@@ -1,6 +1,6 @@
 # Export a computation and verify its serving contract
 
-Phase 15: Deployment, interoperability & edge AI · about 75 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 ## What you will be able to do
 
@@ -23,6 +23,16 @@ The lesson exports a fixed float32 input of shape $(1,3)$ to an output of shape 
 Serialize, load the file again and call the restored computation on new inputs. Comparing only the original in-memory function does not test the exported bytes. Keep artifact hash, environment and tolerance with the result.
 
 If preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.
+
+### Four different deployment boundaries
+
+**Predict:** Which row is tested by the exported object alone?
+
+![Four different deployment boundaries](../../phases/15-deployment/03-export-and-serve-a-trained-computation/outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.
 
 ### Pause and reason
 
@@ -53,6 +63,67 @@ The local exported call still needs a compatible JAX runtime. For TensorFlow ser
 ## From local call to service
 
 Place decoding, normalization, shape checks, inference and response encoding inside your request boundary. Set input size limits and concurrency limits. Measure cold initialization and warmed request latency separately; queueing and network time change the service result. The edge lesson extends this boundary to a single-device request. Autoscaling and a production server are outside this CPU artifact exercise.
+
+## Separate serialized computation from the serving system
+
+Export answers a specific question: can a staged computation be represented, loaded and called with the declared signature? It does not automatically include the request parser, feature names, normalization policy, output labels or service configuration. A fixed shape of $(1,3)$ says that the call expects one observation with three features; it says nothing about which physical measurements those features represent.
+
+This example captures a particular set of weights and bias in the exported computation. The fresh-process experiment loads only the bytes and a request. It does not import the original inference function or retrain a model. Passing that test is stronger than calling the object that just produced the export, but it still checks the installed CPU runtime, not a different accelerator or another runtime's operator coverage.
+
+## Define an inference-only computation
+
+Create main.py in your lesson workspace and run it with the active course Python environment. Keep training out of the function and compute the known probe before exporting.
+
+```python
+import tempfile
+from pathlib import Path
+import numpy as np
+import jax
+import jax.numpy as jnp
+from jax import export
+weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)
+bias = jnp.array([.1, -.2], dtype=jnp.float32)
+@jax.jit
+def inference(x):
+    return x @ weights + bias
+
+np.testing.assert_allclose(inference(jnp.array([[1.,2.,-1.]], jnp.float32)), [[3.1,-.45]], atol=1e-6)
+
+```
+
+The probe returns $[3.1,-0.45]$. Preserve that independent expected value as you cross the serialization boundary.
+
+## Declare the fixed input signature
+
+Append this block to the same main.py and rerun the whole file. Stage the computation for a batch of one with three float32 features.
+
+```python
+signature = jax.ShapeDtypeStruct((1, 3), jnp.float32)
+artifact = export.export(inference)(signature)
+
+assert artifact.in_avals[0].shape == (1,3)
+
+```
+
+The export has one input of shape $(1,3)$. A batch of two is a different contract; the failure experiment tests that rejection.
+
+## Write bytes, reload and compare
+
+Append this block to the same main.py and rerun the whole file. Serialize to disk and call the restored artifact on the same probe.
+
+```python
+with tempfile.TemporaryDirectory() as folder:
+    path = Path(folder) / "dense.jaxexport"
+    path.write_bytes(artifact.serialize())
+    restored = export.deserialize(path.read_bytes())
+    sample = np.array([[1., 2., -1.]], np.float32)
+    actual = np.asarray(restored.call(sample))
+    np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
+    print("Verified serialized bytes:", path.stat().st_size)
+
+```
+
+The output agrees with hand arithmetic. File size is recorded rather than hard-coded because the representation can change with the JAX version. Next, run the fresh-interpreter experiment.
 
 ## Run the example
 
@@ -110,12 +181,15 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:53.010987+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:34.334630+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172
+Verified serialized bytes: 1172
 Rejected incompatible shape: ValueError
+Fresh interpreter loaded bytes and matched the known scores.
 Changed exported request verified
+Invalid requests rejected before the one valid inference call.
 PASS: deployment-03
 
 ```
@@ -137,6 +211,37 @@ else:
 **Expected:** The incompatible shape is rejected.
 
 A Python function being shape-generic does not make its fixed exported interface polymorphic.
+
+## Load only the exported bytes in a fresh interpreter
+
+**Predict before running:** Will the computation still work when the new process has no inference function or live parameter objects?
+
+```python
+import json
+import os
+import subprocess
+import sys
+worker = """import json,sys
+from pathlib import Path
+import numpy as np
+from jax import export
+loaded = export.deserialize(Path(sys.argv[1]).read_bytes())
+request = np.asarray(json.load(sys.stdin)['features'], dtype=np.float32)
+print(json.dumps({'scores': np.asarray(loaded.call(request)).tolist()}, allow_nan=False))
+"""
+with tempfile.TemporaryDirectory() as directory:
+    exported_path = Path(directory) / 'dense.jaxexport'
+    exported_path.write_bytes(artifact.serialize())
+    completed = subprocess.run([sys.executable, '-c', worker, str(exported_path)], input=json.dumps({'features': [[1.,2.,-1.]]}), text=True, capture_output=True, check=True, env=dict(os.environ, JAX_PLATFORMS='cpu'), timeout=60)
+    worker_scores = json.loads(completed.stdout)['scores']
+np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)
+print('Fresh interpreter loaded bytes and matched the known scores.')
+
+```
+
+**Expected:** The child process returns $[3.1,-0.45]$ using only the exported artifact and request.
+
+The checked boundary is artifact bytes → installed JAX CPU runtime → scores. The worker has a JSON transport for the test, not a production web server. A separate deployment runtime requires its own receipt.
 
 ## Make it yours
 
@@ -185,6 +290,41 @@ np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1
 ```
 
 Validation belongs before the runtime call. A dtype cast alone neither verifies input shape nor rejects NaNs.
+
+</details>
+
+## Prove that request validation precedes exported inference
+
+**Transfer / diagnosis**
+
+Build a request wrapper that records how often inference runs. Reject both a malformed feature row and a nonfinite row before calling the exported computation. Then verify one valid request.
+
+<details><summary>Hint</summary>
+
+Increment the counter only after validation succeeds. An error message alone does not prove which boundary rejected the input.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+inference_calls = [0]
+def checked_prediction(values):
+    array = validate_request(values)
+    inference_calls[0] += 1
+    return np.asarray(restored.call(array))
+for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
+    try: checked_prediction(invalid)
+    except ValueError: pass
+    else: raise AssertionError('invalid request reached inference')
+assert inference_calls[0] == 0
+np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
+assert inference_calls[0] == 1
+print('Invalid requests rejected before the one valid inference call.')
+
+```
+
+The wrapper tests ordering as well as acceptance. A service can satisfy an output check on valid inputs and still waste runtime work or fail unclearly on malformed requests.
 
 </details>
 

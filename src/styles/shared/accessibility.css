@@ -2,29 +2,17 @@
   html {
     scroll-behavior: auto;
   }
-  * {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
     transition: none !important;
   }
 }
-@media (max-width: 760px) {
-  header {
-    flex-direction: row !important;
-    align-items: center !important;
-  }
-  header .brand {
-    font-size: 20px;
-  }
-  .navigation-toggle {
-    margin: 0;
-    padding: 10px 12px;
-  }
-  .page-intro {
-    padding-top: 24px;
-  }
-}
 @media print {
-  header,
-  .navigation-toggle {
+  .site-header,
+  .navigation-toggle,
+  button {
     display: none !important;
   }
   body {
@@ -35,33 +23,4 @@
     white-space: pre-wrap !important;
     overflow-wrap: anywhere;
   }
-  button {
-    display: none !important;
-  }
-}
-.empty-state {
-  padding: 1.5rem;
-  border: 1px dashed #aebccf;
-  border-radius: 8px;
-  color: #485a70;
-}
-.field-caption {
-  display: block;
-}
-.field-caption .soft {
-  font: inherit;
-  display: inline;
-}
-
-.copy-status {
-  font-size: 13px;
-  margin: 0;
-  padding-inline: 14px;
-  color: var(--mint);
-}
-.copy-status:empty {
-  display: none;
-}
-.copy-status:not(:empty) {
-  padding-block: 10px !important;
 }

@@ -414,7 +414,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:10.282294+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:01:10.557089+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]

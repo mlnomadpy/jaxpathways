@@ -173,7 +173,7 @@ visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-updat
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:15.523863+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:58:05.023447+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "98f0bccb9822563004b7804a51ae6dfb9a40f3f9d37ec63ca65f2931db682bee",
+  "contentHash": "c9f753036b5befc454e0436038cf75b39cc9352a5db8b646cd3d51abbf64b494",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:36:26.413725+00:00",
+  "generatedAt": "2026-10-06T21:55:31.496608+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -36,5 +36,48 @@
         ]
       }
     ]
+  },
+  "diagram": {
+    "title": "Four different deployment boundaries",
+    "prediction": "Which row is tested by the exported object alone?",
+    "reading": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
+    "alt": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 4.2,
+    "panel": {
+      "kind": "table",
+      "headers": [
+        "Boundary",
+        "Contract",
+        "Example failure"
+      ],
+      "rows": [
+        [
+          "Raw request",
+          "feature order + finite values",
+          "wrong units"
+        ],
+        [
+          "Artifact load",
+          "bytes + runtime support",
+          "wrong artifact"
+        ],
+        [
+          "Numeric call",
+          "shape + dtype + operations",
+          "wrong batch"
+        ],
+        [
+          "Response",
+          "score order + labels",
+          "swapped labels"
+        ]
+      ],
+      "widths": [
+        0.24,
+        0.43,
+        0.33
+      ]
+    }
   }
 }

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-02",
-  "contentHash": "2fef52f3ad2123fb77d565a8cf2497b80ffc0006b0d5f45d433432bcec90a825",
-  "executedAt": "2026-10-06T15:42:43.436992+00:00",
+  "contentHash": "d705098a262938df53b1f2ad6cc1db2d2bd650198bb8603751b0bd93f6004897",
+  "executedAt": "2026-10-06T22:02:12.359932+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{\n  \"pretrained\": {\n    \"held_cross_entropy\": 0.9780182838439941,\n    \"held_brier\": 0.17108705639839172,\n    \"source_cross_entropy\": 0.5451400876045227\n  },\n  \"supervised\": {\n    \"held_cross_entropy\": 0.5554870367050171,\n    \"held_brier\": 0.012093935161828995,\n    \"source_cross_entropy\": 0.7904530763626099\n  },\n  \"teacher\": {\n    \"held_cross_entropy\": 0.5240296125411987,\n    \"held_brier\": 0.00022982103109825402,\n    \"source_cross_entropy\": 1.0046310424804688\n  }\n}\ncheckpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c\n{\n  \"pretrained\": {\n    \"held_cross_entropy\": 0.9780182838439941,\n    \"held_brier\": 0.17108705639839172,\n    \"source_cross_entropy\": 0.5451400876045227\n  },\n  \"supervised\": {\n    \"held_cross_entropy\": 0.5554870367050171,\n    \"held_brier\": 0.012093935161828995,\n    \"source_cross_entropy\": 0.7904530763626099\n  },\n  \"teacher\": {\n    \"held_cross_entropy\": 0.5240296125411987,\n    \"held_brier\": 0.00022982103109825402,\n    \"source_cross_entropy\": 1.0046310424804688\n  }\n}\ncheckpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c\nwrong-teacher held loss: 1.3151594400405884\nsource retention losses: [0.5451400876045227, 0.7904530763626099, 1.0046310424804688]\nPASS: deployment-02\n",
+  "stdout": "{\n  \"pretrained\": {\n    \"held_cross_entropy\": 0.9780182838439941,\n    \"held_brier\": 0.17108705639839172,\n    \"source_cross_entropy\": 0.5451400876045227\n  },\n  \"supervised\": {\n    \"held_cross_entropy\": 0.5554870367050171,\n    \"held_brier\": 0.012093935161828995,\n    \"source_cross_entropy\": 0.7904530763626099\n  },\n  \"teacher\": {\n    \"held_cross_entropy\": 0.5240296125411987,\n    \"held_brier\": 0.00022982103109825402,\n    \"source_cross_entropy\": 1.0046310424804688\n  }\n}\ncheckpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c\n{\n  \"pretrained\": {\n    \"held_cross_entropy\": 0.9780182838439941,\n    \"held_brier\": 0.17108705639839172,\n    \"source_cross_entropy\": 0.5451400876045227\n  },\n  \"supervised\": {\n    \"held_cross_entropy\": 0.5554870367050171,\n    \"held_brier\": 0.012093935161828995,\n    \"source_cross_entropy\": 0.7904530763626099\n  },\n  \"teacher\": {\n    \"held_cross_entropy\": 0.5240296125411987,\n    \"held_brier\": 0.00022982103109825402,\n    \"source_cross_entropy\": 1.0046310424804688\n  }\n}\ncheckpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c\nwrong-teacher held loss: 1.3151594400405884\nsource retention losses: [0.5451400876045227, 0.7904530763626099, 1.0046310424804688]\nsupervised source loss increase 0.24531298875808716 passes declared gate True\nteacher source loss increase 0.45949095487594604 passes declared gate False\nCandidate selected under the declared fixture budget: supervised\nPASS: deployment-02\n",
   "notebookCells": [
     {
       "sourceHash": "2c762c84c76802bf226ca896aa7250935ed4b9c93d15c96a7702a8cba976b154",
@@ -145,6 +145,24 @@
     {
       "sourceHash": "8376c12df74a5bcd0dbf2c7dee18bc7d7890c50eb9853509b60a486464463579",
       "outputs": []
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "b5da94287d2ccc3571b453a9e3a32b6cc96e7ce9dbd8ff20aa4b39168cc3a216",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "supervised source loss increase 0.24531298875808716 passes declared gate True\n",
+            "teacher source loss increase 0.45949095487594604 passes declared gate False\n",
+            "Candidate selected under the declared fixture budget: supervised\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

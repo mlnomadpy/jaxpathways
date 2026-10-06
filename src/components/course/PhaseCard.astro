@@ -61,11 +61,11 @@ const { phase: p } = Astro.props;
       {p.lessons.map((lesson, index) => (
         <li id={lesson.id}>
           <a class="lesson-link" data-lesson={lesson.id} href={siteUrl(`lesson-${lesson.id}.html`)}>
-            <span>
+            <span class="lesson-label">
               <span class="lesson-number">
                 {p.number}.{String(index + 1).padStart(2, '0')}
               </span>
-              {lesson.title}
+              <span class="lesson-title">{lesson.title}</span>
               {lesson.status === 'authored' && (
                 <small class="lesson-runtime">{runtimeLabel(lesson)}</small>
               )}

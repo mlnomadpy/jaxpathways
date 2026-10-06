@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-05",
-  "contentHash": "b898285bf266ce967c8a84c9bae4cc55ca0510daa21c172d6d9c207cb5e8e026",
-  "executedAt": "2026-10-06T15:42:54.155485+00:00",
+  "contentHash": "66c77f5ec56cc20c5da980281bb7fd423eedb2e47cb0887dc1fe1ad69e208eec",
+  "executedAt": "2026-10-06T22:02:36.449777+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,8 +11,43 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nClipped values: 1 reconstructed: [0.19685039 0.8976378  1.        ]\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nZero channel handled\nW8A8 fixture error 0.00742650032043457\nCode-origin invariance and bias-only zero input verified.\nPASS: deployment-05\n",
+  "stdout": "<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\n<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nClipped values: 1 reconstructed: [0.19685039 0.8976378  1.        ]\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nSmall-channel max error; shared / per-channel: 0.03 7.874053e-05\nZero channel handled\nW8A8 fixture error 0.00742650032043457\nCode-origin invariance and bias-only zero input verified.\nWeight-plus-scale subtotals: 24 14 11\nPASS: deployment-05\n",
   "notebookCells": [
+    {
+      "sourceHash": "6cf4573f3b4433b08e638926696659b50991f6f889f2ee1c9183825620afcd52",
+      "outputs": []
+    },
+    {
+      "sourceHash": "c33948895ef442c3a8d860f4e1bb03b5b086acbe3244dc6f89b79b0eecf821ee",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "<class 'jax.numpy.float32'> max absolute error 0.0\n",
+            "<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n",
+            "<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "8cab47c8b2bcd0c8482977c8ea1ad41806573d6eb0fd9637693838028de1127a",
+      "outputs": []
+    },
+    {
+      "sourceHash": "a4e6d0feb56cc37b5220ede398f12310d177dcfa2a80395ff560981f67a6f212",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "W8A32 simulated output error 0.008031368255615234\n",
+            "W4A32 simulated output error 0.14571428298950195\n"
+          ]
+        }
+      ]
+    },
     {
       "sourceHash": "29e72333bdcd15708a22a86cb9e7cbf25a701d53b2b8762f9649bdca7fd296d2",
       "outputs": [
@@ -83,6 +118,18 @@
       ]
     },
     {
+      "sourceHash": "baef37d5b65b0bccf78ed40621261b1d62edccb4e64f98b98c6420e9a020b6c7",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Small-channel max error; shared / per-channel: 0.03 7.874053e-05\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
       "outputs": []
     },
@@ -126,6 +173,22 @@
           "name": "stdout",
           "text": [
             "Code-origin invariance and bias-only zero input verified.\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "4ad6750fbfe8467933895490133fcd80a76d1c533886a9554fea4cdc31782a34",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Weight-plus-scale subtotals: 24 14 11\n"
           ]
         }
       ]

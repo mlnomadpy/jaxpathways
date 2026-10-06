@@ -1,15 +1,11 @@
-/* Composition order preserves the established cascade. Feature pages add their own styles afterwards. */
+/* Shared defaults use low specificity; feature pages own component layouts. */
 @import './shared/reset.css';
-@import './features/computation-base.css';
-@import './features/course-base.css';
-@import './shared/content-chrome.css';
-@import './features/course-controls.css';
 @import './shared/typography.css';
-@import './features/course-presentation.css';
+@import './shared/layout.css';
 @import './shared/interactive-primitives.css';
-@import './features/learning-atlas.css';
 @import './shared/forms.css';
-@import './features/learning-atlas-state.css';
+@import './shared/code.css';
+@import './shared/disclosures.css';
 @import './shared/choices.css';
-@import './features/learning-responsive.css';
+@import './shared/content-chrome.css';
 @import './shared/accessibility.css';

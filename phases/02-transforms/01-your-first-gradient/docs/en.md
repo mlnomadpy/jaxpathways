@@ -136,7 +136,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:39:13.871361+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:56:09.224373+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339

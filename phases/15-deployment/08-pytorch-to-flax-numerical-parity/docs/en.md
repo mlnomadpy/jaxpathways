@@ -1,6 +1,6 @@
 # Convert PyTorch weights to Flax and locate numerical errors
 
-Phase 15: Deployment, interoperability & edge AI · about 90 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
 ## What you will be able to do
 
@@ -23,6 +23,16 @@ Suppose the first dense output agrees but normalized activations do not. Inspect
 Record absolute error and an appropriate relative measure. Near-zero references can make relative error large even when absolute error is small, so tolerances need scale and dtype context.
 
 The layer-error plot identifies a location to investigate, not a universal threshold for all architectures. Use several inputs, including boundary cases, and compare the full preprocessing-to-output contract. Matching one fixture does not establish arbitrary checkpoint compatibility.
+
+### Small errors need a scale-aware budget
+
+**Predict:** Why can a larger absolute difference pass at a larger reference value?
+
+![Small errors need a scale-aware budget](../outputs/mechanism.svg)
+
+*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+
+Read each row as one elementwise decision using absolute tolerance $2\times10^{-6}$ and relative tolerance $2\times10^{-5}$. Near zero the absolute term determines the allowance. At reference $100$, the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.
 
 ### Pause and reason
 
@@ -61,6 +71,212 @@ For a scalar sum of outputs, compare gradients with respect to the input in both
 ## Extend the mapping deliberately
 
 Convolution kernels may require OIHW to HWIO permutations, not a dense transpose. Attention may fuse query/key/value tensors or arrange heads differently. Tied embeddings, normalization order, rotary positions and vocabulary row order can all change behavior despite matching shapes. Add these operations one at a time with golden inputs and intermediate comparisons. This lesson validates its named MLP only; those additional architectures need their own executed mappings.
+
+## Read an error budget one element at a time
+
+A relative error alone behaves badly near a zero reference. Use an absolute allowance $a$ near zero and a relative allowance $r$ for larger values. For a reference $y$ and converted value $\hat y$, the allowed difference is $a+r|y|$. The reference is deliberately the source value; exchanging the two arguments changes the budget slightly.
+
+With $a=2\times10^{-6}$ and $r=2\times10^{-5}$, a reference of zero allows $2\times10^{-6}$ absolute error. An error of $10^{-6}$ passes even though dividing by the reference is undefined. At reference $100$, the budget is $0.002002$, so an error of $0.001$ passes. These tolerances are declared checks for this FP32 fixture. Derive and test a different budget for a different computation or precision policy.
+
+$$
+|\hat y_i-y_i|\leq a+r|y_i|
+$$
+
+### Pause and reason
+
+An output near zero differs by $3\times10^{-6}$. Does a small relative-L2 error over the whole tensor guarantee it passes?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The per-element absolute allowance near zero is about $2\times10^{-6}$. A global norm can conceal one failing element among many large, accurate values. Keep the elementwise gate as well as summary metrics.
+
+</details>
+
+## Probe more than the sum of the outputs
+
+The companion compares the input gradient of the sum of outputs. That is one projection of the Jacobian: it weights every output equally. Opposing errors can cancel in that projection. Use a nonuniform output sensitivity, called a cotangent, to ask how a different weighted combination changes with the input.
+
+Keep the source in evaluation mode, use the same input and cotangent, and reset the PyTorch input gradient before comparing. Inspect the first failing forward boundary before studying derivative differences. Matching this additional probe strengthens the test; it still does not prove equality of the entire Jacobian for every input.
+
+$$
+J(x)^{\mathsf T}v=\nabla_x\left(\sum_i v_i f_i(x)\right)
+$$
+
+## Make the source boundaries inspectable
+
+Create main.py in your lesson workspace and run it with the active course Python environment. Define the source model so every named operation returns its intermediate result.
+
+```python
+"""Explicit CPU PyTorch -> Flax NNX mapping; no generic architecture converter."""
+import numpy as np
+import jax
+import jax.numpy as jnp
+import torch
+from flax import nnx
+
+class TorchModel(torch.nn.Module):
+    def __init__(self, eps=1e-5):
+        super().__init__()
+        self.hidden=torch.nn.Linear(3,5)
+        self.norm=torch.nn.LayerNorm(5,eps=eps)
+        self.out=torch.nn.Linear(5,2)
+    def forward(self,x):
+        h=self.hidden(x);n=self.norm(h);a=torch.nn.functional.gelu(n,approximate='none')
+        return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
+
+assert TorchModel().eval()(torch.zeros((2,3)))['output'].shape == (2,2)
+
+```
+
+The probe has two observations and returns an output of shape $(2,2)$. It also exposes hidden, normalization and activation tensors for diagnosis.
+
+## Write the same operations in Flax
+
+Append this block to the same main.py and rerun the whole file. Match dimensions, normalization epsilon, variance calculation and exact GELU.
+
+```python
+class FlaxModel(nnx.Module):
+    def __init__(self,eps=1e-5):
+        self.hidden=nnx.Linear(3,5,rngs=nnx.Rngs(0))
+        self.norm=nnx.LayerNorm(5,epsilon=eps,use_fast_variance=False,rngs=nnx.Rngs(1))
+        self.out=nnx.Linear(5,2,rngs=nnx.Rngs(2))
+    def __call__(self,x):
+        h=self.hidden(x);n=self.norm(h);a=jax.nn.gelu(n,approximate=False)
+        return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
+
+assert FlaxModel()(jnp.zeros((2,3)))['output'].shape == (2,2)
+
+```
+
+The probe again returns shape $(2,2)$. At this point random parameters differ; matching shapes does not mean matching predictions.
+
+## Map each parameter and declare tolerances
+
+Append this block to the same main.py and rerun the whole file. Copy checked source arrays into named destination parameters. Compare a hidden output with an independent matrix calculation.
+
+```python
+def convert(state,eps=1e-5):
+    shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
+    if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
+    arrays={}
+    for name,shape in shapes.items():
+        value=state[name].detach().cpu().numpy()
+        if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
+            raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)
+        arrays[name]=value.copy()
+    target=FlaxModel(eps)
+    target.hidden.kernel[...]=jnp.asarray(arrays['hidden.weight'].T)
+    target.hidden.bias[...]=jnp.asarray(arrays['hidden.bias'])
+    target.norm.scale[...]=jnp.asarray(arrays['norm.weight'])
+    target.norm.bias[...]=jnp.asarray(arrays['norm.bias'])
+    target.out.kernel[...]=jnp.asarray(arrays['out.weight'].T)
+    target.out.bias[...]=jnp.asarray(arrays['out.bias'])
+    return target
+
+def error_report(reference,actual,atol=2e-6,rtol=2e-5):
+    reference=np.asarray(reference,dtype=np.float64);actual=np.asarray(actual,dtype=np.float64)
+    if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
+        raise ValueError('shape or finite-value mismatch')
+    if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
+    absolute=np.abs(actual-reference)
+    budget=atol+rtol*np.abs(reference)
+    return {'max_abs':float(absolute.max()),'relative_l2':float(np.linalg.norm(actual-reference)/max(np.linalg.norm(reference),1e-12)),
+            'passed':bool(np.all(absolute<=budget))}
+
+step_source = TorchModel().eval()
+step_target = convert(step_source.state_dict())
+step_input = np.array([[1., -2., .5]], np.float32)
+step_expected = step_input @ step_source.hidden.weight.detach().numpy().T + step_source.hidden.bias.detach().numpy()
+np.testing.assert_allclose(step_target(jnp.asarray(step_input))['hidden'], step_expected, rtol=2e-5, atol=2e-6)
+
+```
+
+The hidden-layer check passes after transposing the source kernel. A missing key or wrong source shape should fail before inference.
+
+## Save and reload the converted state
+
+Append this block to the same main.py and rerun the whole file. Store architecture metadata with the arrays and rebuild the target from that archive.
+
+```python
+def save_flax(model,path):
+    np.savez(path,hidden_kernel=np.asarray(model.hidden.kernel[...]),hidden_bias=np.asarray(model.hidden.bias[...]),
+             norm_scale=np.asarray(model.norm.scale[...]),norm_bias=np.asarray(model.norm.bias[...]),
+             out_kernel=np.asarray(model.out.kernel[...]),out_bias=np.asarray(model.out.bias[...]),
+             epsilon=np.array(model.norm.epsilon),schema=np.array(1))
+
+def load_flax(path):
+    shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
+    with np.load(path,allow_pickle=False) as archive:
+        if set(archive.files)!=set(shapes)|{'epsilon','schema'}:raise ValueError('unexpected archive schema')
+        if archive['schema'].shape!=() or int(archive['schema'])!=1:raise ValueError('unknown schema')
+        if archive['epsilon'].shape!=():raise ValueError('epsilon must be scalar')
+        eps=float(archive['epsilon'])
+        if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
+        arrays={}
+        for key,shape in shapes.items():
+            value=archive[key]
+            if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)
+            arrays[key]=value.copy()
+    model=FlaxModel(eps)
+    for module,name,key in [(model.hidden,'kernel','hidden_kernel'),(model.hidden,'bias','hidden_bias'),(model.norm,'scale','norm_scale'),(model.norm,'bias','norm_bias'),(model.out,'kernel','out_kernel'),(model.out,'bias','out_bias')]:
+        getattr(module,name)[...]=jnp.asarray(arrays[key])
+    return model
+
+import tempfile
+from pathlib import Path
+with tempfile.TemporaryDirectory() as step_folder:
+    step_path = Path(step_folder) / 'roundtrip.npz'
+    save_flax(step_target, step_path)
+    step_reloaded = load_flax(step_path)
+    np.testing.assert_allclose(step_reloaded(jnp.asarray(step_input))['output'], step_target(jnp.asarray(step_input))['output'], rtol=2e-5, atol=2e-6)
+
+```
+
+The temporary round trip preserves a probe output. The loader validates the array set, dtype, shape and epsilon; a filename alone establishes none of these properties.
+
+## Compare input regimes and reproduce a mismatch
+
+Append this block to the same main.py and rerun the whole file. Run the fixed-seed source, layerwise comparison, derivative checks and wrong-epsilon intervention.
+
+```python
+import tempfile
+from pathlib import Path
+torch.set_num_threads(1)
+torch.manual_seed(9)
+source=TorchModel().eval()
+# A real local state_dict file, loaded using the tensor-only loading option.
+with tempfile.TemporaryDirectory() as folder:
+    checkpoint=Path(folder)/'weights.pt';torch.save(source.state_dict(),checkpoint)
+    state=torch.load(checkpoint,map_location='cpu',weights_only=True)
+    target=convert(state)
+    # Save the converted weights independently of the live PyTorch object.
+    converted=Path(folder)/'flax-weights.npz'
+    save_flax(target,converted)
+    target=load_flax(converted)
+    errors={name:[] for name in ['hidden','norm','activation','output']}
+    for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:
+        inputs=np.random.default_rng(batch).normal(size=(batch,3)).astype(np.float32)*scale
+        tx=torch.tensor(inputs,requires_grad=True);torch_values=source(tx);flax_values=target(jnp.asarray(inputs))
+        for name in errors:
+            report=error_report(torch_values[name].detach().numpy(),flax_values[name]);assert report['passed'],(name,report)
+            errors[name].append(report['max_abs'])
+        torch_values['output'].sum().backward()
+        input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
+        assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']
+    wrong=convert(state,eps=.1)
+    reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
+    wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
+    assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
+    for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
+        try:convert(bad)
+        except ValueError:pass
+        else:raise AssertionError('incomplete mapping accepted')
+print('Maximum absolute error per layer:',{k:max(v) for k,v in errors.items()})
+print('Wrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.')
+
+```
+
+The original epsilon passes all declared gates. Changing only epsilon leaves the hidden layer unchanged and first fails normalization. Use that first mismatch to choose a repair.
 
 ## Run the example
 
@@ -204,14 +420,18 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:51.932518+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:30.805842+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
 Wrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.
+Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
+Wrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.
 Per-layer wrong-epsilon report: {'hidden': {'max_abs': 2.384185791015625e-07, 'relative_l2': 3.5662515782829134e-08, 'passed': True}, 'norm': {'max_abs': 0.046508073806762695, 'relative_l2': 0.018277932316979384, 'passed': False}, 'activation': {'max_abs': 0.05144989490509033, 'relative_l2': 0.022399576976497533, 'passed': False}, 'output': {'max_abs': 0.011958837509155273, 'relative_l2': 0.013684121610437203, 'passed': False}}
+Near-zero, excessive near-zero, large-value: True False True
 Near-zero acceptance and rejection verified.
 Wrong source layout rejected
+Nonuniform cotangent input-gradient parity: {'max_abs': 2.086162567138672e-07, 'relative_l2': 4.910744924550249e-07, 'passed': True}
 PASS: deployment-08
 
 ```
@@ -229,6 +449,23 @@ print('Per-layer wrong-epsilon report:',wrong_reports)
 **Expected:** The first dense layer passes; normalization fails first.
 
 Localize the first divergent operation before remapping unrelated weights. The plot records downstream effects as well as the first failure.
+
+## Test the tolerance rule near zero
+
+**Predict before running:** Which differences pass at a zero reference and at a reference of $100$?
+
+```python
+near_zero = error_report([0.], [1e-6])
+near_zero_fail = error_report([0.], [3e-6])
+large_value = error_report([100.], [100.001])
+assert near_zero['passed'] and not near_zero_fail['passed'] and large_value['passed']
+print('Near-zero, excessive near-zero, large-value:', near_zero['passed'], near_zero_fail['passed'], large_value['passed'])
+
+```
+
+**Expected:** The three decisions are pass, fail, pass.
+
+The gate checks each element against a reference-dependent budget. A single relative-error percentage is not a substitute.
 
 ## Make it yours
 
@@ -266,6 +503,37 @@ else:raise AssertionError('layout mismatch accepted')
 ```
 
 Asymmetric dimensions expose orientation errors that square test matrices can hide. Shape checks complement numerical checks rather than replacing them.
+
+</details>
+
+## Check a nonuniform output sensitivity
+
+**Transfer / diagnosis**
+
+Compare the source and converted input gradients for an output cotangent that contains unequal positive and negative entries. Explain what this tests beyond summing the outputs.
+
+<details><summary>Hint</summary>
+
+Form the same scalar weighted output in each framework. Create a fresh PyTorch input so earlier gradients do not accumulate.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+probe_inputs = np.array([[.2, -.7, 1.1], [1., .4, -.5]], np.float32)
+cotangent = np.array([[1., -.5], [2., .25]], np.float32)
+probe_torch = torch.tensor(probe_inputs, requires_grad=True)
+weighted_source = (source(probe_torch)['output'] * torch.tensor(cotangent)).sum()
+weighted_source.backward()
+weighted_target = jax.grad(lambda z: jnp.sum(target(z)['output'] * jnp.asarray(cotangent)))(jnp.asarray(probe_inputs))
+vjp_report = error_report(probe_torch.grad.numpy(), weighted_target, atol=5e-6, rtol=5e-5)
+assert vjp_report['passed'], vjp_report
+print('Nonuniform cotangent input-gradient parity:', vjp_report)
+
+```
+
+This checks $J^{\mathsf T}v$ for a second, nonuniform direction. It can reveal errors hidden by an all-ones sensitivity. The same activation, normalization and parameter mapping must support both forward and derivative agreement.
 
 </details>
 

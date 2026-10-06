@@ -223,7 +223,7 @@ visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:44:05.358644+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:04:16.927045+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]

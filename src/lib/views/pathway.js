@@ -27,8 +27,7 @@ export function renderPathway(route, course, hasNext) {
     </div>
     <div class="actions">${hasNext ? '<button type="button" id="use-path" class="primary">Use this path & start</button>' : ''}<a class="button" href="course.html?path=${encodeURIComponent(id)}">Browse lessons</a>
     </div>
-    <p id="path-save-status" role="status">
-    </p>${focusSummary(route)}<div class="role-columns">
+    <p id="path-save-status" role="status"></p>${focusSummary(route)}<div class="role-columns">
     <div>
     <h2>Who this path is for</h2>
     <p>${escapeHtml(route.audience)}</p>

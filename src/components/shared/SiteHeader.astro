@@ -71,21 +71,23 @@ const { active } = Astro.props;
     gap: 4px;
     font: 14px/1.5 var(--ui);
   }
-  .site-header nav a {
+  .site-header nav :global(a) {
     display: inline-flex;
     align-items: center;
     min-height: 44px;
     padding: 10px 12px;
     border-radius: 6px;
     color: var(--muted);
+    border: 0;
+    text-decoration: none;
   }
-  .site-header nav a:hover,
-  .site-header nav a[aria-current='page'] {
+  .site-header nav :global(a):hover,
+  .site-header nav :global(a)[aria-current='page'] {
     background: var(--nav-surface);
     color: var(--atlas);
     text-decoration: none;
   }
-  .site-header nav a[aria-current='page'] {
+  .site-header nav :global(a)[aria-current='page'] {
     font-weight: 700;
   }
   .site-header .navigation-toggle {
@@ -103,7 +105,7 @@ const { active } = Astro.props;
       gap: 0;
       font-size: 13px;
     }
-    .site-header nav a {
+    .site-header nav :global(a) {
       padding-inline: 8px;
     }
   }
@@ -128,19 +130,36 @@ const { active } = Astro.props;
     }
     .site-header nav {
       flex-basis: 100%;
+      flex-direction: column;
       align-items: stretch;
       gap: 4px;
       padding-top: 8px;
     }
-    .site-header nav a {
+    .site-header nav :global(a) {
       border: 0;
       padding: 10px 12px;
     }
-    .site-header:has(.navigation-toggle[hidden]) nav {
-      display: flex !important;
+    .site-header:has(.navigation-toggle:not([hidden])):not(.navigation-open) nav {
+      display: none;
     }
     .site-header.navigation-open nav {
       gap: 4px;
+    }
+  }
+  @media (max-width: 380px) {
+    .site-header {
+      gap: 8px;
+    }
+    .site-header .brand {
+      font-size: 18px;
+      gap: 8px;
+    }
+    .brand img {
+      width: 30px;
+      height: 30px;
+    }
+    .site-header .navigation-toggle:not([hidden]) {
+      padding-inline: 10px;
     }
   }
 </style>

@@ -6,8 +6,12 @@ import { renderCareer } from '../lib/views/career.js';
 import { downloadText } from './browser-actions.js';
 import { navigateToCourse } from './course-navigation.js';
 
+const initializedDocuments = new WeakSet();
+
 export function initCareers() {
   if (!$('#role-detail')) return;
+  if (initializedDocuments.has(document)) return;
+  initializedDocuments.add(document);
   if ($('#career-links'))
     $('#career-links').innerHTML = courseState.course.roles
       .map((r) => `<button data-role="${r.id}">${escapeHtml(r.title)}</button>`)

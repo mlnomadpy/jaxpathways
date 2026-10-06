@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "98f0bccb9822563004b7804a51ae6dfb9a40f3f9d37ec63ca65f2931db682bee",
-  "executedAt": "2026-10-06T15:42:53.010987+00:00",
+  "contentHash": "c9f753036b5befc454e0436038cf75b39cc9352a5db8b646cd3d51abbf64b494",
+  "executedAt": "2026-10-06T22:02:34.334630+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,8 +11,28 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Verified serialized bytes: 1172\nRejected incompatible shape: ValueError\nChanged exported request verified\nPASS: deployment-03\n",
+  "stdout": "Verified serialized bytes: 1172\nVerified serialized bytes: 1172\nRejected incompatible shape: ValueError\nFresh interpreter loaded bytes and matched the known scores.\nChanged exported request verified\nInvalid requests rejected before the one valid inference call.\nPASS: deployment-03\n",
   "notebookCells": [
+    {
+      "sourceHash": "c6e6db3968744f5ddd021ba9f126399354874bdb326d8768f903d7ad854cb2a6",
+      "outputs": []
+    },
+    {
+      "sourceHash": "13e906ff0ebecb52fa41339a5c6a154204ade051aed9be50e2132531334df42c",
+      "outputs": []
+    },
+    {
+      "sourceHash": "5e9f1b16301ca93bc0cc18654a25815a188040e24b2b7d0246fd236127b38ea2",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Verified serialized bytes: 1540\n"
+          ]
+        }
+      ]
+    },
     {
       "sourceHash": "2b767f0c4bd2b01ffb3ea9fed914d85f0328df5475de196be13d93765a739125",
       "outputs": [
@@ -57,6 +77,18 @@
       ]
     },
     {
+      "sourceHash": "189606106634f50972e254ae93badaf92dadd1768fef65b4925e499b71a42851",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Fresh interpreter loaded bytes and matched the known scores.\n"
+          ]
+        }
+      ]
+    },
+    {
       "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
       "outputs": []
     },
@@ -79,6 +111,22 @@
     {
       "sourceHash": "03c9bc41081a3f06cf87e62b17a970a63c2bab8a50cdd1b9fa8decdeac0e2d0a",
       "outputs": []
+    },
+    {
+      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "outputs": []
+    },
+    {
+      "sourceHash": "a0fad4b765fd7cce6edd49bd103e09fea6729b75e9437426f62174bb84b0f0fb",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Invalid requests rejected before the one valid inference call.\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

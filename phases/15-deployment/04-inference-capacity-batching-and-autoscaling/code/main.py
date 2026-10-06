@@ -144,6 +144,14 @@ collection_wait=(batch-1-np.arange(batch))*spacing_ms
 assert collection_wait[0]==14.
 assert collection_wait.mean()==7.
 
+# Experiment: Inspect the interpolation behind p95
+illustrative_ms=np.array([1.]*19+[100.])
+interpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))
+np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)
+assert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.
+print('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())
+
+
 # Reference solution. Try the exercise before reading this.
 _,burst_finish,burst_latency=simulate_queue([0.,0.,0.,0.],2.)
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
@@ -162,4 +170,12 @@ for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
         pass
     else:
         raise AssertionError("invalid timeline was accepted")
+
+# Reference practice: Measure the margin below a response deadline
+_,_,deadline_latencies=simulate_queue(np.zeros(5),2.)
+np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
+missed_deadlines=int(np.count_nonzero(deadline_latencies>6.))
+assert missed_deadlines==2
+print('Requests beyond the declared deadline:',missed_deadlines)
+
 print("PASS: deployment-04")

@@ -1,6 +1,6 @@
 # Move models between JAX, Keras, TensorFlow and PyTorch
 
-Phase 15: Deployment, interoperability & edge AI · about 75 minutes · CPU
+Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
 ## What you will be able to do
 
@@ -81,6 +81,78 @@ $$
 Y=XW+b=XW_{\mathrm{torch}}^\mathsf{T}+b
 $$
 
+## A valid shape can still mean the wrong feature
+
+Imagine that the source reads temperature, pressure and humidity in that order. The target reads humidity, pressure and temperature. Both receive three numbers, so a shape assertion passes. But the first coefficient now multiplies the wrong measurement. Write down feature names and units next to each input column before mapping a weight tensor.
+
+For the worked first row, the two scores are $1+1+1+0.1=3.1$ and $-2+2-0.25-0.2=-0.45$. Swapping the first and last features gives $-0.9$ and $4.05$. These large differences are not floating-point noise. Follow the first mismatch: raw values, normalized values, first layer, activation, then output labels. This order prevents you from adjusting a numerical tolerance to conceal a different function.
+
+### Pause and reason
+
+If the target swaps input features and also swaps the matching rows of its kernel, should its output change?
+
+<details><summary>Compare your reasoning</summary>
+
+No. Both changes restore each feature–coefficient pairing. Swapping only the values or only the rows changes the function. This is a semantic alignment check, separate from changing the storage layout from input-by-output to output-by-input.
+
+</details>
+
+## Use a small bridge before a complete model
+
+Keep the dense example as a test you can reason through by hand. Then add one operation at a time: a nonlinearity, normalization, and a second layer. Record an intermediate tensor at each boundary. For a convolution, declare both image layout and kernel layout; for attention, declare token order, head order, masks, and how query, key and value weights are packed.
+
+The optional Keras lab runs real backends in separate processes. The default companion below uses NumPy and JAX to expose the mapping arithmetic, so its success alone does not certify TensorFlow, PyTorch, or a complete pretrained checkpoint. Carry a table of source names, target names, shapes, axis permutations and test inputs into the model-specific conversion lesson.
+
+## Write the source function and its known input
+
+Create main.py in your lesson workspace and run it with the active course Python environment. Keep feature order fixed while you name the input, kernel and bias.
+
+```python
+import numpy as np
+import jax
+import jax.numpy as jnp
+# Same dense layer, different parameter layouts.
+x = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)
+keras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)
+bias = np.array([.1, -.2], np.float32)
+
+np.testing.assert_allclose(x[0] @ keras_kernel + bias, [3.1, -.45], atol=1e-6)
+
+```
+
+The arrays define a batch of shape $(2,3)$, a kernel of shape $(3,2)$, and a bias of shape $(2,)$. The first known output is $[3.1,-0.45]$.
+
+## Map the stored tensor into explicit JAX parameters
+
+Append this block to the same main.py and rerun the whole file. Transpose the stored PyTorch-style weights back into input-by-output order, then define the pure prediction function.
+
+```python
+torch_weight = keras_kernel.T.copy()  # torch Linear: output, input
+params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
+def predict(params, inputs):
+    return inputs @ params["kernel"] + params["bias"]
+
+np.testing.assert_allclose(predict(params, jnp.zeros((2,3))), np.tile(bias,(2,1)), atol=1e-6)
+
+```
+
+The zero-input check returns the bias twice. If it does not, inspect bias broadcasting before comparing full predictions.
+
+## Verify values before extending the architecture
+
+Append this block to the same main.py and rerun the whole file. Run both independent checks and inspect the two output rows.
+
+```python
+actual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))
+# A hand-computed first row detects a shared layout mistake.
+np.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)
+np.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)
+print("Matched dense outputs:", actual)
+
+```
+
+The first assertion checks hand arithmetic; the second compares the entire batch with the source-layout calculation. Continue with the feature-order and second-layer experiments below.
+
 ## Run the example
 
 ```python
@@ -131,13 +203,17 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:42:44.617912+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:02:14.832395+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
  [-4.9   4.55]]
+Matched dense outputs: [[ 3.1  -0.45]
+ [-4.9   4.55]]
 Equal shapes, unequal outputs
+Feature order failed, then matched after aligning kernel rows.
 Changed batch verified
+Two-layer reference scores: [ 6.5  -4.25]
 PASS: deployment-01
 
 ```
@@ -158,6 +234,26 @@ print("Equal shapes, unequal outputs")
 **Expected:** Both outputs have the same shape but different values.
 
 Check asymmetric values and independently known outputs, not just tensor dimensions.
+
+## Reorder features without changing tensor dimensions
+
+**Predict before running:** Predict both scores if the first and last input features are exchanged while the weights stay fixed.
+
+```python
+permutation = [2, 1, 0]
+reordered = x[:, permutation]
+wrong_order = np.asarray(predict(params, reordered))
+np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)
+assert not np.allclose(wrong_order, actual)
+repaired_params = {'kernel': params['kernel'][permutation, :], 'bias': params['bias']}
+np.testing.assert_allclose(predict(repaired_params, reordered), actual, atol=1e-6)
+print('Feature order failed, then matched after aligning kernel rows.')
+
+```
+
+**Expected:** The wrong first row is $[-0.9,4.05]$; permuting the kernel rows restores both original observations.
+
+The repair changes the pairing of features and coefficients. It does not change the model represented by those pairings. Repeat with asymmetric feature values; repeated values can hide a wrong order.
 
 ## Make it yours
 
@@ -198,6 +294,38 @@ np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
 ```
 
 Input normalization belongs in the deployment contract. Matching weights cannot compensate for a different input distribution.
+
+</details>
+
+## Map a second layer and locate an omitted activation
+
+**Transfer / diagnosis**
+
+Extend the dense mapping with ReLU and a second dense layer. Use independently computed final scores to catch a converter that forgets ReLU. Then show why an all-positive probe would be a weak test.
+
+<details><summary>Hint</summary>
+
+Compute both first-layer rows by hand, replace negative entries by zero, and apply the new output weights.
+
+</details>
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+second_kernel = np.array([[2.], [-1.]], np.float32)
+second_bias = np.array([.3], np.float32)
+hidden = np.maximum(np.asarray(predict(params, x)), 0.)
+bridged_scores = hidden @ second_kernel + second_bias
+np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
+omitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias
+assert not np.allclose(omitted_relu, bridged_scores)
+positive_probe = np.array([[1., 2.]], np.float32)
+np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
+print('Two-layer reference scores:', bridged_scores[:, 0])
+
+```
+
+The first dense layer agrees, but the activation is the first divergent boundary. The final reference scores are $6.5$ and $-4.25$. A probe containing only positive hidden values would make an omitted ReLU invisible.
 
 </details>
 

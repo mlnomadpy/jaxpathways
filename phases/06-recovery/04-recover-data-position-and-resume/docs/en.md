@@ -369,7 +369,7 @@ The diagram is conceptual; its box sizes do not measure storage or runtime. The 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:40:32.501552+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T21:58:31.966933+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]

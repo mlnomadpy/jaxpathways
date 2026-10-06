@@ -15,6 +15,12 @@
   --reading: Georgia, 'Times New Roman', serif;
   --atlas: #30216b;
   --annotation: #d96828;
+  --mono: 'SFMono-Regular', Consolas, monospace;
+  --focus: #8060df;
+  --prose-width: 70ch;
+  --surface-soft: #f3eff9;
+  --code-bg: #28213e;
+  --code-ink: #f0ebfa;
   color-scheme: light;
   --learning-radius: 14px;
 }

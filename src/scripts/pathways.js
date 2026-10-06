@@ -2,8 +2,12 @@ import { courseState, phaseById } from '../lib/course-state.js';
 import { $ } from '../lib/dom.js';
 import { renderPathway } from '../lib/views/pathway.js';
 
+const initializedDocuments = new WeakSet();
+
 export function initPathways() {
   if (!$('#routes') || !$('#path-detail')) return;
+  if (initializedDocuments.has(document)) return;
+  initializedDocuments.add(document);
   function showPath() {
     const id = new URLSearchParams(location.search).get('path'),
       route = courseState.course.pathways.find((r) => r.id === id),

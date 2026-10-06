@@ -7,6 +7,9 @@ html {
 }
 body {
   margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.65 var(--ui);
 }
 a {
   color: inherit;
@@ -15,71 +18,24 @@ a {
 a:hover {
   color: var(--blue);
 }
-button,
-input,
-.brand,
-nav,
-.edition,
-.button,
-code,
-.map-label,
-.diagram-foot,
-.node,
-.terminal > div,
-summary,
-.badge,
-.learning-loop > article > span {
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-}
-button,
-.button {
-  cursor: pointer;
-  border: 1px solid var(--line);
-}
-header {
-  margin: auto;
-  display: flex;
-  justify-content: space-between;
-}
-.brand {
-  font-weight: 700;
-}
-nav {
-  display: flex;
-  gap: 26px;
-  font-size: 12px;
-}
 main {
-  padding: 0 5%;
-  margin: auto;
+  max-width: 1380px;
+  padding-inline: 5%;
+  margin-inline: auto;
+  min-width: 0;
 }
-.hero {
-  display: grid;
-  background-image: radial-gradient(#8c9cff0c 1px, transparent 1px);
-  background-size: 16px 16px;
+img,
+svg {
+  max-width: 100%;
 }
-.edition {
-  margin: 0 0 24px;
+img {
+  height: auto;
 }
-.edition span {
-  display: block;
-  color: var(--muted);
-  margin-top: 4px;
+[hidden] {
+  display: none !important;
 }
-h1,
-h2,
-h3 {
-  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
-  line-height: 1.1;
-  margin: 0;
-}
-h1 {
-  color: var(--blue);
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-}
-.primary {
-  font-weight: 700;
+@media (max-width: 760px) {
+  main {
+    padding-inline: 6%;
+  }
 }

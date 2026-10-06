@@ -68,16 +68,14 @@ export function renderCareer(role, course) {
       )
       .join('')}</div>
     </details>
-    <p id="career-start-note" class="career-start-note" aria-live="polite">
-    </p>
+    <p id="career-start-note" class="career-start-note" aria-live="polite"></p>
     <div class="career-actions">
     <button id="career-start" class="primary">Start this career route</button>
     <button id="career-save">Save my plan</button>
     <button id="career-download">Download plan</button>
     <button id="career-share">Copy route link</button>
     </div>
-    <p id="career-status" class="soft" role="status">
-    </p>${
+    <p id="career-status" class="soft" role="status"></p>${
       role.pathwayIds.length > 1
         ? `<p class="soft">Other route options:</p>
     <div class="actions">${role.pathwayIds

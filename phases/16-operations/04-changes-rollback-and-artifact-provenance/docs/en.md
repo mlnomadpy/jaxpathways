@@ -575,7 +575,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:43:51.357084+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:03:50.042785+00:00. JAX 0.9.2.
 
 ```text
 first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4

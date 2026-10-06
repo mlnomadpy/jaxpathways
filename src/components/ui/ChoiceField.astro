@@ -1,0 +1,28 @@
+---
+/** Native select fallback, progressively enhanced into a single-choice control. */
+interface Props {
+  id: string;
+  label: string;
+  variant?: 'segmented' | 'list';
+  name?: string;
+  required?: boolean;
+  disabled?: boolean;
+}
+const { id, label, variant = 'segmented', name, required, disabled } = Astro.props;
+---
+
+<label for={id}>
+  <span class="field-caption">
+    <slot name="label">{label}</slot>
+  </span>
+  <select
+    id={id}
+    name={name}
+    required={required}
+    disabled={disabled}
+    data-choices={variant === 'list' ? 'disclosure' : 'inline'}
+    data-choice-label={label}
+  >
+    <slot />
+  </select>
+</label>

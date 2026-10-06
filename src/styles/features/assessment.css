@@ -15,8 +15,7 @@
   }
 }
 #assessment pre {
-  color: #f0ebfa;
-  border-color: #4b405f;
+  color: var(--code-ink);
 }
 #assessment pre {
   font-size: 14px;
@@ -64,7 +63,7 @@
 #assessment {
   max-width: 900px;
   margin: 3rem auto;
-  padding: 0 1.5rem;
+  padding: 0;
 }
 #assessment article {
   max-width: 74ch;
@@ -76,7 +75,7 @@
 #assessment h1,
 #assessment h2,
 #assessment h3 {
-  font-family: system-ui, sans-serif;
+  font-family: var(--ui);
   line-height: 1.25;
   scroll-margin-top: 2rem;
 }
@@ -92,7 +91,7 @@
   overflow-wrap: anywhere;
 }
 #assessment pre {
-  background: #f0f3f9;
+  background: var(--code-bg);
   padding: 1rem;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
@@ -110,7 +109,7 @@
 @media (max-width: 600px) {
   #assessment {
     margin: 1.5rem auto;
-    padding: 0 1rem;
+    padding: 0;
   }
   #assessment article {
     font-size: 18px;
@@ -120,7 +119,7 @@
     flex-direction: column;
   }
   #assessment h1 {
-    font-size: 2rem;
+    font-size: clamp(28px, 7vw, 32px);
   }
 }
 .assessment-contents {
@@ -131,7 +130,7 @@
 }
 .assessment-contents ol {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.5rem 2rem;
   padding-left: 1.5rem;
 }

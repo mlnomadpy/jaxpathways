@@ -9,11 +9,8 @@ export const projectCommand = (code, label) =>
     <span>${escape(label)}</span>
     <button class="copy-command" type="button">Copy command</button>
     </div>
-    <pre>
-    <code>${escape(code)}</code>
-    </pre>
-    <p class="copy-status" role="status">
-    </p>
+    <pre><code>${escape(code)}</code></pre>
+    <p class="copy-status" role="status"></p>
     </div>`;
 
 /** @param {import('../../types/manifests').ProjectManifest} p */
@@ -33,7 +30,7 @@ export function renderProject(p) {
     <ul>${p.requiredLessonIds
       .map(
         (id) => `<li>
-    <a href="lesson.html?path=${p.pathwayId}&lesson=${escape(id)}">${escape(id)}</a>
+    <a href="lesson.html?path=${escape(p.pathwayId)}&lesson=${escape(id)}">${escape(id)}</a>
     </li>`,
       )
       .join('')}</ul>
@@ -46,8 +43,7 @@ export function renderProject(p) {
     <option value="unix">macOS / Linux</option>
     <option value="windows">Windows PowerShell</option>
     </select>
-    <div id="project-environment">
-    </div>
+    <div id="project-environment"></div>
     <p>Work in <code>${escape(p.workspaceFile)}</code>. Implement the TODO functions before running the stage checks. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
     <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>This checks the provided solution. It does not establish that your own implementation passes.</p>
     </details>
@@ -68,15 +64,14 @@ export function renderProject(p) {
     <p>Keep the command and the final error line. A missing module usually means the selected interpreter is outside your course environment; NotImplementedError means the starter function still needs your implementation.</p>
     </details>
     <label class="stage-check">
-    <input type="checkbox" data-stage="${s.id}"> I ran this stage on my implementation and kept its evidence</label>
+    <input type="checkbox" data-stage="${escape(s.id)}"> I ran this stage on my implementation and kept its evidence</label>
     <p>
-    <a href="notebook.html?project=${escape(p.id)}&stage=${s.id}&route=${escape(p.pathwayId)}#portfolio">Attach stage ${s.id} evidence</a>
+    <a href="notebook.html?project=${escape(p.id)}&stage=${escape(s.id)}&route=${escape(p.pathwayId)}#portfolio">Attach stage ${s.id} evidence</a>
     </p>
     </li>`,
       )
       .join('')}</ol>
-    <p id="project-status" role="status">
-    </p>${
+    <p id="project-status" role="status"></p>${
       p.assessmentId
         ? `<section>
     <h2>Transfer what you learned</h2>

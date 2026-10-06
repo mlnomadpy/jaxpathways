@@ -196,7 +196,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T15:44:24.647695+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:04:50.036911+00:00. JAX 0.9.2.
 
 ```text
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]

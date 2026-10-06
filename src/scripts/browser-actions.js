@@ -1,8 +1,13 @@
+// @ts-check
+
 import { refreshChoices } from './choices.js';
 
-/** Bind or replace copy behavior, including for dynamically rendered code panels. */
+/** Bind or replace copy behavior, including for dynamically rendered code panels.
+ * @param {{ root?: Document | Element, selector: string, source: (button: HTMLButtonElement) => Element | null, feedback: (button: HTMLButtonElement) => HTMLElement | null, success: string | ((button: HTMLButtonElement) => string), failure: string }} options
+ */
 export function bindClipboard({ root = document, selector, source, feedback, success, failure }) {
-  for (const button of root.querySelectorAll(selector)) {
+  for (const button of root.querySelectorAll('button')) {
+    if (!button.matches(selector)) continue;
     button.onclick = async () => {
       const content = source(button);
       const status = feedback(button);
@@ -19,11 +24,18 @@ export function bindClipboard({ root = document, selector, source, feedback, suc
   }
 }
 
+/** @param {string} selector
+ * @param {string} text
+ */
 export function setStatus(selector, text) {
   const element = document.querySelector(selector);
   if (element) element.textContent = text;
 }
 
+/** @param {string} name
+ * @param {string} text
+ * @param {string} [type]
+ */
 export function downloadText(name, text, type = 'text/plain') {
   const url = URL.createObjectURL(new Blob([text], { type }));
   try {
@@ -36,6 +48,10 @@ export function downloadText(name, text, type = 'text/plain') {
   }
 }
 
+/** @param {HTMLSelectElement | null} select
+ * @param {{ id: string, title: string }[]} entries
+ * @param {string | null} [blank]
+ */
 export function populateSelect(select, entries, blank) {
   if (!select) return;
   const options = blank ? [{ id: '', title: blank }, ...entries] : entries;
@@ -50,7 +66,10 @@ export function populateSelect(select, entries, blank) {
   refreshChoices(select);
 }
 
-/** Programmatic selection is explicit; no native property interception is needed. */
+/** Programmatic selection is explicit; no native property interception is needed.
+ * @param {HTMLSelectElement | null} select
+ * @param {string} value
+ */
 export function setSelectValue(select, value) {
   if (!select) return;
   select.value = value;

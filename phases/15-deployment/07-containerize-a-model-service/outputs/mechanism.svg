@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="302.4pt" viewBox="0 0 576 302.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 302.4 
+L 576 302.4 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 3.00024 89.335536 
+L 139.800125 89.335536 
+L 139.800125 48.09256 
+L 3.00024 48.09256 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="71.400182" y="71.978423" transform="rotate(-0 71.400182 71.978423)">Object</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 139.800125 89.335536 
+L 401.999904 89.335536 
+L 401.999904 48.09256 
+L 139.800125 48.09256 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="270.900014" y="72.025298" transform="rotate(-0 270.900014 72.025298)">Evidence to retain</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 401.999904 89.335536 
+L 572.99976 89.335536 
+L 572.99976 48.09256 
+L 401.999904 48.09256 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="487.499832" y="72.025298" transform="rotate(-0 487.499832 72.025298)">Claim supported</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 3.00024 130.578512 
+L 139.800125 130.578512 
+L 139.800125 89.335536 
+L 3.00024 89.335536 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="71.400182" y="113.268274" transform="rotate(-0 71.400182 113.268274)">Model artifact</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 139.800125 130.578512 
+L 401.999904 130.578512 
+L 401.999904 89.335536 
+L 139.800125 89.335536 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="270.900014" y="113.268274" transform="rotate(-0 270.900014 113.268274)">digest + schema + golden input</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 401.999904 130.578512 
+L 572.99976 130.578512 
+L 572.99976 89.335536 
+L 401.999904 89.335536 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="487.499832" y="113.268274" transform="rotate(-0 487.499832 113.268274)">known model behavior</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 3.00024 171.821488 
+L 139.800125 171.821488 
+L 139.800125 130.578512 
+L 3.00024 130.578512 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="71.400182" y="154.51125" transform="rotate(-0 71.400182 154.51125)">Local process</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 139.800125 171.821488 
+L 401.999904 171.821488 
+L 401.999904 130.578512 
+L 139.800125 130.578512 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="270.900014" y="154.51125" transform="rotate(-0 270.900014 154.51125)">command + exit + response</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 401.999904 171.821488 
+L 572.99976 171.821488 
+L 572.99976 130.578512 
+L 401.999904 130.578512 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="487.499832" y="154.51125" transform="rotate(-0 487.499832 154.51125)">process contract</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 3.00024 213.064464 
+L 139.800125 213.064464 
+L 139.800125 171.821488 
+L 3.00024 171.821488 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="71.400182" y="195.754226" transform="rotate(-0 71.400182 195.754226)">Container image</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 139.800125 213.064464 
+L 401.999904 213.064464 
+L 401.999904 171.821488 
+L 139.800125 171.821488 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="270.900014" y="195.754226" transform="rotate(-0 270.900014 195.754226)">image digest + actual run</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 401.999904 213.064464 
+L 572.99976 213.064464 
+L 572.99976 171.821488 
+L 401.999904 171.821488 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="487.499832" y="195.754226" transform="rotate(-0 487.499832 195.754226)">container behavior</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 3.00024 254.30744 
+L 139.800125 254.30744 
+L 139.800125 213.064464 
+L 3.00024 213.064464 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="71.400182" y="236.997202" transform="rotate(-0 71.400182 236.997202)">Target device</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 139.800125 254.30744 
+L 401.999904 254.30744 
+L 401.999904 213.064464 
+L 139.800125 213.064464 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="270.900014" y="236.997202" transform="rotate(-0 270.900014 236.997202)">hardware + runtime + workload</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 401.999904 254.30744 
+L 572.99976 254.30744 
+L 572.99976 213.064464 
+L 401.999904 213.064464 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="487.499832" y="236.997202" transform="rotate(-0 487.499832 236.997202)">device-specific result</text>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>

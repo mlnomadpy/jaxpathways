@@ -1,0 +1,956 @@
+[
+  {
+    "path": "index.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 320,
+    "documentWidth": 320,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "index.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 390,
+    "documentWidth": 390,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "index.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 12,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 760,
+    "documentWidth": 760,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "index.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 768,
+    "documentWidth": 768,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "index.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 1024,
+    "documentWidth": 1024,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "index.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 1,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "course.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "pathways.html?path=foundations",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "careers.html?role=inference-engineer",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "projects.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project.html?id=regression-audit",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "notebook.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "organizer.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": [
+      18
+    ]
+  },
+  {
+    "path": "developer.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "lesson-first-gradient.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 14,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 13,
+    "radioWidths": []
+  },
+  {
+    "path": "assessments/math.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 1,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "project-workflow.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 6,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "phase-guides/welcome.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "project-guides/derivative-audit.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 4,
+    "minimumCodeContrast": 13.05,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  },
+  {
+    "path": "tracks/image.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 0,
+    "minimumCodeContrast": null,
+    "minimumCodeFontSize": null,
+    "radioWidths": []
+  },
+  {
+    "path": "downloads/jax-foundations.html",
+    "viewport": 1440,
+    "documentWidth": 1440,
+    "codePanelCount": 974,
+    "minimumCodeContrast": 12.65,
+    "minimumCodeFontSize": 14,
+    "radioWidths": []
+  }
+]

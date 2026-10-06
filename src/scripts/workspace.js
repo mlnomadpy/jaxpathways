@@ -34,7 +34,12 @@ async function setupPlatform(routes) {
   let projects = [];
   try {
     projects = parseProjects(await fetchJson('api/v1/projects.json', { cache: 'no-store' }));
-  } catch {}
+  } catch {
+    setStatus(
+      '#evidence-status',
+      'Project associations could not load. You can still save notes; refresh to attach a project.',
+    );
+  }
   let pendingExtras = null;
   const status = setStatus;
   function storedProjects() {

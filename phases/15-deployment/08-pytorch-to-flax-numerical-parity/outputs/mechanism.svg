@@ -1,0 +1,212 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="302.4pt" viewBox="0 0 576 302.4" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Read each row as one elementwise decision using absolute tolerance \(2\times10^{-6}\) and relative tolerance \(2\times10^{-5}\). Near zero the absolute term determines the allowance. At reference \(100\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 302.4 
+L 576 302.4 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="table_1">
+    <g id="patch_2">
+     <path d="M 3.00024 109.957024 
+L 117.000144 109.957024 
+L 117.000144 68.714048 
+L 3.00024 68.714048 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_1">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="92.646786" transform="rotate(-0 60.000192 92.646786)">Reference</text>
+    </g>
+    <g id="patch_3">
+     <path d="M 117.000144 109.957024 
+L 259.500024 109.957024 
+L 259.500024 68.714048 
+L 117.000144 68.714048 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_2">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="188.250084" y="92.646786" transform="rotate(-0 188.250084 92.646786)">Actual</text>
+    </g>
+    <g id="patch_4">
+     <path d="M 259.500024 109.957024 
+L 430.49988 109.957024 
+L 430.49988 68.714048 
+L 259.500024 68.714048 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_3">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="344.999952" y="92.646786" transform="rotate(-0 344.999952 92.646786)">Allowed error</text>
+    </g>
+    <g id="patch_5">
+     <path d="M 430.49988 109.957024 
+L 572.99976 109.957024 
+L 572.99976 68.714048 
+L 430.49988 68.714048 
+z
+" style="fill: #e9e4f5; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_4">
+     <text style="font-weight: 700; font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="92.646786" transform="rotate(-0 501.74982 92.646786)">Decision</text>
+    </g>
+    <g id="patch_6">
+     <path d="M 3.00024 151.2 
+L 117.000144 151.2 
+L 117.000144 109.957024 
+L 3.00024 109.957024 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_5">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="133.889762" transform="rotate(-0 60.000192 133.889762)">0</text>
+    </g>
+    <g id="patch_7">
+     <path d="M 117.000144 151.2 
+L 259.500024 151.2 
+L 259.500024 109.957024 
+L 117.000144 109.957024 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_6">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="188.250084" y="133.889762" transform="rotate(-0 188.250084 133.889762)">0.000001</text>
+    </g>
+    <g id="patch_8">
+     <path d="M 259.500024 151.2 
+L 430.49988 151.2 
+L 430.49988 109.957024 
+L 259.500024 109.957024 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_7">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="344.999952" y="133.889762" transform="rotate(-0 344.999952 133.889762)">0.000002</text>
+    </g>
+    <g id="patch_9">
+     <path d="M 430.49988 151.2 
+L 572.99976 151.2 
+L 572.99976 109.957024 
+L 430.49988 109.957024 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_8">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="133.889762" transform="rotate(-0 501.74982 133.889762)">pass</text>
+    </g>
+    <g id="patch_10">
+     <path d="M 3.00024 192.442976 
+L 117.000144 192.442976 
+L 117.000144 151.2 
+L 3.00024 151.2 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_9">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="175.132738" transform="rotate(-0 60.000192 175.132738)">0</text>
+    </g>
+    <g id="patch_11">
+     <path d="M 117.000144 192.442976 
+L 259.500024 192.442976 
+L 259.500024 151.2 
+L 117.000144 151.2 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_10">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="188.250084" y="175.132738" transform="rotate(-0 188.250084 175.132738)">0.000003</text>
+    </g>
+    <g id="patch_12">
+     <path d="M 259.500024 192.442976 
+L 430.49988 192.442976 
+L 430.49988 151.2 
+L 259.500024 151.2 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_11">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="344.999952" y="175.132738" transform="rotate(-0 344.999952 175.132738)">0.000002</text>
+    </g>
+    <g id="patch_13">
+     <path d="M 430.49988 192.442976 
+L 572.99976 192.442976 
+L 572.99976 151.2 
+L 430.49988 151.2 
+z
+" style="fill: #ffffff; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_12">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="175.132738" transform="rotate(-0 501.74982 175.132738)">fail</text>
+    </g>
+    <g id="patch_14">
+     <path d="M 3.00024 233.685952 
+L 117.000144 233.685952 
+L 117.000144 192.442976 
+L 3.00024 192.442976 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_13">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="60.000192" y="216.375714" transform="rotate(-0 60.000192 216.375714)">100</text>
+    </g>
+    <g id="patch_15">
+     <path d="M 117.000144 233.685952 
+L 259.500024 233.685952 
+L 259.500024 192.442976 
+L 117.000144 192.442976 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_14">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="188.250084" y="216.375714" transform="rotate(-0 188.250084 216.375714)">100.001</text>
+    </g>
+    <g id="patch_16">
+     <path d="M 259.500024 233.685952 
+L 430.49988 233.685952 
+L 430.49988 192.442976 
+L 259.500024 192.442976 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_15">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="344.999952" y="216.375714" transform="rotate(-0 344.999952 216.375714)">0.002002</text>
+    </g>
+    <g id="patch_17">
+     <path d="M 430.49988 233.685952 
+L 572.99976 233.685952 
+L 572.99976 192.442976 
+L 430.49988 192.442976 
+z
+" style="fill: #f4f7fb; stroke: #ccd3df; stroke-linejoin: miter"/>
+    </g>
+    <g id="text_16">
+     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="501.74982" y="216.375714" transform="rotate(-0 501.74982 216.375714)">pass</text>
+    </g>
+   </g>
+  </g>
+ </g>
+</svg>
