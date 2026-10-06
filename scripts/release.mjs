@@ -38,6 +38,14 @@ for (const directory of ['curriculum', 'learning-paths', 'projects']) {
     sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
   }
 }
+// Practical guides and their launchers are canonical course material too.
+for (const directory of ['content/guides', 'resources/tpu-gcp']) {
+  if (!existsSync(directory)) continue;
+  for (const file of readdirSync(directory, { recursive: true }).sort()) {
+    if (!/\.(md|py)$/.test(file) || file.includes('__pycache__')) continue;
+    sources[`${directory}/${file}`] = hash(readFileSync(`${directory}/${file}`, 'utf8'));
+  }
+}
 const digest = hash({ sources, lessons: Object.fromEntries(Object.entries(lessons).map(([id, item]) => [id, item.hash])) });
 if (previous?.version === release.version) {
   assert.equal(previous.hash, digest, 'Course sources changed. Add a new version to curriculum/releases.json, update package version, then run npm run release:prepare. Do not overwrite a published snapshot.');

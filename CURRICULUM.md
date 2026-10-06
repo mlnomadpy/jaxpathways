@@ -288,7 +288,7 @@ Move from a loss and a handwritten update to neural networks, Transformers, repr
 
 **Capabilities:** Design models and optimization loops; Evaluate quality and debug training; Checkpoint and reproduce complete runs.
 
-**Pathways:** Train neural networks; Build a TPU training system; Learn by interacting.
+**Pathways:** Train neural networks; Learn TPUs and Google Cloud; Learn by interacting.
 
 **Roles:** ML & training engineer; RL engineer.
 
@@ -623,19 +623,19 @@ Trace a function into jaxpr, verify forward and reverse sensitivities, write exa
 - Directional and adjoint derivative checks on changed inputs
 - A custom derivative or transformation with a deliberate unsupported case and explicit rejection
 
-### Build a TPU training system
+### Learn TPUs and Google Cloud
 
-Build a small Transformer and a restartable training experiment on CPU before extending the workload to accelerators. Learn masking, mixed precision and synchronized measurement with explicit hardware limits.
+Build and recover a training experiment on CPU, then learn GCP projects, gcloud provisioning, explicit TPU execution, measurement and cleanup. Connect the cloud workflow to Transformer training and operations.
 
 **For:** Model builders who understand minibatches and want to connect sequence models to accelerator engineering.
 
-**First artifact:** A tiny language-model run with causal-mask checks, saved state and reproducible generation.
+**First artifact:** A CPU run dossier with configuration, environment, events and a checkpoint that reproduces an uninterrupted run.
 
-**Study advice:** Start with the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.
+**Study advice:** Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-07. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI.
+**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI → 16: Workload operations.
 
 **Final project:** Causal Transformer training-system capstone.
 
@@ -647,6 +647,7 @@ Build a small Transformer and a restartable training experiment on CPU before ex
 - FP32/BF16/INT8 cache parity, stored bytes and numerical-error comparisons
 - Six serialized prefill/decode endpoints with fresh-process reload and artifact rejection
 - A genuine profile and synchronized CPU measurements, plus separate actual-target qualification before any TPU claim
+- Cloud resource identity, resolved environment, actual backend events, retrieved checkpoints and verified resource cleanup for any claimed TPU run
 
 ### Ship and adapt JAX workloads
 

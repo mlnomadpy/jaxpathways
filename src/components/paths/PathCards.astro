@@ -37,6 +37,13 @@ import { siteUrl } from '../../lib/urls.js';
             <a class="button" href={siteUrl(`pathways.html?path=${route.id}`)}>
               Open path
             </a>
+            {route.practicalGuide && (
+              <p>
+                <a href={siteUrl(route.practicalGuide.url)}>
+                  Open the TPU &amp; GCP practical guide
+                </a>
+              </p>
+            )}
           </article>
         );
       })}

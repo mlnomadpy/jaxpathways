@@ -1,10 +1,7 @@
 ---
-import '../../styles/features/lesson-visuals.css';
-import 'katex/dist/katex.min.css';
-import '../../styles/features/math.css';
 import { authoredLessons } from '../../lib/course-data.js';
+import { readerStyles } from '../../lib/server/reader-styles.js';
 import ReaderChapter from '../../components/shared/ReaderChapter.astro';
-import '../../styles/print.css';
 ---
 
 <!doctype html>
@@ -12,11 +9,22 @@ import '../../styles/print.css';
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>JAX course reader</title>
+    <title>JAX Pathways: illustrated course reader</title>
+    <style is:inline set:html={readerStyles} />
     <meta name="robots" content="noindex,follow" />
   </head>
   <body>
-    <h1>JAX Pathways: course reader</h1>
+    <header class="book-cover">
+      <p class="chapter-kicker">JAX Pathways · Course reader</p>
+      <h1>
+        Understand the math.
+        <br />
+        Build the system.
+      </h1>
+      <p class="book-description">
+        Worked explanations, executable examples and evidence you can inspect.
+      </p>
+    </header>
     <p>
       {authoredLessons.length} lesson drafts from the shared course. Reference execution status is
       recorded separately in validation.json; TPU execution and expert review remain outstanding.
@@ -25,7 +33,7 @@ import '../../styles/print.css';
       Work through each exercise before reading its solution. Checkpoint answers are formative. Keep
       your code, outputs, and diagnosis as evidence.
     </p>
-    <nav>
+    <nav aria-label="Book chapters">
       <h2>Contents</h2>
       <ol>
         {authoredLessons.map((lesson, index) => (
@@ -35,8 +43,31 @@ import '../../styles/print.css';
         ))}
       </ol>
     </nav>
-    {authoredLessons.map((lesson, index) => (
-      <ReaderChapter lesson={lesson} index={index} />
-    ))}
+    <main>
+      {authoredLessons.map((lesson, index) => (
+        <ReaderChapter lesson={lesson} index={index} />
+      ))}
+    </main>
+    <script is:inline>
+      document.documentElement.dataset.readerReady = 'true';
+      document.addEventListener('click', async (event) => {
+        const button = event.target.closest('.copy-snippet');
+        if (!button) return;
+        const panel = button.closest('.code-panel');
+        const code = panel.querySelector('pre code');
+        const feedback = panel.querySelector('.copy-feedback');
+        try {
+          await navigator.clipboard.writeText(code.textContent);
+          feedback.textContent = 'Copied code.';
+        } catch {
+          const range = document.createRange();
+          range.selectNodeContents(code);
+          const selection = window.getSelection();
+          selection.removeAllRanges();
+          selection.addRange(range);
+          feedback.textContent = 'Code selected. Press Ctrl+C or Command+C to copy.';
+        }
+      });
+    </script>
   </body>
 </html>

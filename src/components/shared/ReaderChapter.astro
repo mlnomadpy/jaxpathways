@@ -1,6 +1,7 @@
 ---
 import { inlineMath, renderMath } from '../../lib/math.js';
 import Prose from './Prose.astro';
+import { codePanel as sharedCodePanel } from '../../lib/lesson-content.js';
 import { lessonVisual, lessonExecution, lessonMechanism } from '../../lib/lesson-visuals.js';
 import type { authoredLessons } from '../../lib/course-data.js';
 interface Props {
@@ -9,9 +10,17 @@ interface Props {
 }
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
+const codePanel = (source: string, label: string) =>
+  sharedCodePanel(source, label).replace(
+    '<pre ',
+    '<pre tabindex="0" aria-label="Scrollable code" ',
+  );
 ---
 
 <article id={`chapter-${index}`}>
+  <p class="chapter-kicker">
+    Chapter {index + 1} · {lesson.id}
+  </p>
   <h1>{lesson.title}</h1>
   <p>{lesson.objective}</p>
   {c.objectives && (
@@ -50,7 +59,7 @@ const c = lesson.content!;
       {section.commands?.map((command) => (
         <>
           <h3>{command.label}</h3>
-          <pre><code>{command.code}</code></pre>
+          <Fragment set:html={codePanel(command.code, command.shell || 'Terminal')} />
           <p>
             <strong>Expected:</strong>
           </p>
@@ -58,7 +67,10 @@ const c = lesson.content!;
         </>
       ))}
       <Fragment set:html={section.math ? renderMath(section.math, true) : ''} />
-      {section.formula && <pre><code>{section.formula}</code></pre>}
+      {section.formula && <pre
+        class="shape-sketch"
+        aria-label="Shape or computation sketch"
+      ><code>{section.formula}</code></pre>}
     </>
   ))}
   <Fragment set:html={lessonVisual(lesson)} />
@@ -66,20 +78,23 @@ const c = lesson.content!;
     <>
       <h2>{step.title}</h2>
       <Prose text={step.instruction} />
-      <pre><code>{step.code}</code></pre>
+      <Fragment set:html={codePanel(step.code, 'Python · build step')} />
       <Prose text={step.explanation} />
     </>
   ))}
   {c.buildCode && (
     <>
       <h2>Build a numerical estimate</h2>
-      <pre><code>{c.buildCode}</code></pre>
+      <Fragment set:html={codePanel(c.buildCode, 'Python · numerical estimate')} />
       <Prose text={c.buildOutput} />
     </>
   )}
   <h2>Run the example</h2>
-  <pre><code>{c.code}</code></pre>
-  <Prose text={c.output} />
+  <Fragment set:html={codePanel(c.code, 'Python · complete example')} />
+  <div class="expected-output">
+    <p class="output-label">Expected result</p>
+    <Prose text={c.output} />
+  </div>
   <Fragment set:html={lessonExecution(lesson)} />
   {c.experiments?.map((experiment) => (
     <>
@@ -88,15 +103,18 @@ const c = lesson.content!;
         <strong>Predict before running:</strong>{' '}
         <span set:html={inlineMath(experiment.prediction)} />
       </p>
-      <pre><code>{experiment.code}</code></pre>
-      <Prose text={experiment.output} />
+      <Fragment set:html={codePanel(experiment.code, 'Python · experiment')} />
+      <div class="expected-output">
+        <p class="output-label">Expected result</p>
+        <Prose text={experiment.output} />
+      </div>
       <Prose text={experiment.explanation} />
     </>
   ))}
   <h2>Your exercise</h2>
   <Prose text={c.exercise} />
   <h3>Reference solution</h3>
-  <pre><code>{c.solution}</code></pre>
+  <Fragment set:html={codePanel(c.solution, 'Python · reference solution')} />
   {c.practice?.map((practice) => (
     <>
       <h2>{practice.title}</h2>
@@ -105,7 +123,7 @@ const c = lesson.content!;
       <h3>Hint</h3>
       <Prose text={practice.hint} />
       <h3>Reference solution</h3>
-      <pre><code>{practice.solution}</code></pre>
+      <Fragment set:html={codePanel(practice.solution, 'Python · practice solution')} />
       <Prose text={practice.explanation} />
     </>
   ))}

@@ -18,7 +18,7 @@ const CourseCode = (() => {
     if (language === 'text') return escape(source);
     const shell = language === 'shell';
     const pattern =
-      /"{3}[\s\S]*?"{3}|'{3}[\s\S]*?'{3}|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|#[^\n]*|\$[A-Za-z_][\w:]*(?:\.[\w]+)*|--?[A-Za-z][\w-]*|\b(?:0x[\da-fA-F]+|\d+(?:\.\d*)?(?:[eE][+-]?\d+)?)\b|\b[A-Za-z_]\w*\b|[^\w]/g;
+      /"{3}[\s\S]*?"{3}|'{3}[\s\S]*?'{3}|"(?:[^"\\]|\\.)*"|'(?:[^'\\]|\\.)*'|#[^\n]*|\$[A-Za-z_][\w:]*(?:\.[\w]+)*|--?[A-Za-z][\w-]*|\b(?:0x[\da-fA-F]+|\d[\d_]*(?:\.[\d_]*)?(?:[eE][+-]?[\d_]+)?)\b|\b[A-Za-z_]\w*\b|[\s\S]/g;
     return (String(source).match(pattern) || [])
       .map((token, i, tokens) => {
         let kind = '';

@@ -128,6 +128,7 @@ export interface Phase {
   additionalProjectIds?: string[];
 }
 export interface Pathway {
+  practicalGuide?: { title: string; url: string; scope: string };
   audience: string;
   firstArtifact: string;
   focusPhaseIds: string[];

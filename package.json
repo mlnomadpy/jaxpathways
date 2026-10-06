@@ -1,7 +1,7 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "scripts": {
     "dev": "npm run content:build && astro dev",
     "check": "npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm test && python3 scripts/check-distribution.py && npm run check:site",
@@ -11,7 +11,7 @@
     "test:project": "python3 scripts/check-projects.py",
     "audit:content": "python3 scripts/audit-content.py",
     "preview": "astro preview",
-    "content:build": "node scripts/render-curriculum.mjs && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py",
+    "content:build": "node scripts/render-curriculum.mjs && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py",
     "check:astro": "astro check",
     "lint": "eslint src scripts/*.mjs astro.config.mjs",
     "format": "prettier --write src astro.config.mjs eslint.config.js",
@@ -24,7 +24,8 @@
     "test:math": "python3 assessments/math-reference.py",
     "release:prepare": "node scripts/release.mjs --prepare",
     "release:check": "node scripts/release.mjs",
-    "check:types": "tsc -p tsconfig.domain.json"
+    "check:types": "tsc -p tsconfig.domain.json",
+    "test:tpu-launcher": "python3 resources/tpu-gcp/check.py"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

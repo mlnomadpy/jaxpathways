@@ -1,10 +1,10 @@
 {
   "id": "tpu",
-  "title": "Build a TPU training system",
-  "description": "Build a small Transformer and a restartable training experiment on CPU before extending the workload to accelerators. Learn masking, mixed precision and synchronized measurement with explicit hardware limits.",
+  "title": "Learn TPUs and Google Cloud",
+  "description": "Build and recover a training experiment on CPU, then learn GCP projects, gcloud provisioning, explicit TPU execution, measurement and cleanup. Connect the cloud workflow to Transformer training and operations.",
   "prerequisites": "Shared foundations and basic machine learning",
-  "outcome": "From notebook to training system",
-  "libraries": "Flax NNX · Optax · Grain · Orbax · XProf",
+  "outcome": "A reproducible training run with recovery and cloud resource evidence",
+  "libraries": "JAX · Flax NNX · Optax · Orbax · gcloud · XProf",
   "source": "https://docs.jax.dev/en/latest/",
   "phaseIds": [
     "welcome",
@@ -20,7 +20,8 @@
     "posttraining",
     "performance",
     "distributed",
-    "deployment"
+    "deployment",
+    "operations"
   ],
   "capstone": {
     "title": "Causal Transformer training-system capstone",
@@ -31,7 +32,8 @@
       "Fresh-process recovery of parameters, both Adam moments, dropout keys and document position",
       "FP32/BF16/INT8 cache parity, stored bytes and numerical-error comparisons",
       "Six serialized prefill/decode endpoints with fresh-process reload and artifact rejection",
-      "A genuine profile and synchronized CPU measurements, plus separate actual-target qualification before any TPU claim"
+      "A genuine profile and synchronized CPU measurements, plus separate actual-target qualification before any TPU claim",
+      "Cloud resource identity, resolved environment, actual backend events, retrieved checkpoints and verified resource cleanup for any claimed TPU run"
     ],
     "projectId": "text-harness",
     "assessmentId": "tpu",
@@ -48,22 +50,28 @@
     }
   },
   "audience": "Model builders who understand minibatches and want to connect sequence models to accelerator engineering.",
-  "firstArtifact": "A tiny language-model run with causal-mask checks, saved state and reproducible generation.",
+  "firstArtifact": "A CPU run dossier with configuration, environment, events and a checkpoint that reproduces an uninterrupted run.",
   "focusPhaseIds": [
     "transformers",
     "performance",
     "distributed",
     "pretraining",
-    "posttraining"
+    "posttraining",
+    "operations"
   ],
   "modalityTrackIds": [
     "text",
     "cross-modal"
   ],
-  "studyAdvice": "Start with the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
+  "studyAdvice": "Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
   "engineeringLessonIds": [
     "recovery-06",
     "deployment-07",
     "operations-07"
-  ]
+  ],
+  "practicalGuide": {
+    "title": "From a laptop experiment to a TPU training run",
+    "url": "tpu-gcp.html",
+    "scope": "CPU-tested launcher; cloud instructions require target qualification."
+  }
 }

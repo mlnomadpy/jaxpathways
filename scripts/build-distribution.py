@@ -119,7 +119,7 @@ with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
 # A portable course root for tutors: skills alone do not include their lesson sources.
 workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'scripts/course.py',
                    ROOT/'public/curriculum.json', ROOT/'public/validation.json'}
-for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills', 'assessments'):
+for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills', 'assessments', 'resources/tpu-gcp', 'content/guides'):
     workspace_files.update(path for path in (ROOT/directory).rglob('*')
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
                            and '__pycache__' not in path.parts)

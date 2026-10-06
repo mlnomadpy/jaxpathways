@@ -23,3 +23,8 @@ test('Text outputs remain uncolored and literal',()=>{
  assert.equal(decoded(highlight(source,'text')),source);
  assert.ok(!highlight(source,'text').includes('<span'));
 });
+test('numeric separators and unrecognized token characters are never dropped',()=>{
+ const source='large = 100_000_000.\nsmall = 1_024.5_0e-1_0\nmask = 0xFF_FF\nλ = 0b1010_0011\n';
+ assert.equal(decoded(highlight(source,'python')),source);
+ assert.equal(decoded(highlight(source,'shell')),source);
+});

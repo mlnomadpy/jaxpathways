@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.4.0",
+    "date": "2026-10-06",
+    "title": "TPU and Google Cloud practice, plus a clearer course reader",
+    "summary": "A practical cloud workflow with a CPU-tested training launcher, and readable math and code in the downloadable HTML book.",
+    "changes": [
+      "Extended the TPU pathway with Google Cloud project setup, gcloud provisioning, explicit backend checks, recovery, evidence retrieval and resource cleanup.",
+      "Added a downloadable launcher that reuses the workload-operations worker, rejects accidental overwrites and retains attempt history. CPU recovery and failure checks pass; TPU hardware qualification remains pending.",
+      "Improved the HTML course reader with syntax highlighting, code copy controls, expected-result panels, clearer equations and print styles. Embedded math fonts and styles preserve formatting when the HTML is saved.",
+      "Fixed shared syntax highlighting that dropped Python numeric literals containing underscores; added exact code-preservation checks across all 97 book chapters.",
+      "Added practical guides and launcher sources to release change detection."
+    ]
+  },
+  {
     "version": "0.3.0",
     "date": "2026-10-06",
     "title": "Deeper deployment lessons and reproducible release checks",
