@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "optimization-04",
+  "minutes": 80,
+  "content": {
+    "problem": "An optimizer helps turn gradients into parameter changes. Before introducing a more complicated one, we’ll check that Optax SGD agrees with the update you already know. Then we’ll add momentum and follow the extra state it remembers, so you can explain why resetting that state changes the next step.",
+    "idea": "An Optax optimizer is a gradient transformation. Initialize its state from the parameter pytree. Each update consumes gradients, previous state, and optionally parameters, then returns updates and new state. Apply those updates to obtain new parameters.\n\nFor plain SGD, this reproduces subtracting learning_rate times the gradient. Momentum and Adam introduce additional state. Always carry the returned state into the next step; reinitializing it on every step changes the algorithm.",
+    "code": "import jax\nimport jax.numpy as jnp\nimport optax\nparams = {\"weight\": jnp.array(0.), \"bias\": jnp.array(0.)}\nx = jnp.linspace(-1., 1., 21)\ny = 2. * x + 1.\ndef loss(p):\n    return jnp.mean((p[\"weight\"] * x + p[\"bias\"] - y) ** 2)\noptimizer = optax.sgd(0.2)\nstate = optimizer.init(params)\ninitial_loss = loss(params)\nfor _ in range(120):\n    grads = jax.grad(loss)(params)\n    updates, state = optimizer.update(grads, state, params)\n    params = optax.apply_updates(params, updates)\nprint(\"Parameters:\", params)\nprint(\"Loss:\", float(loss(params)))\nassert loss(params) < 1e-8\nassert jnp.allclose(params[\"weight\"], 2., atol=1e-4)\nassert jnp.allclose(params[\"bias\"], 1., atol=1e-4)",
+    "output": "Weight approaches \\(2.0\\), bias approaches \\(1.0\\), and loss is below \\(10^{-8}\\).",
+    "exercise": "At the original zero parameters, compare the first Optax SGD update with an explicit tree-map gradient descent step.",
+    "solution": "start = {\"weight\": jnp.array(0.), \"bias\": jnp.array(0.)}\ngrads = jax.grad(loss)(start)\nupdates, _ = optimizer.update(grads, optimizer.init(start), start)\nactual = optax.apply_updates(start, updates)\nexpected = jax.tree.map(lambda p, g: p - 0.2 * g, start, grads)\nassert all(jnp.allclose(a, b) for a, b in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)))",
+    "question": "What should a training step retain besides updated parameters for a stateful optimizer?",
+    "options": [
+      "Only the final loss",
+      "The new optimizer state returned by update",
+      "A freshly initialized state every time"
+    ],
+    "answer": 1,
+    "explanation": "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
+    "diagnosis": "If an adaptive optimizer behaves differently after restarting, compare both parameter values and optimizer state. Equal parameters alone do not establish an identical continuation.",
+    "sections": [
+      {
+        "title": "Distinguish gradients, updates, and parameters",
+        "body": "A gradient describes local sensitivity; an update is the change the optimizer wants to add to parameters. Optax SGD transforms \\(g\\) into \\(-\\eta g\\). apply_updates adds that update, so subtracting it again would reverse the intended direction. The tree structure of gradients and updates follows the parameter tree.\n\nFor our evenly spaced \\(x\\) values, \\(\\operatorname{mean}(x)=0\\) and \\(\\operatorname{mean}(x^2)=\\frac{11}{30}\\). At zero parameters, the weight derivative is \\(-4\\cdot\\frac{11}{30}=-\\frac{22}{15}\\) and the bias derivative is \\(-2\\). With rate \\(0.2\\), the first weight becomes \\(22/75\\) and bias \\(0.4\\). Compute these values before trusting a long run.",
+        "formula": "params → loss → grads\ngrads + old optimizer state → updates + new optimizer state\nparams + updates → next params"
+      },
+      {
+        "title": "Understand the state even when SGD has none",
+        "body": "Plain SGD here has no momentum history, so the equality with manual gradient descent is a useful baseline. Momentum adds a trace of prior gradients. Its returned state must be threaded through every call; rebuilding state each step discards that history and gives a different algorithm.\n\nWith momentum \\(0.9\\) and gradients \\(2\\) then \\(1\\), the trace is first \\(2\\) then \\(2.8\\). At rate \\(0.1\\) the second update is \\(-0.28\\). Reinitializing before the second gradient gives \\(-0.1\\). This two-step example demonstrates the actual state dependence without assuming that the regression fit alone proves it."
+      },
+      {
+        "title": "Make a resumable training transition",
+        "body": "Treat a training step as (params, optimizer_state, batch) → (new_params, new_state, metrics). A checkpoint must preserve the algorithm state as well as parameter values. With a deterministic fixed dataset, replaying the next step from identical saved parameters and state should produce identical results within the same environment.\n\nThis lesson performs an in-memory replay; it does not implement file persistence or claim crash recovery. Random keys, data iterator position and distributed topology become additional state in later training systems. A tuple called “checkpoint” is not a resilient checkpoint service."
+      },
+      {
+        "title": "Verify the simpler algorithm before composing one",
+        "body": "Compare one Optax SGD step to a hand-derived tree update before introducing momentum, clipping, schedules or Adam. Composition order matters: transformations operate on the value produced by preceding transformations. Keep loss convention and the rate fixed while comparing algorithms.\n\nThe 120-step fit is a small CPU regression example, not a TPU throughput benchmark or evidence that the same rate is suitable for a network. Inspect the parameters, loss, and optimizer transition separately; the final loss alone cannot reveal a reset-state bug in every problem."
+      },
+      {
+        "title": "Preserve state when a gradient happens to be zero",
+        "body": "Momentum remembers earlier gradients. Under the convention \\(m_t=\\beta m_{t-1}+g_t\\), a zero current gradient can still produce a nonzero update. With \\(\\beta=0.9\\), a previous trace of \\(2\\) becomes \\(1.8\\) when the new gradient is zero. This is why an optimizer’s behavior cannot be reconstructed from the current gradient and weights alone. The next lesson builds on this state model to explain Adam and learning-rate schedules.",
+        "math": "m_t=\\beta m_{t-1}+g_t,\\qquad \\Delta w_t=-\\eta m_t"
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Check the first update against arithmetic",
+        "prediction": "Predict both parameters after one SGD step at the zero initialization.",
+        "code": "p0 = {\"weight\": jnp.array(0.), \"bias\": jnp.array(0.)}\ng0 = jax.grad(loss)(p0)\nu0, s0 = optimizer.update(g0, optimizer.init(p0), p0)\np1 = optax.apply_updates(p0, u0)\nassert jnp.allclose(p1[\"weight\"], 22/75)\nassert jnp.allclose(p1[\"bias\"], 0.4)\nprint(\"First parameters:\", p1)",
+        "output": "Weight ≈ \\(0.293333\\); bias \\(0.4\\).",
+        "explanation": "Independent arithmetic checks the gradient scale and the update sign."
+      },
+      {
+        "title": "Observe stateful momentum",
+        "prediction": "After gradients \\(2\\) then \\(1\\), is the second update the same if you reset state?",
+        "code": "momentum = optax.sgd(0.1, momentum=0.9)\nm0 = momentum.init(jnp.array(0.))\nu1, m1 = momentum.update(jnp.array(2.), m0)\nu2, m2 = momentum.update(jnp.array(1.), m1)\nreset_u2, _ = momentum.update(jnp.array(1.), m0)\nassert jnp.allclose(u1, -0.2)\nassert jnp.allclose(u2, -0.28)\nassert jnp.allclose(reset_u2, -0.1)",
+        "output": "Second update \\(-0.28\\) with retained state, \\(-0.1\\) after reset.",
+        "explanation": "Resetting momentum removes the prior-gradient contribution; it changes the optimization algorithm."
+      },
+      {
+        "title": "Coast through a zero-gradient step",
+        "prediction": "After gradient \\(2\\), does a zero gradient stop momentum SGD immediately?",
+        "code": "momentum_tx = optax.sgd(0.1, momentum=0.9)\nposition = jnp.array(0.)\nmomentum_state = momentum_tx.init(position)\ncoast_first, momentum_state = momentum_tx.update(jnp.array(2.),momentum_state,position)\nposition = optax.apply_updates(position,coast_first)\ncoast_second, momentum_state = momentum_tx.update(jnp.array(0.),momentum_state,position)\nassert jnp.allclose(coast_first,-0.2)\nassert jnp.allclose(coast_second,-0.18)",
+        "output": "The second update is \\(-0.18\\), despite a zero current gradient.",
+        "explanation": "Optimizer state carries information from earlier steps. A zero current gradient need not produce a zero update."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Replay a momentum continuation",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Save the state after the first update; run the next update twice from that state and compare every state leaf.",
+        "hint": "Optimizer transformations return new state; reuse the saved value for the replay.",
+        "solution": "replay_u, replay_state = momentum.update(jnp.array(1.), m1)\nassert jnp.allclose(replay_u, u2)\nassert all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))",
+        "explanation": "This verifies an in-memory optimizer transition. It does not test serialization or a data-loader resume."
+      },
+      {
+        "title": "Catch double subtraction",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates.",
+        "hint": "SGD updates already contain the minus sign.",
+        "solution": "wrong = jax.tree.map(lambda p,u: p-u, p0,u0)\nright = optax.apply_updates(p0,u0)\nassert loss(wrong) > loss(p0)\nassert loss(right) < loss(p0)",
+        "explanation": "Comparing identical gradients exposes an update-sign error rather than a hyperparameter difference."
+      }
+    ],
+    "references": [
+      {
+        "title": "Optax getting started",
+        "url": "https://optax.readthedocs.io/en/latest/getting_started.html"
+      },
+      {
+        "title": "Optax optimizer API",
+        "url": "https://optax.readthedocs.io/en/latest/api/optimizers.html"
+      }
+    ],
+    "objectives": [
+      "Distinguish gradients, updates, and parameters",
+      "Understand the state even when SGD has none",
+      "Make a resumable training transition",
+      "Verify the simpler algorithm before composing one",
+      "Preserve state when a gradient happens to be zero"
+    ],
+    "takeaways": [
+      "Independent arithmetic checks the gradient scale and the update sign.",
+      "Resetting momentum removes the prior-gradient contribution; it changes the optimization algorithm."
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Prepare the inputs",
+        "instruction": "Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport optax",
+        "explanation": "This block establishes the values used by the following steps; run the completed file after step \\(3\\)."
+      },
+      {
+        "title": "2. Define the computation",
+        "instruction": "Append this block below the inputs. Before proceeding, trace which values are inputs, predictions, and state.",
+        "code": "params = {\"weight\": jnp.array(0.), \"bias\": jnp.array(0.)}\nx = jnp.linspace(-1., 1., 21)\ny = 2. * x + 1.\ndef loss(p):\n    return jnp.mean((p[\"weight\"] * x + p[\"bias\"] - y) ** 2)\noptimizer = optax.sgd(0.2)\nstate = optimizer.init(params)",
+        "explanation": "loss maps the two parameter leaves to row-wise predictions. optimizer.init establishes the initial SGD state; retain the update state in the next block."
+      },
+      {
+        "title": "3. Measure and verify",
+        "instruction": "Append the remaining block, then run python main.py in the terminal. Compare the printed result with the expected output below. Assertions stop execution if the contract fails.",
+        "code": "initial_loss = loss(params)\nfor _ in range(120):\n    grads = jax.grad(loss)(params)\n    updates, state = optimizer.update(grads, state, params)\n    params = optax.apply_updates(params, updates)\nprint(\"Parameters:\", params)\nprint(\"Loss:\", float(loss(params)))\nassert loss(params) < 1e-8\nassert jnp.allclose(params[\"weight\"], 2., atol=1e-4)\nassert jnp.allclose(params[\"bias\"], 1., atol=1e-4)",
+        "explanation": "Weight approaches \\(2.0\\), bias approaches \\(1.0\\), and loss is below \\(10^{-8}\\)."
+      }
+    ],
+    "visual": {
+      "title": "The fitted line recovers slope and bias",
+      "kind": "executed",
+      "prediction": "What does each learned parameter change in the predictions?",
+      "reading": "The horizontal axis gives input values and the vertical axis gives predictions. The dashed initial model is flat at zero. The target and trained-model lines rise together from approximately \\((-1,-1)\\) through \\((0,1)\\) to \\((1,3)\\).\n\nThe trained line lies almost exactly on top of the target, so one can hide the other. This overlap is the intended result, not a missing legend entry. It means the predictions agree to the numerical tolerance used in the example.",
+      "connection": "Read the learned parameters from the geometry: the intercept is \\(1\\), and increasing the input by \\(1\\) raises the prediction by \\(2\\). Training has therefore recovered the target relationship \\(y=2x+1\\), whereas the initial model used zero slope and zero intercept.\n\nThis picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It does not establish performance on noisy data or on a different relationship.",
+      "alt": "The fitted line recovers slope and bias. The horizontal axis gives input values and the vertical axis gives predictions. The dashed initial model is flat at zero. The target and trained-model lines rise together from approximately \\((-1,-1)\\) through \\((0,1)\\) to \\((1,3)\\). The trained line lies almost exactly on top of the target, so one can hide the other. This overlap is the intended result, not a missing legend entry. It means the predictions agree to the numerical tolerance used in the example.",
+      "code": "visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}"
+    }
+  }
+}

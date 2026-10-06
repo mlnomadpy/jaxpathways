@@ -1,0 +1,3927 @@
+{
+  "schemaVersion": 1,
+  "auditDate": "2026-10-06",
+  "scope": "Curriculum inventory and source-bound historical receipt verification; no fresh numerical execution, independent learner assessment or hardware qualification.",
+  "lessonReceiptAt": "2026-10-06T01:27:51.059573+00:00",
+  "projectReceiptAt": "2026-10-06T01:27:02.045848+00:00",
+  "counts": {
+    "phases": 19,
+    "lessons": 97,
+    "projects": 19,
+    "pathways": 10,
+    "careers": 7,
+    "executedFigures": 92,
+    "conceptualFigures": 5
+  },
+  "phases": [
+    {
+      "id": "welcome",
+      "title": "Setup & first steps",
+      "prerequisites": [],
+      "lessonIds": [
+        "welcome-01",
+        "welcome-02",
+        "welcome-cpu",
+        "welcome-03"
+      ],
+      "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run."
+    },
+    {
+      "id": "arrays",
+      "title": "Arrays & pure functions",
+      "prerequisites": [
+        "welcome"
+      ],
+      "lessonIds": [
+        "arrays-01",
+        "arrays-02",
+        "arrays-03",
+        "arrays-04"
+      ],
+      "furtherWork": "Sparse and ragged inputs need additional contract-focused labs; this phase deliberately teaches fixed dense arrays first."
+    },
+    {
+      "id": "transforms",
+      "title": "JAX transformations",
+      "prerequisites": [
+        "arrays"
+      ],
+      "lessonIds": [
+        "first-gradient",
+        "transforms-02",
+        "transforms-03",
+        "transforms-04",
+        "transforms-05"
+      ],
+      "furtherWork": "Transformation combinations involving nondifferentiable boundaries require further examples; passing smooth fixtures does not validate arbitrary gradients."
+    },
+    {
+      "id": "state",
+      "title": "State, randomness & control flow",
+      "prerequisites": [
+        "transforms"
+      ],
+      "lessonIds": [
+        "state-01",
+        "state-02",
+        "state-03",
+        "state-04"
+      ],
+      "furtherWork": "Local deterministic state does not establish concurrent-writer or multi-host recovery; the recovery and operations phases extend these boundaries."
+    },
+    {
+      "id": "optimization",
+      "title": "Math & optimization",
+      "prerequisites": [
+        "state"
+      ],
+      "lessonIds": [
+        "optimization-05",
+        "optimization-01",
+        "optimization-06",
+        "optimization-07",
+        "optimization-02",
+        "optimization-08",
+        "optimization-03",
+        "optimization-09",
+        "optimization-10",
+        "optimization-11",
+        "optimization-04",
+        "optimization-12"
+      ],
+      "furtherWork": "Constrained, nonsmooth and large-scale stochastic optimization are not covered comprehensively. Current ranking evidence is limited to declared synthetic objectives."
+    },
+    {
+      "id": "networks",
+      "title": "Neural network training",
+      "prerequisites": [
+        "optimization"
+      ],
+      "lessonIds": [
+        "networks-01",
+        "networks-02",
+        "networks-03",
+        "networks-04",
+        "networks-05"
+      ],
+      "furtherWork": "Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images do not establish real-photo generalization."
+    },
+    {
+      "id": "recovery",
+      "title": "Data & checkpoint recovery",
+      "prerequisites": [
+        "networks"
+      ],
+      "lessonIds": [
+        "recovery-01",
+        "recovery-02",
+        "recovery-03",
+        "recovery-04",
+        "recovery-05",
+        "recovery-06"
+      ],
+      "furtherWork": "Network storage failures, concurrent checkpoint writers and true multi-host recovery still need separate failure-injection qualification."
+    },
+    {
+      "id": "transformers",
+      "title": "Transformers & language models",
+      "prerequisites": [
+        "recovery"
+      ],
+      "lessonIds": [
+        "transformers-01",
+        "transformers-02",
+        "transformers-03",
+        "transformers-04"
+      ],
+      "furtherWork": "Real-corpus curation, tokenizer tradeoff studies, long-context evaluation and live generative quality need further labs beyond the tiny byte-model harness."
+    },
+    {
+      "id": "performance",
+      "title": "Performance diagnosis",
+      "prerequisites": [
+        "networks"
+      ],
+      "lessonIds": [
+        "performance-01",
+        "performance-02",
+        "performance-03",
+        "performance-04",
+        "performance-05"
+      ],
+      "furtherWork": "CPU traces do not characterize TPU/GPU communication or memory. Target traces and sustained workload measurements remain required for accelerator claims."
+    },
+    {
+      "id": "distributed",
+      "title": "Distributed training",
+      "prerequisites": [
+        "recovery",
+        "performance"
+      ],
+      "lessonIds": [
+        "distributed-01",
+        "distributed-02",
+        "distributed-03",
+        "distributed-04"
+      ],
+      "furtherWork": "Real network collectives, multi-controller ingestion and host-loss recovery are unqualified. The optional launch instructions are preparation, not execution receipts."
+    },
+    {
+      "id": "science",
+      "title": "Scientific computing",
+      "prerequisites": [
+        "optimization"
+      ],
+      "lessonIds": [
+        "science-01",
+        "science-02",
+        "science-03",
+        "science-04"
+      ],
+      "furtherWork": "Adaptive solvers, event handling, stiff systems, PDEs and domain-specific physical validation remain outside the scalar ODE lab."
+    },
+    {
+      "id": "probability",
+      "title": "Probabilistic modeling",
+      "prerequisites": [
+        "optimization"
+      ],
+      "lessonIds": [
+        "probability-01",
+        "probability-02",
+        "probability-03",
+        "probability-04"
+      ],
+      "furtherWork": "General hierarchical models and robust modern diagnostic workflows need further examples. The instructional sampler is not a replacement for validated inference libraries."
+    },
+    {
+      "id": "rl",
+      "title": "Reinforcement learning",
+      "prerequisites": [
+        "networks"
+      ],
+      "lessonIds": [
+        "rl-01",
+        "rl-02",
+        "rl-03",
+        "rl-04"
+      ],
+      "furtherWork": "Continuous actions, value-function estimation and larger benchmark environments need new implementation and evaluation labs; this tabular task is deliberately bounded."
+    },
+    {
+      "id": "kernels",
+      "title": "Pallas kernels",
+      "prerequisites": [
+        "distributed"
+      ],
+      "lessonIds": [
+        "kernels-01",
+        "kernels-02",
+        "kernels-03",
+        "kernels-04"
+      ],
+      "furtherWork": "Actual TPU/GPU compilation, race diagnosis and target tuning remain unqualified; CPU interpretation cannot close these gaps."
+    },
+    {
+      "id": "internals",
+      "title": "Autodiff & JAX internals",
+      "prerequisites": [
+        "optimization"
+      ],
+      "lessonIds": [
+        "internals-01",
+        "internals-02",
+        "internals-03",
+        "internals-04"
+      ],
+      "furtherWork": "The tiny interpreter is intentionally incomplete. Production extension APIs, effects and full compiler transformation coverage require further targeted work."
+    },
+    {
+      "id": "deployment",
+      "title": "Deployment, interoperability & edge AI",
+      "prerequisites": [
+        "recovery",
+        "performance"
+      ],
+      "lessonIds": [
+        "deployment-02",
+        "deployment-01",
+        "deployment-08",
+        "deployment-03",
+        "deployment-05",
+        "deployment-07",
+        "deployment-04",
+        "deployment-06"
+      ],
+      "furtherWork": "Actual edge-device delegates, thermal/energy budgets, packed low-bit kernels and production serving loads remain unqualified. The revised sequence moves adaptation before export and containerization before service capacity planning."
+    },
+    {
+      "id": "operations",
+      "title": "Workload operations",
+      "prerequisites": [
+        "distributed"
+      ],
+      "lessonIds": [
+        "operations-01",
+        "operations-02",
+        "operations-03",
+        "operations-04",
+        "operations-05",
+        "operations-06",
+        "operations-07",
+        "operations-08"
+      ],
+      "furtherWork": "Authenticated review, multi-writer promotion, staged cloud rollout, SLO alerting and live-model abuse evaluation still require separate infrastructure and application-specific labs."
+    },
+    {
+      "id": "pretraining",
+      "title": "Self-supervised pretraining: masked and contrastive learning",
+      "prerequisites": [
+        "transformers"
+      ],
+      "lessonIds": [
+        "pretraining-01",
+        "pretraining-02",
+        "pretraining-03"
+      ],
+      "furtherWork": "Full BERT/ViT masked autoencoders, natural corpora, augmentation studies and downstream probe benchmarks remain extensions. The current labs execute small attention, linear reconstruction and embedding models."
+    },
+    {
+      "id": "posttraining",
+      "title": "Post-training: SFT, LoRA, reward models and RLHF",
+      "prerequisites": [
+        "pretraining",
+        "rl"
+      ],
+      "lessonIds": [
+        "posttraining-01",
+        "posttraining-02",
+        "posttraining-03",
+        "posttraining-04",
+        "posttraining-05"
+      ],
+      "furtherWork": "The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work."
+    }
+  ],
+  "lessons": [
+    {
+      "id": "welcome-01",
+      "phaseId": "welcome",
+      "title": "Set up your learning workspace",
+      "source": "phases/00-welcome/01-set-up-your-learning-workspace/lesson.json",
+      "sourceHash": "5d333f3533d399e3f456d2a109d58431c889c4a2bb01df88c1c906c93e9ffc38",
+      "contentHash": "e8fcf356a4c4a495a9bba1da822bd0a16fe8eb3e96fb38d471cf8727787e2d4c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "1. Download and unpack your workspace",
+        "2. Check that Python is installed",
+        "3. Put the terminal in the right folder",
+        "4. Create the environment and install the packages",
+        "5. Run your first saved program",
+        "6. Make one change and save your result",
+        "7. Resume when you open a new terminal",
+        "When a step fails: match the symptom"
+      ],
+      "experiments": 0,
+      "practice": 0,
+      "visual": "conceptual",
+      "prerequisites": []
+    },
+    {
+      "id": "welcome-02",
+      "phaseId": "welcome",
+      "title": "Meet your arrays and devices",
+      "source": "phases/00-welcome/02-meet-your-arrays-and-devices/lesson.json",
+      "sourceHash": "6f4a3ef02404add0f31618d6bb6f92d90f075552baec84de467bd83de3073377",
+      "contentHash": "022dd2a05d4ca7030f0eaaf246c25a54a8537ccedfb23858945e7415daa7da7c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read the table before using an API",
+        "Derive a reduction and its output shape",
+        "Distinguish dtype from mathematical value",
+        "Inspect placement without assuming an accelerator"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "welcome-01"
+      ]
+    },
+    {
+      "id": "welcome-cpu",
+      "phaseId": "welcome",
+      "title": "Practice with four virtual CPU devices",
+      "source": "phases/00-welcome/03-virtual-cpu-devices/lesson.json",
+      "sourceHash": "157ef3456b3fb3031c9c6604ca718a5c97adc93b0fe895cbc0474ca1d2436f90",
+      "contentHash": "256e367ccb97f1bdd794401e246d1a79abea41ae25dbde84a7a6ccd56c420598",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Configure the runtime before it exists",
+        "Distinguish logical devices from your CPU hardware",
+        "A global array contains local pieces",
+        "Check arithmetic separately from placement"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "welcome-02"
+      ]
+    },
+    {
+      "id": "welcome-03",
+      "phaseId": "welcome",
+      "title": "Move your experiment to a TPU",
+      "source": "phases/00-welcome/03-move-your-experiment-to-a-tpu/lesson.json",
+      "sourceHash": "d87852b9626f3bd7b5848cfb0413ba649ad9e4dbdff73d01bb801566a6f188e9",
+      "contentHash": "d1ca121474da84682f23eafae2d27f487bb6a42b5ad4555405e32d8124ef3804",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Carry a prediction, not just an installation",
+        "Establish the CPU reference first",
+        "Run the same file on an existing TPU runtime",
+        "Diagnose the boundary that failed"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "welcome-cpu"
+      ]
+    },
+    {
+      "id": "arrays-01",
+      "phaseId": "arrays",
+      "title": "From NumPy to jax.numpy",
+      "source": "phases/01-arrays/01-from-numpy-to-jax-numpy/lesson.json",
+      "sourceHash": "cc53242ed788bf98208bfaf8721c8adb71cd07995b8ea95748a6c9382abf78e4",
+      "contentHash": "32a5ee2da7c5d4bfd13974783988798103b626baaf2b1b2ec2cd491b6cc77d0f",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Follow an axis through a reduction",
+        "Derive the centering and scale values",
+        "Fit statistics once; apply them consistently",
+        "Give constant features an explicit policy",
+        "Use NumPy as a numerical reference, not an execution substitute"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "arrays-02",
+      "phaseId": "arrays",
+      "title": "Shapes, broadcasting, and dtypes",
+      "source": "phases/01-arrays/02-shapes-broadcasting-and-dtypes/lesson.json",
+      "sourceHash": "52981861810133c1e0c9f481fc1cc1fe2c708805e76e7df6f19b6d7ce0fd63c9",
+      "contentHash": "c36e9197276dab539ebeb183bea158a7e84e0384a15c5b1c61fb15894f20b389",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Work the shape rule one dimension at a time",
+        "Do not test axes with only square arrays",
+        "A legal broadcast can change your loss",
+        "Shape and dtype are separate contracts",
+        "Make boundary checks before reducing"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "arrays-01"
+      ]
+    },
+    {
+      "id": "arrays-03",
+      "phaseId": "arrays",
+      "title": "Pure functions and explicit inputs",
+      "source": "phases/01-arrays/03-pure-functions-and-explicit-inputs/lesson.json",
+      "sourceHash": "71f7cf2ef13a3e32781f4c8adbed07c402be1db00ee472754721c6c891d919aa",
+      "contentHash": "4ae5e7178f9ec2508e5f83718ba9150f4fbd5b0595acd01f0aa8592130a8c570",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Hidden state makes the signature incomplete",
+        "Array immutability does not make a dictionary immutable",
+        "Treat a step as an input/output contract",
+        "Choose a clear transformation boundary",
+        "A deterministic check has limits"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "arrays-02"
+      ]
+    },
+    {
+      "id": "arrays-04",
+      "phaseId": "arrays",
+      "title": "Immutable updates and indexing",
+      "source": "phases/01-arrays/04-immutable-updates-and-indexing/lesson.json",
+      "sourceHash": "aff72d0c7a1906104c26c4752ed0185a5b778d1267b438a63f238e95ca173ce5",
+      "contentHash": "2153993e8c8550b7e4d00fa40547685f394b8f8de389944d2303ec94eaac7fbb",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "A Python name and an array value are different",
+        "Set replaces; add accumulates",
+        "Choose a mask when you want to keep the shape",
+        "Make the index domain part of the contract",
+        "Carry functional updates into training state"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "arrays-03"
+      ]
+    },
+    {
+      "id": "first-gradient",
+      "phaseId": "transforms",
+      "title": "Your first gradient",
+      "source": "phases/02-transforms/01-your-first-gradient/lesson.json",
+      "sourceHash": "b4dbbe203acf80605318e12b9e7a0614c4f3f6226df05437db155438d65097a2",
+      "contentHash": "5fb2611e440319b86af9868d6f4d9ae38c271839f88b8003036f19003c7146d7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read a slope before you compute it",
+        "Three ways to obtain a derivative",
+        "Follow the chain rule through the program",
+        "Know the contract of grad",
+        "A zero gradient is a question, not a verdict"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "transforms-02",
+      "phaseId": "transforms",
+      "title": "Losses and value_and_grad",
+      "source": "phases/02-transforms/02-losses-and-value-and-grad/lesson.json",
+      "sourceHash": "5084afabe2a4645c546b001b121e921475c9b1925bd7e5c95dade78c4526ea97",
+      "contentHash": "9128ef8d163dfdc67e18a3fd5ae6b96611db2675123a3d73cd0d0d2067d41a6d",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "From three residuals to one decision",
+        "Derive the gradient independently",
+        "Read value_and_grad as an interface",
+        "Predict whether a step improves the objective",
+        "Separate objective value from useful metrics"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "first-gradient"
+      ]
+    },
+    {
+      "id": "transforms-03",
+      "phaseId": "transforms",
+      "title": "Batch a function with vmap",
+      "source": "phases/02-transforms/03-batch-a-function-with-vmap/lesson.json",
+      "sourceHash": "e6292fe5e9bb0e3585194b2cd34923fcae7ce58b2b8c6f19dbd8cfcbf4c2c0a9",
+      "contentHash": "68167e166f45b2f4f8c399bc087560e4b91e067297049a5f31c177b374b3797f",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write down the axis contract",
+        "Build a reference that is easy to trust",
+        "Shared does not mean copied or frozen",
+        "Change layout without changing semantics",
+        "Separate per-example and aggregate gradients",
+        "Compose transformations around the question"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "transforms-02"
+      ]
+    },
+    {
+      "id": "transforms-04",
+      "phaseId": "transforms",
+      "title": "Compile a function with jit",
+      "source": "phases/02-transforms/04-compile-a-function-with-jit/lesson.json",
+      "sourceHash": "1ee29d1881b41f02f80643fa47d0e5aa8912edcdcad81f895555d0beaaf3bb20",
+      "contentHash": "bd0f537bbd6b41b858ac0d0c54ecbad9b7acdab954805f6adf59b5b5f5c314f4",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate the work hidden in one call",
+        "Check values before timing",
+        "Wait for the quantity you are timing",
+        "Use repetitions and report a distribution",
+        "Compile the computation you intend to repeat",
+        "Decide when compilation is worth its setup"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "transforms-03"
+      ]
+    },
+    {
+      "id": "transforms-05",
+      "phaseId": "transforms",
+      "title": "Tracing, static arguments, and recompilation",
+      "source": "phases/02-transforms/05-tracing-static-arguments-and-recompilation/lesson.json",
+      "sourceHash": "6abd7a3ae9af1069c3bb178b8ddd8a6b0c002aac17405147bffba64795959b6e",
+      "contentHash": "918fb81dcd3b89b053f8dc01ce3bb1a6efe60dc1a5dc281967c9f685818e1f08",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate metadata, configuration, and data",
+        "Read a tiny staged program",
+        "Why a Python if can fail",
+        "Make configuration choices explicit",
+        "Inspect tracing without confusing it with runtime logging",
+        "Carry this boundary into the next phase"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "conceptual",
+      "prerequisites": [
+        "transforms-04"
+      ]
+    },
+    {
+      "id": "state-01",
+      "phaseId": "state",
+      "title": "Random keys without surprises",
+      "source": "phases/03-state/01-random-keys-without-surprises/lesson.json",
+      "sourceHash": "30ae64d82689c58dfc5a19d88c1e6eb2cd95d4ef3edcd90bba8d6889ccd6a257",
+      "contentHash": "5ea69a17d27e7e0769b6c9767a3783cec3fead7693462853fd22b69da939f4a6",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Treat a key as an explicit input",
+        "Carry the continuation key explicitly",
+        "Separate replay from a statistical claim",
+        "Allocate randomness by sample identity"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "state-02",
+      "phaseId": "state",
+      "title": "Pytrees and structured parameters",
+      "source": "phases/03-state/02-pytrees-and-structured-parameters/lesson.json",
+      "sourceHash": "0f0f7c608c7263b2371cbc0ce7788987175a24f3ddbc54e0596862fdadf15c30",
+      "contentHash": "bf560046289126dcf57859155b521d140b3612e4e0b9ac9f444e263db965cfc4",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Identify containers, leaves and structure",
+        "Derive the matching gradient tree",
+        "Apply corresponding leaves, not unrelated arrays",
+        "Keep metadata separate from differentiated state"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "state-01"
+      ]
+    },
+    {
+      "id": "state-03",
+      "phaseId": "state",
+      "title": "Compiled loops with lax.scan",
+      "source": "phases/03-state/03-compiled-loops-with-lax-scan/lesson.json",
+      "sourceHash": "4a1fff35ac723733d51e8a2198667c65d0a3f7ad4c2464351ba592e87ba82260",
+      "contentHash": "89905a987038fbdee2bcc4181f8df83ae809a9d6d09c0c041569f54dcefd64ff",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate carry from recorded outputs",
+        "Keep the carry contract invariant",
+        "Differentiate the recurrence by hand",
+        "Compile the repeated transition without a timing promise"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "state-02"
+      ]
+    },
+    {
+      "id": "state-04",
+      "phaseId": "state",
+      "title": "Branches with lax.cond",
+      "source": "phases/03-state/04-branches-with-lax-cond/lesson.json",
+      "sourceHash": "55859cbdb5398a44de084afef559eae8ac2872f79f68e3f36c7db3c10d478ac4",
+      "contentHash": "d2dc0b815348fb0743c47f37b788266b0e22a5a596ce8936d51b15436326ce53",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Locate the decision boundary",
+        "Trace both branches and check their result types",
+        "Choose cond or where by the shape of the question",
+        "Inspect boundary behavior and derivatives"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "state-03"
+      ]
+    },
+    {
+      "id": "optimization-05",
+      "phaseId": "optimization",
+      "title": "Vectors, norms, and projections",
+      "source": "phases/04-optimization/05-vectors-norms-and-projections/lesson.json",
+      "sourceHash": "d9983cc5b674d2d406862f2c8af1dc206d8115fd66f6a5f4c278ef4f7cc6ed9e",
+      "contentHash": "bfa7625964b6df4524aeef35dc818ed6bbfc289af1ab9522ddc40a27fa9f2c1c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read length and alignment separately",
+        "Find the closest point on a line",
+        "Use orthogonality as an independent check",
+        "Know when the formula is undefined"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "optimization-01",
+      "phaseId": "optimization",
+      "title": "Linear algebra and loss intuition",
+      "source": "phases/04-optimization/01-linear-algebra-and-loss-intuition/lesson.json",
+      "sourceHash": "b0cd2c98d89ac5c2afd93e6302c966b3100bc6a9b2e7678ab50c0f4760be3759",
+      "contentHash": "a598b1e956c9096deb71528ab1f46168ee1e19487f00faedae5ae655f63792d9",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Map one row to one prediction",
+        "Calculate loss before differentiating",
+        "Expose a broadcast that changes the problem",
+        "Change the dataset and retain the contract",
+        "Derive the vector gradient from individual errors"
+      ],
+      "experiments": 3,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-05"
+      ]
+    },
+    {
+      "id": "optimization-06",
+      "phaseId": "optimization",
+      "title": "Least squares, rank, and conditioning",
+      "source": "phases/04-optimization/06-least-squares-rank-and-conditioning/lesson.json",
+      "sourceHash": "2272e48189a9846eb32e65d445827bd973ac50eb81e48f29821125ea7a5d97bd",
+      "contentHash": "61b3e69844733813d1a05e6094d3f4cb4ca7d15ee5b417b394053e889bfb1d73",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Solve a fit you can verify by hand",
+        "Use a solver, not an explicit inverse",
+        "Separate rank from fit quality",
+        "Measure sensitivity rather than guessing"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-01"
+      ]
+    },
+    {
+      "id": "optimization-07",
+      "phaseId": "optimization",
+      "title": "The chain rule, Jacobians, and directions",
+      "source": "phases/04-optimization/07-chain-rule-jacobians-and-directional-derivatives/lesson.json",
+      "sourceHash": "7e7fd638b2842fb40901cf3af9e630d24ee1388d06f2205b148aa47801d33b99",
+      "contentHash": "f46cef87e888eda6fdb61a89de04737818d9416cb2857d7b96fa3ea71361e54f",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Build a Jacobian one entry at a time",
+        "Push an input direction forward",
+        "Pull output sensitivity backward",
+        "Check both sides of the same calculation"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-06"
+      ]
+    },
+    {
+      "id": "optimization-02",
+      "phaseId": "optimization",
+      "title": "Gradient checking and numerical accuracy",
+      "source": "phases/04-optimization/02-gradient-checking-and-numerical-accuracy/lesson.json",
+      "sourceHash": "e16e5e8c19020eace327805a36f615e20218fc80eabac374686efcbe7afcbc98",
+      "contentHash": "e39e6ff7a0db2abb52580693e9ed90bbb1e401ab1a9adb1db660ce5d9f3876d7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Build an independent derivative estimate",
+        "Separate truncation error from cancellation",
+        "Test directions as well as coordinates",
+        "Recognize what a gradient check cannot prove",
+        "Do not mistake a kink for a smooth derivative"
+      ],
+      "experiments": 3,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-07"
+      ]
+    },
+    {
+      "id": "optimization-08",
+      "phaseId": "optimization",
+      "title": "Curvature, Hessians, and learning rates",
+      "source": "phases/04-optimization/08-curvature-hessians-and-learning-rates/lesson.json",
+      "sourceHash": "c59d0096512eb3a3a44deefbd8c3a93875bd002b05dbe8a7a81a8f718b8cc153",
+      "contentHash": "9c59ef4e4687926cffd09592db99e0a4219e37491bc367f64ad59affdf53e021",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read a bowl through its curvature",
+        "Derive a stability bound",
+        "See why scaling helps",
+        "Distinguish a minimum from a stationary point"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-02"
+      ]
+    },
+    {
+      "id": "optimization-03",
+      "phaseId": "optimization",
+      "title": "Write gradient descent yourself",
+      "source": "phases/04-optimization/03-write-gradient-descent-yourself/lesson.json",
+      "sourceHash": "b2e234cbe9d4550dd3bcff02dc780cf2b87e99de6b17a8d69989e08e243a8427",
+      "contentHash": "ec2f26f4430c686ba326289b1850485f8bc4c44762d1153e429941edccd7f6d5",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Derive one update before writing the loop",
+        "Read the learning rate through curvature",
+        "Make the trajectory part of the state contract",
+        "Diagnose dynamics instead of only the final number",
+        "Use stopping evidence that survives rescaling"
+      ],
+      "experiments": 3,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-08"
+      ]
+    },
+    {
+      "id": "optimization-09",
+      "phaseId": "optimization",
+      "title": "Probability, likelihood, and stable losses",
+      "source": "phases/04-optimization/09-probability-likelihood-and-stable-losses/lesson.json",
+      "sourceHash": "5eeed6f8247951dce7230fceee8252d99523315c8411173634c4bda846724608",
+      "contentHash": "584fd577b194c7fe1f6918fe77a3111946d9e28ab767ef4b7e360f3790f9b955",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read likelihood as support for the observed data",
+        "Move from probabilities to logits",
+        "Avoid overflowing intermediate values",
+        "Extend the idea without overstating it"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-03"
+      ]
+    },
+    {
+      "id": "optimization-10",
+      "phaseId": "optimization",
+      "title": "Regularization and honest validation",
+      "source": "phases/04-optimization/10-regularization-and-validation/lesson.json",
+      "sourceHash": "319c5afb1e8489b75f390a81f8438036018e6bbe3e8a2f6dab26974a70cf4e11",
+      "contentHash": "ab3e0c708aec4a8e40c8a892d32f78025097e3d5b33ecb0d7c423ed1831072d5",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "State the exact objective",
+        "Work through shrinkage by hand",
+        "Keep fitting, choosing and reporting separate",
+        "Choose which parameters to penalize"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-09"
+      ]
+    },
+    {
+      "id": "optimization-11",
+      "phaseId": "optimization",
+      "title": "Minibatches, expectation, and gradient noise",
+      "source": "phases/04-optimization/11-minibatches-expectation-and-gradient-noise/lesson.json",
+      "sourceHash": "e3be56d23b45887a8a95a786994144ddaf3e3a246f56f4d68bd5f66ede5e3513",
+      "contentHash": "ad14e92b3cc3957f28109fd0bf490da0e7722b405a3db95fea38dfcba2cfbb41",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Define the population before estimating it",
+        "Make the independence assumption explicit",
+        "Weight unequal batches by example count",
+        "Separate noise, replay and progress"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-10"
+      ]
+    },
+    {
+      "id": "optimization-04",
+      "phaseId": "optimization",
+      "title": "Optimize with Optax",
+      "source": "phases/04-optimization/04-optimize-with-optax/lesson.json",
+      "sourceHash": "9eeb0b25d4131108d5a6f1d58e05d0df8418108a5e05dce9080349af14ea73f1",
+      "contentHash": "a75771ec1cb5032a659e2013b665b62d0cc926ca5128385bdef5eda1855e5a67",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Distinguish gradients, updates, and parameters",
+        "Understand the state even when SGD has none",
+        "Make a resumable training transition",
+        "Verify the simpler algorithm before composing one",
+        "Preserve state when a gradient happens to be zero"
+      ],
+      "experiments": 3,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-11"
+      ]
+    },
+    {
+      "id": "optimization-12",
+      "phaseId": "optimization",
+      "title": "Adam, clipping, and learning-rate schedules",
+      "source": "phases/04-optimization/12-adam-clipping-and-learning-rate-schedules/lesson.json",
+      "sourceHash": "ac688fcbfc0067bc036bb6a62cb70b5b0dfe54ab6f456415dd56254b8ff70aa9",
+      "contentHash": "d61fa3f2c87600728ac5f2f551089c866cd38fa4ea4aa794c2b96396c7efec6a",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Calculate the first two Adam steps",
+        "Clip a direction without rotating it",
+        "Make the schedule clock explicit",
+        "Compare decisions with evidence",
+        "Bring the phase together in a training audit"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "optimization-04"
+      ]
+    },
+    {
+      "id": "networks-01",
+      "phaseId": "networks",
+      "title": "Build a tiny multilayer perceptron",
+      "source": "phases/05-networks/01-build-a-tiny-multilayer-perceptron/lesson.json",
+      "sourceHash": "a2d07f2278bd96f5502050a37a87c23827fd8eabf9f1ce2e4820f4c9f04fe863",
+      "contentHash": "072de2d154249b45529e24c75f637da2d60ca0c588701dc2828a369ac65419aa",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Trace the shapes from observations to logits",
+        "Explain why the hidden activation matters",
+        "Use stable binary cross-entropy",
+        "Separate learning from held-out measurement",
+        "Read the classification loss one example at a time"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "networks-02",
+      "phaseId": "networks",
+      "title": "Model and state with Flax NNX",
+      "source": "phases/05-networks/02-model-and-state-with-flax-nnx/lesson.json",
+      "sourceHash": "2fb443f4da0741665a1a9ab2abe69ee091a606df2a0d2604183a3356372fd6fd",
+      "contentHash": "baee083865d68fb1de76e991420aa2f919b9eb735f3ea598cece48f09c622c52",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Move the explicit equations into a module",
+        "Separate parameter state from diagnostic state",
+        "Reconstruct an independent graph from a snapshot",
+        "Check a library forward pass independently"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "conceptual",
+      "prerequisites": [
+        "networks-01"
+      ]
+    },
+    {
+      "id": "networks-03",
+      "phaseId": "networks",
+      "title": "A compiled train and evaluation step",
+      "source": "phases/05-networks/03-a-compiled-train-and-evaluation-step/lesson.json",
+      "sourceHash": "3458746e8b267070dda1025e828f608e85e84d4528bf2759b7a6c720b8795632",
+      "contentHash": "f5eb6f01cf97738e527331673f91be525cb82819b82641dfbb4b7486bef64c78",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Choose a transparent train and held-out split",
+        "Read the state transition in execution order",
+        "Compute useful metrics without changing the model",
+        "Make replay a controlled experiment"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "networks-02"
+      ]
+    },
+    {
+      "id": "networks-04",
+      "phaseId": "networks",
+      "title": "Train a CNN on a small dataset",
+      "source": "phases/05-networks/04-train-a-cnn-on-a-small-dataset/lesson.json",
+      "sourceHash": "acd2d936064b2e5f03aa4ca03f22ed3cafd74d6232badcc6ff11a0404435c310",
+      "contentHash": "5f79c4633395adae74d1ce54d903b7679eb6ac0e042ba62154f36b5389b66e08",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Generate images with an explicit label rule",
+        "Derive the convolution output shape",
+        "Pool spatial responses and retain class scores",
+        "Read a confusion matrix rather than a success label"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "networks-03"
+      ]
+    },
+    {
+      "id": "networks-05",
+      "phaseId": "networks",
+      "title": "Debug unstable learning",
+      "source": "phases/05-networks/05-debug-unstable-learning/lesson.json",
+      "sourceHash": "cb7a81701e53e54b5274194b90bf1dc5aa8e2f4bbb2214dc6af89c6f2ede0502",
+      "contentHash": "88adf1e633cff07efe56de82cee9ceaf0aea0207db464108718c3f1f980ed605",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Derive the gradient and curvature on paper",
+        "Record pre-update and post-update quantities distinctly",
+        "Use gradient clipping for a bounded symptom, not a diagnosis",
+        "Change the feature scale and predict the new bound"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "networks-04"
+      ]
+    },
+    {
+      "id": "recovery-01",
+      "phaseId": "recovery",
+      "title": "Design an input pipeline",
+      "source": "phases/06-recovery/01-design-an-input-pipeline/lesson.json",
+      "sourceHash": "c31047e46573c7eb878d63c9832d14914767f5f7223133674e7a184e22d9eeef",
+      "contentHash": "851fdefd46d0691b9f1f70dd8d04e0a4a967091751bfd3e7c67ee48c6c748485",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Preserve identity across every transformation",
+        "Make epoch ordering a pure decision",
+        "Choose a deliberate policy for the last batch",
+        "Measure what the stopwatch surrounds"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "recovery-02",
+      "phaseId": "recovery",
+      "title": "Load, batch, and checkpoint order with Grain",
+      "source": "phases/06-recovery/02-load-batch-and-prefetch-with-grain/lesson.json",
+      "sourceHash": "013ef973eef6a66471d9954f247ab54536cb3166c585e8318335e1fb182d94de",
+      "contentHash": "dbafb2107e8c27431ee117b3a44ed03a4b77e9e593b1a64b47682baa6b80e3ec",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Map a record key to a testable source",
+        "Follow the sampler-to-batch boundary",
+        "Snapshot the iterator after consumption",
+        "Worker and buffer settings are workload choices"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "recovery-01"
+      ]
+    },
+    {
+      "id": "recovery-03",
+      "phaseId": "recovery",
+      "title": "Save model, optimizer, and random state",
+      "source": "phases/06-recovery/03-save-model-optimizer-and-random-state/lesson.json",
+      "sourceHash": "07b81ae2622d43df763eba2fcf9d7478979f5a25aad1740e922d6b7d8a518575",
+      "contentHash": "f9cceb87d34622e3e9ed17cd66d2880610affe8ad0a40274c3fbdb8ccc722006",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Inventory everything the next step reads",
+        "Save to a real local checkpoint directory",
+        "Restore into an explicit state template",
+        "Version and data checks belong to the application"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "conceptual",
+      "prerequisites": [
+        "recovery-02"
+      ]
+    },
+    {
+      "id": "recovery-04",
+      "phaseId": "recovery",
+      "title": "Recover data position and resume",
+      "source": "phases/06-recovery/04-recover-data-position-and-resume/lesson.json",
+      "sourceHash": "0dbe7f91adb7f28f38e76f23ce80937f5c92481a909f5ea88dbf294d9856720d",
+      "contentHash": "422ca72562f0e1688b78a5418766e2532081b26ebcf20830586b45d131226844",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Commit one logical boundary",
+        "Persist opaque iterator bytes without editing them",
+        "Audit the future, including an epoch transition",
+        "Define the limits of this recovery claim"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "conceptual",
+      "prerequisites": [
+        "recovery-03"
+      ]
+    },
+    {
+      "id": "recovery-05",
+      "phaseId": "recovery",
+      "title": "Asynchronous checkpoints and failure boundaries",
+      "source": "phases/06-recovery/05-asynchronous-checkpoints-and-failure-boundaries/lesson.json",
+      "sourceHash": "e696f4d4f75a18e1318f61d89abd7f86df73a94ac26bb2ccf443a4b46d1d4ca6",
+      "contentHash": "72a46547743e115bedfa6f828a4f5cd358fa0f11029e89b0cfb019b23f215d8b",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Define a completed training boundary",
+        "Separate save latency from acceptance",
+        "Publish a checkpoint you can actually restore",
+        "Practice interruption without relying on lucky timing",
+        "Translate the boundary into an operational rule"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "recovery-04"
+      ]
+    },
+    {
+      "id": "recovery-06",
+      "phaseId": "recovery",
+      "title": "Track experiments and lineage with MLflow",
+      "source": "phases/06-recovery/06-track-experiments-and-lineage-with-mlflow/lesson.json",
+      "sourceHash": "5fec8531bfb8f529bbf94c97287e1837cea1563e24e7141f671f91cd8561470c",
+      "contentHash": "6177981f0ccb37d0d5345dbacf100694b1a8d9de6ef436123c76f6c2a9c98fa2",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Decide what makes runs comparable",
+        "Give data and code an identity",
+        "Use a database and a deliberate artifact location",
+        "Log at a useful boundary",
+        "Retrieve before trusting the dashboard",
+        "Continue into a real registry"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "recovery-05"
+      ]
+    },
+    {
+      "id": "transformers-01",
+      "phaseId": "transformers",
+      "title": "Attention from small pieces",
+      "source": "phases/07-transformers/01-attention-from-small-pieces/lesson.json",
+      "sourceHash": "fea7652de7631ad5d972714b874680e27026927fa3d1092f229010ab9cef0caf",
+      "contentHash": "d2edd9f0aab5f5df7a89909fa97adb5c19e3ea980a004c1682e4fd7a2763fe5d",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Track query, key and value axes",
+        "Derive the uniform-query result",
+        "Scale scores and keep softmax stable",
+        "Test relationships that should survive a change",
+        "Read attention as matching, then mixing"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "transformers-02",
+      "phaseId": "transformers",
+      "title": "Masking, tokenization, and sequence packing",
+      "source": "phases/07-transformers/02-masking-tokenization-and-sequence-packing/lesson.json",
+      "sourceHash": "016fcf1491d0a4b922fc880a02bca713d76bfec2a2eadefeee016eac4f8d88d8",
+      "contentHash": "59705ba997519aa5b3ebc7da2d1a813ac59dac88767f3dbc0576d2d0e494e615",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Build a causal mask from positions",
+        "Keep token IDs and targets aligned",
+        "Combine causal and segment boundaries",
+        "Handle padding without an all-masked softmax",
+        "Turn the allowed positions into weights"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "transformers-01"
+      ]
+    },
+    {
+      "id": "transformers-03",
+      "phaseId": "transformers",
+      "title": "A Transformer block and mixed precision",
+      "source": "phases/07-transformers/03-a-transformer-block-and-mixed-precision/lesson.json",
+      "sourceHash": "f8e9d0b0547129356969a6a8cf43825677c51fe6f462aa67d6491ce63b6fa3e6",
+      "contentHash": "baf365086e2e92737356f5291281aa3ef4141989217ef0ea41cbb048ff0ceade",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Follow the two residual paths",
+        "Normalize features rather than examples",
+        "Test causal independence and differentiation",
+        "Separate storage precision from sensitive arithmetic"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "transformers-02"
+      ]
+    },
+    {
+      "id": "transformers-04",
+      "phaseId": "transformers",
+      "title": "Train, checkpoint, and generate",
+      "source": "phases/07-transformers/04-train-checkpoint-and-generate/lesson.json",
+      "sourceHash": "27881507390c540891ce91762ee45146dafebf91a00540e9c1c8b644d0f8ff2f",
+      "contentHash": "b333d126da273b97119fb1620ced29a02a3a4bd9696b0a1e643ef24782779d3c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Assemble the token-to-logit contract",
+        "Separate a learning experiment from a benchmark",
+        "Checkpoint the continuation state and its schema",
+        "Generate with an explicit decoding policy",
+        "Use failures to test the experiment boundary"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "transformers-03"
+      ]
+    },
+    {
+      "id": "performance-01",
+      "phaseId": "performance",
+      "title": "Benchmark asynchronous work correctly",
+      "source": "phases/08-performance/01-benchmark-asynchronous-work-correctly/lesson.json",
+      "sourceHash": "b89032e3fde522f8894c888c910a805b308cdfca7d29b2ca82ae22b90552d716",
+      "contentHash": "b83b877686dcadf3fafc52a191c4f8aa2a3ac1e37979beacced37ea022e433ce",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Draw the boundary before starting the clock",
+        "A handle is not proof of completion",
+        "First call and steady state answer different questions",
+        "Correctness comes before a speed ratio"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "performance-02",
+      "phaseId": "performance",
+      "title": "Diagnose recompilation and host synchronization",
+      "source": "phases/08-performance/02-diagnose-recompilation-and-host-synchronization/lesson.json",
+      "sourceHash": "3a49a39a17882bfa801f056aca3917c3bf78c412140829012fc0abbcd51a685c",
+      "contentHash": "1bb1324724e08faae15caaa84b0bfc8ebe1082b1748e14687ec7fbe453379ac4",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "A call signature is different from its numerical data",
+        "Observe tracing without mislabeling compilation",
+        "Choose static arguments for structure rather than convenience",
+        "A host metric is an explicit synchronization boundary"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "performance-01"
+      ]
+    },
+    {
+      "id": "performance-03",
+      "phaseId": "performance",
+      "title": "Read an XProf trace",
+      "source": "phases/08-performance/03-read-an-xprof-trace/lesson.json",
+      "sourceHash": "8c43725484f7a132449bf2182932ff1c76554b3ba717d7c7987760c2848a9449",
+      "contentHash": "e21de7625720c6e5bae784d2b87e331112f2ede6c7c3dadc7907b815bb390773",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Give the timeline a question",
+        "Capture warmed work without hiding completion",
+        "Read a trace without adding the same time twice",
+        "Open the same evidence in XProf",
+        "Make one change and repeat the same question"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "performance-02"
+      ]
+    },
+    {
+      "id": "performance-04",
+      "phaseId": "performance",
+      "title": "Reason with HLO and the roofline model",
+      "source": "phases/08-performance/04-reason-with-hlo-and-the-roofline-model/lesson.json",
+      "sourceHash": "b0e04d16aaabd41aab5c7bc5c5a5f25657ab1c75a130cedc5e5a074ef4bd5cb4",
+      "contentHash": "1061447f0e22727c613e36eece1574a4c2802397b9209f8234bdc25e9b40dbd5",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read the contract before the compiler text",
+        "Count work with a stated convention",
+        "Minimum traffic is an assumption you can challenge",
+        "Find the corner in a hypothetical roofline",
+        "Compare measurements only after checking equivalence"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "performance-03"
+      ]
+    },
+    {
+      "id": "performance-05",
+      "phaseId": "performance",
+      "title": "Memory, rematerialization, and optimization tradeoffs",
+      "source": "phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/lesson.json",
+      "sourceHash": "aa9bec27f0e505ebd4f14aa7942f7aab91de9316732ed5daf39b680fd980241a",
+      "contentHash": "b503e31ca2a672adf247aeb700c6ad6b820b5f69f4b621cc3b194e957f019b64",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Follow one layer backward",
+        "Choose a boundary around pure work",
+        "Inspect what autodiff saves",
+        "Read compiled memory estimates separately",
+        "Measure the tradeoff you actually care about"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "performance-04"
+      ]
+    },
+    {
+      "id": "distributed-01",
+      "phaseId": "distributed",
+      "title": "Arrays, meshes, and sharding",
+      "source": "phases/09-distributed/01-arrays-meshes-and-sharding/lesson.json",
+      "sourceHash": "5bb9771594a6e0c17ec86b7f65d8a4da9695e70f609cc97dd272d125b6d818a4",
+      "contentHash": "b8bb16506c70fc68aa99d05481500a85ea162550bb191d8e871d3f4c4885eb89",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Read the mapping from left to right",
+        "Inspect indices rather than guessing ordering",
+        "A reduction has a communication requirement",
+        "Choose placement for the operation you will perform"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "distributed-02",
+      "phaseId": "distributed",
+      "title": "A sharded training step",
+      "source": "phases/09-distributed/02-a-sharded-training-step/lesson.json",
+      "sourceHash": "d9928126b9c9b57b4829ee0f99dd799d8cf6bb3ed7999df89f5997c1f5981981",
+      "contentHash": "2337605c4d07f89885445d19b6aeb1c51b3471d2864c67f7a389a5dfedbdcd16",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write the objective before splitting the data",
+        "Give batch and parameters different placements",
+        "Differentiate the global function rather than inventing a local objective",
+        "A correct first update is stronger evidence than a falling curve"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "distributed-01"
+      ]
+    },
+    {
+      "id": "distributed-03",
+      "phaseId": "distributed",
+      "title": "Communication-efficient algorithms",
+      "source": "phases/09-distributed/03-communication-efficient-algorithms/lesson.json",
+      "sourceHash": "f3ae545211ff0e27de22e7129b9c4673e8a1bf428622ffa469cabe75729dbe83",
+      "contentHash": "eb1590e00dc1eec0a0d3b680bf291149c7bec37970931ac184fad2dc689722d6",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Keep normalization independent of device count",
+        "Read the local result before interpreting the global array",
+        "Derive a communication model with its assumptions visible",
+        "Follow the consumer of the gradient",
+        "Separate observed execution from the payload model"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "distributed-02"
+      ]
+    },
+    {
+      "id": "distributed-04",
+      "phaseId": "distributed",
+      "title": "Resilient distributed training",
+      "source": "phases/09-distributed/04-resilient-distributed-training/lesson.json",
+      "sourceHash": "172332c619a2bfa502fa05d099492ad17aa7d3ab8fbef8fd50830d26c1e4a977",
+      "contentHash": "5e544b413b57efe327ec890d0362f0160165ef7a8a9ac1a4537d9d3beadf0e1d",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Name the values that determine the next transition",
+        "Checkpoint one completed global step",
+        "Prove the next updates, including the next epoch",
+        "Move the protocol to multiple controllers explicitly",
+        "Reject an inconsistent recovery point"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "distributed-03"
+      ]
+    },
+    {
+      "id": "science-01",
+      "phaseId": "science",
+      "title": "A functional physical simulation",
+      "source": "phases/10-science/01-a-functional-physical-simulation/lesson.json",
+      "sourceHash": "1acca96787879d04fc63ba9cb89395070306d1bdfbd8543a58962cacdcf99068",
+      "contentHash": "68a054c2483e4706e0be0d5be0d473691e701c55d3768e782fae8ac02c157624",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Start with units and one step",
+        "Keep state explicit and keep the initial observation",
+        "Use two references because they answer different questions",
+        "Accuracy and stability are different requirements",
+        "Make a convergence table before fitting parameters"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "science-02",
+      "phaseId": "science",
+      "title": "Vectorize trajectories and scan time",
+      "source": "phases/10-science/02-vectorize-trajectories-and-scan-time/lesson.json",
+      "sourceHash": "e0572e5e56b0e06be404309a53ea7d2838b7c43dc14d9d4cceaa457a1c214963",
+      "contentHash": "ce7d0872e87d02e419bf69f502aa92a6b9aae5dd47e9dcbe77b2ec50745fa90b",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Improve one step before multiplying trajectories",
+        "Read shapes as physical statements",
+        "One transformation handles independence; another handles dependency",
+        "Use physical structure as a second check",
+        "Choose saved outputs deliberately"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "science-01"
+      ]
+    },
+    {
+      "id": "science-03",
+      "phaseId": "science",
+      "title": "Differentiate through a solver",
+      "source": "phases/10-science/03-differentiate-through-a-solver/lesson.json",
+      "sourceHash": "9d49361402ccb8d4cfdcdf740353d9835b6a781f49eb554fe8bb360729803759",
+      "contentHash": "491d30fb7bc99017d6646d874059b6c1aef754e8e580e58c926f50e20670c703",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Follow one parameter through every time step",
+        "Check the discrete derivative before asking about physics",
+        "Turn a trajectory into a scalar objective",
+        "Use a finite-difference window, not one magical epsilon",
+        "Know which solver problem you have solved"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "science-02"
+      ]
+    },
+    {
+      "id": "science-04",
+      "phaseId": "science",
+      "title": "Fit parameters and scale the simulation",
+      "source": "phases/10-science/04-fit-parameters-and-scale-the-simulation/lesson.json",
+      "sourceHash": "719ca4f2d0bc648deabd70b59ab78e91640eac4decf9bee5ab805b624a8eb9fb",
+      "contentHash": "d1013a9aa82695d18c7ebe8a029f2140f96cb250b7c64f78a7ba81a2d8efac6e",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Choose data that can reveal the parameter",
+        "Enforce positivity through a parameterization",
+        "Inspect the recovered model beyond the training curve",
+        "Recognize observations that cannot identify a parameter",
+        "Keep numerical bias separate from physical estimates",
+        "Measure a bounded scaling experiment",
+        "Move from this audit to a scientific workflow"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "science-03"
+      ]
+    },
+    {
+      "id": "probability-01",
+      "phaseId": "probability",
+      "title": "Distributions and sampling",
+      "source": "phases/11-probability/01-distributions-and-sampling/lesson.json",
+      "sourceHash": "091c6fcebe896f3a5bdd92a1bddfebb004ccc962a8776d3d8be5defebf1f9fca",
+      "contentHash": "91c0113c647659d6b3b5e3c6ac21e83e3a6b4d3a127877d271dde3d6252ce5c3",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Start with units, not an API",
+        "One draw and a sample average answer different questions",
+        "Logarithms preserve ratios that densities lose",
+        "A random key is part of the experiment"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "probability-02",
+      "phaseId": "probability",
+      "title": "Build a Bayesian regression",
+      "source": "phases/11-probability/02-build-a-bayesian-regression/lesson.json",
+      "sourceHash": "982f878bca1c0b43d693796d1e8a20a40acfd166e9cfbf1e587abfb77bc6e5c4",
+      "contentHash": "b6c2b484c33030475e0e25505da32e1a62a5f75587c281950e13505e4ac7e9a7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "State what is random",
+        "Combine information through precision",
+        "Check the special case by hand",
+        "Two uncertainty bands answer two questions",
+        "Use a tiny exact model as an inference test"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "probability-01"
+      ]
+    },
+    {
+      "id": "probability-03",
+      "phaseId": "probability",
+      "title": "Hamiltonian Monte Carlo and sampler diagnostics",
+      "source": "phases/11-probability/03-hamiltonian-monte-carlo-and-sampler-diagnostics/lesson.json",
+      "sourceHash": "8230d0879df76ecee181db84dbc8b3119f6837fbf097b6ea422ca24d2f9969e1",
+      "contentHash": "2334a9940a564c1ca9ef4264a4a64a99727597f5472e0c9cbe97d2136cd40731",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Turn log-density into potential energy",
+        "Trace the half steps",
+        "Correct discretization error in log space",
+        "Read diagnostics as evidence, not a certificate",
+        "Use the reference model to expose failure"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "probability-02"
+      ]
+    },
+    {
+      "id": "probability-04",
+      "phaseId": "probability",
+      "title": "Variational inference and model checking",
+      "source": "phases/11-probability/04-variational-inference-and-model-checking/lesson.json",
+      "sourceHash": "141281fbdc1a8dd2ab1299172696fe331c22993831f3e3c783306c0d859a2b5f",
+      "contentHash": "0bf2b8fc641d175022ed73b6b9836133a0cddbe1da625ca8a7f246eaaaabdf98",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Name the approximation and the KL direction",
+        "Work through the remaining error",
+        "Connect the exact objective to an ELBO",
+        "Inspect what the model predicts, not only its optimizer",
+        "Keep inference and model errors separate"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "probability-03"
+      ]
+    },
+    {
+      "id": "rl-01",
+      "phaseId": "rl",
+      "title": "Write a functional environment",
+      "source": "phases/12-rl/01-write-a-functional-environment/lesson.json",
+      "sourceHash": "c637ff2ef4726efebeaf46b18620369a719a10bde5c6a5a90190c750eafd2ee6",
+      "contentHash": "ea4ed7ca6aec36ef41ec5fdaa96f069ac6baf5d8fea3adea339214a354819dbc",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "State contains what the next transition needs",
+        "Walk through the reward before naming the return",
+        "Ending is an event; finished is a state",
+        "A timeout does not always mean a zero future value",
+        "Make the contract small enough to test"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "rl-02",
+      "phaseId": "rl",
+      "title": "Batch environments and scan rollouts",
+      "source": "phases/12-rl/02-batch-environments-and-scan-rollouts/lesson.json",
+      "sourceHash": "90adffa29101ec0b53e48033bce2c3ae50e53b6d3b56465676c7b2dde7a19d28",
+      "contentHash": "ab63d497fd3551a9714aa81b09c9c56dd776132f146604c116908a4e9f4a5f8b",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Give each axis one meaning",
+        "Split randomness where ownership changes",
+        "Store the behavior policy before changing it",
+        "A final transition is still a learning example",
+        "Credit each action with rewards that follow it"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "rl-01"
+      ]
+    },
+    {
+      "id": "rl-03",
+      "phaseId": "rl",
+      "title": "Policy gradients and PPO",
+      "source": "phases/12-rl/03-policy-gradients-and-ppo/lesson.json",
+      "sourceHash": "20c7ac9688b40891c101641f35c9f38e5867c8cf24c88d00018361ef76a165e1",
+      "contentHash": "4dfc29a89c371d8d2d4e6cf587db6a68a4d4eac302f41a40057a7ea89217e6d2",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "The derivative does not pass through the sampled action",
+        "Normalize by the object you promised to optimize",
+        "Freeze the policy that collected the batch",
+        "The minimum matters for negative advantages",
+        "Clipping is not a guaranteed trust region",
+        "Calculate expected return without sampling"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "rl-02"
+      ]
+    },
+    {
+      "id": "rl-04",
+      "phaseId": "rl",
+      "title": "Evaluate agents across seeds",
+      "source": "phases/12-rl/04-evaluate-agents-across-seeds/lesson.json",
+      "sourceHash": "617d00e7715210c23c53a077e36db6349a7b43194b6b7c702a86dffb03c84002",
+      "contentHash": "f12e24e5f6708e072d5c438e9c24a0cf408e2a0b9f56ad65aee5e3503afaa651",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write the protocol before inspecting results",
+        "Name the experimental unit",
+        "Pair the comparison deliberately",
+        "A baseline can catch a broken evaluator",
+        "Evaluation must leave training state alone",
+        "Keep a report another learner can challenge"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "rl-03"
+      ]
+    },
+    {
+      "id": "kernels-01",
+      "phaseId": "kernels",
+      "title": "Pallas grids and BlockSpecs",
+      "source": "phases/13-kernels/01-pallas-grids-and-blockspecs/lesson.json",
+      "sourceHash": "2cfdc416c0e1d8675cef2d5a927bf9cc39ab3d8172dce8f98d137db6fcc80615",
+      "contentHash": "a0c3437bc6b210fac1831e9025102c0430250808474c7fe3041309828233828d",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write the simplest useful contract",
+        "A grid coordinate is not an element coordinate",
+        "Make boundary behavior explicit",
+        "Check ownership and arithmetic separately",
+        "Interpretation proves bounded semantics, not speed"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "kernels-02",
+      "phaseId": "kernels",
+      "title": "A first TPU kernel",
+      "source": "phases/13-kernels/02-a-first-tpu-kernel/lesson.json",
+      "sourceHash": "c65fa625441891c4e508b6f67413e03b3777fa1131bb8435ab4297fcd559374a",
+      "contentHash": "92dd32f28241f220d68a8f64ed53b6ce4369bec0bdbe548bb0dde2bc33beb1c2",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Map each operand according to its meaning",
+        "Use a conservative TPU tile contract",
+        "State where precision changes",
+        "Make the execution mode inspectable",
+        "Run the real target path as a separate lab",
+        "Compare with a strong baseline before optimizing"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "kernels-01"
+      ]
+    },
+    {
+      "id": "kernels-03",
+      "phaseId": "kernels",
+      "title": "Tiling, memory, and pipelining",
+      "source": "phases/13-kernels/03-tiling-memory-and-pipelining/lesson.json",
+      "sourceHash": "6163d7cee606a1b169e1a9629a33773a74ce62eed6c190df28c1b02ab69a5274",
+      "contentHash": "a9585b20e6c103dd9465e4aeeb251bc6670b578a3758cce9394b10fa23957477",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Keep one numerical operation while changing data movement",
+        "What buffering is trying to overlap",
+        "Use the appropriate interpreter for memory operations",
+        "Use synchronous execution as a debugging comparison",
+        "Count the cost of a tile choice",
+        "Only target measurements can rank pipeline speed"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "kernels-02"
+      ]
+    },
+    {
+      "id": "kernels-04",
+      "phaseId": "kernels",
+      "title": "Iterate with correctness and performance evidence",
+      "source": "phases/13-kernels/04-iterate-with-correctness-and-performance-evidence/lesson.json",
+      "sourceHash": "6c20d484e1afee1a3b9b049b84bf0262e3573fc7ff409d04b4f60f13d31622b1",
+      "contentHash": "3d6fa8940a62aeacb3e09609159e660557bf929df4863d43f00755aaa9e43dea",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Choose cases that challenge the contract",
+        "Use two references for two different questions",
+        "Make target timing a complete operation",
+        "Compare a strong baseline with the same contract",
+        "Relate local kernels to the distributed workload",
+        "Accept, revise or decline the optimization"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "kernels-03"
+      ]
+    },
+    {
+      "id": "internals-01",
+      "phaseId": "internals",
+      "title": "Read your first jaxpr",
+      "source": "phases/14-internals/01-read-your-first-jaxpr/lesson.json",
+      "sourceHash": "418a3d0ed6170f9d173379032e3d118f3a5a22e4dee74475b5e9b9bf2b1dfee8",
+      "contentHash": "7d5b379962faf68fd8f79b09898068e39850b835d557214700a7d811d0d6d01b",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Compute the values before reading the representation",
+        "Read one equation at a time",
+        "Trace an abstract signature, not the sample’s values",
+        "Inspect the gradient as another program",
+        "Separate data inputs from captured constants",
+        "Compare Python unrolling with structured iteration"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "internals-02",
+      "phaseId": "internals",
+      "title": "JVPs, VJPs, and higher-order derivatives",
+      "source": "phases/14-internals/02-jvps-vjps-and-higher-order-derivatives/lesson.json",
+      "sourceHash": "c2ba95a86bdc949a6e418c43634b67b4a447786fd713ba15e9ba148f9766d2bf",
+      "contentHash": "b16547d6f5e169c41b3617cb72311289d8ade3cafffedc83bde4eb512d380ed2",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate the point from the direction",
+        "A VJP answers a different directional question",
+        "Check the adjoint identity with independent values",
+        "Count directions before choosing a Jacobian strategy",
+        "Curvature includes the changing Jacobian",
+        "Use finite differences as a second perspective"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "internals-01"
+      ]
+    },
+    {
+      "id": "internals-03",
+      "phaseId": "internals",
+      "title": "Custom derivative rules",
+      "source": "phases/14-internals/03-custom-derivative-rules/lesson.json",
+      "sourceHash": "7612ff33b92c5e73321ec8b1e0623a8e0beb0311bf5f1c05f5bfaefbad032343",
+      "contentHash": "2b001b01ac8e8147484cb9f19ae884b7747d2e82be42be80264df27da42796c8",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Keep the primal stable before customizing its derivative",
+        "A custom JVP must remain linear in its tangent",
+        "Choose residuals for a custom reverse pass",
+        "Higher-order behavior is part of the promise",
+        "Custom reverse mode has a transformation boundary",
+        "An intentionally different gradient needs a different claim"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "internals-02"
+      ]
+    },
+    {
+      "id": "internals-04",
+      "phaseId": "internals",
+      "title": "Lowering, compilation, and a tiny transformation",
+      "source": "phases/14-internals/04-lowering-compilation-and-a-tiny-transformation/lesson.json",
+      "sourceHash": "d09795f93775ca4992e2b3fc44a2f8ad54cbb8ab977a5539e8963d428ac63435",
+      "contentHash": "ab5ba6c7954b625187c26b91f40b3ab3f06555f2fa163368221a6f91b346a4d7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Treat a jaxpr as a typed data-flow program",
+        "Attach a tangent to every value",
+        "A small supported subset is an enforceable boundary",
+        "Verify a complete transformed program",
+        "Trace, lower and compile are separate stages",
+        "Specialization is part of the artifact contract"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "internals-03"
+      ]
+    },
+    {
+      "id": "deployment-02",
+      "phaseId": "deployment",
+      "title": "Adapt a pretrained model and choose a post-training objective",
+      "source": "phases/15-deployment/02-adapt-a-pretrained-model-and-choose-a-post-training-objective/lesson.json",
+      "sourceHash": "3f3bb2f0c207b6727b224646015113e5b5be384cfac18e5bed6194f73c5b7c7d",
+      "contentHash": "095001e29082aba726481f6c6b13c4ef85a0351125072911eb87a0a6067e3014",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Define the tasks before choosing an objective",
+        "Understand hard labels and soft targets",
+        "Make pretrained mean previously trained",
+        "Choose a fair comparison",
+        "Locate preference and reinforcement objectives",
+        "Carry the contract to a real pretrained model"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "deployment-01",
+      "phaseId": "deployment",
+      "title": "Move models between JAX, Keras, TensorFlow and PyTorch",
+      "source": "phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/lesson.json",
+      "sourceHash": "a9f7847825cc0c0d727baa82b1f2afaa797308b29de80baccf9c38f467c6b9be",
+      "contentHash": "2e08ad4613c37ad206aa7dd1bf21bd1152e375e3b835b36ce7fa18116aade9de",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "A parameter file is not a model",
+        "Use Keras as a shared model vocabulary",
+        "Explicit JAX state is a design decision",
+        "Choose the bridge for the destination",
+        "Run the optional real-framework lab",
+        "Write the same dense layer in both layouts"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-02"
+      ]
+    },
+    {
+      "id": "deployment-08",
+      "phaseId": "deployment",
+      "title": "Convert PyTorch weights to Flax and locate numerical errors",
+      "source": "phases/15-deployment/08-pytorch-to-flax-numerical-parity/lesson.json",
+      "sourceHash": "67c0015866b7436a6f7f654eb5000d7c20803189acd64743e3a85fa2f439b8da",
+      "contentHash": "9770c7a915cadae3df035c9c3d6546a73d6831023ce1682ef054a939ea743b39",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write the architecture contract before mapping weights",
+        "Match operations, not just tensors",
+        "Use an error budget that works near zero",
+        "Find the first mismatch",
+        "Validate the derivative and the saved artifact",
+        "Extend the mapping deliberately"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-01"
+      ]
+    },
+    {
+      "id": "deployment-03",
+      "phaseId": "deployment",
+      "title": "Export a computation and verify its serving contract",
+      "source": "phases/15-deployment/03-export-and-serve-a-trained-computation/lesson.json",
+      "sourceHash": "1a8143eb301db5b22d7a190cdd9b41684c65b3fbc73ea4871eac71382d2c5f80",
+      "contentHash": "0ee1b009e2d4e696151d9b57843c65c477cd01dd00eee5bd715ca61dd18d045e",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Freeze the inference boundary",
+        "Fixed shapes are a deliberate constraint",
+        "Verify the file, not the original function",
+        "Choose a runtime after choosing an artifact",
+        "From local call to service"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-08"
+      ]
+    },
+    {
+      "id": "deployment-05",
+      "phaseId": "deployment",
+      "title": "Choose weight, activation and accumulation precision",
+      "source": "phases/15-deployment/05-weight-activation-and-accumulation-precision/lesson.json",
+      "sourceHash": "1e96f71c23eb94938e43c122a71f51cad69d620cc34730e16c6764958b90a0aa",
+      "contentHash": "72d85d9b5c4df3c7bd1a45d8812741aa9f5e87b229dcb4b4ca4c076f4bf663a7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Write the policy before choosing a dtype",
+        "Mixed precision during training",
+        "Quantize weights with scale metadata",
+        "Weight-only and full integer are different deployments",
+        "FP8 and other low-bit formats require a target contract",
+        "Evaluate quality separately from size and speed",
+        "Follow one value onto the quantization grid",
+        "Follow an affine output through every numeric unit"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-03"
+      ]
+    },
+    {
+      "id": "deployment-07",
+      "phaseId": "deployment",
+      "title": "Containerize a model service and verify its boundary",
+      "source": "phases/15-deployment/07-containerize-a-model-service/lesson.json",
+      "sourceHash": "35c0f7a26d657d95875ee2ddac7186617137ef37fb1e11df347a6eedc85d174f",
+      "contentHash": "5bf8292f46800a80a59e2468b92d1ecb3012b897d970a90dee7db73291488a6d",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate training from inference",
+        "Understand the build context",
+        "Keep runtime inputs explicit",
+        "Prove the same request survives the boundary",
+        "Readiness, liveness and startup are different",
+        "Ship the artifact you actually checked"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-05"
+      ]
+    },
+    {
+      "id": "deployment-04",
+      "phaseId": "deployment",
+      "title": "Inference capacity, batching, and autoscaling",
+      "source": "phases/15-deployment/04-inference-capacity-batching-and-autoscaling/lesson.json",
+      "sourceHash": "0e8302bd75dabdd46ed5b3b7dad066ac5a96d7611f67ea5d4383d65a95473a38",
+      "contentHash": "b3398442c7a69047f9d3431bbfae82f3d31641f580c34db4aef597b7f4f0308b",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Choose the clock boundary first",
+        "Keep request units and example units separate",
+        "Trace a queue before using a rate formula",
+        "A utilization estimate is not a latency guarantee",
+        "Batch collection trades waiting for throughput",
+        "Plan replicas with headroom, then test the plan"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-07"
+      ]
+    },
+    {
+      "id": "deployment-06",
+      "phaseId": "deployment",
+      "title": "Deploy at the edge: conversion, budgets and device checks",
+      "source": "phases/15-deployment/06-edge-ai-conversion-and-device-validation/lesson.json",
+      "sourceHash": "a3c123a18e06c924bc44eaaf17a37f816fe800b4b118c088f7620fdd4c15342f",
+      "contentHash": "001159df5cb1d504d520278f02447ff19090263da55b16b4ef104e728ec59b39",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Choose a deployment lane",
+        "Follow one concrete TensorFlow-to-LiteRT route",
+        "Keep preprocessing attached to the model",
+        "Budget more than weights",
+        "Measure the request the user experiences",
+        "Device acceptance is an experiment"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "deployment-04"
+      ]
+    },
+    {
+      "id": "operations-01",
+      "phaseId": "operations",
+      "title": "Accelerator jobs and runtime lifecycle",
+      "source": "phases/16-operations/01-accelerator-jobs-and-runtime-lifecycle/lesson.json",
+      "sourceHash": "32f11428acd695f1e2ae345c255758cbaa6f3e6bd1d8a52a02789258258a9de5",
+      "contentHash": "d02269ad55bed833fdfb682b245592adb93131483166ddb9fd42a562711e4b2c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate intent from observation",
+        "The process handle is the lifecycle authority",
+        "Ready means initialization finished",
+        "Configuration should reject nonsense early",
+        "Treat a deadline as evidence, not a diagnosis",
+        "Transfer the contract to available hardware"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "operations-02",
+      "phaseId": "operations",
+      "title": "Health, logs, and workload observability",
+      "source": "phases/16-operations/02-health-logs-and-workload-observability/lesson.json",
+      "sourceHash": "6e48743eacdf3ec2b23d1081984f26e8492bffdd2f5dbdf1dbb34dab425a04c3",
+      "contentHash": "14d5d384839e3566c2257ade559a6854a2891e509ced7bb809e690a7d31a8ad7",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "An event needs meaning and units",
+        "Time completed computation",
+        "Two throughputs answer different questions",
+        "Freshness is about committed progress",
+        "A declining loss is not a health guarantee",
+        "Scope of this collector"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-01"
+      ]
+    },
+    {
+      "id": "operations-03",
+      "phaseId": "operations",
+      "title": "Failure recovery and operational runbooks",
+      "source": "phases/16-operations/03-failure-recovery-and-operational-runbooks/lesson.json",
+      "sourceHash": "2c91b4399a889a8c36f3f8cd8ba887b8c0142b47878eff176375e9ab515013f3",
+      "contentHash": "517c339bbf12ae1d06c032585dcfde3857104fca21d797e2bb1c9b3f22bb8eaa",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Identify the boundary before issuing a retry",
+        "Momentum is part of the experiment",
+        "Write the complete artifact before selecting it",
+        "Compatibility is more than array shape",
+        "Prove the continuation at the next update",
+        "Write a runbook from the failed drill"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-02"
+      ]
+    },
+    {
+      "id": "operations-04",
+      "phaseId": "operations",
+      "title": "Changes, rollback, and artifact provenance",
+      "source": "phases/16-operations/04-changes-rollback-and-artifact-provenance/lesson.json",
+      "sourceHash": "ca1475e2b661dd9029c424cc110bdb8ff203ad555e45b73ae4b8383568a7eb1c",
+      "contentHash": "ac9415c0adc49ea3b0a1abc225e345027389102efe37e125d1acec45bff69768",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "A name is not a content identity",
+        "Attach enough provenance to reproduce the question",
+        "Publish without affecting the current reader",
+        "Keep selection atomic and scope the guarantee",
+        "Rollback is another checked selection",
+        "A change record should support diagnosis"
+      ],
+      "experiments": 3,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-03"
+      ]
+    },
+    {
+      "id": "operations-05",
+      "phaseId": "operations",
+      "title": "Capacity, utilization, and operating cost",
+      "source": "phases/16-operations/05-capacity-utilization-and-operating-cost/lesson.json",
+      "sourceHash": "cbad0f24baa6923f597e54a4d645316e9cb9ebffd2d4166257f3c66e2f928ff7",
+      "contentHash": "4d8596f858b53dc09831246e26a0062ee4821030b0532cb724d743b7520a12f0",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Measure the service boundary you intend to provision",
+        "Convert seconds into worker demand",
+        "State the reserve rather than hiding it",
+        "A cost number needs a declared price model",
+        "Do not confuse duty fraction with hardware utilization",
+        "Capacity is a distribution, not just a mean"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-04"
+      ]
+    },
+    {
+      "id": "operations-06",
+      "phaseId": "operations",
+      "title": "MLOps: data contracts, CI gates and monitoring",
+      "source": "phases/16-operations/06-mlops-data-contracts-and-release-pipelines/lesson.json",
+      "sourceHash": "dfbbea42a3adb9088b7396073f07bc0b3347e1b662093381a1e272dbd145f2ac",
+      "contentHash": "b2ae8bf77e153af7ce4dd2d6be963fc2e01e93dc846c4d952223158a80e9f05a",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Validate data before the expensive job",
+        "Use a fixed release evaluation",
+        "Separate code CI from model delivery",
+        "Compare distributions without inventing labels",
+        "Plan a response instead of a reflex",
+        "Rehearse the failed gate"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-05"
+      ]
+    },
+    {
+      "id": "operations-07",
+      "phaseId": "operations",
+      "title": "LLMOps: version prompts, evaluate behavior and trace requests",
+      "source": "phases/16-operations/07-llmops-prompts-evaluation-and-traces/lesson.json",
+      "sourceHash": "a041fc19d3f10f44adb1e6952e3c122cdba7b93f598f1cb0128a153e892d0650",
+      "contentHash": "86a5119efa98b1bcf4833461d62c02279bdc7de5b082430630f208da26c44721",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Version the application boundary",
+        "Define cases before changing the prompt",
+        "Read the rare-case failure",
+        "Trace enough to diagnose, without retaining everything",
+        "Add the production cases deliberately",
+        "Measure serving work in the right units",
+        "A missing response is an evaluation failure"
+      ],
+      "experiments": 2,
+      "practice": 2,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-06"
+      ]
+    },
+    {
+      "id": "operations-08",
+      "phaseId": "operations",
+      "title": "ModelOps: own, approve, roll back and retire a model",
+      "source": "phases/16-operations/08-modelops-ownership-approval-and-retirement/lesson.json",
+      "sourceHash": "14285c1ba094a469002cfeed0f9af4f3b752cd5ed39bdb1a22ba9ed78d3bdc0a",
+      "contentHash": "7f6ef6f1278c327584347b150deaf5e3a7b62f0ccd2bb0a02e07427eb4d78858",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Inventory the complete release",
+        "Bind review to immutable evidence",
+        "Make failed transitions leave no side effects",
+        "Separate selection, rollout and monitoring",
+        "Rollback needs its own valid target",
+        "Work through the four decisions"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "operations-07"
+      ]
+    },
+    {
+      "id": "pretraining-01",
+      "phaseId": "pretraining",
+      "title": "Masked language modeling: predict hidden tokens",
+      "source": "phases/17-pretraining/01-mlm/lesson.json",
+      "sourceHash": "9e8c26a79e5cefa95ac649e5be67f1464dac968ac7ed3bd102c36fe47a1fc66c",
+      "contentHash": "a69363671b4868b822bfcfbfd8d06211225d4c45475cae63e86d0b93d812589e",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate the clean targets from the corrupted input",
+        "Normalize over selected target positions",
+        "Use both sides without using the hidden value",
+        "Distinguish selection from replacement policy",
+        "Test a different corruption before claiming progress"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "pretraining-02",
+      "phaseId": "pretraining",
+      "title": "Masked image modeling: reconstruct missing patches",
+      "source": "phases/17-pretraining/02-mim/lesson.json",
+      "sourceHash": "7be4bb2be3dbd4d1338263aedd69ce4ce0e141eadb18f0a1d4d87fcc5a57308c",
+      "contentHash": "d8a6feaa9b103390e8c02e74b41653d59edd4e7ea04605411b8a64595c333206",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Preserve patch order and pixel order",
+        "Keep hidden pixels out of the encoder",
+        "Reduce over the hidden reconstruction targets",
+        "Interpret normalization and reconstruction",
+        "Evaluate beyond the training mask"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "pretraining-01"
+      ]
+    },
+    {
+      "id": "pretraining-03",
+      "phaseId": "pretraining",
+      "title": "Contrastive learning: views, positives and negatives",
+      "source": "phases/17-pretraining/03-contrastive/lesson.json",
+      "sourceHash": "0d4ce8a87c5f51b34d10c6b32983fa58521e4fb1d59ace5baad6b5beccdf5860",
+      "contentHash": "9cefa6de1c46151270f38e778b4a2f7cf9dca719c6d3a2184d15c739d3a4dff5",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Define the positive pair before augmenting",
+        "Normalize embeddings and introduce temperature",
+        "Check both directions independently",
+        "Understand collapse and false negatives",
+        "Separate pretraining evidence from downstream quality"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "pretraining-02"
+      ]
+    },
+    {
+      "id": "posttraining-01",
+      "phaseId": "posttraining",
+      "title": "Supervised fine-tuning with response-only token loss",
+      "source": "phases/18-posttraining/01-sft/lesson.json",
+      "sourceHash": "649569c3bcb192fad9b066f96ec871eaad9535368b4779372fd0f0e384a8d43d",
+      "contentHash": "728439870aaa4e806db668f209fafe702dcbe716d0b57996ef78e20f2f46cb6e",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Align predictions with their target tokens",
+        "Separate the attention mask from the loss mask",
+        "Choose a reduction and keep its denominator",
+        "Fine-tune an identified base model",
+        "Check behavior and forgetting separately"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": []
+    },
+    {
+      "id": "posttraining-02",
+      "phaseId": "posttraining",
+      "title": "LoRA: adapt, save and merge low-rank updates",
+      "source": "phases/18-posttraining/02-lora/lesson.json",
+      "sourceHash": "e2eaf47824c5376668bfa7ffbe5fff0b092699873094f56719fc8dbacfbce1c3",
+      "contentHash": "8eb7ad49c668b31a454b08443ee49008f60d49968e624a558e89e9b467459ed6",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Separate the frozen base from trainable adapters",
+        "Understand initialization and the first gradient",
+        "Count the right kind of savings",
+        "Merge only under an explicit serving contract",
+        "Save the adaptation identity"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "posttraining-01"
+      ]
+    },
+    {
+      "id": "posttraining-03",
+      "phaseId": "posttraining",
+      "title": "Learn a reward model from pairwise preferences",
+      "source": "phases/18-posttraining/03-reward/lesson.json",
+      "sourceHash": "44f11cca0570307df757f5f5f81cf8c866dee1f6c03c456b99de7b3c5eeb2ff9",
+      "contentHash": "2174ff889f06b76702bc63b29ba7a36ba2b7bdbf118c85ebf528b0fa57ba0c5f",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Represent a preference as a comparison",
+        "Fit score differences with a stable likelihood",
+        "Separate ranking from calibration",
+        "Preserve disagreement and data provenance",
+        "Keep the reward model fixed during policy evaluation"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "posttraining-02"
+      ]
+    },
+    {
+      "id": "posttraining-04",
+      "phaseId": "posttraining",
+      "title": "RLHF mechanics: a frozen reward and PPO policy updates",
+      "source": "phases/18-posttraining/04-rlhf/lesson.json",
+      "sourceHash": "5251334a0c863bd2ddd41598473dbef0c1f5fe23863a7a61ffda01fde08a6131",
+      "contentHash": "48d9207aaa1e9f73c17bb516ea30bc4aa6984442869326ed54345911cb2ce81c",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Keep three identities separate",
+        "Collect actions before optimizing them",
+        "Clip the surrogate with the advantage sign intact",
+        "Measure reward and reference drift together",
+        "Do not confuse reward optimization with alignment"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "posttraining-03"
+      ]
+    },
+    {
+      "id": "posttraining-05",
+      "phaseId": "posttraining",
+      "title": "Direct preference optimization and reference-corrected margins",
+      "source": "phases/18-posttraining/05-dpo/lesson.json",
+      "sourceHash": "17dede74ebd40fe8da4b5d8e41a356628b1e3e71a703a3bb6ae515757072ae9c",
+      "contentHash": "23340f3b30568b2d03740ea932b9fd2a7dd1f4839ba86a9b2014fb382c4332a2",
+      "status": "authored",
+      "receiptMatches": true,
+      "script": "passed",
+      "notebook": "passed",
+      "sections": [
+        "Compare chosen and rejected response log probabilities",
+        "Subtract the reference preference",
+        "Keep the algorithm distinction visible",
+        "Treat beta and length as part of the objective",
+        "Evaluate beyond chosen-pair fit"
+      ],
+      "experiments": 1,
+      "practice": 1,
+      "visual": "executed",
+      "prerequisites": [
+        "posttraining-04"
+      ]
+    }
+  ],
+  "projects": [
+    {
+      "id": "regression-audit",
+      "source": "projects/regression-audit/project.json",
+      "title": "Build a regression training audit",
+      "requiredLessonIds": [
+        "welcome-01",
+        "welcome-02",
+        "arrays-01",
+        "arrays-02",
+        "arrays-03",
+        "arrays-04",
+        "first-gradient",
+        "transforms-02",
+        "transforms-03",
+        "transforms-04",
+        "transforms-05",
+        "state-01",
+        "state-02",
+        "state-03",
+        "state-04",
+        "optimization-01",
+        "optimization-02",
+        "optimization-03",
+        "optimization-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Prediction and objective"
+        },
+        {
+          "id": "2",
+          "title": "Gradient evidence"
+        },
+        {
+          "id": "3",
+          "title": "Compiled training"
+        },
+        {
+          "id": "4",
+          "title": "Training audit"
+        }
+      ],
+      "sourceHash": "d9b7f17335ed9530e85f2f227b1ef7578e87a9e06d0d6b4250a84af20c191991",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "mlp-classifier",
+      "source": "projects/mlp-classifier/project.json",
+      "title": "Build a reproducible classifier audit",
+      "requiredLessonIds": [
+        "networks-01",
+        "networks-02",
+        "networks-03",
+        "networks-04",
+        "networks-05"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Model and shape contract"
+        },
+        {
+          "id": "2",
+          "title": "Objective and derivative evidence"
+        },
+        {
+          "id": "3",
+          "title": "Training audit"
+        }
+      ],
+      "sourceHash": "38536d27f8061fbf17cc076a620369e1ac840084f9623179bcb8866689cba123",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "scientific-inverse",
+      "source": "projects/scientific-inverse/project.json",
+      "title": "Audit a differentiable scientific inverse problem",
+      "requiredLessonIds": [
+        "science-01",
+        "science-02",
+        "science-03",
+        "science-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Simulation and numerical references"
+        },
+        {
+          "id": "2",
+          "title": "Objective and solver sensitivity"
+        },
+        {
+          "id": "3",
+          "title": "Parameter recovery and an inference report"
+        }
+      ],
+      "sourceHash": "ecbc30ad015ab607664d721fd1f9f820ca903dd8a593f6118c23879365db19cb",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "policy-evaluation",
+      "source": "projects/policy-evaluation/project.json",
+      "title": "Train and audit a policy from interaction",
+      "requiredLessonIds": [
+        "rl-01",
+        "rl-02",
+        "rl-03",
+        "rl-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Functional environment"
+        },
+        {
+          "id": "2",
+          "title": "Batched trajectories"
+        },
+        {
+          "id": "3",
+          "title": "Policy objectives"
+        },
+        {
+          "id": "4",
+          "title": "Training and held-out evaluation"
+        }
+      ],
+      "sourceHash": "a4fa7e3d73afea5c4907b31f17fa63da52dd5e4be9c74d7258054096496b058a",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "bayesian-regression",
+      "source": "projects/bayesian-regression/project.json",
+      "title": "Audit a Bayesian regression model",
+      "requiredLessonIds": [
+        "probability-01",
+        "probability-02",
+        "probability-03",
+        "probability-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Exact posterior and density"
+        },
+        {
+          "id": "2",
+          "title": "Sampler and diagnostic audit"
+        },
+        {
+          "id": "3",
+          "title": "Predictive uncertainty and mismatch"
+        }
+      ],
+      "sourceHash": "04813d15cf1a358732eddbf062623f2c13e044b64478d209ece76106db79eeea",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "derivative-audit",
+      "source": "projects/derivative-audit/project.json",
+      "title": "Audit derivatives and compile a tiny transformation",
+      "requiredLessonIds": [
+        "internals-01",
+        "internals-02",
+        "internals-03",
+        "internals-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Directional products and exact curvature"
+        },
+        {
+          "id": "2",
+          "title": "Exact custom derivative contracts"
+        },
+        {
+          "id": "3",
+          "title": "A compiled primitive-level transformation"
+        }
+      ],
+      "sourceHash": "3c9d6f48266453e58c081793945ccf71a6a64ddf6ca5884f182e2e1b25c5c943",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "deployment-audit",
+      "source": "projects/deployment-audit/project.json",
+      "title": "Release a trained computation with a deployment audit",
+      "requiredLessonIds": [
+        "deployment-01",
+        "deployment-03",
+        "deployment-05",
+        "deployment-06",
+        "deployment-02",
+        "deployment-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Trained artifact and adaptation provenance"
+        },
+        {
+          "id": "2",
+          "title": "Export and precision contract"
+        },
+        {
+          "id": "3",
+          "title": "Request timing and capacity evidence"
+        }
+      ],
+      "sourceHash": "db587714401cf31f492db43377b0986678277d57f3ed0d0e84f883fec026498f",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "workload-operations",
+      "source": "projects/workload-operations/project.json",
+      "title": "Operate and recover a local JAX workload",
+      "requiredLessonIds": [
+        "operations-01",
+        "operations-02",
+        "operations-03",
+        "operations-04",
+        "operations-05"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Real process lifecycle"
+        },
+        {
+          "id": "2",
+          "title": "Workload observability"
+        },
+        {
+          "id": "3",
+          "title": "Complete-state recovery"
+        },
+        {
+          "id": "4",
+          "title": "Artifact selection and rollback"
+        },
+        {
+          "id": "5",
+          "title": "Capacity and cost"
+        }
+      ],
+      "sourceHash": "8d59bda78291a93fedb9ec6071c4cc7650e802490a82e679765ea582be41e6d9",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "audio-harness",
+      "source": "projects/audio-harness/project.json",
+      "title": "Build an audio waveform-to-inference harness",
+      "requiredLessonIds": [
+        "arrays-02",
+        "state-01",
+        "state-02",
+        "optimization-02",
+        "networks-03",
+        "recovery-03",
+        "recovery-04",
+        "deployment-03",
+        "deployment-05",
+        "deployment-06"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Waveform and spectral contract"
+        },
+        {
+          "id": "2",
+          "title": "Training, recovery and held-out errors"
+        },
+        {
+          "id": "3",
+          "title": "Precision and complete exported artifacts"
+        },
+        {
+          "id": "4",
+          "title": "Measured inference and boundary drills"
+        }
+      ],
+      "sourceHash": "5e54441ac5205919c5595b4ad335c58f157db8ba01b9185dce1a85220cf86b4f",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "cross-modal-harness",
+      "source": "projects/cross-modal-harness/project.json",
+      "title": "Build and audit image–text retrieval",
+      "requiredLessonIds": [
+        "networks-01",
+        "optimization-02",
+        "optimization-09",
+        "transformers-01",
+        "recovery-03",
+        "recovery-04",
+        "deployment-03",
+        "deployment-05"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Pair and preprocessing contracts"
+        },
+        {
+          "id": "2",
+          "title": "Symmetric contrastive objective"
+        },
+        {
+          "id": "3",
+          "title": "Training and complete recovery"
+        },
+        {
+          "id": "4",
+          "title": "Precision and exported branches"
+        },
+        {
+          "id": "5",
+          "title": "Inference, measured release and rollback"
+        }
+      ],
+      "sourceHash": "a15d6837b81e4fae0fe55b20c693002090af36822788970e5bbc7925655943ef",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "kernel-audit",
+      "source": "projects/kernel-audit/project.json",
+      "title": "Audit a Pallas kernel and its target evidence",
+      "requiredLessonIds": [
+        "performance-01",
+        "performance-02",
+        "distributed-01",
+        "distributed-02",
+        "kernels-01",
+        "kernels-02",
+        "kernels-03",
+        "kernels-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Grid and precision contract"
+        },
+        {
+          "id": "2",
+          "title": "Fused target-oriented kernel"
+        },
+        {
+          "id": "3",
+          "title": "Pipeline semantics and measurement protocol"
+        }
+      ],
+      "sourceHash": "0013b942db553a96b11743de635f1e972afd1f4dc29225817fe7f1edf1b78ae4",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "image-harness",
+      "source": "projects/image-harness/project.json",
+      "title": "Build a recoverable image classifier through exported inference",
+      "requiredLessonIds": [
+        "networks-01",
+        "networks-02",
+        "networks-03",
+        "networks-04",
+        "networks-05",
+        "recovery-01",
+        "recovery-02",
+        "recovery-03",
+        "recovery-04",
+        "deployment-01",
+        "deployment-03",
+        "deployment-05",
+        "deployment-06",
+        "performance-01",
+        "performance-02"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Image data and preprocessing"
+        },
+        {
+          "id": "2",
+          "title": "Transparent CNN baseline"
+        },
+        {
+          "id": "3",
+          "title": "Actual augmented training"
+        },
+        {
+          "id": "4",
+          "title": "Full-state recovery"
+        },
+        {
+          "id": "5",
+          "title": "Frozen evaluation and errors"
+        },
+        {
+          "id": "6",
+          "title": "Calibrated precision"
+        },
+        {
+          "id": "7",
+          "title": "Serialized inference artifact"
+        },
+        {
+          "id": "8",
+          "title": "Measured serving adapter"
+        }
+      ],
+      "sourceHash": "9eb1f56e31651c5aedce352bced10f4977c443fe73c414f6bc447e2c72f8dbc8",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "foundation-toolkit",
+      "source": "projects/foundation-toolkit/project.json",
+      "title": "Connect arrays, transformations and explicit state",
+      "requiredLessonIds": [
+        "welcome-01",
+        "welcome-02",
+        "arrays-01",
+        "arrays-02",
+        "arrays-03",
+        "first-gradient",
+        "transforms-02",
+        "transforms-03",
+        "state-01",
+        "state-03"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Report the completed environment"
+        },
+        {
+          "id": "2",
+          "title": "Process observations with a mask"
+        },
+        {
+          "id": "3",
+          "title": "Compile a batch of gradients"
+        },
+        {
+          "id": "4",
+          "title": "Replay a batched simulation"
+        }
+      ],
+      "sourceHash": "dfec3ccdfdb176b60ae8954aca456446c59382acc00a3b6ec4721bf265e2881b",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "sharded-training",
+      "source": "projects/sharded-training/project.json",
+      "title": "Resume and profile a sharded training run",
+      "requiredLessonIds": [
+        "state-01",
+        "state-02",
+        "state-03",
+        "state-04",
+        "optimization-02",
+        "recovery-01",
+        "recovery-02",
+        "recovery-03",
+        "recovery-04",
+        "recovery-05",
+        "performance-01",
+        "performance-02",
+        "performance-03",
+        "performance-04",
+        "performance-05",
+        "distributed-01",
+        "distributed-02",
+        "distributed-03",
+        "distributed-04"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "State and input ownership"
+        },
+        {
+          "id": "2",
+          "title": "Count-weighted sharded updates"
+        },
+        {
+          "id": "3",
+          "title": "Fresh-process complete recovery"
+        },
+        {
+          "id": "4",
+          "title": "Trace-backed performance evidence"
+        }
+      ],
+      "sourceHash": "c364733ffddd2d518241e25c8a517e2914ed11dadc12ca7adf7966ca70c568b3",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "text-harness",
+      "source": "projects/text-harness/project.json",
+      "title": "Build a causal Transformer training and inference harness",
+      "requiredLessonIds": [
+        "state-01",
+        "state-02",
+        "optimization-02",
+        "optimization-04",
+        "networks-03",
+        "recovery-03",
+        "recovery-04",
+        "transformers-01",
+        "transformers-02",
+        "transformers-03",
+        "transformers-04",
+        "performance-02",
+        "deployment-03",
+        "deployment-05"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Tokens, causal computation and loss"
+        },
+        {
+          "id": "2",
+          "title": "Actual training and full recovery"
+        },
+        {
+          "id": "3",
+          "title": "Real KV-cache precision"
+        },
+        {
+          "id": "4",
+          "title": "Exported inference and profiler evidence"
+        }
+      ],
+      "sourceHash": "6a612bdcd3401ca9ce974e0455842dd9000cbcab3133ff2cd88f53ba66955c7b",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "optimizer-audit",
+      "source": "projects/optimizer-audit/project.json",
+      "title": "Audit conditioning, gradient noise and optimizer decisions",
+      "requiredLessonIds": [
+        "optimization-01",
+        "optimization-02",
+        "optimization-03",
+        "optimization-04",
+        "optimization-05",
+        "optimization-06",
+        "optimization-07",
+        "optimization-08",
+        "optimization-09",
+        "optimization-10",
+        "optimization-11",
+        "optimization-12"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Derive and check the local geometry"
+        },
+        {
+          "id": "2",
+          "title": "Change coordinates without changing predictions"
+        },
+        {
+          "id": "3",
+          "title": "Measure noise by enumerating the sampler"
+        },
+        {
+          "id": "4",
+          "title": "Audit optimizer state and update order"
+        },
+        {
+          "id": "5",
+          "title": "Separate prediction and coefficient stability"
+        }
+      ],
+      "sourceHash": "029149af088091b6560c828864094a419879428d033a03b14ad4c1c78ae51bc3",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "engineering-release",
+      "source": "projects/engineering-release/project.json",
+      "title": "Ship a tracked and containerized model release",
+      "requiredLessonIds": [
+        "recovery-06",
+        "deployment-07",
+        "operations-06",
+        "operations-07",
+        "operations-08"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Data identity and slice gates"
+        },
+        {
+          "id": "2",
+          "title": "LLM application evaluation"
+        },
+        {
+          "id": "3",
+          "title": "Model ownership and release transitions"
+        },
+        {
+          "id": "4",
+          "title": "Tracked training to inference"
+        }
+      ],
+      "sourceHash": "2694410d866dd0994c3b680f0621dafaba8246edbdf52070922dd255c468f3ae",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "training-methods",
+      "source": "projects/training-methods/project.json",
+      "title": "Audit pretraining and post-training objectives",
+      "requiredLessonIds": [
+        "pretraining-01",
+        "pretraining-02",
+        "pretraining-03",
+        "posttraining-01",
+        "posttraining-02",
+        "posttraining-03",
+        "posttraining-04",
+        "posttraining-05"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Masked language modeling"
+        },
+        {
+          "id": "2",
+          "title": "Masked image reconstruction"
+        },
+        {
+          "id": "3",
+          "title": "Paired contrastive learning"
+        },
+        {
+          "id": "4",
+          "title": "Response-only SFT"
+        },
+        {
+          "id": "5",
+          "title": "Frozen-base LoRA"
+        },
+        {
+          "id": "6",
+          "title": "Preference reward model"
+        },
+        {
+          "id": "7",
+          "title": "Learned-reward PPO"
+        },
+        {
+          "id": "8",
+          "title": "Direct preference optimization"
+        }
+      ],
+      "sourceHash": "90c94661caf50db668b31d05d7c32adbfb6ff71eec431e0eaf39833c2bf51523",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    },
+    {
+      "id": "weight-conversion",
+      "source": "projects/weight-conversion/project.json",
+      "title": "Convert PyTorch weights and audit Flax architecture parity",
+      "requiredLessonIds": [
+        "deployment-01",
+        "deployment-08"
+      ],
+      "stages": [
+        {
+          "id": "1",
+          "title": "Map and compare real frameworks"
+        },
+        {
+          "id": "2",
+          "title": "Locate numerical disagreement"
+        },
+        {
+          "id": "3",
+          "title": "Reload converted weights independently"
+        }
+      ],
+      "sourceHash": "09d7d354b31acc7d7b5b96a2d10beeb2fed4c95a7ea4765b59a445f50c279d10",
+      "receiptMatches": true,
+      "recordedStatus": "passed"
+    }
+  ],
+  "routes": [
+    {
+      "id": "foundations",
+      "source": "learning-paths/foundations.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization"
+      ],
+      "lessonCount": 29,
+      "capstoneProject": "regression-audit",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "recovery-06"
+      ]
+    },
+    {
+      "id": "internals",
+      "source": "learning-paths/internals.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "internals"
+      ],
+      "lessonCount": 33,
+      "capstoneProject": "derivative-audit",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "deployment-07"
+      ]
+    },
+    {
+      "id": "models",
+      "source": "learning-paths/models.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "transformers",
+        "pretraining",
+        "rl",
+        "posttraining",
+        "performance",
+        "deployment"
+      ],
+      "lessonCount": 69,
+      "capstoneProject": "image-harness",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "operations-06"
+      ]
+    },
+    {
+      "id": "ops",
+      "source": "learning-paths/ops.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "distributed",
+        "deployment",
+        "operations"
+      ],
+      "lessonCount": 65,
+      "capstoneProject": "workload-operations",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": []
+    },
+    {
+      "id": "probability",
+      "source": "learning-paths/probability.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "probability"
+      ],
+      "lessonCount": 33,
+      "capstoneProject": "bayesian-regression",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "recovery-06"
+      ]
+    },
+    {
+      "id": "rl",
+      "source": "learning-paths/rl.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "rl"
+      ],
+      "lessonCount": 38,
+      "capstoneProject": "policy-evaluation",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "recovery-06",
+        "operations-06"
+      ]
+    },
+    {
+      "id": "scale",
+      "source": "learning-paths/scale.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "distributed",
+        "kernels"
+      ],
+      "lessonCount": 53,
+      "capstoneProject": "kernel-audit",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "deployment-07",
+        "operations-06"
+      ]
+    },
+    {
+      "id": "science",
+      "source": "learning-paths/science.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "science"
+      ],
+      "lessonCount": 33,
+      "capstoneProject": "scientific-inverse",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "recovery-06"
+      ]
+    },
+    {
+      "id": "ship",
+      "source": "learning-paths/ship.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "performance",
+        "deployment"
+      ],
+      "lessonCount": 53,
+      "capstoneProject": "deployment-audit",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "operations-06",
+        "operations-07",
+        "operations-08"
+      ]
+    },
+    {
+      "id": "tpu",
+      "source": "learning-paths/tpu.json",
+      "phaseIds": [
+        "welcome",
+        "arrays",
+        "transforms",
+        "state",
+        "optimization",
+        "networks",
+        "recovery",
+        "transformers",
+        "pretraining",
+        "rl",
+        "posttraining",
+        "performance",
+        "distributed",
+        "deployment"
+      ],
+      "lessonCount": 73,
+      "capstoneProject": "text-harness",
+      "assessmentStatus": "review-draft",
+      "engineeringLessonsOutsideRoute": [
+        "operations-07"
+      ]
+    }
+  ],
+  "careers": [
+    {
+      "id": "training-engineer",
+      "pathwayIds": [
+        "models",
+        "tpu"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Train and evaluate a small model",
+          "phaseIds": [
+            "networks"
+          ]
+        },
+        {
+          "title": "Prove full-state recovery",
+          "phaseIds": [
+            "recovery"
+          ]
+        },
+        {
+          "title": "Diagnose and improve training speed",
+          "phaseIds": [
+            "performance"
+          ]
+        }
+      ],
+      "skills": [
+        "Flax NNX and explicit state",
+        "Optax and train/eval steps",
+        "Grain, Orbax, and XProf",
+        "MLflow experiment provenance",
+        "Masked and contrastive pretraining; response-only SFT, LoRA and preference optimization; numerical architecture parity"
+      ]
+    },
+    {
+      "id": "research-engineer",
+      "pathwayIds": [
+        "internals",
+        "probability"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Inspect and verify a differentiable method",
+          "phaseIds": [
+            "internals"
+          ]
+        }
+      ],
+      "skills": [
+        "JVPs, VJPs, and custom derivatives",
+        "jaxpr and program inspection",
+        "NumPyro and sampler diagnostics",
+        "MLflow experiment provenance"
+      ]
+    },
+    {
+      "id": "scientific-ml",
+      "pathwayIds": [
+        "science"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Recover a hidden physical parameter",
+          "phaseIds": [
+            "science"
+          ]
+        }
+      ],
+      "skills": [
+        "scan and batched simulation",
+        "Solver sensitivities; optional Diffrax extension",
+        "Numerical accuracy and inverse problems",
+        "MLflow experiment provenance"
+      ]
+    },
+    {
+      "id": "rl-engineer",
+      "pathwayIds": [
+        "rl"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Build a policy model",
+          "phaseIds": [
+            "networks"
+          ]
+        },
+        {
+          "title": "Evaluate a learning agent",
+          "phaseIds": [
+            "rl"
+          ]
+        }
+      ],
+      "skills": [
+        "Vectorized environments and PRNG",
+        "scan-based rollouts",
+        "Policy gradients and PPO",
+        "MLflow experiment provenance"
+      ]
+    },
+    {
+      "id": "performance-engineer",
+      "pathwayIds": [
+        "scale"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Build a reference workload",
+          "phaseIds": [
+            "networks"
+          ]
+        },
+        {
+          "title": "Make it recoverable",
+          "phaseIds": [
+            "recovery"
+          ]
+        },
+        {
+          "title": "Find its measured bottleneck",
+          "phaseIds": [
+            "performance"
+          ]
+        },
+        {
+          "title": "Partition it across devices",
+          "phaseIds": [
+            "distributed"
+          ]
+        },
+        {
+          "title": "Optimize a checked kernel",
+          "phaseIds": [
+            "kernels"
+          ]
+        }
+      ],
+      "skills": [
+        "XProf, HLO, and roofline reasoning",
+        "Meshes, sharding, and distributed recovery",
+        "Pallas and reference correctness checks",
+        "MLflow experiment provenance"
+      ]
+    },
+    {
+      "id": "inference-engineer",
+      "pathwayIds": [
+        "ship"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Produce a trained artifact",
+          "phaseIds": [
+            "networks"
+          ]
+        },
+        {
+          "title": "Reproduce its saved state",
+          "phaseIds": [
+            "recovery"
+          ]
+        },
+        {
+          "title": "Measure a reference workload",
+          "phaseIds": [
+            "performance"
+          ]
+        },
+        {
+          "title": "Verify serving and capacity",
+          "phaseIds": [
+            "deployment"
+          ]
+        }
+      ],
+      "skills": [
+        "JAX, Keras, TensorFlow and PyTorch interoperability",
+        "JAX export and artifact verification",
+        "Weight, activation and accumulation precision",
+        "Edge deployment and capacity analysis",
+        "Containerized delivery and release evidence"
+      ]
+    },
+    {
+      "id": "operations-engineer",
+      "pathwayIds": [
+        "ops",
+        "scale"
+      ],
+      "milestones": [
+        {
+          "title": "Build the shared foundation",
+          "phaseIds": [
+            "welcome",
+            "arrays",
+            "transforms",
+            "state",
+            "optimization"
+          ]
+        },
+        {
+          "title": "Run a reference job",
+          "phaseIds": [
+            "networks"
+          ]
+        },
+        {
+          "title": "Verify a recovery point",
+          "phaseIds": [
+            "recovery"
+          ]
+        },
+        {
+          "title": "Observe and diagnose workload behavior",
+          "phaseIds": [
+            "performance"
+          ]
+        },
+        {
+          "title": "Operate a sharded job",
+          "phaseIds": [
+            "distributed"
+          ]
+        },
+        {
+          "title": "Rehearse failure and recovery",
+          "phaseIds": [
+            "operations"
+          ]
+        }
+      ],
+      "skills": [
+        "Distributed JAX and workload configuration",
+        "Grain, Orbax, and recovery protocols",
+        "Profiling, observability, and operational runbooks",
+        "Containerized delivery and release evidence"
+      ]
+    }
+  ]
+}

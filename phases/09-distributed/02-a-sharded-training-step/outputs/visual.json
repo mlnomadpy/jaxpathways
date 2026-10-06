@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-02",
+  "contentHash": "2337605c4d07f89885445d19b6aeb1c51b3471d2864c67f7a389a5dfedbdcd16",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:38:28.655789+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 4,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Initial loss: 4.875\nGradient: [-5.25 -0.75] updated weights: [0.52500004 0.075     ]\nUpdated loss: 2.6784372329711914\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "weight 0",
+      "weight 1"
+    ],
+    "ylabel": "gradient coordinate",
+    "series": [
+      {
+        "label": "sharded JAX",
+        "y": [
+          -5.25,
+          -0.75
+        ]
+      },
+      {
+        "label": "NumPy reference",
+        "y": [
+          -5.25,
+          -0.75
+        ]
+      }
+    ]
+  }
+}

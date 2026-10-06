@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 190" role="img" aria-labelledby="title desc">
+<title id="title">Transform a pure function with JAX</title><desc id="desc">grad for derivatives, vmap for batching, jit for compilation.</desc>
+<rect width="360" height="190" rx="18" fill="#f7f4ff"/>
+<g fill="none" stroke="#b2a3d3" stroke-width="2"><path d="M105 95h20c25 0 10-57 35-57h10M105 95h65M105 95h20c25 0 10 57 35 57h10"/></g>
+<circle cx="64" cy="95" r="41" fill="#30216b"/><text x="64" y="106" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="34" fill="#fff">f(x)</text>
+<g fill="#fff" stroke="#6043c4" stroke-width="1.5"><rect x="170" y="16" width="172" height="44" rx="8"/><rect x="170" y="73" width="172" height="44" rx="8"/><rect x="170" y="130" width="172" height="44" rx="8"/></g>
+<g font-family="monospace" font-size="19" fill="#30216b"><text x="184" y="45">grad</text><text x="184" y="102">vmap</text><text x="184" y="159">jit</text></g>
+<g font-family="Avenir Next,Trebuchet MS,sans-serif" font-size="13" fill="#5f5873"><text x="242" y="44">differentiate</text><text x="242" y="101">batch</text><text x="242" y="158">compile</text></g>
+</svg>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transformers-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why is saving only parameters insufficient to replay the next Adam update?",
+      "options": [
+        "Adam uses optimizer count and moment history as well as parameters",
+        "The vocabulary alone stores all optimizer state",
+        "A matching current loss proves every future update matches"
+      ],
+      "correct": 0,
+      "explanation": "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values."
+    }
+  ]
+}

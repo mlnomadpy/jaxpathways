@@ -1,0 +1,124 @@
+{
+  "schemaVersion": 1,
+  "id": "state-04",
+  "minutes": 60,
+  "content": {
+    "idea": "lax.cond selects between two branches using a runtime predicate. Both branches must return compatible structures, shapes, and dtypes, because the compiled program needs a consistent result type. Both branch functions are traced; for an ordinary scalar predicate, cond chooses one branch at runtime.\n\nFor elementwise selection, `jnp.where` is often clearer. Under transformations such as vmap, cond can be converted into selection, so do not rely on branch choice to suppress side effects. Keep the branches pure and numerically well-defined.",
+    "code": "import jax\nimport jax.numpy as jnp\n@jax.jit\ndef magnitude(x):\n    return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)\nprint(float(magnitude(-3.)))\nassert jnp.allclose(magnitude(-3.), 3.)\nassert jnp.allclose(magnitude(2.), 2.)",
+    "output": "\\(3.0\\)",
+    "exercise": "Write a compiled function that applies \\(2x\\) when \\(x\\) is positive and \\(x-2\\) otherwise. Check positive, negative, and zero inputs.",
+    "solution": "@jax.jit\ndef choose_update(x):\n    return jax.lax.cond(x > 0., lambda v: v * 2., lambda v: v - 2., x)\nassert jnp.allclose(choose_update(3.), 6.)\nassert jnp.allclose(choose_update(-3.), -5.)\nassert jnp.allclose(choose_update(0.), -2.)",
+    "question": "Can one cond branch return a scalar and the other a length-three array?",
+    "options": [
+      "Yes, any shapes are allowed",
+      "No, branch result types and shapes must be compatible",
+      "Only if the predicate is negative"
+    ],
+    "answer": 1,
+    "explanation": "Compiled control flow requires compatible output structures and array types across branches.",
+    "problem": "A Python branch can choose a path when it knows a value. Inside jit, that value may not be available yet. We’ll use lax.cond to make the choice at runtime, check what both branches must return, and compare a single decision with elementwise selection.",
+    "sections": [
+      {
+        "title": "Locate the decision boundary",
+        "body": "The predicate \\(x\\ge0\\) is numerical data when \\(x\\) is a traced argument. A Python if must choose a branch while tracing, before that runtime value is available. lax.cond represents the choice inside the staged computation instead.\n\nIts arguments are a scalar Boolean predicate, two pure branch functions and an operand. Each branch receives that operand; each must return the same kind of result. Read the contract as an ordinary state transition with two possible implementations, not as a magic exception to tracing.",
+        "formula": "predicate: x>=0\ntrue:  operand x → x\nfalse: operand x → −x\njoined result: scalar float"
+      },
+      {
+        "title": "Trace both branches and check their result types",
+        "body": "For a scalar predicate, cond selects one branch at runtime, but both branches are traced when building the computation. Therefore an invalid operation in a branch can fail during tracing even if a particular test input would not choose it.\n\nBoth result pytrees must agree and corresponding array leaves must have compatible shapes and dtypes. A scalar in one branch and a vector in the other cannot be joined by this contract. This is different from numerical correctness: matching output types can still hide a wrong branch formula."
+      },
+      {
+        "title": "Choose cond or where by the shape of the question",
+        "body": "cond makes one scalar decision for a computation. where chooses values elementwise from compatible arrays. A vector predicate naturally belongs to where or a deliberately batched conditional.\n\nWhen cond is transformed with vmap over predicates, it can become selection. Do not use a branch as a promise that side effects or invalid arithmetic will never be evaluated under transformations. Keep functions pure and design numerical expressions that are valid in the relevant domain."
+      },
+      {
+        "title": "Inspect boundary behavior and derivatives",
+        "body": "Our magnitude function equals absolute value. Away from zero its derivative is +\\(1\\) for positive inputs and \\(-1\\) for negative inputs. At zero the mathematical function is not differentiable; a selected branch rule is a convention rather than proof of a derivative.\n\nTest negative, positive and exact-boundary inputs because a `>` versus `>=` change can alter boundary behavior in other functions. Keep a separate argument about mathematical smoothness when differentiating conditional computations."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Reproduce the Python truth-test failure",
+        "prediction": "Why does eager evaluation choose a branch while jit cannot use a runtime value in Python if?",
+        "code": "def eager_branch(v):\n    if v>=0.:\n        return v\n    return -v\nassert eager_branch(-3.)==3.\ntry:\n    jax.jit(eager_branch)(jnp.array(-3.))\nexcept jax.errors.TracerBoolConversionError:\n    print(\"Expected traced Python Boolean failure\")\nelse:\n    raise AssertionError(\"Expected branch error\")\nfor v in [-3.,0.,2.]:\n    assert jnp.allclose(magnitude(v),abs(v))",
+        "output": "The traced Python branch fails; cond gives the correct values for all three cases.",
+        "explanation": "The repair changes where the decision is represented. It does not make \\(x\\) static or remove the negative case."
+      },
+      {
+        "title": "Check a batched numerical selection",
+        "prediction": "Predict the outputs and derivatives away from the nonsmooth point.",
+        "code": "values=jnp.array([-3.,-1.,2.,4.])\nassert jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))\nassert jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))",
+        "output": "Magnitudes \\([3,1,2,4]\\) and slopes \\([-1,-1,1,1]\\).",
+        "explanation": "Correct values under batching do not imply a conditional branch remains lazy after every transformation."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Match a changed piecewise rule",
+        "prompt": "Implement \\(x^2\\) for \\(x>1\\) and \\(2x\\) otherwise. Derive outputs at \\(-1\\),\\(1\\),\\(2\\) and derivatives away from \\(1\\).",
+        "hint": "At \\(x=1\\) the false branch is selected.",
+        "solution": "def piecewise(v):\n    return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)\nassert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))\nassert jnp.allclose(jax.grad(piecewise)(-1.),2.)\nassert jnp.allclose(jax.grad(piecewise)(2.),4.)",
+        "explanation": "The values check the exact boundary and both formulas; the derivatives are checked only at smooth points.",
+        "difficulty": "Practice"
+      },
+      {
+        "title": "Repair incompatible branch shapes",
+        "prompt": "Return a scalar in one branch and a length-two vector in the other, reproduce the error, then define a consistent two-value result.",
+        "hint": "Decide what each output component means before padding.",
+        "solution": "try:\n    jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))\nexcept TypeError:\n    print(\"Expected branch shape mismatch\")\nelse:\n    raise AssertionError(\"Expected result type error\")\ndef pair(v):\n    return jax.lax.cond(v>=0.,lambda x:jnp.stack([x,x*x]),lambda x:jnp.stack([-x,x*x]),v)\nassert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))",
+        "explanation": "A branch mismatch is a result-contract error even when the current predicate is known. Here the repaired output explicitly means [magnitude,square].",
+        "difficulty": "Challenge"
+      }
+    ],
+    "objectives": [
+      "Locate the decision boundary",
+      "Trace both branches and check their result types",
+      "Choose cond or where by the shape of the question",
+      "Inspect boundary behavior and derivatives"
+    ],
+    "takeaways": [
+      "The repair changes where the decision is represented. It does not make \\(x\\) static or remove the negative case.",
+      "Correct values under batching do not imply a conditional branch remains lazy after every transformation."
+    ],
+    "references": [
+      {
+        "title": "JAX cond",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.cond.html"
+      },
+      {
+        "title": "JAX control flow",
+        "url": "https://docs.jax.dev/en/latest/control-flow.html"
+      }
+    ],
+    "diagnosis": "A branch mismatch is a result-contract error even when the current predicate is known. Here the repaired output explicitly means [magnitude,square].",
+    "buildSteps": [
+      {
+        "title": "Prepare the inputs",
+        "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
+        "code": "import jax\nimport jax.numpy as jnp",
+        "explanation": "These explicit inputs define the case that the later checks will verify."
+      },
+      {
+        "title": "Build the computation",
+        "instruction": "Append this block below the inputs in the same file.",
+        "code": "@jax.jit\ndef magnitude(x):\n    return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)",
+        "explanation": "Both branches return the same scalar type. cond takes the runtime predicate and passes \\(x\\) to the selected numerical branch."
+      },
+      {
+        "title": "Run and check the result",
+        "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
+        "code": "print(float(magnitude(-3.)))\nassert jnp.allclose(magnitude(-3.), 3.)\nassert jnp.allclose(magnitude(2.), 2.)",
+        "explanation": "Compare the output to the expected result below before making the exercise change."
+      }
+    ],
+    "visual": {
+      "title": "Both branches form one magnitude function",
+      "kind": "executed",
+      "prediction": "What happens on each side of zero?",
+      "reading": "The horizontal axis varies the input and the vertical axis gives the returned magnitude. The V-shaped line passes through \\((-3,3)\\), \\((0,0)\\), and \\((3,3)\\). Equal distances to the left and right of zero produce equal outputs.\n\nThe left arm comes from negating a negative input. The right arm comes from returning a nonnegative input unchanged. At zero the two values meet, so there is no jump in the output.",
+      "connection": "The branches together implement \\(|x|\\). Moving right along the negative side decreases the result with slope \\(-1\\); moving right along the positive side increases it with slope \\(1\\). The sharp corner records that change of rule.\n\nContinuity at the join does not imply differentiability: the classical derivative is undefined at zero because the two slopes disagree. A branch-selected autodiff value there must not be confused with a derivative of a smooth curve. The picture helps separate correct branch outputs from assumptions about gradients.",
+      "alt": "Both branches form one magnitude function. The horizontal axis varies the input and the vertical axis gives the returned magnitude. The V-shaped line passes through \\((-3,3)\\), \\((0,0)\\), and \\((3,3)\\). Equal distances to the left and right of zero produce equal outputs. The left arm comes from negating a negative input. The right arm comes from returning a nonnegative input unchanged. At zero the two values meet, so there is no jump in the output.",
+      "code": "grid = jnp.linspace(-3.0, 3.0, 25)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 'magnitude', 'series': [{'label': 'lax.cond output', 'y': jax.vmap(magnitude)(grid).tolist()}]}"
+    }
+  }
+}

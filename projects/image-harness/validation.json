@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "stage": 8,
+  "implementationHash": "c68a972dc8c3e2679bcfe49e31ed6a6a1aa46540cf389e91a4f1affdd1cbf629",
+  "checkerHash": "940218e6058375b9c7cdb46dd6f7455ea24afefc8f08c7026736a5e53cc0d5c0",
+  "environment": {
+    "python": "3.14.3",
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "backend": "cpu",
+    "device": "TFRT_CPU_0"
+  },
+  "results": {
+    "training": {
+      "steps": 200,
+      "seed": 0,
+      "clean_accuracy": 1.0,
+      "train_loss": 0.003124317212853988,
+      "changed_seed_accuracy": 1.0
+    },
+    "recovery": {
+      "committed_step": 13,
+      "next_steps": [
+        14,
+        15,
+        16,
+        17,
+        18,
+        19,
+        20,
+        21,
+        22,
+        23,
+        24
+      ],
+      "fresh_process": true,
+      "ids_augmented_inputs_losses_state_equal": true
+    },
+    "evaluation": {
+      "clean_accuracy": 1.0,
+      "corruption_accuracy": 0.1,
+      "corruption_confusion": [
+        [
+          6,
+          14,
+          0
+        ],
+        [
+          20,
+          0,
+          0
+        ],
+        [
+          20,
+          0,
+          0
+        ]
+      ],
+      "error_ids": [
+        "occlusion-31-0000",
+        "occlusion-31-0001",
+        "occlusion-31-0002",
+        "occlusion-31-0004",
+        "occlusion-31-0005",
+        "occlusion-31-0006",
+        "occlusion-31-0007",
+        "occlusion-31-0008",
+        "occlusion-31-0010",
+        "occlusion-31-0011",
+        "occlusion-31-0013",
+        "occlusion-31-0014",
+        "occlusion-31-0015",
+        "occlusion-31-0016",
+        "occlusion-31-0017",
+        "occlusion-31-0019",
+        "occlusion-31-0020",
+        "occlusion-31-0021",
+        "occlusion-31-0022",
+        "occlusion-31-0023",
+        "occlusion-31-0024",
+        "occlusion-31-0025",
+        "occlusion-31-0026",
+        "occlusion-31-0027",
+        "occlusion-31-0028",
+        "occlusion-31-0029",
+        "occlusion-31-0030",
+        "occlusion-31-0031",
+        "occlusion-31-0032",
+        "occlusion-31-0033",
+        "occlusion-31-0034",
+        "occlusion-31-0035",
+        "occlusion-31-0036",
+        "occlusion-31-0037",
+        "occlusion-31-0038",
+        "occlusion-31-0039",
+        "occlusion-31-0040",
+        "occlusion-31-0041",
+        "occlusion-31-0042",
+        "occlusion-31-0043",
+        "occlusion-31-0044",
+        "occlusion-31-0045",
+        "occlusion-31-0046",
+        "occlusion-31-0047",
+        "occlusion-31-0049",
+        "occlusion-31-0050",
+        "occlusion-31-0051",
+        "occlusion-31-0052",
+        "occlusion-31-0053",
+        "occlusion-31-0054",
+        "occlusion-31-0055",
+        "occlusion-31-0056",
+        "occlusion-31-0058",
+        "occlusion-31-0059"
+      ]
+    },
+    "precision": {
+      "lower_float_policies": {
+        "float16": {
+          "accuracy": 1.0,
+          "loss": 0.00262303436342136,
+          "max_logit_error": 0.006237506866455078,
+          "accumulation": "float32",
+          "optimizer_storage": "float32"
+        },
+        "bfloat16": {
+          "accuracy": 1.0,
+          "loss": 0.002631919957866902,
+          "max_logit_error": 0.043764591217041016,
+          "accumulation": "float32",
+          "optimizer_storage": "float32"
+        }
+      },
+      "int8_accuracy": 1.0,
+      "max_logit_error": 0.3679218292236328,
+      "clipping": {
+        "input_clipped": 0,
+        "input_count": 3840,
+        "hidden_clipped": 3,
+        "hidden_count": 360
+      },
+      "aggressive_calibration_clipping": {
+        "input_clipped": 2674,
+        "input_count": 3840,
+        "hidden_clipped": 253,
+        "hidden_count": 360
+      },
+      "weight_bytes_float32": 324,
+      "quantized_payload_bytes": 160
+    },
+    "export": {
+      "actual_serialized_jax": true,
+      "fresh_process": true,
+      "request_batches": [
+        1,
+        2,
+        4,
+        7
+      ],
+      "artifact_bytes": 10641,
+      "manifest": {
+        "version": 1,
+        "preprocess": {
+          "version": "image-v1",
+          "height": 8,
+          "width": 8,
+          "channels": 1,
+          "source_channels": [
+            1,
+            3
+          ],
+          "resize": "nearest floor-index",
+          "rgb_weights": [
+            0.2126,
+            0.7152,
+            0.0722
+          ],
+          "normalization": "2 * gray_in_0_1 - 1",
+          "layout": "NHWC",
+          "exif": "transpose on file decode"
+        },
+        "classes": [
+          "vertical",
+          "horizontal",
+          "cross"
+        ],
+        "batches": [
+          1,
+          4
+        ],
+        "training_data_hash": "709966f0a577d70af3f55467ed1ffae200c2cc3abd05d9b08270202b27805457",
+        "training_settings": {
+          "batch_size": 12,
+          "learning_rate": 0.08,
+          "momentum": 0.9
+        },
+        "calibration_data_hash": "709966f0a577d70af3f55467ed1ffae200c2cc3abd05d9b08270202b27805457",
+        "calibration_percentile": 99.0,
+        "completed_steps": 200,
+        "jax_version": "0.9.2",
+        "validated_platform": "cpu",
+        "integer_accumulator": "int32",
+        "files": {
+          "model-1.jax": "538536b20440f8e6139b848a739f1ab669589e2d489dd65472a0756c796ed664",
+          "model-4.jax": "2e308d5d9c9a71545acfb4b16ca2ef02760eaff5035c6f5135726fc72ef66c82",
+          "integer.npz": "822d2688d512b98850448d4a74c1441ea21d96508c075d36ef387c7e873cdb1f",
+          "float-params.npz": "eb3683d46f2e148847864bace4b911230ad94c2bdecce37197a9aaf8d668e718"
+        }
+      }
+    },
+    "inference_measurements": [
+      {
+        "precision": "float32",
+        "backend": "cpu",
+        "device": "TFRT_CPU_0",
+        "batch": 4,
+        "repeats": 12,
+        "warmup_s": 0.0008719582110643387,
+        "samples_s": [
+          0.0002539579290896654,
+          0.00015662494115531445,
+          0.00013654213398694992,
+          0.00012120790779590607,
+          0.0001216670498251915,
+          0.00013104197569191456,
+          0.0001212910283356905,
+          0.00011366582475602627,
+          0.0001099160872399807,
+          0.00011120899580419064,
+          0.0001138751395046711,
+          0.00011283392086625099
+        ],
+        "median_ms": 0.12124946806579828,
+        "p95_ms": 0.2004247857257723,
+        "images_per_s": 29928.304239730212,
+        "scope": "host preprocessing + synchronous inference; excludes file decoding"
+      },
+      {
+        "precision": "int8",
+        "backend": "cpu",
+        "device": "TFRT_CPU_0",
+        "batch": 4,
+        "repeats": 12,
+        "warmup_s": 9.179115295410156e-05,
+        "samples_s": [
+          4.300009459257126e-05,
+          3.591692075133324e-05,
+          3.3624935895204544e-05,
+          3.220816142857075e-05,
+          3.258301876485348e-05,
+          3.933301195502281e-05,
+          3.2708048820495605e-05,
+          3.13750933855772e-05,
+          3.1250063329935074e-05,
+          3.091711550951004e-05,
+          3.150012344121933e-05,
+          3.124983049929142e-05
+        ],
+        "median_ms": 0.03239559009671211,
+        "p95_ms": 0.04098319914191961,
+        "images_per_s": 118323.8193401457,
+        "scope": "host preprocessing + synchronous inference; excludes file decoding"
+      }
+    ],
+    "curves": [
+      {
+        "step": 10,
+        "train_loss": 0.9872842604496835,
+        "validation_loss": 0.9833785274950096
+      },
+      {
+        "step": 20,
+        "train_loss": 0.7368773145548521,
+        "validation_loss": 0.7285151640626372
+      },
+      {
+        "step": 30,
+        "train_loss": 0.33197290591356626,
+        "validation_loss": 0.3198268185097431
+      },
+      {
+        "step": 40,
+        "train_loss": 0.0893077694454456,
+        "validation_loss": 0.08517669673632992
+      },
+      {
+        "step": 50,
+        "train_loss": 0.030793712931390715,
+        "validation_loss": 0.027178734381250718
+      },
+      {
+        "step": 60,
+        "train_loss": 0.01602459432575733,
+        "validation_loss": 0.014410726632817185
+      },
+      {
+        "step": 70,
+        "train_loss": 0.010997090021440786,
+        "validation_loss": 0.010014531092615998
+      },
+      {
+        "step": 80,
+        "train_loss": 0.008601254403343766,
+        "validation_loss": 0.007622505768772212
+      },
+      {
+        "step": 90,
+        "train_loss": 0.007423332217853761,
+        "validation_loss": 0.0063807542702428565
+      },
+      {
+        "step": 100,
+        "train_loss": 0.006509440656996191,
+        "validation_loss": 0.005616660825485444
+      },
+      {
+        "step": 110,
+        "train_loss": 0.005815800886262985,
+        "validation_loss": 0.005015526074667391
+      },
+      {
+        "step": 120,
+        "train_loss": 0.005295574753898159,
+        "validation_loss": 0.004606312695222869
+      },
+      {
+        "step": 130,
+        "train_loss": 0.004893805855150265,
+        "validation_loss": 0.004221883390440347
+      },
+      {
+        "step": 140,
+        "train_loss": 0.0045472178763908645,
+        "validation_loss": 0.003886802840886343
+      },
+      {
+        "step": 150,
+        "train_loss": 0.004245592895778341,
+        "validation_loss": 0.0035923336726683295
+      },
+      {
+        "step": 160,
+        "train_loss": 0.003956502713888743,
+        "validation_loss": 0.00337724199975293
+      },
+      {
+        "step": 170,
+        "train_loss": 0.0037192617753165924,
+        "validation_loss": 0.0032168993563196535
+      },
+      {
+        "step": 180,
+        "train_loss": 0.003495704533298984,
+        "validation_loss": 0.003015714586091268
+      },
+      {
+        "step": 190,
+        "train_loss": 0.003291419614335911,
+        "validation_loss": 0.0027974982989136007
+      },
+      {
+        "step": 200,
+        "train_loss": 0.003124317212853988,
+        "validation_loss": 0.0026222901979600756
+      }
+    ]
+  }
+}

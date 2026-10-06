@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "pretraining-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why must the encoder input be inspected separately from reconstruction loss?",
+      "options": [
+        "A leaked target can produce a perfect loss without learning to infer missing content.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A batch of eight finishes in four milliseconds. Which statement follows for a fully occupied serial worker?",
+      "options": [
+        "Every example experiences half a millisecond of response latency",
+        "The compute-throughput proxy is two thousand examples per second, while batch execution still takes four milliseconds",
+        "The service can guarantee the same throughput for every arrival pattern"
+      ],
+      "correct": 1,
+      "explanation": "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs."
+    }
+  ]
+}

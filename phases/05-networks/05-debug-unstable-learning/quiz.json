@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why does scaling both \\(x\\) and \\(y\\) by ten require a different stable step-size range?",
+      "options": [
+        "The squared-loss curvature grows by \\(100\\)",
+        "Autodiff stops working on scaled inputs",
+        "The number of observations changes"
+      ],
+      "correct": 0,
+      "explanation": "Both the residual scale and its weight derivative scale by ten, so the gradient and curvature scale by \\(100\\). This is specific to the squared objective and paired scaling."
+    }
+  ]
+}

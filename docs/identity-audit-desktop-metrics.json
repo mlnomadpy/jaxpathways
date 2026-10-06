@@ -1,0 +1,250 @@
+[
+  {
+    "height": 2094,
+    "main": 1280,
+    "nav": [
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": "page",
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/course.html",
+    "textWidths": [
+      {
+        "font": "20px",
+        "text": "Learn connected ideas, build an experiment, and keep the evidence",
+        "width": 530
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 4434,
+    "main": 1280,
+    "nav": [
+      {
+        "active": "page",
+        "label": "Learning & career routes"
+      },
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/pathways.html",
+    "textWidths": [
+      {
+        "font": "20px",
+        "text": "Follow a career route through the shared JAX course, with clear m",
+        "width": 530
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 3508,
+    "main": 1120,
+    "nav": [
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": "page",
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/notebook.html",
+    "textWidths": [
+      {
+        "font": "13px",
+        "text": "Your local workspace",
+        "width": 992
+      },
+      {
+        "font": "16px",
+        "text": "Return to your reading, keep the work you can explain, and take y",
+        "width": 992
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 1668,
+    "main": 1120,
+    "nav": [
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/organizer.html",
+    "textWidths": [
+      {
+        "font": "16px",
+        "text": "Choose a pathway and a weekly time budget. Assign available lesso",
+        "width": 992
+      },
+      {
+        "font": "16px",
+        "text": "20 available lessons · 19 estimated lesson hours · 12 hours of sc",
+        "width": 992
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 3613,
+    "main": 1200,
+    "nav": [
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": "page",
+        "label": "Resources"
+      }
+    ],
+    "page": "/developer.html",
+    "textWidths": [],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 3844,
+    "main": 1280,
+    "nav": [
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/project.html",
+    "textWidths": [
+      {
+        "font": "13px",
+        "text": "Integration project · CPU",
+        "width": 980
+      },
+      {
+        "font": "16px",
+        "text": "Build your implementation, check each stage, and explain the evid",
+        "width": 980
+      },
+      {
+        "font": "16px",
+        "text": "0/3 stages self-reported. Your evidence stays separate from revie",
+        "width": 980
+      },
+      {
+        "font": "14px",
+        "text": "Stage ticks record your report of practice. Public checks establi",
+        "width": 980
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  },
+  {
+    "height": 7001,
+    "main": 980,
+    "nav": [
+      {
+        "active": null,
+        "label": "Course"
+      },
+      {
+        "active": null,
+        "label": "Career routes"
+      },
+      {
+        "active": null,
+        "label": "My learning"
+      },
+      {
+        "active": null,
+        "label": "Resources"
+      }
+    ],
+    "page": "/assessments/models.html",
+    "textWidths": [
+      {
+        "font": "13px",
+        "text": "Synthesis assessment · CPU · editorial review draft",
+        "width": 932
+      },
+      {
+        "font": "19px",
+        "text": "Scope: a small Flax NNX classifier, stable objective, parameter d",
+        "width": 910
+      }
+    ],
+    "viewport": 1280,
+    "width": 1280
+  }
+]

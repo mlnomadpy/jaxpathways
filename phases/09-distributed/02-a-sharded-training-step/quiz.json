@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Four equal-size shards compute local mean gradients. Which aggregation gives the global mean gradient?",
+      "options": [
+        "Sum them without scaling.",
+        "Average them, or sum local gradient numerators and divide by total examples.",
+        "Choose the device with the lowest local loss."
+      ],
+      "correct": 1,
+      "explanation": "A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting."
+    }
+  ]
+}

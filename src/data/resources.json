@@ -1,0 +1,73 @@
+{
+  "cards": [
+    {
+      "tag": "First run · CPU",
+      "title": "A ready-to-use workspace",
+      "description": "Follow the setup lesson to choose an interpreter, install the course environment and save your first experiment.",
+      "links": [
+        {
+          "label": "Open setup lesson →",
+          "href": "lesson.html?lesson=welcome-01",
+          "download": false
+        },
+        {
+          "label": "Download beginner workspace",
+          "href": "downloads/jax-start-here.zip",
+          "download": true
+        }
+      ]
+    },
+    {
+      "tag": "Placement practice · CPU",
+      "title": "Four logical devices",
+      "description": "Inspect local shards, compare replication with partitioning, and repair an uneven batch on one physical host.",
+      "note": "Restart the notebook kernel, then Run all. Logical CPU devices do not emulate TPU performance.",
+      "links": [
+        {
+          "label": "Open virtual-device lesson →",
+          "href": "lesson.html?lesson=welcome-cpu",
+          "download": false
+        },
+        {
+          "label": "Download notebook",
+          "href": "exercises/welcome-cpu.ipynb",
+          "download": true
+        }
+      ]
+    },
+    {
+      "tag": "Integration project · CPU",
+      "title": "Regression audit",
+      "description": "Build preprocessing, check gradients, fit a model and produce a report through four inspectable stages.",
+      "links": [
+        {
+          "label": "Open project →",
+          "href": "project.html?id=regression-audit",
+          "download": false
+        },
+        {
+          "label": "Download starter, checks & reference",
+          "href": "downloads/regression-audit.zip",
+          "download": true
+        }
+      ]
+    },
+    {
+      "tag": "Training project · CPU",
+      "title": "A checked classifier",
+      "description": "Connect model shapes, training updates and evaluation checks in a small synthetic classification experiment.",
+      "links": [
+        {
+          "label": "Open classifier project →",
+          "href": "project.html?id=mlp-classifier",
+          "download": false
+        },
+        {
+          "label": "Download project bundle",
+          "href": "downloads/mlp-classifier.zip",
+          "download": true
+        }
+      ]
+    }
+  ]
+}

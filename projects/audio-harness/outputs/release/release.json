@@ -1,0 +1,81 @@
+{
+  "preprocessing": {
+    "version": "audio-stft-v1",
+    "sample_rate": 8000,
+    "channels": 1,
+    "samples": 1024,
+    "clip_samples": 1280,
+    "window": 128,
+    "hop": 64,
+    "window_function": "symmetric Hann",
+    "spectrum": "rfft magnitude squared / sum(window squared)",
+    "feature": "mean over frames of log1p(power); 65 frequency bins",
+    "normalization": "training mean and std; std floor 0.05"
+  },
+  "classes": [
+    "background",
+    "low-tone",
+    "high-tone"
+  ],
+  "batches": [
+    1,
+    4
+  ],
+  "training_data_sha256": "5fb78aec334f1100c02bf036c12daaa00f005f5f40d701a89f2c7b6c6fd3288b",
+  "completed_steps": 80,
+  "parameter_sha256": "8c6b1957449b0fc1b16b90764868bf1ef144cd0d33ad336c55c912b935009e74",
+  "normalizer_sha256": "1aee5f98305ca1b2778477b124aaa709abf2d050cb0d02b69ca4c2ea90ce817a",
+  "calibration_sha256": "5fb78aec334f1100c02bf036c12daaa00f005f5f40d701a89f2c7b6c6fd3288b",
+  "jax": "0.9.2",
+  "activation_scale": 0.03911081824715682,
+  "weight_scales": [
+    [
+      0.006764792371541262,
+      0.009748447686433792,
+      0.009482665918767452
+    ]
+  ],
+  "integer_contract": {
+    "weight_axis": "output class",
+    "zero_point": 0,
+    "range": [
+      -127,
+      127
+    ],
+    "bias": "float32 after rescaling",
+    "codes_dtype": "int8"
+  },
+  "policies": {
+    "fp32": "FP32 STFT/features/weights/accumulation/output",
+    "w8a32": "FP32 STFT/features; INT8 weight storage dequantized to FP32; FP32 accumulation/bias/output",
+    "w8a8": "FP32 STFT/features; INT8 normalized features and weights; INT32 dot accumulation; FP32 bias/output"
+  },
+  "native_integer_acceleration_claimed": false,
+  "device": "CPU",
+  "artifacts": {
+    "fp32:1": {
+      "file": "fp32-b1.jaxexport",
+      "sha256": "419e755e3585fbf3f1fa3e19919d567305de055241d5a96502ceb03ac21fb185"
+    },
+    "fp32:4": {
+      "file": "fp32-b4.jaxexport",
+      "sha256": "710ecee57b73f296c534a556e7125cb988f3a754c92b9c7bc381c6f0800feb96"
+    },
+    "w8a32:1": {
+      "file": "w8a32-b1.jaxexport",
+      "sha256": "26bde4a9f3df88030d21c9756e82d3cb1015c5b1c253dce4716dfab2fac95a9d"
+    },
+    "w8a32:4": {
+      "file": "w8a32-b4.jaxexport",
+      "sha256": "34c4da3562c5268ec8644491ea194150b5e5d0681c47332b5ef4423386846cad"
+    },
+    "w8a8:1": {
+      "file": "w8a8-b1.jaxexport",
+      "sha256": "eb17fb5b8a72b4c1391c34e8c52858bf07afbd20a2899c8c6ef9b00d4a208160"
+    },
+    "w8a8:4": {
+      "file": "w8a8-b4.jaxexport",
+      "sha256": "419f2987bbe67f9f098203d734bee298992018219e020210a4ba12eed13a4619"
+    }
+  }
+}

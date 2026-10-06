@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "arrays-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What makes predict easier to transform and test?",
+      "options": [
+        "Reading an editable global weight",
+        "Passing parameters and data explicitly",
+        "Printing inside every numerical operation"
+      ],
+      "correct": 1,
+      "explanation": "Explicit inputs expose the computation and let you compare calls with controlled parameter values."
+    }
+  ]
+}

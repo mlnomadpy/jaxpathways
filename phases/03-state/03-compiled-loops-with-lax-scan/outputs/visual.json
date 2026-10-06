@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-03",
+  "contentHash": "89905a987038fbdee2bcc4181f8df83ae809a9d6d09c0c041569f54dcefd64ff",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:24.475366+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "History: [1.    1.5   1.75  1.875]\nFinal: 1.875\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1,
+      2,
+      3,
+      4
+    ],
+    "xlabel": "completed step",
+    "ylabel": "carry value",
+    "series": [
+      {
+        "label": "scan history",
+        "y": [
+          1.0,
+          1.5,
+          1.75,
+          1.875
+        ]
+      },
+      {
+        "label": "fixed point 2",
+        "y": [
+          2.0,
+          2.0,
+          2.0,
+          2.0
+        ]
+      }
+    ]
+  }
+}

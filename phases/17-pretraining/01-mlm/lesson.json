@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "pretraining-01",
+  "minutes": 75,
+  "content": {
+    "problem": "A text model can see a sentence but one word is hidden. What prevents it from copying the answer, and which positions should contribute to its loss? We will train a small bidirectional attention model and audit those two boundaries.",
+    "idea": "Masked language modeling predicts selected original tokens from a corrupted input. It differs from causal next-token prediction: allowed context can come from both sides. Our repeated-token fixture makes the correct answer inspectable; this is a small objective and attention experiment, not a BERT reproduction or a language benchmark.",
+    "objectives": [
+      "Separate the clean targets from the corrupted input",
+      "Normalize over selected target positions",
+      "Verify the changed-condition exercise and explain the limits of this fixture."
+    ],
+    "sections": [
+      {
+        "title": "Separate the clean targets from the corrupted input",
+        "body": "Keep an immutable copy of the original token IDs. The selection mask identifies positions to predict; corruption changes the input tokens, not the targets. Here the extra token ID \\(3\\) means hidden, while output classes are \\(0,1,2\\). Passing clean targets into the encoder would leak the answer. Check the corrupted arrays before the first update."
+      },
+      {
+        "title": "Normalize over selected target positions",
+        "body": "Compute log-softmax over vocabulary, gather the log probability of each original target, then average only selected positions. For uniform predictions over three classes, the initial loss is \\(\\log 3\\), regardless of how many valid positions are selected. Reject an empty mask before entering the jitted step; silently dividing by zero creates an undefined objective.",
+        "math": "L=-\\frac{\\sum_{b,t}m_{bt}\\log p_\\theta(x_{bt}\\mid\\widetilde x_b)}{\\sum_{b,t}m_{bt}}"
+      },
+      {
+        "title": "Use both sides without using the hidden value",
+        "body": "The encoder forms attention scores across every input position. There is no causal triangle: a later visible token is useful evidence here. This tiny model has one attention head, no positional encoding and a linear vocabulary head. Repeated token sequences deliberately avoid word-order ambiguity; a realistic encoder also needs positions, padding handling, residual blocks and a tokenizer."
+      },
+      {
+        "title": "Distinguish selection from replacement policy",
+        "body": "This lab always replaces selected tokens with the mask ID so information flow is easy to inspect. BERT-style training can mix mask replacement, random replacement and unchanged selected tokens; selection still determines the supervised positions. Keep special/padding tokens ineligible. Track a masking key and regenerate masks under a stated schedule rather than accidentally fixing one easy corruption forever."
+      },
+      {
+        "title": "Test a different corruption before claiming progress",
+        "body": "The training curve uses one selected position. The code evaluates a second position without additional updates and checks that changing target labels changes the loss. This supports the bounded repeated-token task, not language understanding. A real corpus needs document-separated splits, a frozen tokenizer, mask provenance and downstream evaluation against random initialization."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef masked_ce(logits, targets, selected):\n    # Caller validates a nonempty mask before a transformed training step.\n    logp = jax.nn.log_softmax(logits, axis=-1)\n    nll = -jnp.take_along_axis(logp, targets[..., None], axis=-1)[..., 0]\n    return jnp.sum(jnp.where(selected, nll, 0.)) / jnp.sum(selected)\n\ndef validate_mask(selected, shape):\n    a = np.asarray(selected)\n    if a.shape != shape or a.dtype != np.bool_ or not a.any():\n        raise ValueError('a nonempty Boolean mask of the target shape is required')\n\ndef corrupt_tokens(tokens, selected, mask_id):\n    validate_mask(selected, tokens.shape)\n    return jnp.where(selected, mask_id, tokens)\n\ndef mlm_logits(p, corrupted):\n    h = p['embedding'][corrupted]\n    # Bidirectional single-head attention, deliberately no causal mask.\n    scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])\n    context = jax.nn.softmax(scores, axis=-1) @ h\n    return context @ p['head']\n\ntokens = jnp.array([[0,0,0,0],[1,1,1,1],[2,2,2,2]],jnp.int32)\nselected = jnp.array([[False,True,False,False]]*3)\ncorrupted = corrupt_tokens(tokens,selected,3)\nkey = jax.random.key(7)\np = {'embedding':jax.random.normal(key,(4,6))*.2,'head':jnp.zeros((6,3))}\nloss = lambda p: masked_ce(mlm_logits(p,corrupted),tokens,selected)\nstep = jax.jit(jax.value_and_grad(loss)); history=[]\nfor _ in range(100):\n    value,g = step(p); history.append(float(value)); p=jax.tree.map(lambda a,b:a-.4*b,p,g)\nassert history[-1] < history[0]*.15\nnp.testing.assert_allclose(history[0],np.log(3),atol=1e-6)\n# Changing the clean target after constructing corrupted input cannot change the forward pass.\nchanged_targets=tokens.at[:,1].set((tokens[:,1]+1)%3)\nassert not np.isclose(float(masked_ce(mlm_logits(p,corrupted),changed_targets,selected)),history[-1])\nheld_mask=jnp.array([[False,False,True,False]]*3)\nheld_loss=float(masked_ce(mlm_logits(p,corrupt_tokens(tokens,held_mask,3)),tokens,held_mask))\nassert held_loss < .2\nprint('MLM initial/final/changed-mask:',history[0],history[-1],held_loss)\n",
+    "output": "Loss starts near 1.099 and ends below 0.02; an unseen mask position remains below 0.2.",
+    "experiments": [
+      {
+        "title": "Show that unsupervised positions have no direct loss gradient",
+        "prediction": "If we change logits only where the selection mask is false, does this masked objective change?",
+        "code": "logits=mlm_logits(p,corrupted)\nchanged_logits=jnp.where(selected[...,None],logits,logits+100.)\nnp.testing.assert_allclose(masked_ce(changed_logits,tokens,selected),masked_ce(logits,tokens,selected),atol=1e-6)\ngrad_logits=jax.grad(masked_ce)(logits,tokens,selected)\nnp.testing.assert_array_equal(np.asarray(grad_logits)[~np.asarray(selected)],0.)\nprint('Unselected output logits have zero direct loss gradient.')",
+        "output": "Unselected logits do not affect the masked loss and have zero direct gradient.",
+        "explanation": "Visible input tokens can still influence selected predictions through attention. Zero direct gradient at an unselected output is not a claim that visible-token embeddings never learn."
+      }
+    ],
+    "exercise": "Select the first position instead of the second and evaluate the trained model without updating it.",
+    "solution": "first_mask=jnp.array([[True,False,False,False]]*3)\nfirst_loss=float(masked_ce(mlm_logits(p,corrupt_tokens(tokens,first_mask,3)),tokens,first_mask))\nassert first_loss<.2\nprint('Changed position loss:',first_loss)",
+    "practice": [
+      {
+        "title": "Reject a missing learning signal",
+        "difficulty": "Transfer",
+        "prompt": "Pass an empty selection mask through the public corruption boundary and require a clear failure.",
+        "hint": "Validate outside the transformed objective before dividing by a count.",
+        "solution": "try:corrupt_tokens(tokens,jnp.zeros_like(tokens,dtype=bool),3)\nexcept ValueError:print('Empty mask rejected')\nelse:raise AssertionError('empty mask accepted')",
+        "explanation": "A skipped batch requires an explicit training policy. It must not silently become a zero loss or a NaN update."
+      }
+    ],
+    "question": "Why are visible input tokens useful even when their output positions are excluded from the loss?",
+    "options": [
+      "They supply context to predictions at selected positions through the encoder.",
+      "A lower training loss by itself proves the full application is ready.",
+      "Matching shapes alone establishes the required behavior."
+    ],
+    "answer": 0,
+    "explanation": "The mask controls the supervised outputs, while attention controls how input context influences them.",
+    "diagnosis": "If loss is suspiciously perfect at initialization, inspect target leakage and the selection count. If loss becomes NaN, reject empty masks and inspect vocabulary indices before changing the optimizer.",
+    "references": [
+      {
+        "title": "BERT: masked language pretraining",
+        "url": "https://arxiv.org/abs/1810.04805"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Masked language modeling: predict hidden tokens — recorded experiment",
+      "kind": "executed",
+      "prediction": "Predict what should change during training and what this curve cannot establish.",
+      "reading": "The horizontal axis is the number of updates already applied; the vertical axis is selected-token cross-entropy in nats. The first value is about \\(1.099=\\log 3\\). It falls to about \\(0.011\\) on the fixed synthetic sequences. This is training loss, not masked-token accuracy on natural text.",
+      "connection": "The zero vocabulary head makes initial predictions uniform. Falling loss shows the trained attention/embedding/head system can use the remaining repeated tokens. A held mask position is checked separately; the plot does not show a held-out corpus or establish transfer quality.",
+      "alt": "The horizontal axis is the number of updates already applied; the vertical axis is selected-token cross-entropy in nats. The first value is about \\(1.099=\\log 3\\). It falls to about \\(0.011\\) on the fixed synthetic sequences. This is training loss, not masked-token accuracy on natural text.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+    }
+  }
+}

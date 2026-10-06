@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which axis should be summed to obtain one return per environment from a time-major reward array?",
+      "options": [
+        "The time axis",
+        "The environment axis",
+        "Both axes before averaging by live transitions"
+      ],
+      "correct": 0,
+      "explanation": "Summing over time leaves one scalar for each episode. Averaging these episode returns gives the finite-episode performance objective."
+    }
+  ]
+}

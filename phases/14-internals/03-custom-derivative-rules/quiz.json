@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "internals-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A custom derivative is linear in its tangent and returns finite values. What additional evidence is necessary before calling it exact?",
+      "options": [
+        "Agreement with the actual primal derivative through an independent derivation or numerical check.",
+        "A larger batch size so its bars look smoother.",
+        "No additional evidence: linearity guarantees the coefficient is correct."
+      ],
+      "correct": 0,
+      "explanation": "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement."
+    }
+  ]
+}

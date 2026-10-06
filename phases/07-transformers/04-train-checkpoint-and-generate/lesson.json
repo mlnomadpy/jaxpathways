@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 1,
+  "id": "transformers-04",
+  "minutes": 120,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "Let’s connect the pieces into a tiny next-token model. We’ll use a repeating three-character sequence, so the targets and expected continuations are easy to inspect. You’ll train, save, resume one matching step, and generate tokens. Success on this controlled sequence does not demonstrate general language ability.",
+    "idea": "We use a three-character periodic corpus and a context of four tokens. This is a deterministic CPU integration exercise, not a pretrained model, useful language system, or generalization benchmark. The held-out string follows the same periodic rule and repeats contexts already represented in training.\n\nThe objective connects integer IDs → embeddings and positions → causal Transformer block → vocabulary logits → cross entropy. A correct causal mask and shifted targets are required before a low training loss means anything.",
+    "objectives": [
+      "Assemble the token-to-logit contract",
+      "Separate a learning experiment from a benchmark",
+      "Checkpoint the continuation state and its schema",
+      "Generate with an explicit decoding policy",
+      "Use failures to test the experiment boundary"
+    ],
+    "sections": [
+      {
+        "title": "Assemble the token-to-logit contract",
+        "body": "Each token ID indexes one row of a \\((3, 8)\\) embedding table. Add a position row, apply the single-head causal block, normalize and project to three vocabulary logits. vmap applies this per-sequence function over the batch. The loss averages token cross entropy over both example and position axes.\n\nFor a uniform three-class prediction, negative log probability is `log(3)`, about \\(1.0986\\), regardless of the target class. Zeroing the head provides a known check of that objective. This reduction assumes all positions are valid; padding and packing would require the masks and eligible-token reduction taught in the preceding lesson.",
+        "formula": "IDs (B, T) → embeddings (B, T, 8)\n+ positions → causal block → logits (B, T, 3)\nshifted targets (B, T) → mean cross entropy → scalar"
+      },
+      {
+        "title": "Separate a learning experiment from a benchmark",
+        "body": "The training string repeats abc; the held-out string begins with bca. Splitting strings makes the evaluation call distinct, but repeated periodic contexts mean that the split does not establish unseen-context generalization. The expected greedy sequence follows a known cycle, so it is a correctness fixture.\n\nRecord initial loss, final held-out loss and accuracy, and inspect target alignment by hand. A model could learn this rule with a simpler architecture. This exercise demonstrates the Transformer training plumbing; it does not demonstrate that attention is necessary for the task or that the model understands language."
+      },
+      {
+        "title": "Checkpoint the continuation state and its schema",
+        "body": "Adam carries count and moment estimates. Saving only parameters loses those values; even an equal initial loss after restart cannot prove that the next update will match. Save parameter and optimizer leaves, step, vocabulary and context. Recreate the expected tree structure from the same model and optimizer schema when loading, and reject mismatched leaf counts, shapes or dtypes.\n\nThe example writes numeric NPZ arrays with pickle disabled and a JSON manifest in a temporary directory, then checks the next transition against the uninterrupted state. The files are deliberately cleaned up after this smoke exercise. To keep learner evidence, change the directory to a persistent experiment folder. This two-file format is not atomic crash recovery; the data/recovery phase teaches stronger failure boundaries."
+      },
+      {
+        "title": "Generate with an explicit decoding policy",
+        "body": "For greedy generation, take the last token’s logits, choose argmax, append that token and repeat. Keep at most four tokens as the next context. There is no sampling key because this decoding policy is deterministic. Ties follow the argmax implementation; temperature and stochastic sampling would change the policy.\n\nRecomputing the whole window is simple but inefficient for a large model. This lesson does not implement a key/value cache or serving scheduler. Unknown characters and empty prompts must fail clearly instead of silently becoming another vocabulary ID."
+      },
+      {
+        "title": "Use failures to test the experiment boundary",
+        "body": "Zero logits should give `log(3)`; a future-token perturbation should not affect earlier logits; a mismatched checkpoint vocabulary should be rejected; and an empty prompt should fail. These cases test different contracts, so passing one does not certify the others.\n\nKeep the corpus, vocabulary, context, model seed, optimizer settings, package versions and numeric outputs with your work. The deterministic fixture has no shuffled data position or dropout key after initialization; a production resume must preserve those additional states when present."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport json\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nVOCAB = {\"a\":0, \"b\":1, \"c\":2}\nCONTEXT = 4\ndef layer_norm(x):\n    mean = jnp.mean(x, axis=-1, keepdims=True)\n    variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)\n    return (x-mean) / jnp.sqrt(variance + 1e-5)\n\ndef init_block(key, width=8):\n    keys = jax.random.split(key, 6)\n    shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]\n    return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(\n        [\"q\",\"k\",\"v\",\"o\",\"up\",\"down\"], keys, shapes)}\n\ndef block_forward(p, x):\n    h = layer_norm(x)\n    q, k, v = h@p[\"q\"], h@p[\"k\"], h@p[\"v\"]\n    scores = q@k.T / jnp.sqrt(x.shape[-1])\n    allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]\n    weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)\n    residual = x + (weights@v)@p[\"o\"]\n    return residual + jax.nn.gelu(layer_norm(residual)@p[\"up\"])@p[\"down\"]\n\ndef init_lm(key):\n    embed_key, block_key, head_key = jax.random.split(key, 3)\n    return {\"embed\":jax.random.normal(embed_key,(3,8))*0.1,\n            \"position\":jnp.arange(CONTEXT*8,dtype=jnp.float32).reshape(CONTEXT,8)*0.001,\n            \"block\":init_block(block_key),\n            \"head\":jax.random.normal(head_key,(8,3))*0.1}\n\ndef logits(p, tokens):\n    h = p[\"embed\"][tokens] + p[\"position\"][:tokens.shape[0]]\n    return layer_norm(block_forward(p[\"block\"],h))@p[\"head\"]\n\ndef make_examples(text):\n    ids = np.array([VOCAB[c] for c in text],dtype=np.int32)\n    rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])\n    return jnp.array(rows[:,:-1]), jnp.array(rows[:,1:])\n\ntrain_x, train_y = make_examples(\"abc\"*12)\nheld_x, held_y = make_examples(\"bca\"*6)\ndef lm_loss(p, x, y):\n    predictions = jax.vmap(logits,in_axes=(None,0))(p,x)\n    return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))\noptimizer = optax.adam(0.03)\n@jax.jit\ndef train_step(p, state, x, y):\n    value, gradients = jax.value_and_grad(lm_loss)(p,x,y)\n    updates, next_state = optimizer.update(gradients,state,p)\n    return optax.apply_updates(p,updates), next_state, value\n\nparams = init_lm(jax.random.key(3))\nstate = optimizer.init(params)\ninitial = float(lm_loss(params,train_x,train_y))\nfor _ in range(20):\n    params, state, _ = train_step(params,state,train_x,train_y)\n# Save numeric leaves only, with a schema checked against this program's template.\ndef save_snapshot(folder, p, state, step):\n    leaves, _ = jax.tree.flatten((p,state))\n    np.savez(folder/\"state.npz\", **{f\"leaf_{i}\":np.asarray(x) for i,x in enumerate(leaves)})\n    manifest = {\"schema\":1,\"step\":step,\"vocabulary\":VOCAB,\"context\":CONTEXT,\n                \"shapes\":[list(x.shape) for x in leaves],\n                \"dtypes\":[str(x.dtype) for x in leaves]}\n    (folder/\"manifest.json\").write_text(json.dumps(manifest))\n\ndef load_snapshot(folder):\n    meta = json.loads((folder/\"manifest.json\").read_text())\n    if meta[\"schema\"] != 1 or meta[\"vocabulary\"] != VOCAB or meta[\"context\"] != CONTEXT:\n        raise ValueError(\"checkpoint architecture/vocabulary mismatch\")\n    if type(meta[\"step\"]) is not int or meta[\"step\"] < 0:\n        raise ValueError(\"invalid checkpoint step\")\n    template = init_lm(jax.random.key(0))\n    template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))\n    arrays = []\n    with np.load(folder/\"state.npz\",allow_pickle=False) as data:\n        if set(data.files) != {f\"leaf_{i}\" for i in range(len(template_leaves))}:\n            raise ValueError(\"checkpoint leaf count mismatch\")\n        for i, leaf in enumerate(template_leaves):\n            saved = data[f\"leaf_{i}\"]\n            if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:\n                raise ValueError(\"checkpoint leaf contract mismatch\")\n            arrays.append(jnp.array(saved))\n    restored_p, restored_state = jax.tree.unflatten(structure,arrays)\n    if int(restored_state[0].count) != meta[\"step\"]:\n        raise ValueError(\"checkpoint step and Adam count disagree\")\n    return restored_p, restored_state, meta[\"step\"]\n\nwith TemporaryDirectory() as directory:\n    folder = Path(directory)\n    save_snapshot(folder,params,state,20)\n    restored, restored_state, step = load_snapshot(folder)\n    assert step == 20\n    next_a, state_a, _ = train_step(params,state,train_x,train_y)\n    next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)\n    assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(\n        jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))\nfor _ in range(80):\n    params, state, _ = train_step(params,state,train_x,train_y)\nheld_logits = jax.vmap(logits,in_axes=(None,0))(params,held_x)\naccuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)\nfinal_loss = lm_loss(params,held_x,held_y)\nprint(\"Initial / held loss / held accuracy:\",initial,float(final_loss),float(accuracy))\nassert final_loss < 0.05\nassert accuracy > 0.99\n\ndef generate(p, prompt, count):\n    tokens = [VOCAB[c] for c in prompt]\n    if not tokens:\n        raise ValueError(\"generation needs a nonempty prompt\")\n    inverse = {i:c for c,i in VOCAB.items()}\n    for _ in range(count):\n        window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)\n        new = int(jnp.argmax(logits(p,window)[-1]))\n        tokens.append(new)\n    return \"\".join(inverse[i] for i in tokens)\n\ncontinuation = generate(params,\"abca\",8)\nprint(\"Greedy continuation:\",continuation)\nassert continuation == \"abcabcabcabc\"",
+    "output": "Held-out loss below \\(0.05\\) and accuracy above \\(0.99\\) for the periodic fixture. Snapshot next-step replay agrees. Greedy continuation: abcabcabcabc. Exact loss depends on the tested backend.",
+    "experiments": [
+      {
+        "title": "Verify uniform-logit cross entropy",
+        "prediction": "With a zero output head, what is the cross entropy for any of the three targets?",
+        "code": "zero_head = {**params,\"head\":jnp.zeros_like(params[\"head\"])}\nassert jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)",
+        "output": "Mean loss `log(3)` ≈ \\(1.098612\\).",
+        "explanation": "A known probability distribution independently checks target handling and reduction."
+      },
+      {
+        "title": "Test causality at the final model output",
+        "prediction": "Changing only the last input token can affect which logits?",
+        "code": "example = jnp.array([0,1,2,0])\noriginal = logits(params,example)\nmodified = logits(params,example.at[-1].set(1))\nassert jnp.allclose(original[:3],modified[:3],atol=1e-5)",
+        "output": "Earlier three logit rows remain the same.",
+        "explanation": "Causal independence should hold for the full model, not only the standalone attention operation."
+      }
+    ],
+    "exercise": "Generate twelve new tokens from prompt bcab. Derive the expected cycle first; verify the string. Explain why success on this periodic example does not establish natural-language performance.",
+    "solution": "assert generate(params,\"bcab\",12) == \"bcabcabcabcabcab\"",
+    "practice": [
+      {
+        "title": "Reject an incompatible checkpoint",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Save a fresh snapshot, edit only the vocabulary metadata, and prove the loader rejects it. Restore the metadata and verify recovery. Then forge `step=101` while retaining the 100-step optimizer state and verify that this mismatch is also rejected.",
+        "hint": "Change one vocabulary mapping rather than numeric leaves.",
+        "solution": "with TemporaryDirectory() as directory:\n    folder = Path(directory)\n    save_snapshot(folder,params,state,100)\n    metadata_path = folder/\"manifest.json\"\n    correct = metadata_path.read_text()\n    metadata = json.loads(correct)\n    metadata[\"vocabulary\"] = {\"a\":1,\"b\":0,\"c\":2}\n    metadata_path.write_text(json.dumps(metadata))\n    try:\n        load_snapshot(folder)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"wrong vocabulary accepted\")\n    forged_step = json.loads(correct)\n    forged_step[\"step\"] = 101\n    metadata_path.write_text(json.dumps(forged_step))\n    try:\n        load_snapshot(folder)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"wrong step accepted\")\n    metadata_path.write_text(correct)\n    recovered, _, recovered_step = load_snapshot(folder)\n    assert recovered_step == 100\n    assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))",
+        "explanation": "The metadata is part of the model contract even when parameter array shapes still match."
+      },
+      {
+        "title": "Make prompt failures explicit",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Verify empty prompt rejection and unknown-character rejection. Record the difference between a ValueError for missing context and a KeyError for an unknown token.",
+        "hint": "The vocabulary mapping intentionally accepts only a, b and c.",
+        "solution": "try:\n    generate(params,\"\",1)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"empty prompt accepted\")\ntry:\n    generate(params,\"x\",1)\nexcept KeyError:\n    pass\nelse:\n    raise AssertionError(\"unknown token accepted\")\nassert generate(params,\"abca\",0) == \"abca\"",
+        "explanation": "A decoding interface needs a defined input contract; neither failure should be mistaken for a training problem."
+      }
+    ],
+    "question": "Why is saving only parameters insufficient to replay the next Adam update?",
+    "options": [
+      "Adam uses optimizer count and moment history as well as parameters",
+      "The vocabulary alone stores all optimizer state",
+      "A matching current loss proves every future update matches"
+    ],
+    "answer": 0,
+    "explanation": "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.",
+    "diagnosis": "If loss does not improve, inspect the first shifted input/target window and verify the zero-head `log(3)` result before tuning the rate. If a resumed next step differs, compare both parameter leaves and Adam moments/count; a matching current loss is insufficient. The loader rejects vocabulary, shape, dtype and step/count mismatches. Generation failures require checking the prompt and context contract separately from training.",
+    "takeaways": [
+      "A known probability distribution independently checks target handling and reduction.",
+      "Causal independence should hold for the full model, not only the standalone attention operation."
+    ],
+    "references": [
+      {
+        "title": "JAX softmax API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.softmax.html"
+      },
+      {
+        "title": "JAX attention API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.dot_product_attention.html"
+      },
+      {
+        "title": "Optax cross entropy",
+        "url": "https://optax.readthedocs.io/en/latest/api/losses.html"
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Prepare packages and the vocabulary",
+        "instruction": "Create main.py in the CPU environment. Add these imports and the vocabulary/context contract. Integer IDs must stay consistent with the output head.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport json\nfrom pathlib import Path\nfrom tempfile import TemporaryDirectory\n\nVOCAB = {\"a\":0, \"b\":1, \"c\":2}\nCONTEXT = 4",
+        "explanation": "Vocabulary size is three, model width is eight, and the context limit is four."
+      },
+      {
+        "title": "2. Reuse the verified causal block",
+        "instruction": "Append the normalization, projection initialization and causal block from the previous lesson. Identify where the attention mask prevents future reads.",
+        "code": "def layer_norm(x):\n    mean = jnp.mean(x, axis=-1, keepdims=True)\n    variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)\n    return (x-mean) / jnp.sqrt(variance + 1e-5)\n\ndef init_block(key, width=8):\n    keys = jax.random.split(key, 6)\n    shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]\n    return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(\n        [\"q\",\"k\",\"v\",\"o\",\"up\",\"down\"], keys, shapes)}\n\ndef block_forward(p, x):\n    h = layer_norm(x)\n    q, k, v = h@p[\"q\"], h@p[\"k\"], h@p[\"v\"]\n    scores = q@k.T / jnp.sqrt(x.shape[-1])\n    allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]\n    weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)\n    residual = x + (weights@v)@p[\"o\"]\n    return residual + jax.nn.gelu(layer_norm(residual)@p[\"up\"])@p[\"down\"]",
+        "explanation": "The block returns one model-width vector per token; it has no dropout or running statistics."
+      },
+      {
+        "title": "3. Add embeddings and the vocabulary head",
+        "instruction": "Append model initialization, token-to-logit mapping and example construction. Write the input and target IDs for the first abcab window before proceeding.",
+        "code": "def init_lm(key):\n    embed_key, block_key, head_key = jax.random.split(key, 3)\n    return {\"embed\":jax.random.normal(embed_key,(3,8))*0.1,\n            \"position\":jnp.arange(CONTEXT*8,dtype=jnp.float32).reshape(CONTEXT,8)*0.001,\n            \"block\":init_block(block_key),\n            \"head\":jax.random.normal(head_key,(8,3))*0.1}\n\ndef logits(p, tokens):\n    h = p[\"embed\"][tokens] + p[\"position\"][:tokens.shape[0]]\n    return layer_norm(block_forward(p[\"block\"],h))@p[\"head\"]\n\ndef make_examples(text):\n    ids = np.array([VOCAB[c] for c in text],dtype=np.int32)\n    rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])\n    return jnp.array(rows[:,:-1]), jnp.array(rows[:,1:])",
+        "explanation": "The head has three columns; make_examples shifts each window by one token for its targets."
+      },
+      {
+        "title": "4. Define the loss and compiled state transition",
+        "instruction": "Append the dataset calls, cross-entropy reduction, Adam transformation and compiled step. Which values are returned for the next update?",
+        "code": "train_x, train_y = make_examples(\"abc\"*12)\nheld_x, held_y = make_examples(\"bca\"*6)\ndef lm_loss(p, x, y):\n    predictions = jax.vmap(logits,in_axes=(None,0))(p,x)\n    return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))\noptimizer = optax.adam(0.03)\n@jax.jit\ndef train_step(p, state, x, y):\n    value, gradients = jax.value_and_grad(lm_loss)(p,x,y)\n    updates, next_state = optimizer.update(gradients,state,p)\n    return optax.apply_updates(p,updates), next_state, value",
+        "explanation": "train_step returns new parameters, optimizer state and the pre-update scalar loss; it does not mutate the caller."
+      },
+      {
+        "title": "5. Run the first twenty updates",
+        "instruction": "Append this training block. You will save this state after twenty steps; keep the optimizer state alongside parameters.",
+        "code": "params = init_lm(jax.random.key(3))\nstate = optimizer.init(params)\ninitial = float(lm_loss(params,train_x,train_y))\nfor _ in range(20):\n    params, state, _ = train_step(params,state,train_x,train_y)\n# Save numeric leaves only, with a schema checked against this program's template.",
+        "explanation": "Adam count should now equal twenty; initialization is the only random operation in this deterministic fixture."
+      },
+      {
+        "title": "6. Write and validate the snapshot format",
+        "instruction": "Append the save/load helpers. Read each rejection check. Rebuilding a tree template supplies structure, not the saved numeric state.",
+        "code": "def save_snapshot(folder, p, state, step):\n    leaves, _ = jax.tree.flatten((p,state))\n    np.savez(folder/\"state.npz\", **{f\"leaf_{i}\":np.asarray(x) for i,x in enumerate(leaves)})\n    manifest = {\"schema\":1,\"step\":step,\"vocabulary\":VOCAB,\"context\":CONTEXT,\n                \"shapes\":[list(x.shape) for x in leaves],\n                \"dtypes\":[str(x.dtype) for x in leaves]}\n    (folder/\"manifest.json\").write_text(json.dumps(manifest))\n\ndef load_snapshot(folder):\n    meta = json.loads((folder/\"manifest.json\").read_text())\n    if meta[\"schema\"] != 1 or meta[\"vocabulary\"] != VOCAB or meta[\"context\"] != CONTEXT:\n        raise ValueError(\"checkpoint architecture/vocabulary mismatch\")\n    if type(meta[\"step\"]) is not int or meta[\"step\"] < 0:\n        raise ValueError(\"invalid checkpoint step\")\n    template = init_lm(jax.random.key(0))\n    template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))\n    arrays = []\n    with np.load(folder/\"state.npz\",allow_pickle=False) as data:\n        if set(data.files) != {f\"leaf_{i}\" for i in range(len(template_leaves))}:\n            raise ValueError(\"checkpoint leaf count mismatch\")\n        for i, leaf in enumerate(template_leaves):\n            saved = data[f\"leaf_{i}\"]\n            if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:\n                raise ValueError(\"checkpoint leaf contract mismatch\")\n            arrays.append(jnp.array(saved))\n    restored_p, restored_state = jax.tree.unflatten(structure,arrays)\n    if int(restored_state[0].count) != meta[\"step\"]:\n        raise ValueError(\"checkpoint step and Adam count disagree\")\n    return restored_p, restored_state, meta[\"step\"]",
+        "explanation": "The loader checks architecture, vocabulary, numeric leaf contracts, step type and agreement with Adam count. It disables pickle."
+      },
+      {
+        "title": "7. Verify resume and evaluate the final fit",
+        "instruction": "Append the disk round trip and next-step comparison, then the remaining eighty updates and held-out evaluation. The temporary folder is cleaned up.",
+        "code": "with TemporaryDirectory() as directory:\n    folder = Path(directory)\n    save_snapshot(folder,params,state,20)\n    restored, restored_state, step = load_snapshot(folder)\n    assert step == 20\n    next_a, state_a, _ = train_step(params,state,train_x,train_y)\n    next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)\n    assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(\n        jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))\nfor _ in range(80):\n    params, state, _ = train_step(params,state,train_x,train_y)\nheld_logits = jax.vmap(logits,in_axes=(None,0))(params,held_x)\naccuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)\nfinal_loss = lm_loss(params,held_x,held_y)\nprint(\"Initial / held loss / held accuracy:\",initial,float(final_loss),float(accuracy))\nassert final_loss < 0.05\nassert accuracy > 0.99",
+        "explanation": "Uninterrupted and restored next transitions agree; the held-out periodic corpus tests pipeline behavior but repeats learned contexts."
+      },
+      {
+        "title": "8. Define greedy decoding",
+        "instruction": "Append the prompt encoder and generation loop. Locate the context truncation and the deterministic argmax policy.",
+        "code": "def generate(p, prompt, count):\n    tokens = [VOCAB[c] for c in prompt]\n    if not tokens:\n        raise ValueError(\"generation needs a nonempty prompt\")\n    inverse = {i:c for c,i in VOCAB.items()}\n    for _ in range(count):\n        window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)\n        new = int(jnp.argmax(logits(p,window)[-1]))\n        tokens.append(new)\n    return \"\".join(inverse[i] for i in tokens)",
+        "explanation": "The generator recomputes a short window each step. It has no sampling, key/value cache or serving scheduler."
+      },
+      {
+        "title": "9. Check the expected continuation",
+        "instruction": "Append the final call and run python main.py. Compare the continuation to the abc cycle you derived before training.",
+        "code": "continuation = generate(params,\"abca\",8)\nprint(\"Greedy continuation:\",continuation)\nassert continuation == \"abcabcabcabc\"",
+        "explanation": "The expected continuation is abcabcabcabc, with held-out loss below \\(0.05\\) and accuracy above \\(0.99\\) for this fixture."
+      }
+    ],
+    "visual": {
+      "title": "Inspect next-token probabilities before greedy decoding",
+      "kind": "executed",
+      "prediction": "Which token should follow each position in the held-out context?",
+      "reading": "Each row is a position in the held-out context, and columns are the possible next tokens: a, b, and c. The cells contain next-token probabilities, with darker purple indicating larger probability. Each row sums to approximately \\(1\\); displayed numbers are rounded.\n\nRead the darkest column in each row: c, a, b, then c. Their probabilities are all above \\(0.99\\) in this run, while the other entries are close to zero. For the context b, c, a, b, these choices continue the learned repeating sequence.",
+      "connection": "Greedy decoding takes the largest-probability token from the relevant row. The final context position therefore chooses c as the next token. The earlier rows show predictions for earlier prefixes; they are not four independently generated continuations from the final position.\n\nThese probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern do not establish general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.",
+      "alt": "Inspect next-token probabilities before greedy decoding. Each row is a position in the held-out context, and columns are the possible next tokens: a, b, and c. The cells contain next-token probabilities, with darker purple indicating larger probability. Each row sums to approximately \\(1\\); displayed numbers are rounded. Read the darkest column in each row: c, a, b, then c. Their probabilities are all above \\(0.99\\) in this run, while the other entries are close to zero. For the context b, c, a, b, these choices continue the learned repeating sequence.",
+      "code": "probs = jax.nn.softmax(held_logits[0], axis=-1)\nvisual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position ' + str(i) for i in range(CONTEXT)], 'columns': list(VOCAB.keys()), 'unit': 'next-token probability'}"
+    }
+  }
+}

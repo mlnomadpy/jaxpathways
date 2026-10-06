@@ -1,0 +1,25 @@
+---
+import links from '../../data/navigation.json';
+import { siteUrl } from '../../lib/urls.js';
+interface Props {
+  active?: string;
+}
+const { active } = Astro.props;
+---
+
+<header>
+  <a
+    class="brand"
+    href={siteUrl('index.html')}
+    aria-current={active === 'index' ? 'page' : undefined}
+  >
+    JAX Pathways
+  </a>
+  <nav aria-label="Main navigation">
+    {links.map((link) => (
+      <a href={siteUrl(link.href)} aria-current={active === link.id ? 'page' : undefined}>
+        {link.label}
+      </a>
+    ))}
+  </nav>
+</header>

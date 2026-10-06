@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "During multiple PPO epochs on one rollout batch, what must remain fixed?",
+      "options": [
+        "Only the current candidate policy",
+        "Only the clipping threshold; old probabilities can be recomputed from the candidate",
+        "The collected actions, return targets and behavior-policy log probabilities"
+      ],
+      "correct": 2,
+      "explanation": "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison."
+    }
+  ]
+}

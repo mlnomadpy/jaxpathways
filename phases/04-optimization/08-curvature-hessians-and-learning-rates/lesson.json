@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "optimization-08",
+  "minutes": 75,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "Why can the same learning rate crawl along one direction and explode along another? A gradient tells us the local slope. Curvature tells us how quickly that slope changes. We will use a two-dimensional bowl whose behavior can be predicted exactly.",
+    "idea": "The Hessian is the matrix of second derivatives. For a quadratic bowl it is constant, so each principal direction behaves like a separate one-dimensional update. This lets us derive a safe range for a learning rate and understand the effect of uneven feature scales.",
+    "objectives": [
+      "Use curvature to explain learning-rate stability, slow directions and why a zero gradient need not be a minimum.",
+      "Read a bowl through its curvature",
+      "Derive a stability bound",
+      "See why scaling helps",
+      "Distinguish a minimum from a stationary point"
+    ],
+    "sections": [
+      {
+        "title": "Read a bowl through its curvature",
+        "body": "Consider \\(L(w)=\\tfrac12(w_0^2+10w_1^2)\\). Its gradient is \\((w_0,10w_1)\\), and its Hessian is diagonal with entries \\(1\\) and \\(10\\). Moving equally far along the second axis changes the slope ten times as much. An eigenvector of a matrix keeps its direction when multiplied by that matrix; its eigenvalue is the scale factor. Here the coordinate axes are eigenvectors, and their eigenvalues are those diagonal entries.",
+        "math": "H_{ij}=\\frac{\\partial^2 L}{\\partial w_i\\partial w_j},\\qquad H=\\begin{pmatrix}1&0\\\\0&10\\end{pmatrix}"
+      },
+      {
+        "title": "Derive a stability bound",
+        "body": "Gradient descent uses \\(w_{t+1}=w_t-\\eta\\nabla L(w_t)\\), where \\(\\eta\\) is the learning rate. Along an eigenvector with positive curvature \\(\\lambda\\), the error is multiplied by \\(1-\\eta\\lambda\\). Its magnitude shrinks only when \\(|1-\\eta\\lambda|<1\\). All directions of this strictly convex quadratic shrink when \\(0<\\eta<2/\\lambda_{\\max}=0.2\\). At the boundary the steep coordinate flips sign without shrinking. This exact global bound belongs to this constant-curvature quadratic; a nonquadratic model needs more care.",
+        "math": "0<\\eta<\\frac{2}{\\lambda_{\\max}}"
+      },
+      {
+        "title": "See why scaling helps",
+        "body": "At \\(\\eta=0.1\\), the steep coordinate reaches zero immediately, while the shallow coordinate shrinks by \\(0.9\\) each step. Reparameterize with \\(z=(w_0,\\sqrt{10}w_1)\\). The same objective becomes \\(\\tfrac12\\|z\\|^2\\), an evenly curved bowl. A step of size \\(1\\) in these coordinates reaches the optimum. Real feature standardization is a practical approximation to improving this geometry; it does not remove all correlations or guarantee one-step convergence."
+      },
+      {
+        "title": "Distinguish a minimum from a stationary point",
+        "body": "At a stationary point the gradient is zero. Positive definite curvature gives a strict local minimum for a twice continuously differentiable function; an indefinite Hessian has both rising and falling directions and indicates a saddle. For \\(S(w)=w_0^2-w_1^2\\), the origin is a saddle despite its zero gradient. A positive semidefinite Hessian alone can be inconclusive. For large models, avoid storing the full Hessian when a product \\(Hv\\) answers your question; use a JVP of the gradient."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "Write the bowl",
+        "instruction": "Create main.py with the objective and independently known curvature.",
+        "code": "import jax\nimport jax.numpy as jnp\n\ndef loss(w):\n    return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)\nw = jnp.array([1.0, 1.0])\nH = jnp.diag(jnp.array([1.0, 10.0]))\nassert jnp.allclose(jax.grad(loss)(w), H @ w)",
+        "explanation": "At the starting point the gradient is \\((1,10)\\)."
+      },
+      {
+        "title": "Check second derivatives",
+        "instruction": "Append the full Hessian and a product check.",
+        "code": "assert jnp.allclose(jax.hessian(loss)(w), H)\nv = jnp.array([2.0, -1.0])\nhv = jax.jvp(jax.grad(loss), (w,), (v,))[1]\nassert jnp.allclose(hv, jnp.array([2.0, -10.0]))",
+        "explanation": "The product agrees with the diagonal matrix without constructing a Hessian inside the JVP."
+      },
+      {
+        "title": "Run an explicit trajectory",
+        "instruction": "Append this scan and run python main.py. The history records losses after each update.",
+        "code": "def run(rate, steps=20):\n\n    def step(w, _):\n        w = w - rate * jax.grad(loss)(w)\n        return (w, loss(w))\n    return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)\nfinal, history = run(0.1)\nassert jnp.allclose(final, jnp.array([0.9 ** 20, 0.0]), atol=2e-06)\nassert jnp.all(jnp.diff(history) <= 1e-06)\nprint('final weights / loss:', final, history[-1])",
+        "explanation": "The second coordinate vanishes; the first remains near \\(0.1216\\) after \\(20\\) steps."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\n\ndef loss(w):\n    return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)\nw = jnp.array([1.0, 1.0])\nH = jnp.diag(jnp.array([1.0, 10.0]))\nassert jnp.allclose(jax.grad(loss)(w), H @ w)\n\nassert jnp.allclose(jax.hessian(loss)(w), H)\nv = jnp.array([2.0, -1.0])\nhv = jax.jvp(jax.grad(loss), (w,), (v,))[1]\nassert jnp.allclose(hv, jnp.array([2.0, -10.0]))\n\ndef run(rate, steps=20):\n\n    def step(w, _):\n        w = w - rate * jax.grad(loss)(w)\n        return (w, loss(w))\n    return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)\nfinal, history = run(0.1)\nassert jnp.allclose(final, jnp.array([0.9 ** 20, 0.0]), atol=2e-06)\nassert jnp.all(jnp.diff(history) <= 1e-06)\nprint('final weights / loss:', final, history[-1])",
+    "output": "At rate \\(0.1\\), the final loss is about \\(0.00739\\) and the trajectory is decreasing.",
+    "experiments": [
+      {
+        "title": "Cross the stability boundary",
+        "prediction": "Predict the steep coordinate at rates \\(0.2\\) and \\(0.21\\).",
+        "code": "edge, _ = run(0.2)\nbad, bad_history = run(0.21)\nassert jnp.allclose(jnp.abs(edge[1]), 1.0, atol=2e-06)\nassert jnp.abs(bad[1]) > 6.0\nassert bad_history[-1] > loss(w)",
+        "output": "At the boundary its magnitude stays \\(1\\); above it the magnitude grows.",
+        "explanation": "A learning-rate bound depends on curvature, not on a universal default value."
+      },
+      {
+        "title": "Change coordinates",
+        "prediction": "For \\(\\tfrac12\\|z\\|^2\\), what happens after a gradient step of size \\(1\\)?",
+        "code": "z = jnp.array([w[0], jnp.sqrt(10.0) * w[1]])\nround_loss = lambda z: 0.5 * jnp.dot(z, z)\nz_next = z - jax.grad(round_loss)(z)\nassert jnp.allclose(z_next, jnp.zeros(2))\nassert jnp.allclose(round_loss(z), loss(w))",
+        "output": "The transformed objective starts at the same value and reaches zero in one step.",
+        "explanation": "Coordinates can change optimization geometry while representing the same underlying objective."
+      }
+    ],
+    "exercise": "For curvatures \\((2,8)\\), derive the stable interval and check one step at rate \\(0.1\\) from \\((1,1)\\).",
+    "solution": "H2 = jnp.diag(jnp.array([2.0, 8.0]))\nw_next = w - 0.1 * (H2 @ w)\nassert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)\nassert jnp.allclose(2 / jnp.max(jnp.linalg.eigvalsh(H2)), 0.25)",
+    "practice": [
+      {
+        "title": "Reject the zero-gradient shortcut",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "At the origin of \\(S(w)=w_0^2-w_1^2\\), show zero gradient and both a lower and higher nearby value.",
+        "hint": "Move by \\(0.1\\) along each axis separately.",
+        "solution": "saddle = lambda z: z[0] ** 2 - z[1] ** 2\nzero = jnp.zeros(2)\nassert jnp.allclose(jax.grad(saddle)(zero), zero)\nassert saddle(jnp.array([0.0, 0.1])) < saddle(zero)\nassert saddle(jnp.array([0.1, 0.0])) > saddle(zero)\nassert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-2.0, 2.0]))",
+        "explanation": "Stationarity is a first-order condition, not a proof of a minimum."
+      },
+      {
+        "title": "Transfer to a nonquadratic function",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "For \\(F(w)=\\sum_i e^{w_i}\\), verify a Hessian-vector product at \\((0,\\log 2)\\) along \\((1,3)\\).",
+        "hint": "The analytic Hessian is diagonal with entries \\(e^{w_i}\\).",
+        "solution": "point = jnp.array([0.0, jnp.log(2.0)])\ndirection = jnp.array([1.0, 3.0])\nproduct = jax.jvp(jax.grad(lambda z: jnp.sum(jnp.exp(z))), (point,), (direction,))[1]\nassert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)",
+        "explanation": "For a nonquadratic function the Hessian changes with the point; a bound from one location is not a global guarantee."
+      }
+    ],
+    "question": "A smooth function has zero gradient at a point. What can we conclude?",
+    "options": [
+      "It is a global minimum",
+      "It is stationary; curvature or other evidence is needed",
+      "The optimizer implementation is broken"
+    ],
+    "answer": 1,
+    "explanation": "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.",
+    "diagnosis": "If a run oscillates or diverges, inspect the steepest curvature and the effective step size. If it barely moves, compare directional scales. If a zero gradient appears suspicious, probe nearby values before declaring success.",
+    "takeaways": [
+      "A learning-rate bound depends on curvature, not on a universal default value.",
+      "Coordinates can change optimization geometry while representing the same underlying objective."
+    ],
+    "references": [
+      {
+        "title": "JAX autodiff cookbook: Hessian-vector products",
+        "url": "https://docs.jax.dev/en/latest/301/cookbook.html"
+      },
+      {
+        "title": "JAX Hessian API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.hessian.html"
+      }
+    ],
+    "visual": {
+      "title": "Unequal curvature produces unequal progress",
+      "kind": "executed",
+      "prediction": "At rate \\(0.1\\), which coordinate reaches zero immediately?",
+      "reading": "The horizontal axis counts completed updates; the point at \\(0\\) is the initial state. The vertical axis shows a parameter coordinate, not the total loss. Both coordinates start at \\(1\\), but the coordinate with curvature \\(10\\) drops to zero after one update, while the coordinate with curvature \\(1\\) decays gradually.\n\nThe gradual curve starts \\(1,0.9,0.81\\) and is still about \\(0.122\\) after \\(20\\) updates. The dashed curve remains at zero after its first drop. It has reached its optimum in this particular direction.",
+      "connection": "For a quadratic direction with curvature \\(\\lambda\\), gradient descent multiplies the coordinate by \\(1-\\eta\\lambda\\). At learning rate \\(0.1\\), that multiplier is \\(0.9\\) for curvature \\(1\\) and zero for curvature \\(10\\). The unequal curves come from curvature interacting with the same learning rate.\n\nThe steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.",
+      "alt": "Unequal curvature produces unequal progress. The horizontal axis counts completed updates; the point at \\(0\\) is the initial state. The vertical axis shows a parameter coordinate, not the total loss. Both coordinates start at \\(1\\), but the coordinate with curvature \\(10\\) drops to zero after one update, while the coordinate with curvature \\(1\\) decays gradually. The gradual curve starts \\(1,0.9,0.81\\) and is still about \\(0.122\\) after \\(20\\) updates. The dashed curve remains at zero after its first drop. It has reached its optimum in this particular direction.",
+      "code": "points = [jnp.array([1.0, 1.0])]\nfor _ in range(20):\n    points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))\ntrace = jnp.stack(points)\nvisual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}"
+    }
+  }
+}

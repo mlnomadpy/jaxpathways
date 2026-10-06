@@ -1,0 +1,16 @@
+---
+import { course } from '../../lib/course-data.js';
+---
+
+{course.roles.map((role) => (
+  <article class="role-card">
+    <h3>{role.title}</h3>
+    <p class="role-headline">{role.headline}</p>
+    <ul>
+      {role.responsibilities.slice(0, 2).map((responsibility) => (
+        <li>{responsibility}</li>
+      ))}
+    </ul>
+    <button data-role={role.id}>Explore this role</button>
+  </article>
+))}

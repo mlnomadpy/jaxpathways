@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-03",
+  "minutes": 75,
+  "content": {
+    "problem": "Your function works in the training process. Let’s make sure it also works after saving and reloading its inference computation. We’ll define one request shape, check a known prediction, and deliberately send an incompatible request. These checks give us a clear contract before adding a service around the model.",
+    "idea": "A serving artifact has an interface: names, shapes, dtypes, preprocessing and output meaning. Serialization captures a staged computation; it does not provide an HTTP server, input validation or an edge runtime. This lesson verifies a local JAX export round trip on CPU. Use trusted artifacts and a compatible runtime; this is not a claim of arbitrary version or hardware portability.",
+    "objectives": [
+      "Serialize and reload a fixed-shape JAX inference computation.",
+      "Test known values and changed requests independently.",
+      "Distinguish export compatibility from service and edge-device readiness."
+    ],
+    "sections": [
+      {
+        "title": "Freeze the inference boundary",
+        "body": "The example closes over trained weights and bias, so those values become part of the exported computation. The single input is float32 \\([1, 3]\\); the output is float32 \\([1, 2]\\). A new weight version requires a new artifact here. For systems that pass weights as inputs, define and version those parameter signatures instead. Remove optimizer state and training-only behavior from this inference boundary."
+      },
+      {
+        "title": "Fixed shapes are a deliberate constraint",
+        "body": "A fixed batch-one signature simplifies the runtime contract. A batch of two is not accepted merely because the original Python expression supports it. JAX shape polymorphism is a separate export feature with its own constraints. Record permitted dimensions explicitly; an HTTP wrapper should reject malformed requests before invoking the computation."
+      },
+      {
+        "title": "Verify the file, not the original function",
+        "body": "Serialize, read back and deserialize before checking predictions. Then compare to both a manually known row and NumPy on new inputs. Record the JAX/jaxlib versions, platform, artifact hash, preprocessing and tolerance with the release. Exported calling conventions and supported platforms have compatibility rules; retain the environment instead of assuming a byte file runs everywhere."
+      },
+      {
+        "title": "Choose a runtime after choosing an artifact",
+        "body": "The local exported call still needs a compatible JAX runtime. For TensorFlow serving, investigate a supported jax2tf or Keras SavedModel route and retest outputs after conversion. For LiteRT, use its supported converter and runtime with explicit operator and dtype checks. ONNX Runtime needs a supported ONNX graph and execution provider. A format name alone says nothing about whether a target NPU can execute every operator."
+      },
+      {
+        "title": "From local call to service",
+        "body": "Place decoding, normalization, shape checks, inference and response encoding inside your request boundary. Set input size limits and concurrency limits. Measure cold initialization and warmed request latency separately; queueing and network time change the service result. The edge lesson extends this boundary to a single-device request. Autoscaling and a production server are outside this CPU artifact exercise."
+      }
+    ],
+    "code": "import tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nfrom jax import export\nweights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)\nbias = jnp.array([.1, -.2], dtype=jnp.float32)\n@jax.jit\ndef inference(x):\n    return x @ weights + bias\nsignature = jax.ShapeDtypeStruct((1, 3), jnp.float32)\nartifact = export.export(inference)(signature)\nwith tempfile.TemporaryDirectory() as folder:\n    path = Path(folder) / \"dense.jaxexport\"\n    path.write_bytes(artifact.serialize())\n    restored = export.deserialize(path.read_bytes())\n    sample = np.array([[1., 2., -1.]], np.float32)\n    actual = np.asarray(restored.call(sample))\n    np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)\n    print(\"Verified serialized bytes:\", path.stat().st_size)\n",
+    "output": "The serialized artifact reloads and returns \\([3.1, -0.45]\\). File size depends on the JAX version.",
+    "experiments": [
+      {
+        "title": "Reject the wrong batch",
+        "prediction": "Does the exported signature accept two rows?",
+        "code": "try:\n    restored.call(np.ones((2, 3), np.float32))\nexcept (ValueError, TypeError) as error:\n    print(\"Rejected incompatible shape:\", type(error).__name__)\nelse:\n    raise AssertionError(\"Fixed batch-one contract was not enforced\")\n",
+        "output": "The incompatible shape is rejected.",
+        "explanation": "A Python function being shape-generic does not make its fixed exported interface polymorphic."
+      }
+    ],
+    "exercise": "Verify a new input \\([-2, 0, 3]\\) against an independent NumPy expression.",
+    "solution": "changed = np.array([[-2., 0., 3.]], np.float32)\nexpected = changed @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(restored.call(changed), expected, atol=1e-6)\nprint(\"Changed exported request verified\")",
+    "practice": [
+      {
+        "title": "Validate a request before inference",
+        "difficulty": "Transfer",
+        "prompt": "Write a host-side request checker that rejects nonfinite values and the wrong shape. Test a NaN input and a wrong feature count.",
+        "hint": "Validate shape and finiteness on the host before calling inference. Include a singleton batch, the wrong feature count and a NaN; specify which cases your serving signature permits.",
+        "solution": "def validate_request(values):\n    array = np.asarray(values, dtype=np.float32)\n    if array.shape != (1, 3) or not np.isfinite(array).all():\n        raise ValueError(\"expected finite float32 [1, 3]\")\n    return array\nfor invalid in ([[1., 2.]], [[1., float(\"nan\"), 3.]]):\n    try:\n        validate_request(invalid)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError(\"invalid input accepted\")\nnp.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)\n",
+        "explanation": "Validation belongs before the runtime call. A dtype cast alone neither verifies input shape nor rejects NaNs."
+      }
+    ],
+    "question": "What does a successful local export round trip prove?",
+    "options": [
+      "The saved computation matches the tested CPU contract.",
+      "The file is an edge executable on every NPU.",
+      "An HTTP service now exists."
+    ],
+    "answer": 0,
+    "explanation": "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.",
+    "diagnosis": "A missing flatbuffers dependency prevents serialization: reinstall requirements-cpu.txt. A rejected input may be correct enforcement of your shape/dtype signature. Conversion success with output drift calls for intermediate-tensor comparison, preprocessing checks and evaluation on held-out examples.",
+    "references": [
+      {
+        "title": "JAX export and serialization",
+        "url": "https://docs.jax.dev/en/latest/export/export.html"
+      },
+      {
+        "title": "JAX shape polymorphism",
+        "url": "https://docs.jax.dev/en/latest/export/shape_poly.html"
+      },
+      {
+        "title": "Keras inference export",
+        "url": "https://keras.io/api/models/model_saving_apis/export/"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Serialization preserves the declared computation",
+      "kind": "executed",
+      "prediction": "Do the restored scores match the direct function?",
+      "reading": "Each category is one output score. The paired bars compare the direct computation with the restored serialized artifact on the same input. Both give approximately \\(3.1\\) for score \\(0\\) and \\(-0.45\\) for score \\(1\\).\n\nThe matching heights show numerical agreement. The bars are adjacent, rather than one line hiding another. A negative second score is valid because these are raw outputs, not probabilities constrained to lie between zero and one.",
+      "connection": "This is the first behavior to check after serialization: does the restored computation preserve the result within the declared tolerance? The figure makes a coordinate-by-coordinate mismatch visible instead of reducing all outputs to one aggregate number.\n\nThe example exports a specific float32 input signature with shape \\((1,3)\\). Agreement for this case does not establish acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.",
+      "alt": "Serialization preserves the declared computation. Each category is one output score. The paired bars compare the direct computation with the restored serialized artifact on the same input. Both give approximately \\(3.1\\) for score \\(0\\) and \\(-0.45\\) for score \\(1\\). The matching heights show numerical agreement. The bars are adjacent, rather than one line hiding another. A negative second score is valid because these are raw outputs, not probabilities constrained to lie between zero and one.",
+      "code": "direct = np.asarray(inference(sample))\nvisual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'output score', 'series': [{'label': 'direct', 'y': direct[0].tolist()}, {'label': 'restored artifact', 'y': actual[0].tolist()}]}"
+    }
+  }
+}

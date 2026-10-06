@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which claim is supported by the measured update duty fraction?",
+      "options": [
+        "The fraction of local job wall time inside synchronized updates",
+        "The accelerator will be occupied by the same fraction",
+        "The same worker count meets any bursty arrival pattern"
+      ],
+      "correct": 0,
+      "explanation": "The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload."
+    }
+  ]
+}

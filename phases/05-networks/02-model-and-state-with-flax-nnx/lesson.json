@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "networks-02",
+  "minutes": 80,
+  "content": {
+    "problem": "A model library can organize weights for us, but we still want to see what is being learned. We’ll build a small Flax NNX module, compare its predictions with NumPy, and inspect its state. A diagnostic counter will help us distinguish trainable parameters from other values a model carries.",
+    "idea": "NNX represents modules as object graphs with typed variables. Param marks trainable arrays; an ordinary Variable can hold other state. The graph also contains static Python structure such as layer widths. Use NNX transforms for these mutable graph objects, or explicitly split graph definition and array state when a pure function is needed.",
+    "objectives": [
+      "Move the explicit equations into a module",
+      "Separate parameter state from diagnostic state",
+      "Reconstruct an independent graph from a snapshot",
+      "Check a library forward pass independently"
+    ],
+    "sections": [
+      {
+        "title": "Move the explicit equations into a module",
+        "body": "A module groups the same equations from the previous lesson with the arrays that they use. `nnx.Linear` owns a kernel and bias; `hidden( x )` computes \\(xW+b\\). A second Linear consumes tanh of the hidden values. The constructor must know the feature dimensions, so an input feature mismatch is a contract error rather than a request to infer a new model. Our width-three example has \\(6+3+3+1=13\\) trainable scalars. A batch dimension can vary without adding parameters. Class-based organization has not changed the mathematics."
+      },
+      {
+        "title": "Separate parameter state from diagnostic state",
+        "body": "The calls counter is an ordinary `nnx.Variable`, not `nnx.Param.` Calling the model with `record=True` increments it as a deliberate teaching example. It is not a learned weight and should not enter optimizer updates. `nnx.state(model, nnx.Param)` selects trainable variables; `nnx.state(model, nnx.Not(nnx.Param))` selects the remaining state. A real model may have batch-normalization statistics or dropout RNG counts in this second category. Excluding a variable from gradients does not make it immutable. You still need to specify when forward passes may change it.",
+        "formula": "model\n├─ hidden: kernel, bias [Param]\n├─ out: kernel, bias [Param]\n└─ calls: diagnostic counter [Variable]"
+      },
+      {
+        "title": "Reconstruct an independent graph from a snapshot",
+        "body": "`nnx.split` separates the graph definition from dynamic state; `nnx.merge` reconstructs a module from those pieces. In the tested Flax version, merging the original State can reuse Variable objects; map a copying function over state leaves to reconstruct independent typed state first. Think of graph definition as the wiring and state as the current array contents. This is an in-memory demonstration, not a durable checkpoint format. The copied-state clone starts with identical values and independent mutable variables, which we verify below. Incrementing its counter must not increment the original. Copying an attribute reference, in contrast, may share a module. Explicitly test independence rather than assuming any assignment or shallow copy creates a training snapshot."
+      },
+      {
+        "title": "Check a library forward pass independently",
+        "body": "Reading model.hidden.kernel[...] retrieves its array contents in the tested Flax API. Compute the affine maps and tanh with NumPy using those arrays and compare the logits on several observations. This verifies the wiring, activation placement, and squeeze axis; it does not independently validate the initializer. Then change one output bias and predict the exact added logit shift. Keep this algebraic test separate from classification accuracy. A library refactor can preserve predictions but change state ownership, so both numerical and ownership checks are necessary."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Define typed state and the model",
+        "instruction": "Create main.py. From the repository root, run python3 -m pip install -\\(r\\) requirements-cpu.txt in your activated environment; the course pins Flax 0.12.6. Copy the model before adding any optimizer.",
+        "code": "from flax import nnx\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nclass TinyMLP(nnx.Module):\n    def __init__(self,seed=0):\n        rngs=nnx.Rngs(seed)\n        self.hidden=nnx.Linear(2,3,rngs=rngs)\n        self.out=nnx.Linear(3,1,rngs=rngs)\n        self.calls=nnx.Variable(jnp.array(0,dtype=jnp.int32))\n    def __call__(self,x,record=False):\n        if record:self.calls[...] += 1\n        return self.out(nnx.tanh(self.hidden(x))).squeeze(-1)\nmodel=TinyMLP()\nbatch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])",
+        "explanation": "`nnx.Rngs` manages initializer keys. The optional diagnostic counter changes only when explicitly requested."
+      },
+      {
+        "title": "2. Verify equations and inspect the filters",
+        "instruction": "Append an independent NumPy computation. Count only `nnx.Param` leaves, not the counter.",
+        "code": "scores=model(batch,record=True)\nh=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))\nexpected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)\nnp.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)\nparam_state=nnx.state(model,nnx.Param)\nother_state=nnx.state(model,nnx.Not(nnx.Param))\nassert sum(a.size for a in jax.tree.leaves(param_state))==13\nassert sum(a.size for a in jax.tree.leaves(other_state))==1\nassert int(model.calls[...])==1",
+        "explanation": "The matching forward pass verifies the network wiring. The filters identify \\(13\\) learned scalars and one unlearned state scalar."
+      },
+      {
+        "title": "3. Split, merge, and test independence",
+        "instruction": "Append the clone test. Predict which counter changes when the clone executes.",
+        "code": "graphdef,state=nnx.split(model)\nclone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))\nnp.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)\nclone(batch,record=True)\nassert int(clone.calls[...])==2 and int(model.calls[...])==1\ngrads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)\nassert sum(a.size for a in jax.tree.leaves(grads))==13\nassert 'calls' not in grads\nprint('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[...]),int(clone.calls[...]))",
+        "explanation": "`nnx.grad` differentiates Param variables by default. Counter independence is a state-ownership invariant, not a performance measurement."
+      }
+    ],
+    "code": "from flax import nnx\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nclass TinyMLP(nnx.Module):\n    def __init__(self,seed=0):\n        rngs=nnx.Rngs(seed)\n        self.hidden=nnx.Linear(2,3,rngs=rngs)\n        self.out=nnx.Linear(3,1,rngs=rngs)\n        self.calls=nnx.Variable(jnp.array(0,dtype=jnp.int32))\n    def __call__(self,x,record=False):\n        if record:self.calls[...] += 1\n        return self.out(nnx.tanh(self.hidden(x))).squeeze(-1)\nmodel=TinyMLP()\nbatch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])\n\nscores=model(batch,record=True)\nh=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))\nexpected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)\nnp.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)\nparam_state=nnx.state(model,nnx.Param)\nother_state=nnx.state(model,nnx.Not(nnx.Param))\nassert sum(a.size for a in jax.tree.leaves(param_state))==13\nassert sum(a.size for a in jax.tree.leaves(other_state))==1\nassert int(model.calls[...])==1\n\ngraphdef,state=nnx.split(model)\nclone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))\nnp.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)\nclone(batch,record=True)\nassert int(clone.calls[...])==2 and int(model.calls[...])==1\ngrads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)\nassert sum(a.size for a in jax.tree.leaves(grads))==13\nassert 'calls' not in grads\nprint('Trainable scalars: 13; other state: 1; clone counters:',int(model.calls[...]),int(clone.calls[...]))",
+    "output": "Trainable scalars: \\(13\\); other state: \\(1\\); original and cloned counters are \\(1\\) and \\(2\\).",
+    "experiments": [
+      {
+        "title": "Bias shifts every score equally",
+        "prediction": "Adding \\(0.25\\) to the output bias should do what to each logit?",
+        "code": "before=np.asarray(model(batch))\nsaved=model.out.bias[...]\nmodel.out.bias[...] = saved+.25\nnp.testing.assert_allclose(model(batch),before+.25,atol=1e-6)\nmodel.out.bias[...] = saved",
+        "output": "All logits increase by \\(0.25\\).",
+        "explanation": "An affine output bias changes the decision threshold uniformly; the hidden representation is unchanged."
+      },
+      {
+        "title": "Repeated construction reproduces state",
+        "prediction": "Will two modules initialized with the same seed produce equal parameters?",
+        "code": "replay=TinyMLP(0)\nfor a,b in zip(jax.tree.leaves(nnx.state(replay,nnx.Param)),jax.tree.leaves(param_state)):\n    np.testing.assert_array_equal(a,b)\ndifferent=TinyMLP(1)\nassert not np.array_equal(np.asarray(different.hidden.kernel[...]),np.asarray(model.hidden.kernel[...]))",
+        "output": "Equal seeds reproduce the parameter arrays; a changed seed changes the hidden kernel.",
+        "explanation": "Replay is checked in one pinned environment. Seeds alone do not promise identical bytes across package versions or backends."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Change a clone without changing its source",
+        "difficulty": "Transfer",
+        "prompt": "Increase only the cloned model’s output bias by one. Predict the change in every logit and verify the original model’s parameter leaves remain unchanged.",
+        "hint": "Snapshot the original parameters before editing clone.out.bias.",
+        "solution": "original_leaves=[np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(model,nnx.Param))]\nold_clone=np.asarray(clone(batch)).copy()\nclone.out.bias[...] = clone.out.bias[...] + 1.\nnp.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)\nfor before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):\n    np.testing.assert_array_equal(before,after)\nprint('Clone logits shifted by one; original parameters unchanged.')",
+        "explanation": "The bias is broadcast over observations, so every logit shifts equally. Comparing original leaves detects accidental aliasing; equal parameter counts cannot detect that bug."
+      },
+      {
+        "title": "Diagnose a shared module reference",
+        "difficulty": "Intermediate",
+        "prompt": "Assign `shared = model`, increment its counter, and demonstrate why this is not a snapshot. Then reconstruct an independent module.",
+        "hint": "Assignment changes which name refers to the same object.",
+        "solution": "saved_count=int(model.calls[...])\nshared=model\nshared(batch,record=True)\nassert int(model.calls[...])==saved_count+1\ngraph,state=nnx.split(model)\nindependent=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))\nindependent(batch,record=True)\nassert int(model.calls[...])==saved_count+1\nassert int(independent.calls[...])==saved_count+2",
+        "explanation": "Sharing a graph is useful for tied layers but wrong for an independent evaluation copy. Split, copy state, and merge supply independent variables in this example."
+      }
+    ],
+    "exercise": "Apply the model to one new row and to five rows. Verify the scalar parameter count stays \\(13\\) and the batch axis survives.",
+    "solution": "single=jnp.array([[.3,-.7]])\nassert model(single).shape==(1,)\nassert model(jnp.repeat(single,5,axis=0)).shape==(5,)\nassert sum(a.size for a in jax.tree.leaves(nnx.state(model,nnx.Param)))==13",
+    "question": "What does excluding the counter from `nnx.Param` guarantee?",
+    "options": [
+      "It is excluded from parameter gradients, but may still change in a forward pass",
+      "It can never change",
+      "It is automatically saved to disk"
+    ],
+    "answer": 0,
+    "explanation": "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.",
+    "diagnosis": "If evaluation changes state, inspect every nonparameter variable and forward flag. If a clone changes the original, inspect shared references. If an NNX module fails under a raw JAX transform, use nnx transformations or split it into graph/state deliberately instead of hiding the error.",
+    "takeaways": [
+      "Move the explicit equations into a module",
+      "Separate parameter state from diagnostic state",
+      "Reconstruct an independent graph from a snapshot",
+      "Check a library forward pass independently"
+    ],
+    "references": [
+      {
+        "title": "Flax NNX basics",
+        "url": "https://flax.readthedocs.io/en/latest/nnx_basics.html"
+      },
+      {
+        "title": "NNX module and pytree guide",
+        "url": "https://flax.readthedocs.io/en/latest/guides/pytree.html"
+      }
+    ],
+    "visual": {
+      "title": "Separate graph structure from trainable and other state",
+      "kind": "conceptual",
+      "prediction": "Should the call counter receive a gradient?",
+      "reading": "The three boxes across the top separate the model’s module graph, trainable parameters, and other mutable state. Their arrows meet at the split operation, then continue to the construction of an independent clone. They are parallel ingredients, not three training steps.\n\nIn this example the trainable kernels and biases contain \\(13\\) scalars. The call counter is one additional state value. It belongs to the model’s state but is not a parameter that gradient descent should optimize.",
+      "connection": "The graph describes how the modules are connected; the state supplies their current values. Splitting and merging preserve both roles. Copying the state before merging lets the clone evolve independently while initially producing the same predictions.\n\nThe code makes that independence visible through a check: after a recorded call on the clone, its counter is \\(2\\), while the original counter stays \\(1\\). The diagram explains what must be carried across the boundary; the assertions provide evidence of equal predictions, separate counters, and gradients restricted to trainable parameters.",
+      "alt": "Separate graph structure from trainable and other state. The three boxes across the top separate the model’s module graph, trainable parameters, and other mutable state. Their arrows meet at the split operation, then continue to the construction of an independent clone. They are parallel ingredients, not three training steps. In this example the trainable kernels and biases contain \\(13\\) scalars. The call counter is one additional state value. It belongs to the model’s state but is not a parameter that gradient descent should optimize.",
+      "nodes": [
+        "Module graph: hidden → output",
+        "Trainable kernel and bias leaves",
+        "Other state: call counter",
+        "Split graph and state",
+        "Merge an independent clone"
+      ],
+      "layout": "merge"
+    }
+  }
+}

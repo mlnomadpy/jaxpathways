@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The Dense predictions match after transposing weights. What has been established?",
+      "options": [
+        "The tested inference mapping matches for these inputs.",
+        "Optimizer and random state are now equivalent.",
+        "Any runtime can execute the model."
+      ],
+      "correct": 0,
+      "explanation": "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence."
+    }
+  ]
+}

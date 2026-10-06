@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-01",
+  "contentHash": "851fdefd46d0691b9f1f70dd8d04e0a4a967091751bfd3e7c67ee48c6c748485",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T22:15:35.716113+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.011360291158780456\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10
+    ],
+    "xlabel": "position in epoch",
+    "ylabel": "example ID",
+    "series": [
+      {
+        "label": "shuffled order",
+        "y": [
+          9,
+          10,
+          4,
+          1,
+          0,
+          7,
+          6,
+          8,
+          2,
+          5,
+          3
+        ]
+      }
+    ],
+    "boundaries": [
+      3.5,
+      7.5
+    ]
+  }
+}

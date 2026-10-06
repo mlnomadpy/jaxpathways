@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The train step returns a loss before optimizer.update. Which parameters does it describe?",
+      "options": [
+        "The parameters entering that update",
+        "The final parameters after all updates",
+        "A separate held-out model"
+      ],
+      "correct": 0,
+      "explanation": "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters."
+    }
+  ]
+}

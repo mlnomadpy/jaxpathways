@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "scientific-inverse",
+  "title": "Audit a differentiable scientific inverse problem",
+  "pathwayId": "science",
+  "status": "authored",
+  "hardware": "CPU float64; no accelerator qualification",
+  "source": "projects/scientific-inverse/README.md",
+  "requiredLessonIds": [
+    "science-01",
+    "science-02",
+    "science-03",
+    "science-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Simulation and numerical references",
+      "command": "python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 1",
+      "evidence": "Two rate/grid comparisons, shape diagram and an unstable-step diagnosis",
+      "expected": "PASS stage 1: two rates, grids, independent polynomial and exponential oracles, axes, invalid inputs",
+      "diagnosis": "If the polynomial matches but the exponential does not, test grid refinement before changing the implementation."
+    },
+    {
+      "id": "2",
+      "title": "Objective and solver sensitivity",
+      "command": "python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 2",
+      "evidence": "Independent scalar loss, two finite-difference probes and malformed-observation checks",
+      "expected": "PASS stage 2: independent objective, log-rate finite differences at two probes, malformed-target rejection",
+      "diagnosis": "If the derivative is zero but finite differences are nonzero, inspect detached arrays or missing dependence on log-rate."
+    },
+    {
+      "id": "3",
+      "title": "Parameter recovery and an inference report",
+      "command": "python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 3",
+      "evidence": "Changed physical rates, frozen held-out metrics, replay, refinement and noisy search comparison",
+      "expected": "PASS stage 3: changed-parameter recovery, frozen held-out metrics, replay, refinement, noisy independent grid-search agreement",
+      "diagnosis": "If fit is excellent but inferred rate changes with the grid, quantify numerical bias; do not tune against held-out observations."
+    }
+  ],
+  "rubric": [
+    "Separate discrete algorithm correctness from continuous approximation error",
+    "Verify batch/time axes, singleton batches and malformed-input rejection",
+    "Check rate sensitivities against independent finite differences at two probes",
+    "Recover changed physical rates from independently generated observations",
+    "Preserve held-out data and prove deterministic replay",
+    "Compare noisy-data inference with an independent search",
+    "Report grid refinement, non-identifiability and limits of synthetic evidence"
+  ],
+  "workspaceFile": "projects/scientific-inverse/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/scientific-inverse/starter/model.py projects/scientific-inverse/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/scientific-inverse/starter/model.py projects/scientific-inverse/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/scientific-inverse/tests/check.py --implementation solution --stage all",
+  "setupNote": "Extract the project ZIP into a fresh folder, install its requirements-cpu.txt in your course environment, and run commands from the extracted top folder. CPU float64 is enabled by the scaffold.",
+  "assessmentId": "science"
+}

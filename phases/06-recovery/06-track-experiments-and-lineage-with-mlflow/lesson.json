@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "recovery-06",
+  "minutes": 70,
+  "content": {
+    "problem": "You ran two training configurations yesterday. Today you remember which curve looked better, but not which dataset, preprocessing or checkpoint produced it. Let’s make the comparison reproducible: train two small JAX models, log them to a real local MLflow database, then retrieve the selected run and its artifact.",
+    "idea": "An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment.",
+    "objectives": [
+      "Decide what makes runs comparable",
+      "Give data and code an identity",
+      "Use a database and a deliberate artifact location",
+      "Log at a useful boundary"
+    ],
+    "sections": [
+      {
+        "title": "Decide what makes runs comparable",
+        "body": "We reuse a known regression problem so the engineering does not hide behind model complexity. Training inputs and validation inputs are separate. The target is \\(y=2x+1\\), and the learned parameters are a weight and bias. Both runs start from zero, use the same examples and receive \\(30\\) updates. Only the learning rate changes. Log those choices as parameters. Never compare two metrics with the same name when one is a sum and the other a mean, or one was measured before the update and the other afterward."
+      },
+      {
+        "title": "Give data and code an identity",
+        "body": "A path such as data.csv is a location, not a version. Hash the actual bytes, record the split IDs, and preserve preprocessing configuration. For this tiny fixture the hash covers the training arrays; a real dataset manifest should additionally identify schema, split/group rules and transformations. A Git commit is useful for clean code, but uncommitted edits require a source hash or captured diff. A checkpoint and an MLflow run should refer to the same identities; neither replaces the other."
+      },
+      {
+        "title": "Use a database and a deliberate artifact location",
+        "body": "The companion creates a temporary SQLite database and local artifact directory. SQLite stores run metadata; the artifacts contain the learned coefficients and preprocessing note. MlflowClient reads the records back, so a print statement is not our only evidence that logging occurred. These local examples use MLflow 3.16.1. A shared server needs supported database storage, artifact access, authentication, backup and retention; do not expose this local exercise as a public service.",
+        "commands": [
+          {
+            "label": "From the course workspace, install the tested CPU dependencies",
+            "shell": "bash",
+            "code": "python -m pip install -r requirements-cpu.txt",
+            "expected": "MLflow 3.16.1 and the course numerical packages are installed in the selected environment."
+          }
+        ]
+      },
+      {
+        "title": "Log at a useful boundary",
+        "body": "JAX dispatch is asynchronous. Converting a scalar loss to a Python float waits for it; logging every update is acceptable for this small demonstration but can slow a real training loop. Choose a reporting cadence, log the completed step, and separate checkpoint cadence from logging cadence. Here every training MSE is measured after its update. The validation MSE is computed on a fixed four-row set, with a second Python calculation checking the denominator.",
+        "math": "\\operatorname{MSE}=\\frac{1}{n}\\sum_{i=1}^{n}(\\hat y_i-y_i)^2"
+      },
+      {
+        "title": "Retrieve before trusting the dashboard",
+        "body": "The checker fetches all thirty metric steps, compares their stored values with the actual trajectory, checks the data tag and queries runs ordered by validation MSE. The faster-learning candidate wins this fixture. That is validation selection, not a final test result or a universal learning-rate recommendation. Finally we download the selected artifact and inspect its coefficients. Autologging can help supported frameworks, but explicit logging makes the boundary of this custom JAX loop visible."
+      },
+      {
+        "title": "Continue into a real registry",
+        "body": "Run the connected project lab to log two pyfunc models, register immutable versions, move a champion alias, reload the selected version and retain prompt/trace evidence. An alias is a mutable lookup; resolve it to a version for a deployment record. Setting champion does not roll out a service and MLflow does not enforce this course’s quality policy for you.",
+        "commands": [
+          {
+            "label": "Keep the local database and artifacts in a new output folder",
+            "shell": "bash",
+            "code": "python projects/engineering-release/mlflow_lab.py --output ./engineering-run",
+            "expected": "Two training runs, two registered versions, one prompt version, one three-span trace and a model.json artifact are written. Use a fresh folder for another independent run."
+          }
+        ]
+      }
+    ],
+    "code": "import os\nos.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'\nos.environ['MLFLOW_ENABLE_TELEMETRY'] = 'false'\nimport hashlib, json, tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nimport mlflow\nfrom mlflow import MlflowClient\nx = jnp.array([-2., -1., 0., 1., 2.]); y = 2 * x + 1\nvx = jnp.array([-1.5, -.5, .5, 1.5]); vy = 2 * vx + 1\nobjective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)\nupdate = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))\ndata_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()\ncurves, validation, run_ids = [], [], []\nwith tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:\n    root = Path(folder)\n    mlflow.set_tracking_uri('sqlite:///' + str(root / 'tracking.db'))\n    client = MlflowClient()\n    experiment = client.create_experiment('two-rates', artifact_location=(root / 'artifacts').as_uri())\n    for rate in [.02, .15]:\n        p = jnp.zeros(2); history = []\n        with mlflow.start_run(experiment_id=experiment) as run:\n            mlflow.log_params({'rate': rate, 'updates': 30})\n            mlflow.set_tags({'data_sha256': data_hash, 'jax': jax.__version__, 'backend': jax.default_backend(), 'metric_boundary': 'after update'})\n            for step in range(1, 31):\n                p = update(p, rate)\n                metric = float(objective(p)); history.append(metric)\n                mlflow.log_metric('train_mse', metric, step=step)\n            held = float(jnp.mean((p[0] * vx + p[1] - vy) ** 2))\n            # Independent host arithmetic checks what the reported validation metric means.\n            oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4\n            assert abs(held - oracle) < 1e-6\n            mlflow.log_metric('validation_mse', held, step=30)\n            mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')\n            run_ids.append(run.info.run_id)\n        curves.append(history); validation.append(held)\n        saved = client.get_metric_history(run_ids[-1], 'train_mse')\n        assert [m.step for m in saved] == list(range(1, 31))\n        np.testing.assert_allclose([m.value for m in saved], history)\n        assert client.get_run(run_ids[-1]).data.tags['data_sha256'] == data_hash\n    selected = client.search_runs([experiment], order_by=['metrics.validation_mse ASC'])[0]\n    assert selected.info.run_id == run_ids[int(np.argmin(validation))]\n    artifact = client.download_artifacts(selected.info.run_id, 'model.json')\n    restored = json.loads(Path(artifact).read_text())\n    assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001\nprint('Validation MSE by learning rate:', dict(zip([.02, .15], validation)))\nprint('Verified 30 logged steps per run; selected and reloaded the better validation candidate.')\n",
+    "output": "Validation MSE by learning rate: {0.02: 0.1199446..., 0.15: 5.04947...e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.",
+    "exercise": "Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.",
+    "solution": "bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4\nassert bad_validation > min(validation)\nprint('Wrong zero model validation MSE:',bad_validation)",
+    "experiments": [
+      {
+        "title": "Check the stored comparison",
+        "prediction": "Which learning rate should give the smaller error after the same update budget?",
+        "code": "assert validation[1] < validation[0]\nprint('Validation difference:',validation[0]-validation[1])",
+        "output": "The rate 0.15 run has smaller validation MSE than the rate 0.02 run.",
+        "explanation": "Both runs share initialization, data and update count. This isolates a configuration comparison; it does not compare equal wall-clock budgets or establish an optimal rate."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Change a data value",
+        "difficulty": "transfer",
+        "prompt": "Change one training target and compute the data fingerprint again without overwriting the original record.",
+        "hint": "Hash the same input bytes plus changed target bytes.",
+        "solution": "changed_y=np.asarray(y).copy();changed_y[0]+=.1\nchanged_hash=hashlib.sha256(np.asarray(x).tobytes()+changed_y.tobytes()).hexdigest()\nassert changed_hash != data_hash\nprint('Changed target changes dataset identity.')",
+        "explanation": "Identical filenames or shapes do not imply identical data. A changed target creates a different experiment contract."
+      }
+    ],
+    "question": "A run is tagged champion. What does that establish?",
+    "options": [
+      "It is automatically deployed and monitored.",
+      "A registry alias points to that version; deployment and acceptance need their own evidence.",
+      "Its validation set is now an untouched test set."
+    ],
+    "answer": 1,
+    "explanation": "An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment.",
+    "diagnosis": "If a run is missing, inspect the tracking URI and experiment ID before repeating training. If metrics disagree, compare step and reduction conventions. If recovery changes the next batch, fix checkpoint state; MLflow logging does not restore it.",
+    "takeaways": [
+      "Decide what makes runs comparable",
+      "Log at a useful boundary",
+      "Continue into a real registry"
+    ],
+    "references": [
+      {
+        "title": "MLflow experiment tracking",
+        "url": "https://mlflow.org/docs/latest/ml/tracking/quickstart/"
+      },
+      {
+        "title": "MLflow model registry workflows",
+        "url": "https://mlflow.org/docs/latest/ml/model-registry/workflow/"
+      }
+    ],
+    "visual": {
+      "title": "Compare the runs that MLflow actually recorded",
+      "kind": "executed",
+      "prediction": "Do the two runs improve at the same rate, and can these training curves select a release by themselves?",
+      "reading": "The horizontal axis counts completed updates, from \\(1\\) to \\(30\\). The vertical axis is post-update training MSE on a logarithmic scale: equal vertical distances represent ratios. The rate \\(0.15\\) curve drops more quickly and ends far below the rate \\(0.02\\) curve. The companion independently retrieves every plotted metric from MLflow. The final validation errors are about \\(0.11994\\) and \\(5.05\\times10^{-10}\\), respectively; they are not plotted as a fabricated validation trajectory.",
+      "connection": "The comparison is controlled by shared data, initialization and update budget. It illustrates tracking and retrieval of evidence, not a general optimizer ranking. A separately held-out test and release checks still belong after validation selection.",
+      "alt": "Two recorded training MSE curves fall at different rates over thirty updates.",
+      "code": "visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','ylabel':'post-update training MSE (log scale)','yscale':'log','series':[{'label':'rate 0.02','y':curves[0]},{'label':'rate 0.15','y':curves[1]}]}"
+    }
+  }
+}

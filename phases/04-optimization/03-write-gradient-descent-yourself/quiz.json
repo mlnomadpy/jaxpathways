@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What makes rate \\(1.1\\) unstable for this particular quadratic?",
+      "options": [
+        "The error multiplier has magnitude greater than one",
+        "scan cannot differentiate scalar weights",
+        "All learning rates above \\(0.01\\) are unstable"
+      ],
+      "correct": 0,
+      "explanation": "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates."
+    }
+  ]
+}

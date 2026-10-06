@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-05",
+  "contentHash": "918fb81dcd3b89b053f8dc01ce3bb1a6efe60dc1a5dc281967c9f685818e1f08",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "conceptual",
+  "generatedAt": "2026-10-05T21:29:21.609280+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Sum: 6.0\nMean: 2.0\n",
+  "data": {
+    "kind": "flow",
+    "nodes": [
+      "Static mode: sum or mean",
+      "Trace Python branch",
+      "Compile selected operations",
+      "Pass dynamic array values",
+      "Return reduced result"
+    ],
+    "layout": "sequence"
+  }
+}

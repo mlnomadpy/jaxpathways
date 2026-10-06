@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "regression-audit",
+  "title": "Build a regression training audit",
+  "pathwayId": "foundations",
+  "status": "authored",
+  "hardware": "CPU",
+  "source": "projects/regression-audit/README.md",
+  "requiredLessonIds": [
+    "welcome-01",
+    "welcome-02",
+    "arrays-01",
+    "arrays-02",
+    "arrays-03",
+    "arrays-04",
+    "first-gradient",
+    "transforms-02",
+    "transforms-03",
+    "transforms-04",
+    "transforms-05",
+    "state-01",
+    "state-02",
+    "state-03",
+    "state-04",
+    "optimization-01",
+    "optimization-02",
+    "optimization-03",
+    "optimization-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Prediction and objective",
+      "command": "python3 projects/regression-audit/tests/check.py --stage 1",
+      "evidence": "Shape contracts and independently checked scalar loss",
+      "expected": "PASS stage 1: prediction, objective, and shape contract",
+      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction."
+    },
+    {
+      "id": "2",
+      "title": "Gradient evidence",
+      "command": "python3 projects/regression-audit/tests/check.py --stage 2",
+      "evidence": "Autodiff and finite differences at two settings",
+      "expected": "PASS stage 2: independent gradients at two parameter settings",
+      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks."
+    },
+    {
+      "id": "3",
+      "title": "Compiled training",
+      "command": "python3 projects/regression-audit/tests/check.py --stage 3",
+      "evidence": "Recovered parameters and complete loss history",
+      "expected": "PASS stage 3: compiled training and parameter recovery",
+      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state."
+    },
+    {
+      "id": "4",
+      "title": "Training audit",
+      "command": "python3 projects/regression-audit/tests/check.py --stage 4",
+      "evidence": "Held-out performance, replay, and an unstable run",
+      "expected": "PASS stage 4: held-out checks, replay, and failure diagnosis",
+      "diagnosis": "If the audit fails, separate replay, held-out checks and deliberately unstable training; a low training loss alone cannot satisfy all three."
+    }
+  ],
+  "rubric": [
+    "Implement matching prediction/target shapes and scalar loss",
+    "Explain finite-difference tolerance and precision",
+    "Recover known parameters with compiled state transitions",
+    "Distinguish training fit from held-out checks",
+    "Diagnose an unstable learning rate with recorded evidence"
+  ],
+  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/regression-audit. Use the extracted top folder as your working directory; a full course checkout is optional for this project.",
+  "workspaceFile": "projects/regression-audit/starter/model.py",
+  "referenceCommand": "python3 projects/regression-audit/tests/check.py --implementation solution --stage all",
+  "assessmentId": "foundations"
+}

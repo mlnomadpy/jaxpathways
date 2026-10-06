@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which evidence most directly supports a correct resume?",
+      "options": [
+        "The process prints started again",
+        "The next and later complete training states match a compatible uninterrupted run",
+        "The final loss is finite"
+      ],
+      "correct": 1,
+      "explanation": "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker."
+    }
+  ]
+}

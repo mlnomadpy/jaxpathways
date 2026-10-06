@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "engineering-release",
+  "title": "Ship a tracked and containerized model release",
+  "pathwayId": "ops",
+  "status": "authored",
+  "hardware": "CPU; optional real local Docker qualification",
+  "source": "projects/engineering-release/README.md",
+  "requiredLessonIds": [
+    "recovery-06",
+    "deployment-07",
+    "operations-06",
+    "operations-07",
+    "operations-08"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Data identity and slice gates",
+      "command": "python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 1",
+      "evidence": "dataset, schema, leakage and independently weighted metrics",
+      "expected": "PASS stage 1 and all earlier stages",
+      "diagnosis": "Inspect the first rejected boundary and retain its evidence; do not bypass a failed policy by changing the active version manually."
+    },
+    {
+      "id": "2",
+      "title": "LLM application evaluation",
+      "command": "python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 2",
+      "evidence": "schema, answer, citation and abstention regression cases",
+      "expected": "PASS stage 2 and all earlier stages",
+      "diagnosis": "Inspect the first rejected boundary and retain its evidence; do not bypass a failed policy by changing the active version manually."
+    },
+    {
+      "id": "3",
+      "title": "Model ownership and release transitions",
+      "command": "python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 3",
+      "evidence": "immutable bundle review, expiry, rejected activation and rollback",
+      "expected": "PASS stage 3 and all earlier stages",
+      "diagnosis": "Inspect the first rejected boundary and retain its evidence; do not bypass a failed policy by changing the active version manually."
+    },
+    {
+      "id": "4",
+      "title": "Tracked training to inference",
+      "command": "python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 4",
+      "evidence": "actual MLflow tracking, registry/model reload, prompt version, trace and serving artifact",
+      "expected": "PASS stage 4 and all earlier stages",
+      "diagnosis": "Inspect the first rejected boundary and retain its evidence; do not bypass a failed policy by changing the active version manually."
+    }
+  ],
+  "rubric": [
+    "Keep exact data, code, environment, model and evaluation identities",
+    "Reject hidden slice failures and missing evidence",
+    "Explain prompt/retrieval/tool versions and deterministic LLM evaluation limits",
+    "Bind approval to an immutable bundle and revalidate rollback",
+    "Retrieve actual MLflow records and check exported-model predictions",
+    "Qualify a non-root container with a read-only model and actual readiness"
+  ],
+  "workspaceFile": "projects/engineering-release/my_engineering.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/engineering-release/starter/engineering.py projects/engineering-release/my_engineering.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/engineering-release/starter/engineering.py projects/engineering-release/my_engineering.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/engineering-release/tests/check.py --implementation solution --stage all",
+  "setupNote": "Install the course requirements including MLflow 3.16.1. The four-stage reference runs locally without Docker or cloud credentials. Run container_check.py separately with a local Docker engine. The generated service is a teaching fixture, not a production web stack."
+}

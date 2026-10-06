@@ -1,0 +1,116 @@
+---
+import registry from '../../../public/api/v1/projects.json';
+import { course } from '../../lib/course-data.js';
+import { runtimeLabel } from '../../lib/runtime.js';
+import { siteUrl } from '../../lib/urls.js';
+import type { Phase } from '../../types/course';
+interface Props {
+  phase: Phase;
+}
+const { phase: p } = Astro.props;
+---
+
+<details id={`phase-${p.id}`} class="phase-card">
+  <summary>
+    <span class="num">{p.number}</span>
+    <span>
+      <h2 class="phase-title">{p.title}</h2>
+      <small>{p.part}</small>
+    </span>
+    <span class="badge">
+      {p.lessons.filter((l) => l.status === 'authored').length} available ·{' '}
+      {p.lessons.filter((l) => l.status !== 'authored').length} unwritten
+    </span>
+  </summary>
+  <div class="route-details">
+    <p>{p.description}</p>
+    <p class="soft">{p.learningAdvice}</p>
+    <p>
+      <a href={siteUrl(`phase-guides/${p.id}.html`)}>Phase study guide: {p.studyGuide.question}</a>
+    </p>
+    {p.coreLessonIds && (
+      <p>
+        <strong>Direct links for the first project:</strong>{' '}
+        {p.coreLessonIds.map((id) => (
+          <a class="inline-phase" href={siteUrl(`lesson.html?lesson=${id}`)}>
+            {p.lessons.find((lesson) => lesson.id === id)?.title}
+          </a>
+        ))}
+      </p>
+    )}
+    <p>
+      <strong>Start after:</strong>{' '}
+      {p.prerequisitePhaseIds.length
+        ? p.prerequisitePhaseIds.map((id) => {
+            const phase = course.phases.find((phase) => phase.id === id)!;
+            return (
+              <a class="inline-phase" data-phase={id} href={`#phase-${id}`}>
+                {phase.number} {phase.title}
+              </a>
+            );
+          })
+        : 'No previous JAX experience needed. Begin with the guided setup.'}
+    </p>
+    <details class="phase-hardware">
+      <summary>Hardware and future work</summary>
+      <p>{p.hardware}</p>
+    </details>
+    <ul class="lessons">
+      {p.lessons.map((lesson, index) => (
+        <li id={lesson.id}>
+          <a
+            class="lesson-link"
+            data-lesson={lesson.id}
+            href={siteUrl(`lesson.html?lesson=${lesson.id}`)}
+          >
+            <span>
+              <span class="lesson-number">
+                {p.number}.{String(index + 1).padStart(2, '0')}
+              </span>
+              {lesson.title}
+              {lesson.status === 'authored' && (
+                <small class="lesson-runtime">{runtimeLabel(lesson)}</small>
+              )}
+            </span>
+            <span class:list={['badge', lesson.status]}>
+              {lesson.status === 'authored' ? 'Open lesson ↗' : 'View roadmap status ↗'}
+            </span>
+          </a>
+          <p class="search-excerpt" hidden>
+            <a></a>
+          </p>
+        </li>
+      ))}
+    </ul>
+    <div class="phase-project">
+      <p class="edition">Bring the phase together</p>
+      <h3>{p.project}</h3>
+      <p>
+        <strong>Checkpoint:</strong> {p.checkpoint}
+      </p>
+      {p.id === 'optimization' && (
+        <p>
+          <a href={siteUrl('assessments/math.html')}>Math synthesis assessment · review draft</a>
+        </p>
+      )}
+      <p class="soft">
+        {p.projectId ? (
+          <a href={siteUrl(`project.html?id=${p.projectId}`)}>
+            Open the staged project
+            {p.projectStageIds?.length ? ` · stages ${p.projectStageIds.join(', ')}` : ''}
+          </a>
+        ) : (
+          'Project brief · planned'
+        )}
+      </p>
+      {p.projectNote && <p class="soft">{p.projectNote}</p>}
+      {p.additionalProjectIds?.map((id) => (
+        <p>
+          <a href={siteUrl(`project-guides/${id}.html`)}>
+            Additional project: {registry.projects.find((project) => project.id === id)?.title}
+          </a>
+        </p>
+      ))}
+    </div>
+  </div>
+</details>

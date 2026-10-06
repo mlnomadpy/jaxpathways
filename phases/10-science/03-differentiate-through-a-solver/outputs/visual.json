@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-03",
+  "contentHash": "491d30fb7bc99017d6646d874059b6c1aef754e8e580e58c926f50e20670c703",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:32:40.051715+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257\nLoss: 0.04837454286198381 gradient: 0.2686922266772409 finite difference: 0.26869222316237146\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      5,
+      10,
+      20,
+      40
+    ],
+    "xlabel": "RK4 steps over two seconds",
+    "ylabel": "absolute endpoint sensitivity error",
+    "yscale": "log",
+    "series": [
+      {
+        "label": "autodiff versus continuous derivative",
+        "y": [
+          0.00024487955137553197,
+          1.3192617195678658e-05,
+          7.654351461550135e-07,
+          4.609148129830487e-08
+        ]
+      }
+    ]
+  }
+}

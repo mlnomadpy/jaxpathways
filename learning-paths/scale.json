@@ -1,0 +1,58 @@
+{
+  "id": "scale",
+  "title": "Make it fast. Make it scale.",
+  "description": "Profile a correct workload, preserve its global objective while partitioning arrays, and audit actual Pallas kernels before requesting target measurements. CPU semantics are available; accelerator speed and multi-host claims require their own receipts.",
+  "prerequisites": "Shared foundations and a working training loop",
+  "outcome": "A checked kernel and a measurement-backed optimization argument",
+  "libraries": "JAX sharding · profiling · Pallas",
+  "source": "https://docs.jax.dev/en/latest/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "recovery",
+    "performance",
+    "distributed",
+    "kernels"
+  ],
+  "capstone": {
+    "title": "A checked kernel and a measurement-backed optimization argument",
+    "status": "authored",
+    "assessment": "Defend the profile, global objective, partitioning and kernel correctness; quantify a whole-workload opportunity. CPU checks establish semantics. Actual accelerator execution and performance remain a separate required qualification for device claims.",
+    "evidence": [
+      "Reference agreement across more than one shape and parameter setting",
+      "Synchronized compile and execution measurements with a trace of the bottleneck",
+      "Array partitioning, collective communication and a before/after comparison on the stated hardware"
+    ],
+    "projectId": "kernel-audit",
+    "assessmentId": "scale",
+    "assessmentDraft": {
+      "id": "scale",
+      "projectId": "kernel-audit",
+      "title": "Profiling, partitioning and kernel synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/scale.md",
+      "url": "assessments/scale.html"
+    }
+  },
+  "audience": "Engineers comfortable with training loops who want to reason about memory, communication and throughput.",
+  "firstArtifact": "A synchronized timing report and a checked array placement on logical CPU devices.",
+  "focusPhaseIds": [
+    "performance",
+    "distributed",
+    "kernels"
+  ],
+  "modalityTrackIds": [
+    "image",
+    "text"
+  ],
+  "studyAdvice": "Keep one correct reference workload throughout this path. Measure completed work, inspect its trace and relate the bottleneck to memory traffic or computation. Verify partitioning and collectives on logical devices, then audit a Pallas kernel against independent references. Run the separate guarded TPU measurement only on supported target hardware before claiming a device or system speedup.",
+  "engineeringLessonIds": [
+    "deployment-07",
+    "operations-06"
+  ]
+}

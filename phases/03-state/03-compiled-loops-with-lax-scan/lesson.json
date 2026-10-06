@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "state-03",
+  "minutes": 65,
+  "content": {
+    "idea": "lax.scan expresses a loop as a state transition. Each step receives the carry and one input, then returns a new carry and one output. Scan combines these outputs and returns the final carry. This separates state carried through time from values recorded at each step.\n\nThe carry must keep a consistent structure, shape, and dtype. Unlike a long Python loop traced inside jit, scan represents the repeated computation as a loop operation. It is useful for recurrent models, simulations, and repeated optimization steps.",
+    "code": "import jax\nimport jax.numpy as jnp\ndef step(carry, increment):\n    next_value = 0.5 * carry + increment\n    return next_value, next_value\nincrements = jnp.array([1., 1., 1., 1.])\nfinal, history = jax.lax.scan(step, jnp.array(0.), increments)\nprint(\"History:\", history)\nprint(\"Final:\", float(final))\nassert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))\nassert jnp.allclose(final, history[-1])",
+    "output": "History: \\([1., 1.5, 1.75, 1.875]\\); Final: \\(1.875\\).",
+    "exercise": "Make the decay an explicit scalar argument. Differentiate the final value with respect to decay and compare at \\(0.5\\) with the analytic derivative \\(2.75\\).",
+    "solution": "def simulate(decay):\n    def transition(carry, increment):\n        value = decay * carry + increment\n        return value, value\n    return jax.lax.scan(transition, jnp.array(0.), increments)[0]\nassert jnp.allclose(jax.grad(simulate)(0.5), 2.75)",
+    "question": "What must remain consistent across scan steps?",
+    "options": [
+      "The numerical value of the carry",
+      "The carry structure, shapes, and dtypes",
+      "Every recorded output must be zero"
+    ],
+    "answer": 1,
+    "explanation": "The carry value changes through time, but its structural and array type properties must remain consistent.",
+    "problem": "Suppose a simulator keeps part of its current value and adds a new input at each step. Let’s write out four steps so we know what should happen. Then we’ll express the same loop with scan, compare it with Python, and see how changing the retained fraction affects the final value.",
+    "sections": [
+      {
+        "title": "Separate carry from recorded outputs",
+        "body": "Each scan step receives (carry,input) and returns (next_carry,output). Carry is what the next step needs. Output is what you want stacked into a history. They can have different meanings even when this demonstration returns the new state in both positions.\n\nFor decay \\(0.5\\), initial state \\(0\\) and four inputs of \\(1\\), the states are \\(1\\),\\(1.5\\),\\(1.75\\),\\(1.875\\). There are four recorded outputs; the initial state is not automatically part of history. Decide whether a plot should include that initial point before labeling the time axis.",
+        "formula": "(state_t, input_t) → transition → (state_(t+1), recorded_t)\nstate: 0 → 1 → 1.5 → 1.75 → 1.875"
+      },
+      {
+        "title": "Keep the carry contract invariant",
+        "body": "Carry values change, but their pytree structure, shapes and dtypes must remain compatible across steps. Growing a Python list or concatenating a larger array into the carry changes that contract. Allocate a fixed-size state or use the separately stacked outputs instead.\n\nThis constraint is a representation decision, not an arbitrary restriction on simulation. A fixed-dimensional physical state naturally meets it. If a system has variable numbers of entities, consider padding and masks with an explicit maximum capacity."
+      },
+      {
+        "title": "Differentiate the recurrence by hand",
+        "body": "With four unit inputs and initial zero, the final value is \\(1+d+d^2+d^3\\). Its derivative is \\(1+2d+3d^2\\), giving \\(2.75\\) at \\(d=0.5\\). The derivative also obeys a recurrence: \\(s_{t+1}=\\mathrm{state}_t+d s_t\\), starting from \\(s_0=0\\).\n\nAutodiff through scan differentiates the represented state transition. It does not make an unstable or inaccurate numerical model valid. Verify a small analytic case first, then a changed input sequence, before trusting a longer simulation.",
+        "math": "\\begin{aligned}s_{\\mathrm{final}}(d)&=1+d+d^2+d^3\\\\\\frac{ds_{\\mathrm{final}}}{dd}&=1+2d+3d^2\\\\s_{\\mathrm{final}}(0.5)&=1.875,\\qquad s_{\\mathrm{final}}\\prime(0.5)=2.75\\end{aligned}"
+      },
+      {
+        "title": "Compile the repeated transition without a timing promise",
+        "body": "A Python loop inside jit can be unrolled while tracing; scan expresses a repeated operation compactly. That can reduce compilation work for long loops, but it is not a universal promise that scan is faster for every workload.\n\nBefore benchmarking, compare numerical results on the same inputs and synchronize execution. Keep step count and precision explicit. For this lesson we verify correctness and derivatives; hardware profiling belongs to a later course unit."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Compare scan to the Python recurrence",
+        "prediction": "Predict every output for inputs \\([1,-1,2,0]\\) and decay \\(0.5\\).",
+        "code": "inputs=jnp.array([1.,-1.,2.,0.])\nstate=0.\nreference=[]\nfor inc in [1.,-1.,2.,0.]:\n    state=0.5*state+inc\n    reference.append(state)\nlast,observed=jax.lax.scan(step,jnp.array(0.),inputs)\nassert jnp.allclose(observed,jnp.array([1.,-0.5,1.75,0.875]))\nassert jnp.allclose(observed,jnp.array(reference))\nassert jnp.allclose(last,state)",
+        "output": "History \\([1,-0.5,1.75,0.875]\\); final \\(0.875\\).",
+        "explanation": "The loop is an independent control-flow reference and the fixed numbers verify time indexing."
+      },
+      {
+        "title": "Verify state and sensitivity together",
+        "prediction": "How do the state and derivative recurrences differ?",
+        "code": "def terminal(d):\n    return jax.lax.scan(lambda c,u:(d*c+u,d*c+u),jnp.array(0.),increments)[0]\nvalue,sensitivity=jax.value_and_grad(terminal)(0.5)\nassert jnp.allclose(value,1.875)\nassert jnp.allclose(sensitivity,2.75)\nassert jnp.allclose(jax.jit(terminal)(0.5),value)",
+        "output": "Final state \\(1.875\\) and sensitivity \\(2.75\\).",
+        "explanation": "The scalar objective is the final state. Returning the whole history to ordinary grad would need a deliberate scalar reduction."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Record a different output",
+        "prompt": "Carry the state, but record its squared value. Confirm that final carry still means state.",
+        "hint": "The second returned value is only the recorded output.",
+        "solution": "last,energy=jax.lax.scan(lambda c,u:(0.5*c+u,(0.5*c+u)**2),jnp.array(0.),increments)\nassert jnp.allclose(last,1.875)\nassert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))",
+        "explanation": "Carry and history need not have the same interpretation. The state remains unsquared for the next transition.",
+        "difficulty": "Practice"
+      },
+      {
+        "title": "Diagnose a growing carry",
+        "prompt": "Try appending each input to the carry with concatenate. Explain why scan rejects it and replace it with stacked output.",
+        "hint": "The carry shape is part of the loop type.",
+        "solution": "def growing(c,u):\n    return jnp.concatenate([c,u[None]]),u\ntry:\n    jax.lax.scan(growing,jnp.zeros((0,)),increments)\nexcept TypeError:\n    print(\"Expected carry-shape mismatch\")\nelse:\n    raise AssertionError(\"Expected scan type failure\")\n_,saved=jax.lax.scan(lambda c,u:(c,u),jnp.array(0.),increments)\nassert jnp.array_equal(saved,increments)",
+        "explanation": "The error identifies incompatible carry input/output types. Store per-step values in scan outputs instead of growing the carry.",
+        "difficulty": "Challenge"
+      }
+    ],
+    "objectives": [
+      "Separate carry from recorded outputs",
+      "Keep the carry contract invariant",
+      "Differentiate the recurrence by hand",
+      "Compile the repeated transition without a timing promise"
+    ],
+    "takeaways": [
+      "The loop is an independent control-flow reference and the fixed numbers verify time indexing.",
+      "The scalar objective is the final state. Returning the whole history to ordinary grad would need a deliberate scalar reduction."
+    ],
+    "references": [
+      {
+        "title": "JAX scan contract",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html"
+      },
+      {
+        "title": "JAX control flow",
+        "url": "https://docs.jax.dev/en/latest/control-flow.html"
+      }
+    ],
+    "diagnosis": "The error identifies incompatible carry input/output types. Store per-step values in scan outputs instead of growing the carry.",
+    "buildSteps": [
+      {
+        "title": "Prepare the inputs",
+        "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
+        "code": "import jax\nimport jax.numpy as jnp",
+        "explanation": "These explicit inputs define the case that the later checks will verify."
+      },
+      {
+        "title": "Build the computation",
+        "instruction": "Append this block below the inputs in the same file.",
+        "code": "def step(carry, increment):\n    next_value = 0.5 * carry + increment\n    return next_value, next_value\nincrements = jnp.array([1., 1., 1., 1.])",
+        "explanation": "step returns the next scalar carry and one recorded scalar. scan feeds that carry back into step and stacks the four recorded outputs."
+      },
+      {
+        "title": "Run and check the result",
+        "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
+        "code": "final, history = jax.lax.scan(step, jnp.array(0.), increments)\nprint(\"History:\", history)\nprint(\"Final:\", float(final))\nassert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))\nassert jnp.allclose(final, history[-1])",
+        "explanation": "Compare the output to the expected result below before making the exercise change."
+      }
+    ],
+    "visual": {
+      "title": "The carry approaches a fixed point",
+      "kind": "executed",
+      "prediction": "Why does the increment between successive states shrink?",
+      "reading": "The solid line shows the carry after each completed scan step. It starts at step \\(1\\) with value \\(1\\), then rises through \\(1.5\\), \\(1.75\\), and \\(1.875\\). The dashed horizontal line marks the fixed point \\(2\\).\n\nThe initial carry \\(0\\) is not plotted. Each visible point is the value after applying the recurrence once more, so the first point already includes one update.",
+      "connection": "The update is \\(c_{t+1}=0.5c_t+1\\). Subtracting it from the fixed point gives \\(2-c_{t+1}=0.5(2-c_t)\\): each step halves the remaining gap. This explains both the upward movement and its slowing pace.\n\nThe shrinking gaps are \\(1\\), \\(0.5\\), \\(0.25\\), and \\(0.125\\). `scan` carries the evolving value forward while collecting this history. One more step would produce \\(1.9375\\); it would not add another full unit or restart from the initial carry.",
+      "alt": "The carry approaches a fixed point. The solid line shows the carry after each completed scan step. It starts at step \\(1\\) with value \\(1\\), then rises through \\(1.5\\), \\(1.75\\), and \\(1.875\\). The dashed horizontal line marks the fixed point \\(2\\). The initial carry \\(0\\) is not plotted. Each visible point is the value after applying the recurrence once more, so the first point already includes one update.",
+      "code": "visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}"
+    }
+  }
+}

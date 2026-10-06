@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What must a timeout handler do beyond recording a timeout status?",
+      "options": [
+        "Leave the child running so it might finish later",
+        "Terminate or kill as required, then wait for the actual child to exit",
+        "Delete the last log line"
+      ],
+      "correct": 1,
+      "explanation": "The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "You duplicate every example and keep the same learning rate. What happens to a sum-loss SGD update compared with the original batch?",
+      "options": [
+        "Its gradient and update magnitude double.",
+        "It stays unchanged because the data values are unchanged.",
+        "value_and_grad silently converts the sum to a mean."
+      ],
+      "correct": 0,
+      "explanation": "A sum counts each replicated contribution again. A mean divides by the new batch size and would preserve the gradient in this example."
+    }
+  ]
+}

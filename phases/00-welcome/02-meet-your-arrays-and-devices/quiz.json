@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "For an array of shape \\((2, 3)\\), what shape results from `sum(axis=0)`?",
+      "options": [
+        "\\((2,)\\)",
+        "\\((3,)\\)",
+        "\\((2, 3)\\)"
+      ],
+      "correct": 1,
+      "explanation": "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\)."
+    }
+  ]
+}

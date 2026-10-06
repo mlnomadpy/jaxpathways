@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?",
+      "options": [
+        "The TPU installation and its execution are validated.",
+        "The arithmetic matches the reference, but the requested TPU execution has not been validated.",
+        "The model must be numerically wrong."
+      ],
+      "correct": 1,
+      "explanation": "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run."
+    }
+  ]
+}

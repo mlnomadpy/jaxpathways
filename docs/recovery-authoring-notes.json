@@ -1,0 +1,75 @@
+{
+  "testedDependencies": {
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "optax": "0.2.8",
+    "grain": "0.2.16",
+    "orbax-checkpoint": "0.11.34"
+  },
+  "scope": "CPU single-process deterministic input, synchronous local checkpoint save/read and object reconstruction; not power-loss, TPU, multi-host or asynchronous durability.",
+  "entries": [
+    {
+      "id": "recovery-01",
+      "title": "Design an input pipeline",
+      "status": "authored",
+      "path": "phases/06-recovery/01-design-an-input-pipeline",
+      "objective": "Build and audit a deterministic batched host pipeline.",
+      "exercise": "Pad the final three-label batch to four elements with zero. Show that an unmasked mean differs, then derive the correct masked mean.",
+      "check": "What information is missing from a model-only checkpoint for mid-epoch recovery?",
+      "evidence": "Keep example IDs and predictions, observed outputs, package versions, state inventory, changed-case checks and the diagnosed failure with repair. This is a single-process CPU tutorial; no TPU, multi-host or asynchronous recovery has been validated.",
+      "runtime": {
+        "kind": "cpu"
+      }
+    },
+    {
+      "id": "recovery-02",
+      "title": "Load, batch, and checkpoint order with Grain",
+      "status": "authored",
+      "path": "phases/06-recovery/02-load-batch-and-prefetch-with-grain",
+      "objective": "Build a Grain source/sampler/batch pipeline and verify its record order.",
+      "exercise": "Consume two batches, snapshot, and replay the third batch with a new compatible iterator.",
+      "check": "What makes a fresh loader resume at the saved next batch?",
+      "evidence": "Keep example IDs and predictions, observed outputs, package versions, state inventory, changed-case checks and the diagnosed failure with repair. This is a single-process CPU tutorial; no TPU, multi-host or asynchronous recovery has been validated.",
+      "runtime": {
+        "kind": "cpu"
+      }
+    },
+    {
+      "id": "recovery-03",
+      "title": "Save model, optimizer, and random state",
+      "status": "authored",
+      "path": "phases/06-recovery/03-save-model-optimizer-and-random-state",
+      "objective": "Checkpoint complete training state with Orbax and replay the next update.",
+      "exercise": "Advance to step five, save to a new directory, restore and verify step six against uninterrupted execution.",
+      "check": "Which checkpoint supports replaying the next Adam update with stochastic targets?",
+      "evidence": "Keep example IDs and predictions, observed outputs, package versions, state inventory, changed-case checks and the diagnosed failure with repair. This is a single-process CPU tutorial; no TPU, multi-host or asynchronous recovery has been validated.",
+      "runtime": {
+        "kind": "cpu"
+      }
+    },
+    {
+      "id": "recovery-04",
+      "title": "Recover data position and resume",
+      "status": "authored",
+      "path": "phases/06-recovery/04-recover-data-position-and-resume",
+      "objective": "Persist model/optimizer/key and Grain iterator position at one boundary.",
+      "exercise": "Repeat the protocol after one batch and compare the next five batches through step six. Save to a distinct directory.",
+      "check": "Which evidence supports a consistent restart boundary?",
+      "evidence": "Keep example IDs and predictions, observed outputs, package versions, state inventory, changed-case checks and the diagnosed failure with repair. This is a single-process CPU tutorial; no TPU, multi-host or asynchronous recovery has been validated.",
+      "runtime": {
+        "kind": "cpu"
+      }
+    }
+  ],
+  "validation": {
+    "generatedScripts": "4/4 passed in fresh CPU processes",
+    "joinedNotebookCode": "4/4 passed in fresh CPU processes",
+    "integerState": "Exact key/counter equality; floating leaves allclose rtol=1e-6, atol=1e-7",
+    "sourceHashes": {
+      "recovery-01": "01f41e8ef8a616c990838c40e7c02b5a998bb15950b2ff4f23bbf758e8800e67",
+      "recovery-02": "019aac6a1d7c2295156eee4e721edcf9dd7a06196f00e1c7069727dd6e90da9c",
+      "recovery-03": "cc6389633c7245ecc2c23a18c1ac546dd700d875da7a74b9cf1e3e748275cded",
+      "recovery-04": "c6412d03b328334b40c748999ff31fe4de3480cd25065d4e7eba2e50b0bd4969"
+    }
+  }
+}

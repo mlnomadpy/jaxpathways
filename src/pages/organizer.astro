@@ -1,0 +1,73 @@
+---
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/workspace.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { siteUrl } from '../lib/urls.js';
+import pages from '../data/pages.json';
+---
+
+<SiteLayout {...pages.organizer}>
+  <main id="main" class="learner-workspace">
+    <div class="page-intro">
+      <a href={siteUrl('notebook.html')}>My learning / Organizer</a>
+      <h1>Plan a learning club</h1>
+      <p>
+        Choose a pathway and a weekly time budget. Assign available lessons in order; see the
+        unfinished work and extra sessions explicitly.
+      </p>
+    </div>
+    <section id="club">
+      <div class="club-controls">
+        <label for="club-route">
+          Pathway<select id="club-route"></select>
+        </label>
+        <label for="club-weeks">
+          Schedule
+          <select id="club-weeks">
+            <option value="4">4 weeks</option>
+            <option value="8">8 weeks</option>
+          </select>
+        </label>
+        <label for="club-budget">
+          Lesson time each week
+          <select id="club-budget">
+            <option value="120">2 hours</option>
+            <option value="180" selected>
+              3 hours
+            </option>
+            <option value="240">4 hours</option>
+            <option value="360">6 hours</option>
+          </select>
+        </label>
+        <button id="club-download">Download facilitator plan</button>
+      </div>
+      <div id="club-summary" role="status" aria-live="polite"></div>
+      <p class="club-estimates">
+        Lesson estimates exclude extra project, setup, debugging, and discussion time.
+      </p>
+      <p class="club-session">
+        <strong>In each session:</strong> predict one result, run the build, compare a changed
+        condition, and discuss one diagnostic artifact. Peer feedback is not reviewed certification.
+      </p>
+      <div id="club-plan" class="club-plan"></div>
+      <h2>Work outside this schedule</h2>
+      <p>
+        Later lessons are not advanced past an earlier lesson that does not fit. Increase the
+        budget, use a longer schedule, or plan a second club. Unwritten topics are not runnable
+        assignments.
+      </p>
+      <ul id="club-blocked"></ul>
+      <p class="soft">
+        Lesson estimates are guidance, not promises of mastery. Allocate extra time for project
+        builds, setup, debugging, discussion, and artifact review. This planner does not reserve TPU
+        access or award certificates.
+      </p>
+    </section>
+    <SiteFooter />
+  </main>
+  <script>
+    import '../scripts/entries/organizer.js';
+  </script>
+</SiteLayout>

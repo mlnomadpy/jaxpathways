@@ -1,0 +1,38 @@
+.math-display {
+  display: block;
+  max-width: 100%;
+  overflow-x: auto;
+  padding: 14px 8px;
+  margin: 20px 0;
+  border-left: 3px solid var(--violet, #6043c4);
+  background: var(--panel, #fff);
+  break-inside: avoid;
+}
+.math-display .katex-display {
+  margin: 0;
+  text-align: left;
+}
+.math-display .katex-display > .katex {
+  text-align: left;
+}
+.math-display:focus-visible {
+  outline: 2px solid var(--violet, #6043c4);
+  outline-offset: 3px;
+}
+.katex {
+  font-size: 1.08em;
+}
+@media (max-width: 760px) {
+  .math-display {
+    padding: 12px 6px;
+    font-size: 0.95em;
+  }
+}
+@media print {
+  .math-display {
+    overflow: visible;
+    border-left: 0;
+    background: none;
+    font-size: 0.9em;
+  }
+}

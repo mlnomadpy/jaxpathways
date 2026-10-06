@@ -1,0 +1,38 @@
+---
+import SiteHeader from '../components/shared/SiteHeader.astro';
+import { siteUrl } from '../lib/urls.js';
+interface Props {
+  title: string;
+  description: string;
+  bodyClass?: string;
+  active?: string;
+  skipTarget?: string;
+  skipLabel?: string;
+}
+const {
+  title,
+  description,
+  bodyClass,
+  active,
+  skipTarget = '#main',
+  skipLabel = 'Skip to content',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href={siteUrl('assets/pathway-mark.svg')} />
+  </head>
+  <body class={bodyClass}>
+    <a class="skip" href={skipTarget}>
+      {skipLabel}
+    </a>
+    <SiteHeader active={active} />
+    <slot />
+  </body>
+</html>

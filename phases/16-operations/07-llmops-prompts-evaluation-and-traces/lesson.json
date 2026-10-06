@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "id": "operations-07",
+  "minutes": 75,
+  "content": {
+    "problem": "A prompt edit improves ordinary answers but makes the system confidently answer a question its documents cannot support. Let’s build a small regression suite that exposes the failure and save real MLflow traces without calling a paid model.",
+    "idea": "LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.",
+    "objectives": [
+      "Version the application boundary",
+      "Define cases before changing the prompt",
+      "Read the rare-case failure",
+      "Trace enough to diagnose, without retaining everything"
+    ],
+    "sections": [
+      {
+        "title": "Version the application boundary",
+        "body": "For a text generator, record the model revision, tokenizer, prompt template and decoding settings. For retrieval, add corpus/index versions, chunking and retrieval configuration. For tools, version schemas and implementations and define permission boundaries. MLflow’s prompt registry can store versions; an alias is convenient for development, while an evaluated release should resolve an immutable prompt version. The connected lab actually registers and reloads a prompt version."
+      },
+      {
+        "title": "Define cases before changing the prompt",
+        "body": "The companion replays controlled answer objects against ten public fixtures: nine answerable cases and one unsupported question. An answer contains text, citation IDs and an abstention flag. The evaluator checks the output schema, exact expected answer for these deliberately simple fixtures, allowed citation IDs and abstention for the unsupported case. A citation ID being allowed does not generally prove that a claim is entailed by a document; real tasks need claim-level checks and human calibration."
+      },
+      {
+        "title": "Read the rare-case failure",
+        "body": "The always-answer candidate passes all nine ordinary cases and fails the unsupported one. Its aggregate pass rate is \\(0.9\\), but its unsupported-case pass rate is \\(0\\). The contract-aware replay passes all ten. These are deterministic candidate response fixtures, not outputs from a live LLM or a model-quality benchmark. They let us test whether the evaluator and release policy catch a known defect before spending money on generation."
+      },
+      {
+        "title": "Trace enough to diagnose, without retaining everything",
+        "body": "A trace connects one request’s spans: retrieval, model invocation, tool calls, validation and response. Keep request IDs, version IDs, timing, error category and useful aggregate diagnostics. Raw prompts, retrieved documents and tool outputs can contain private data; define redaction, access and retention before collecting them. This lab records fixture IDs and summary scores in two actual MLflow traces. It does not log private messages. Tracing observes behavior; it does not enforce tool permissions or protect against prompt injection."
+      },
+      {
+        "title": "Add the production cases deliberately",
+        "body": "Extend the suite with missing/contradictory context, multilingual inputs, long contexts, prompt injection in retrieved text, malformed tool arguments, unsupported tools, timeouts and rate limits. Treat retrieved text as data, not trusted instructions. Check tool allowlists and permissions outside the model. Keep a held-out test set and human-reviewed examples separate from cases used to tune prompts. If using an LLM judge, record the judge version and rubric and compare with human labels; judge disagreement is evidence to inspect, not an infallible score."
+      },
+      {
+        "title": "Measure serving work in the right units",
+        "body": "Measure prefill and decode separately, along with time to first token, output tokens per second, completion rate, tail latency and request cost under declared context lengths and concurrency. Provider token accounting must use the provider’s tokenizer and pricing; whitespace counts are not interchangeable tokens. Set retry and timeout budgets and test the fallback path. The text harness supplies actual tiny-model cache/export measurements; the replay lesson supplies evaluation/tracing contracts, not production throughput.",
+        "commands": [
+          {
+            "label": "Run the complete local prompt/trace demonstration",
+            "shell": "bash",
+            "code": "python projects/engineering-release/mlflow_lab.py --output ./engineering-run-llm",
+            "expected": "Registers a real prompt version and records a nested retrieval/replay trace; no paid model API is used."
+          }
+        ]
+      },
+      {
+        "title": "A missing response is an evaluation failure",
+        "body": "Freeze the case inventory before collecting responses. Pair responses by stable case ID, not by arrival order: concurrent requests may finish out of order, and a timeout may omit a reply entirely. A loop over paired lists can silently stop at the shorter list and make coverage disappear from the denominator. The new experiment accepts reordered complete replies but rejects missing, duplicate and unknown IDs. In a live application, retain a timeout or tool-error outcome under the original case ID and score it under a declared policy; do not delete difficult cases after seeing results."
+      }
+    ],
+    "code": "import os\nos.environ[\"MLFLOW_DISABLE_AGENT_HINT\"]=\"1\"\nos.environ[\"MLFLOW_ENABLE_ASYNC_TRACE_LOGGING\"]=\"false\"\nos.environ[\"MLFLOW_ENABLE_TELEMETRY\"]=\"false\"\nimport tempfile\nfrom pathlib import Path\nimport mlflow\nfrom mlflow import MlflowClient\n\ndef llm_case(case, answer, allowed_citations):\n    \"\"\"Deterministic replay evaluator, not an LLM judge or a general safety classifier.\"\"\"\n    if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):\n        return False\n    if not isinstance(answer['citations'], list) or any(not isinstance(c, str) for c in answer['citations']):\n        return False\n    if type(answer['abstain']) is not bool or not set(answer['citations']) <= set(allowed_citations):\n        return False\n    if case['unanswerable']:\n        return answer['abstain'] and not answer['citations'] and answer['answer'] == ''\n    return not answer['abstain'] and answer['answer'] == case['expected'] and case['document'] in answer['citations']\n\ncases = [dict(id=f'answerable-{i}', unanswerable=False, expected='CPU', document='course-v1') for i in range(9)]\ncases += [dict(id='unsupported', unanswerable=True)]\nanswer = dict(answer='CPU', citations=['course-v1'], abstain=False)\nunsafe = [dict(answer) for _ in cases]\nguarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]\nresults = []\nwith tempfile.TemporaryDirectory(prefix='llmops-') as folder:\n    mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))\n    client = MlflowClient(); experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())\n    mlflow.set_experiment(experiment_id=experiment)\n    for name,replies in [('always-answer',unsafe),('contract-aware',guarded)]:\n        with mlflow.start_span(name='evaluate-replay', span_type='CHAIN') as span:\n            span.set_inputs({'candidate': name, 'dataset_version': 'public-fixture-v1', 'case_count': len(cases)})\n            passed = [llm_case(case, reply, ['course-v1']) for case,reply in zip(cases,replies)]\n            summary = {'overall': sum(passed)/len(passed), 'answerable': sum(passed[:-1])/9, 'unanswerable': float(passed[-1])}\n            span.set_outputs(summary); results.append(summary)\n    traces = mlflow.search_traces(experiment_ids=[experiment], return_type='list')\n    assert len(traces) == 2\nassert results[0] == {'overall': .9, 'answerable': 1., 'unanswerable': 0.}\nassert results[1] == {'overall': 1., 'answerable': 1., 'unanswerable': 1.}\nassert not llm_case(cases[0],dict(answer='CPU',citations=['invented'],abstain=False),['course-v1'])\nprint('Observed replay scores:', results)\nprint('Two real MLflow traces; no LLM API was called and no general model quality was evaluated.')\n",
+    "output": "Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.",
+    "exercise": "Add a response with an invented citation and require the evaluator to fail it.",
+    "solution": "for citation in ['invented','old-index-v0']:\n    assert not llm_case(cases[0],dict(answer='CPU',citations=[citation],abstain=False),['course-v1'])\nprint('Unrecognized citations rejected.')",
+    "experiments": [
+      {
+        "title": "Separate aggregate and critical-case behavior",
+        "prediction": "Can the 90% candidate satisfy a rule that requires the unsupported case to pass?",
+        "code": "release=[r['overall']>=.9 and r['unanswerable']==1. for r in results]\nassert release==[False,True]\nprint('Release decisions:',release)",
+        "output": "Release decisions are False and True.",
+        "explanation": "The extra gate encodes a required behavior that the overall average hides. One unsupported fixture is a regression test, not a population estimate."
+      },
+      {
+        "title": "Reject an incomplete replay before reporting a score",
+        "prediction": "If the only omitted response belongs to the unsupported case, what would a score over returned answers hide?",
+        "code": "def score_replay(inventory, replies, allowed_citations):\n    ids = [case['id'] for case in inventory]\n    reply_ids = [reply['id'] for reply in replies]\n    if not ids or len(set(ids)) != len(ids):\n        raise ValueError('empty or duplicate case inventory')\n    if len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids):\n        raise ValueError('missing, duplicate or unknown response IDs')\n    by_id = {reply['id']: reply['response'] for reply in replies}\n    passed = [llm_case(case, by_id[case['id']], allowed_citations) for case in inventory]\n    return {'count': len(ids), 'passed': sum(passed), 'fraction': sum(passed) / len(ids)}\n\ncomplete_replies = [{'id': case['id'], 'response': reply} for case, reply in zip(cases, unsafe)]\nreplay_summary = score_replay(cases, list(reversed(complete_replies)), ['course-v1'])\nassert replay_summary == {'count': 10, 'passed': 9, 'fraction': .9}\nfor broken in (complete_replies[:-1], complete_replies + [complete_replies[0]],\n               complete_replies[:-1] + [dict(id='unknown', response=answer)]):\n    try: score_replay(cases, broken, ['course-v1'])\n    except ValueError: pass\n    else: raise AssertionError('incomplete or ambiguous evaluation accepted')\nprint('Complete inventory:', replay_summary, '; missing, duplicate and unknown responses rejected.')",
+        "output": "Ten cases, nine passes, fraction 0.9; reordering preserves the score. Missing, duplicate and unknown response identities are rejected.",
+        "explanation": "The case inventory defines the denominator. In particular, losing the unsupported case must not convert a critical failure into a perfect answerable-only score. This checks evaluation bookkeeping on replayed data, not live generation quality."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Check abstention structure",
+        "difficulty": "transfer",
+        "prompt": "Try a response that claims to abstain but still returns an unsupported answer.",
+        "hint": "The fixture contract requires both empty answer text and no citations.",
+        "solution": "bad=dict(answer='An unsupported claim',citations=[],abstain=True)\nassert not llm_case(cases[-1],bad,['course-v1'])\nprint('An abstention flag alone does not satisfy the output contract.')",
+        "explanation": "Validate the full response object; a boolean alone cannot establish that the application withheld an answer."
+      },
+      {
+        "title": "Keep failed work in the evaluation inventory",
+        "difficulty": "Transfer",
+        "prompt": "Replace the answer for the first answerable case with an empty abstention. Keep the case ID and show how the complete-suite score changes.",
+        "hint": "Use the contract-aware replies as the starting point. An empty abstention is correct for the unsupported case but wrong for the selected answerable case.",
+        "solution": "timeout_replies = [{'id': case['id'], 'response': dict(reply)} for case, reply in zip(cases, guarded)]\ntimeout_replies[0]['response'] = dict(answer='', citations=[], abstain=True)\ntimeout_summary = score_replay(cases, timeout_replies, ['course-v1'])\nassert timeout_summary == {'count': 10, 'passed': 9, 'fraction': .9}\nprint('Failed answerable work remains in denominator:', timeout_summary)",
+        "explanation": "The fixture represents an unsuccessful answer as an empty abstention. A real trace should additionally distinguish timeout, retrieval failure and deliberate abstention as causes, while retaining all cases in the predeclared metric."
+      }
+    ],
+    "question": "The controlled replay suite passes every case. What is established?",
+    "options": [
+      "The live LLM is safe and accurate for arbitrary requests.",
+      "The evaluator accepts these fixtures; live model and held-out application evaluation remain separate.",
+      "Prompt versions no longer need recording."
+    ],
+    "answer": 1,
+    "explanation": "LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.",
+    "diagnosis": "When quality changes, compare prompt/model/retrieval/tool versions and case-level traces before tuning weights. A high average can hide an unsupported-case regression. Do not call a synthetic replay a measured LLM response.",
+    "takeaways": [
+      "Version the application boundary",
+      "Trace enough to diagnose, without retaining everything",
+      "Measure serving work in the right units"
+    ],
+    "references": [
+      {
+        "title": "MLflow tracing quickstart",
+        "url": "https://mlflow.org/docs/latest/genai/tracing/quickstart/"
+      },
+      {
+        "title": "MLflow prompt registry",
+        "url": "https://mlflow.org/docs/latest/genai/prompt-registry/index.html"
+      }
+    ],
+    "visual": {
+      "title": "The unsupported case changes the release decision",
+      "kind": "executed",
+      "prediction": "How can a candidate pass 90% overall and still fail every unsupported case?",
+      "reading": "The horizontal axis names the aggregate, answerable and unsupported groups. The vertical axis is the deterministic fixture pass fraction, between \\(0\\) and \\(1\\). Always-answer scores \\(0.9,1,0\\); contract-aware scores \\(1,1,1\\). The aggregate has ten cases, answerable has nine, and unsupported has one. The two answerable bars have equal height because both replays contain the same correct answers there.",
+      "connection": "The plot reports evaluator outputs from controlled answer objects recorded in real traces. It does not report accuracy of a live language model. In a real suite, expand critical cases and preserve sample counts and model-version evidence before making a release claim.",
+      "alt": "Always-answer replay passes nine ordinary cases but fails the unsupported case; the contract-aware replay passes all ten.",
+      "code": "visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported (1)'],'xlabel':'fixture group (count)','ylabel':'fixture pass fraction','series':[{'label':name,'y':[r[k] for k in ['overall','answerable','unanswerable']]} for name,r in zip(['always-answer','contract-aware'],results)]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Prepare the explicit contract",
+        "instruction": "Create main.py and add this setup block. Continue with the next block in the same file.",
+        "code": "import os\nos.environ[\"MLFLOW_DISABLE_AGENT_HINT\"]=\"1\"\nos.environ[\"MLFLOW_ENABLE_ASYNC_TRACE_LOGGING\"]=\"false\"\nos.environ[\"MLFLOW_ENABLE_TELEMETRY\"]=\"false\"\nimport tempfile\nfrom pathlib import Path\nimport mlflow\nfrom mlflow import MlflowClient",
+        "explanation": "For a text generator, record the model revision, tokenizer, prompt template and decoding settings. For retrieval, add corpus/index versions, chunking and retrieval configuration. For tools, version schemas and implementations and define permission boundaries. MLflow’s prompt registry can store versions; an alias is convenient for development, while an evaluated release should resolve an immutable prompt version. The connected lab actually registers and reloads a prompt version."
+      },
+      {
+        "title": "Run and inspect the controlled experiment",
+        "instruction": "Append this block, run main.py in the course environment, and retain the actual output.",
+        "code": "def llm_case(case, answer, allowed_citations):\n    \"\"\"Deterministic replay evaluator, not an LLM judge or a general safety classifier.\"\"\"\n    if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):\n        return False\n    if not isinstance(answer['citations'], list) or any(not isinstance(c, str) for c in answer['citations']):\n        return False\n    if type(answer['abstain']) is not bool or not set(answer['citations']) <= set(allowed_citations):\n        return False\n    if case['unanswerable']:\n        return answer['abstain'] and not answer['citations'] and answer['answer'] == ''\n    return not answer['abstain'] and answer['answer'] == case['expected'] and case['document'] in answer['citations']\n\ncases = [dict(id=f'answerable-{i}', unanswerable=False, expected='CPU', document='course-v1') for i in range(9)]\ncases += [dict(id='unsupported', unanswerable=True)]\nanswer = dict(answer='CPU', citations=['course-v1'], abstain=False)\nunsafe = [dict(answer) for _ in cases]\nguarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]\nresults = []\nwith tempfile.TemporaryDirectory(prefix='llmops-') as folder:\n    mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))\n    client = MlflowClient(); experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())\n    mlflow.set_experiment(experiment_id=experiment)\n    for name,replies in [('always-answer',unsafe),('contract-aware',guarded)]:\n        with mlflow.start_span(name='evaluate-replay', span_type='CHAIN') as span:\n            span.set_inputs({'candidate': name, 'dataset_version': 'public-fixture-v1', 'case_count': len(cases)})\n            passed = [llm_case(case, reply, ['course-v1']) for case,reply in zip(cases,replies)]\n            summary = {'overall': sum(passed)/len(passed), 'answerable': sum(passed[:-1])/9, 'unanswerable': float(passed[-1])}\n            span.set_outputs(summary); results.append(summary)\n    traces = mlflow.search_traces(experiment_ids=[experiment], return_type='list')\n    assert len(traces) == 2\nassert results[0] == {'overall': .9, 'answerable': 1., 'unanswerable': 0.}\nassert results[1] == {'overall': 1., 'answerable': 1., 'unanswerable': 1.}\nassert not llm_case(cases[0],dict(answer='CPU',citations=['invented'],abstain=False),['course-v1'])\nprint('Observed replay scores:', results)\nprint('Two real MLflow traces; no LLM API was called and no general model quality was evaluated.')",
+        "explanation": "A trace connects one request’s spans: retrieval, model invocation, tool calls, validation and response. Keep request IDs, version IDs, timing, error category and useful aggregate diagnostics. Raw prompts, retrieved documents and tool outputs can contain private data; define redaction, access and retention before collecting them. This lab records fixture IDs and summary scores in two actual MLflow traces. It does not log private messages. Tracing observes behavior; it does not enforce tool permissions or protect against prompt injection."
+      }
+    ]
+  }
+}

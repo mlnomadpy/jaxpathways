@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-04",
+  "contentHash": "422ca72562f0e1688b78a5418766e2532081b26ebcf20830586b45d131226844",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "conceptual",
+  "generatedAt": "2026-10-05T22:15:43.616646+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\n",
+  "data": {
+    "kind": "flow",
+    "nodes": [
+      "Model and optimizer state",
+      "Random state",
+      "Dataset identity and iterator position",
+      "Restore one shared boundary",
+      "Same next batch \u2192 same transition"
+    ],
+    "layout": "merge"
+  }
+}

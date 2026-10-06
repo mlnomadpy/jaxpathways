@@ -1,0 +1,56 @@
+---
+import ModalityTracks from '../components/paths/ModalityTracks.astro';
+import PathCards from '../components/paths/PathCards.astro';
+import RoleCards from '../components/paths/RoleCards.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/paths.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { siteUrl } from '../lib/urls.js';
+import pages from '../data/pages.json';
+---
+
+<SiteLayout {...pages.pathways}>
+  <main id="main" class="paths-page">
+    <div class="page-intro">
+      <a href={siteUrl('index.html')}>Home</a>
+      <h1>
+        What would you
+        <br />
+        like to build?
+      </h1>
+      <p class="intro">One shared foundation. Several ways to use it.</p>
+    </div>
+    <section class="path-foundation">
+      <div>
+        <h2>Start with JAX.</h2>
+        <p>Arrays, functions and transformations. Build a checked regression experiment.</p>
+      </div>
+      <a class="button primary" href={siteUrl('pathways.html?path=foundations')}>
+        Open foundations path
+      </a>
+    </section>
+    <ModalityTracks />
+    <section id="pathways" aria-label="Learning paths">
+      <div id="routes">
+        <PathCards />
+      </div>
+    </section>
+    <section id="roles">
+      <div id="career-browser">
+        <h2>Explore careers connected to these skills</h2>
+        <p>See the work, milestones and portfolio goals behind each role.</p>
+        <div class="roles-grid" id="role-cards">
+          <RoleCards />
+        </div>
+      </div>
+      <div id="role-detail" class="role-detail" hidden aria-live="polite"></div>
+    </section>
+    <section id="path-detail" hidden aria-live="polite"></section>
+    <SiteFooter />
+  </main>
+  <script>
+    import '../scripts/entries/pathways.js';
+  </script>
+</SiteLayout>

@@ -1,0 +1,54 @@
+---
+import '../../styles/home/directions.css';
+import { directions } from '../../data/home.json';
+import { course } from '../../lib/course-data.js';
+import { pathwayCoverage } from '../../lib/careers.js';
+import { siteUrl } from '../../lib/urls.js';
+import SectionHeading from '../shared/SectionHeading.astro';
+---
+
+<section class="work-section" aria-labelledby="work-title">
+  <SectionHeading
+    id="work-title"
+    title={directions.title}
+    intro={directions.intro}
+    href="careers.html"
+    linkLabel={`Explore all ${course.roles.length} career routes ↗`}
+  />
+  <div class="work-routes">
+    {directions.items.map((direction) => {
+      const path = course.pathways.find((path) => path.id === direction.path);
+      if (!path) throw Error(`Unknown home pathway: ${direction.path}`);
+      const availability = pathwayCoverage(path, course).focus;
+      return (
+        <article class="work-route">
+          <span class="route-symbol" aria-hidden="true">
+            {direction.symbol}
+          </span>
+          <h3>{direction.title}</h3>
+          <p>{direction.description}</p>
+          <p class="route-availability">
+            <strong>
+              {availability.available} available · {availability.planned} planned
+            </strong>
+            Lessons in the focus phases. Shared preparation is listed in the path.
+          </p>
+          <div class="route-links">
+            <a
+              href={siteUrl(`course.html?path=${direction.path}`)}
+              aria-label={`Explore the ${direction.title.toLowerCase()} learning path`}
+            >
+              Learning path ↗
+            </a>
+            <a
+              href={siteUrl(`careers.html?role=${direction.role}#roles`)}
+              aria-label={`Explore ${direction.title.toLowerCase()} career skills`}
+            >
+              Career skills ↗
+            </a>
+          </div>
+        </article>
+      );
+    })}
+  </div>
+</section>

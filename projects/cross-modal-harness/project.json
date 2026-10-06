@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "cross-modal-harness",
+  "title": "Build and audit image\u2013text retrieval",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU synthetic image/text fixture; target runtime unverified",
+  "source": "projects/cross-modal-harness/README.md",
+  "requiredLessonIds": [
+    "networks-01",
+    "optimization-02",
+    "optimization-09",
+    "transformers-01",
+    "recovery-03",
+    "recovery-04",
+    "deployment-03",
+    "deployment-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Pair and preprocessing contracts",
+      "command": "python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 1",
+      "evidence": "Independent pixel/token checks, stable IDs, source groups and leakage rejection",
+      "expected": "PASS stage 1 plus all earlier stages",
+      "diagnosis": "A shape-correct pair can still be semantically wrong; inspect the actual image and caption."
+    },
+    {
+      "id": "2",
+      "title": "Symmetric contrastive objective",
+      "command": "python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 2",
+      "evidence": "Independent host objective, normalization and finite differences at changed parameters",
+      "expected": "PASS stage 2 plus all earlier stages",
+      "diagnosis": "Inspect the positive mask before adjusting temperature or optimizer settings."
+    },
+    {
+      "id": "3",
+      "title": "Training and complete recovery",
+      "command": "python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 3",
+      "evidence": "Two training seeds, frozen evaluation and five resumed transitions in a fresh process",
+      "expected": "PASS stage 3 plus all earlier stages",
+      "diagnosis": "Compare pair IDs first, then weights, momentum and the future shuffle key."
+    },
+    {
+      "id": "4",
+      "title": "Precision and exported branches",
+      "command": "python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 4",
+      "evidence": "Calibration provenance, integer oracle and twelve serialized computations loaded in fresh processes",
+      "expected": "PASS stage 4 plus all earlier stages",
+      "diagnosis": "Check preprocessing and scale axes before relaxing parity tolerance."
+    },
+    {
+      "id": "5",
+      "title": "Inference, measured release and rollback",
+      "command": "python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 5",
+      "evidence": "Boundary rejection, raw timings, degraded-candidate rejection and pointer preservation",
+      "expected": "PASS stage 5 plus all earlier stages",
+      "diagnosis": "A good file checksum does not establish model quality; evaluate the candidate before selecting it."
+    }
+  ],
+  "rubric": [
+    "Validate paired semantic inputs and split by source identity",
+    "Derive and independently check a multi-positive objective",
+    "Train both encoders and inspect clean versus shifted retrieval",
+    "Restore optimizer, random and iterator state in a fresh process",
+    "Verify calibrated integer arithmetic and serialized branch parity",
+    "Measure the actual request boundary and reject a degraded release",
+    "Bound conclusions to the synthetic CPU fixture"
+  ],
+  "workspaceFile": "projects/cross-modal-harness/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/cross-modal-harness/starter/model.py projects/cross-modal-harness/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/cross-modal-harness/starter/model.py projects/cross-modal-harness/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/cross-modal-harness/tests/check.py --implementation solution --stage all",
+  "setupNote": "Extract the ZIP and install its requirements-cpu.txt; run commands from the extracted top folder. Reference figures are measured on a synthetic CPU fixture."
+}

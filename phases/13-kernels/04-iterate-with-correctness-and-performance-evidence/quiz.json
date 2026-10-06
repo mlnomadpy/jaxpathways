@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The kernel matches the represented-input oracle exactly but differs from the original float32 dataset in bfloat16. What should the report say?",
+      "options": [
+        "The kernel is necessarily incorrect.",
+        "The interpretation proves TPU throughput.",
+        "Implementation correctness passed for the declared precision policy; the separate representation gap must still be reported."
+      ],
+      "correct": 2,
+      "explanation": "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
+    }
+  ]
+}

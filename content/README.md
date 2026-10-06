@@ -1,6 +1,6 @@
 # Curriculum authoring
 
-The course is a connected body of lessons, not a notebook directory. Its source of truth is `site/curriculum.json`.
+The course is a connected body of lessons, not a notebook directory. Phase membership lives in `curriculum/course.json`, routes in `learning-paths/`, and authored content in the lesson’s `lesson.json` under `phases/`. The website manifest is generated.
 
 - **Core domains** organize the work: training, inference, operations, and research.
 - **Career routes** explain the responsibilities and capabilities that those skills support.
@@ -21,4 +21,30 @@ An authored lesson needs a narrative, runnable code, expected results, exercises
 
 The training notebook belongs to phase 05; recovery to phase 06; profiling to phase 08. Their files are still unavailable here. Split them into concept-sized companion labs when imported, preserving one integration exercise for each phase. Do not repeat setup and foundational teaching inside every notebook.
 
-`npm run curriculum:docs` renders `CURRICULUM.md` and phase READMEs for reading on GitHub. These are generated from the same manifest as the website.
+`npm run curriculum:docs` renders lesson Markdown, Python scripts, notebooks, `CURRICULUM.md`, and phase READMEs for reading on GitHub. These are generated from the same manifest as the website.
+
+Use `npm run smoke:cpu` after changing numerical material. It executes both the scripts and notebook code cells in fresh CPU processes and records the tested environment in `public/validation.json`. Browser checkpoints are formative checks; exercise completion is self-reported. Neither awards a reviewed competency.
+
+## A lesson bundle
+
+An authored lesson lives in `phases/<phase>/<lesson>/`. Edit its `lesson.json`; `npm run build` generates `docs/en.md`, `code/main.py`, `notebooks/exercise.ipynb`, `quiz.json`, and `outputs/evidence.md`, plus website downloads and API representations. Planned briefs have manifest entries without pretending to supply executable code.
+
+Use problem → concept → small implementation → JAX/library implementation → modification → diagnosis → evidence when that progression helps teach the subject. Do not add empty sections just to satisfy a template. Interactive figures illustrate numerical behavior and state whether they execute JAX or show an analytic model.
+
+## Depth before coverage
+
+An executable toy example is a starting point, not sufficient teaching. Before extending the authored count, apply the editorial questions in [the content quality review](../docs/content-quality.md). Explain the mechanism with worked reasoning, check independent known results, ask for a prediction before an experiment, and require transfer to changed inputs or conditions. Introduce terminology at the point it is needed. Avoid substituting longer prose, more headings, or more quizzes for understanding.
+
+Expanded lesson content can include `objectives`, concept `sections` (title/body/optional formula), worked `experiments` (prediction/code/output/explanation), `practice` (difficulty/prompt/hint/solution/explanation), `takeaways`, and primary `references`. These are optional schema tools, not a section-count rubric. All teaching and runnable solutions must survive generation into the reader, Markdown, notebook, script, and offline book. CPU receipts identify the content revision that was actually run.
+
+## Friendly explanations and equations
+
+Use the [learner writing and math guide](../docs/learner-writing-and-math.md). Author inline math with `\( ... \)` and standalone equations in a section’s `math` field; JSON requires escaped backslashes. KaTeX renders the browser and printable reader, while EPUB receives native MathML. A section’s `formula` remains a plain-text sketch. Begin with a concrete question, define symbols, work through one small result and invite a changed-condition attempt.
+
+## Figures and recorded executions
+
+Every authored lesson has a canonical `content.visual` with a prediction prompt, reading guidance and a connection to the lesson. Use `kind: executed` and a small `code` experiment producing `visual_data` for a real plot; use `kind: conceptual` and labeled nodes for a workflow diagram. Never substitute illustrative values for measured results.
+
+`npm run figures:build` runs each complete example and its figure experiment in a fresh CPU process, then creates SVG, PNG and data/provenance JSON under the lesson’s `outputs/`. `npm run content:build` generates companions. `npm run smoke:cpu` executes scripts and notebook cells, retaining real streams and Matplotlib outputs in `outputs/execution.json`. Run `npm run build` afterward to attach those current results to the reader, notebooks and books. Content hashes and per-cell hashes prevent stale output reuse. `npm run audit:visuals` verifies coverage and updates the whole-course visual audit.
+
+Notebook plotting helpers are self-contained and their source is initially collapsed by compatible readers; plotted outputs remain visible. Matplotlib is pinned in the CPU environment. Browser figures are saved reference results, not a browser Python runtime. Figure runs and full exercise runs have separate timestamps, so timing samples may differ.

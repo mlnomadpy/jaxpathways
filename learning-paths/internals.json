@@ -1,0 +1,51 @@
+{
+  "id": "internals",
+  "title": "Understand JAX itself",
+  "description": "Trace a function into jaxpr, verify forward and reverse sensitivities, write exact custom derivative rules, and compile a small transformation whose limits you can explain.",
+  "prerequisites": "Shared foundations and advanced autodiff",
+  "outcome": "Audit derivatives and a tiny transformation",
+  "libraries": "jaxpr · autodiff · XLA",
+  "source": "https://docs.jax.dev/en/latest/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "internals"
+  ],
+  "capstone": {
+    "title": "Audit derivatives and a tiny transformation",
+    "status": "authored",
+    "assessment": "Connect a jaxpr to your function and numerically verify the derivative rule.",
+    "evidence": [
+      "An annotated jaxpr linking primitives and shapes to the original function",
+      "Directional and adjoint derivative checks on changed inputs",
+      "A custom derivative or transformation with a deliberate unsupported case and explicit rejection"
+    ],
+    "projectId": "derivative-audit",
+    "assessmentId": "internals",
+    "assessmentDraft": {
+      "id": "internals",
+      "projectId": "derivative-audit",
+      "title": "Derivative synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/internals.md",
+      "url": "assessments/internals.html"
+    }
+  },
+  "audience": "Curious JAX users who can already use grad and jit and want to diagnose transformation behavior.",
+  "firstArtifact": "An annotated jaxpr that explains a computation and a changed input shape.",
+  "focusPhaseIds": [
+    "internals"
+  ],
+  "modalityTrackIds": [
+    "text",
+    "image"
+  ],
+  "studyAdvice": "Start by connecting each jaxpr primitive to the function that produced it. Revisit directional derivatives and the chain rule before studying JVPs, VJPs and custom rules. Keep an independent derivative reference beside every transformation. Finish the derivative audit, then extend the tiny interpreter in the synthesis assessment and explain its unsupported cases.",
+  "engineeringLessonIds": [
+    "deployment-07"
+  ]
+}

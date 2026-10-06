@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "probability-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The variational mean is correct and the optimization gradient is tiny. Why can posterior intervals still be too narrow?",
+      "options": [
+        "The diagonal family cannot represent the correlated target, even at its optimum",
+        "Any Gaussian model necessarily produces wrong uncertainty",
+        "The number of optimizer iterations defines posterior variance"
+      ],
+      "correct": 0,
+      "explanation": "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer."
+    }
+  ]
+}

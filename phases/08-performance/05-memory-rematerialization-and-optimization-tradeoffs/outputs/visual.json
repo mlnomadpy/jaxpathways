@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-05",
+  "contentHash": "b503e31ca2a672adf247aeb700c6ad6b820b5f69f4b621cc3b194e957f019b64",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:31:45.042902+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of sub from performance-05-example:11:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nf32[16] output of tanh from performance-05-example:11:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[5.150004290044308e-05, 3.200001083314419e-05, 3.066682256758213e-05, 1.2333039194345474e-05, 1.158309169113636e-05], [8.820882067084312e-05, 7.258402183651924e-05, 5.024997517466545e-05, 4.975008778274059e-05, 5.179201252758503e-05]]\nIndependent reverse recurrence agrees with both gradients.\n",
+  "data": {
+    "kind": "panels",
+    "panels": [
+      {
+        "kind": "bar",
+        "title": "Autodiff residual descriptions",
+        "labels": [
+          "ordinary",
+          "layer remat"
+        ],
+        "ylabel": "saved entries (not bytes)",
+        "series": [
+          {
+            "label": "residual descriptions",
+            "y": [
+              9,
+              6
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "bar",
+        "title": "Compiler memory estimate",
+        "labels": [
+          "ordinary",
+          "layer remat"
+        ],
+        "ylabel": "estimated temporary bytes",
+        "series": [
+          {
+            "label": "compiler temporaries",
+            "y": [
+              256,
+              256
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,9 @@
+---
+import { mathProse } from '../../lib/math.js';
+interface Props {
+  text?: string;
+}
+const { text = '' } = Astro.props;
+---
+
+<Fragment set:html={mathProse(text)} />

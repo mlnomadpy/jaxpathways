@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-04",
+  "contentHash": "5e544b413b57efe327ec890d0362f0160165ef7a8a9ac1a4537d9d3beadf0e1d",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-06T00:09:39.678391+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 4,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-vmrl9k1b/step-one\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1,
+      2,
+      3
+    ],
+    "xlabel": "update after checkpoint",
+    "ylabel": "batch mean squared loss",
+    "series": [
+      {
+        "label": "uninterrupted",
+        "y": [
+          0.5069587826728821,
+          0.19637340307235718,
+          0.1798383891582489
+        ]
+      },
+      {
+        "label": "restored",
+        "y": [
+          0.5069587826728821,
+          0.19637340307235718,
+          0.1798383891582489
+        ]
+      }
+    ]
+  }
+}

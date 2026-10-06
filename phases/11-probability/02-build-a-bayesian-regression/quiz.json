@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "probability-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which variance describes a new noisy reading at a given input?",
+      "options": [
+        "Only the posterior variance of the intercept",
+        "The propagated weight uncertainty plus observation-noise variance",
+        "The training mean squared error divided by the number of weights"
+      ],
+      "correct": 1,
+      "explanation": "Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading."
+    }
+  ]
+}

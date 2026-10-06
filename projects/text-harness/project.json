@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "id": "text-harness",
+  "title": "Build a causal Transformer training and inference harness",
+  "pathwayId": "tpu",
+  "status": "authored",
+  "hardware": "CPU reference; physical TPU and multi-controller qualification remain separate",
+  "source": "projects/text-harness/README.md",
+  "requiredLessonIds": [
+    "state-01",
+    "state-02",
+    "optimization-02",
+    "optimization-04",
+    "networks-03",
+    "recovery-03",
+    "recovery-04",
+    "transformers-01",
+    "transformers-02",
+    "transformers-03",
+    "transformers-04",
+    "performance-02",
+    "deployment-03",
+    "deployment-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Tokens, causal computation and loss",
+      "command": "python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 1",
+      "evidence": "UTF-8 byte contracts, disjoint document/content provenance, independent attention and token-normalized objective",
+      "expected": "PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance",
+      "diagnosis": "Inspect shifted targets, padded-key and future masks, normalization and valid-token denominators before adding model capacity."
+    },
+    {
+      "id": "2",
+      "title": "Actual training and full recovery",
+      "command": "python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 2",
+      "evidence": "Gradient comparison, trained Transformer, fresh-process Adam/dropout/order recovery and fixed held-out token metrics",
+      "expected": "PASS stage 2: derivative check, full Adam/dropout/iterator fresh-process recovery, actual training and fixed token evaluation",
+      "diagnosis": "Compare the next document IDs and dropout keys before parameters; preserve both Adam moments and the completed step."
+    },
+    {
+      "id": "3",
+      "title": "Real KV-cache precision",
+      "command": "python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 3",
+      "evidence": "Sequential cached/full parity under FP32/BF16/INT8, stored dtype/scale evidence, immutable prefix and overflow rejection",
+      "expected": "PASS stage 3: actual FP32/BF16/INT8 KV storage, sequential cached/full parity, immutable prefix, overflow and independent integer arithmetic",
+      "diagnosis": "Separate a broken cache transition from quantization error by comparing the same policy first."
+    },
+    {
+      "id": "4",
+      "title": "Exported inference and profiler evidence",
+      "command": "python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 4",
+      "evidence": "Six real endpoints, fresh-process reload, bounded generation, synchronized prefill/decode measurements and actual profiler trace",
+      "expected": "PASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing",
+      "diagnosis": "Verify actual artifact hashes and context length, then inspect the declared timed and traced boundaries."
+    }
+  ],
+  "rubric": [
+    "Explain UTF-8 tokens, causal/padding masks and valid-token loss normalization",
+    "Train a real tiny Transformer and compare fixed held-out token evidence with a declared baseline",
+    "Recover optimizer, dropout and document-order state in a fresh process",
+    "Verify sequential cache parity and actual cache precision/storage boundaries",
+    "Reload real prefill/decode exports and reject corrupted or over-context requests",
+    "Retain real profiler traces and synchronized CPU measurements with workload units",
+    "Explain actual generation successes and failures without natural-language quality claims",
+    "Keep physical TPU and distributed qualification distinct from the CPU training-system capstone"
+  ],
+  "workspaceFile": "projects/text-harness/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/text-harness/starter/model.py projects/text-harness/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/text-harness/starter/model.py projects/text-harness/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/text-harness/tests/check.py --implementation solution --stage all",
+  "setupNote": "Use the extracted ZIP top folder containing requirements-cpu.txt and projects/text-harness. The README explains the full connected runner and actual plots/profile artifacts. Linked TPU/distributed phase commands require the full course workspace and an existing supported target environment.",
+  "assessmentId": "tpu"
+}

@@ -1,0 +1,22 @@
+---
+import { siteUrl } from '../../lib/urls.js';
+interface Props {
+  assessment: { id: string; projectId: string };
+}
+const { assessment } = Astro.props;
+---
+
+<nav class="assessment-actions" aria-label="Assessment actions">
+  <a class="button" href={siteUrl(`project.html?id=${assessment.projectId}`)}>
+    Open project workspace
+  </a>
+  <a class="button" download href={siteUrl(`assessments/${assessment.id}.md`)}>
+    Download assignment
+  </a>
+  <a
+    class="button"
+    href={siteUrl(`notebook.html?project=${assessment.projectId}&route=${assessment.id}#portfolio`)}
+  >
+    Keep assessment evidence
+  </a>
+</nav>

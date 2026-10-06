@@ -1,0 +1,75 @@
+{
+  "schemaVersion": 1,
+  "id": "foundation-toolkit",
+  "title": "Connect arrays, transformations and explicit state",
+  "pathwayId": "foundations",
+  "status": "authored",
+  "hardware": "CPU; synthetic array/state contracts",
+  "source": "projects/foundation-toolkit/README.md",
+  "requiredLessonIds": [
+    "welcome-01",
+    "welcome-02",
+    "arrays-01",
+    "arrays-02",
+    "arrays-03",
+    "first-gradient",
+    "transforms-02",
+    "transforms-03",
+    "state-01",
+    "state-03"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Report the completed environment",
+      "command": "python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1",
+      "evidence": "Independent row sums, actual device and package versions",
+      "expected": "PASS stage 1 and all earlier stages",
+      "diagnosis": "Import success alone does not identify the device of the output."
+    },
+    {
+      "id": "2",
+      "title": "Process observations with a mask",
+      "command": "python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 2",
+      "evidence": "Independent statistics, singleton and constant columns, changed shape and input purity",
+      "expected": "PASS stage 2 and all earlier stages",
+      "diagnosis": "Padded rows must not enter either the numerator or count."
+    },
+    {
+      "id": "3",
+      "title": "Compile a batch of gradients",
+      "command": "python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 3",
+      "evidence": "Two parameter settings, independent derivatives, singleton and vector batches",
+      "expected": "PASS stage 3 and all earlier stages",
+      "diagnosis": "Keep parameters shared while mapping observation and target axes together."
+    },
+    {
+      "id": "4",
+      "title": "Replay a batched simulation",
+      "command": "python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 4",
+      "evidence": "Independent update order, saved keys/state and fresh-process continuation",
+      "expected": "PASS stage 4 and all earlier stages",
+      "diagnosis": "A reused or missing random key changes the future even when the saved positions match."
+    }
+  ],
+  "rubric": [
+    "Describe the environment of a completed result",
+    "Preserve observation/feature axes and exclude invalid observations",
+    "Explain grad, vmap and jit through independent per-example derivatives",
+    "Make random keys and update order explicit",
+    "Replay a continued trajectory in a fresh process"
+  ],
+  "workspaceFile": "projects/foundation-toolkit/my_toolkit.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/foundation-toolkit/starter/toolkit.py projects/foundation-toolkit/my_toolkit.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/foundation-toolkit/starter/toolkit.py projects/foundation-toolkit/my_toolkit.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/foundation-toolkit/tests/check.py --implementation solution --stage all",
+  "setupNote": "Run from the extracted bundle\u2019s top folder with requirements-cpu.txt installed. Four stages connect the first four phases before the regression capstone."
+}

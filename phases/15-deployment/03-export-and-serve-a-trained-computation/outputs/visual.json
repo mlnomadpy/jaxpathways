@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-03",
+  "contentHash": "0ee1b009e2d4e696151d9b57843c65c477cd01dd00eee5bd715ca61dd18d045e",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-06T00:59:30.057050+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Verified serialized bytes: 1312\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "score 0",
+      "score 1"
+    ],
+    "ylabel": "output score",
+    "series": [
+      {
+        "label": "direct",
+        "y": [
+          3.0999999046325684,
+          -0.4500000476837158
+        ]
+      },
+      {
+        "label": "restored artifact",
+        "y": [
+          3.0999999046325684,
+          -0.4500000476837158
+        ]
+      }
+    ]
+  }
+}

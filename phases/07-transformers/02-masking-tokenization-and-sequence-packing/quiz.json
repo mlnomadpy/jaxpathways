@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transformers-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What must a packed causal mask enforce?",
+      "options": [
+        "Causal order only",
+        "Same segment and permitted causal keys, plus explicit padding behavior",
+        "Equal token IDs"
+      ],
+      "correct": 1,
+      "explanation": "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries."
+    }
+  ]
+}

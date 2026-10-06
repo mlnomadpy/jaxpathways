@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-04",
+  "contentHash": "bd0f537bbd6b41b858ac0d0c54ecbad9b7acdab954805f6adf59b5b5f5c314f4",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:20.808157+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.025510916952043772 1.9582919776439667e-05\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "eager",
+      "first compiled",
+      "repeat compiled"
+    ],
+    "ylabel": "mean squared loss",
+    "series": [
+      {
+        "label": "evaluated loss",
+        "y": [
+          0.46000000834465027,
+          0.46000000834465027,
+          0.46000000834465027
+        ]
+      }
+    ]
+  }
+}

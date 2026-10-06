@@ -1,0 +1,105 @@
+{
+  "arrays-02": {
+    "title": "Broadcast along the missing axis",
+    "steps": [
+      ["Batch", "x: (2, 3)", "Two rows, three features per row."],
+      ["Shared bias", "b: (3,)", "Align the trailing feature axis."],
+      ["Result", "x + b: (2, 3)", "Add the same three bias values to each row."]
+    ],
+    "note": "Conceptual example: broadcasting repeats values logically; it does not add a new example axis. A target (2, 1) and prediction (2,) can accidentally form a (2, 2) result."
+  },
+  "state-01": {
+    "title": "A key is an explicit input",
+    "steps": [
+      ["Parent key", "key", "Keep one owner for the sequence."],
+      ["Split", "next_key, sample_key", "Use one child to continue, another for this sample."],
+      ["Next call", "next_key → split", "Pass the continuation key forward."]
+    ],
+    "note": "Reusing sample_key reproduces the same random computation. Splitting does not mutate the parent key; decide which child belongs to each computation."
+  },
+  "state-02": {
+    "title": "Structure travels with the leaves",
+    "steps": [
+      [
+        "Parameter tree",
+        "{weight: array, bias: array}",
+        "Names and containers describe the structure."
+      ],
+      [
+        "Tree operation",
+        "map(update, parameters)",
+        "Apply a matching operation to each array leaf."
+      ],
+      [
+        "New parameter tree",
+        "same structure, new leaves",
+        "The optimizer and gradients must agree on the tree."
+      ]
+    ],
+    "note": "A pytree is a nested structure with array leaves, not one large flattened tensor. Shape and dtype still matter separately at each leaf."
+  },
+  "state-03": {
+    "title": "Carry state through a compiled loop",
+    "steps": [
+      ["Initial state", "carry₀, inputs[0]", "Start with an explicit state tree."],
+      [
+        "Body",
+        "carry₁, output₀ = body(carry₀, input₀)",
+        "Return the next state and this step’s output."
+      ],
+      ["Repeat", "carryₜ → body → carryₜ₊₁", "scan collects outputs and returns the final carry."]
+    ],
+    "note": "Every carry leaf keeps the same shape and dtype through the loop. Outputs are stacked along the scan axis; the carry is the state that connects steps."
+  },
+  "optimization-04": {
+    "title": "Optimizer history is part of training state",
+    "steps": [
+      ["Differentiate", "loss, gradients", "Evaluate the objective at the current parameters."],
+      ["Transform", "updates, next_optimizer_state", "Combine gradients with optimizer history."],
+      [
+        "Apply",
+        "next_parameters = apply_updates(parameters, updates)",
+        "Pass both updated values into the next step."
+      ]
+    ],
+    "note": "Optax updates are increments applied to parameters. Adam also carries moments and a count; restoring parameters alone cannot reproduce the same next update."
+  },
+  "recovery-04": {
+    "title": "Restore one consistent training boundary",
+    "steps": [
+      [
+        "Before update",
+        "model + optimizer + key + data position",
+        "Identify the state needed to choose and process the next batch."
+      ],
+      [
+        "Completed snapshot",
+        "save these values together",
+        "Wait for the local checkpoint operation to finish."
+      ],
+      [
+        "After restore",
+        "same next batch → same next transition",
+        "Compare the restored transition with uninterrupted training."
+      ]
+    ],
+    "note": "This illustrates the lesson’s completed local snapshot boundary. It does not establish power-loss durability, asynchronous failure recovery or multi-host coordination."
+  },
+  "distributed-01": {
+    "title": "One global array, four local row shards",
+    "steps": [
+      ["Global view", "rows 0…7", "The program sees an eight-row array."],
+      [
+        "Partition rows",
+        "CPU 0: 0–1 | CPU 1: 2–3 | CPU 2: 4–5 | CPU 3: 6–7",
+        "A four-device mesh splits the chosen axis."
+      ],
+      [
+        "Global operation",
+        "reduce across all rows",
+        "Local storage and global array semantics are different views."
+      ]
+    ],
+    "note": "Conceptual layout for eight rows and four logical CPU devices. All devices share one host; this explains partitioning rather than simulating accelerator speed or network behavior."
+  }
+}

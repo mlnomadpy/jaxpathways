@@ -1,0 +1,247 @@
+{
+  "date": "2026-10-05",
+  "scope": "All 17 phase manifests and 88 lesson structures; targeted close reading and numerical changes documented in the Markdown report. Not an independent expert review of every claim.",
+  "phases": [
+    {
+      "phaseId": "welcome",
+      "title": "Setup & first steps",
+      "lessonIds": [
+        "welcome-01",
+        "welcome-02",
+        "welcome-cpu",
+        "welcome-03"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can someone else reproduce your first result?",
+      "remainingGap": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run."
+    },
+    {
+      "phaseId": "arrays",
+      "title": "Arrays & pure functions",
+      "lessonIds": [
+        "arrays-01",
+        "arrays-02",
+        "arrays-03",
+        "arrays-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can you spot a wrong axis even when the program runs?",
+      "remainingGap": "Sparse and ragged inputs need additional contract-focused labs; this phase deliberately teaches fixed dense arrays first."
+    },
+    {
+      "phaseId": "transforms",
+      "title": "JAX transformations",
+      "lessonIds": [
+        "first-gradient",
+        "transforms-02",
+        "transforms-03",
+        "transforms-04",
+        "transforms-05"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "What changes when you differentiate, batch or compile a function?",
+      "remainingGap": "Transformation combinations involving nondifferentiable boundaries require further examples; passing smooth fixtures does not validate arbitrary gradients."
+    },
+    {
+      "phaseId": "state",
+      "title": "State, randomness & control flow",
+      "lessonIds": [
+        "state-01",
+        "state-02",
+        "state-03",
+        "state-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Have you saved everything needed to determine the next step?",
+      "remainingGap": "Local deterministic state does not establish concurrent-writer or multi-host recovery; the recovery and operations phases extend these boundaries."
+    },
+    {
+      "phaseId": "optimization",
+      "title": "Math & optimization",
+      "lessonIds": [
+        "optimization-05",
+        "optimization-01",
+        "optimization-06",
+        "optimization-07",
+        "optimization-02",
+        "optimization-08",
+        "optimization-03",
+        "optimization-09",
+        "optimization-10",
+        "optimization-11",
+        "optimization-04",
+        "optimization-12"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can you explain an optimizer\u2019s behavior from the objective and data?",
+      "remainingGap": "Constrained, nonsmooth and large-scale stochastic optimization are not covered comprehensively. Current ranking evidence is limited to declared synthetic objectives."
+    },
+    {
+      "phaseId": "networks",
+      "title": "Neural network training",
+      "lessonIds": [
+        "networks-01",
+        "networks-02",
+        "networks-03",
+        "networks-04",
+        "networks-05"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Did the network learn the task, or exploit an evaluation mistake?",
+      "remainingGap": "Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images do not establish real-photo generalization."
+    },
+    {
+      "phaseId": "recovery",
+      "title": "Data & checkpoint recovery",
+      "lessonIds": [
+        "recovery-01",
+        "recovery-02",
+        "recovery-03",
+        "recovery-04",
+        "recovery-05",
+        "recovery-06"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can an interrupted run make exactly the same next update?",
+      "remainingGap": "Network storage failures, concurrent checkpoint writers and true multi-host recovery still need separate failure-injection qualification."
+    },
+    {
+      "phaseId": "transformers",
+      "title": "Transformers & language models",
+      "lessonIds": [
+        "transformers-01",
+        "transformers-02",
+        "transformers-03",
+        "transformers-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can you prove that a predicted token cannot see its future?",
+      "remainingGap": "Real-corpus curation, tokenizer tradeoff studies, long-context evaluation and live generative quality need further labs beyond the tiny byte-model harness."
+    },
+    {
+      "phaseId": "performance",
+      "title": "Performance diagnosis",
+      "lessonIds": [
+        "performance-01",
+        "performance-02",
+        "performance-03",
+        "performance-04",
+        "performance-05"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "What measured evidence identifies the bottleneck?",
+      "remainingGap": "CPU traces do not characterize TPU/GPU communication or memory. Target traces and sustained workload measurements remain required for accelerator claims."
+    },
+    {
+      "phaseId": "distributed",
+      "title": "Distributed training",
+      "lessonIds": [
+        "distributed-01",
+        "distributed-02",
+        "distributed-03",
+        "distributed-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Is the distributed update still optimizing the same objective?",
+      "remainingGap": "Real network collectives, multi-controller ingestion and host-loss recovery are unqualified. The optional launch instructions are preparation, not execution receipts."
+    },
+    {
+      "phaseId": "science",
+      "title": "Scientific computing",
+      "lessonIds": [
+        "science-01",
+        "science-02",
+        "science-03",
+        "science-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Are you fitting the physical model or the solver\u2019s error?",
+      "remainingGap": "Adaptive solvers, event handling, stiff systems, PDEs and domain-specific physical validation remain outside the scalar ODE lab."
+    },
+    {
+      "phaseId": "probability",
+      "title": "Probabilistic modeling",
+      "lessonIds": [
+        "probability-01",
+        "probability-02",
+        "probability-03",
+        "probability-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Which uncertainty does your model actually represent?",
+      "remainingGap": "General hierarchical models and robust modern diagnostic workflows need further examples. The instructional sampler is not a replacement for validated inference libraries."
+    },
+    {
+      "phaseId": "rl",
+      "title": "Reinforcement learning",
+      "lessonIds": [
+        "rl-01",
+        "rl-02",
+        "rl-03",
+        "rl-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Is the policy improving under a fixed evaluation protocol?",
+      "remainingGap": "Continuous actions, value-function estimation and larger benchmark environments need new implementation and evaluation labs; this tabular task is deliberately bounded."
+    },
+    {
+      "phaseId": "kernels",
+      "title": "Pallas kernels",
+      "lessonIds": [
+        "kernels-01",
+        "kernels-02",
+        "kernels-03",
+        "kernels-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Does a custom kernel earn its complexity?",
+      "remainingGap": "Actual TPU/GPU compilation, race diagnosis and target tuning remain unqualified; CPU interpretation cannot close these gaps."
+    },
+    {
+      "phaseId": "internals",
+      "title": "Autodiff & JAX internals",
+      "lessonIds": [
+        "internals-01",
+        "internals-02",
+        "internals-03",
+        "internals-04"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Which mathematical operation does the transformed program represent?",
+      "remainingGap": "The tiny interpreter is intentionally incomplete. Production extension APIs, effects and full compiler transformation coverage require further targeted work."
+    },
+    {
+      "phaseId": "deployment",
+      "title": "Deployment, interoperability & edge AI",
+      "lessonIds": [
+        "deployment-02",
+        "deployment-01",
+        "deployment-03",
+        "deployment-05",
+        "deployment-07",
+        "deployment-04",
+        "deployment-06"
+      ],
+      "finding": "Adaptation followed edge deployment, and container packaging followed capacity planning; the phase lacked a diagnostic and staged synthesis.",
+      "improvement": "Does the exported service preserve the model\u2019s complete contract?",
+      "remainingGap": "Actual edge-device delegates, thermal/energy budgets, packed low-bit kernels and production serving loads remain unqualified. The revised sequence moves adaptation before export and containerization before service capacity planning."
+    },
+    {
+      "phaseId": "operations",
+      "title": "Workload operations",
+      "lessonIds": [
+        "operations-01",
+        "operations-02",
+        "operations-03",
+        "operations-04",
+        "operations-05",
+        "operations-06",
+        "operations-07",
+        "operations-08"
+      ],
+      "finding": "Phase entry lacked a diagnostic, staged synthesis and a changed-condition exit task.",
+      "improvement": "Can you detect, explain and safely recover a failed model release?",
+      "remainingGap": "Authenticated review, multi-writer promotion, staged cloud rollout, SLO alerting and live-model abuse evaluation still require separate infrastructure and application-specific labs."
+    }
+  ]
+}

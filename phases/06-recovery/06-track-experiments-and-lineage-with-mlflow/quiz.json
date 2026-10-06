@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-06",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A run is tagged champion. What does that establish?",
+      "options": [
+        "It is automatically deployed and monitored.",
+        "A registry alias points to that version; deployment and acceptance need their own evidence.",
+        "Its validation set is now an untouched test set."
+      ],
+      "correct": 1,
+      "explanation": "An experiment groups comparable runs. A run stores one configuration, a history of metrics and artifacts. Lineage is the connection between those results and the exact code, data and environment that produced them. Tracking records an experiment; it does not recover the optimizer state or prove that a model deserves deployment."
+    }
+  ]
+}

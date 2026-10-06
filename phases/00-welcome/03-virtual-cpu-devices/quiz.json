@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-cpu",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a \\((12,2)\\) global array sharded with `P(\"data\",None)` over four devices mean?",
+      "options": [
+        "Each device holds a \\((3,2)\\) slice and the global array remains \\((12,2)\\).",
+        "Each device holds the complete array.",
+        "Each device represents a separate TPU chip."
+      ],
+      "correct": 0,
+      "explanation": "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware."
+    }
+  ]
+}

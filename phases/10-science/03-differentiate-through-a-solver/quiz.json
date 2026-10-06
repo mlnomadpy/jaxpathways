@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "An autodiff derivative matches the discrete RK4 formula, but both differ from the exact ODE derivative. What should you test next?",
+      "options": [
+        "Replace the derivative with zero.",
+        "Refine the grid at fixed horizon and inspect convergence of sensitivity.",
+        "Increase the optimizer learning rate until they match."
+      ],
+      "correct": 1,
+      "explanation": "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough."
+    }
+  ]
+}

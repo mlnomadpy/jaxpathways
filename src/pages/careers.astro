@@ -1,0 +1,38 @@
+---
+import RoleCards from '../components/paths/RoleCards.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/paths.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { siteUrl } from '../lib/urls.js';
+import pages from '../data/pages.json';
+---
+
+<SiteLayout {...pages.careers}>
+  <main id="main" class="paths-page careers-page">
+    <div class="page-intro">
+      <a href={siteUrl('index.html')}>Home</a>
+      <h1>Explore JAX careers.</h1>
+      <p class="intro">
+        Explore the problems each role solves, the evidence you can practice producing and the
+        lessons available now.
+      </p>
+      <p class="career-availability-note">
+        Each route separates available lessons from planned work.
+      </p>
+    </div>
+    <section id="roles" aria-label="Career routes">
+      <div id="career-browser">
+        <div class="roles-grid" id="role-cards">
+          <RoleCards />
+        </div>
+      </div>
+      <div id="role-detail" class="role-detail" hidden aria-live="polite"></div>
+    </section>
+    <SiteFooter />
+  </main>
+  <script>
+    import '../scripts/entries/careers.js';
+  </script>
+</SiteLayout>

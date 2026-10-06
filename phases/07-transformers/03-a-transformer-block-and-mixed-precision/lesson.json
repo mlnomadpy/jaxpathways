@@ -1,0 +1,131 @@
+{
+  "schemaVersion": 1,
+  "id": "transformers-03",
+  "minutes": 90,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "An attention head mixes information across positions. What else makes it a Transformer block? We’ll add normalization, a small feature-processing network and two residual connections. Then we’ll inspect gradients and compare a lower-precision version. This is a deliberately small CPU teaching block, not a production architecture.",
+    "idea": "This is a teaching block with one attention head, no dropout, no learned normalization scale/bias and no rotary embeddings. It isolates the mechanics rather than reproducing a production architecture. The next lesson adds embeddings and an output head.\n\nAll checks run on CPU. A bfloat16 comparison checks numeric behavior on the installed backend; it does not establish TPU throughput or a universal tolerance.",
+    "objectives": [
+      "Follow the two residual paths",
+      "Normalize features rather than examples",
+      "Test causal independence and differentiation",
+      "Separate storage precision from sensitive arithmetic"
+    ],
+    "sections": [
+      {
+        "title": "Follow the two residual paths",
+        "body": "The first sublayer normalizes each token’s features, creates Q/K/V projections, performs causal attention and projects back to the model width. Add that result to the original \\(x\\). The second sublayer normalizes the intermediate residual, expands feature width, applies GELU, contracts back and adds again.\n\nEvery residual addition needs matching shapes. Zeroing all six projection matrices makes both sublayers contribute zero, so the block must return \\(x\\) exactly. This is an independent boundary case that catches many incorrect residual connections.",
+        "formula": "x → norm → Q/K/V → causal attention → output projection\n└────────────────────────────── add → residual\nresidual → norm → expansion → GELU → contraction\n└────────────────────────────────── add → output"
+      },
+      {
+        "title": "Normalize features rather than examples",
+        "body": "For each token, compute the mean and variance over its feature axis. Subtracting the mean and dividing by `sqrt(variance+epsilon)` makes this sublayer insensitive to a shared finite feature shift, within numerical tolerance. Epsilon prevents division by zero for a constant feature row.\n\nLayer normalization here does not compute statistics across the batch or sequence. Its result has the same shape as its input, and it has no running statistics. Batch normalization and learned affine normalization introduce different state or parameters; do not swap them without revisiting the contract."
+      },
+      {
+        "title": "Test causal independence and differentiation",
+        "body": "Perturb the last token heavily and verify that the first three output rows stay the same. Pre-normalization and the MLP act per token, while the attention mask prevents earlier queries from reading the last key. A full gradient with respect to the parameter pytree should retain each leaf’s shape and remain finite for this input.\n\nFinite gradients are necessary but not sufficient evidence of a correct block. Check known cases, changed inputs, residual identity and eager/compiled agreement together. The loss reduction determines the gradient scale."
+      },
+      {
+        "title": "Separate storage precision from sensitive arithmetic",
+        "body": "Casting every parameter and input to bfloat16 is a simple controlled low-precision experiment, not a complete mixed-precision training policy. A common policy stores selected tensors at lower precision while computing reductions and normalization in float32. The second experiment compares fully cast bfloat16 computation with a policy that keeps feature normalization and score softmax in float32, while casting their outputs back for the lower-precision projections.\n\nRecord maximum absolute error for the supplied small input; do not require bitwise agreement. Precision affects both small denominators and accumulated dot products. If a comparison fails, inspect normalization and input scale before increasing the tolerance. Real models require workload-specific accuracy and performance qualification."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef layer_norm(x):\n    mean = jnp.mean(x, axis=-1, keepdims=True)\n    variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)\n    return (x-mean) / jnp.sqrt(variance + 1e-5)\n\ndef init_block(key, width=8):\n    keys = jax.random.split(key, 6)\n    shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]\n    return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(\n        [\"q\",\"k\",\"v\",\"o\",\"up\",\"down\"], keys, shapes)}\n\ndef block_forward(p, x):\n    h = layer_norm(x)\n    q, k, v = h@p[\"q\"], h@p[\"k\"], h@p[\"v\"]\n    scores = q@k.T / jnp.sqrt(x.shape[-1])\n    allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]\n    weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)\n    residual = x + (weights@v)@p[\"o\"]\n    return residual + jax.nn.gelu(layer_norm(residual)@p[\"up\"])@p[\"down\"]\n\np = init_block(jax.random.key(7))\nx = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10\noutput = block_forward(p, x)\nassert output.shape == x.shape\nassert jnp.all(jnp.isfinite(output))\nzero = jax.tree.map(jnp.zeros_like, p)\nassert jnp.allclose(block_forward(zero, x), x)\nassert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)\nprint(\"Block shape:\", output.shape)",
+    "output": "Output shape \\((4, 8)\\); finite values, zero-projection identity, compiled/eager agreement.",
+    "experiments": [
+      {
+        "title": "Verify the residual identity and causal boundary",
+        "prediction": "Which output rows can change when only the last token changes?",
+        "code": "changed_x = x.at[-1].add(100.)\nchanged_output = block_forward(p, changed_x)\nassert jnp.allclose(changed_output[:3], output[:3], atol=1e-5)\nassert not jnp.allclose(changed_output[-1], output[-1])",
+        "output": "First three rows agree; the last row changes.",
+        "explanation": "Masking and per-token operations preserve causal independence through both sublayers."
+      },
+      {
+        "title": "Compare two precision policies",
+        "prediction": "Which operations use float32 in mixed_block? Will its error necessarily be smaller for every input?",
+        "code": "low_p = jax.tree.map(lambda z:z.astype(jnp.bfloat16), p)\nlow_x = x.astype(jnp.bfloat16)\nlow_out = block_forward(low_p, low_x).astype(jnp.float32)\nerror = jnp.max(jnp.abs(low_out-output))\nprint(\"bfloat16 max absolute error:\", float(error))\nassert jnp.all(jnp.isfinite(low_out))\nassert error < 0.1\n\ndef mixed_block(p, x):\n    h = layer_norm(x.astype(jnp.float32)).astype(jnp.bfloat16)\n    q,k,v = h@p[\"q\"], h@p[\"k\"], h@p[\"v\"]\n    scores = (q@k.T).astype(jnp.float32)/jnp.sqrt(x.shape[-1])\n    allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]\n    weights = jax.nn.softmax(jnp.where(allowed,scores,-jnp.inf),axis=-1).astype(jnp.bfloat16)\n    residual = x+(weights@v)@p[\"o\"]\n    normalized = layer_norm(residual.astype(jnp.float32)).astype(jnp.bfloat16)\n    activation = jax.nn.gelu((normalized@p[\"up\"]).astype(jnp.float32)).astype(jnp.bfloat16)\n    return residual + activation@p[\"down\"]\n\nmixed_out = mixed_block(low_p,low_x).astype(jnp.float32)\nmixed_error = jnp.max(jnp.abs(mixed_out-output))\nprint(\"Float32 reduction policy max absolute error:\",float(mixed_error))\nassert jnp.all(jnp.isfinite(mixed_out))\nassert mixed_error < 0.1",
+        "output": "Both outputs are finite, with max absolute errors below \\(0.1\\) for this fixture. Record both actual errors; their relative order is not guaranteed.",
+        "explanation": "Storage/activation casts and sensitive-reduction precision are separate choices. One fixture cannot establish an accuracy or throughput guarantee."
+      }
+    ],
+    "exercise": "Differentiate the mean squared block output with respect to every projection. Check each gradient leaf’s shape and finite values, then perturb one parameter coordinate and compare a central difference.",
+    "solution": "def objective(params):\n    return jnp.mean(block_forward(params,x)**2)\ng = jax.grad(objective)(p)\nassert all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(jax.tree.leaves(p),jax.tree.leaves(g)))\ndef shifted_objective(delta):\n    altered = {**p, \"down\": p[\"down\"].at[0,0].add(delta)}\n    return objective(altered)\nfd = (shifted_objective(1e-2)-shifted_objective(-1e-2))/(2e-2)\nassert jnp.allclose(fd,g[\"down\"][0,0],atol=1e-4,rtol=2e-2)",
+    "practice": [
+      {
+        "title": "Check normalization without autodiff",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Compute the first normalized row using NumPy and compare. Also check a constant row.",
+        "hint": "Use population variance over features and epsilon \\(10^{-5}\\).",
+        "solution": "row = np.asarray(x[0])\nreference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)\nnp.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)\nassert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)",
+        "explanation": "The independent reduction and constant-row case check the normalization mechanism."
+      },
+      {
+        "title": "Repair a residual width mismatch",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Remove the contraction from the MLP and reproduce the residual addition failure. Restore the contraction and verify shape.",
+        "hint": "The expanded tensor has twice the model width.",
+        "solution": "expanded = jax.nn.gelu(layer_norm(x)@p[\"up\"])\nassert expanded.shape == (4,16)\ntry:\n    _ = x + expanded\nexcept TypeError:\n    pass\nelse:\n    raise AssertionError(\"expected width mismatch\")\nassert (x + expanded@p[\"down\"]).shape == x.shape",
+        "explanation": "Residual paths require matching widths; the down projection restores the model-width contract."
+      }
+    ],
+    "question": "If all projection matrices are zero in this block, what should the output be?",
+    "options": [
+      "Zero",
+      "The original input",
+      "Undefined because attention has zero scores"
+    ],
+    "answer": 1,
+    "explanation": "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\).",
+    "diagnosis": "A residual width error means the expanded MLP tensor was added before its contraction. Check \\((T,2D)\\) versus \\((T,D)\\), restore the down projection and verify the zero-projection identity. For nonfinite or inaccurate lower-precision results, inspect feature variance, epsilon and reduction dtype. Report both measured precision errors rather than assuming a policy must always improve them.",
+    "takeaways": [
+      "Masking and per-token operations preserve causal independence through both sublayers.",
+      "The error bound is a checked example, not an accuracy guarantee for arbitrary models."
+    ],
+    "references": [
+      {
+        "title": "JAX softmax API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.softmax.html"
+      },
+      {
+        "title": "JAX attention API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.dot_product_attention.html"
+      },
+      {
+        "title": "Optax cross entropy",
+        "url": "https://optax.readthedocs.io/en/latest/api/losses.html"
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Prepare the experiment",
+        "instruction": "In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np",
+        "explanation": "These imports provide JAX array transformations and NumPy reference calculations. Define the numerical functions next; the final build block supplies the concrete fixture and checks."
+      },
+      {
+        "title": "2. Implement the mechanism",
+        "instruction": "Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.",
+        "code": "def layer_norm(x):\n    mean = jnp.mean(x, axis=-1, keepdims=True)\n    variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)\n    return (x-mean) / jnp.sqrt(variance + 1e-5)\n\ndef init_block(key, width=8):\n    keys = jax.random.split(key, 6)\n    shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]\n    return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(\n        [\"q\",\"k\",\"v\",\"o\",\"up\",\"down\"], keys, shapes)}\n\ndef block_forward(p, x):\n    h = layer_norm(x)\n    q, k, v = h@p[\"q\"], h@p[\"k\"], h@p[\"v\"]\n    scores = q@k.T / jnp.sqrt(x.shape[-1])\n    allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]\n    weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)\n    residual = x + (weights@v)@p[\"o\"]\n    return residual + jax.nn.gelu(layer_norm(residual)@p[\"up\"])@p[\"down\"]",
+        "explanation": "\\(x\\) → norm → Q/K/V → causal attention → output projection\n└────────────────────────────── add → residual\nresidual → norm → expansion → GELU → contraction\n└────────────────────────────────── add → output"
+      },
+      {
+        "title": "3. Run and check",
+        "instruction": "Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.",
+        "code": "p = init_block(jax.random.key(7))\nx = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10\noutput = block_forward(p, x)\nassert output.shape == x.shape\nassert jnp.all(jnp.isfinite(output))\nzero = jax.tree.map(jnp.zeros_like, p)\nassert jnp.allclose(block_forward(zero, x), x)\nassert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)\nprint(\"Block shape:\", output.shape)",
+        "explanation": "Output shape \\((4, 8)\\); finite values, zero-projection identity, compiled/eager agreement."
+      }
+    ],
+    "visual": {
+      "title": "A residual block adds a correction to its input",
+      "kind": "executed",
+      "prediction": "Does a residual connection force the output to equal the input?",
+      "reading": "Rows are token positions and columns are features. Every cell shows output minus input at that location, so this is a map of the block’s correction, not its raw output. Purple indicates a positive correction, brown a negative correction, and near-white little change.\n\nFeature \\(3\\) increases by about \\(0.0897\\), while feature \\(7\\) decreases by about \\(0.385\\). Those same column patterns repeat across all four rows, up to floating-point rounding. The strongest color marks the largest change in magnitude, not the feature with the largest original activation.",
+      "connection": "Why do the rows look identical? The example builds input rows that differ only by a constant offset across their features. Per-token layer normalization removes that offset, so the normalized rows match. Their projected values match too, so attention’s weighted average is the same even when the causal mask allows different numbers of tokens. The subsequent normalized feed-forward branch preserves this symmetry.\n\nThe block therefore adds almost the same correction to different input rows; the final rows themselves are still different. This repeated pattern comes from the chosen input, not a rule that transformers treat every token identically. Change one feature of one token, rather than shifting the entire row, to break the symmetry and inspect how the correction changes.",
+      "alt": "A residual block adds a correction to its input. Rows are token positions and columns are features. Every cell shows output minus input at that location, so this is a map of the block’s correction, not its raw output. Purple indicates a positive correction, brown a negative correction, and near-white little change. Feature \\(3\\) increases by about \\(0.0897\\), while feature \\(7\\) decreases by about \\(0.385\\). Those same column patterns repeat across all four rows, up to floating-point rounding. The strongest color marks the largest change in magnitude, not the feature with the largest original activation.",
+      "code": "visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['token ' + str(i) for i in range(4)], 'columns': ['f' + str(i) for i in range(8)], 'unit': 'output minus input', 'diverging': True}"
+    }
+  }
+}

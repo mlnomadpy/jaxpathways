@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A program replaces all-reduce with reduce-scatter and immediately gathers the full vector again. What does the idealized ring model predict?",
+      "options": [
+        "Half the communication of the original all-reduce.",
+        "The same two-phase payload, despite a temporarily smaller local result.",
+        "No communication because the global shape is unchanged."
+      ],
+      "correct": 1,
+      "explanation": "The scatter and gather each contribute one phase. The advantage depends on what consumes the partitioned value and when reconstruction is required."
+    }
+  ]
+}

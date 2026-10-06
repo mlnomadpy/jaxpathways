@@ -1,0 +1,24 @@
+---
+import { siteUrl } from '../../lib/urls.js';
+import type { cards } from '../../data/resources.json';
+interface Props {
+  card: (typeof cards)[number];
+}
+const { card } = Astro.props;
+---
+
+<article class="resource-item">
+  <span class="resource-tag">{card.tag}</span>
+  <h3>{card.title}</h3>
+  <p>{card.description}</p>
+  {card.links.map((link, index) => (
+    <a
+      class:list={{ 'resource-link': index === 0 }}
+      href={siteUrl(link.href)}
+      download={link.download}
+    >
+      {link.label}
+    </a>
+  ))}
+  {card.note && <p class="resource-note">{card.note}</p>}
+</article>

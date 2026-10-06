@@ -1,0 +1,81 @@
+{
+  "schemaVersion": 1,
+  "id": "workload-operations",
+  "title": "Operate and recover a local JAX workload",
+  "pathwayId": "ops",
+  "status": "authored",
+  "hardware": "CPU; optional target runtime requires separate validation",
+  "source": "projects/workload-operations/README.md",
+  "requiredLessonIds": [
+    "operations-01",
+    "operations-02",
+    "operations-03",
+    "operations-04",
+    "operations-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Real process lifecycle",
+      "command": "python3 projects/workload-operations/tests/check.py --stage 1 --implementation projects/workload-operations/my_model.py",
+      "evidence": "Success, runtime rejection and reaped timeout traces",
+      "expected": "PASS stage 1",
+      "diagnosis": "Check observed backend, last event, stderr and the actual child exit before retrying."
+    },
+    {
+      "id": "2",
+      "title": "Workload observability",
+      "command": "python3 projects/workload-operations/tests/check.py --stage 2 --implementation projects/workload-operations/my_model.py",
+      "evidence": "Raw structured events and independently recomputed throughput boundaries",
+      "expected": "PASS stage 2",
+      "diagnosis": "Count examples once and synchronize completed updates before timing."
+    },
+    {
+      "id": "3",
+      "title": "Complete-state recovery",
+      "command": "python3 projects/workload-operations/tests/check.py --stage 3 --implementation projects/workload-operations/my_model.py",
+      "evidence": "Interrupted/uninterrupted next-update and final-state equality",
+      "expected": "PASS stage 3",
+      "diagnosis": "Inspect momentum, key, step and provenance rather than only final loss."
+    },
+    {
+      "id": "4",
+      "title": "Artifact selection and rollback",
+      "command": "python3 projects/workload-operations/tests/check.py --stage 4 --implementation projects/workload-operations/my_model.py",
+      "evidence": "Content IDs, failed gate and unchanged pointer, tested rollback",
+      "expected": "PASS stage 4",
+      "diagnosis": "Verify stored payload digests and prior compatibility before changing the pointer."
+    },
+    {
+      "id": "5",
+      "title": "Capacity and cost",
+      "command": "python3 projects/workload-operations/tests/check.py --stage 5 --implementation projects/workload-operations/my_model.py",
+      "evidence": "Measured local service time plus separately labeled demand, reserve and price assumptions",
+      "expected": "PASS stage 5",
+      "diagnosis": "Carry seconds-to-hours conversion, idle reservation and failure overhead explicitly."
+    }
+  ],
+  "rubric": [
+    "Observe actual worker exit and reap timed-out processes",
+    "Derive useful metrics from synchronized work with explicit units",
+    "Rehearse failure and verify complete-state next-update recovery",
+    "Reject corrupted or incompatible checkpoint provenance",
+    "Publish, gate, atomically select and roll back exact content IDs",
+    "Separate measured workload duration from hypothetical demand and prices",
+    "Keep a runbook grounded in the actual failure trace and target limitations"
+  ],
+  "workspaceFile": "projects/workload-operations/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/workload-operations/starter/model.py projects/workload-operations/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/workload-operations/starter/model.py projects/workload-operations/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/workload-operations/tests/check.py --stage 5 --implementation solution",
+  "setupNote": "Work from the extracted top folder containing requirements-cpu.txt and projects/workload-operations. The checks use bounded local subprocesses and temporary directories; no cloud allocation occurs.",
+  "assessmentId": "ops"
+}

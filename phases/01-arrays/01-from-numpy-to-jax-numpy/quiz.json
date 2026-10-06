@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "arrays-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why does `x.mean(axis=0)` return two values?",
+      "options": [
+        "It averages each row",
+        "It preserves the two feature columns while reducing observations",
+        "JAX always returns two values"
+      ],
+      "correct": 1,
+      "explanation": "Axis \\(0\\) is the observation axis. Reducing it leaves one statistic for each feature column."
+    }
+  ]
+}

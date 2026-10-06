@@ -1,0 +1,85 @@
+{
+  "schemaVersion": 1,
+  "id": "optimizer-audit",
+  "title": "Audit conditioning, gradient noise and optimizer decisions",
+  "pathwayId": "foundations",
+  "status": "authored",
+  "hardware": "CPU; original synthetic numerical experiments",
+  "source": "projects/optimizer-audit/README.md",
+  "requiredLessonIds": [
+    "optimization-01",
+    "optimization-02",
+    "optimization-03",
+    "optimization-04",
+    "optimization-05",
+    "optimization-06",
+    "optimization-07",
+    "optimization-08",
+    "optimization-09",
+    "optimization-10",
+    "optimization-11",
+    "optimization-12"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Derive and check the local geometry",
+      "command": "python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1",
+      "evidence": "Changed-shape loss, gradient, Hessian and independent directional checks",
+      "expected": "PASS stage 1 and all earlier stages",
+      "diagnosis": "Keep the one-half and mean factors consistent; compare actual residuals before debugging autodiff."
+    },
+    {
+      "id": "2",
+      "title": "Change coordinates without changing predictions",
+      "command": "python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 2",
+      "evidence": "Training-only RMS, mapped weights and measured Hessian condition",
+      "expected": "PASS stage 2 and all earlier stages",
+      "diagnosis": "Use training scales on held-out rows and map weights back before comparing predictions."
+    },
+    {
+      "id": "3",
+      "title": "Measure noise by enumerating the sampler",
+      "command": "python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 3",
+      "evidence": "Exact batch mean/covariance and uneven-batch weighting diagnosis",
+      "expected": "PASS stage 3 and all earlier stages",
+      "diagnosis": "Declare with-replacement sampling and count every ordered draw; do not average unequal batches equally."
+    },
+    {
+      "id": "4",
+      "title": "Audit optimizer state and update order",
+      "command": "python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 4",
+      "evidence": "NumPy-matched GD/momentum/Adam trajectories, clipping, schedules and divergent step",
+      "expected": "PASS stage 4 and all earlier stages",
+      "diagnosis": "Separate raw gradients, optimizer directions and parameter updates; compare post-update MSE on the same rows."
+    },
+    {
+      "id": "5",
+      "title": "Separate prediction and coefficient stability",
+      "command": "python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 5",
+      "evidence": "Rank-deficient ridge oracle, sensitivity perturbation and validation-selected penalty",
+      "expected": "PASS stage 5 and all earlier stages",
+      "diagnosis": "A small prediction error does not identify each coefficient; never select the penalty with test results."
+    }
+  ],
+  "rubric": [
+    "Derive loss, gradient and Hessian independently of autodiff",
+    "Explain a coordinate change through prediction and curvature evidence",
+    "Distinguish exact minibatch expectation from an observed noisy update",
+    "Compare retained optimizer state and clipping/schedule order using identical examples",
+    "Separate coefficient identification, prediction quality and validation/test roles"
+  ],
+  "workspaceFile": "projects/optimizer-audit/my_optimization.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/optimizer-audit/starter/optimization.py projects/optimizer-audit/my_optimization.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/optimizer-audit/starter/optimization.py projects/optimizer-audit/my_optimization.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/optimizer-audit/tests/check.py --implementation solution --stage all",
+  "setupNote": "Run from the extracted bundle\u2019s top folder with requirements-cpu.txt installed. Complete the initial regression audit before this deeper five-stage optimization audit."
+}

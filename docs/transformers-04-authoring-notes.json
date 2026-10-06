@@ -1,0 +1,6 @@
+{
+  "id": "transformers-04",
+  "exercise": "Generate twelve new tokens from prompt bcab. Derive the expected cycle first; verify the string. Explain why success on this periodic example does not establish natural-language performance.",
+  "evidence": "Save the target alignment, uniform-loss derivation, training/held-out metrics with corpus limitations, snapshot continuation check, generated cycle and metadata/prompt rejection repairs.",
+  "check": "Why is saving only parameters insufficient to replay the next Adam update?"
+}

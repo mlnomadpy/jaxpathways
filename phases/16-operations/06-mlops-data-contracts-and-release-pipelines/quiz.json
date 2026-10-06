@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-06",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "An input drift alert fired before new labels arrived. What follows?",
+      "options": [
+        "Retrain and automatically replace the active model.",
+        "Investigate the change and gather quality evidence before choosing a response.",
+        "Declare accuracy has decreased by the drift score."
+      ],
+      "correct": 1,
+      "explanation": "MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which evidence lets another learner reproduce your environment?",
+      "options": [
+        "A screenshot of the final number only",
+        "Python/package versions, device information, and the script",
+        "The name of your editor"
+      ],
+      "correct": 1,
+      "explanation": "The script records what ran; versions and device information record where it ran. CPU success does not establish TPU compatibility."
+    }
+  ]
+}

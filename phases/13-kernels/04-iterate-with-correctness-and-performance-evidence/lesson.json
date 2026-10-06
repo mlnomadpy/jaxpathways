@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "id": "kernels-04",
+  "minutes": 120,
+  "content": {
+    "problem": "A custom kernel is useful only if it stays correct when shapes and dtypes change and improves an actual workload. What evidence is enough to keep an optimization, and what should we do when no target hardware is available? We will build a repeatable audit and an executable target-only measurement protocol.",
+    "idea": "Treat each optimization as a hypothesis about a measured bottleneck. Freeze the mathematical and precision contract, test representative boundaries, then compare completed target execution with a strong baseline. This lesson executes the correctness side on CPU simulation and makes target-only evidence impossible to fabricate through fallback.",
+    "objectives": [
+      "Build a representative shape/dtype correctness matrix for an actual Pallas pipeline.",
+      "Separate kernel implementation error from input/output precision differences.",
+      "Implement a guarded compile/warmup/synchronized target benchmark.",
+      "Connect profiling, partitioning, tiling and numerical evidence to an optimization decision."
+    ],
+    "sections": [
+      {
+        "title": "Choose cases that challenge the contract",
+        "body": "The fixtures include a singleton matrix, one exact tile, a small tail and a larger tail. The same frozen random data is tested in float32 and bfloat16. A benchmark-sized divisible matrix alone would miss many boundary bugs. Every implementation must return the original logical shape; padding is internal work, not extra observations in the output."
+      },
+      {
+        "title": "Use two references for two different questions",
+        "body": "The represented-input oracle promotes the actual stored inputs to float32, computes \\(2X+Y\\), then applies the declared output cast. Kernel agreement with that reference checks implementation correctness. Comparing against the original float32 dataset instead reveals input and output rounding. These differences should not be merged into one unexplained error number or hidden by arbitrarily loose tolerances."
+      },
+      {
+        "title": "Make target timing a complete operation",
+        "body": "The target protocol compiles separately, warms up five times and synchronizes every measured output. Inputs are already placed on the target before timing. The measured boundary includes logical-shape padding, the Pallas call and cropping, because those are part of this wrapper’s user-visible cost. A kernel-only benchmark would need a different explicit boundary and could not be compared directly with these results."
+      },
+      {
+        "title": "Compare a strong baseline with the same contract",
+        "body": "The baseline is jitted ordinary JAX with float32 arithmetic and the same final dtype cast. XLA can fuse simple expressions, so the custom kernel may lose. Report every sample, median and ninetieth percentile, plus compilation time and actual device. The percentile is a distribution summary, not the maximum. Repeated samples expose variability but do not erase cache, thermal or system-load effects."
+      },
+      {
+        "title": "Relate local kernels to the distributed workload",
+        "body": "A kernel optimizes an operation on local arrays; it does not automatically reduce all-reduce or resharding costs. Use a profile to determine whether the workload is limited by local compute, memory movement, input staging or communication. Keep the partitioning decision explicit and verify the same global numerical objective. A faster local operation may have little end-to-end benefit when another part dominates."
+      },
+      {
+        "title": "Accept, revise or decline the optimization",
+        "body": "Keep the change only when representative correctness and the declared target boundary improve enough to justify maintenance and specialization costs. If performance is unchanged or worse, retain the simpler baseline and record the experiment. If target hardware is unavailable, retain the tested kernel and its runnable target protocol, mark performance unverified, and do not fill the gap with interpret-mode timings. The scale synthesis assessment asks for profiling and partitioning evidence as well as the local kernel audit."
+      }
+    ],
+    "output": "All eight shape/dtype cases exactly match the represented-input oracle. bfloat16 differs from original float32 values by a separately reported precision gap. The benchmark refuses CPU execution; no target speedup is reported.",
+    "experiments": [
+      {
+        "title": "Preserve correctness under a joint row permutation",
+        "prediction": "Will permuting both input rows change any value after restoring the order?",
+        "code": "a=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)\nb=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)\norder=jnp.array([8,0,7,1,6,2,5,3,4])\ninverse=jnp.argsort(order)\noriginal=pipelined_axpy(a,b)\npermuted=pipelined_axpy(a[order],b[order])[inverse]\nnp.testing.assert_array_equal(np.asarray(permuted),np.asarray(original))\nprint(\"Joint row permutation preserves output identity\")",
+        "output": "The restored output is identical.",
+        "explanation": "This operation has no coupling between rows. A failure suggests ownership or data-pairing errors rather than ordinary floating-point variability."
+      },
+      {
+        "title": "Make a precision-policy counterexample",
+        "prediction": "Will rounding an intermediate bfloat16 value always equal one final output cast?",
+        "code": "first=jnp.array([1.00390625],dtype=jnp.float32)\nsecond=jnp.array([0.00390625],dtype=jnp.float32)\nearly=(first.astype(jnp.bfloat16).astype(jnp.float32)+second).astype(jnp.bfloat16)\nlate=(first+second).astype(jnp.bfloat16)\nassert float(early[0])!=float(late[0])\nprint(\"Early/final-only rounding:\",float(early[0]),float(late[0]))",
+        "output": "Early rounding yields 1.0 while one final cast yields 1.0078125.",
+        "explanation": "The order of representation changes is part of the numerical algorithm. A reference must reflect the declared contract rather than a superficially similar expression."
+      }
+    ],
+    "exercise": "Add a (15,255) fixture, compare two tile choices and two buffer counts, and retain the same frozen inputs for every candidate. Report errors and padded work separately.",
+    "solution": "a=jnp.asarray(np.random.default_rng(8).normal(size=(15,255)),dtype=jnp.float32)\nb=jnp.asarray(np.random.default_rng(9).normal(size=(15,255)),dtype=jnp.float32)\nexpected=2*np.asarray(a)+np.asarray(b)\nfor block in [(8,128),(16,256)]:\n    for buffers in (2,3):\n        result=pipelined_axpy(a,b,block,buffers=buffers)\n        np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)\n        gm=(15+block[0]-1)//block[0];gn=(255+block[1]-1)//block[1]\n        print(\"Configuration, padded elements:\",block,buffers,gm*gn*block[0]*block[1])",
+    "practice": [
+      {
+        "title": "Reject unsupported dtype mixing",
+        "prompt": "Pass a float32 matrix and a bfloat16 matrix together, then pass integer arrays. Verify neither is silently coerced into an undocumented kernel contract.",
+        "hint": "The wrapper promises matching float32 or bfloat16 inputs.",
+        "solution": "for first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:\n    rejected=False\n    try:pipelined_axpy(first,second)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Mixed and integer dtypes rejected\")",
+        "explanation": "Supported dtype boundaries are a correctness decision. Adding a new dtype requires a reference, target support and justified tolerances.",
+        "difficulty": "Practice"
+      },
+      {
+        "title": "Bound the end-to-end opportunity",
+        "prompt": "A profile attributes \\(30\\%\\) of time to a local operation. Derive the best end-to-end speedup if that operation becomes twice as fast, then the impossible-to-exceed limit if its cost vanished.",
+        "hint": "Keep the remaining workload time unchanged in the calculation.",
+        "solution": "fraction=.3\nlocal_speedup=2.0\nend_to_end=1/((1-fraction)+fraction/local_speedup)\nlimit=1/(1-fraction)\nnp.testing.assert_allclose(end_to_end,1.1764705882352942)\nnp.testing.assert_allclose(limit,1.4285714285714286)\nprint(\"Modeled twofold-local speedup and zero-cost limit:\",end_to_end,limit)",
+        "explanation": "These are conditional analytic estimates, not measured speedups. Communication or scheduling changes can alter the fraction, so reprofile the complete workload.",
+        "difficulty": "Challenge"
+      }
+    ],
+    "diagnosis": "If bfloat16 disagrees only with the original float32 data, check whether the represented-input oracle still passes before calling it a kernel bug. If timings are implausibly tiny, inspect synchronization and device placement. If a local speedup fails to improve the training step, reprofile communication and other unchanged work. Never replace missing target evidence with simulated-device labels.",
+    "question": "The kernel matches the represented-input oracle exactly but differs from the original float32 dataset in bfloat16. What should the report say?",
+    "options": [
+      "The kernel is necessarily incorrect.",
+      "The interpretation proves TPU throughput.",
+      "Implementation correctness passed for the declared precision policy; the separate representation gap must still be reported."
+    ],
+    "answer": 2,
+    "explanation": "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset.",
+    "visual": {
+      "title": "Precision gaps remain after kernel correctness passes",
+      "kind": "executed",
+      "prediction": "Can a kernel have zero implementation error and still differ from the original higher-precision data?",
+      "reading": "The horizontal axis names four frozen matrix fixtures. The vertical axis is maximum absolute difference between the actual simulated Pallas output and the original float32 dataset calculation. Float32 bars have zero height; bfloat16 bars are positive because stored inputs and final outputs are rounded.\n\nThe bfloat16 gaps are approximately \\(0.000862\\), \\(0.02522\\), \\(0.03079\\) and \\(0.02922\\). The largest matrix does not have the largest gap in this run. These are different frozen inputs, so the bar heights do not establish a monotonic law relating shape and error.",
+      "connection": "The separate represented-input oracle checks in the code report zero implementation error for every shape and dtype. This plot answers the additional precision question: what changed relative to the original float32 values despite correct execution of the chosen contract?\n\nThe figure contains no runtime or target-memory data. It cannot establish throughput, pipeline overlap or TPU correctness. Those claims require the guarded target runner and actual completed accelerator execution.",
+      "alt": "Float32 bars show zero gap to the original data calculation, while bfloat16 gaps range from about 0.000862 to 0.03079 after all represented-input correctness checks pass.",
+      "code": "labels=['1 x 1','8 x 128','9 x 129','17 x 257']\nvisual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original float32 values','series':[{'label':'float32','y':[r[0] for r in precision_gaps]},{'label':'bfloat16','y':[r[1] for r in precision_gaps]}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Keep reference semantics, target mode and benchmark boundary together",
+        "instruction": "Create main.py for the first block, then append each block in order in your course CPU environment.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nfrom jax.experimental import pallas as pl\nfrom jax.experimental.pallas import tpu as pltpu\n\ndef validate_pair(x,y,block):\n    if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:\n        raise ValueError(\"inputs must be nonempty matrices with identical shapes\")\n    if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):\n        raise ValueError(\"matching float32 or bfloat16 inputs required\")\n    if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):\n        raise ValueError(\"two positive integer block dimensions required\")\n\ndef pad_pair(x,y,block):\n    validate_pair(x,y,block)\n    m,n=x.shape;bm,bn=block\n    padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)\n    pads=((0,padded[0]-m),(0,padded[1]-n))\n    return jnp.pad(x,pads),jnp.pad(y,pads),padded\n\ndef axpy_body(x_ref,y_ref,out_ref):\n    result=2.0*x_ref[...].astype(jnp.float32)+y_ref[...].astype(jnp.float32)\n    out_ref[...]=result.astype(out_ref.dtype)\n\ndef blocked_axpy(x,y,block=(2,4)):\n    px,py,padded=pad_pair(x,y,block)\n    bm,bn=block\n    spec=pl.BlockSpec(block,lambda i,j:(i,j))\n    out=pl.pallas_call(axpy_body,\n        out_shape=jax.ShapeDtypeStruct(padded,x.dtype),\n        grid=(padded[0]//bm,padded[1]//bn),\n        in_specs=(spec,spec),out_specs=spec,interpret=True)(px,py)\n    return out[:x.shape[0],:x.shape[1]]\n\ndef pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode=\"simulate\"):\n    px,py,padded=pad_pair(x,y,block)\n    bm,bn=block\n    if bm%8 or bn%128:\n        raise ValueError(\"pipeline blocks must be multiples of (8,128)\")\n    if buffers not in (2,3):\n        raise ValueError(\"this lab supports two or three buffers\")\n    if mode not in (\"simulate\",\"tpu\"):\n        raise ValueError(\"mode must explicitly be simulate or tpu\")\n    if mode==\"tpu\" and (jax.default_backend()!=\"tpu\" or any(not isinstance(a,jax.core.Tracer) and any(d.platform!=\"tpu\" for d in a.devices()) for a in (x,y))):\n        raise RuntimeError(\"Real TPU inputs/backend required; simulation fallback is disabled\")\n    spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=buffers))\n    output_spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=2))\n    def outer(x_hbm,y_hbm,out_hbm):\n        pltpu.emit_pipeline(axpy_body,grid=(padded[0]//bm,padded[1]//bn),\n            in_specs=(spec,spec),out_specs=output_spec,\n            no_pipelining=no_pipelining)(x_hbm,y_hbm,out_hbm)\n    whole=pl.BlockSpec(memory_space=pl.ANY)\n    interpretation=pltpu.InterpretParams(detect_races=True) if mode==\"simulate\" else False\n    call=pl.pallas_call(outer,out_shape=jax.ShapeDtypeStruct(padded,x.dtype),\n        in_specs=(whole,whole),out_specs=whole,interpret=interpretation)\n    if mode==\"simulate\":\n        # This describes a SIMULATED TPU layout, not the machine running the code.\n        abstract=jax.sharding.AbstractMesh((1,),(\"simulated_device\",),\n            abstract_device=jax.sharding.AbstractDevice(device_kind=\"TPU v5 lite\",num_cores=1))\n        with jax.sharding.use_abstract_mesh(abstract):\n            output=call(px,py)\n    else:\n        output=call(px,py)\n    return output[:x.shape[0],:x.shape[1]]\n\ndef target_benchmark(candidate,baseline,args,repeats=20):\n    if jax.default_backend()!=\"tpu\" or any(d.platform!=\"tpu\" for a in args for d in a.devices()):\n        raise RuntimeError(\"TPU benchmark requires real TPU inputs; interpretation timings are not accepted\")\n    if repeats<5:\n        raise ValueError(\"at least five repeated target measurements required\")\n    import time\n    records={}\n    for label,function in ((\"candidate\",candidate),(\"baseline\",baseline)):\n        started=time.perf_counter()\n        compiled=jax.jit(function).lower(*args).compile()\n        compile_seconds=time.perf_counter()-started\n        for _ in range(5):compiled(*args).block_until_ready()\n        samples=[]\n        for _ in range(repeats):\n            started=time.perf_counter()\n            compiled(*args).block_until_ready()\n            samples.append((time.perf_counter()-started)*1000)\n        records[label]={\"compile_seconds\":compile_seconds,\"samples_ms\":samples,\n            \"median_ms\":float(np.median(samples)),\"p90_ms\":float(np.percentile(samples,90))}\n    records[\"actual_backend\"]=jax.default_backend()\n    records[\"device_kind\"]=jax.devices()[0].device_kind\n    records[\"boundary\"]=\"already-placed logical inputs; complete padded/cropped wrapper output; warm synchronized execution\"\n    return records",
+        "explanation": "The candidate uses the same checked Pallas pipeline. The benchmark rejects CPU inputs before compiling or timing. It measures the complete wrapper, including padding/cropping, and records compilation separately."
+      },
+      {
+        "title": "Audit a matrix of shapes and precisions",
+        "instruction": "Create main.py for the first block, then append each block in order in your course CPU environment.",
+        "code": "rng=np.random.default_rng(42)\ncorrectness=[];precision_gaps=[]\nfor shape in [(1,1),(8,128),(9,129),(17,257)]:\n    original_x=rng.normal(size=shape).astype(np.float32)\n    original_y=rng.normal(size=shape).astype(np.float32)\n    ideal=2*original_x+original_y\n    row=[];gaps=[]\n    for dtype in (jnp.float32,jnp.bfloat16):\n        a=jnp.asarray(original_x,dtype=dtype);b=jnp.asarray(original_y,dtype=dtype)\n        actual=pipelined_axpy(a,b)\n        represented=(2*a.astype(jnp.float32)+b.astype(jnp.float32)).astype(dtype)\n        np.testing.assert_array_equal(np.asarray(actual),np.asarray(represented))\n        error=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-np.asarray(represented,dtype=np.float32))))\n        gap=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-ideal)))\n        row.append(error);gaps.append(gap)\n    correctness.append(row);precision_gaps.append(gaps)\nprint(\"Kernel errors versus represented-input oracle:\",correctness)\nprint(\"Gaps versus original float32 data:\",precision_gaps)",
+        "explanation": "A zero kernel error means the implementation honored the declared precision contract. A nonzero gap to the original float32 dataset measures representation and output rounding, which must be reported separately."
+      },
+      {
+        "title": "Check the evidence boundary before requesting a speed claim",
+        "instruction": "Create main.py for the first block, then append each block in order in your course CPU environment.",
+        "code": "if jax.default_backend()==\"cpu\":\n    probe=jnp.ones((8,128),dtype=jnp.float32)\n    rejected=False\n    try:target_benchmark(lambda a,b:pipelined_axpy(a,b,mode=\"tpu\"),lambda a,b:2*a+b,(probe,probe))\n    except RuntimeError as error:\n        rejected=True;print(\"Expected benchmark refusal:\",error)\n    assert rejected\nprint(\"CPU correctness audit complete; no TPU latency or speedup measured\")",
+        "explanation": "The runnable target entry point is the project target_tpu.py script. A missing target receipt remains a missing target receipt; the CPU result is not relabeled as performance data."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nfrom jax.experimental import pallas as pl\nfrom jax.experimental.pallas import tpu as pltpu\n\ndef validate_pair(x,y,block):\n    if x.ndim!=2 or x.shape!=y.shape or min(x.shape)<1:\n        raise ValueError(\"inputs must be nonempty matrices with identical shapes\")\n    if x.dtype!=y.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):\n        raise ValueError(\"matching float32 or bfloat16 inputs required\")\n    if len(block)!=2 or any(not isinstance(n,int) or n<1 for n in block):\n        raise ValueError(\"two positive integer block dimensions required\")\n\ndef pad_pair(x,y,block):\n    validate_pair(x,y,block)\n    m,n=x.shape;bm,bn=block\n    padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)\n    pads=((0,padded[0]-m),(0,padded[1]-n))\n    return jnp.pad(x,pads),jnp.pad(y,pads),padded\n\ndef axpy_body(x_ref,y_ref,out_ref):\n    result=2.0*x_ref[...].astype(jnp.float32)+y_ref[...].astype(jnp.float32)\n    out_ref[...]=result.astype(out_ref.dtype)\n\ndef blocked_axpy(x,y,block=(2,4)):\n    px,py,padded=pad_pair(x,y,block)\n    bm,bn=block\n    spec=pl.BlockSpec(block,lambda i,j:(i,j))\n    out=pl.pallas_call(axpy_body,\n        out_shape=jax.ShapeDtypeStruct(padded,x.dtype),\n        grid=(padded[0]//bm,padded[1]//bn),\n        in_specs=(spec,spec),out_specs=spec,interpret=True)(px,py)\n    return out[:x.shape[0],:x.shape[1]]\n\ndef pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode=\"simulate\"):\n    px,py,padded=pad_pair(x,y,block)\n    bm,bn=block\n    if bm%8 or bn%128:\n        raise ValueError(\"pipeline blocks must be multiples of (8,128)\")\n    if buffers not in (2,3):\n        raise ValueError(\"this lab supports two or three buffers\")\n    if mode not in (\"simulate\",\"tpu\"):\n        raise ValueError(\"mode must explicitly be simulate or tpu\")\n    if mode==\"tpu\" and (jax.default_backend()!=\"tpu\" or any(not isinstance(a,jax.core.Tracer) and any(d.platform!=\"tpu\" for d in a.devices()) for a in (x,y))):\n        raise RuntimeError(\"Real TPU inputs/backend required; simulation fallback is disabled\")\n    spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=buffers))\n    output_spec=pl.BlockSpec(block,lambda i,j:(i,j),pipeline_mode=pl.Buffered(buffer_count=2))\n    def outer(x_hbm,y_hbm,out_hbm):\n        pltpu.emit_pipeline(axpy_body,grid=(padded[0]//bm,padded[1]//bn),\n            in_specs=(spec,spec),out_specs=output_spec,\n            no_pipelining=no_pipelining)(x_hbm,y_hbm,out_hbm)\n    whole=pl.BlockSpec(memory_space=pl.ANY)\n    interpretation=pltpu.InterpretParams(detect_races=True) if mode==\"simulate\" else False\n    call=pl.pallas_call(outer,out_shape=jax.ShapeDtypeStruct(padded,x.dtype),\n        in_specs=(whole,whole),out_specs=whole,interpret=interpretation)\n    if mode==\"simulate\":\n        # This describes a SIMULATED TPU layout, not the machine running the code.\n        abstract=jax.sharding.AbstractMesh((1,),(\"simulated_device\",),\n            abstract_device=jax.sharding.AbstractDevice(device_kind=\"TPU v5 lite\",num_cores=1))\n        with jax.sharding.use_abstract_mesh(abstract):\n            output=call(px,py)\n    else:\n        output=call(px,py)\n    return output[:x.shape[0],:x.shape[1]]\n\ndef target_benchmark(candidate,baseline,args,repeats=20):\n    if jax.default_backend()!=\"tpu\" or any(d.platform!=\"tpu\" for a in args for d in a.devices()):\n        raise RuntimeError(\"TPU benchmark requires real TPU inputs; interpretation timings are not accepted\")\n    if repeats<5:\n        raise ValueError(\"at least five repeated target measurements required\")\n    import time\n    records={}\n    for label,function in ((\"candidate\",candidate),(\"baseline\",baseline)):\n        started=time.perf_counter()\n        compiled=jax.jit(function).lower(*args).compile()\n        compile_seconds=time.perf_counter()-started\n        for _ in range(5):compiled(*args).block_until_ready()\n        samples=[]\n        for _ in range(repeats):\n            started=time.perf_counter()\n            compiled(*args).block_until_ready()\n            samples.append((time.perf_counter()-started)*1000)\n        records[label]={\"compile_seconds\":compile_seconds,\"samples_ms\":samples,\n            \"median_ms\":float(np.median(samples)),\"p90_ms\":float(np.percentile(samples,90))}\n    records[\"actual_backend\"]=jax.default_backend()\n    records[\"device_kind\"]=jax.devices()[0].device_kind\n    records[\"boundary\"]=\"already-placed logical inputs; complete padded/cropped wrapper output; warm synchronized execution\"\n    return records\n\nrng=np.random.default_rng(42)\ncorrectness=[];precision_gaps=[]\nfor shape in [(1,1),(8,128),(9,129),(17,257)]:\n    original_x=rng.normal(size=shape).astype(np.float32)\n    original_y=rng.normal(size=shape).astype(np.float32)\n    ideal=2*original_x+original_y\n    row=[];gaps=[]\n    for dtype in (jnp.float32,jnp.bfloat16):\n        a=jnp.asarray(original_x,dtype=dtype);b=jnp.asarray(original_y,dtype=dtype)\n        actual=pipelined_axpy(a,b)\n        represented=(2*a.astype(jnp.float32)+b.astype(jnp.float32)).astype(dtype)\n        np.testing.assert_array_equal(np.asarray(actual),np.asarray(represented))\n        error=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-np.asarray(represented,dtype=np.float32))))\n        gap=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-ideal)))\n        row.append(error);gaps.append(gap)\n    correctness.append(row);precision_gaps.append(gaps)\nprint(\"Kernel errors versus represented-input oracle:\",correctness)\nprint(\"Gaps versus original float32 data:\",precision_gaps)\n\nif jax.default_backend()==\"cpu\":\n    probe=jnp.ones((8,128),dtype=jnp.float32)\n    rejected=False\n    try:target_benchmark(lambda a,b:pipelined_axpy(a,b,mode=\"tpu\"),lambda a,b:2*a+b,(probe,probe))\n    except RuntimeError as error:\n        rejected=True;print(\"Expected benchmark refusal:\",error)\n    assert rejected\nprint(\"CPU correctness audit complete; no TPU latency or speedup measured\")",
+    "references": [
+      {
+        "title": "Pallas grids and block specifications",
+        "url": "https://docs.jax.dev/en/latest/pallas/grid_blockspec.html"
+      },
+      {
+        "title": "Writing TPU kernels: layout and memory restrictions",
+        "url": "https://docs.jax.dev/en/latest/pallas/tpu/details.html"
+      },
+      {
+        "title": "TPU pipelining and emit_pipeline",
+        "url": "https://docs.jax.dev/en/latest/pallas/tpu/pipelining.html"
+      },
+      {
+        "title": "TPU interpretation is simulation, not target execution",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.experimental.pallas.tpu.InterpretParams.html"
+      }
+    ],
+    "takeaways": [
+      "Choose cases that challenge the contract",
+      "Use two references for two different questions",
+      "Make target timing a complete operation",
+      "Compare a strong baseline with the same contract",
+      "Relate local kernels to the distributed workload",
+      "Accept, revise or decline the optimization"
+    ]
+  }
+}

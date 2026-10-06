@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transformers-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which dimension should softmax normalize for one query to combine all key/value pairs?",
+      "options": [
+        "The query dimension",
+        "The key dimension",
+        "The value feature dimension"
+      ],
+      "correct": 1,
+      "explanation": "One query needs a probability distribution across keys; each row must sum to one."
+    }
+  ]
+}

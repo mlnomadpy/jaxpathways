@@ -1,0 +1,94 @@
+.project-section {
+  background: #faf9fe;
+  padding: 54px 0;
+}
+.project-section > .page-width {
+  width: 100%;
+}
+.project-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 28px;
+}
+.project-tile {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  background: white;
+  display: flex;
+  flex-direction: column;
+}
+.project-drawing {
+  min-height: 170px;
+  background: #e8e1f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+.project-drawing :is(svg, img) {
+  width: 100%;
+  height: 125px;
+}
+.project-copy {
+  padding: 26px 28px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+.project-copy h3 {
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+.project-copy p {
+  font: 16px/1.7 var(--reading);
+  color: var(--muted);
+  max-width: 47ch;
+  margin-bottom: 18px;
+}
+.project-copy a {
+  align-self: flex-start;
+  margin-top: auto;
+}
+.project-scope {
+  font-size: 12px;
+  color: var(--muted);
+  margin: 18px 0 0;
+}
+@media (max-width: 760px) {
+  .project-section {
+    padding: 36px 0;
+  }
+}
+@media (max-width: 760px) {
+  .project-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .project-copy {
+    padding: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .project-copy h3 {
+    font-size: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .project-copy p {
+    font-size: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .project-drawing {
+    min-height: 145px;
+    padding: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .project-drawing :is(svg, img) {
+    height: 110px;
+  }
+}

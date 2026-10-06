@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "pretraining-02",
+  "minutes": 75,
+  "content": {
+    "problem": "If part of an image is hidden, can the model infer it from visible patches? The important question is whether hidden pixels are truly absent from the encoder, not whether the reconstruction looks attractive.",
+    "idea": "We split small synthetic images into patches, expose only two patches to a linear encoder/decoder map and train on the other two. This teaches masking, spatial order and reconstruction accounting. It is not a full ViT masked autoencoder; the simple image generator makes independent checks possible.",
+    "objectives": [
+      "Preserve patch order and pixel order",
+      "Keep hidden pixels out of the encoder",
+      "Verify the changed-condition exercise and explain the limits of this fixture."
+    ],
+    "sections": [
+      {
+        "title": "Preserve patch order and pixel order",
+        "body": "Images use batch, height, width, channel axes. A \\(4\\times4\\) single-channel image becomes four \\(2\\times2\\) patches with four scalars each. Reshape alone does not generally produce row-major patch order; transpose the grid and within-patch axes deliberately. The first patch is checked against an independently sliced image region."
+      },
+      {
+        "title": "Keep hidden pixels out of the encoder",
+        "body": "Gather visible patches before constructing features. The clean full image belongs only to the reconstruction target. In a masked autoencoder, a visible-only encoder can reduce encoder work while a decoder uses position information and mask tokens to restore the complete patch ordering. Our linear decoder has an explicit output coordinate for each patch/pixel, so it has a fixed positional contract without a Transformer."
+      },
+      {
+        "title": "Reduce over the hidden reconstruction targets",
+        "body": "First average squared pixel error within each patch, then sum the hidden-patch errors and divide by the hidden count. This definition gives equal weight to every hidden pixel because all patches have equal size. Errors on visible outputs are excluded. Mixing visible and hidden pixels can flatter the score when copying visible inputs is easy.",
+        "math": "L=\\frac{\\sum_{b,k}m_{bk}\\,\\frac1P\\sum_{j=1}^{P}(\\widehat x_{bkj}-x_{bkj})^2}{\\sum_{b,k}m_{bk}}"
+      },
+      {
+        "title": "Interpret normalization and reconstruction",
+        "body": "Raw-pixel reconstruction and per-patch normalized reconstruction are different objectives. Normalization can remove a patch’s brightness/contrast information and requires a clear inverse or evaluation convention. This lesson uses raw synthetic values and records MSE in squared input units. Do not compare that number directly with a differently normalized experiment."
+      },
+      {
+        "title": "Evaluate beyond the training mask",
+        "body": "The reference checks intermediate amplitudes that were not training examples. That is a small interpolation test, not semantic recognition. For transfer, freeze the encoder and train a probe on separate labels, or fine-tune under a held-out protocol. Compare mask ratios with fixed compute/data budgets and keep all-hidden or all-visible policies explicit."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef patchify(images, patch=2):\n    b,h,w,c = images.shape\n    if h % patch or w % patch:\n        raise ValueError('image dimensions must be divisible by patch size')\n    return images.reshape(b,h//patch,patch,w//patch,patch,c).transpose(0,1,3,2,4,5).reshape(b,(h//patch)*(w//patch),patch*patch*c)\n\ndef masked_mse(prediction, target, hidden):\n    per_patch = jnp.mean((prediction-target)**2, axis=-1)\n    return jnp.sum(jnp.where(hidden, per_patch, 0.)) / jnp.sum(hidden)\n\ndef validate_mask(selected, shape):\n    a = np.asarray(selected)\n    if a.shape != shape or a.dtype != np.bool_ or not a.any():\n        raise ValueError('a nonempty Boolean mask of the target shape is required')\n\n# Four patches share an amplitude plus a fixed spatial offset; no real photographs.\namplitude = jnp.array([.1,.3,.6,.8])\nbase_image = jnp.arange(16,dtype=jnp.float32).reshape(4,4,1)/32\nimages = amplitude[:,None,None,None]+base_image[None]\npatches = patchify(images)\nnp.testing.assert_array_equal(patches[0,0],np.asarray(images[0,:2,:2,:]).reshape(-1))\nhidden = jnp.array([[False,True,True,False]]*4)\nvalidate_mask(hidden,patches.shape[:2])\n# The encoder receives only visible patches; original hidden pixels are targets only.\nvisible = patches[:,[0,3],:]\nfeatures = jnp.concatenate([visible.reshape(4,-1),jnp.ones((4,1))],axis=1)\nw = jnp.zeros((9,16)); history=[]\nloss=lambda w:masked_mse((features@w).reshape(4,4,4),patches,hidden)\nstep=jax.jit(jax.value_and_grad(loss))\nfor _ in range(100):\n    value,g=step(w);history.append(float(value));w=w-.15*g\nprediction=(features@w).reshape(4,4,4)\nassert history[-1] < history[0]*.02\n# A scalar host loop is independent of the vectorized reduction.\nexpected=np.mean([float(np.mean((np.asarray(prediction[b,k])-np.asarray(patches[b,k]))**2)) for b in range(4) for k in [1,2]])\nnp.testing.assert_allclose(loss(w),expected,rtol=1e-5)\nvisible_changed=prediction.at[:,[0,3],:].set(999.)\nnp.testing.assert_allclose(masked_mse(visible_changed,patches,hidden),loss(w),atol=1e-7)\nheld_images=jnp.array([.2,.5])[:,None,None,None]+base_image[None]\nheld_patches=patchify(held_images)\nheld_features=jnp.concatenate([held_patches[:,[0,3],:].reshape(2,-1),jnp.ones((2,1))],axis=1)\nheld_loss=float(masked_mse((held_features@w).reshape(2,4,4),held_patches,hidden[:2]))\nassert held_loss < .02\nprint('Masked pixel MSE initial/final/held amplitudes:',history[0],history[-1],held_loss)\n",
+    "output": "Hidden-patch training MSE falls below 0.002 and held-amplitude MSE stays below 0.02.",
+    "experiments": [
+      {
+        "title": "Make visible-output errors arbitrarily large",
+        "prediction": "Will visible-output corruption raise the hidden-patch objective?",
+        "code": "bad_visible=prediction.at[:,[0,3],:].set(-1000.)\nnp.testing.assert_allclose(masked_mse(bad_visible,patches,hidden),masked_mse(prediction,patches,hidden))\nassert float(jnp.mean((bad_visible-patches)**2))>1000\nprint('Hidden MSE unchanged; full-image MSE is large.')",
+        "output": "Hidden MSE stays unchanged while full-image MSE grows dramatically.",
+        "explanation": "The disagreement identifies the reduction contract. Neither metric is universally correct; label which region and preprocessing it measures."
+      }
+    ],
+    "exercise": "Verify the bottom-right patch against a direct slice and explain why a whole-array reshape can hide a spatial permutation.",
+    "solution": "np.testing.assert_array_equal(patches[2,3],np.asarray(images[2,2:,2:,:]).reshape(-1))\nprint('Bottom-right patch order verified.')",
+    "practice": [
+      {
+        "title": "Expose the leakage shortcut",
+        "difficulty": "Transfer",
+        "prompt": "Compare a decoder that returns the clean target with the visible-only model. Explain why zero reconstruction loss is not sufficient evidence.",
+        "hint": "Measure the shortcut, then inspect which function inputs contain hidden pixels.",
+        "solution": "shortcut=patches\nassert float(masked_mse(shortcut,patches,hidden))==0.\nassert features.shape[1]==9\nprint('The zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.')",
+        "explanation": "An information-flow check is necessary because the leaked solution can outperform the honest model on the objective itself."
+      }
+    ],
+    "question": "Why must the encoder input be inspected separately from reconstruction loss?",
+    "options": [
+      "A leaked target can produce a perfect loss without learning to infer missing content.",
+      "A lower training loss by itself proves the full application is ready.",
+      "Matching shapes alone establishes the required behavior."
+    ],
+    "answer": 0,
+    "explanation": "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order.",
+    "diagnosis": "If reconstruction is excellent before learning, inspect target leakage. If patches look shuffled, verify the patch transpose and decoder restoration order. If metrics differ, compare the mask count and normalization.",
+    "references": [
+      {
+        "title": "Masked Autoencoders",
+        "url": "https://arxiv.org/abs/2111.06377"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Masked image modeling: reconstruct missing patches — recorded experiment",
+      "kind": "executed",
+      "prediction": "Predict what should change during training and what this curve cannot establish.",
+      "reading": "The line shows hidden-patch training MSE before each update, falling from about \\(0.554\\) to \\(0.00169\\). The vertical units are squared raw pixel units. The line excludes visible-patch reconstruction errors; it cannot be read as full-image MSE.",
+      "connection": "Each image contains an amplitude and a fixed spatial pattern. Visible patches reveal the amplitude, so a linear decoder can infer hidden pixels on this deliberately learnable task. Separate held-amplitude MSE is approximately 0.00118. Natural-image semantics and a visible-token Transformer remain different experiments.",
+      "alt": "The line shows hidden-patch training MSE before each update, falling from about \\(0.554\\) to \\(0.00169\\). The vertical units are squared raw pixel units. The line excludes visible-patch reconstruction errors; it cannot be read as full-image MSE.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+    }
+  }
+}

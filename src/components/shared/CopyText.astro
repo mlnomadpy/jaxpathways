@@ -1,0 +1,26 @@
+---
+interface Props {
+  id: string;
+  text: string;
+  label: string;
+  kind?: 'command' | 'prompt';
+}
+const { id, text, label, kind = 'command' } = Astro.props;
+---
+
+<div class={kind === 'command' ? 'command-line' : 'prompt-line'}>
+  {kind === 'command' ? (
+    <pre><code id={id}>{text}</code></pre>
+  ) : (
+    <p>
+      <span class="prompt-label">
+        <strong>3.</strong> Ask your agent:
+      </span>{' '}
+      <code id={id}>{text}</code>
+    </p>
+  )}
+  <button type="button" data-home-copy={id} aria-label={label}>
+    {kind === 'command' ? 'Copy command' : 'Copy prompt'}
+  </button>
+</div>
+<p class="copy-result" id={`${id}-status`} role="status" aria-live="polite"></p>

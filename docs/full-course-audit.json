@@ -1,0 +1,1781 @@
+{
+  "date": "2026-10-05",
+  "scope": "All canonical entries, route/project/assessment manifests, source-bound CPU evidence, reader/tutor delivery, CI configuration, and targeted editorial review. Not independent expert review, exhaustive mathematical proof checking, or live browser/device validation.",
+  "counts": {
+    "phases": 17,
+    "entries": 83,
+    "authored": 50,
+    "planned": 33,
+    "implementedProjects": 2,
+    "assessmentDrafts": 2,
+    "authoredRouteCapstones": 1,
+    "duplicateMainPractice": 9,
+    "quizCorrectPositions": {
+      "first": 16,
+      "second": 34,
+      "thirdOrLater": 0
+    },
+    "declaredAuthoredMinutes": 3710
+  },
+  "phases": [
+    {
+      "id": "welcome",
+      "title": "Setup & first steps",
+      "authored": 3,
+      "total": 4,
+      "improvement": "Make a CPU-only first success an explicit complete path; keep logical devices and the unfinished TPU bridge optional.",
+      "acceptance": "Fresh-machine walkthrough on each supported OS; first independent edit and explanation."
+    },
+    {
+      "id": "arrays",
+      "title": "Arrays & pure functions",
+      "authored": 4,
+      "total": 4,
+      "improvement": "Connect isolated transformations into one reusable preprocessing module, retaining training-only statistics.",
+      "acceptance": "Unequal axes, constant feature, unseen batch and malformed input checked by a learner-owned script."
+    },
+    {
+      "id": "transforms",
+      "title": "JAX transformations",
+      "authored": 5,
+      "total": 5,
+      "improvement": "Use one running problem to compose grad, vmap and jit, then ask for a transfer without showing the solution.",
+      "acceptance": "Independent vectorized/loop and eager/compiled comparisons with a changed batch and objective."
+    },
+    {
+      "id": "state",
+      "title": "State, randomness & control flow",
+      "authored": 4,
+      "total": 4,
+      "improvement": "Combine keys, pytree state, scan and branching in one small persistent simulator.",
+      "acceptance": "A restart from a saved state reproduces the next random event and transition."
+    },
+    {
+      "id": "optimization",
+      "title": "Math & optimization",
+      "authored": 12,
+      "total": 12,
+      "improvement": "Retain the mathematical depth but separate essential training prerequisites from optional deeper study; expand the synthesis assessment to match the eight added lessons.",
+      "acceptance": "A learner justifies validation, regularization, batch aggregation and optimizer-state decisions on a changed multifeature problem."
+    },
+    {
+      "id": "networks",
+      "title": "Neural network training",
+      "authored": 5,
+      "total": 5,
+      "improvement": "Move from synthetic shape/correctness fixtures to a fixed, documented real dataset with a baseline and failure analysis.",
+      "acceptance": "Dataset provenance, frozen splits, train-only preprocessing, baseline, error examples and multiseed report."
+    },
+    {
+      "id": "recovery",
+      "title": "Data & checkpoint recovery",
+      "authored": 4,
+      "total": 5,
+      "improvement": "Make recovery a runnable staged project; complete asynchronous/failure-boundary instruction.",
+      "acceptance": "Interrupt a separate process after known boundaries, resume, compare state and data position, and reject incomplete snapshots."
+    },
+    {
+      "id": "transformers",
+      "title": "Transformers & language models",
+      "authored": 4,
+      "total": 4,
+      "improvement": "Keep the periodic fixture as a wiring check, then add a small corpus project that needs contextual prediction.",
+      "acceptance": "Documented corpus split, simple baseline, eligible-token loss, persistent checkpoint, generation policy and failure examples."
+    },
+    {
+      "id": "performance",
+      "title": "Performance diagnosis",
+      "authored": 2,
+      "total": 5,
+      "improvement": "Complete profiling, memory and before/after measurement rather than stopping at timers and trace counters.",
+      "acceptance": "A saved trace with annotated bottleneck, correctness-preserving change, repeated measurements and named hardware."
+    },
+    {
+      "id": "distributed",
+      "title": "Distributed training",
+      "authored": 2,
+      "total": 4,
+      "improvement": "Complete communication and recovery; provide actual multi-device evidence before promising scaling outcomes.",
+      "acceptance": "Global numerical reference, placement explanation, communication evidence and a measured scaling/recovery report."
+    },
+    {
+      "id": "science",
+      "title": "Scientific computing",
+      "authored": 0,
+      "total": 4,
+      "improvement": "Author the first complete CPU inverse-problem sequence; all four specialist lessons are missing.",
+      "acceptance": "Known parameter recovery, conservation/stability checks, independent gradients and unseen trajectories."
+    },
+    {
+      "id": "probability",
+      "title": "Probabilistic modeling",
+      "authored": 0,
+      "total": 4,
+      "improvement": "Author a Bayesian regression sequence and diagnostics; all four specialist lessons are missing.",
+      "acceptance": "Prior/posterior predictive checks, chain diagnostics and uncertainty interpretation."
+    },
+    {
+      "id": "rl",
+      "title": "Reinforcement learning",
+      "authored": 0,
+      "total": 4,
+      "improvement": "Author environment, rollout, policy-gradient and evaluation lessons as one project; all four are missing.",
+      "acceptance": "Known transition tests, baseline policy and evaluated returns across independent seeds."
+    },
+    {
+      "id": "kernels",
+      "title": "Pallas kernels",
+      "authored": 0,
+      "total": 4,
+      "improvement": "Keep the route a roadmap until kernel lessons and supported accelerator evidence exist.",
+      "acceptance": "Reference parity across shapes/dtypes followed by reproducible timing on named hardware."
+    },
+    {
+      "id": "internals",
+      "title": "Autodiff & JAX internals",
+      "authored": 1,
+      "total": 4,
+      "improvement": "Build out JVP/VJP, custom derivatives and lowering from the existing jaxpr lesson; reuse rather than duplicate the math-phase introduction.",
+      "acceptance": "A custom rule checked independently, including its domain boundaries and a changed input."
+    },
+    {
+      "id": "deployment",
+      "title": "Deployment, interoperability & edge AI",
+      "authored": 4,
+      "total": 6,
+      "improvement": "Connect the framework and precision labs to a trained artifact, executable serving workload and real device evaluation.",
+      "acceptance": "Cross-runtime parity, calibration/accuracy report, supported operators, cold/warm latency, memory and target-device record."
+    },
+    {
+      "id": "operations",
+      "title": "Workload operations",
+      "authored": 0,
+      "total": 5,
+      "improvement": "Author one operational vertical slice before presenting five separate job capabilities; all five lessons are missing.",
+      "acceptance": "Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    }
+  ],
+  "routes": [
+    {
+      "id": "foundations",
+      "title": "Start with JAX",
+      "authored": 28,
+      "total": 29,
+      "estimatedAuthoredMinutes": 1790,
+      "capstoneStatus": "authored",
+      "missing": [
+        "welcome-03"
+      ]
+    },
+    {
+      "id": "internals",
+      "title": "Understand JAX itself",
+      "authored": 29,
+      "total": 33,
+      "estimatedAuthoredMinutes": 1880,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "internals-02",
+        "internals-03",
+        "internals-04"
+      ]
+    },
+    {
+      "id": "models",
+      "title": "Train neural networks",
+      "authored": 41,
+      "total": 43,
+      "estimatedAuthoredMinutes": 2990,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "recovery-05"
+      ]
+    },
+    {
+      "id": "ops",
+      "title": "Operate JAX workloads",
+      "authored": 41,
+      "total": 53,
+      "estimatedAuthoredMinutes": 2930,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "recovery-05",
+        "performance-03",
+        "performance-04",
+        "performance-05",
+        "distributed-03",
+        "distributed-04",
+        "operations-01",
+        "operations-02",
+        "operations-03",
+        "operations-04",
+        "operations-05"
+      ]
+    },
+    {
+      "id": "probability",
+      "title": "Model uncertainty",
+      "authored": 28,
+      "total": 33,
+      "estimatedAuthoredMinutes": 1790,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "probability-01",
+        "probability-02",
+        "probability-03",
+        "probability-04"
+      ]
+    },
+    {
+      "id": "rl",
+      "title": "Learn by interacting",
+      "authored": 33,
+      "total": 38,
+      "estimatedAuthoredMinutes": 2245,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "rl-01",
+        "rl-02",
+        "rl-03",
+        "rl-04"
+      ]
+    },
+    {
+      "id": "scale",
+      "title": "Make it fast. Make it scale.",
+      "authored": 41,
+      "total": 52,
+      "estimatedAuthoredMinutes": 2930,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "recovery-05",
+        "performance-03",
+        "performance-04",
+        "performance-05",
+        "distributed-03",
+        "distributed-04",
+        "kernels-01",
+        "kernels-02",
+        "kernels-03",
+        "kernels-04"
+      ]
+    },
+    {
+      "id": "science",
+      "title": "Simulate and discover",
+      "authored": 28,
+      "total": 33,
+      "estimatedAuthoredMinutes": 1790,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "science-01",
+        "science-02",
+        "science-03",
+        "science-04"
+      ]
+    },
+    {
+      "id": "ship",
+      "title": "Ship and adapt JAX workloads",
+      "authored": 43,
+      "total": 50,
+      "estimatedAuthoredMinutes": 3060,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "recovery-05",
+        "performance-03",
+        "performance-04",
+        "performance-05",
+        "deployment-02",
+        "deployment-04"
+      ]
+    },
+    {
+      "id": "tpu",
+      "title": "Build a TPU training system",
+      "authored": 43,
+      "total": 48,
+      "estimatedAuthoredMinutes": 3150,
+      "capstoneStatus": "planned",
+      "missing": [
+        "welcome-03",
+        "recovery-05",
+        "performance-03",
+        "performance-04",
+        "performance-05"
+      ]
+    }
+  ],
+  "lessons": [
+    {
+      "id": "welcome-01",
+      "title": "Set up your learning workspace",
+      "phase": "welcome",
+      "status": "authored",
+      "source": "phases/00-welcome/01-set-up-your-learning-workspace/lesson.json",
+      "path": "phases/00-welcome/01-set-up-your-learning-workspace",
+      "minutes": 40,
+      "proseWordsExcludingVisual": 1724,
+      "coreLines": 14,
+      "buildSteps": 0,
+      "experiments": 0,
+      "practice": 0,
+      "sections": [
+        "1. Download and unpack your workspace",
+        "2. Check that Python is installed",
+        "3. Put the terminal in the right folder",
+        "4. Create the environment and install the packages",
+        "5. Run your first saved program",
+        "6. Make one change and save your result",
+        "7. Resume when you open a new terminal",
+        "When a step fails: match the symptom"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Observe a novice installing and editing the first script; report OS-specific failures and time to first independent result."
+    },
+    {
+      "id": "welcome-02",
+      "title": "Meet your arrays and devices",
+      "phase": "welcome",
+      "status": "authored",
+      "source": "phases/00-welcome/02-meet-your-arrays-and-devices/lesson.json",
+      "path": "phases/00-welcome/02-meet-your-arrays-and-devices",
+      "minutes": 45,
+      "proseWordsExcludingVisual": 932,
+      "coreLines": 9,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read the table before using an API",
+        "Derive a reduction and its output shape",
+        "Distinguish dtype from mathematical value",
+        "Inspect placement without assuming an accelerator"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a no-code-before-prediction axis exercise with an unfamiliar rectangular array."
+    },
+    {
+      "id": "welcome-cpu",
+      "title": "Practice with four virtual CPU devices",
+      "phase": "welcome",
+      "status": "authored",
+      "source": "phases/00-welcome/03-virtual-cpu-devices/lesson.json",
+      "path": "phases/00-welcome/03-virtual-cpu-devices",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 1090,
+      "coreLines": 27,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Configure the runtime before it exists",
+        "Distinguish logical devices from your CPU hardware",
+        "A global array contains local pieces",
+        "Check arithmetic separately from placement"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Offer as an optional placement lab rather than a required early detour for CPU model learners."
+    },
+    {
+      "id": "welcome-03",
+      "title": "Move your experiment to a TPU",
+      "phase": "welcome",
+      "status": "planned",
+      "source": "phases/00-welcome/03-move-your-experiment-to-a-tpu/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Fresh-machine walkthrough on each supported OS; first independent edit and explanation."
+    },
+    {
+      "id": "arrays-01",
+      "title": "From NumPy to jax.numpy",
+      "phase": "arrays",
+      "status": "authored",
+      "source": "phases/01-arrays/01-from-numpy-to-jax-numpy/lesson.json",
+      "path": "phases/01-arrays/01-from-numpy-to-jax-numpy",
+      "minutes": 45,
+      "proseWordsExcludingVisual": 1184,
+      "coreLines": 8,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Follow an axis through a reduction",
+        "Derive the centering and scale values",
+        "Fit statistics once; apply them consistently",
+        "Give constant features an explicit policy",
+        "Use NumPy as a numerical reference, not an execution substitute"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Continue the same preprocessing artifact into later array lessons instead of resetting the example."
+    },
+    {
+      "id": "arrays-02",
+      "title": "Shapes, broadcasting, and dtypes",
+      "phase": "arrays",
+      "status": "authored",
+      "source": "phases/01-arrays/02-shapes-broadcasting-and-dtypes/lesson.json",
+      "path": "phases/01-arrays/02-shapes-broadcasting-and-dtypes",
+      "minutes": 50,
+      "proseWordsExcludingVisual": 1037,
+      "coreLines": 8,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Work the shape rule one dimension at a time",
+        "Do not test axes with only square arrays",
+        "A legal broadcast can change your loss",
+        "Shape and dtype are separate contracts",
+        "Make boundary checks before reducing"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Turn the shape and dtype cases into an independent preprocessing contract exercise."
+    },
+    {
+      "id": "arrays-03",
+      "title": "Pure functions and explicit inputs",
+      "phase": "arrays",
+      "status": "authored",
+      "source": "phases/01-arrays/03-pure-functions-and-explicit-inputs/lesson.json",
+      "path": "phases/01-arrays/03-pure-functions-and-explicit-inputs",
+      "minutes": 45,
+      "proseWordsExcludingVisual": 1033,
+      "coreLines": 7,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Hidden state makes the signature incomplete",
+        "Array immutability does not make a dictionary immutable",
+        "Treat a step as an input/output contract",
+        "Choose a clear transformation boundary",
+        "A deterministic check has limits"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Carry the explicit function interface into the next project and test caller-state preservation."
+    },
+    {
+      "id": "arrays-04",
+      "title": "Immutable updates and indexing",
+      "phase": "arrays",
+      "status": "authored",
+      "source": "phases/01-arrays/04-immutable-updates-and-indexing/lesson.json",
+      "path": "phases/01-arrays/04-immutable-updates-and-indexing",
+      "minutes": 45,
+      "proseWordsExcludingVisual": 1024,
+      "coreLines": 10,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "A Python name and an array value are different",
+        "Set replaces; add accumulates",
+        "Choose a mask when you want to keep the shape",
+        "Make the index domain part of the contract",
+        "Carry functional updates into training state"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a small debugging task combining masking, update semantics and invalid-index policy."
+    },
+    {
+      "id": "first-gradient",
+      "title": "Your first gradient",
+      "phase": "transforms",
+      "status": "authored",
+      "source": "phases/02-transforms/01-your-first-gradient/lesson.json",
+      "path": "phases/02-transforms/01-your-first-gradient",
+      "minutes": 55,
+      "proseWordsExcludingVisual": 1278,
+      "coreLines": 8,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read a slope before you compute it",
+        "Three ways to obtain a derivative",
+        "Follow the chain rule through the program",
+        "Know the contract of grad",
+        "A zero gradient is a question, not a verdict"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a short placement check and a learner-generated explanation of a slope on a new curve."
+    },
+    {
+      "id": "transforms-02",
+      "title": "Losses and value_and_grad",
+      "phase": "transforms",
+      "status": "authored",
+      "source": "phases/02-transforms/02-losses-and-value-and-grad/lesson.json",
+      "path": "phases/02-transforms/02-losses-and-value-and-grad",
+      "minutes": 55,
+      "proseWordsExcludingVisual": 1164,
+      "coreLines": 10,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "From three residuals to one decision",
+        "Derive the gradient independently",
+        "Read value_and_grad as an interface",
+        "Predict whether a step improves the objective",
+        "Separate objective value from useful metrics"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Reuse the regression fixture across transformations and later optimization to reduce repeated introductions."
+    },
+    {
+      "id": "transforms-03",
+      "title": "Batch a function with vmap",
+      "phase": "transforms",
+      "status": "authored",
+      "source": "phases/02-transforms/03-batch-a-function-with-vmap/lesson.json",
+      "path": "phases/02-transforms/03-batch-a-function-with-vmap",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 1242,
+      "coreLines": 9,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Write down the axis contract",
+        "Build a reference that is easy to trust",
+        "Shared does not mean copied or frozen",
+        "Change layout without changing semantics",
+        "Separate per-example and aggregate gradients",
+        "Compose transformations around the question"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a composed transformation task whose axes differ from the worked example."
+    },
+    {
+      "id": "transforms-04",
+      "title": "Compile a function with jit",
+      "phase": "transforms",
+      "status": "authored",
+      "source": "phases/02-transforms/04-compile-a-function-with-jit/lesson.json",
+      "path": "phases/02-transforms/04-compile-a-function-with-jit",
+      "minutes": 55,
+      "proseWordsExcludingVisual": 1213,
+      "coreLines": 19,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Separate the work hidden in one call",
+        "Check values before timing",
+        "Wait for the quantity you are timing",
+        "Use repetitions and report a distribution",
+        "Compile the computation you intend to repeat",
+        "Decide when compilation is worth its setup"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Tie timing practice to a saved report with a measurement boundary and repeated samples."
+    },
+    {
+      "id": "transforms-05",
+      "title": "Tracing, static arguments, and recompilation",
+      "phase": "transforms",
+      "status": "authored",
+      "source": "phases/02-transforms/05-tracing-static-arguments-and-recompilation/lesson.json",
+      "path": "phases/02-transforms/05-tracing-static-arguments-and-recompilation",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 1289,
+      "coreLines": 14,
+      "buildSteps": 0,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Separate metadata, configuration, and data",
+        "Read a tiny staged program",
+        "Why a Python if can fail",
+        "Make configuration choices explicit",
+        "Inspect tracing without confusing it with runtime logging",
+        "Carry this boundary into the next phase"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Turn trace diagnosis into a small executable bug-and-repair lab with retained output."
+    },
+    {
+      "id": "state-01",
+      "title": "Random keys without surprises",
+      "phase": "state",
+      "status": "authored",
+      "source": "phases/03-state/01-random-keys-without-surprises/lesson.json",
+      "path": "phases/03-state/01-random-keys-without-surprises",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 941,
+      "coreLines": 12,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Treat a key as an explicit input",
+        "Carry the continuation key explicitly",
+        "Separate replay from a statistical claim",
+        "Allocate randomness by sample identity"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Use learner-authored random-state continuation in the phase integration artifact."
+    },
+    {
+      "id": "state-02",
+      "title": "Pytrees and structured parameters",
+      "phase": "state",
+      "status": "authored",
+      "source": "phases/03-state/02-pytrees-and-structured-parameters/lesson.json",
+      "path": "phases/03-state/02-pytrees-and-structured-parameters",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 917,
+      "coreLines": 12,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Identify containers, leaves and structure",
+        "Derive the matching gradient tree",
+        "Apply corresponding leaves, not unrelated arrays",
+        "Keep metadata separate from differentiated state"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Extend structured parameters into the same running model rather than another isolated tree."
+    },
+    {
+      "id": "state-03",
+      "title": "Compiled loops with lax.scan",
+      "phase": "state",
+      "status": "authored",
+      "source": "phases/03-state/03-compiled-loops-with-lax-scan/lesson.json",
+      "path": "phases/03-state/03-compiled-loops-with-lax-scan",
+      "minutes": 65,
+      "proseWordsExcludingVisual": 872,
+      "coreLines": 11,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Separate carry from recorded outputs",
+        "Keep the carry contract invariant",
+        "Differentiate the recurrence by hand",
+        "Compile the repeated transition without a timing promise"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Join scan history and saved carry to the phase simulator and test a resumed suffix."
+    },
+    {
+      "id": "state-04",
+      "title": "Branches with lax.cond",
+      "phase": "state",
+      "status": "authored",
+      "source": "phases/03-state/04-branches-with-lax-cond/lesson.json",
+      "path": "phases/03-state/04-branches-with-lax-cond",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 902,
+      "coreLines": 8,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Locate the decision boundary",
+        "Trace both branches and check their result types",
+        "Choose cond or where by the shape of the question",
+        "Inspect boundary behavior and derivatives"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Combine branching with that simulator and check behavior around a changed boundary."
+    },
+    {
+      "id": "optimization-05",
+      "title": "Vectors, norms, and projections",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/05-vectors-norms-and-projections/lesson.json",
+      "path": "phases/04-optimization/05-vectors-norms-and-projections",
+      "minutes": 60,
+      "proseWordsExcludingVisual": 792,
+      "coreLines": 18,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read length and alignment separately",
+        "Find the closest point on a line",
+        "Use orthogonality as an independent check",
+        "Know when the formula is undefined"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Offer geometry as a just-in-time bridge with a new-vector reasoning check."
+    },
+    {
+      "id": "optimization-01",
+      "title": "Linear algebra and loss intuition",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/01-linear-algebra-and-loss-intuition/lesson.json",
+      "path": "phases/04-optimization/01-linear-algebra-and-loss-intuition",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1197,
+      "coreLines": 15,
+      "buildSteps": 3,
+      "experiments": 3,
+      "practice": 2,
+      "sections": [
+        "Map one row to one prediction",
+        "Calculate loss before differentiating",
+        "Expose a broadcast that changes the problem",
+        "Change the dataset and retain the contract",
+        "Derive the vector gradient from individual errors"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Connect residual accounting to the project data contract and learner-written validation."
+    },
+    {
+      "id": "optimization-06",
+      "title": "Least squares, rank, and conditioning",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/06-least-squares-rank-and-conditioning/lesson.json",
+      "path": "phases/04-optimization/06-least-squares-rank-and-conditioning",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 798,
+      "coreLines": 16,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Solve a fit you can verify by hand",
+        "Use a solver, not an explicit inverse",
+        "Separate rank from fit quality",
+        "Measure sensitivity rather than guessing"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Assess changed-rank and ill-conditioned examples in the synthesis, with prediction error versus parameter sensitivity."
+    },
+    {
+      "id": "optimization-07",
+      "title": "The chain rule, Jacobians, and directions",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/07-chain-rule-jacobians-and-directional-derivatives/lesson.json",
+      "path": "phases/04-optimization/07-chain-rule-jacobians-and-directional-derivatives",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 703,
+      "coreLines": 23,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Build a Jacobian one entry at a time",
+        "Push an input direction forward",
+        "Pull output sensitivity backward",
+        "Check both sides of the same calculation"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Require a directional sensitivity explanation in synthesis; align with the future internals JVP/VJP lesson."
+    },
+    {
+      "id": "optimization-02",
+      "title": "Gradient checking and numerical accuracy",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/02-gradient-checking-and-numerical-accuracy/lesson.json",
+      "path": "phases/04-optimization/02-gradient-checking-and-numerical-accuracy",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1154,
+      "coreLines": 14,
+      "buildSteps": 3,
+      "experiments": 3,
+      "practice": 2,
+      "sections": [
+        "Build an independent derivative estimate",
+        "Separate truncation error from cancellation",
+        "Test directions as well as coordinates",
+        "Recognize what a gradient check cannot prove",
+        "Do not mistake a kink for a smooth derivative"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Have the learner produce and explain their own finite-difference error plot on a nonquadratic function."
+    },
+    {
+      "id": "optimization-08",
+      "title": "Curvature, Hessians, and learning rates",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/08-curvature-hessians-and-learning-rates/lesson.json",
+      "path": "phases/04-optimization/08-curvature-hessians-and-learning-rates",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 787,
+      "coreLines": 24,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read a bowl through its curvature",
+        "Derive a stability bound",
+        "See why scaling helps",
+        "Distinguish a minimum from a stationary point"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add curvature-based rate justification to the project decision report."
+    },
+    {
+      "id": "optimization-03",
+      "title": "Write gradient descent yourself",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/03-write-gradient-descent-yourself/lesson.json",
+      "path": "phases/04-optimization/03-write-gradient-descent-yourself",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1092,
+      "coreLines": 15,
+      "buildSteps": 3,
+      "experiments": 3,
+      "practice": 2,
+      "sections": [
+        "Derive one update before writing the loop",
+        "Read the learning rate through curvature",
+        "Make the trajectory part of the state contract",
+        "Diagnose dynamics instead of only the final number",
+        "Use stopping evidence that survives rescaling"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Make a learner diagnose a changed objective before revealing the stable rate."
+    },
+    {
+      "id": "optimization-09",
+      "title": "Probability, likelihood, and stable losses",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/09-probability-likelihood-and-stable-losses/lesson.json",
+      "path": "phases/04-optimization/09-probability-likelihood-and-stable-losses",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 803,
+      "coreLines": 21,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read likelihood as support for the observed data",
+        "Move from probabilities to logits",
+        "Avoid overflowing intermediate values",
+        "Extend the idea without overstating it"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Extend the assessment beyond regression to a stable classification likelihood and its assumptions."
+    },
+    {
+      "id": "optimization-10",
+      "title": "Regularization and honest validation",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/10-regularization-and-validation/lesson.json",
+      "path": "phases/04-optimization/10-regularization-and-validation",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 835,
+      "coreLines": 24,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "State the exact objective",
+        "Work through shrinkage by hand",
+        "Keep fitting, choosing and reporting separate",
+        "Choose which parameters to penalize"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Make validation-based model selection a full project stage with an untouched final evaluation set."
+    },
+    {
+      "id": "optimization-11",
+      "title": "Minibatches, expectation, and gradient noise",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/11-minibatches-expectation-and-gradient-noise/lesson.json",
+      "path": "phases/04-optimization/11-minibatches-expectation-and-gradient-noise",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 814,
+      "coreLines": 24,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Define the population before estimating it",
+        "Make the independence assumption explicit",
+        "Weight unequal batches by example count",
+        "Separate noise, replay and progress"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Assess unequal microbatch aggregation and a deliberately biased sampler in the project."
+    },
+    {
+      "id": "optimization-04",
+      "title": "Optimize with Optax",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/04-optimize-with-optax/lesson.json",
+      "path": "phases/04-optimization/04-optimize-with-optax",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1060,
+      "coreLines": 20,
+      "buildSteps": 3,
+      "experiments": 3,
+      "practice": 2,
+      "sections": [
+        "Distinguish gradients, updates, and parameters",
+        "Understand the state even when SGD has none",
+        "Make a resumable training transition",
+        "Verify the simpler algorithm before composing one",
+        "Preserve state when a gradient happens to be zero"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Use the project checkpoint to test a real resumed optimizer transition."
+    },
+    {
+      "id": "optimization-12",
+      "title": "Adam, clipping, and learning-rate schedules",
+      "phase": "optimization",
+      "status": "authored",
+      "source": "phases/04-optimization/12-adam-clipping-and-learning-rate-schedules/lesson.json",
+      "path": "phases/04-optimization/12-adam-clipping-and-learning-rate-schedules",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 1048,
+      "coreLines": 26,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Calculate the first two Adam steps",
+        "Clip a direction without rotating it",
+        "Make the schedule clock explicit",
+        "Compare decisions with evidence",
+        "Bring the phase together in a training audit"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Assess clipping order, schedule-clock recovery and optimizer comparison at a fixed budget; these exceed the old regression rubric."
+    },
+    {
+      "id": "networks-01",
+      "title": "Build a tiny multilayer perceptron",
+      "phase": "networks",
+      "status": "authored",
+      "source": "phases/05-networks/01-build-a-tiny-multilayer-perceptron/lesson.json",
+      "path": "phases/05-networks/01-build-a-tiny-multilayer-perceptron",
+      "minutes": 85,
+      "proseWordsExcludingVisual": 1037,
+      "coreLines": 39,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Trace the shapes from observations to logits",
+        "Explain why the hidden activation matters",
+        "Use stable binary cross-entropy",
+        "Separate learning from held-out measurement",
+        "Read the classification loss one example at a time"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace the duplicated main/practice prompt with a new transfer task; retain XOR as a numerical fixture."
+    },
+    {
+      "id": "networks-02",
+      "title": "Model and state with Flax NNX",
+      "phase": "networks",
+      "status": "authored",
+      "source": "phases/05-networks/02-model-and-state-with-flax-nnx/lesson.json",
+      "path": "phases/05-networks/02-model-and-state-with-flax-nnx",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 983,
+      "coreLines": 35,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Move the explicit equations into a module",
+        "Separate parameter state from diagnostic state",
+        "Reconstruct an independent graph from a snapshot",
+        "Check a library forward pass independently"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice and add a concrete nontrainable-state task in the running model."
+    },
+    {
+      "id": "networks-03",
+      "title": "A compiled train and evaluation step",
+      "phase": "networks",
+      "status": "authored",
+      "source": "phases/05-networks/03-a-compiled-train-and-evaluation-step/lesson.json",
+      "path": "phases/05-networks/03-a-compiled-train-and-evaluation-step",
+      "minutes": 95,
+      "proseWordsExcludingVisual": 918,
+      "coreLines": 46,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Choose a transparent train and held-out split",
+        "Read the state transition in execution order",
+        "Compute useful metrics without changing the model",
+        "Make replay a controlled experiment"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice and connect train/eval contracts to a real frozen dataset split."
+    },
+    {
+      "id": "networks-04",
+      "title": "Train a CNN on a small dataset",
+      "phase": "networks",
+      "status": "authored",
+      "source": "phases/05-networks/04-train-a-cnn-on-a-small-dataset/lesson.json",
+      "path": "phases/05-networks/04-train-a-cnn-on-a-small-dataset",
+      "minutes": 110,
+      "proseWordsExcludingVisual": 1048,
+      "coreLines": 56,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Generate images with an explicit label rule",
+        "Derive the convolution output shape",
+        "Pool spatial responses and retain class scores",
+        "Read a confusion matrix rather than a success label"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice; add real image error analysis and a simple non-neural baseline."
+    },
+    {
+      "id": "networks-05",
+      "title": "Debug unstable learning",
+      "phase": "networks",
+      "status": "authored",
+      "source": "phases/05-networks/05-debug-unstable-learning/lesson.json",
+      "path": "phases/05-networks/05-debug-unstable-learning",
+      "minutes": 85,
+      "proseWordsExcludingVisual": 1043,
+      "coreLines": 30,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Derive the gradient and curvature on paper",
+        "Record pre-update and post-update quantities distinctly",
+        "Use gradient clipping for a bounded symptom, not a diagnosis",
+        "Change the feature scale and predict the new bound"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice; diagnose a failure in the actual NNX model rather than only a scalar quadratic."
+    },
+    {
+      "id": "recovery-01",
+      "title": "Design an input pipeline",
+      "phase": "recovery",
+      "status": "authored",
+      "source": "phases/06-recovery/01-design-an-input-pipeline/lesson.json",
+      "path": "phases/06-recovery/01-design-an-input-pipeline",
+      "minutes": 70,
+      "proseWordsExcludingVisual": 990,
+      "coreLines": 42,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Preserve identity across every transformation",
+        "Make epoch ordering a pure decision",
+        "Choose a deliberate policy for the last batch",
+        "Measure what the stopwatch surrounds"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice; add file-backed data validation and a reproducible dataset fingerprint."
+    },
+    {
+      "id": "recovery-02",
+      "title": "Load, batch, and checkpoint order with Grain",
+      "phase": "recovery",
+      "status": "authored",
+      "source": "phases/06-recovery/02-load-batch-and-prefetch-with-grain/lesson.json",
+      "path": "phases/06-recovery/02-load-batch-and-prefetch-with-grain",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 949,
+      "coreLines": 39,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Map a record key to a testable source",
+        "Follow the sampler-to-batch boundary",
+        "Snapshot the iterator after consumption",
+        "Worker and buffer settings are workload choices"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice; persist and resume an iterator in a separate process."
+    },
+    {
+      "id": "recovery-03",
+      "title": "Save model, optimizer, and random state",
+      "phase": "recovery",
+      "status": "authored",
+      "source": "phases/06-recovery/03-save-model-optimizer-and-random-state/lesson.json",
+      "path": "phases/06-recovery/03-save-model-optimizer-and-random-state",
+      "minutes": 100,
+      "proseWordsExcludingVisual": 1052,
+      "coreLines": 86,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Inventory everything the next step reads",
+        "Save to a real local checkpoint directory",
+        "Restore into an explicit state template",
+        "Version and data checks belong to the application"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice; supply a persistent checkpoint workspace and partial-write failure exercise."
+    },
+    {
+      "id": "recovery-04",
+      "title": "Recover data position and resume",
+      "phase": "recovery",
+      "status": "authored",
+      "source": "phases/06-recovery/04-recover-data-position-and-resume/lesson.json",
+      "path": "phases/06-recovery/04-recover-data-position-and-resume",
+      "minutes": 110,
+      "proseWordsExcludingVisual": 1031,
+      "coreLines": 117,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Commit one logical boundary",
+        "Persist opaque iterator bytes without editing them",
+        "Audit the future, including an epoch transition",
+        "Define the limits of this recovery claim"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": true,
+      "improvement": "Replace duplicate practice and turn the existing full-state example into a staged recovery project."
+    },
+    {
+      "id": "recovery-05",
+      "title": "Asynchronous checkpoints and failure boundaries",
+      "phase": "recovery",
+      "status": "planned",
+      "source": "phases/06-recovery/05-asynchronous-checkpoints-and-failure-boundaries/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Interrupt a separate process after known boundaries, resume, compare state and data position, and reject incomplete snapshots."
+    },
+    {
+      "id": "transformers-01",
+      "title": "Attention from small pieces",
+      "phase": "transformers",
+      "status": "authored",
+      "source": "phases/07-transformers/01-attention-from-small-pieces/lesson.json",
+      "path": "phases/07-transformers/01-attention-from-small-pieces",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 1013,
+      "coreLines": 17,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Track query, key and value axes",
+        "Derive the uniform-query result",
+        "Scale scores and keep softmax stable",
+        "Test relationships that should survive a change",
+        "Read attention as matching, then mixing"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a transfer from one head to multiple heads with independently checked shape and normalization contracts."
+    },
+    {
+      "id": "transformers-02",
+      "title": "Masking, tokenization, and sequence packing",
+      "phase": "transformers",
+      "status": "authored",
+      "source": "phases/07-transformers/02-masking-tokenization-and-sequence-packing/lesson.json",
+      "path": "phases/07-transformers/02-masking-tokenization-and-sequence-packing",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 1017,
+      "coreLines": 21,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Build a causal mask from positions",
+        "Keep token IDs and targets aligned",
+        "Combine causal and segment boundaries",
+        "Handle padding without an all-masked softmax",
+        "Turn the allowed positions into weights"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Connect padding/packing to an actual eligible-token training-loss reduction, rather than only mask illustrations."
+    },
+    {
+      "id": "transformers-03",
+      "title": "A Transformer block and mixed precision",
+      "phase": "transformers",
+      "status": "authored",
+      "source": "phases/07-transformers/03-a-transformer-block-and-mixed-precision/lesson.json",
+      "path": "phases/07-transformers/03-a-transformer-block-and-mixed-precision",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 988,
+      "coreLines": 33,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Follow the two residual paths",
+        "Normalize features rather than examples",
+        "Test causal independence and differentiation",
+        "Separate storage precision from sensitive arithmetic"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Use varied input rows in a second experiment and carry the precision policy into a complete training run."
+    },
+    {
+      "id": "transformers-04",
+      "title": "Train, checkpoint, and generate",
+      "phase": "transformers",
+      "status": "authored",
+      "source": "phases/07-transformers/04-train-checkpoint-and-generate/lesson.json",
+      "path": "phases/07-transformers/04-train-checkpoint-and-generate",
+      "minutes": 120,
+      "proseWordsExcludingVisual": 1437,
+      "coreLines": 126,
+      "buildSteps": 9,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Assemble the token-to-logit contract",
+        "Separate a learning experiment from a benchmark",
+        "Checkpoint the continuation state and its schema",
+        "Generate with an explicit decoding policy",
+        "Use failures to test the experiment boundary"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Provide a learner starter with persistent artifacts and a small corpus baseline beyond the periodic three-token fixture."
+    },
+    {
+      "id": "performance-01",
+      "title": "Benchmark asynchronous work correctly",
+      "phase": "performance",
+      "status": "authored",
+      "source": "phases/08-performance/01-benchmark-asynchronous-work-correctly/lesson.json",
+      "path": "phases/08-performance/01-benchmark-asynchronous-work-correctly",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1122,
+      "coreLines": 47,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Draw the boundary before starting the clock",
+        "A handle is not proof of completion",
+        "First call and steady state answer different questions",
+        "Correctness comes before a speed ratio"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Create a retained benchmark report and repeatability protocol, then use it in the profiling project."
+    },
+    {
+      "id": "performance-02",
+      "title": "Diagnose recompilation and host synchronization",
+      "phase": "performance",
+      "status": "authored",
+      "source": "phases/08-performance/02-diagnose-recompilation-and-host-synchronization/lesson.json",
+      "path": "phases/08-performance/02-diagnose-recompilation-and-host-synchronization",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1289,
+      "coreLines": 38,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "A call signature is different from its numerical data",
+        "Observe tracing without mislabeling compilation",
+        "Choose static arguments for structure rather than convenience",
+        "A host metric is an explicit synchronization boundary"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Connect Python trace counts to an actual profiler view without equating tracing with compilation."
+    },
+    {
+      "id": "performance-03",
+      "title": "Read an XProf trace",
+      "phase": "performance",
+      "status": "planned",
+      "source": "phases/08-performance/03-read-an-xprof-trace/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A saved trace with annotated bottleneck, correctness-preserving change, repeated measurements and named hardware."
+    },
+    {
+      "id": "performance-04",
+      "title": "Reason with HLO and the roofline model",
+      "phase": "performance",
+      "status": "planned",
+      "source": "phases/08-performance/04-reason-with-hlo-and-the-roofline-model/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A saved trace with annotated bottleneck, correctness-preserving change, repeated measurements and named hardware."
+    },
+    {
+      "id": "performance-05",
+      "title": "Memory, rematerialization, and optimization tradeoffs",
+      "phase": "performance",
+      "status": "planned",
+      "source": "phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A saved trace with annotated bottleneck, correctness-preserving change, repeated measurements and named hardware."
+    },
+    {
+      "id": "distributed-01",
+      "title": "Arrays, meshes, and sharding",
+      "phase": "distributed",
+      "status": "authored",
+      "source": "phases/09-distributed/01-arrays-meshes-and-sharding/lesson.json",
+      "path": "phases/09-distributed/01-arrays-meshes-and-sharding",
+      "minutes": 80,
+      "proseWordsExcludingVisual": 1009,
+      "coreLines": 31,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Read the mapping from left to right",
+        "Inspect indices rather than guessing ordering",
+        "A reduction has a communication requirement",
+        "Choose placement for the operation you will perform"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a supported physical-device reproduction and separate it from logical-CPU placement evidence."
+    },
+    {
+      "id": "distributed-02",
+      "title": "A sharded training step",
+      "phase": "distributed",
+      "status": "authored",
+      "source": "phases/09-distributed/02-a-sharded-training-step/lesson.json",
+      "path": "phases/09-distributed/02-a-sharded-training-step",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 1084,
+      "coreLines": 40,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Write the objective before splitting the data",
+        "Give batch and parameters different placements",
+        "Differentiate the global function rather than inventing a local objective",
+        "A correct first update is stronger evidence than a falling curve"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Move from a single checked update to a resumable multi-step project with measured communication."
+    },
+    {
+      "id": "distributed-03",
+      "title": "Communication-efficient algorithms",
+      "phase": "distributed",
+      "status": "planned",
+      "source": "phases/09-distributed/03-communication-efficient-algorithms/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Global numerical reference, placement explanation, communication evidence and a measured scaling/recovery report."
+    },
+    {
+      "id": "distributed-04",
+      "title": "Resilient distributed training",
+      "phase": "distributed",
+      "status": "planned",
+      "source": "phases/09-distributed/04-resilient-distributed-training/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Global numerical reference, placement explanation, communication evidence and a measured scaling/recovery report."
+    },
+    {
+      "id": "science-01",
+      "title": "A functional physical simulation",
+      "phase": "science",
+      "status": "planned",
+      "source": "phases/10-science/01-a-functional-physical-simulation/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known parameter recovery, conservation/stability checks, independent gradients and unseen trajectories."
+    },
+    {
+      "id": "science-02",
+      "title": "Vectorize trajectories and scan time",
+      "phase": "science",
+      "status": "planned",
+      "source": "phases/10-science/02-vectorize-trajectories-and-scan-time/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known parameter recovery, conservation/stability checks, independent gradients and unseen trajectories."
+    },
+    {
+      "id": "science-03",
+      "title": "Differentiate through a solver",
+      "phase": "science",
+      "status": "planned",
+      "source": "phases/10-science/03-differentiate-through-a-solver/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known parameter recovery, conservation/stability checks, independent gradients and unseen trajectories."
+    },
+    {
+      "id": "science-04",
+      "title": "Fit parameters and scale the simulation",
+      "phase": "science",
+      "status": "planned",
+      "source": "phases/10-science/04-fit-parameters-and-scale-the-simulation/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known parameter recovery, conservation/stability checks, independent gradients and unseen trajectories."
+    },
+    {
+      "id": "probability-01",
+      "title": "Distributions and sampling",
+      "phase": "probability",
+      "status": "planned",
+      "source": "phases/11-probability/01-distributions-and-sampling/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Prior/posterior predictive checks, chain diagnostics and uncertainty interpretation."
+    },
+    {
+      "id": "probability-02",
+      "title": "Build a Bayesian regression",
+      "phase": "probability",
+      "status": "planned",
+      "source": "phases/11-probability/02-build-a-bayesian-regression/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Prior/posterior predictive checks, chain diagnostics and uncertainty interpretation."
+    },
+    {
+      "id": "probability-03",
+      "title": "Hamiltonian Monte Carlo and sampler diagnostics",
+      "phase": "probability",
+      "status": "planned",
+      "source": "phases/11-probability/03-hamiltonian-monte-carlo-and-sampler-diagnostics/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Prior/posterior predictive checks, chain diagnostics and uncertainty interpretation."
+    },
+    {
+      "id": "probability-04",
+      "title": "Variational inference and model checking",
+      "phase": "probability",
+      "status": "planned",
+      "source": "phases/11-probability/04-variational-inference-and-model-checking/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Prior/posterior predictive checks, chain diagnostics and uncertainty interpretation."
+    },
+    {
+      "id": "rl-01",
+      "title": "Write a functional environment",
+      "phase": "rl",
+      "status": "planned",
+      "source": "phases/12-rl/01-write-a-functional-environment/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known transition tests, baseline policy and evaluated returns across independent seeds."
+    },
+    {
+      "id": "rl-02",
+      "title": "Batch environments and scan rollouts",
+      "phase": "rl",
+      "status": "planned",
+      "source": "phases/12-rl/02-batch-environments-and-scan-rollouts/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known transition tests, baseline policy and evaluated returns across independent seeds."
+    },
+    {
+      "id": "rl-03",
+      "title": "Policy gradients and PPO",
+      "phase": "rl",
+      "status": "planned",
+      "source": "phases/12-rl/03-policy-gradients-and-ppo/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known transition tests, baseline policy and evaluated returns across independent seeds."
+    },
+    {
+      "id": "rl-04",
+      "title": "Evaluate agents across seeds",
+      "phase": "rl",
+      "status": "planned",
+      "source": "phases/12-rl/04-evaluate-agents-across-seeds/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Known transition tests, baseline policy and evaluated returns across independent seeds."
+    },
+    {
+      "id": "kernels-01",
+      "title": "Pallas grids and BlockSpecs",
+      "phase": "kernels",
+      "status": "planned",
+      "source": "phases/13-kernels/01-pallas-grids-and-blockspecs/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Reference parity across shapes/dtypes followed by reproducible timing on named hardware."
+    },
+    {
+      "id": "kernels-02",
+      "title": "A first TPU kernel",
+      "phase": "kernels",
+      "status": "planned",
+      "source": "phases/13-kernels/02-a-first-tpu-kernel/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Reference parity across shapes/dtypes followed by reproducible timing on named hardware."
+    },
+    {
+      "id": "kernels-03",
+      "title": "Tiling, memory, and pipelining",
+      "phase": "kernels",
+      "status": "planned",
+      "source": "phases/13-kernels/03-tiling-memory-and-pipelining/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Reference parity across shapes/dtypes followed by reproducible timing on named hardware."
+    },
+    {
+      "id": "kernels-04",
+      "title": "Iterate with correctness and performance evidence",
+      "phase": "kernels",
+      "status": "planned",
+      "source": "phases/13-kernels/04-iterate-with-correctness-and-performance-evidence/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Reference parity across shapes/dtypes followed by reproducible timing on named hardware."
+    },
+    {
+      "id": "internals-01",
+      "title": "Read your first jaxpr",
+      "phase": "internals",
+      "status": "authored",
+      "source": "phases/14-internals/01-read-your-first-jaxpr/lesson.json",
+      "path": "phases/14-internals/01-read-your-first-jaxpr",
+      "minutes": 90,
+      "proseWordsExcludingVisual": 1463,
+      "coreLines": 20,
+      "buildSteps": 3,
+      "experiments": 2,
+      "practice": 2,
+      "sections": [
+        "Compute the values before reading the representation",
+        "Read one equation at a time",
+        "Trace an abstract signature, not the sample’s values",
+        "Inspect the gradient as another program",
+        "Separate data inputs from captured constants",
+        "Compare Python unrolling with structured iteration"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Make this material discoverable where the foundations assessment requires make_jaxpr; author the remaining internals sequence."
+    },
+    {
+      "id": "internals-02",
+      "title": "JVPs, VJPs, and higher-order derivatives",
+      "phase": "internals",
+      "status": "planned",
+      "source": "phases/14-internals/02-jvps-vjps-and-higher-order-derivatives/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A custom rule checked independently, including its domain boundaries and a changed input."
+    },
+    {
+      "id": "internals-03",
+      "title": "Custom derivative rules",
+      "phase": "internals",
+      "status": "planned",
+      "source": "phases/14-internals/03-custom-derivative-rules/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A custom rule checked independently, including its domain boundaries and a changed input."
+    },
+    {
+      "id": "internals-04",
+      "title": "Lowering, compilation, and a tiny transformation",
+      "phase": "internals",
+      "status": "planned",
+      "source": "phases/14-internals/04-lowering-compilation-and-a-tiny-transformation/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. A custom rule checked independently, including its domain boundaries and a changed input."
+    },
+    {
+      "id": "deployment-01",
+      "title": "Move models between JAX, Keras, TensorFlow and PyTorch",
+      "phase": "deployment",
+      "status": "authored",
+      "source": "phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/lesson.json",
+      "path": "phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 853,
+      "coreLines": 16,
+      "buildSteps": 0,
+      "experiments": 1,
+      "practice": 1,
+      "sections": [
+        "A parameter file is not a model",
+        "Use Keras as a shared model vocabulary",
+        "Explicit JAX state is a design decision",
+        "Choose the bridge for the destination",
+        "Run the optional real-framework lab",
+        "Write the same dense layer in both layouts"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add a multi-layer, nontrainable-state transfer task and a reproducible environment matrix for the optional backends."
+    },
+    {
+      "id": "deployment-03",
+      "title": "Export a computation and verify its serving contract",
+      "phase": "deployment",
+      "status": "authored",
+      "source": "phases/15-deployment/03-export-and-serve-a-trained-computation/lesson.json",
+      "path": "phases/15-deployment/03-export-and-serve-a-trained-computation",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 654,
+      "coreLines": 21,
+      "buildSteps": 0,
+      "experiments": 1,
+      "practice": 1,
+      "sections": [
+        "Freeze the inference boundary",
+        "Fixed shapes are a deliberate constraint",
+        "Verify the file, not the original function",
+        "Choose a runtime after choosing an artifact",
+        "From local call to service"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Wrap the exported artifact in an actual request handler with signature, malformed-input and version checks."
+    },
+    {
+      "id": "deployment-05",
+      "title": "Choose weight, activation and accumulation precision",
+      "phase": "deployment",
+      "status": "authored",
+      "source": "phases/15-deployment/05-weight-activation-and-accumulation-precision/lesson.json",
+      "path": "phases/15-deployment/05-weight-activation-and-accumulation-precision",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 1124,
+      "coreLines": 33,
+      "buildSteps": 0,
+      "experiments": 1,
+      "practice": 1,
+      "sections": [
+        "Write the policy before choosing a dtype",
+        "Mixed precision during training",
+        "Quantize weights with scale metadata",
+        "Weight-only and full integer are different deployments",
+        "FP8 and other low-bit formats require a target contract",
+        "Evaluate quality separately from size and speed",
+        "Follow one value onto the quantization grid"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Add activation calibration and held-out quality comparisons to the running trained model; separate simulated and native kernel evidence."
+    },
+    {
+      "id": "deployment-06",
+      "title": "Deploy at the edge: conversion, budgets and device checks",
+      "phase": "deployment",
+      "status": "authored",
+      "source": "phases/15-deployment/06-edge-ai-conversion-and-device-validation/lesson.json",
+      "path": "phases/15-deployment/06-edge-ai-conversion-and-device-validation",
+      "minutes": 75,
+      "proseWordsExcludingVisual": 889,
+      "coreLines": 35,
+      "buildSteps": 0,
+      "experiments": 1,
+      "practice": 1,
+      "sections": [
+        "Choose a deployment lane",
+        "Follow one concrete TensorFlow-to-LiteRT route",
+        "Keep preprocessing attached to the model",
+        "Budget more than weights",
+        "Measure the request the user experiences",
+        "Device acceptance is an experiment"
+      ],
+      "currentCpuReceipt": true,
+      "duplicateMainPractice": false,
+      "improvement": "Run the converted model on a named real target device and retain conversion, correctness and resource measurements."
+    },
+    {
+      "id": "deployment-02",
+      "title": "Adapt a pretrained model and choose a post-training objective",
+      "phase": "deployment",
+      "status": "planned",
+      "source": "phases/15-deployment/02-adapt-a-pretrained-model-and-choose-a-post-training-objective/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Cross-runtime parity, calibration/accuracy report, supported operators, cold/warm latency, memory and target-device record."
+    },
+    {
+      "id": "deployment-04",
+      "title": "Inference capacity, batching, and autoscaling",
+      "phase": "deployment",
+      "status": "planned",
+      "source": "phases/15-deployment/04-inference-capacity-batching-and-autoscaling/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Cross-runtime parity, calibration/accuracy report, supported operators, cold/warm latency, memory and target-device record."
+    },
+    {
+      "id": "operations-01",
+      "title": "Accelerator jobs and runtime lifecycle",
+      "phase": "operations",
+      "status": "planned",
+      "source": "phases/16-operations/01-accelerator-jobs-and-runtime-lifecycle/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    },
+    {
+      "id": "operations-02",
+      "title": "Health, logs, and workload observability",
+      "phase": "operations",
+      "status": "planned",
+      "source": "phases/16-operations/02-health-logs-and-workload-observability/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    },
+    {
+      "id": "operations-03",
+      "title": "Failure recovery and operational runbooks",
+      "phase": "operations",
+      "status": "planned",
+      "source": "phases/16-operations/03-failure-recovery-and-operational-runbooks/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    },
+    {
+      "id": "operations-04",
+      "title": "Changes, rollback, and artifact provenance",
+      "phase": "operations",
+      "status": "planned",
+      "source": "phases/16-operations/04-changes-rollback-and-artifact-provenance/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    },
+    {
+      "id": "operations-05",
+      "title": "Capacity, utilization, and operating cost",
+      "phase": "operations",
+      "status": "planned",
+      "source": "phases/16-operations/05-capacity-utilization-and-operating-cost/lesson.json",
+      "improvement": "Author the missing lesson within its phase project. Versioned job, telemetry, controlled incident, verified recovery/rollback and measured resource report."
+    }
+  ],
+  "verification": {
+    "build": "passed",
+    "check": "passed: 51 tests plus distribution/site checks",
+    "regressionProject": "passed: all four stages",
+    "classifierProject": "passed: three cumulative stages",
+    "currentCpuReceiptHashes": 50,
+    "optionalLabSourceHashes": "2 match stored receipts; no backend rerun",
+    "freshLessonExecutionsThisTurn": 0,
+    "previousTurnLessonExecutions": 100,
+    "liveBrowserReview": "not performed",
+    "learnerValidation": "not performed",
+    "independentExpertReview": "not performed"
+  }
+}

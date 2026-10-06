@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "probability-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Four chains have classical split R-hat close to one. What can we conclude?",
+      "options": [
+        "They have certainly explored every posterior mode",
+        "Their retained draws are independent",
+        "Their within-chain and between-chain variance estimates agree, but additional checks are still necessary"
+      ],
+      "correct": 2,
+      "explanation": "A diagnostic can reveal problems without proving their absence. Here we also compare to exact moments; an unknown target needs several diagnostics and model checks."
+    }
+  ]
+}

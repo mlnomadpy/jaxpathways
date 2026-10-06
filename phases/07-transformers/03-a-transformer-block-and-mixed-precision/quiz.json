@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transformers-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "If all projection matrices are zero in this block, what should the output be?",
+      "options": [
+        "Zero",
+        "The original input",
+        "Undefined because attention has zero scores"
+      ],
+      "correct": 1,
+      "explanation": "Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve \\(x\\)."
+    }
+  ]
+}

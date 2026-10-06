@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A frequently changing runtime scalar controls a branch. What is the most appropriate first repair for a traced Python if?",
+      "options": [
+        "Mark every runtime scalar static.",
+        "Express the runtime decision with compatible JAX control flow.",
+        "Catch every exception and return zero."
+      ],
+      "correct": 1,
+      "explanation": "A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations."
+    }
+  ]
+}

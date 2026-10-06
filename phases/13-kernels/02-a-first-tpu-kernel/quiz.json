@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a successful CPU interpret run establish for this target-oriented kernel?",
+      "options": [
+        "The TPU kernel has measured high throughput.",
+        "The tested numerical Ref/grid semantics agree with the reference; target lowering and performance remain separate checks.",
+        "Every TPU generation accepts all block sizes."
+      ],
+      "correct": 1,
+      "explanation": "Interpretation is useful correctness evidence. It does not execute the target compiler or hardware, so those claims require a separate guarded target run."
+    }
+  ]
+}

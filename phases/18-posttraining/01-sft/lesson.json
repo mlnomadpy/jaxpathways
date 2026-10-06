@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "posttraining-01",
+  "minutes": 75,
+  "content": {
+    "problem": "A conversation contains instructions and an answer. If we want to teach answer behavior, which tokens should receive loss? We will shift targets explicitly and exclude prompt tokens without hiding the prompt from the model.",
+    "idea": "Supervised fine-tuning learns from demonstrations. The example uses a tiny next-token table so the alignment is visible: prompt IDs determine answer IDs, followed by an end token. In a pretrained Transformer, the same response-mask bookkeeping surrounds a much richer causal forward pass.",
+    "objectives": [
+      "Align predictions with their target tokens",
+      "Separate the attention mask from the loss mask",
+      "Verify the changed-condition exercise and explain the limits of this fixture."
+    ],
+    "sections": [
+      {
+        "title": "Align predictions with their target tokens",
+        "body": "Logits at position \\(t\\) predict token \\(t+1\\). Therefore shift the role mask with the target IDs. A prompt position can produce a supervised logit when its next token begins the answer. Masking logits according to the input role instead would drop that first answer token."
+      },
+      {
+        "title": "Separate the attention mask from the loss mask",
+        "body": "The attention mask controls what the model sees; the response mask controls which predictions are scored. Prompt tokens must remain available as causal context even when predicting them is not the objective. Keep padding and packed-document boundaries out of valid targets. The final input position in this fixture has no next token and contributes no loss."
+      },
+      {
+        "title": "Choose a reduction and keep its denominator",
+        "body": "This lab sums negative log probabilities of response and end tokens, then divides by the total supervised token count. That is a token-weighted loss: longer answers have greater total influence. Equal weighting per sequence is a different objective. Decide deliberately and retain both sequence and token counts.",
+        "math": "L_{\\mathrm{SFT}}=-\\frac{\\sum_{b,t}m_{b,t+1}\\log p_\\theta(x_{b,t+1}\\mid x_{b,\\le t})}{\\sum_{b,t}m_{b,t+1}}"
+      },
+      {
+        "title": "Fine-tune an identified base model",
+        "body": "In a real run record the base checkpoint, tokenizer, chat template, data revision and special-token configuration. Demonstrations may contain personal or sensitive text; use data with appropriate permission and review. Split by source or conversation identity before formatting. This executable table starts from uniform logits to isolate the objective; the LoRA lesson separately trains and freezes a base model before adaptation."
+      },
+      {
+        "title": "Check behavior and forgetting separately",
+        "body": "A falling demonstration loss is not an instruction-following benchmark. Freeze a validation prompt set, compare answer quality under fixed decoding, and retain a base-task evaluation to detect forgetting. Do not tune prompt formatting or training duration against final test prompts."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef response_logps(logits, tokens, response_mask):\n    # logits at t predict token t+1; the role mask belongs to the target token.\n    logp = jax.nn.log_softmax(logits[:,:-1,:],axis=-1)\n    selected = jnp.take_along_axis(logp,tokens[:,1:,None],axis=-1)[...,0]\n    return jnp.sum(jnp.where(response_mask[:,1:],selected,0.),axis=-1)\n\ndef validate_mask(selected, shape):\n    a = np.asarray(selected)\n    if a.shape != shape or a.dtype != np.bool_ or not a.any():\n        raise ValueError('a nonempty Boolean mask of the target shape is required')\n\n# Token 0/1 is a prompt; 2/3 is its response; 4 marks the end.\ntokens=jnp.array([[0,2,4],[1,3,4]],jnp.int32)\nroles=jnp.array([[False,True,True]]*2)\nvalidate_mask(roles[:,1:],tokens[:,1:].shape)\np=jnp.zeros((5,5));history=[]\ndef sft_objective(p):\n    return -jnp.sum(response_logps(p[tokens],tokens,roles))/jnp.sum(roles[:,1:])\nstep=jax.jit(jax.value_and_grad(sft_objective))\nfor _ in range(100):\n    value,g=step(p);history.append(float(value));p=p-.5*g\nnp.testing.assert_allclose(history[0],np.log(5),atol=1e-6)\nassert history[-1]<.15\nassert np.array_equal(np.argmax(np.asarray(p)[[0,1]],axis=1),[2,3])\n# The final position predicts nothing and has no contribution.\nbase_logits=p[tokens]\nchanged=base_logits.at[:,-1,:].set(100.)\nnp.testing.assert_allclose(response_logps(changed,tokens,roles),response_logps(base_logits,tokens,roles))\nprint('Response-only token NLL initial/final:',history[0],history[-1])\n",
+    "output": "Response-only loss decreases from log(5) to below 0.15.",
+    "experiments": [
+      {
+        "title": "Prove the target-mask shift",
+        "prediction": "Which table rows should get gradients when only answer and end tokens are supervised?",
+        "code": "g=jax.grad(sft_objective)(jnp.zeros((5,5)))\nassert np.linalg.norm(np.asarray(g)[0])>0 and np.linalg.norm(np.asarray(g)[1])>0\nnp.testing.assert_array_equal(np.asarray(g)[4],0.)\nprint('Prompt rows learn to predict first answers; the final end-token row has no target.')",
+        "output": "Rows for prompt IDs have nonzero gradients; the unused final-token row has zero gradient.",
+        "explanation": "The prediction made at the prompt position is supervised because its target is an answer. Input-role masking would confuse context with target eligibility."
+      }
+    ],
+    "exercise": "Score only the first response token in each sequence and compare the resulting count and objective.",
+    "solution": "first_only=roles.at[:,2].set(False)\nvalue=-jnp.sum(response_logps(p[tokens],tokens,first_only))/jnp.sum(first_only[:,1:])\nassert int(jnp.sum(first_only[:,1:]))==2\nassert np.isfinite(float(value))\nprint('Two first-response targets:',float(value))",
+    "practice": [
+      {
+        "title": "Reject a batch with no answer targets",
+        "difficulty": "Transfer",
+        "prompt": "Validate an all-prompt batch before computing the token average.",
+        "hint": "Use the shifted target mask, not the unshifted input mask.",
+        "solution": "try:validate_mask(jnp.zeros_like(roles[:,1:]),tokens[:,1:].shape)\nexcept ValueError:print('No-target SFT batch rejected')\nelse:raise AssertionError('empty supervision accepted')",
+        "explanation": "An empty answer mask should trigger a clear skip/rejection policy before the update; a fabricated zero objective disguises lost training data."
+      }
+    ],
+    "question": "Should prompt inputs disappear when using response-only loss?",
+    "options": [
+      "No. They remain context; only their target eligibility changes.",
+      "A lower training loss by itself proves the full application is ready.",
+      "Matching shapes alone establishes the required behavior."
+    ],
+    "answer": 0,
+    "explanation": "Attention visibility and supervised output positions are separate contracts.",
+    "diagnosis": "When the first answer token fails to learn, inspect the shifted mask. When answer length changes the metric, compare token versus sequence weighting and retain valid target counts.",
+    "references": [
+      {
+        "title": "InstructGPT: supervised demonstrations and preference training",
+        "url": "https://arxiv.org/abs/2203.02155"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Supervised fine-tuning with response-only token loss — recorded experiment",
+      "kind": "executed",
+      "prediction": "Predict what should change during training and what this curve cannot establish.",
+      "reading": "The curve shows response-token mean negative log likelihood before each update. Uniform predictions start at \\(\\log 5\\approx1.609\\), then fall to about \\(0.080\\). It is the training loss of a five-token table, not a natural-language quality score.",
+      "connection": "The table learns prompt-to-answer and answer-to-end transitions. The independent gradient check confirms the intended target shift, and the mask exercise changes which target positions count without removing prompt context.",
+      "alt": "The curve shows response-token mean negative log likelihood before each update. Uniform predictions start at \\(\\log 5\\approx1.609\\), then fall to about \\(0.080\\). It is the training loss of a five-token table, not a natural-language quality score.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+    }
+  }
+}

@@ -1,0 +1,121 @@
+---
+import ModalityTracks from '../components/paths/ModalityTracks.astro';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/projects.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import pages from '../data/pages.json';
+import registry from '../../public/api/v1/projects.json';
+import { course } from '../lib/course-data.js';
+import { siteUrl } from '../lib/urls.js';
+const planned = course.phases.filter((phase) => !phase.projectId);
+---
+
+<SiteLayout {...pages.projects}>
+  <main id="main" class="projects-catalog">
+    <section class="projects-intro" aria-labelledby="projects-heading">
+      <h1 id="projects-heading">Projects</h1>
+      <p>Build something you can explain.</p>
+      <p class="projects-lede">
+        Choose a project, work through its stages, and keep the evidence. Every available project
+        includes starter code, a reference solution, and checks you can run on CPU.
+      </p>
+      <div class="actions">
+        <a class="button primary" href="#available">
+          Available projects
+        </a>
+        {planned.length > 0 && (
+          <a class="button" href="#planned">
+            Future project briefs
+          </a>
+        )}
+      </div>
+    </section>
+    <section id="available" aria-labelledby="available-heading">
+      <h2 id="available-heading">Ready to build</h2>
+      {registry.projects.map((project) => (
+        <article class="project-entry" data-project-id={project.id}>
+          <div class="project-overview">
+            <p class="project-context">
+              {course.pathways.find((path) => path.id === project.pathwayId)?.title} /{' '}
+              {project.hardware}
+            </p>
+            <h3>{project.title}</h3>
+            <p>{project.rubric.slice(0, 2).join('. ')}.</p>
+            <div class="actions">
+              <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
+                Open project
+              </a>
+              <a class="button" href={siteUrl(`project-guides/${project.id}.html`)}>
+                Read guide and figures
+              </a>
+              <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>
+                Download ZIP
+              </a>
+            </div>
+          </div>
+          <div class="project-stages">
+            <h4>Your stages</h4>
+            <ol>
+              {project.stages.map((stage) => (
+                <li>{stage.title}</li>
+              ))}
+            </ol>
+          </div>
+          <div class="project-prerequisites">
+            <h4>Before you start</h4>
+            <ul>
+              {course.phases
+                .filter((phase) =>
+                  phase.lessons.some((lesson) => project.requiredLessonIds.includes(lesson.id)),
+                )
+                .map((phase) => (
+                  <li>
+                    <a
+                      href={siteUrl(
+                        `course.html?path=${project.pathwayId}&phase=${phase.id}#phase-${phase.id}`,
+                      )}
+                    >
+                      {phase.title}
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </div>
+        </article>
+      ))}
+      <p class="projects-note">
+        Passing the public checks is practice evidence. It is not an independently reviewed
+        qualification.
+      </p>
+    </section>
+    <ModalityTracks />
+    {planned.length > 0 && (
+      <section id="planned" class="project-roadmap" aria-labelledby="planned-heading">
+        <h2 id="planned-heading">Future project briefs</h2>
+        <p>
+          These outcomes are planned. Their project workspaces and checks are not available yet.
+        </p>
+        <ul>
+          {planned.map((phase) => (
+            <li>
+              <div>
+                <h3>{phase.project}</h3>
+                <p>{phase.title}</p>
+              </div>
+              <a href={siteUrl(`course.html?phase=${phase.id}&roadmap=1#phase-${phase.id}`)}>
+                Explore course step
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )}
+    <SiteFooter />
+  </main>
+  <script>
+    import { initExperience } from '../scripts/experience.js';
+    initExperience();
+  </script>
+</SiteLayout>

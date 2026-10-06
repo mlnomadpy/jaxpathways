@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The three-buffer simulation is correct and has fewer grid programs after a tile change. Can you conclude the TPU version is faster?",
+      "options": [
+        "Yes; program count determines runtime.",
+        "Yes; simulation latency is the TPU latency.",
+        "No; padding, local memory and actual target overlap must be measured with synchronized target execution."
+      ],
+      "correct": 2,
+      "explanation": "Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance."
+    }
+  ]
+}

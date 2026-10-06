@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-03",
+  "contentHash": "a9585b20e6c103dd9465e4aeeb251bc6670b578a3758cce9394b10fa23957477",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:57:55.286452+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Actual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\n",
+  "data": {
+    "panels": [
+      {
+        "kind": "bar",
+        "labels": [
+          "8 x 128",
+          "16 x 128",
+          "16 x 256"
+        ],
+        "ylabel": "program count (configuration-derived)",
+        "series": [
+          {
+            "label": "grid programs",
+            "y": [
+              9,
+              6,
+              4
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "bar",
+        "labels": [
+          "8 x 128",
+          "16 x 128",
+          "16 x 256"
+        ],
+        "ylabel": "modeled data buffers (KiB)",
+        "series": [
+          {
+            "label": "double-buffered inputs and output",
+            "y": [
+              24.0,
+              48.0,
+              96.0
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

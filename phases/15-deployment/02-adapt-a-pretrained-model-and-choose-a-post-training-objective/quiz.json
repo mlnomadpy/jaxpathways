@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why should the two adaptation branches be compared using a common held-out criterion rather than their own training losses?",
+      "options": [
+        "Teacher targets always make training loss zero",
+        "Their supervision differs, so their training losses answer different questions",
+        "Using the evaluation split during every update guarantees fairness"
+      ],
+      "correct": 1,
+      "explanation": "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information."
+    }
+  ]
+}

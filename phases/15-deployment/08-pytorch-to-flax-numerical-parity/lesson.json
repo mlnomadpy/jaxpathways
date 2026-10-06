@@ -1,0 +1,95 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-08",
+  "minutes": 90,
+  "content": {
+    "problem": "You copied a checkpoint and the new model runs, but its answers differ. Is the weight mapping wrong, or does the architecture compute a different function? We will load actual PyTorch tensors into a Flax NNX model and stop at the first layer whose values diverge.",
+    "idea": "Numerical parity is an architecture audit, not a file-format check. Match the input contract and every operation, compare intermediate activations with explicit error budgets, then verify gradients and reloaded-artifact outputs. This lab converts a dense–LayerNorm–exact-GELU–dense network on CPU; it is not a universal checkpoint converter.",
+    "objectives": [
+      "Map named PyTorch tensors into Flax NNX parameters with complete key, shape and dtype checks.",
+      "Locate the first mismatching operation using absolute and relative errors.",
+      "Verify input gradients and reload the converted artifact independently."
+    ],
+    "sections": [
+      {
+        "title": "Write the architecture contract before mapping weights",
+        "body": "Our input has shape \\((B,3)\\), the hidden width is \\(5\\), and the output width is \\(2\\). PyTorch Linear stores output-by-input weights, while Flax Linear uses input-by-output kernels, so transpose those two arrays. LayerNorm scale and bias stay one-dimensional and do not transpose. Require every expected key exactly once; ignoring unknown or missing parameters can silently leave random weights in the target."
+      },
+      {
+        "title": "Match operations, not just tensors",
+        "body": "Use the same LayerNorm epsilon, feature axes, variance convention and affine parameters. Select exact GELU in both frameworks instead of mixing exact and tanh approximations. Disable training-only behavior and match preprocessing, padding, positions and output labels before claiming parity. The Flax implementation disables the fast variance formula to make the comparison boundary explicit; float32 execution can still differ slightly across kernels."
+      },
+      {
+        "title": "Use an error budget that works near zero",
+        "body": "For each element, require the absolute difference to fit an absolute tolerance plus a relative tolerance times the reference magnitude. Absolute tolerance handles near-zero references; relative tolerance scales with large values. Report maximum absolute error and relative L2 error, but retain the elementwise decision so a small aggregate cannot hide a bad element. Set tolerances before inspecting the candidate, record dtype/backend, and never turn NaN into a passing comparison.",
+        "math": "|y_i-\\widehat y_i|\\leq a+r|y_i|,\\qquad e_{\\mathrm{rel},2}=\\frac{\\|y-\\widehat y\\|_2}{\\max(\\|y\\|_2,10^{-12})}"
+      },
+      {
+        "title": "Find the first mismatch",
+        "body": "Capture hidden linear output, normalized values, activation and final logits for the same inputs. A wrong LayerNorm epsilon leaves the hidden linear output correct but changes the normalized output first. Later mismatches may be consequences rather than separate bugs. Use several batch sizes and amplitudes: one large random batch can miss epsilon-sensitive or near-zero behavior."
+      },
+      {
+        "title": "Validate the derivative and the saved artifact",
+        "body": "For a scalar sum of outputs, compare gradients with respect to the input in both frameworks. Then save the Flax arrays with architecture metadata and reload them before inference. The project also starts a fresh process for this step. Only load trusted checkpoint sources; weights_only loading limits the PyTorch loading path but does not establish authenticity or universal safety."
+      },
+      {
+        "title": "Extend the mapping deliberately",
+        "body": "Convolution kernels may require OIHW to HWIO permutations, not a dense transpose. Attention may fuse query/key/value tensors or arrange heads differently. Tied embeddings, normalization order, rotary positions and vocabulary row order can all change behavior despite matching shapes. Add these operations one at a time with golden inputs and intermediate comparisons. This lesson validates its named MLP only; those additional architectures need their own executed mappings."
+      }
+    ],
+    "code": "\"\"\"Explicit CPU PyTorch -> Flax NNX mapping; no generic architecture converter.\"\"\"\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nimport torch\nfrom flax import nnx\n\nclass TorchModel(torch.nn.Module):\n    def __init__(self, eps=1e-5):\n        super().__init__()\n        self.hidden=torch.nn.Linear(3,5)\n        self.norm=torch.nn.LayerNorm(5,eps=eps)\n        self.out=torch.nn.Linear(5,2)\n    def forward(self,x):\n        h=self.hidden(x);n=self.norm(h);a=torch.nn.functional.gelu(n,approximate='none')\n        return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}\n\nclass FlaxModel(nnx.Module):\n    def __init__(self,eps=1e-5):\n        self.hidden=nnx.Linear(3,5,rngs=nnx.Rngs(0))\n        self.norm=nnx.LayerNorm(5,epsilon=eps,use_fast_variance=False,rngs=nnx.Rngs(1))\n        self.out=nnx.Linear(5,2,rngs=nnx.Rngs(2))\n    def __call__(self,x):\n        h=self.hidden(x);n=self.norm(h);a=jax.nn.gelu(n,approximate=False)\n        return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}\n\ndef convert(state,eps=1e-5):\n    shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}\n    if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')\n    arrays={}\n    for name,shape in shapes.items():\n        value=state[name].detach().cpu().numpy()\n        if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():\n            raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)\n        arrays[name]=value.copy()\n    target=FlaxModel(eps)\n    target.hidden.kernel[...]=jnp.asarray(arrays['hidden.weight'].T)\n    target.hidden.bias[...]=jnp.asarray(arrays['hidden.bias'])\n    target.norm.scale[...]=jnp.asarray(arrays['norm.weight'])\n    target.norm.bias[...]=jnp.asarray(arrays['norm.bias'])\n    target.out.kernel[...]=jnp.asarray(arrays['out.weight'].T)\n    target.out.bias[...]=jnp.asarray(arrays['out.bias'])\n    return target\n\ndef error_report(reference,actual,atol=2e-6,rtol=2e-5):\n    reference=np.asarray(reference,dtype=np.float64);actual=np.asarray(actual,dtype=np.float64)\n    if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():\n        raise ValueError('shape or finite-value mismatch')\n    if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')\n    absolute=np.abs(actual-reference)\n    budget=atol+rtol*np.abs(reference)\n    return {'max_abs':float(absolute.max()),'relative_l2':float(np.linalg.norm(actual-reference)/max(np.linalg.norm(reference),1e-12)),\n            'passed':bool(np.all(absolute<=budget))}\n\ndef save_flax(model,path):\n    np.savez(path,hidden_kernel=np.asarray(model.hidden.kernel[...]),hidden_bias=np.asarray(model.hidden.bias[...]),\n             norm_scale=np.asarray(model.norm.scale[...]),norm_bias=np.asarray(model.norm.bias[...]),\n             out_kernel=np.asarray(model.out.kernel[...]),out_bias=np.asarray(model.out.bias[...]),\n             epsilon=np.array(model.norm.epsilon),schema=np.array(1))\n\ndef load_flax(path):\n    shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}\n    with np.load(path,allow_pickle=False) as archive:\n        if set(archive.files)!=set(shapes)|{'epsilon','schema'}:raise ValueError('unexpected archive schema')\n        if archive['schema'].shape!=() or int(archive['schema'])!=1:raise ValueError('unknown schema')\n        if archive['epsilon'].shape!=():raise ValueError('epsilon must be scalar')\n        eps=float(archive['epsilon'])\n        if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')\n        arrays={}\n        for key,shape in shapes.items():\n            value=archive[key]\n            if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)\n            arrays[key]=value.copy()\n    model=FlaxModel(eps)\n    for module,name,key in [(model.hidden,'kernel','hidden_kernel'),(model.hidden,'bias','hidden_bias'),(model.norm,'scale','norm_scale'),(model.norm,'bias','norm_bias'),(model.out,'kernel','out_kernel'),(model.out,'bias','out_bias')]:\n        getattr(module,name)[...]=jnp.asarray(arrays[key])\n    return model\n\nimport tempfile\nfrom pathlib import Path\ntorch.set_num_threads(1)\ntorch.manual_seed(9)\nsource=TorchModel().eval()\n# A real local state_dict file, loaded using the tensor-only loading option.\nwith tempfile.TemporaryDirectory() as folder:\n    checkpoint=Path(folder)/'weights.pt';torch.save(source.state_dict(),checkpoint)\n    state=torch.load(checkpoint,map_location='cpu',weights_only=True)\n    target=convert(state)\n    # Save the converted weights independently of the live PyTorch object.\n    converted=Path(folder)/'flax-weights.npz'\n    save_flax(target,converted)\n    target=load_flax(converted)\n    errors={name:[] for name in ['hidden','norm','activation','output']}\n    for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:\n        inputs=np.random.default_rng(batch).normal(size=(batch,3)).astype(np.float32)*scale\n        tx=torch.tensor(inputs,requires_grad=True);torch_values=source(tx);flax_values=target(jnp.asarray(inputs))\n        for name in errors:\n            report=error_report(torch_values[name].detach().numpy(),flax_values[name]);assert report['passed'],(name,report)\n            errors[name].append(report['max_abs'])\n        torch_values['output'].sum().backward()\n        input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))\n        assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']\n    wrong=convert(state,eps=.1)\n    reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}\n    wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}\n    assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']\n    for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:\n        try:convert(bad)\n        except ValueError:pass\n        else:raise AssertionError('incomplete mapping accepted')\nprint('Maximum absolute error per layer:',{k:max(v) for k,v in errors.items()})\nprint('Wrong epsilon: first mismatch is norm; intermediate outputs and input gradients verified on CPU.')\n",
+    "output": "Correct FP32 conversion passes layerwise and input-gradient tolerances on three input regimes. A changed LayerNorm epsilon first fails at norm; missing and unexpected keys are rejected.",
+    "experiments": [
+      {
+        "title": "Inspect the wrong-epsilon signature",
+        "prediction": "Will the dense hidden output fail when only normalization epsilon changes?",
+        "code": "assert wrong_reports['hidden']['passed']\nassert not wrong_reports['norm']['passed']\nprint('Per-layer wrong-epsilon report:',wrong_reports)",
+        "output": "The first dense layer passes; normalization fails first.",
+        "explanation": "Localize the first divergent operation before remapping unrelated weights. The plot records downstream effects as well as the first failure."
+      }
+    ],
+    "exercise": "Compare a near-zero reference against two candidate errors. Verify that the absolute tolerance accepts rounding noise but rejects a meaningful discrepancy.",
+    "solution": "assert error_report([0.,1.],[1e-7,1.000001])['passed']\nassert not error_report([0.,1.],[1e-3,1.])['passed']\nprint('Near-zero acceptance and rejection verified.')",
+    "practice": [
+      {
+        "title": "Reject a plausible but wrong tensor layout",
+        "difficulty": "Transfer",
+        "prompt": "Transpose the first PyTorch weight before conversion and prove the boundary rejects it instead of transposing it a second time.",
+        "hint": "The first weight is rectangular, so validate its source shape before applying the mapping.",
+        "solution": "bad_state=dict(state);bad_state['hidden.weight']=state['hidden.weight'].T\ntry:convert(bad_state)\nexcept ValueError:print('Wrong source layout rejected')\nelse:raise AssertionError('layout mismatch accepted')",
+        "explanation": "Asymmetric dimensions expose orientation errors that square test matrices can hide. Shape checks complement numerical checks rather than replacing them."
+      }
+    ],
+    "question": "The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?",
+    "options": [
+      "Normalization axes, variance calculation, epsilon and affine parameters.",
+      "Relax every tolerance until the final outputs pass.",
+      "Assume successful checkpoint loading proves parity."
+    ],
+    "answer": 0,
+    "explanation": "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference.",
+    "diagnosis": "Reject missing, extra, malformed or nonfinite weights before assignment. If the first linear output differs, inspect orientation and bias. If normalization first differs, inspect its contract. If forward outputs agree but gradients differ, inspect operation approximations and differentiability; retain both results.",
+    "references": [
+      {
+        "title": "PyTorch state_dict and weights-only loading",
+        "url": "https://docs.pytorch.org/tutorials/beginner/saving_loading_models.html"
+      },
+      {
+        "title": "Flax NNX Linear",
+        "url": "https://flax.readthedocs.io/en/latest/api_reference/flax.nnx/nn/linear.html"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Locate the first divergent layer",
+      "kind": "executed",
+      "prediction": "Which bar should remain near zero when only LayerNorm epsilon is wrong?",
+      "reading": "The horizontal categories follow execution order: hidden linear, normalization, activation and output. Bars show maximum absolute difference in that layer’s output units. The correct mapping remains near floating-point rounding error; the changed-epsilon model first diverges at normalization. The earlier matching hidden output narrows the cause. These are numerical errors, not accuracy or latency.",
+      "connection": "All weights are identical between the correct and wrong-epsilon target models. A parameter-file comparison alone would miss the changed operation. Later error may grow or shrink through nonlinearities and the output projection, so the largest bar is not necessarily the location of the original bug. The per-element tolerance and gradient checks are reported separately from this plot.",
+      "alt": "Layerwise maximum absolute errors for matching conversion and a deliberately wrong LayerNorm epsilon; the first wrong layer is normalization.",
+      "code": "visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution order','ylabel':'maximum absolute output error','series':[{'label':'matched architecture (max across inputs)','y':[max(v) for v in errors.values()]},{'label':'wrong epsilon (last input batch)','y':[wrong_reports[k]['max_abs'] for k in errors]}]}"
+    }
+  }
+}

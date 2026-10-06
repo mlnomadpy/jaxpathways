@@ -1,0 +1,6 @@
+[
+  { "title": "Train models", "ids": ["models", "rl", "tpu"] },
+  { "title": "Deploy models", "ids": ["ship"] },
+  { "title": "Scientific work", "ids": ["science", "probability", "internals"] },
+  { "title": "Systems work", "ids": ["scale", "ops"] }
+]

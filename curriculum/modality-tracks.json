@@ -1,0 +1,705 @@
+{
+  "schemaVersion": 1,
+  "title": "Build a model system, one contract at a time",
+  "description": "Reuse the experiment, checkpoint, evaluation and artifact contracts. Keep tokenization, image transforms, signal processing, pairing and decoding specific to the modality.",
+  "tracks": [
+    {
+      "id": "image",
+      "title": "Image: from pixels to a deployed classifier",
+      "summary": "Build an image classification system whose preprocessing, errors and runtime behavior you can inspect.",
+      "task": "Classify small images, explain per-class failures and compare a float reference with a supported edge artifact.",
+      "prerequisites": "Shared foundations and the neural-network phase. The existing classifier project prepares training contracts; the CNN lesson introduces image inputs.",
+      "firstLessonId": "networks-04",
+      "pathwayIds": [
+        "models",
+        "ship"
+      ],
+      "projectIds": [
+        "image-harness",
+        "mlp-classifier",
+        "engineering-release",
+        "training-methods",
+        "weight-conversion"
+      ],
+      "status": "authored",
+      "available": "A connected CPU image harness is runnable: a trained CNN, full fresh-process recovery, interpreted clean/corrupted evaluation, calibrated integer arithmetic, serialized inference and measured rollout/rollback. Local image ingestion is implemented; real-photo quality and target-device performance remain unverified.",
+      "plot": "Show labeled input thumbnails beside a confusion matrix. Read rows as true classes and columns as predicted classes; inspect the off-diagonal examples before explaining an error. Add training and validation curves with the same loss definition.",
+      "stages": [
+        {
+          "id": "data",
+          "title": "Define the data contract",
+          "explanation": "Begin with what one example means. Keep stable IDs and split before fitting normalization, tokenization or augmentation. A small synthetic fixture makes bugs visible; a separate documented dataset is needed to study generalization.",
+          "artifact": "A split manifest, provenance/license note, preprocessing version and an example inspection.",
+          "check": "Assert that train and held-out IDs are disjoint. Change one preprocessing setting and make the contract check reject the old artifact.",
+          "lessonIds": [
+            "arrays-01",
+            "arrays-02",
+            "recovery-01"
+          ],
+          "application": "Use the synthetic bar images for contract debugging. For a later real-image extension, document rights and split by source or subject where related images could leak across splits. Store resize, channel order and normalization in the artifact.",
+          "projectStageIds": [
+            "1"
+          ]
+        },
+        {
+          "id": "model",
+          "title": "Build a transparent baseline",
+          "explanation": "First build a model small enough to inspect. Predict intermediate shapes and check a forward pass using a separate calculation. Your baseline provides a reference for every later optimization.",
+          "artifact": "A shape diagram, baseline configuration and an independently checked forward pass.",
+          "check": "Test a singleton batch and a changed batch size. Reject malformed targets before broadcasting can silently change the objective.",
+          "lessonIds": [
+            "networks-01",
+            "networks-02"
+          ],
+          "application": "Start with the small CNN. Trace batch, height, width and channel axes through convolution and pooling; compare one receptive field by hand before adding capacity.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "train",
+          "title": "Make each update explainable",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
+          "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
+          "lessonIds": [
+            "optimization-02",
+            "optimization-04",
+            "networks-03",
+            "networks-05",
+            "recovery-06",
+            "pretraining-02",
+            "pretraining-03",
+            "posttraining-02"
+          ],
+          "application": "Compare the CNN against a declared simple baseline. Keep augmentation on the training path and evaluate the original held-out images without stochastic augmentation. The training-methods project supplies separate objective labs for these methods; follow each phase prerequisite before attempting them. Integrating every objective into this modality harness remains an extension.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "recover",
+          "title": "Prove that training can resume",
+          "explanation": "Weights alone cannot reconstruct an interrupted experiment. Save optimizer memory, random state, completed step and input iterator position together with the data and package contract. Compare the next several updates after restore.",
+          "artifact": "A checkpoint manifest and uninterrupted-versus-restored sample IDs, losses and state.",
+          "check": "Interrupt at a known boundary. Restore into a fresh process and compare several subsequent batches; reject a changed dataset or optimizer configuration.",
+          "lessonIds": [
+            "recovery-02",
+            "recovery-03",
+            "recovery-04"
+          ],
+          "application": "Save augmentation random state and the image-sampler position as well as model and optimizer state. Compare the next image IDs and augmented inputs after restore.",
+          "projectStageIds": [
+            "4"
+          ]
+        },
+        {
+          "id": "evaluate",
+          "title": "Measure quality and inspect errors",
+          "explanation": "Freeze evaluation inputs before tuning. Aggregate sums and counts instead of averaging unequal batch means. Show representative failures alongside a metric so a reader can see what the model gets wrong.",
+          "artifact": "A baseline comparison, counts, error examples and a written interpretation of each figure.",
+          "check": "Evaluate one set as a whole and in uneven batches. Confirm that evaluation changes neither parameters nor optimizer state.",
+          "lessonIds": [
+            "networks-03",
+            "networks-04",
+            "optimization-10"
+          ],
+          "application": "Keep the confusion matrix counts and class frequencies. Compare clean inputs with a separately declared corruption set; do not select examples until a target accuracy is reached.",
+          "projectStageIds": [
+            "5"
+          ]
+        },
+        {
+          "id": "precision",
+          "title": "Choose weights, activations and accumulation separately",
+          "explanation": "Start from a float32 reference. Weight storage, activation computation, accumulation and optimizer memory are separate decisions. Integer quantization also needs scales, zero-point policy, calibration data and runtime support. A smaller file is not evidence of faster inference.",
+          "artifact": "A table of precision policies, artifact bytes, measured quality change and target-runtime latency.",
+          "check": "Calibrate on training or calibration data, keep final evaluation separate, and report unsupported kernels explicitly. Compare the same examples across policies.",
+          "lessonIds": [
+            "transformers-03",
+            "deployment-05"
+          ],
+          "application": "Compare float32 with supported lower-precision policies. For integer calibration, use representative training images and inspect class-specific degradation as well as overall accuracy.",
+          "projectStageIds": [
+            "6"
+          ]
+        },
+        {
+          "id": "export",
+          "title": "Verify the deployment boundary",
+          "explanation": "Package preprocessing with the trained computation. Check exported outputs on fixed normal and boundary inputs before serving them. Framework conversion and copying weights between model definitions need explicit shape, layout and dtype contracts.",
+          "artifact": "A versioned artifact with signatures, preprocessing assets and source-versus-runtime parity results.",
+          "check": "Load in a fresh process. Test singleton and supported changed shapes, malformed input and a deliberately mismatched preprocessing version.",
+          "lessonIds": [
+            "deployment-01",
+            "deployment-03",
+            "deployment-06",
+            "deployment-07",
+            "deployment-08"
+          ],
+          "application": "Verify resize, normalization, layout and class-index mapping across the source model and exported runtime. Do not treat the tabular classifier project as an image model. Use the weight-conversion project to audit an actual PyTorch/Flax dense–normalization–activation architecture. Extend its layerwise checks for this modality rather than assuming that its MLP mapping covers all operators.",
+          "projectStageIds": [
+            "7"
+          ]
+        },
+        {
+          "id": "operate",
+          "title": "Measure inference and rehearse failure",
+          "explanation": "Define the workload before timing it: input sizes, batching, concurrency and device. Warm up, synchronize device work and distinguish startup from steady execution. Test a failed load and a rollback to the last verified artifact.",
+          "artifact": "A workload report with latency units, throughput denominator, memory observations and a recovery/rollback note.",
+          "check": "Repeat the benchmark with a stated number of runs. On edge hardware, include preprocessing and transfer time and record the actual device; desktop proxies remain labeled proxies.",
+          "lessonIds": [
+            "performance-01",
+            "performance-02",
+            "operations-06",
+            "operations-08"
+          ],
+          "application": "Measure image decoding and preprocessing separately from model execution, then report end-to-end latency on the target device. Track unsupported resolutions and corrupted files.",
+          "projectStageIds": [
+            "8"
+          ]
+        }
+      ],
+      "harnessProjectId": "image-harness"
+    },
+    {
+      "id": "text",
+      "title": "Text: from tokens to reproducible generation",
+      "summary": "Build a small causal language-model system with trustworthy masking, recovery and decoding.",
+      "task": "Train a tiny next-token model, resume it correctly and serve reproducible generation under a stated prompt workload.",
+      "prerequisites": "Shared foundations, neural networks, recovery, Transformers and the linked performance/deployment lessons. Start with data and model stages, then return to export after completing its prerequisites.",
+      "firstLessonId": "transformers-01",
+      "pathwayIds": [
+        "models",
+        "tpu",
+        "ship"
+      ],
+      "projectIds": [
+        "text-harness",
+        "engineering-release",
+        "training-methods",
+        "weight-conversion"
+      ],
+      "status": "authored",
+      "available": "Runnable four-stage CPU byte-Transformer harness: real training, complete fresh-process recovery, fixed held-out evaluation, FP32/BF16/INT8 KV caches, six inference exports and profiler traces. Includes a local document loader. External-corpus quality, service load and physical TPU qualification remain extensions.",
+      "plot": "Read the measured training curve and final held-out comparison separately: a single final-model line is not a validation trajectory. Inspect one actual causal attention head, allocated cache bytes and isolated cache logit errors. Keep generation failures alongside aggregate metrics.",
+      "stages": [
+        {
+          "id": "data",
+          "title": "Define the data contract",
+          "explanation": "Begin with what one example means. Keep stable IDs and split before fitting normalization, tokenization or augmentation. A small synthetic fixture makes bugs visible; a separate documented dataset is needed to study generalization.",
+          "artifact": "A split manifest, provenance/license note, preprocessing version and an example inspection.",
+          "check": "Assert that train and held-out IDs are disjoint. Change one preprocessing setting and make the contract check reject the old artifact.",
+          "lessonIds": [
+            "arrays-01",
+            "arrays-02",
+            "recovery-01"
+          ],
+          "application": "Split by document before forming overlapping token windows. Store tokenizer identity, vocabulary, special tokens and padding rules; document corpus provenance and deduplication.",
+          "projectStageIds": [
+            "1"
+          ]
+        },
+        {
+          "id": "model",
+          "title": "Build a transparent baseline",
+          "explanation": "First build a model small enough to inspect. Predict intermediate shapes and check a forward pass using a separate calculation. Your baseline provides a reference for every later optimization.",
+          "artifact": "A shape diagram, baseline configuration and an independently checked forward pass.",
+          "check": "Test a singleton batch and a changed batch size. Reject malformed targets before broadcasting can silently change the objective.",
+          "lessonIds": [
+            "networks-01",
+            "networks-02"
+          ],
+          "application": "Trace token IDs to embeddings, attention and vocabulary logits. Begin with a small causal Transformer and compare a masked attention row against an independent calculation.",
+          "projectStageIds": [
+            "1"
+          ]
+        },
+        {
+          "id": "train",
+          "title": "Make each update explainable",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
+          "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
+          "lessonIds": [
+            "optimization-02",
+            "optimization-04",
+            "networks-03",
+            "networks-05",
+            "recovery-06",
+            "pretraining-01",
+            "posttraining-01",
+            "posttraining-02",
+            "posttraining-03",
+            "posttraining-04",
+            "posttraining-05"
+          ],
+          "application": "Shift inputs and targets explicitly. Normalize loss by valid predicted-token count, excluding padding; test that changing future tokens cannot alter earlier causal outputs. The training-methods project supplies separate objective labs for these methods; follow each phase prerequisite before attempting them. Integrating every objective into this modality harness remains an extension.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "recover",
+          "title": "Prove that training can resume",
+          "explanation": "Weights alone cannot reconstruct an interrupted experiment. Save optimizer memory, random state, completed step and input iterator position together with the data and package contract. Compare the next several updates after restore.",
+          "artifact": "A checkpoint manifest and uninterrupted-versus-restored sample IDs, losses and state.",
+          "check": "Interrupt at a known boundary. Restore into a fresh process and compare several subsequent batches; reject a changed dataset or optimizer configuration.",
+          "lessonIds": [
+            "recovery-02",
+            "recovery-03",
+            "recovery-04"
+          ],
+          "application": "Save token sampler or packed-sequence position, optimizer state and random keys. Reproduce subsequent packed examples and losses, not only the generated sentence.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "evaluate",
+          "title": "Measure quality and inspect errors",
+          "explanation": "Freeze evaluation inputs before tuning. Aggregate sums and counts instead of averaging unequal batch means. Show representative failures alongside a metric so a reader can see what the model gets wrong.",
+          "artifact": "A baseline comparison, counts, error examples and a written interpretation of each figure.",
+          "check": "Evaluate one set as a whole and in uneven batches. Confirm that evaluation changes neither parameters nor optimizer state.",
+          "lessonIds": [
+            "networks-03",
+            "networks-04",
+            "optimization-10"
+          ],
+          "application": "Report held-out token loss with its tokenizer and denominator. Compare a simple frequency baseline, inspect continuations from fixed prompts and keep decoding separate from likelihood evaluation.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "precision",
+          "title": "Choose weights, activations and accumulation separately",
+          "explanation": "Start from a float32 reference. Weight storage, activation computation, accumulation and optimizer memory are separate decisions. Integer quantization also needs scales, zero-point policy, calibration data and runtime support. A smaller file is not evidence of faster inference.",
+          "artifact": "A table of precision policies, artifact bytes, measured quality change and target-runtime latency.",
+          "check": "Calibrate on training or calibration data, keep final evaluation separate, and report unsupported kernels explicitly. Compare the same examples across policies.",
+          "lessonIds": [
+            "transformers-03",
+            "deployment-05"
+          ],
+          "application": "Separate weight, activation, accumulation and cache precision. Compare teacher-forced logits first; small numerical changes can change sampled text, so text equality is not a general parity criterion.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "export",
+          "title": "Verify the deployment boundary",
+          "explanation": "Package preprocessing with the trained computation. Check exported outputs on fixed normal and boundary inputs before serving them. Framework conversion and copying weights between model definitions need explicit shape, layout and dtype contracts.",
+          "artifact": "A versioned artifact with signatures, preprocessing assets and source-versus-runtime parity results.",
+          "check": "Load in a fresh process. Test singleton and supported changed shapes, malformed input and a deliberately mismatched preprocessing version.",
+          "lessonIds": [
+            "deployment-01",
+            "deployment-03",
+            "deployment-06",
+            "deployment-07",
+            "deployment-08"
+          ],
+          "application": "Ship tokenizer files, special-token policy, context limit and decoding defaults with the artifact. Test prompt truncation, empty input and maximum supported length. Use the weight-conversion project to audit an actual PyTorch/Flax dense–normalization–activation architecture. Extend its layerwise checks for this modality rather than assuming that its MLP mapping covers all operators.",
+          "projectStageIds": [
+            "4"
+          ]
+        },
+        {
+          "id": "operate",
+          "title": "Measure inference and rehearse failure",
+          "explanation": "Define the workload before timing it: input sizes, batching, concurrency and device. Warm up, synchronize device work and distinguish startup from steady execution. Test a failed load and a rollback to the last verified artifact.",
+          "artifact": "A workload report with latency units, throughput denominator, memory observations and a recovery/rollback note.",
+          "check": "Repeat the benchmark with a stated number of runs. On edge hardware, include preprocessing and transfer time and record the actual device; desktop proxies remain labeled proxies.",
+          "lessonIds": [
+            "performance-01",
+            "performance-02",
+            "operations-06",
+            "operations-08",
+            "operations-07"
+          ],
+          "application": "Measure prefill and decode separately. Report time to first token, generated tokens per second, prompt/output lengths and concurrency. Advanced MaxText experiments use a separately pinned environment.",
+          "projectStageIds": [
+            "4"
+          ]
+        }
+      ],
+      "harnessProjectId": "text-harness"
+    },
+    {
+      "id": "audio",
+      "title": "Audio: from waveforms to an edge sound classifier",
+      "summary": "Build a sound-event system that preserves timing, handles silence and measures the full signal-processing path.",
+      "task": "Classify short sound events from fixed windows and explain what happens with silence, noise and a changed recording source.",
+      "prerequisites": "Shared foundations, neural-network training, explicit recovery and deployment contracts. The project supplies a connected waveform/STFT tutorial and lifecycle exercise.",
+      "firstLessonId": "arrays-02",
+      "pathwayIds": [
+        "models",
+        "ship"
+      ],
+      "projectIds": [
+        "audio-harness",
+        "engineering-release",
+        "weight-conversion"
+      ],
+      "status": "authored",
+      "available": "A complete CPU waveform-to-inference harness is runnable: trained spectral classifier, full fresh-process recovery, fixed evaluation, calibrated precision and complete exported artifacts. PCM WAV ingestion is available; natural-recording quality and target-edge performance remain unmeasured.",
+      "plot": "Inspect the actual held-out error as waveform and spectrogram with a shared seconds axis. Color is log(1 + window-normalized power), not probability. Read confusion by true-class rows and predicted-class columns, and explain the high-tone/background error.",
+      "stages": [
+        {
+          "id": "data",
+          "title": "Define the data contract",
+          "explanation": "Begin with what one example means. Keep stable IDs and split before fitting normalization, tokenization or augmentation. A small synthetic fixture makes bugs visible; a separate documented dataset is needed to study generalization.",
+          "artifact": "A split manifest, provenance/license note, preprocessing version and an example inspection.",
+          "check": "Assert that train and held-out IDs are disjoint. Change one preprocessing setting and make the contract check reject the old artifact.",
+          "lessonIds": [
+            "arrays-01",
+            "arrays-02",
+            "recovery-01"
+          ],
+          "application": "Record sample rate, channel count, clip duration and amplitude convention. Split by speaker, recording session or source as appropriate before making overlapping windows.",
+          "projectStageIds": [
+            "1"
+          ]
+        },
+        {
+          "id": "model",
+          "title": "Build a transparent baseline",
+          "explanation": "First build a model small enough to inspect. Predict intermediate shapes and check a forward pass using a separate calculation. Your baseline provides a reference for every later optimization.",
+          "artifact": "A shape diagram, baseline configuration and an independently checked forward pass.",
+          "check": "Test a singleton batch and a changed batch size. Reject malformed targets before broadcasting can silently change the objective.",
+          "lessonIds": [
+            "networks-01",
+            "networks-02"
+          ],
+          "application": "First compare an energy or simple feature baseline with a small spectrogram classifier. Specify window size, hop, frequency bins and log floor. Test silence without producing nonfinite values.",
+          "projectStageIds": [
+            "1",
+            "2"
+          ]
+        },
+        {
+          "id": "train",
+          "title": "Make each update explainable",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
+          "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
+          "lessonIds": [
+            "optimization-02",
+            "optimization-04",
+            "networks-03",
+            "networks-05",
+            "recovery-06"
+          ],
+          "application": "Keep window labels and valid-frame masks aligned. Apply noise or gain augmentation only in training, and verify that padding does not become a class cue.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "recover",
+          "title": "Prove that training can resume",
+          "explanation": "Weights alone cannot reconstruct an interrupted experiment. Save optimizer memory, random state, completed step and input iterator position together with the data and package contract. Compare the next several updates after restore.",
+          "artifact": "A checkpoint manifest and uninterrupted-versus-restored sample IDs, losses and state.",
+          "check": "Interrupt at a known boundary. Restore into a fresh process and compare several subsequent batches; reject a changed dataset or optimizer configuration.",
+          "lessonIds": [
+            "recovery-02",
+            "recovery-03",
+            "recovery-04"
+          ],
+          "application": "Save clip/window position and augmentation state. After restore, compare clip IDs, crop offsets and feature arrays before comparing losses.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "evaluate",
+          "title": "Measure quality and inspect errors",
+          "explanation": "Freeze evaluation inputs before tuning. Aggregate sums and counts instead of averaging unequal batch means. Show representative failures alongside a metric so a reader can see what the model gets wrong.",
+          "artifact": "A baseline comparison, counts, error examples and a written interpretation of each figure.",
+          "check": "Evaluate one set as a whole and in uneven batches. Confirm that evaluation changes neither parameters nor optimizer state.",
+          "lessonIds": [
+            "networks-03",
+            "networks-04",
+            "optimization-10"
+          ],
+          "application": "Measure per-class recall and false positives on a fixed silence/background set. Aggregate at the intended unit—window or clip—and state how window decisions become a clip decision.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "precision",
+          "title": "Choose weights, activations and accumulation separately",
+          "explanation": "Start from a float32 reference. Weight storage, activation computation, accumulation and optimizer memory are separate decisions. Integer quantization also needs scales, zero-point policy, calibration data and runtime support. A smaller file is not evidence of faster inference.",
+          "artifact": "A table of precision policies, artifact bytes, measured quality change and target-runtime latency.",
+          "check": "Calibrate on training or calibration data, keep final evaluation separate, and report unsupported kernels explicitly. Compare the same examples across policies.",
+          "lessonIds": [
+            "transformers-03",
+            "deployment-05"
+          ],
+          "application": "Calibrate across quiet and loud representative signals. Compare feature-extraction precision separately from model precision; inspect clipping and rare-event recall.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "export",
+          "title": "Verify the deployment boundary",
+          "explanation": "Package preprocessing with the trained computation. Check exported outputs on fixed normal and boundary inputs before serving them. Framework conversion and copying weights between model definitions need explicit shape, layout and dtype contracts.",
+          "artifact": "A versioned artifact with signatures, preprocessing assets and source-versus-runtime parity results.",
+          "check": "Load in a fresh process. Test singleton and supported changed shapes, malformed input and a deliberately mismatched preprocessing version.",
+          "lessonIds": [
+            "deployment-01",
+            "deployment-03",
+            "deployment-06",
+            "deployment-07",
+            "deployment-08"
+          ],
+          "application": "Package resampling and spectrogram settings with weights. Compare features and logits stage by stage to locate a mismatch; an exported model alone does not define microphone input behavior. Use the weight-conversion project to audit an actual PyTorch/Flax dense–normalization–activation architecture. Extend its layerwise checks for this modality rather than assuming that its MLP mapping covers all operators.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "operate",
+          "title": "Measure inference and rehearse failure",
+          "explanation": "Define the workload before timing it: input sizes, batching, concurrency and device. Warm up, synchronize device work and distinguish startup from steady execution. Test a failed load and a rollback to the last verified artifact.",
+          "artifact": "A workload report with latency units, throughput denominator, memory observations and a recovery/rollback note.",
+          "check": "Repeat the benchmark with a stated number of runs. On edge hardware, include preprocessing and transfer time and record the actual device; desktop proxies remain labeled proxies.",
+          "lessonIds": [
+            "performance-01",
+            "performance-02",
+            "operations-06",
+            "operations-08"
+          ],
+          "application": "Measure capture-window delay, preprocessing and inference. Use a stated hop size and real-time factor definition; verify dropped-window and missing-device behavior on actual hardware.",
+          "projectStageIds": [
+            "4"
+          ]
+        }
+      ],
+      "harnessProjectId": "audio-harness"
+    },
+    {
+      "id": "cross-modal",
+      "title": "Cross-modal: connect images and text",
+      "summary": "Build a retrieval system that checks alignment between modalities before optimizing similarity search.",
+      "task": "Train and deploy two encoders that retrieve matching synthetic images and literal captions; explain the observed failure when image geometry shifts.",
+      "prerequisites": "Shared foundations, neural networks, recovery and deployment contracts. The connected project teaches its own pairing, multi-positive alignment and retrieval mechanism; attention-based and generative multimodal systems are extensions.",
+      "firstLessonId": "networks-03",
+      "pathwayIds": [
+        "models",
+        "ship"
+      ],
+      "projectIds": [
+        "cross-modal-harness",
+        "engineering-release",
+        "training-methods",
+        "weight-conversion"
+      ],
+      "status": "authored",
+      "available": "A connected CPU image–text retrieval harness is runnable: both encoders train, complete state restores in a fresh process, calibrated precision policies export and reload, and a measured release gate supports rollback. The synthetic four-concept fixture does not establish natural-language or real-image retrieval quality.",
+      "plot": "Read the actual training curve, paired image and clean similarity matrix, then inspect shifted-image confusion counts. Clean retrieval is 20/20 while one-pixel shifted retrieval is 5/20; explain the fixed pixel coordinates behind that failure.",
+      "stages": [
+        {
+          "id": "data",
+          "title": "Define the data contract",
+          "explanation": "Begin with what one example means. Keep stable IDs and split before fitting normalization, tokenization or augmentation. A small synthetic fixture makes bugs visible; a separate documented dataset is needed to study generalization.",
+          "artifact": "A split manifest, provenance/license note, preprocessing version and an example inspection.",
+          "check": "Assert that train and held-out IDs are disjoint. Change one preprocessing setting and make the contract check reject the old artifact.",
+          "lessonIds": [
+            "arrays-01",
+            "arrays-02",
+            "recovery-01"
+          ],
+          "application": "Keep pair and group IDs through every shuffle. Split related images and captions together; record the policy for multiple valid captions or near-duplicate images.",
+          "projectStageIds": [
+            "1"
+          ]
+        },
+        {
+          "id": "model",
+          "title": "Build a transparent baseline",
+          "explanation": "First build a model small enough to inspect. Predict intermediate shapes and check a forward pass using a separate calculation. Your baseline provides a reference for every later optimization.",
+          "artifact": "A shape diagram, baseline configuration and an independently checked forward pass.",
+          "check": "Test a singleton batch and a changed batch size. Reject malformed targets before broadcasting can silently change the objective.",
+          "lessonIds": [
+            "networks-01",
+            "networks-02"
+          ],
+          "application": "Start with two small encoders and a declared embedding normalization rule. Trace both batch axes in the similarity matrix and compare one dot product independently.",
+          "projectStageIds": [
+            "2"
+          ]
+        },
+        {
+          "id": "train",
+          "title": "Make each update explainable",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
+          "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
+          "lessonIds": [
+            "optimization-02",
+            "optimization-04",
+            "networks-03",
+            "networks-05",
+            "recovery-06",
+            "pretraining-03",
+            "posttraining-02"
+          ],
+          "application": "Use a stable contrastive objective with an explicit temperature and positive-pair mask. Test aligned versus deliberately permuted pairs; duplicate positives must not silently become negatives. The training-methods project supplies separate objective labs for these methods; follow each phase prerequisite before attempting them. Integrating every objective into this modality harness remains an extension.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "recover",
+          "title": "Prove that training can resume",
+          "explanation": "Weights alone cannot reconstruct an interrupted experiment. Save optimizer memory, random state, completed step and input iterator position together with the data and package contract. Compare the next several updates after restore.",
+          "artifact": "A checkpoint manifest and uninterrupted-versus-restored sample IDs, losses and state.",
+          "check": "Interrupt at a known boundary. Restore into a fresh process and compare several subsequent batches; reject a changed dataset or optimizer configuration.",
+          "lessonIds": [
+            "recovery-02",
+            "recovery-03",
+            "recovery-04"
+          ],
+          "application": "Save both encoders, optimizer state and the paired sampler position together. Reject a checkpoint that restores only one side of the learned embedding space.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "evaluate",
+          "title": "Measure quality and inspect errors",
+          "explanation": "Freeze evaluation inputs before tuning. Aggregate sums and counts instead of averaging unequal batch means. Show representative failures alongside a metric so a reader can see what the model gets wrong.",
+          "artifact": "A baseline comparison, counts, error examples and a written interpretation of each figure.",
+          "check": "Evaluate one set as a whole and in uneven batches. Confirm that evaluation changes neither parameters nor optimizer state.",
+          "lessonIds": [
+            "networks-03",
+            "networks-04",
+            "optimization-10"
+          ],
+          "application": "Evaluate image-to-text and text-to-image retrieval on a frozen candidate set. Report recall at declared ranks, candidate count and multiple-positive handling; changing the candidate pool changes the task.",
+          "projectStageIds": [
+            "3"
+          ]
+        },
+        {
+          "id": "precision",
+          "title": "Choose weights, activations and accumulation separately",
+          "explanation": "Start from a float32 reference. Weight storage, activation computation, accumulation and optimizer memory are separate decisions. Integer quantization also needs scales, zero-point policy, calibration data and runtime support. A smaller file is not evidence of faster inference.",
+          "artifact": "A table of precision policies, artifact bytes, measured quality change and target-runtime latency.",
+          "check": "Calibrate on training or calibration data, keep final evaluation separate, and report unsupported kernels explicitly. Compare the same examples across policies.",
+          "lessonIds": [
+            "transformers-03",
+            "deployment-05"
+          ],
+          "application": "Compare encoder precision and stored embedding precision separately. Track rank changes and recall, not only elementwise embedding error.",
+          "projectStageIds": [
+            "4"
+          ]
+        },
+        {
+          "id": "export",
+          "title": "Verify the deployment boundary",
+          "explanation": "Package preprocessing with the trained computation. Check exported outputs on fixed normal and boundary inputs before serving them. Framework conversion and copying weights between model definitions need explicit shape, layout and dtype contracts.",
+          "artifact": "A versioned artifact with signatures, preprocessing assets and source-versus-runtime parity results.",
+          "check": "Load in a fresh process. Test singleton and supported changed shapes, malformed input and a deliberately mismatched preprocessing version.",
+          "lessonIds": [
+            "deployment-01",
+            "deployment-03",
+            "deployment-06",
+            "deployment-07",
+            "deployment-08"
+          ],
+          "application": "Version the two encoders, preprocessing assets and search index together. Refuse an index built by an incompatible encoder version. Use the weight-conversion project to audit an actual PyTorch/Flax dense–normalization–activation architecture. Extend its layerwise checks for this modality rather than assuming that its MLP mapping covers all operators.",
+          "projectStageIds": [
+            "4"
+          ]
+        },
+        {
+          "id": "operate",
+          "title": "Measure inference and rehearse failure",
+          "explanation": "Define the workload before timing it: input sizes, batching, concurrency and device. Warm up, synchronize device work and distinguish startup from steady execution. Test a failed load and a rollback to the last verified artifact.",
+          "artifact": "A workload report with latency units, throughput denominator, memory observations and a recovery/rollback note.",
+          "check": "Repeat the benchmark with a stated number of runs. On edge hardware, include preprocessing and transfer time and record the actual device; desktop proxies remain labeled proxies.",
+          "lessonIds": [
+            "performance-01",
+            "performance-02",
+            "operations-06",
+            "operations-08"
+          ],
+          "application": "Measure query encoding and search separately, then end-to-end response time. Test missing or corrupted inputs and rebuild/rollback of an index. Generative multimodal models are a later extension.",
+          "projectStageIds": [
+            "5"
+          ]
+        }
+      ],
+      "harnessProjectId": "cross-modal-harness"
+    }
+  ],
+  "references": [
+    {
+      "title": "MaxText: advanced language-model training reference",
+      "url": "https://github.com/AI-Hypercomputer/maxtext"
+    },
+    {
+      "title": "MaxText multimodal tutorial",
+      "url": "https://maxtext.readthedocs.io/en/latest/tutorials/posttraining/multimodal.html"
+    },
+    {
+      "title": "MaxDiffusion: image-generation extension reference",
+      "url": "https://github.com/AI-Hypercomputer/maxdiffusion"
+    }
+  ],
+  "sharedSections": [
+    {
+      "title": "Write a precision policy, not just a dtype",
+      "paragraphs": [
+        "Record weights, activations, accumulation, optimizer state and any inference cache separately. Keep a float32 reference and compare the same held-out examples before choosing a lower-precision artifact.",
+        "For every supported policy keep artifact size, task quality, output error, latency and the actual device. Record unsupported policies as unsupported."
+      ],
+      "items": [
+        "Float32: establish the reference output and quality first.",
+        "Bfloat16 or float16: test numerical range and reduction behavior on the actual backend; retain sensitive reductions or optimizer state in higher precision where needed.",
+        "Int8: document calibration examples, scale granularity, clipping and activation policy. Weight-only and weight-and-activation quantization are different experiments.",
+        "Int4 or float8 extensions: require a supported runtime and hardware, declared packing/scaling rules and new quality measurements. No general compatibility or speedup is assumed."
+      ]
+    },
+    {
+      "title": "Cross-framework work begins with parity",
+      "paragraphs": [
+        "Use the existing Keras/JAX and TensorFlow conversion labs as preparation. A model definition, a saved checkpoint and an inference artifact have different contracts. Moving weights does not automatically move optimizer state, preprocessing or training behavior.",
+        "PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example does not establish that every model can round-trip between them."
+      ],
+      "items": [
+        "Pin both environments and choose a conversion path supported by those versions.",
+        "Map parameter names, kernel layouts, input shapes and dtypes explicitly.",
+        "Compare intermediate tensors and final outputs on fixed inputs, including boundary cases.",
+        "Compare task quality after export and again after quantization; measure the exported runtime itself."
+      ]
+    },
+    {
+      "title": "Grow the harness after the small version works",
+      "paragraphs": [
+        "Share run configuration, metrics, checkpoint metadata and artifact packaging. Keep modality-specific preprocessing, objectives and decoding behind explicit interfaces. Extend one working image system first, then text, audio and paired retrieval.",
+        "MaxText is an advanced reference for language-model training and supported multimodal workflows. Study its configuration, input pipeline, checkpointing, sharding and precision choices. Pin a release or commit in a separate compatible environment before adapting code; the course CPU environment does not validate a MaxText installation."
+      ],
+      "items": []
+    },
+    {
+      "title": "Carry engineering evidence across the lifecycle",
+      "paragraphs": [
+        "Use the engineering-release project after the modality harness. Track the same data, preprocessing, model and evaluation identity from experiment through service.",
+        "MLflow tracking and Docker are concrete tools; MLOps, LLMOps and ModelOps describe responsibilities around them. Read the linked operations lessons before treating a registry alias or a passing local check as a deployed system."
+      ],
+      "items": [
+        "MLflow: compare runs with the same metric definition and preserve data/code lineage.",
+        "Containers: record base/image/model digests, non-root runtime, mounted artifacts and readiness.",
+        "MLOps: validate data contracts, automate repeatable evaluation, inspect slices and monitor delayed quality.",
+        "LLMOps: version prompts, retrieval and tools; retain calibrated evaluation cases and redacted traces.",
+        "ModelOps: assign ownership, bind approval to a specific bundle and rehearse rollback and retirement."
+      ]
+    }
+  ]
+}

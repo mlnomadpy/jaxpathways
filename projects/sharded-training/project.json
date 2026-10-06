@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "id": "sharded-training",
+  "title": "Resume and profile a sharded training run",
+  "pathwayId": "scale",
+  "status": "authored",
+  "hardware": "One CPU process with four actual logical JAX devices; multi-host/accelerator execution unverified",
+  "source": "projects/sharded-training/README.md",
+  "requiredLessonIds": [
+    "state-01",
+    "state-02",
+    "state-03",
+    "state-04",
+    "optimization-02",
+    "recovery-01",
+    "recovery-02",
+    "recovery-03",
+    "recovery-04",
+    "recovery-05",
+    "performance-01",
+    "performance-02",
+    "performance-03",
+    "performance-04",
+    "performance-05",
+    "distributed-01",
+    "distributed-02",
+    "distributed-03",
+    "distributed-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "State and input ownership",
+      "command": "python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1",
+      "evidence": "Immutable sampler, exact epoch coverage, replay, row placement and tails",
+      "expected": "PASS stage 1: immutable sampler, key progression, complete epochs, changed seeds and padded tails",
+      "diagnosis": "If tail batches fail, inspect padding and cursor advancement before changing the model."
+    },
+    {
+      "id": "2",
+      "title": "Count-weighted sharded updates",
+      "command": "python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 2",
+      "evidence": "Actual four-device collectives, independent global/partition gradient oracles and replicated optimizer state",
+      "expected": "PASS stage 2: actual four-device collectives, independent NumPy gradients, unequal/empty partition counts and replicated momentum",
+      "diagnosis": "An average of local means is wrong for unequal or empty partitions; aggregate numerators and valid counts."
+    },
+    {
+      "id": "3",
+      "title": "Fresh-process complete recovery",
+      "command": "python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 3",
+      "evidence": "Durable full-state checkpoint, independent process replay across epochs, reset faults and corrupt-contract rejection",
+      "expected": "PASS stage 3: fresh-process complete replay, metadata/corruption rejection and observable momentum/cursor/key faults",
+      "diagnosis": "Matching weights at restore is insufficient; compare future IDs, losses, momentum and random progression."
+    },
+    {
+      "id": "4",
+      "title": "Trace-backed performance evidence",
+      "command": "python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4",
+      "evidence": "Actual StableHLO, synchronized compiled single/four-device baselines, XPlane/Perfetto trace and explained plots",
+      "expected": "PASS stage 4: lowered/compiled equivalence, synchronized warm samples, actual XPlane/Perfetto trace and source-bound plotted evidence",
+      "diagnosis": "Separate compilation, preparation/placement and ready-output timing; logical CPU devices do not establish distributed hardware scaling."
+    }
+  ],
+  "rubric": [
+    "Carry complete momentum, random, permutation, cursor and step state through pure transitions",
+    "Preserve every example with padded valid masks and reject unsupported input contracts",
+    "Verify actual four-device global mean gradients with independent NumPy and count-weighted partition oracles",
+    "Inspect real collective IR and each replica placement",
+    "Restore in a fresh process and compare sample IDs and full future state across epoch boundaries",
+    "Expose missing momentum, cursor and key as measurable failure cases",
+    "Separate compilation, warmed synchronized execution and traced preparation/placement overhead",
+    "Compare compiled single-device and four-logical-device baselines without claiming hardware scaling",
+    "Preserve actual trace, sample distributions, figures and source/environment receipts"
+  ],
+  "workspaceFile": "projects/sharded-training/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/sharded-training/starter/model.py projects/sharded-training/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/sharded-training/starter/model.py projects/sharded-training/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/sharded-training/tests/check.py --implementation solution --stage all",
+  "setupNote": "Use requirements-cpu.txt and a fresh Python interpreter. The checker configures four logical CPU devices before initializing JAX and executes a real small profile. The optional multi-host lesson extension remains separately unverified.",
+  "assessmentId": "scale"
+}

@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-05",
+  "contentHash": "72d85d9b5c4df3c7bd1a45d8812741aa9f5e87b229dcb4b4ca4c076f4bf663a7",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-06T00:59:31.409698+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\n",
+  "data": {
+    "panels": [
+      {
+        "kind": "bar",
+        "labels": [
+          "FP32",
+          "FP16 \u2192 FP32",
+          "BF16 \u2192 FP32",
+          "W8 A32",
+          "W4 A32"
+        ],
+        "ylabel": "maximum absolute output error",
+        "series": [
+          {
+            "label": "CPU reference error",
+            "y": [
+              0.0,
+              0.0010547637939453125,
+              0.006171703338623047,
+              0.008031368255615234,
+              0.14571428298950195
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "bar",
+        "labels": [
+          "output 0",
+          "output 1"
+        ],
+        "ylabel": "output value",
+        "series": [
+          {
+            "label": "correct affine / float reference",
+            "y": [
+              0.625,
+              0.9375
+            ]
+          },
+          {
+            "label": "input zero point omitted",
+            "y": [
+              -0.125,
+              0.5625
+            ]
+          },
+          {
+            "label": "narrow output grid clips",
+            "y": [
+              0.52734375,
+              0.52734375
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

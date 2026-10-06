@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What happens if the same key is used twice for the same random operation?",
+      "options": [
+        "The generator automatically advances",
+        "The same sample is reproduced",
+        "JAX guarantees an exception"
+      ],
+      "correct": 1,
+      "explanation": "Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness."
+    }
+  ]
+}

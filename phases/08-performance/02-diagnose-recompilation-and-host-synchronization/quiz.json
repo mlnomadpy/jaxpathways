@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does an append to a Python list inside a jitted function demonstrate?",
+      "options": [
+        "One recorded event per device execution",
+        "An observed Python tracing event, which is not an executable compilation count",
+        "An exact measure of compiler duration"
+      ],
+      "correct": 1,
+      "explanation": "Python executes during tracing; compiled array computation may run repeatedly without that append. Correlate with public compiler logs or traces before claiming recompilation."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What should a training step retain besides updated parameters for a stateful optimizer?",
+      "options": [
+        "Only the final loss",
+        "The new optimizer state returned by update",
+        "A freshly initialized state every time"
+      ],
+      "correct": 1,
+      "explanation": "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history."
+    }
+  ]
+}

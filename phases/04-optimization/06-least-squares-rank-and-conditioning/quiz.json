@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-06",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Can zero training error prove that fitted weights are uniquely determined?",
+      "options": [
+        "Yes, zero error is a unique solution",
+        "No; dependent columns can produce many equally good weights",
+        "Only if we use float64"
+      ],
+      "correct": 1,
+      "explanation": "Independent feature directions determine uniqueness. Extra precision cannot create information missing from the design matrix."
+    }
+  ]
+}

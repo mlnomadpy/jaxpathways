@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Does passing one gradient check prove a loss implementation is correct for all inputs?",
+      "options": [
+        "Yes, autodiff is an oracle",
+        "No; it is evidence at tested inputs and must be combined with shape and objective checks",
+        "Only on TPU"
+      ],
+      "correct": 1,
+      "explanation": "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior."
+    }
+  ]
+}

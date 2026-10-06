@@ -1,0 +1,52 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-01",
+  "contentHash": "5ea69a17d27e7e0769b6c9767a3783cec3fead7693462853fd22b69da939f4a6",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:22.571566+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Replay equal: True\nFresh draw equal: False\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      0,
+      1,
+      2
+    ],
+    "xlabel": "sample coordinate",
+    "ylabel": "normal draw",
+    "series": [
+      {
+        "label": "first draw",
+        "y": [
+          0.6057640314102173,
+          0.7990440726280212,
+          -0.9089270234107971
+        ]
+      },
+      {
+        "label": "same key replay",
+        "y": [
+          0.6057640314102173,
+          0.7990440726280212,
+          -0.9089270234107971
+        ]
+      },
+      {
+        "label": "split next draw",
+        "y": [
+          -0.21089035272598267,
+          -1.3627947568893433,
+          -0.045003850013017654
+        ]
+      }
+    ]
+  }
+}

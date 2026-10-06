@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-03",
+  "contentHash": "517c339bbf12ae1d06c032585dcfde3857104fca21d797e2bb1c9b3f22bb8eaa",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:48:00.475254+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]\nall next-update state hashes match: True\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "xlabel": "completed training step",
+    "ylabel": "sampled minibatch mean squared error",
+    "series": [
+      {
+        "label": "uninterrupted continuation",
+        "y": [
+          0.3778156042098999,
+          1.5120896100997925,
+          0.8378463983535767,
+          0.46349823474884033,
+          0.7546424865722656,
+          0.50294029712677
+        ]
+      },
+      {
+        "label": "restored continuation (overlaps)",
+        "y": [
+          0.3778156042098999,
+          1.5120896100997925,
+          0.8378463983535767,
+          0.46349823474884033,
+          0.7546424865722656,
+          0.50294029712677
+        ]
+      }
+    ]
+  }
+}

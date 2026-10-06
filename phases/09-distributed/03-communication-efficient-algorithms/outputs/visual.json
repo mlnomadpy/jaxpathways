@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-03",
+  "contentHash": "eb1590e00dc1eec0a0d3b680bf291149c7bec37970931ac184fad2dc689722d6",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:47:39.412643+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 4,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 58.45818668603897, 'reduce_scatter': 61.04097701609135, 'all_gather_only': 53.00017073750496}\n",
+  "data": {
+    "panels": [
+      {
+        "kind": "bar",
+        "labels": [
+          "all-reduce",
+          "reduce-scatter",
+          "after gather"
+        ],
+        "ylabel": "values stored per device",
+        "series": [
+          {
+            "label": "observed local shape",
+            "y": [
+              8,
+              2,
+              8
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "bar",
+        "labels": [
+          "all-reduce",
+          "reduce-scatter",
+          "scatter + gather"
+        ],
+        "ylabel": "modeled bytes per rank",
+        "series": [
+          {
+            "label": "idealized ring payload",
+            "y": [
+              48.0,
+              24.0,
+              48.0
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

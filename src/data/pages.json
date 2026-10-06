@@ -1,0 +1,82 @@
+{
+  "pathways": {
+    "title": "Learning paths & career routes \u2014 JAX Pathways",
+    "description": "A friendly, project-led map of JAX: learn the foundations, then choose your pathway.",
+    "bodyClass": "",
+    "active": "pathways",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to content"
+  },
+  "lesson": {
+    "title": "Lesson \u2014 JAX Pathways",
+    "description": "Read, build, run, and explain one JAX lesson at a time.",
+    "bodyClass": "reader",
+    "active": "course",
+    "skipTarget": "#lesson-body",
+    "skipLabel": "Skip to lesson"
+  },
+  "index": {
+    "title": "JAX Pathways \u2014 from arrays to models",
+    "description": "Learn JAX from arrays to models. Explore practical lessons, follow a career path, or start the course with your own AI coding agent.",
+    "bodyClass": "atlas-home tutor-home",
+    "active": "index",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to content"
+  },
+  "careers": {
+    "title": "Careers \u2014 JAX Pathways",
+    "description": "Explore seven JAX career routes: the work, skills, milestones and portfolio projects for each role.",
+    "bodyClass": "career-page",
+    "active": "careers",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to content"
+  },
+  "notebook": {
+    "title": "My learning \u2014 JAX Pathways",
+    "description": "Resume a JAX lesson, keep experimental evidence, and back up your local learning workspace.",
+    "bodyClass": "",
+    "active": "notebook",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to content"
+  },
+  "organizer": {
+    "title": "Learning club planner \u2014 JAX Pathways",
+    "description": "Learn JAX with practical lessons and projects.",
+    "bodyClass": "",
+    "active": "organizer",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to content"
+  },
+  "course": {
+    "title": "The course \u2014 JAX Pathways",
+    "description": "A friendly, project-led map of JAX: learn the foundations, then choose your pathway.",
+    "bodyClass": "course-page",
+    "active": "course",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to course"
+  },
+  "project": {
+    "title": "Project workspace \u2014 JAX Pathways",
+    "description": "Learn JAX with practical lessons and projects.",
+    "bodyClass": "",
+    "active": "projects",
+    "skipTarget": "#project",
+    "skipLabel": "Skip to project"
+  },
+  "developer": {
+    "title": "Learner resources \u2014 JAX Pathways",
+    "description": "Practice JAX on CPU, download projects and offline lessons, or add optional agent tutors from the same course source.",
+    "bodyClass": "resources-page",
+    "active": "developer",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to resources"
+  },
+  "projects": {
+    "title": "Projects \u2014 JAX Pathways",
+    "description": "Find every JAX course project, its prerequisites, staged checks and downloadable workspace.",
+    "bodyClass": "projects-page",
+    "active": "projects",
+    "skipTarget": "#main",
+    "skipLabel": "Skip to projects"
+  }
+}

@@ -1,0 +1,129 @@
+---
+import 'katex/dist/katex.min.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/features/reader.css';
+import '../../styles/features/assessment.css';
+import '../../styles/features/math.css';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import registry from '../../../public/api/v1/projects.json';
+import { course } from '../../lib/course-data.js';
+import { inlineMath } from '../../lib/math.js';
+import { siteUrl } from '../../lib/urls.js';
+export function getStaticPaths() {
+  return course.phases.map((phase) => ({ params: { id: phase.id }, props: { phase } }));
+}
+const { phase } = Astro.props;
+const guide = phase.studyGuide;
+const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
+---
+
+<SiteLayout
+  title={`${phase.title}: study guide — JAX Pathways`}
+  description={guide.why}
+  active="course"
+  skipTarget="#assessment"
+  skipLabel="Skip to phase guide"
+>
+  <main id="assessment">
+    <a href={siteUrl(`course.html#phase-${phase.id}`)}>Course · {phase.title}</a>
+    <p class="edition">Phase {phase.number} · Study guide</p>
+    <h1>{guide.question}</h1>
+    <p set:html={inlineMath(guide.why)} />
+    <p>
+      <strong>Preparation:</strong>{' '}
+      {phase.prerequisitePhaseIds.length
+        ? phase.prerequisitePhaseIds.map((id, index) => {
+            const previous = course.phases.find((item) => item.id === id)!;
+            return (
+              <Fragment>
+                {index ? ' · ' : ''}
+                <a href={siteUrl(`phase-guides/${id}.html`)}>{previous.title}</a>
+              </Fragment>
+            );
+          })
+        : 'Basic Python; no previous JAX experience.'}
+    </p>
+    <p>
+      <strong>Runtime:</strong> {phase.hardware}
+    </p>
+    <div class="assessment-actions">
+      <a class="button primary" href={siteUrl(`lesson.html?lesson=${phase.lessons[0].id}`)}>
+        Start the phase
+      </a>
+      <a class="button" href={siteUrl(`project-guides/${phase.projectId}.html`)}>
+        See the project
+      </a>
+    </div>
+    <nav class="assessment-contents" aria-label="Phase guide sections">
+      <a href="#readiness">Check your starting point</a> · <a href="#milestones">Build in stages</a>{' '}
+      · <a href="#transfer">Try a changed condition</a> ·{' '}
+      <a href="#completion">Decide what is ready</a>
+    </nav>
+    <article>
+      <h2 id="readiness">Check your starting point</h2>
+      <p set:html={inlineMath(guide.readiness.prompt)} />
+      <details>
+        <summary>Compare your reasoning</summary>
+        <p set:html={inlineMath(guide.readiness.answer)} />
+      </details>
+      <p>
+        If this is unfamiliar, work through{' '}
+        <a href={siteUrl(`lesson.html?lesson=${guide.readiness.lessonId}`)}>
+          {lesson(guide.readiness.lessonId).title}
+        </a>{' '}
+        before attempting the project.
+      </p>
+      <h2 id="milestones">Build in stages</h2>
+      {guide.milestones.map((stage, index) => (
+        <section aria-labelledby={`milestone-${index + 1}`}>
+          <h3 id={`milestone-${index + 1}`}>
+            {index + 1}. {stage.title}
+          </h3>
+          <p set:html={inlineMath(stage.task)} />
+          <ul>
+            {stage.lessonIds.map((id) => (
+              <li>
+                <a href={siteUrl(`lesson.html?lesson=${id}`)}>{lesson(id).title}</a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))}
+      <h2 id="transfer">Try a changed condition</h2>
+      <p>
+        Make a prediction before opening the reasoning. Keep your answer and the evidence you would
+        collect.
+      </p>
+      <p set:html={inlineMath(guide.transfer.prompt)} />
+      <details>
+        <summary>Compare an approach</summary>
+        <p set:html={inlineMath(guide.transfer.approach)} />
+      </details>
+      <h3>Diagnose a likely failure</h3>
+      <p>
+        <strong>Symptom:</strong> <span set:html={inlineMath(guide.pitfall.symptom)} />
+      </p>
+      <p>
+        <strong>Check next:</strong> <span set:html={inlineMath(guide.pitfall.check)} />
+      </p>
+      <h2 id="completion">Decide what is ready</h2>
+      <p set:html={inlineMath(guide.completion)} />
+      <p>
+        Use the project's staged checks on your own implementation. Passing the reference checks and
+        explaining this scenario are different kinds of evidence; neither is independent review of
+        your work.
+      </p>
+      <a href={siteUrl(`project-guides/${phase.projectId}.html`)}>Open {phase.project}</a>
+      {phase.additionalProjectIds?.map((id) => (
+        <p>
+          <a href={siteUrl(`project-guides/${id}.html`)}>
+            Open {registry.projects.find((project) => project.id === id)?.title}
+          </a>
+        </p>
+      ))}
+      <h3>What still needs further work</h3>
+      <p set:html={inlineMath(guide.furtherWork)} />
+    </article>
+  </main>
+</SiteLayout>

@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "id": "optimization-02",
+  "minutes": 80,
+  "content": {
+    "problem": "JAX can differentiate your loss, but how can you check the answer independently? We’ll nudge one weight a little in each direction and compare the change in loss with the reported gradient. You’ll also see why making the nudge smaller and smaller eventually hurts a floating-point calculation.",
+    "idea": "A central finite difference estimates a derivative from nearby function values. For a vector input, perturb one coordinate at a time to build an approximate gradient. Compare with absolute and relative tolerances, rather than demanding exact equality.\n\nThe step size trades approximation error against floating-point cancellation. Smaller is not always better. Start with a smooth function and a moderate step in float32. Nondifferentiable points need separate interpretation.",
+    "code": "import jax\nimport jax.numpy as jnp\ndef objective(w):\n    return jnp.sum((w - jnp.array([2., -1.])) ** 2)\nw = jnp.array([0.5, 0.25], dtype=jnp.float32)\nh = 1e-2\nbasis = jnp.eye(2)\nfinite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)\nautomatic = jax.grad(objective)(w)\nanalytic = 2 * (w - jnp.array([2., -1.]))\nprint(\"Finite difference:\", finite)\nprint(\"Autodiff:\", automatic)\nassert jnp.allclose(automatic, analytic)\nassert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)",
+    "output": "Both gradients are approximately \\([-3., 2.5]\\). The analytic and autodiff gradients agree; finite differences agree within tolerance.",
+    "exercise": "Check the gradient again at \\(w=[2., -1.]\\). Explain why this checks a minimum but does not prove correctness everywhere.",
+    "solution": "minimum = jnp.array([2., -1.])\nassert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))\nassert jnp.allclose(objective(minimum), 0.)",
+    "question": "Does passing one gradient check prove a loss implementation is correct for all inputs?",
+    "options": [
+      "Yes, autodiff is an oracle",
+      "No; it is evidence at tested inputs and must be combined with shape and objective checks",
+      "Only on TPU"
+    ],
+    "answer": 1,
+    "explanation": "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.",
+    "diagnosis": "If the finite-difference check fails, sweep several step sizes before changing the model. Inspect dtype, reduction axes, and whether the point crosses a nonsmooth operation.",
+    "sections": [
+      {
+        "title": "Build an independent derivative estimate",
+        "body": "Our objective is \\((w_0-2)^2+(w_1+1)^2\\). At \\([0.5, 0.25]\\), the derivative is \\([-3, 2.5]\\). This formula comes from elementary differentiation, so it can check the automatic result without invoking another autodiff API. The function returns a scalar because grad requires a scalar output.\n\nCentral differences probe each coordinate along a basis vector: hold all other coordinates fixed, evaluate at \\(w+h e_i\\) and \\(w-h e_i\\), then divide the difference by \\(2h\\). vmap batches these independent probes; it does not make the approximation exact. In the formula, \\(e_i\\) is a vector with a \\(1\\) in position \\(i\\) and zeros elsewhere. It lets us move just one weight while keeping the others fixed. The symbol \\(\\approx\\) reminds us that this is an estimate.",
+        "math": "\\frac{\\partial L}{\\partial w_i}\\approx\\frac{L(w+h e_i)-L(w-h e_i)}{2h}"
+      },
+      {
+        "title": "Separate truncation error from cancellation",
+        "body": "For a general smooth function, central difference has an approximation error that typically shrinks quadratically with \\(h\\) near a regular point. This quadratic objective is special: its central difference is exact in real arithmetic. Any discrepancy here mainly exposes floating-point effects. Do not use it alone to demonstrate a universal error curve.\n\nFloat32 cannot represent every nearby number. With an extremely small step, the two perturbed inputs can round to the same stored value. Subtracting their function values then gives zero rather than the derivative. A step sweep is evidence about this computation, not a recipe that works at every scale."
+      },
+      {
+        "title": "Test directions as well as coordinates",
+        "body": "A directional derivative compares \\(\\nabla L(w)^\\mathsf{T}v\\) with a finite difference along the direction vector \\(v\\). This is useful for large parameter trees because a few directions cost fewer evaluations than probing every scalar. It can miss an error orthogonal to all tested directions, so combine it with several points and known structural cases.\n\nAn allclose check permits absolute error near zero and relative error for larger values. Record the actual difference and dtype alongside a pass/fail result. Relaxing a tolerance until a broken calculation passes removes the value of the check."
+      },
+      {
+        "title": "Recognize what a gradient check cannot prove",
+        "body": "Autodiff differentiates the supplied program. If the loss accidentally omits a feature or uses the wrong targets, a perfect derivative check of that wrong loss can still pass. Compare expected predictions and loss values first, then derivatives.\n\nAt a kink such as `abs(0)`, a classical derivative does not exist. A symmetric finite difference can report zero while autodiff follows an implementation convention. Check smooth points on either side and document the boundary instead of treating the mismatch as automatic evidence of a JAX defect."
+      },
+      {
+        "title": "Do not mistake a kink for a smooth derivative",
+        "body": "The function \\(f(x)=|x|\\) has slope \\(-1\\) for negative inputs and \\(1\\) for positive inputs. There is no classical derivative at zero because the one-sided slopes disagree. A symmetric finite difference at zero nevertheless returns zero. This is a property of the probe, not a proof of differentiability. For a piecewise model, first test points that stay inside a smooth region, then document the boundary convention separately."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Sweep the perturbation size",
+        "prediction": "Will \\(10^{-8}\\) produce a more accurate estimate than \\(10^{-2}\\) in float32?",
+        "code": "for step_size in [1e-1, 1e-2, 1e-4, 1e-8]:\n    estimate = jax.vmap(lambda e: (objective(w+step_size*e)-objective(w-step_size*e))/(2*step_size))(basis)\n    print(\"h / max error:\", step_size, float(jnp.max(jnp.abs(estimate-analytic))))\ntiny = jax.vmap(lambda e: (objective(w+1e-8*e)-objective(w-1e-8*e))/(2e-8))(basis)\nassert not jnp.allclose(tiny, analytic, atol=1e-3)",
+        "output": "The tiny-step check fails; exact intermediate errors depend on backend arithmetic.",
+        "explanation": "Nearby float32 inputs can coincide, so reducing the step does not monotonically improve a check."
+      },
+      {
+        "title": "Check a new direction",
+        "prediction": "For direction \\([1, -2]\\), predict grad dot direction before evaluation.",
+        "code": "direction = jnp.array([1., -2.])\ndirectional = (objective(w+h*direction)-objective(w-h*direction))/(2*h)\nassert jnp.allclose(directional, -8., atol=2e-4)\nassert jnp.allclose(jnp.dot(automatic, direction), -8.)",
+        "output": "Directional derivative \\(-8\\) within tolerance.",
+        "explanation": "A new projection supplies a separate numerical check, though it does not test every direction."
+      },
+      {
+        "title": "A symmetric probe can hide a kink",
+        "prediction": "What does a symmetric finite difference of \\(|x|\\) report at \\(x=0\\), and what do the one-sided slopes report?",
+        "code": "h_kink = 0.01\nsymmetric = (jnp.abs(h_kink)-jnp.abs(-h_kink))/(2*h_kink)\nleft = (jnp.abs(0.)-jnp.abs(-h_kink))/h_kink\nright = (jnp.abs(h_kink)-jnp.abs(0.))/h_kink\nassert jnp.allclose(symmetric,0.)\nassert jnp.allclose(left,-1.) and jnp.allclose(right,1.)\nassert jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)\nassert jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)",
+        "output": "The symmetric estimate is \\(0\\); left and right slopes are \\(-1\\) and \\(1\\).",
+        "explanation": "Agreement with one numerical probe can conceal nondifferentiability. Choose probes that test the assumption your claim needs."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Move to a different smooth objective",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Check the derivative of `sum(sin(z))` at \\([0.2, -0.7]\\) using cosine and central differences.",
+        "hint": "Use cosine as the analytic reference; here truncation error also matters.",
+        "solution": "z = jnp.array([0.2, -0.7])\ndef trig_loss(z):\n    return jnp.sum(jnp.sin(z))\nfd = jax.vmap(lambda e: (trig_loss(z+1e-2*e)-trig_loss(z-1e-2*e))/(2e-2))(jnp.eye(2))\nassert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))\nassert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)",
+        "explanation": "The analytic reference checks a nonquadratic function at a new point."
+      },
+      {
+        "title": "Catch the wrong objective despite correct gradients",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "A model is meant to use both coordinates. Show that an objective omitting the second coordinate has a correct derivative for itself but fails the intended analytic reference. Repair it.",
+        "hint": "Differentiate \\((z_0-2)^2\\) and compare both coordinates.",
+        "solution": "def incomplete(z):\n    return (z[0]-2.)**2\nbad = jax.grad(incomplete)(w)\nassert jnp.allclose(bad, jnp.array([-3., 0.]))\nassert not jnp.allclose(bad, analytic)\nassert jnp.allclose(jax.grad(objective)(w), analytic)",
+        "explanation": "The omitted term is a specification error; numerical differentiation of the same incomplete loss would not expose it."
+      }
+    ],
+    "references": [
+      {
+        "title": "Automatic differentiation",
+        "url": "https://docs.jax.dev/en/latest/automatic-differentiation.html"
+      },
+      {
+        "title": "JAX default dtypes",
+        "url": "https://docs.jax.dev/en/latest/default_dtypes.html"
+      }
+    ],
+    "objectives": [
+      "Build an independent derivative estimate",
+      "Separate truncation error from cancellation",
+      "Test directions as well as coordinates",
+      "Recognize what a gradient check cannot prove",
+      "Do not mistake a kink for a smooth derivative"
+    ],
+    "takeaways": [
+      "Nearby float32 inputs can coincide, so reducing the step does not monotonically improve a check.",
+      "A new projection supplies a separate numerical check, though it does not test every direction."
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Prepare the inputs",
+        "instruction": "Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.",
+        "code": "import jax\nimport jax.numpy as jnp",
+        "explanation": "This block establishes the values used by the following steps; run the completed file after step \\(3\\)."
+      },
+      {
+        "title": "2. Define the computation",
+        "instruction": "Append this block below the inputs. Before proceeding, trace which values are inputs, predictions, and state.",
+        "code": "def objective(w):\n    return jnp.sum((w - jnp.array([2., -1.])) ** 2)\nw = jnp.array([0.5, 0.25], dtype=jnp.float32)\nh = 1e-2\nbasis = jnp.eye(2)\nfinite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)\nautomatic = jax.grad(objective)(w)\nanalytic = 2 * (w - jnp.array([2., -1.]))",
+        "explanation": "Each row of basis perturbs one coordinate. vmap returns both central differences; automatic and analytic are separate references for comparison."
+      },
+      {
+        "title": "3. Measure and verify",
+        "instruction": "Append the remaining block, then run python main.py in the terminal. Compare the printed result with the expected output below. Assertions stop execution if the contract fails.",
+        "code": "print(\"Finite difference:\", finite)\nprint(\"Autodiff:\", automatic)\nassert jnp.allclose(automatic, analytic)\nassert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)",
+        "explanation": "Both gradients are approximately \\([-3., 2.5]\\). The analytic and autodiff gradients agree; finite differences agree within tolerance."
+      }
+    ],
+    "visual": {
+      "title": "Smaller perturbations eventually lose accuracy",
+      "kind": "executed",
+      "prediction": "Will shrinking the finite-difference step always improve the answer?",
+      "reading": "The horizontal axis is the finite-difference step \\(h\\), increasing from left to right. The vertical axis is the largest absolute discrepancy between the numerical gradient and the analytic gradient. Both axes are logarithmic: a change by one power of ten represents a tenfold change, not an equal additive increment.\n\nAt the smallest steps, the error stays near \\(3\\). Moving right to steps around \\(10^{-2}\\) brings it down to a few times \\(10^{-6}\\), with small irregular rises along the way. All displayed errors are positive; none of the plotted estimates is exactly equal to the analytic gradient.",
+      "connection": "At very small steps, float32 rounding makes the two nearby function evaluations indistinguishable or nearly so. Their subtraction then loses the change we are trying to measure. Dividing that damaged difference by an even smaller step does not repair it. The left-hand plateau is therefore a failure of the numerical estimate, not evidence that autodiff is wrong.\n\nThis particular objective is quadratic, so a central difference has no truncation error in exact arithmetic. Do not expect a pronounced U-shaped error curve on the right of this example. For a general nonlinear objective, overly large steps can introduce truncation error too. Check several step sizes and look for agreement across a useful range, rather than choosing the smallest available step.",
+      "alt": "Smaller perturbations eventually lose accuracy. The horizontal axis is the finite-difference step \\(h\\), increasing from left to right. The vertical axis is the largest absolute discrepancy between the numerical gradient and the analytic gradient. Both axes are logarithmic: a change by one power of ten represents a tenfold change, not an equal additive increment. At the smallest steps, the error stays near \\(3\\). Moving right to steps around \\(10^{-2}\\) brings it down to a few times \\(10^{-6}\\), with small irregular rises along the way. All displayed errors are positive; none of the plotted estimates is exactly equal to the analytic gradient.",
+      "code": "steps = jnp.logspace(-8.0, -1.0, 22)\nerrors = []\nfor h_plot in steps:\n    estimate = jax.vmap(lambda e: (objective(w + h_plot * e) - objective(w - h_plot * e)) / (2 * h_plot))(basis)\n    errors.append(float(jnp.max(jnp.abs(estimate - analytic))))\nvisual_data = {'kind': 'line', 'x': steps.tolist(), 'xscale': 'log', 'xlabel': 'finite-difference step', 'ylabel': 'maximum absolute gradient error', 'series': [{'label': 'float32 central difference', 'y': errors}]}\nvisual_data['yscale'] = 'log'"
+    }
+  }
+}

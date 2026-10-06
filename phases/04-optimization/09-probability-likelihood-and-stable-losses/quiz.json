@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-09",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why compute binary cross-entropy from logits?",
+      "options": [
+        "It makes all classifications correct",
+        "It avoids unstable probability and logarithm intermediates",
+        "It removes the need for held-out evaluation"
+      ],
+      "correct": 1,
+      "explanation": "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model."
+    }
+  ]
+}

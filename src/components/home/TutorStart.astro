@@ -1,0 +1,40 @@
+---
+import '../../styles/home/tutor.css';
+import { tutor } from '../../data/home.json';
+import { siteUrl } from '../../lib/urls.js';
+import CopyText from '../shared/CopyText.astro';
+---
+
+<section class="tutor-band" id="tutor" aria-labelledby="tutor-title">
+  <div class="tutor-heading">
+    <h2 id="tutor-title">{tutor.title}</h2>
+    <p>{tutor.hosts}</p>
+  </div>
+  <p class="tutor-prereq">
+    <strong>1.</strong>{' '}
+    <a href={siteUrl(tutor.workspace)} download>
+      Download the course workspace
+    </a>
+    , unzip it, and open the <code>jaxpathways</code> folder in your agent. <strong>2.</strong> Run
+    this in that folder’s terminal (requires Node.js/npm):
+  </p>
+  <CopyText id="tutor-install" text={tutor.command} label="Copy tutor installation command" />
+  <CopyText
+    id="tutor-prompt"
+    text={tutor.prompt}
+    label="Copy course starting prompt"
+    kind="prompt"
+  />
+  <details class="tutor-more">
+    <summary>Using a browser chatbot, or need setup help?</summary>
+    <p>
+      For ChatGPT or another browser chatbot,{' '}
+      <a href={siteUrl('exercises/welcome-01.md')} download>
+        download the first lesson
+      </a>
+      , attach it to your chat, and ask for a guided walkthrough. The command above installs skills
+      for coding agents that can read local files.{' '}
+      <a href={siteUrl('developer.html#tutors')}>Read the setup guide</a>.
+    </p>
+  </details>
+</section>

@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-cpu",
+  "contentHash": "256e367ccb97f1bdd794401e246d1a79abea41ae25dbde84a7a6ccd56c420598",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:23:54.924301+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 4,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "JAX version: 0.9.2\nCPU devices: 4\nDevice 0 index (slice(0, 1, None), slice(None, None, None)) values [[0. 1.]]\nDevice 1 index (slice(1, 2, None), slice(None, None, None)) values [[2. 3.]]\nDevice 2 index (slice(2, 3, None), slice(None, None, None)) values [[4. 5.]]\nDevice 3 index (slice(3, 4, None), slice(None, None, None)) values [[6. 7.]]\nGlobal shape: (4, 2) result: [[1.0, 3.0], [5.0, 7.0], [9.0, 11.0], [13.0, 15.0]]\n",
+  "data": {
+    "kind": "heatmap",
+    "values": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        3
+      ]
+    ],
+    "unit": "logical CPU device ID",
+    "rows": [
+      "row 0",
+      "row 1",
+      "row 2",
+      "row 3"
+    ],
+    "columns": [
+      "feature 0",
+      "feature 1"
+    ]
+  }
+}

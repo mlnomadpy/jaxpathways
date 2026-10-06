@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-02",
+  "contentHash": "baee083865d68fb1de76e991420aa2f919b9eb735f3ea598cece48f09c622c52",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "conceptual",
+  "generatedAt": "2026-10-05T22:15:27.501832+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Trainable scalars: 13; other state: 1; clone counters: 1 2\n",
+  "data": {
+    "kind": "flow",
+    "nodes": [
+      "Module graph: hidden \u2192 output",
+      "Trainable kernel and bias leaves",
+      "Other state: call counter",
+      "Split graph and state",
+      "Merge an independent clone"
+    ],
+    "layout": "merge"
+  }
+}

@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="331.2pt" viewBox="0 0 576 331.2" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Separate graph structure from trainable and other state</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 331.2 
+L 576 331.2 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 14.40023 88.527714 
+L 179.700091 88.527714 
+Q 188.250084 88.527714 188.250084 87.552115 
+L 188.250084 22.512211 
+Q 188.250084 21.536613 179.700091 21.536613 
+L 14.40023 21.536613 
+Q 5.850238 21.536613 5.850238 22.512211 
+L 5.850238 87.552115 
+Q 5.850238 88.527714 14.40023 88.527714 
+z
+" clip-path="url(#pe2b16e38f8)" style="fill: #f0eafa; stroke: #6240ad; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 202.500072 88.527714 
+L 367.799933 88.527714 
+Q 376.349926 88.527714 376.349926 87.552115 
+L 376.349926 22.512211 
+Q 376.349926 21.536613 367.799933 21.536613 
+L 202.500072 21.536613 
+Q 193.950079 21.536613 193.950079 22.512211 
+L 193.950079 87.552115 
+Q 193.950079 88.527714 202.500072 88.527714 
+z
+" clip-path="url(#pe2b16e38f8)" style="fill: #f0eafa; stroke: #6240ad; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 390.599914 88.527714 
+L 555.899774 88.527714 
+Q 564.449767 88.527714 564.449767 87.552115 
+L 564.449767 22.512211 
+Q 564.449767 21.536613 555.899774 21.536613 
+L 390.599914 21.536613 
+Q 382.049921 21.536613 382.049921 22.512211 
+L 382.049921 87.552115 
+Q 382.049921 88.527714 390.599914 88.527714 
+z
+" clip-path="url(#pe2b16e38f8)" style="fill: #f0eafa; stroke: #6240ad; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 48.600202 196.493954 
+L 527.399798 196.493954 
+Q 541.649786 196.493954 541.649786 194.867957 
+L 541.649786 149.340024 
+Q 541.649786 147.714026 527.399798 147.714026 
+L 48.600202 147.714026 
+Q 34.350214 147.714026 34.350214 149.340024 
+L 34.350214 194.867957 
+Q 34.350214 196.493954 48.600202 196.493954 
+z
+" clip-path="url(#pe2b16e38f8)" style="fill: #f0eafa; stroke: #6240ad; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 48.600202 294.05381 
+L 527.399798 294.05381 
+Q 541.649786 294.05381 541.649786 292.427813 
+L 541.649786 246.89988 
+Q 541.649786 245.273882 527.399798 245.273882 
+L 48.600202 245.273882 
+Q 34.350214 245.273882 34.350214 246.89988 
+L 34.350214 292.427813 
+Q 34.350214 294.05381 48.600202 294.05381 
+z
+" clip-path="url(#pe2b16e38f8)" style="fill: #f0eafa; stroke: #6240ad; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(36.734067 51.908679)">Module graph: hidden</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(72.552817 64.226273)">→ output</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 98.970265 90.072302 
+Q 192.526081 117.795967 285.009939 145.201975 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+    <path d="M 280.762952 141.231698 
+L 285.009939 145.201975 
+L 279.285525 146.217399 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(229.406643 51.908679)">Trainable kernel and</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(254.359456 64.226273)">bias leaves</text>
+   </g>
+   <g id="patch_8">
+    <path d="M 285.250719 91.50298 
+Q 286.575103 117.797688 287.843246 142.975778 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+    <path d="M 290.178378 137.651573 
+L 287.843246 142.975778 
+L 284.984961 137.913149 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(428.901797 51.908679)">Other state: call</text>
+    <text style="font-size: 11px; font-family: 'DejaVu Sans'; fill: #30273e" transform="translate(452.087735 64.226273)">counter</text>
+   </g>
+   <g id="patch_9">
+    <path d="M 471.336176 90.087844 
+Q 380.62343 117.796126 290.979949 145.177801 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+    <path d="M 296.712653 146.145328 
+L 290.979949 145.177801 
+L 295.193593 141.172154 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="288" y="175.41524" transform="rotate(-0 288 175.41524)">Split graph and state</text>
+   </g>
+   <g id="text_5">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #30273e" x="288" y="272.975096" transform="rotate(-0 288 272.975096)">Merge an independent clone</text>
+   </g>
+   <g id="patch_10">
+    <path d="M 288 200.117912 
+Q 288 220.882591 288 240.529236 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+    <path d="M 290.6 235.329236 
+L 288 240.529236 
+L 285.4 235.329236 
+" style="fill: none; stroke: #6240ad; stroke-linecap: round"/>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="pe2b16e38f8">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="325.19952"/>
+  </clipPath>
+ </defs>
+</svg>

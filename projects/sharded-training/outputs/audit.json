@@ -1,0 +1,151 @@
+{
+  "backend": "cpu",
+  "devices": [
+    "TFRT_CPU_0",
+    "TFRT_CPU_1",
+    "TFRT_CPU_2",
+    "TFRT_CPU_3"
+  ],
+  "jax": "0.9.2",
+  "numpy": "2.4.4",
+  "implementation_sha256": "2d60f971f135fc762a536fe02f3eb6ce9fd0cf074cb45d7966fbf92ea256ad75",
+  "checker_sha256": "76a9780b44f47f3b572584bcb1365e15a7aa04cb4c97c891f3637492fffd7f92",
+  "executed_at_utc": "2026-10-06T00:10:13.493493+00:00",
+  "partition_counts": [
+    [
+      2,
+      2,
+      2,
+      1
+    ],
+    [
+      1,
+      1,
+      0,
+      0
+    ],
+    [
+      3,
+      3,
+      3,
+      1
+    ],
+    [
+      1,
+      1,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0
+    ],
+    [
+      6,
+      6,
+      6,
+      5
+    ]
+  ],
+  "stablehlo_all_reduce_occurrences": 3,
+  "local_weight_shape": [
+    8
+  ],
+  "recovery": [
+    {
+      "seed": 17,
+      "batch_size": 7,
+      "saved_step": 5,
+      "saved_cursor": 7,
+      "restored_max_weight_error": 0.0,
+      "fault_max_weight_error": {
+        "momentum": 0.33989739418029785,
+        "cursor": 0.04003068804740906,
+        "key": 0.06173306703567505
+      }
+    },
+    {
+      "seed": 29,
+      "batch_size": 10,
+      "saved_step": 4,
+      "saved_cursor": 10,
+      "restored_max_weight_error": 0.0,
+      "fault_max_weight_error": {
+        "momentum": 0.12764877080917358,
+        "cursor": 0.09380055963993073,
+        "key": 0.17282067239284515
+      }
+    }
+  ],
+  "compile_ms": 33.90024998225272,
+  "single_device_compile_ms": 28.761208057403564,
+  "timing_ms": {
+    "eager_shard_map": [
+      426.25270783901215,
+      421.6795419342816,
+      441.31087488494813,
+      421.3102920912206,
+      396.8045001383871,
+      425.734625197947,
+      461.58220898360014,
+      417.07625007256866,
+      405.7920000050217,
+      410.78775003552437,
+      421.46287485957146
+    ],
+    "compiled_shard_map": [
+      0.2096670214086771,
+      0.16779196448624134,
+      0.16608298756182194,
+      0.13983296230435371,
+      0.1532081514596939,
+      0.21866708993911743,
+      0.1949169673025608,
+      0.1572081819176674,
+      0.1746669877320528,
+      0.13783411122858524,
+      0.15650014393031597
+    ],
+    "compiled_single_device": [
+      0.08345907554030418,
+      0.06349990144371986,
+      0.07687509059906006,
+      0.06820890121161938,
+      0.07129204459488392,
+      0.07225014269351959,
+      0.07462501525878906,
+      0.06358395330607891,
+      0.07929210551083088,
+      0.06266706623136997,
+      0.07687509059906006
+    ]
+  },
+  "timing_scope": "already placed inputs, output readiness included, host sampling excluded",
+  "trace_scope": "four annotated preparation/placement and compiled update steps; profiler overhead included",
+  "trace_durations_ms": {
+    "prepare_and_place": [
+      0.421,
+      0.79,
+      0.777,
+      0.752
+    ],
+    "compiled_update_and_wait": [
+      0.196,
+      0.193,
+      0.167,
+      0.153
+    ]
+  },
+  "trace_files": [
+    "trace/plugins/profile/2026_10_05_17_10_21/perfetto_trace.json.gz",
+    "trace/plugins/profile/2026_10_05_17_10_21/192.168.11.125.xplane.pb"
+  ],
+  "fixture_shape": [
+    1023,
+    64
+  ],
+  "eager_to_compiled_ratio": 2537.6643390563295,
+  "single_to_four_logical_device_ratio": 0.43502434387884276
+}

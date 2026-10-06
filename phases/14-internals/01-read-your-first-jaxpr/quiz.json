@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "internals-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A jaxpr has more equations after grad. What can you conclude from that observation alone?",
+      "options": [
+        "The derivative must run slower on every device.",
+        "The traced derivative has a different computation structure; runtime needs separate measurement.",
+        "Every equation corresponds to one hardware kernel."
+      ],
+      "correct": 1,
+      "explanation": "A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing."
+    }
+  ]
+}

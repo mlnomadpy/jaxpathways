@@ -1,0 +1,273 @@
+---
+import ResourceCard from '../components/resources/ResourceCard.astro';
+import resources from '../data/resources.json';
+import { tutor } from '../data/home.json';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/resources.css';
+import '../styles/features/reader.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { siteUrl } from '../lib/urls.js';
+import pages from '../data/pages.json';
+---
+
+<SiteLayout {...pages.developer}>
+  <main id="main">
+    <section class="resources-intro">
+      <p class="edition">Take the course with you</p>
+      <h1>Learner resources</h1>
+      <p class="intro">
+        Practice on your CPU, keep your own evidence, and learn in the browser, a notebook or your
+        agent.
+      </p>
+      <nav class="resource-jumps" aria-label="Resource sections">
+        <a href="#practice">Practice</a>
+        <a href="#offline">Read offline</a>
+        <a href="#tutors">Agent tutors</a>
+        <a href="#terminal">Terminal</a>
+        <a href="#contributors">Authors & APIs</a>
+      </nav>
+    </section>
+    <section id="practice" class="resource-section">
+      <div class="resource-heading">
+        <p class="edition">Run something real</p>
+        <h2>Start small. Verify the result.</h2>
+        <p>
+          Each download includes the work to try and the checks to explain. Reference execution and
+          your own exercise evidence stay separate.
+        </p>
+      </div>
+      <div class="resource-grid">
+        {resources.cards.map((card) => (
+          <ResourceCard card={card} />
+        ))}
+      </div>
+    </section>
+    <section id="offline" class="resource-section resource-split">
+      <div class="resource-heading">
+        <p class="edition">Away from the browser</p>
+        <h2>Read offline.</h2>
+        <p>
+          The book includes available lesson drafts, their worked code, experiments, practice and
+          references. Unwritten roadmap topics are excluded.
+        </p>
+      </div>
+      <div class="resource-downloads">
+        <a class="download-row" href={siteUrl('downloads/jax-foundations.html')}>
+          <strong>Printable course reader</strong>
+          <span>HTML · open and print to PDF</span>
+          <span aria-hidden="true">↗</span>
+        </a>
+        <a class="download-row" href={siteUrl('downloads/jax-foundations.epub')} download>
+          <strong>Course EPUB</strong>
+          <span>For your ebook reader</span>
+          <span aria-hidden="true">↓</span>
+        </a>
+        <p class="resource-note">
+          The filename retains “foundations”; both editions contain all available lesson drafts from
+          the current build.
+        </p>
+      </div>
+    </section>
+    <section id="tutors" class="resource-section">
+      <div class="resource-heading">
+        <p class="edition">Your agent host</p>
+        <h2>A tutor that uses this course.</h2>
+        <p>
+          Ask for a starting point, work through an exercise and keep a study plan in{' '}
+          <code>LEARNING.md</code>. Skills need local course files; they do not install the course
+          or its Python environment.{' '}
+          <a href={siteUrl('downloads/jax-course-workspace.zip')} download>
+            Download the course workspace
+          </a>{' '}
+          for the current lessons and tutors together.
+        </p>
+      </div>
+      <ol class="install-steps">
+        <li>
+          <h3>Choose the tools you need</h3>
+          <dl class="skill-list">
+            <div>
+              <dt>start-learning</dt>
+              <dd>Choose a route or resume your plan.</dd>
+            </div>
+            <div>
+              <dt>learn-jax</dt>
+              <dd>Work through an authored lesson.</dd>
+            </div>
+            <div>
+              <dt>jax-course-guide</dt>
+              <dd>Find a topic, prerequisite or debugging lesson.</dd>
+            </div>
+            <div>
+              <dt>check-jax</dt>
+              <dd>Check understanding and a practical modification.</dd>
+            </div>
+          </dl>
+        </li>
+        <li>
+          <h3>Add them from your course folder</h3>
+          <p>
+            Read the skill files first. With Node.js/npm available, run this in the extracted course
+            folder or repository root and choose your agent when prompted:
+          </p>
+          <div class="resource-code">
+            <div class="code-panel-heading">
+              <span>Terminal · course checkout</span>
+              <button type="button" data-copy="local-skill-command">
+                Copy command
+              </button>
+            </div>
+            <pre><code id="local-skill-command">{tutor.command}</code></pre>
+            <p class="copy-status" role="status"></p>
+          </div>
+          <p class="resource-note">
+            Project installation is the default. To select Codex explicitly, add{' '}
+            <code>--agent codex</code>. No global installation is required.
+          </p>
+          <details class="resource-disclosure">
+            <summary>Install from GitHub or without Node.js</summary>
+            <p>
+              The current tutors are not yet published on GitHub. After a revision containing these
+              skills is published:
+            </p>
+            <div class="resource-code">
+              <div class="code-panel-heading">
+                <span>Terminal · course checkout</span>
+                <button type="button" data-copy="remote-skill-command">
+                  Copy command
+                </button>
+              </div>
+              <pre><code id="remote-skill-command">npx skills add mlnomadpy/jaxpathways --skill start-learning learn-jax jax-course-guide check-jax</code></pre>
+              <p class="copy-status" role="status"></p>
+            </div>
+            <p>
+              A private repository requires configured Git/GitHub access. Use the local command
+              above for the current working source. The remote command becomes available once these
+              skills are published.
+            </p>
+            <p>
+              Without Node.js,{' '}
+              <a href={siteUrl('downloads/jax-tutor-skills.zip')} download>
+                download the skill bundle
+              </a>{' '}
+              and copy the desired skill folders into the directory your agent host supports. The
+              bundle also includes the contributor skill <code>create-jax-course</code>.
+            </p>
+            <p>
+              <a href="https://github.com/vercel-labs/skills">
+                Skills CLI installation documentation ↗
+              </a>{' '}
+              ·{' '}
+              <a href="https://github.com/mlnomadpy/jaxpathways/blob/main/skills/README.md">
+                Repository skill instructions ↗
+              </a>
+            </p>
+          </details>
+        </li>
+        <li>
+          <h3>Start a conversation, then resume it</h3>
+          <p>
+            Keep the extracted course folder or checkout open. In Codex, choose{' '}
+            <code>start-learning</code> or type <code>$start-learning</code>. In Claude Code, use{' '}
+            <code>/start-learning</code>. In another host, say “Use start-learning to help me learn
+            JAX from this workspace.”
+          </p>
+          <p>
+            The tutor keeps your goal, next lesson, attempts and review queue in{' '}
+            <code>LEARNING.md</code>. Use <code>learn-jax</code> next time to continue.
+            Browser-local progress is separate; neither store synchronizes automatically.
+          </p>
+        </li>
+      </ol>
+      <p id="resource-copy-status" class="resource-note" role="status" aria-live="polite"></p>
+    </section>
+    <section id="terminal" class="resource-section resource-split">
+      <div class="resource-heading">
+        <p class="edition">From your course checkout</p>
+        <h2>Use the terminal.</h2>
+        <p>
+          Browse availability, read a lesson or run its reference companion. Execution needs the
+          tested packages in <code>requirements-cpu.txt</code>.
+        </p>
+        <p class="resource-note">
+          The reference runner includes solutions. Passing it does not mean you completed the
+          exercise.
+        </p>
+      </div>
+      <div class="resource-code">
+        <div class="code-panel-heading">
+          <span>Terminal · command examples</span>
+        </div>
+        <pre><code>python3 scripts/course.py list --available
+python3 scripts/course.py list --pathway ship
+python3 scripts/course.py show first-gradient
+python3 scripts/course.py run first-gradient
+python3 scripts/course.py quiz first-gradient
+python3 scripts/course.py plan inference-engineer</code></pre>
+        <p class="resource-note terminal-note">
+          The final command prints a proposed route. Keep the selected next lesson and your own
+          evidence in your learning plan.
+        </p>
+      </div>
+    </section>
+    <section id="contributors" class="resource-section">
+      <div class="resource-heading">
+        <p class="edition">For course authors and integrations</p>
+        <h2>One source, several ways to read it.</h2>
+      </div>
+      <details class="resource-disclosure">
+        <summary>Author a lesson</summary>
+        <p>
+          Edit <code>curriculum/course.json</code> for membership and ordering,{' '}
+          <code>learning-paths/*.json</code> for routes, and the canonical <code>lesson.json</code>{' '}
+          for teaching material. Build the generated documents, notebooks, website resources and
+          books from that source.
+        </p>
+        <pre><code>npm run build
+npm run check
+npm run smoke:cpu</code></pre>
+        <p>
+          Use <code>create-jax-course</code> to guide authoring. A draft, an execution receipt and
+          independent review are different states. CPU checks do not establish TPU correctness or
+          performance.
+        </p>
+      </details>
+      <details class="resource-disclosure">
+        <summary>Read-only course APIs</summary>
+        <p>
+          These are static JSON resources, with authored/planned availability. They provide no
+          remote execution or progress service.
+        </p>
+        <ul class="api-list">
+          <li>
+            <a href={siteUrl('api/v1/catalog.json')}>Lesson catalog</a>
+          </li>
+          <li>
+            <a href={siteUrl('api/v1/pathways.json')}>Ordered pathways</a>
+          </li>
+          <li>
+            <a href={siteUrl('api/v1/roles.json')}>Learning paths</a>
+          </li>
+          <li>
+            <a href={siteUrl('api/v1/projects.json')}>Projects & evidence rubrics</a>
+          </li>
+          <li>
+            <a href={siteUrl('api/v1/lessons/first-gradient.json')}>Example lesson JSON</a>
+          </li>
+          <li>
+            <a href={siteUrl('openapi.json')}>OpenAPI contract</a>
+          </li>
+          <li>
+            <a href={siteUrl('llms.txt')}>Agent index</a>
+          </li>
+        </ul>
+      </details>
+    </section>
+  </main>
+  <SiteFooter />
+  <script>
+    import '../scripts/entries/developer.js';
+  </script>
+</SiteLayout>

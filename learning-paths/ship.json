@@ -1,0 +1,60 @@
+{
+  "id": "ship",
+  "title": "Ship and adapt JAX workloads",
+  "description": "Move trained computations into a measured inference service. Check framework/precision parity, package a non-root Docker image, verify readiness and connect evaluation, model identity and rollback evidence.",
+  "prerequisites": "Shared foundations and a working model",
+  "outcome": "Verify an inference artifact and capacity hypothesis",
+  "libraries": "JAX export · Keras · TensorFlow · PyTorch · LiteRT · Docker · MLflow",
+  "source": "https://docs.jax.dev/en/latest/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "recovery",
+    "performance",
+    "deployment"
+  ],
+  "capstone": {
+    "title": "Verify an inference artifact and capacity hypothesis",
+    "status": "authored",
+    "assessment": "Audit adaptation, exported precision artifacts and a validated local request boundary. Derive a capacity hypothesis from measured execution and explicitly simulated arrivals; network serving and target-device measurements remain extensions.",
+    "evidence": [
+      "Saved-model and exported-runtime parity on a fixed input contract",
+      "Weight, activation and accumulation policies with accuracy and range checks",
+      "Completed inference timings and a workload-based capacity argument, identifying unmeasured target runtimes"
+    ],
+    "projectId": "deployment-audit",
+    "assessmentId": "ship",
+    "assessmentDraft": {
+      "id": "ship",
+      "projectId": "deployment-audit",
+      "title": "Shipping synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/ship.md",
+      "url": "assessments/ship.html"
+    }
+  },
+  "audience": "Model builders who want to package reliable inference on servers or edge devices.",
+  "firstArtifact": "An exported computation checked against its source on the same inputs.",
+  "focusPhaseIds": [
+    "deployment"
+  ],
+  "modalityTrackIds": [
+    "image",
+    "text",
+    "audio",
+    "cross-modal"
+  ],
+  "studyAdvice": "Begin with one saved model and a fixed set of parity inputs. Trace preprocessing, parameter layout and output semantics across each framework boundary. Separate training precision, exported precision and the target runtime before benchmarking. Use the precision and edge lessons to build a validation checklist; measure a real target device before claiming device latency or memory savings.",
+  "engineeringLessonIds": [
+    "recovery-06",
+    "deployment-07",
+    "operations-06",
+    "operations-07",
+    "operations-08"
+  ]
+}

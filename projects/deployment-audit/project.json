@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-audit",
+  "title": "Release a trained computation with a deployment audit",
+  "pathwayId": "ship",
+  "status": "authored",
+  "hardware": "CPU; device and network validation remain separate",
+  "source": "projects/deployment-audit/README.md",
+  "requiredLessonIds": [
+    "deployment-01",
+    "deployment-03",
+    "deployment-05",
+    "deployment-06",
+    "deployment-02",
+    "deployment-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Trained artifact and adaptation provenance",
+      "command": "python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 1",
+      "evidence": "Stable objective oracle, actual pretraining, saved/reloaded base and changed-task update",
+      "expected": "PASS stage 1: independent objective gradient, genuine pretraining, checkpoint reload and changed-task adaptation",
+      "diagnosis": "Check objective reduction, target shape and checkpoint identity before altering the learning rate."
+    },
+    {
+      "id": "2",
+      "title": "Export and precision contract",
+      "command": "python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 2",
+      "evidence": "Six real serialized artifacts, independent output and integer arithmetic checks, calibration hashes and corruption rejection",
+      "expected": "PASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection",
+      "diagnosis": "Inspect weight axes, scale granularity, activation calibration and the actual restored artifact."
+    },
+    {
+      "id": "3",
+      "title": "Request timing and capacity evidence",
+      "command": "python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 3",
+      "evidence": "Validated JSON requests, completed batch timings, clipping reports and independently checked queue assumptions",
+      "expected": "PASS stage 3: real JSON request parity, timed batch requests, clipping, bad inputs and independent queue timelines",
+      "diagnosis": "Separate compute completion, request overhead and simulated queue delay; preserve units."
+    }
+  ],
+  "rubric": [
+    "Identify the trained base and adaptation data using recorded hashes",
+    "Compare a stable objective and gradient with an independent reference",
+    "Reload actual exported artifacts across declared batch and precision policies",
+    "Keep calibration separate from evaluation and report activation clipping",
+    "Verify corruption and malformed-request rejection",
+    "Measure completion inside an explicit local request boundary",
+    "Explain simulated queue growth without claiming a real server load test"
+  ],
+  "workspaceFile": "projects/deployment-audit/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/deployment-audit/starter/model.py projects/deployment-audit/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/deployment-audit/starter/model.py projects/deployment-audit/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/deployment-audit/tests/check.py --implementation solution --stage all",
+  "setupNote": "Use the top folder of the extracted ZIP as the working directory. It contains requirements-cpu.txt and projects/deployment-audit. This project exercises an in-process CPU request boundary; real network and target-device measurements require separate runs.",
+  "assessmentId": "ship"
+}

@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "arrays-02",
+  "contentHash": "c36e9197276dab539ebeb183bea158a7e84e0384a15c5b1c61fb15894f20b389",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:23:56.794443+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "[[11. 22. 33.]\n [14. 25. 36.]]\nShape: (2, 3) dtype: float32\n",
+  "data": {
+    "kind": "heatmap",
+    "values": [
+      [
+        10.0,
+        20.0,
+        30.0
+      ],
+      [
+        10.0,
+        20.0,
+        30.0
+      ]
+    ],
+    "rows": [
+      "observation 0",
+      "observation 1"
+    ],
+    "columns": [
+      "feature 0",
+      "feature 1",
+      "feature 2"
+    ],
+    "unit": "added bias"
+  }
+}

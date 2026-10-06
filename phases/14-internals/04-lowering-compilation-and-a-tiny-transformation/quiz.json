@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "internals-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why does the tiny interpreter raise an error for an unsupported primitive instead of calling that primitive directly?",
+      "options": [
+        "Every unsupported primitive is mathematically nondifferentiable.",
+        "Executing a primal without a verified tangent rule would silently break the derivative contract.",
+        "Compiled JAX cannot run exponentials."
+      ],
+      "correct": 1,
+      "explanation": "The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest."
+    }
+  ]
+}

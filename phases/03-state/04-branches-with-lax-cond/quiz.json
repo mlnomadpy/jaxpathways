@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Can one cond branch return a scalar and the other a length-three array?",
+      "options": [
+        "Yes, any shapes are allowed",
+        "No, branch result types and shapes must be compatible",
+        "Only if the predicate is negative"
+      ],
+      "correct": 1,
+      "explanation": "Compiled control flow requires compatible output structures and array types across branches."
+    }
+  ]
+}

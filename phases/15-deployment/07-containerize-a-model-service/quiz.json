@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-07",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The image built successfully. What should happen before serving traffic?",
+      "options": [
+        "Assume the trained model is included and ready.",
+        "Load the expected artifact, verify its digest and complete a prediction through the target runtime.",
+        "Ignore preprocessing because dependencies are pinned."
+      ],
+      "correct": 1,
+      "explanation": "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever."
+    }
+  ]
+}

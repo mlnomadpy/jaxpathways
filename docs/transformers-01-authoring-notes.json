@@ -1,0 +1,6 @@
+{
+  "id": "transformers-01",
+  "exercise": "Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.",
+  "evidence": "Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform reference, paired permutation check, and wrong-axis repair.",
+  "check": "Which dimension should softmax normalize for one query to combine all key/value pairs?"
+}

@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "rl-03",
+  "minutes": 110,
+  "content": {
+    "problem": "The collector produces experiences, but which parameter change makes useful actions more likely? We will train an actual stochastic policy from freshly sampled episodes, first with REINFORCE and then with repeated clipped policy updates. An exact calculation in this tiny environment will tell us whether the policy improved, independently of its noisy training rewards.",
+    "idea": "An action that is followed by a good return should become more probable. Multiply its log probability by its reward-to-go, sum over active actions, then average over episodes. Differentiating the negative of that quantity gives a descent direction for a loss. The discrete rollout is fixed data during this derivative. PPO reuses a batch cautiously by comparing the new action probability with the probability that generated that batch.",
+    "objectives": [
+      "Derive and implement the score-function policy gradient for complete episodes.",
+      "Train with fresh stochastic rollouts and a fixed behavior policy per PPO batch.",
+      "Explain both signs of the clipping objective and verify improvement against exact expected return."
+    ],
+    "sections": [
+      {
+        "title": "The derivative does not pass through the sampled action",
+        "body": "Let \\(\\theta\\) denote the three position logits. We maximize expected episode return \\(J(\\theta)\\). The score-function identity gives the expectation below. Rewards before an action do not depend on that action, so reward-to-go is a valid credit signal. Our baseline is zero; we do not fit a critic or use generalized advantage estimation. We freeze sampled actions and targets with stop_gradient. Trying to differentiate through Bernoulli sampling is a different, inappropriate estimator for this exercise.",
+        "math": "\\nabla J(\\theta)=\\mathbb{E}\\!\\left[\\sum_t \\nabla_\\theta\\log\\pi_\\theta(a_t\\mid s_t)G_t\\right]"
+      },
+      {
+        "title": "Normalize by the object you promised to optimize",
+        "body": "The objective is return per episode. We sum live action terms and divide by the number of episodes \\(B\\), not the number of live transitions. Dividing by live transitions changes the batch-dependent scale as the policy learns to finish sooner. Each REINFORCE update uses a fresh on-policy rollout once. The learning rate is \\(0.5\\) for this tabular fixture; that value is not a recommendation for neural agents."
+      },
+      {
+        "title": "Freeze the policy that collected the batch",
+        "body": "For PPO, store old log probabilities at collection time and keep them fixed through all \\(3\\) optimization epochs. The ratio is computed by subtracting log probabilities before exponentiating. At the first epoch the ratio is \\(1\\). It changes as the candidate policy changes; overwriting old probabilities each epoch would erase the reference point and defeat clipping. Our target \\(\\hat A_t\\) is reward-to-go with zero baseline, a noisy but valid first-epoch policy-gradient estimator.",
+        "math": "\\rho_t(\\theta)=\\exp\\!\\left(\\log\\pi_\\theta(a_t\\mid s_t)-\\log\\pi_{\\mathrm{old}}(a_t\\mid s_t)\\right)"
+      },
+      {
+        "title": "The minimum matters for negative advantages",
+        "body": "We maximize the minimum of the ordinary ratio-weighted target and its clipped alternative, with \\(\\epsilon=0.2\\). For a positive target \\(1\\) and ratio \\(1.4\\), the clipped objective is \\(1.2\\): extra probability gets no extra reward. For a negative target \\(-1\\) and ratio \\(0.6\\), it is \\(-0.8\\): reducing probability further gets no extra reward. The opposite directions remain penalized. Clipping a ratio inside every term without the minimum is not the same objective.",
+        "math": "L^{\\mathrm{clip}}(\\theta)=\\frac1B\\sum_{b,t}\\min\\!\\left(\\rho_{t,b}\\hat A_{t,b},\\operatorname{clip}(\\rho_{t,b},1-\\epsilon,1+\\epsilon)\\hat A_{t,b}\\right)"
+      },
+      {
+        "title": "Clipping is not a guaranteed trust region",
+        "body": "The surrogate has flat regions for particular sampled actions; it does not constrain every probability or guarantee improvement in true return. Several parameters share data in a neural model, unseen states are absent, and multiple gradient steps can move the policy substantially. Our complete learning loop repeatedly collects fresh episodes and optimizes the frozen batch. It is a small clipped policy-gradient agent, not a production PPO stack: no critic, entropy bonus, observation normalization or minibatch scheduler is included."
+      },
+      {
+        "title": "Calculate expected return without sampling",
+        "body": "This environment has only three unfinished positions, so dynamic programming can average left and right outcomes exactly for each remaining step budget. Start from zero remaining reward, back up the transition expectation \\(8\\) times, and average the values at initial positions \\(0\\) and \\(1\\). This evaluator does not use rollout samples. An always-left policy earns \\(-0.08\\), the uniform policy earns \\(0.466875\\), and always-right earns \\(0.985\\). It is an unusually strong diagnostic available in a tiny fixture, not a scalable evaluator for arbitrary environments."
+      }
+    ],
+    "output": "The reference seed improves exact expected return from \\(0.466875\\) to approximately \\(0.9522\\) with REINFORCE and \\(0.9758\\) with the clipped updates after \\(40\\) rollout batches.",
+    "experiments": [
+      {
+        "title": "Check clipping on both signs",
+        "prediction": "For which ratios does the clipped objective become flat?",
+        "code": "ratio = jnp.array([.6,1.,1.4])\npositive = jnp.minimum(ratio,jnp.clip(ratio,.8,1.2))\nnegative = jnp.minimum(-ratio,-jnp.clip(ratio,.8,1.2))\nassert jnp.allclose(positive,jnp.array([.6,1.,1.2]))\nassert jnp.allclose(negative,jnp.array([-.8,-1.,-1.4]))\nprint('positive / negative targets:', positive, negative)",
+        "output": "Positive and negative targets flatten on opposite sides.",
+        "explanation": "The minimum prevents an update from gaining unlimited credit for pushing a sampled action in an already beneficial direction."
+      },
+      {
+        "title": "Compare sampled and exact gradients",
+        "prediction": "Will a large batch reproduce the exact gradient perfectly?",
+        "code": "_, batch = rollout(z,jax.random.key(902),32768,8)\nsampled = -jax.grad(policy_loss)(z,batch,'reinforce')\nexact = jax.grad(exact_return)(z)\nassert jnp.allclose(sampled,exact,atol=.012,rtol=.04)\nprint('sampled / exact gradient:', sampled, exact)",
+        "output": "The gradients agree within the declared sampling tolerance, not bit for bit.",
+        "explanation": "The large batch reduces Monte Carlo noise. The exact evaluator and the sampled score-function estimator compute the same objective by different paths."
+      }
+    ],
+    "exercise": "Run REINFORCE with a different training seed and retain the initial and final exact return. Verify that the final policy improves on the uniform baseline without requiring every intermediate point to improve.",
+    "solution": "other_theta, other_history = train(seed=11,method='reinforce',epochs=1)\nassert other_history[-1] > other_history[0] + .35\nassert other_history[-1] > .9\nassert not jnp.array_equal(other_theta,theta_pg)\nprint('changed seed final exact return:', other_history[-1])",
+    "practice": [
+      {
+        "title": "Inspect a frozen behavior reference",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Collect at zero logits, then increase all logits to \\(1\\). Verify that stored old log probabilities do not change and that live-action ratios include values on both sides of \\(1\\).",
+        "hint": "Compute new probabilities from changed parameters, leaving the rollout dictionary untouched.",
+        "solution": "_, b = rollout(jnp.zeros(3),jax.random.key(77),128,8)\nold = b['old_logp'].copy()\nnewlog = log_probability(jnp.ones(3),b['observation'],b['action'])\nratios = jnp.exp(newlog-old)\nassert jnp.array_equal(old,b['old_logp'])\nassert float(jnp.min(ratios)) < 1 < float(jnp.max(ratios))\nold_grad = jax.grad(lambda lp: policy_loss(jnp.ones(3),dict(b,old_logp=lp)))(old)\nassert jnp.all(old_grad == 0)",
+        "explanation": "The candidate changes while the behavior policy remains the fixed denominator. A zero derivative through old probabilities enforces that distinction."
+      },
+      {
+        "title": "Change the time budget",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "For horizon \\(2\\), compute the always-right expected return before running code. Only one initial position can reach the goal.",
+        "hint": "From position \\(0\\), two moves earn \\(-0.02\\). From position \\(1\\), they earn \\(0.99\\).",
+        "solution": "short = exact_return(jnp.full(3,100.),horizon=2)\nassert jnp.allclose(short,(-.02+.99)/2,atol=1e-6)\nassert short < exact_return(jnp.full(3,100.),horizon=8)",
+        "explanation": "Changing the horizon changes the task itself. A lower return need not indicate a broken gradient."
+      }
+    ],
+    "question": "During multiple PPO epochs on one rollout batch, what must remain fixed?",
+    "options": [
+      "Only the current candidate policy",
+      "Only the clipping threshold; old probabilities can be recomputed from the candidate",
+      "The collected actions, return targets and behavior-policy log probabilities"
+    ],
+    "answer": 2,
+    "explanation": "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison.",
+    "diagnosis": "If loss falls while exact return fails to improve, first inspect the sign of the loss, the active mask and the frozen behavior probabilities. A ratio stuck at one on every epoch suggests the old policy was overwritten. If returns improve only on collection samples, evaluate independently before changing the optimizer.",
+    "takeaways": [
+      "A complete policy update alternates new interaction data with optimization.",
+      "Clipping modifies an objective; it does not prove monotonic improvement or constrain every policy probability."
+    ],
+    "visual": {
+      "title": "Two sampled training procedures, one exact evaluator",
+      "kind": "executed",
+      "prediction": "Must the exact return rise at every update?",
+      "reading": "The horizontal axis counts freshly collected rollout batches; zero is the untrained policy. Each later point is the exact expected finite-horizon return of the updated policy. Both lines begin at \\(0.466875\\). In this seed the REINFORCE line ends near \\(0.9522\\), while the clipped-update line ends near \\(0.9758\\). The curves measure return, not the optimization surrogate.",
+      "connection": "The clipped method takes three gradient steps per collection, while REINFORCE takes one. This is therefore not a compute-matched algorithm comparison. The always-right ceiling in this environment is \\(0.985\\); approaching it shows that the policy has learned this corridor task. Small non-monotonic changes are compatible with stochastic updates, and one seed cannot establish which method is better on other tasks.",
+      "alt": "Two sampled training procedures, one exact evaluator. The horizontal axis counts freshly collected rollout batches; zero is the untrained policy. Each later point is the exact expected finite-horizon return of the updated policy. Both lines begin at \\(0.466875\\). In this seed the REINFORCE line ends near \\(0.9522\\), while the clipped-update line ends near \\(0.9758\\). The curves measure return, not the optimization surrogate.",
+      "code": "visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches','ylabel':'exact expected episode return','series':[{'label':'REINFORCE: 1 epoch/batch','y':history_pg.tolist()},{'label':'clipped updates: 3 epochs/batch','y':history_ppo.tolist()}]}"
+    },
+    "runtime": {
+      "kind": "cpu"
+    },
+    "references": [
+      {
+        "title": "JAX: explicit pseudorandom keys",
+        "url": "https://docs.jax.dev/en/latest/random-numbers.html"
+      },
+      {
+        "title": "JAX scan: fixed-shape carry",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html"
+      },
+      {
+        "title": "Schulman et al.: Proximal Policy Optimization Algorithms",
+        "url": "https://arxiv.org/abs/1707.06347"
+      },
+      {
+        "title": "Gymnasium: termination and truncation",
+        "url": "https://gymnasium.farama.org/tutorials/gymnasium_basics/handling_time_limits/"
+      }
+    ],
+    "code": "\"\"\"Finite-horizon tabular policy training. CPU teaching environment, not a benchmark.\"\"\"\nfrom functools import partial\nfrom typing import NamedTuple\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\nclass State(NamedTuple):\n    position: jax.Array\n    elapsed: jax.Array\n    done: jax.Array\n\n\ndef reset(key):\n    \"\"\"Start uniformly at position 0 or 1; goal is position 3.\"\"\"\n    return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))\n\n\ndef step(state, action, horizon=8):\n    \"\"\"Action 0: left, 1: right. Caller supplies binary action and positive horizon.\n\n    Returns next state, reward, termination event, truncation event. Finished\n    states absorb without more rewards/events. No implicit reset or lost final observation.\n    \"\"\"\n    active = ~state.done\n    proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)\n    position = jnp.where(active, proposed, state.position)\n    elapsed = state.elapsed + active.astype(jnp.int32)\n    terminated = active & (position == 3)\n    truncated = active & ~terminated & (elapsed >= horizon)\n    reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)\n    return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated\n\ndef log_probability(theta, observations, actions):\n    logits = theta[jnp.minimum(observations, 2)]\n    return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))\n\n\n@partial(jax.jit, static_argnames=('batch_size', 'horizon'))\ndef rollout(theta, key, batch_size=256, horizon=8):\n    reset_key, action_key = jax.random.split(key)\n    states = jax.vmap(reset)(jax.random.split(reset_key, batch_size))\n    time_keys = jax.random.split(action_key, horizon)\n    def body(states, time_key):\n        observations = states.position\n        keys = jax.random.split(time_key, batch_size)\n        probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])\n        actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)\n        next_states, rewards, terminated, truncated = jax.vmap(\n            lambda s, a: step(s, a, horizon))(states, actions)\n        record = dict(observation=observations, action=actions, reward=rewards,\n                      active=~states.done, terminated=terminated, truncated=truncated,\n                      old_logp=log_probability(theta, observations, actions))\n        return next_states, record\n    final, records = jax.lax.scan(body, states, time_keys)\n    return final, records\n\n\ndef returns_to_go(rewards):\n    \"\"\"Undiscounted finite-episode objective; rewards after done are already zero.\"\"\"\n    return jnp.cumsum(rewards[::-1], axis=0)[::-1]\n\ndef policy_loss(theta, records, method='ppo', clip=.2):\n    \"\"\"Normalize by episodes, not live transitions. Freeze behavior data/returns.\"\"\"\n    advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))\n    old_logp = jax.lax.stop_gradient(records['old_logp'])\n    new_logp = log_probability(theta, records['observation'], records['action'])\n    if method == 'reinforce':\n        terms = new_logp * advantage\n    elif method == 'ppo':\n        ratio = jnp.exp(new_logp - old_logp)\n        terms = jnp.minimum(ratio * advantage, jnp.clip(ratio, 1-clip, 1+clip) * advantage)\n    else:\n        raise ValueError('method must be reinforce or ppo')\n    return -jnp.sum(jnp.where(records['active'], terms, 0.)) / records['reward'].shape[1]\n\n\n@partial(jax.jit, static_argnames=('horizon',))\ndef exact_return(theta, horizon=8):\n    \"\"\"Dynamic programming over states, independent of sampled rollouts.\"\"\"\n    p = jax.nn.sigmoid(theta)\n    states = jnp.arange(3)\n    left = jnp.maximum(states-1, 0)\n    right = states+1\n    def backup(_, values):\n        q_left = -.01 + values[left]\n        q_right = jnp.where(right == 3, 1., -.01 + values[right])\n        return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))\n    values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))\n    return jnp.mean(values[:2])\n\n\n@partial(jax.jit, static_argnames=('updates', 'batch_size', 'horizon', 'method', 'epochs'))\ndef _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):\n    key = jax.random.key(seed)\n    theta = jnp.zeros(3)\n    def update(carry, _):\n        theta, key = carry\n        key, sample_key = jax.random.split(key)\n        _, records = rollout(theta, sample_key, batch_size, horizon)\n        def epoch(_, candidate):\n            grad = jax.grad(policy_loss)(candidate, records, method)\n            return candidate - learning_rate * grad\n        theta = jax.lax.fori_loop(0, epochs, epoch, theta)\n        return (theta, key), exact_return(theta, horizon)\n    (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)\n    return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))\n\n\ndef train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):\n    if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:\n        raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')\n    if method not in ('ppo', 'reinforce'):\n        raise ValueError('unknown method')\n    if method == 'reinforce' and epochs != 1:\n        raise ValueError('REINFORCE uses one update per fresh on-policy rollout')\n    return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)\n\ntheta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)\ntheta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)\nassert history_pg[-1] > .9 and history_ppo[-1] > .9\nassert jnp.allclose(history_pg[0], .466875, atol=1e-6)\nprint('REINFORCE initial/final exact return:', history_pg[0], history_pg[-1])\nprint('PPO initial/final exact return:', history_ppo[0], history_ppo[-1])\n# Compare a derivative of exact expectation with central differences.\nz = jnp.array([-.2, .3, .7]); eps = 1e-3\nd = jnp.array([0., 1., 0.])\nfd = (exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)\nassert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)\n",
+    "buildSteps": [
+      {
+        "title": "Reuse the environment and collector",
+        "instruction": "Create main.py with this block. Run python3 main.py in the course CPU environment.",
+        "code": "\"\"\"Finite-horizon tabular policy training. CPU teaching environment, not a benchmark.\"\"\"\nfrom functools import partial\nfrom typing import NamedTuple\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\nclass State(NamedTuple):\n    position: jax.Array\n    elapsed: jax.Array\n    done: jax.Array\n\n\ndef reset(key):\n    \"\"\"Start uniformly at position 0 or 1; goal is position 3.\"\"\"\n    return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))\n\n\ndef step(state, action, horizon=8):\n    \"\"\"Action 0: left, 1: right. Caller supplies binary action and positive horizon.\n\n    Returns next state, reward, termination event, truncation event. Finished\n    states absorb without more rewards/events. No implicit reset or lost final observation.\n    \"\"\"\n    active = ~state.done\n    proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)\n    position = jnp.where(active, proposed, state.position)\n    elapsed = state.elapsed + active.astype(jnp.int32)\n    terminated = active & (position == 3)\n    truncated = active & ~terminated & (elapsed >= horizon)\n    reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)\n    return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated\n\ndef log_probability(theta, observations, actions):\n    logits = theta[jnp.minimum(observations, 2)]\n    return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))\n\n\n@partial(jax.jit, static_argnames=('batch_size', 'horizon'))\ndef rollout(theta, key, batch_size=256, horizon=8):\n    reset_key, action_key = jax.random.split(key)\n    states = jax.vmap(reset)(jax.random.split(reset_key, batch_size))\n    time_keys = jax.random.split(action_key, horizon)\n    def body(states, time_key):\n        observations = states.position\n        keys = jax.random.split(time_key, batch_size)\n        probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])\n        actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)\n        next_states, rewards, terminated, truncated = jax.vmap(\n            lambda s, a: step(s, a, horizon))(states, actions)\n        record = dict(observation=observations, action=actions, reward=rewards,\n                      active=~states.done, terminated=terminated, truncated=truncated,\n                      old_logp=log_probability(theta, observations, actions))\n        return next_states, record\n    final, records = jax.lax.scan(body, states, time_keys)\n    return final, records\n\n\ndef returns_to_go(rewards):\n    \"\"\"Undiscounted finite-episode objective; rewards after done are already zero.\"\"\"\n    return jnp.cumsum(rewards[::-1], axis=0)[::-1]",
+        "explanation": "These functions generate genuine trajectories. The policy update will not differentiate through their sampled actions."
+      },
+      {
+        "title": "Add objectives and the repeated training loop",
+        "instruction": "Append this block to main.py. Run python3 main.py in the course CPU environment.",
+        "code": "def policy_loss(theta, records, method='ppo', clip=.2):\n    \"\"\"Normalize by episodes, not live transitions. Freeze behavior data/returns.\"\"\"\n    advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))\n    old_logp = jax.lax.stop_gradient(records['old_logp'])\n    new_logp = log_probability(theta, records['observation'], records['action'])\n    if method == 'reinforce':\n        terms = new_logp * advantage\n    elif method == 'ppo':\n        ratio = jnp.exp(new_logp - old_logp)\n        terms = jnp.minimum(ratio * advantage, jnp.clip(ratio, 1-clip, 1+clip) * advantage)\n    else:\n        raise ValueError('method must be reinforce or ppo')\n    return -jnp.sum(jnp.where(records['active'], terms, 0.)) / records['reward'].shape[1]\n\n\n@partial(jax.jit, static_argnames=('horizon',))\ndef exact_return(theta, horizon=8):\n    \"\"\"Dynamic programming over states, independent of sampled rollouts.\"\"\"\n    p = jax.nn.sigmoid(theta)\n    states = jnp.arange(3)\n    left = jnp.maximum(states-1, 0)\n    right = states+1\n    def backup(_, values):\n        q_left = -.01 + values[left]\n        q_right = jnp.where(right == 3, 1., -.01 + values[right])\n        return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))\n    values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))\n    return jnp.mean(values[:2])\n\n\n@partial(jax.jit, static_argnames=('updates', 'batch_size', 'horizon', 'method', 'epochs'))\ndef _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):\n    key = jax.random.key(seed)\n    theta = jnp.zeros(3)\n    def update(carry, _):\n        theta, key = carry\n        key, sample_key = jax.random.split(key)\n        _, records = rollout(theta, sample_key, batch_size, horizon)\n        def epoch(_, candidate):\n            grad = jax.grad(policy_loss)(candidate, records, method)\n            return candidate - learning_rate * grad\n        theta = jax.lax.fori_loop(0, epochs, epoch, theta)\n        return (theta, key), exact_return(theta, horizon)\n    (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)\n    return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))\n\n\ndef train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):\n    if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:\n        raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')\n    if method not in ('ppo', 'reinforce'):\n        raise ValueError('unknown method')\n    if method == 'reinforce' and epochs != 1:\n        raise ValueError('REINFORCE uses one update per fresh on-policy rollout')\n    return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)",
+        "explanation": "Keep a frozen rollout per update, then collect again using a fresh key. The exact evaluator is separate from the training targets."
+      },
+      {
+        "title": "Train and compare to a derivative reference",
+        "instruction": "Append this block to main.py. Run python3 main.py in the course CPU environment.",
+        "code": "theta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)\ntheta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)\nassert history_pg[-1] > .9 and history_ppo[-1] > .9\nassert jnp.allclose(history_pg[0], .466875, atol=1e-6)\nprint('REINFORCE initial/final exact return:', history_pg[0], history_pg[-1])\nprint('PPO initial/final exact return:', history_ppo[0], history_ppo[-1])\n# Compare a derivative of exact expectation with central differences.\nz = jnp.array([-.2, .3, .7]); eps = 1e-3\nd = jnp.array([0., 1., 0.])\nfd = (exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)\nassert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)\n",
+        "explanation": "The seed-specific return is measured after actual interaction and updates, while the derivative check uses deterministic expectations."
+      }
+    ]
+  }
+}

@@ -1,0 +1,132 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-05",
+  "minutes": 75,
+  "content": {
+    "problem": "Someone asks you for an “8-bit model.” A helpful first question is: 8-bit weights, activations, or both? We’ll separate those choices, compare them with a float32 reference, and watch what happens when an input falls outside the calibrated range. You’ll leave with a precision policy you can explain, not just a dtype label.",
+    "idea": "Weights are the numbers a model has learned. Activations are the values it computes for the current input. Accumulators hold intermediate sums. We can choose a different precision for each, so it helps to write those choices separately.\n\nFor example, W8A16 describes 8-bit weights and 16-bit activations, but leaves other questions open: how are values scaled, how wide are the sums, and which runtime kernels can use that format? Our CPU experiments isolate the numerical effects. They do not claim packed INT4 storage or accelerator speed.",
+    "objectives": [
+      "Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.",
+      "Implement per-output-channel symmetric INT8 and INT4 weight quantization.",
+      "Calibrate activations and diagnose clipping on unseen ranges.",
+      "Explain FP64, FP8, weight-only, full integer and mixed precision policies."
+    ],
+    "sections": [
+      {
+        "title": "Write the policy before choosing a dtype",
+        "body": "Use separate fields for stored weights, input/intermediate activations, multiply operands, accumulator, output and optimizer/master weights. FP32 is a useful baseline. FP64 can help sensitive numerical work; in JAX enable jax_enable_x64 before creating arrays and account for target support and cost. FP16 has a narrower exponent range than BF16, while BF16 gives up fraction precision for range. Keep reductions, normalization statistics and sensitive losses in FP32 when needed. The example rounds operands to each format, then explicitly returns them to FP32 for multiplication; it isolates representation error rather than proving low-precision kernel behavior."
+      },
+      {
+        "title": "Mixed precision during training",
+        "body": "A Keras mixed_float16 or mixed_bfloat16 policy generally keeps variables in FP32 while using lower-precision computations. Set the policy before constructing layers and inspect variable_dtype and compute_dtype. FP16 training may need loss scaling to avoid gradient underflow; unscale before clipping and updating, reject nonfinite updates, and keep optimizer/master state at suitable precision. BF16 has wider range but still incurs rounding. In explicit JAX code, cast intentionally at operation boundaries and test the full update. Merely changing the parameter storage dtype is not a complete mixed precision implementation."
+      },
+      {
+        "title": "Quantize weights with scale metadata",
+        "body": "Let \\(b\\) be the number of bits and \\(q_{\\max}=2^{b-1}-1\\) the largest positive code. For each weight column, choose scale \\(s=\\max(|w|)/q_{\\max}\\). Dividing a weight by \\(s\\) moves it onto the integer grid; rounding chooses the nearest code, and clipping keeps the code in range. Reconstruct the approximate weight with \\(\\widehat w=sq\\).\n\nOur Dense kernel’s output channels lie along axis \\(1\\), so each column gets its own scale. This preserves resolution when columns have different ranges. For a zero column, use scale \\(1\\) and codes \\(0\\). Without clipping, rounding changes a value by at most \\(s/2\\). Smaller quantization groups can improve local resolution, but each group also needs scale metadata."
+      },
+      {
+        "title": "Weight-only and full integer are different deployments",
+        "body": "W4A16 and W8A16 usually describe compressed weights with floating activations; a runtime may dequantize before multiplication or use a specialized mixed kernel. Our 4-bit codes live in int8 arrays and are not nibble-packed, so they do not realize 4-bit memory savings. W8A8 quantizes activations too. An affine activation reconstructs as \\(a=s(q-z)\\), where \\(q\\) is its integer code, \\(s\\) is its scale, and \\(z\\) is the zero point; calibration estimates its range from representative training/calibration data, never the held-out evaluation set. Static quantization fixes ranges; dynamic quantization estimates activation ranges at runtime. Accumulation commonly uses INT32 for integer kernels; bias and requantization must use compatible scales."
+      },
+      {
+        "title": "FP8 and other low-bit formats require a target contract",
+        "body": "FP8 E4M3 and E5M2 differ in range and precision; their names are not interchangeable. Scaling granularity, saturation behavior and kernel support matter. Do not treat a successful CPU dtype cast as evidence of FP8 acceleration. INT4, UINT8, INT16 activation schemes and newer sub-byte floating formats also depend on runtime/operator support. For ONNX Runtime or LiteRT, inspect the format, operator, quantization scheme and execution provider together. If a supported PTQ policy loses too much task accuracy, evaluate quantization-aware training rather than silently relaxing acceptance criteria."
+      },
+      {
+        "title": "Evaluate quality separately from size and speed",
+        "body": "Compare the original and converted models on held-out examples, including low-margin decisions and uncommon ranges. Record absolute/relative error with a sensible near-zero floor, task metrics, clipping rates and acceptance thresholds chosen in advance. Estimate weight storage as `ceil(parameter_count*bits/8)` plus metadata, but measure the real artifact and peak runtime memory. Activation buffers, KV caches, workspace and fallback copies can dominate. Benchmark on the intended device after verifying which kernels actually execute."
+      },
+      {
+        "title": "Follow one value onto the quantization grid",
+        "body": "A scale \\(s\\) tells us how far apart the representable values are. For \\(s=0.1\\), a weight of \\(0.26\\) rounds to integer code \\(3\\) and reconstructs as \\(0.3\\). The error is \\(0.04\\), less than half a grid step. If a value lies outside the supported range, clipping can make the error much larger. Our per-channel code computes a separate scale for each output column and treats a zero column specially.",
+        "math": "\\begin{aligned}q_{\\max}&=2^{b-1}-1\\\\q&=\\operatorname{clip}\\!\\left(\\operatorname{round}(w/s),-q_{\\max},q_{\\max}\\right)\\\\\\widehat w&=sq,\\qquad |w-\\widehat w|\\le s/2\\quad\\text{without clipping}\\end{aligned}"
+      },
+      {
+        "title": "Follow an affine output through every numeric unit",
+        "body": "Let an activation code be \\(q_x\\), its zero point \\(z_x\\), and its positive scale \\(s_x\\). The represented value is \\(s_x(q_x-z_x)\\). Subtract the zero point after widening the codes: raw INT8 arithmetic can overflow before accumulation. With symmetric weights, each output channel has weight zero point zero and scale \\(s_{w,j}\\). Its accumulator therefore has units \\(s_xs_{w,j}\\), so round the bias into those same units before adding it. In the worked experiment, corrected products plus bias give accumulators \\(5\\) and \\(15\\); their real outputs are \\(0.625\\) and \\(0.9375\\). Requantization maps these values onto the output grid. A small output scale offers fine spacing but can also make the representable range too narrow. The second plot separates forgetting the input zero point from clipping at the output; these are different bugs with different repairs.",
+        "math": "a_j=\\sum_i(q_{x,i}-z_x)q_{w,ij}+\\operatorname{round}\\!\\left(\\frac{b_j}{s_xs_{w,j}}\\right),\\qquad q_{y,j}=\\operatorname{clip}\\!\\left(\\operatorname{round}\\!\\left(\\frac{s_xs_{w,j}}{s_y}a_j\\right)+z_y,-128,127\\right)"
+      }
+    ],
+    "code": "import numpy as np\nimport jax.numpy as jnp\nx = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)\nw = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)\nreference = x @ w\ndef mixed_forward(x, w, dtype):\n    # Demonstrate rounding inputs/weights with explicit float32 accumulation.\n    a = jnp.asarray(x, dtype).astype(jnp.float32)\n    b = jnp.asarray(w, dtype).astype(jnp.float32)\n    return np.asarray(a @ b)\nfor dtype in (jnp.float32, jnp.float16, jnp.bfloat16):\n    y = mixed_forward(x, w, dtype)\n    error = float(np.max(np.abs(y-reference)))\n    assert np.isfinite(y).all() and error < .05\n    print(str(dtype), \"max absolute error\", error)\n\ndef quantize_weights(weights, bits):\n    if bits not in (4, 8):\n        raise ValueError(\"use signed 4 or 8 bit symmetric quantization\")\n    limit = 2 ** (bits - 1) - 1\n    maxima = np.max(np.abs(weights), axis=0, keepdims=True)\n    scale = np.where(maxima == 0, 1., maxima / limit).astype(np.float32)\n    q = np.clip(np.rint(weights / scale), -limit, limit).astype(np.int8)\n    return q, scale\nfor bits in (8, 4):\n    q, scale = quantize_weights(w, bits)\n    reconstructed = q.astype(np.float32) * scale\n    assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)\n    # Independent error bound: |x deltaW| <= |x| |deltaW|.\n    error = np.abs(x @ reconstructed-reference)\n    bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)\n    assert np.all(error <= bound + 1e-6)\n    print(\"W%dA32 simulated output error\" % bits, float(error.max()))\n",
+    "output": "FP32, FP16 and BF16 comparisons are finite with error below \\(0.05\\) for this fixture. INT8/INT4 reconstruction errors obey a half-scale bound; these are simulated weight-only computations.",
+    "experiments": [
+      {
+        "title": "Calibrate an activation range, then shift it",
+        "prediction": "What happens to a value of \\(4\\) if calibration only covered \\([-1, 1]\\)?",
+        "code": "calibration = np.linspace(-1., 1., 101, dtype=np.float32)\nactivation_scale = float(np.max(np.abs(calibration))) / 127\nheld_out = np.array([.2, .9, 4.], np.float32)\nactivation_codes = np.clip(np.rint(held_out / activation_scale), -127, 127).astype(np.int8)\nrestored_activations = activation_codes.astype(np.float32) * activation_scale\nclipped = np.count_nonzero(np.abs(held_out) > 127 * activation_scale)\nassert clipped == 1 and abs(float(restored_activations[-1])-4.) > 2.9\nprint(\"Clipped values:\", clipped, \"reconstructed:\", restored_activations)\n",
+        "output": "One value clips and reconstructs near \\(1\\) instead of \\(4\\).",
+        "explanation": "Do not recalibrate on the test set to hide this error. Collect representative calibration data or choose a policy that meets the task requirements."
+      },
+      {
+        "title": "Include zero points, bias and the output grid",
+        "prediction": "Can finer output spacing make the answer worse? Predict the two outputs when the output scale changes from \\(0.0625\\) to \\(1/256\\), with zero point \\(-8\\) held fixed.",
+        "code": "# Deliberately exact grid values make an independent hand calculation possible.\na_sx, a_zx = .25, -3\na_sw = np.array([.5, .25], np.float64)\na_qx = np.array([[-3, 1, 5]], np.int8)\na_qw = np.array([[2, -1], [-1, 2], [1, 1]], np.int8)\na_bias = np.array([.125, -.0625], np.float64)\na_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)\n# Check the wide result before representing it with an INT32 accumulator.\na_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes\nassert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))\na_acc = a_wide.astype(np.int32)\nnp.testing.assert_array_equal(a_acc, [[5, 15]])\na_real = a_acc.astype(np.float64) * a_sx * a_sw\n# Independent real-valued input/weights, written without decoding the codes.\na_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias\nnp.testing.assert_array_equal(a_real, [[.625, .9375]])\nnp.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)\ndef output_grid(real, scale, zero_point):\n    if not np.isfinite(scale) or scale <= 0:\n        raise ValueError('positive finite output scale required')\n    if type(zero_point) is not int or not -128 <= zero_point <= 127:\n        raise ValueError('integer INT8 zero point required')\n    unbounded = np.rint(real / scale) + zero_point\n    clipped = (unbounded < -128) | (unbounded > 127)\n    codes = np.clip(unbounded, -128, 127).astype(np.int8)\n    return codes, (codes.astype(np.float64) - zero_point) * scale, clipped\n\na_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)\nnp.testing.assert_array_equal(a_codes, [[2, 7]])\nassert not a_clipped.any()\nnp.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)\na_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw\nnp.testing.assert_array_equal(a_wrong, [[-.125, .5625]])\n_, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)\nassert a_small_clipped.all()\nnp.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])\nprint('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())\nprint('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())\n",
+        "output": "Accumulators [[5, 15]], output codes [[2, 7]], correct outputs [[0.625, 0.9375]]. Omitting the input zero point gives [[-0.125, 0.5625]]. The narrow output grid clips both outputs to [[0.52734375, 0.52734375]].",
+        "explanation": "The first grid represents both values exactly. With scale \\(1/256\\), the highest output is \\((127+8)/256=0.52734375\\), so both values saturate. A half-step rounding bound applies only without clipping. This is a NumPy arithmetic audit, not a native INT8 kernel or bit-exact LiteRT implementation: real runtimes specify operator layouts, multiplier approximations and rounding rules separately."
+      }
+    ],
+    "exercise": "Add a zero-valued output channel and verify that its quantization scale is finite and its reconstruction is exactly zero.",
+    "solution": "with_zero = np.column_stack((w, np.zeros(3, np.float32)))\nq, scale = quantize_weights(with_zero, 8)\nassert np.isfinite(scale).all()\nnp.testing.assert_array_equal(q[:, -1], 0)\nnp.testing.assert_array_equal((q * scale)[:, -1], 0)\nprint(\"Zero channel handled\")",
+    "practice": [
+      {
+        "title": "Compute W8A8 with a wide accumulator",
+        "difficulty": "Transfer",
+        "prompt": "Use calibrated symmetric scales for \\(x\\) and per-channel scales for \\(w\\). Multiply integer codes with INT32 accumulation, rescale, and compare to the float baseline. Do not multiply int8 arrays directly.",
+        "hint": "Cast both integer-code arrays before multiplication. The real accumulator unit is the activation scale multiplied by each output channel’s weight scale; compare with the unchanged floating-point reference.",
+        "solution": "sx = float(np.max(np.abs(x))) / 127\nqx = np.clip(np.rint(x / sx), -127, 127).astype(np.int8)\nqw, sw = quantize_weights(w, 8)\naccumulator = qx.astype(np.int32) @ qw.astype(np.int32)\ny_integer = accumulator.astype(np.float32) * sx * sw\nassert accumulator.dtype == np.int32\nnp.testing.assert_allclose(y_integer, reference, atol=.06, rtol=0)\nprint(\"W8A8 fixture error\", float(np.max(np.abs(y_integer-reference))))\n",
+        "explanation": "This dense fixture uses zero points of zero and no bias. A real affine operator must subtract zero points and handle bias and output requantization. Wide accumulation avoids int8 overflow; sufficiently long reductions can still overflow INT32."
+      },
+      {
+        "title": "Change the code origin without changing the values",
+        "difficulty": "Transfer",
+        "prompt": "Change the activation zero point from \\(-3\\) to \\(17\\), shift the input codes accordingly, and prove that predictions stay unchanged. Then feed codes representing real zero and identify the expected bias-only result.",
+        "hint": "Shift the zero point and codes by the same amount before subtracting; verify representability before casting back to INT8.",
+        "solution": "shifted_zx = 17\nshifted_codes_wide = a_qx.astype(np.int64) + (shifted_zx - a_zx)\nassert np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))\nshifted_codes = shifted_codes_wide.astype(np.int8)\nshifted_acc = (shifted_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes\nnp.testing.assert_array_equal(shifted_acc, a_acc)\nzero_codes = np.full((1, 3), shifted_zx, np.int8)\nzero_result = ((zero_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw\nnp.testing.assert_array_equal(zero_result, a_bias[None, :])\nfor bad_scale in (0., -1., float('nan')):\n    try: output_grid(a_real, bad_scale, -8)\n    except ValueError: pass\n    else: raise AssertionError('invalid scale accepted')\nprint('Code-origin invariance and bias-only zero input verified.')",
+        "explanation": "Integer codes are coordinates on a grid. Changing the coordinate origin consistently preserves represented values. The zero-input check exposes a missing zero-point correction or bias in the wrong accumulator units."
+      }
+    ],
+    "question": "What must a deployment policy specify beyond “INT8 weights”?",
+    "options": [
+      "Activation, accumulator and output formats, scales, calibration and supported kernels.",
+      "Only the filename extension.",
+      "Nothing; INT8 guarantees acceleration."
+    ],
+    "answer": 0,
+    "explanation": "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.",
+    "diagnosis": "NaNs in FP16 suggest checking range and sensitive reductions. Finite but degraded predictions suggest rounding or clipping; inspect tensor ranges and per-channel errors. No memory improvement from the INT4 exercise is expected because its codes use int8 storage. No latency gain after conversion calls for profiling fallback operators and data transfers on the target.",
+    "references": [
+      {
+        "title": "Keras mixed precision policies",
+        "url": "https://keras.io/api/mixed_precision/"
+      },
+      {
+        "title": "JAX dtype defaults and X64",
+        "url": "https://docs.jax.dev/en/latest/default_dtypes.html"
+      },
+      {
+        "title": "ONNX Runtime quantization",
+        "url": "https://onnxruntime.ai/docs/performance/model-optimizations/quantization.html"
+      },
+      {
+        "title": "LiteRT integer conversion",
+        "url": "https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_integer_quant"
+      },
+      {
+        "title": "LiteRT INT8 operator, zero-point and bias contracts",
+        "url": "https://developers.google.com/edge/litert/conversion/tensorflow/quantization/quantization_spec"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "Precision choices trade representation for output error",
+      "kind": "executed",
+      "prediction": "Must two low-precision formats have the same error?",
+      "reading": "The horizontal categories are precision policies; the vertical axis is maximum absolute output error against the FP32 reference on the same small input. Lower bars mean closer numerical agreement, not faster execution. The FP32 baseline is zero by construction.\n\nThe errors are approximately \\(0.00105\\) for FP16 rounding, \\(0.00617\\) for BF16 rounding, \\(0.00803\\) for W8 A32, and \\(0.146\\) for W4 A32. The four-bit weight simulation has about eighteen times the output error of the eight-bit simulation in this example. These are output units, not percentages or classification error rates.\n\nThe lower panel uses a separate exactly representable affine fixture, with output channel on the horizontal axis and real output value on the vertical axis. Correct values are \\(0.625\\) and \\(0.9375\\). Omitting the input zero point lowers them to \\(-0.125\\) and \\(0.5625\\); this is systematic offset error, not random rounding. The narrow output grid makes both bars equal \\(0.52734375\\), the largest representable output under that policy. Equal bars here reveal saturation, not equal underlying predictions.",
+      "connection": "For the floating-point policies, both inputs and weights are rounded, then converted to FP32 for accumulation. FP16 has finer precision than BF16 around these particular values; BF16’s wider exponent range is not being tested here. The weight-only policies keep activations in FP32 and reconstruct quantized weights before multiplication.\n\nFour-bit quantization uses fewer representable weight levels, so its larger rounding steps can create larger output discrepancies. The code uses per-output-column scales and checks an independent error bound. This is simulated quantization using ordinary CPU arrays, not a measurement of packed four-bit storage or native low-bit kernels. Accuracy, memory, and latency must each be evaluated on the intended workload and runtime.\n\nUse the lower panel to decide what to inspect: zero-point subtraction and bias units for an offset mismatch; output range and clipping counts for saturation. The upper panel compares precision policies on the original fixture, while the lower panel isolates operator bookkeeping on a different fixture. Neither measures latency.",
+      "alt": "Precision choices trade representation for output error. The horizontal categories are precision policies; the vertical axis is maximum absolute output error against the FP32 reference on the same small input. Lower bars mean closer numerical agreement, not faster execution. The FP32 baseline is zero by construction. The errors are approximately \\(0.00105\\) for FP16 rounding, \\(0.00617\\) for BF16 rounding, \\(0.00803\\) for W8 A32, and \\(0.146\\) for W4 A32. The four-bit weight simulation has about eighteen times the output error of the eight-bit simulation in this example. These are output units, not percentages or classification error rates. A second panel compares correct affine outputs with an omitted zero point and a clipping output grid; the text supplies every value and its interpretation.",
+      "code": "names = []\nerrors = []\nfor name, dtype in [('FP32', jnp.float32), ('FP16 → FP32', jnp.float16), ('BF16 → FP32', jnp.bfloat16)]:\n    names.append(name)\n    errors.append(float(np.max(np.abs(mixed_forward(x, w, dtype) - reference))))\nfor bits_plot in (8, 4):\n    q_plot, s_plot = quantize_weights(w, bits_plot)\n    names.append('W' + str(bits_plot) + ' A32')\n    errors.append(float(np.max(np.abs(x @ (q_plot.astype(np.float32) * s_plot) - reference))))\nvisual_data = {'kind': 'bar', 'labels': names, 'ylabel': 'maximum absolute output error', 'series': [{'label': 'CPU reference error', 'y': errors}]}\n# Deliberately exact grid values make an independent hand calculation possible.\na_sx, a_zx = .25, -3\na_sw = np.array([.5, .25], np.float64)\na_qx = np.array([[-3, 1, 5]], np.int8)\na_qw = np.array([[2, -1], [-1, 2], [1, 1]], np.int8)\na_bias = np.array([.125, -.0625], np.float64)\na_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)\n# Check the wide result before representing it with an INT32 accumulator.\na_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes\nassert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))\na_acc = a_wide.astype(np.int32)\nnp.testing.assert_array_equal(a_acc, [[5, 15]])\na_real = a_acc.astype(np.float64) * a_sx * a_sw\n# Independent real-valued input/weights, written without decoding the codes.\na_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias\nnp.testing.assert_array_equal(a_real, [[.625, .9375]])\nnp.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)\ndef output_grid(real, scale, zero_point):\n    if not np.isfinite(scale) or scale <= 0:\n        raise ValueError('positive finite output scale required')\n    if type(zero_point) is not int or not -128 <= zero_point <= 127:\n        raise ValueError('integer INT8 zero point required')\n    unbounded = np.rint(real / scale) + zero_point\n    clipped = (unbounded < -128) | (unbounded > 127)\n    codes = np.clip(unbounded, -128, 127).astype(np.int8)\n    return codes, (codes.astype(np.float64) - zero_point) * scale, clipped\n\na_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)\nnp.testing.assert_array_equal(a_codes, [[2, 7]])\nassert not a_clipped.any()\nnp.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)\na_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw\nnp.testing.assert_array_equal(a_wrong, [[-.125, .5625]])\n_, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)\nassert a_small_clipped.all()\nnp.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])\nprint('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())\nprint('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())\n\nfirst_panel = visual_data\nvisual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'output 1'], 'ylabel': 'output value', 'series': [\n    {'label': 'correct affine / float reference', 'y': a_restored[0].tolist()},\n    {'label': 'input zero point omitted', 'y': a_wrong[0].tolist()},\n    {'label': 'narrow output grid clips', 'y': a_saturated[0].tolist()}]}]}\n"
+    }
+  }
+}

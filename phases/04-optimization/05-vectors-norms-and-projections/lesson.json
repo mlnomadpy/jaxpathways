@@ -1,0 +1,129 @@
+{
+  "schemaVersion": 1,
+  "id": "optimization-05",
+  "minutes": 60,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "When a model multiplies features by weights, what is it measuring? Start with two arrows you can draw on paper. We will measure length, alignment and the part of one arrow that lies along the other. These ideas make regression and gradient directions easier to reason about.",
+    "idea": "A vector is an ordered list of coordinates. Its Euclidean norm measures length. A dot product multiplies matching coordinates and adds them; it mixes length with alignment. Projection asks a more specific question: how much of a vector can we explain using one chosen direction?",
+    "objectives": [
+      "Read a dot product geometrically and separate a vector into a projection and an orthogonal residual.",
+      "Read length and alignment separately",
+      "Find the closest point on a line",
+      "Use orthogonality as an independent check",
+      "Know when the formula is undefined"
+    ],
+    "sections": [
+      {
+        "title": "Read length and alignment separately",
+        "body": "Let \\(u=(3,4)\\) and \\(a=(1,0)\\). The length of \\(u\\) is \\(5\\), and \\(u^\\mathsf{T}a=3\\). The dot product is not a distance or a probability: reversing \\(a\\) changes its sign. For nonzero vectors, dividing by both lengths gives the cosine of their angle, here \\(3/5\\). In higher dimensions we use exactly the same sum, even when we cannot draw all the axes.",
+        "math": "\\|u\\|_2=\\sqrt{\\sum_i u_i^2},\\qquad u^\\mathsf{T}a=\\sum_i u_i a_i"
+      },
+      {
+        "title": "Find the closest point on a line",
+        "body": "Points on the line through \\(a\\) have the form \\(ca\\), where \\(c\\) is a scalar. Choose the point nearest \\(u\\). Its coefficient is \\(c=(a^\\mathsf{T}u)/(a^\\mathsf{T}a)\\). For our axis direction, \\(c=3\\), so the projection is \\(p=(3,0)\\) and the leftover is \\(r=u-p=(0,4)\\). Notice that the coefficient depends on how long we draw \\(a\\); the projected point does not.",
+        "math": "p=\\frac{a^\\mathsf{T}u}{a^\\mathsf{T}a}a,\\qquad r=u-p,\\qquad a^\\mathsf{T}r=0"
+      },
+      {
+        "title": "Use orthogonality as an independent check",
+        "body": "Orthogonal means perpendicular; algebraically, the dot product is zero. Because \\(p\\) and \\(r\\) are perpendicular, their squared lengths add to the squared length of \\(u\\): \\(9+16=25\\). We check both this identity and the leftover dot product. Matching a library projection to a copy of the same formula would give less independent evidence. For float32 calculations, a small absolute tolerance allows rounding near zero."
+      },
+      {
+        "title": "Know when the formula is undefined",
+        "body": "The zero vector has no direction. Projecting onto it would divide by \\(0\\), and cosine similarity with it is also undefined. Our eager teaching helper raises a clear error for that input. A compiled application needs a separately defined policy, such as a validity mask or input validation before compilation. Adding a tiny constant silently changes the mathematical question; explain that policy if you choose it."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "Draw the two vectors",
+        "instruction": "Create main.py in your activated CPU course environment. Add the vectors and verify their lengths before adding a projection.",
+        "code": "import jax.numpy as jnp\nu = jnp.array([3.0, 4.0])\na = jnp.array([1.0, 0.0])\nassert jnp.allclose(jnp.linalg.norm(u), 5.0)\nassert jnp.allclose(jnp.dot(u, a), 3.0)",
+        "explanation": "The length is \\(5\\); the component along the horizontal unit direction is \\(3\\)."
+      },
+      {
+        "title": "Build the projection",
+        "instruction": "Append this eager helper. Keep the input check outside any jitted function in this exercise.",
+        "code": "def project(u, a):\n    denominator = jnp.dot(a, a)\n    if float(denominator) == 0.0:\n        raise ValueError('Projection needs a nonzero direction')\n    return jnp.dot(a, u) / denominator * a\np = project(u, a)\nr = u - p",
+        "explanation": "The leftover \\(r\\) contains what the chosen direction cannot explain."
+      },
+      {
+        "title": "Check with geometry",
+        "instruction": "Append these assertions and run python main.py. Compare with your drawing before reading the experiment.",
+        "code": "assert jnp.allclose(p, jnp.array([3.0, 0.0]))\nassert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)\nassert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))\nprint('projection / residual:', p, r)",
+        "explanation": "You should see \\([3,0]\\) and \\([0,4]\\); the squared lengths sum to \\(25\\)."
+      }
+    ],
+    "code": "import jax.numpy as jnp\nu = jnp.array([3.0, 4.0])\na = jnp.array([1.0, 0.0])\nassert jnp.allclose(jnp.linalg.norm(u), 5.0)\nassert jnp.allclose(jnp.dot(u, a), 3.0)\n\ndef project(u, a):\n    denominator = jnp.dot(a, a)\n    if float(denominator) == 0.0:\n        raise ValueError('Projection needs a nonzero direction')\n    return jnp.dot(a, u) / denominator * a\np = project(u, a)\nr = u - p\n\nassert jnp.allclose(p, jnp.array([3.0, 0.0]))\nassert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)\nassert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))\nprint('projection / residual:', p, r)",
+    "output": "Projection \\([3,0]\\), residual \\([0,4]\\). Both orthogonality and the length identity pass.",
+    "experiments": [
+      {
+        "title": "Rescale the direction",
+        "prediction": "If the direction becomes \\(2a\\), does the projected point double?",
+        "code": "assert jnp.allclose(project(u, 2 * a), p)\nassert jnp.allclose(project(u, -a), p)\nassert jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))",
+        "output": "The projection stays fixed; the raw dot product doubles.",
+        "explanation": "A line does not change when its nonzero direction is rescaled. A dot product alone does change."
+      },
+      {
+        "title": "Rotate the line",
+        "prediction": "For \\(a=(1,1)\\), predict the projection coefficient and leftover.",
+        "code": "diagonal = jnp.array([1.0, 1.0])\np2 = project(u, diagonal)\nassert jnp.allclose(p2, jnp.array([3.5, 3.5]))\nassert jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)",
+        "output": "Projection \\([3.5,3.5]\\), residual \\([-0.5,0.5]\\).",
+        "explanation": "Changing direction changes what can be explained; merely changing its length does not."
+      }
+    ],
+    "exercise": "Project \\(u=(2,-1,2)\\) onto \\(a=(1,0,1)\\). Check the residual by hand first.",
+    "solution": "u3 = jnp.array([2.0, -1.0, 2.0])\na3 = jnp.array([1.0, 0.0, 1.0])\np3 = project(u3, a3)\nassert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))\nassert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)",
+    "practice": [
+      {
+        "title": "Handle an undefined direction",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Show that a zero direction produces a clear input error instead of a misleading projection.",
+        "hint": "Use a try/except block; a silent successful result should fail the check.",
+        "solution": "try:\n    project(u, jnp.zeros_like(a))\nexcept ValueError as exc:\n    assert 'nonzero' in str(exc)\nelse:\n    raise AssertionError('Zero direction was accepted')",
+        "explanation": "Rejecting an undefined input is part of the function contract."
+      },
+      {
+        "title": "Use two perpendicular directions",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Reconstruct \\(u\\) from projections onto \\((1,1)\\) and \\((1,-1)\\). Would adding independent projections still work for arbitrary nonorthogonal directions?",
+        "hint": "Check the directions have zero dot product. Nonorthogonal directions can count the same component twice.",
+        "solution": "a1 = jnp.array([1.0, 1.0])\na2 = jnp.array([1.0, -1.0])\nassert jnp.allclose(project(u, a1) + project(u, a2), u)\nassert not jnp.allclose(project(u, a) + project(u, a1), u)",
+        "explanation": "Adding separate projections reconstructs a vector in an orthogonal basis. Correlated feature directions require a joint least-squares solve."
+      }
+    ],
+    "question": "Does doubling a nonzero direction double the projection onto its line?",
+    "options": [
+      "Yes, because the dot product doubles",
+      "No; the coefficient and direction rescale in opposite ways",
+      "Only when the vectors are perpendicular"
+    ],
+    "answer": 1,
+    "explanation": "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.",
+    "diagnosis": "If the leftover is not perpendicular, check the denominator: it is \\(a^\\mathsf{T}a\\), not the length of \\(a\\). If cosine exceeds its expected range, check normalization and rounding; first reject zero-length inputs.",
+    "takeaways": [
+      "A line does not change when its nonzero direction is rescaled. A dot product alone does change.",
+      "Changing direction changes what can be explained; merely changing its length does not."
+    ],
+    "references": [
+      {
+        "title": "JAX vector norms",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.numpy.linalg.norm.html"
+      },
+      {
+        "title": "MIT: projections and least squares",
+        "url": "https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/resources/lecture-16-projection-matrices-and-least-squares/"
+      }
+    ],
+    "visual": {
+      "title": "Projection and leftover form a right triangle",
+      "kind": "executed",
+      "prediction": "Which part of \\((3,4)\\) is explained by the horizontal direction?",
+      "reading": "Both axes are ordinary vector coordinates. The diagonal arrow goes from the origin to \\(u=(3,4)\\). The horizontal arrow reaches the projection \\(p=(3,0)\\), and the vertical arrow then goes from that point up to \\(u\\).\n\nFollow the horizontal and vertical arrows tip to tail: together they reproduce the diagonal arrow. Although the residual arrow is drawn starting at \\((3,0)\\), its displacement is \\(r=(0,4)\\), not \\((3,4)\\).",
+      "connection": "We projected onto the horizontal direction. The residual is perpendicular to that direction, so its dot product with \\((1,0)\\) is zero. This right angle explains why moving the projection along the horizontal line cannot remove the remaining vertical error.\n\nThe lengths form a familiar check: \\(\\lVert p\\rVert=3\\), \\(\\lVert r\\rVert=4\\), and \\(\\lVert u\\rVert=5\\), with \\(3^2+4^2=5^2\\). Projection separates the part represented by the chosen direction from the part that direction cannot represent.",
+      "alt": "Projection and leftover form a right triangle. Both axes are ordinary vector coordinates. The diagonal arrow goes from the origin to \\(u=(3,4)\\). The horizontal arrow reaches the projection \\(p=(3,0)\\), and the vertical arrow then goes from that point up to \\(u\\). Follow the horizontal and vertical arrows tip to tail: together they reproduce the diagonal arrow. Although the residual arrow is drawn starting at \\((3,0)\\), its displacement is \\(r=(0,4)\\), not \\((3,4)\\).",
+      "code": "visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}"
+    }
+  }
+}

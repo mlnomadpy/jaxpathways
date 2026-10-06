@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What should step emit when called on a finished state?",
+      "options": [
+        "Another goal reward because the agent is still at the goal",
+        "A new random start and its first reward",
+        "The unchanged state, zero reward and no new ending event"
+      ],
+      "correct": 2,
+      "explanation": "Absorbing padding preserves one episode. Reset is a separate explicit operation, and ending flags mark events rather than every later padded row."
+    }
+  ]
+}

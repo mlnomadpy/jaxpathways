@@ -1,0 +1,23 @@
+---
+import { siteUrl } from '../../lib/urls.js';
+interface Props {
+  id: string;
+  title: string;
+  intro?: string;
+  href?: string;
+  linkLabel?: string;
+}
+const { id, title, intro, href, linkLabel } = Astro.props;
+---
+
+<div class="section-heading">
+  <div>
+    <h2 id={id}>{title}</h2>
+    {intro && <p>{intro}</p>}
+  </div>
+  {href && (
+    <a class="text-link" href={siteUrl(href)}>
+      {linkLabel}
+    </a>
+  )}
+</div>

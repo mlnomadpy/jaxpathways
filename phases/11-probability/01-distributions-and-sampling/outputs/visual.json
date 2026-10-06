@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "probability-01",
+  "contentHash": "91c0113c647659d6b3b5e3c6ac21e83e3a6b4d3a127877d271dde3d6252ce5c3",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:35:48.728001+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "sample mean, variance: 2.0067408084869385 9.035282135009766\nstable equal-mixture log density: -1000.3799438476562\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1,
+      4,
+      16,
+      64,
+      100,
+      400
+    ],
+    "xlabel": "independent observations N",
+    "ylabel": "standard deviation (reading units)",
+    "xscale": "log",
+    "series": [
+      {
+        "label": "individual reading",
+        "y": [
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0,
+          3.0
+        ]
+      },
+      {
+        "label": "average of N readings",
+        "y": [
+          3.0,
+          1.5,
+          0.75,
+          0.375,
+          0.3,
+          0.15
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-11",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "When does averaging batch means reproduce the dataset mean?",
+      "options": [
+        "Always",
+        "When batch sizes are equal, or the means are weighted by their example counts",
+        "Only with Adam"
+      ],
+      "correct": 1,
+      "explanation": "The dataset mean weights examples equally. Unequal batches need count weighting."
+    }
+  ]
+}

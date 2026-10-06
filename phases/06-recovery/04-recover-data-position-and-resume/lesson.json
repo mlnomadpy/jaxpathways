@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "id": "recovery-04",
+  "minutes": 110,
+  "content": {
+    "problem": "Let’s bring model recovery and data recovery together. We’ll interrupt training after two batches, save both the model state and the next-read position, then continue. Comparing the remaining batches with an uninterrupted run will show whether we really resumed at the same point, including across an epoch boundary.",
+    "idea": "A restart boundary is consistent only when data consumption and completed model updates describe the same point in time. Save after the second update and after its batch has been consumed; then restore both components together. Restoring parameters at step two while restarting the reader at batch zero reprocesses earlier examples with later model state.",
+    "sections": [
+      {
+        "title": "Commit one logical boundary",
+        "body": "consume retrieves a batch, computes an update and returns the updated training state. After two calls, the model step is two and the iterator points at batch three. We pack that iterator snapshot in the same Orbax payload as the model, Adam memory, random stream and contract.\n\nA real prefetcher may prepare data ahead of consumption; the snapshot semantics must refer to the iterator boundary supported by its implementation. This tutorial uses a serial Grain loader and synchronous checkpointing, so no speculative workers or asynchronous outstanding writes complicate the boundary. Do not extrapolate this protocol to an arbitrary data queue without checking its restore contract.",
+        "formula": "read batch 1 → update 1\nread batch 2 → update 2 → save {state_2,next_read_3}\nrestore → read batch 3 → update 3"
+      },
+      {
+        "title": "Persist opaque iterator bytes without editing them",
+        "body": "Grain get_state returns bytes. We store them as a fixed-size uint8 buffer plus length so the Orbax restore target has a predictable shape. set_state receives the original byte sequence recovered from that buffer. The application does not inspect or patch Grain internal counters.\n\nThe buffer capacity is \\(4096\\) bytes and over-capacity snapshots fail. It is a teaching representation, not a general replacement for Grain checkpoint integration handlers. Restore is supported for this tested source/sampler/worker configuration. Changing those settings may invalidate a snapshot, so our contract also records seed, batch size, record count and source revision."
+      },
+      {
+        "title": "Audit the future, including an epoch transition",
+        "body": "There are twelve records in each of two epochs and three four-example batches per epoch. We checkpoint after two batches. The remaining four batches are the final batch of epoch zero followed by all three batches of epoch one. Compare each future ID vector and each future loss in order, then compare every final state leaf.\n\nComparing only final loss can miss skipped or repeated observations, particularly on an easy dataset. Comparing only IDs can miss an optimizer/key reset. Comparing only weights can miss a count or random-state error that changes a subsequent step. The combined check targets all three failure classes.",
+        "formula": "epoch 0: batch 1 | batch 2 | checkpoint | batch 3\nepoch 1: batch 4 | batch 5 | batch 6\nreplay compares IDs + losses + params + Adam + key + step"
+      },
+      {
+        "title": "Define the limits of this recovery claim",
+        "body": "The payload contract contains dataset SHA256, source revision, counts, ordering configuration, update configuration, PRNG implementation and package versions. Refuse a mismatch rather than silently announcing a resumed run. This is intentionally stricter than claiming compatibility between arbitrary versions.\n\nThe local directory is temporary and the writer is synchronous. The lesson verifies readable files and CPU replay after reconstructing objects in the same process; it does not simulate power loss, a separate machine, multi-host orchestration, async interruption or remote storage behavior. Your portfolio report should state those limits and identify the next failure mode to test. Production use should adopt the library-supported combined handlers/manager and test its completion/recovery boundaries."
+      }
+    ],
+    "code": "import jax\njax.config.update(\"jax_platforms\",\"cpu\")\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport orbax.checkpoint as ocp\nimport tempfile\nimport json\nimport hashlib\nfrom pathlib import Path\ntx = optax.adam(0.05)\ndef initial_state():\n    params = {\"weight\":jnp.array(0.,jnp.float32),\"bias\":jnp.array(0.,jnp.float32)}\n    return {\"params\":params,\"optimizer\":tx.init(params),\n            \"key_data\":jax.random.key_data(jax.random.key(7,impl=\"threefry2x32\")),\n            \"step\":jnp.array(0,jnp.int32)}\ndef pack_bytes(raw,capacity=4096):\n    if len(raw)>capacity:\n        raise ValueError(\"Snapshot exceeds tutorial fixed-byte capacity\")\n    buffer = np.zeros(capacity,dtype=np.uint8)\n    buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)\n    return {\"buffer\":buffer,\"length\":np.array(len(raw),dtype=np.int32)}\ndef unpack_bytes(packed):\n    length = int(packed[\"length\"])\n    if not 0 <= length <= len(packed[\"buffer\"]):\n        raise ValueError(\"Invalid snapshot length\")\n    return np.asarray(packed[\"buffer\"],dtype=np.uint8)[:length].tobytes()\ndef same_tree(left,right):\n    assert jax.tree.structure(left)==jax.tree.structure(right)\n    for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):\n        host_a,host_b = np.asarray(a),np.asarray(b)\n        assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype\n        if np.issubdtype(host_a.dtype,np.integer):\n            np.testing.assert_array_equal(host_a,host_b)\n        else:\n            np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)\ndef step(state,x,y):\n    key = jax.random.wrap_key_data(state[\"key_data\"],impl=\"threefry2x32\")\n    next_key,sample_key = jax.random.split(key)\n    target_noise = 0.01*jax.random.normal(sample_key,y.shape)\n    def objective(params):\n        residual = params[\"weight\"]*x+params[\"bias\"]-(y+target_noise)\n        return jnp.mean(residual**2)\n    value,gradient = jax.value_and_grad(objective)(state[\"params\"])\n    updates,opt_state = tx.update(gradient,state[\"optimizer\"],state[\"params\"])\n    next_state = {\"params\":optax.apply_updates(state[\"params\"],updates),\n                  \"optimizer\":opt_state,\"key_data\":jax.random.key_data(next_key),\n                  \"step\":state[\"step\"]+1}\n    return next_state,value\ndef package_versions():\n    import importlib.metadata\n    return {name:importlib.metadata.version(name) for name in (\"jax\",\"numpy\",\"optax\",\"orbax-checkpoint\")}\ndef encode_contract(contract):\n    return pack_bytes(json.dumps(contract,sort_keys=True).encode())\ndef validate_contract(saved,expected):\n    actual = json.loads(unpack_bytes(saved))\n    if actual != expected:\n        raise ValueError(\"Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions\")\nworkspace = tempfile.TemporaryDirectory()\nroot = Path(workspace.name)\n\nimport numpy as np\nimport grain.python as grain\nclass TutorialSource:\n    def __init__(self,count=12):\n        self.count = count\n    def __len__(self):\n        return self.count\n    def __getitem__(self,index):\n        value = np.float32(index/10)\n        return {\"id\":np.int64(index),\"x\":value,\"y\":np.float32(2*value-1)}\n    def __repr__(self):\n        return f\"TutorialSource(v1,n={self.count})\"\ndef make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):\n    return grain.DataLoader(\n        data_source=TutorialSource(count),\n        sampler=grain.IndexSampler(num_records=count,num_epochs=2,shuffle=True,seed=seed),\n        operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],\n        worker_count=0)\n\ndef data_contract(seed=42):\n    source = TutorialSource()\n    values = np.array([[source[i][\"x\"],source[i][\"y\"]] for i in range(len(source))],dtype=np.float32)\n    return {\"schema\":1,\"seed\":seed,\"batch_size\":4,\"count\":12,\"source\":\"TutorialSource(v1,n=12)\",\n            \"sha256\":hashlib.sha256(values.tobytes()).hexdigest(),\n            \"learning_rate\":0.05,\"optimizer\":\"adam\",\"key_impl\":\"threefry2x32\",\n            \"versions\":dict(package_versions(),grain=__import__(\"importlib.metadata\",fromlist=[\"version\"]).version(\"grain\"))}\ndef consume(state,iterator,count):\n    losses=[];orders=[]\n    for _ in range(count):\n        batch = next(iterator)\n        orders.append(batch[\"id\"].copy())\n        state,value = step(state,jnp.asarray(batch[\"x\"]),jnp.asarray(batch[\"y\"]))\n        losses.append(float(value))\n    return state,np.array(losses),orders\ncontract = data_contract()\nreference_iterator = iter(make_loader())\nreference_state,_,_ = consume(initial_state(),reference_iterator,2)\npayload = {\"training\":reference_state,\"pipeline\":pack_bytes(reference_iterator.get_state()),\"contract\":encode_contract(contract)}\nresume_path = root/\"completed_step_2\"\nwith ocp.StandardCheckpointer() as cp:\n    cp.save(resume_path,payload)\n    cp.wait_until_finished()\n    restored_payload = cp.restore(resume_path,target={\"training\":initial_state(),\"pipeline\":pack_bytes(b\"\"),\"contract\":encode_contract(contract)})\nvalidate_contract(restored_payload[\"contract\"],contract)\nresumed_iterator = iter(make_loader())\nresumed_iterator.set_state(unpack_bytes(restored_payload[\"pipeline\"]))\n\nreference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)\nresumed_final,resumed_losses,resumed_ids = consume(restored_payload[\"training\"],resumed_iterator,4)\nfor a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)\nnp.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)\nsame_tree(reference_final,resumed_final)\nassert int(resumed_final[\"step\"])==6\nprint(\"Restored next four ID batches:\",[a.tolist() for a in resumed_ids])\nprint(\"Restored next four losses:\",resumed_losses.tolist())\nprint(\"Full state agrees at step six\")",
+    "output": "The next four ID batches and losses match; parameters, Adam state, continuation key and step agree at step six. One epoch boundary is crossed.",
+    "experiments": [
+      {
+        "title": "Restart only the reader",
+        "prediction": "Keep restored training state but start a fresh iterator. Which IDs arrive first, and should the next update match?",
+        "code": "fresh = iter(make_loader())\nwrong_state,wrong_losses,wrong_ids = consume(restored_payload[\"training\"],fresh,1)\nassert not np.array_equal(wrong_ids[0],reference_ids[0])\nassert not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)\nprint(\"Missing iterator restore repeats earlier IDs and changes the next loss\")",
+        "output": "The first batch repeats instead of the saved next batch; the next loss differs.",
+        "explanation": "A model step counter does not automatically seek a data iterator."
+      },
+      {
+        "title": "Restore only the reader",
+        "prediction": "Replay the correct IDs but initialize model/optimizer/key from scratch. Will losses match?",
+        "code": "reader_only = iter(make_loader());reader_only.set_state(unpack_bytes(restored_payload[\"pipeline\"]))\nwrong_model,wrong_model_losses,correct_ids = consume(initial_state(),reader_only,1)\nnp.testing.assert_array_equal(correct_ids[0],reference_ids[0])\nassert not np.isclose(wrong_model_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)\nassert int(wrong_model[\"step\"])==1\nprint(\"Correct IDs alone do not restore the training transition\")",
+        "output": "IDs agree but loss and step differ.",
+        "explanation": "Input replay and model-state replay are complementary requirements; either alone can look superficially successful."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Reject an incompatible resume before consuming data",
+        "difficulty": "Transfer",
+        "prompt": "Try the saved contract with a changed sampler seed and then a changed dataset fingerprint. Both must fail before training resumes. Verify that the unchanged contract still passes.",
+        "hint": "Use validate_contract on copies of the expected contract; do not rewrite the saved payload.",
+        "solution": "for field,value in [('seed',43),('sha256','different-dataset')]:\n    incompatible=dict(contract,**{field:value})\n    try:validate_contract(restored_payload['contract'],incompatible)\n    except ValueError:print('Rejected incompatible',field)\n    else:raise AssertionError('Incompatible resume was accepted')\nvalidate_contract(restored_payload['contract'],contract)\nprint('Original run contract remains valid.')",
+        "explanation": "Exact state replay only makes sense under a compatible data and update contract. Rejecting a mismatch before consuming a batch keeps an invalid resume from looking like a successful run."
+      },
+      {
+        "title": "Reject changed batch size before consuming",
+        "difficulty": "Challenge",
+        "prompt": "Pretend the resumed application now uses batch size three. Reject the saved contract before a reader is used, then restore the original configuration and check the next IDs.",
+        "hint": "The stored cursor is interpreted in a particular pipeline configuration.",
+        "solution": "changed = dict(contract,batch_size=3)\ntry:\n    validate_contract(restored_payload[\"contract\"],changed)\nexcept ValueError:\n    print(\"Expected batch-configuration mismatch\")\nelse:\n    raise AssertionError(\"Expected incompatible restore rejection\")\nvalidate_contract(restored_payload[\"contract\"],contract)\nfixed_reader = iter(make_loader());fixed_reader.set_state(unpack_bytes(restored_payload[\"pipeline\"]))\nnp.testing.assert_array_equal(next(fixed_reader)[\"id\"],reference_ids[0])",
+        "explanation": "Changing batching changes consumption semantics. Refuse the mismatched configuration instead of assuming that training step two corresponds to the same next examples."
+      }
+    ],
+    "question": "Which evidence supports a consistent restart boundary?",
+    "options": [
+      "The checkpoint directory exists.",
+      "The next IDs, losses and full training state match the uninterrupted future under a compatible contract.",
+      "The final loss eventually decreases."
+    ],
+    "answer": 1,
+    "explanation": "A consistent restart preserves both data position and transition state, not just a readable file or a favorable metric.",
+    "exercise": "Repeat the protocol after one batch and compare the next five batches through step six. Save to a distinct directory.",
+    "solution": "other_iterator = iter(make_loader())\nother_state,_,_ = consume(initial_state(),other_iterator,1)\nother_payload = {\"training\":other_state,\"pipeline\":pack_bytes(other_iterator.get_state()),\"contract\":encode_contract(contract)}\nwith ocp.StandardCheckpointer() as cp:\n    other_path = Path(tempfile.mkdtemp(dir=root))/\"completed_step_1\"\n    cp.save(other_path,other_payload)\n    cp.wait_until_finished()\n    other_saved = cp.restore(other_path,target={\"training\":initial_state(),\"pipeline\":pack_bytes(b\"\"),\"contract\":encode_contract(contract)})\nother_resumed = iter(make_loader());other_resumed.set_state(unpack_bytes(other_saved[\"pipeline\"]))\na,loss_a,ids_a = consume(other_state,other_iterator,5)\nb,loss_b,ids_b = consume(other_saved[\"training\"],other_resumed,5)\nfor l,r in zip(ids_a,ids_b):np.testing.assert_array_equal(l,r)\nnp.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)\nsame_tree(a,b)\nassert int(b[\"step\"])==6",
+    "objectives": [
+      "Persist model/optimizer/key and Grain iterator position at one boundary.",
+      "Replay across an epoch transition and compare every future batch.",
+      "Diagnose reader-only and model-only restores.",
+      "Reject changed pipeline configuration and state the tested recovery limits."
+    ],
+    "takeaways": [
+      "Commit one logical boundary",
+      "Persist opaque iterator bytes without editing them",
+      "Audit the future, including an epoch transition",
+      "Define the limits of this recovery claim"
+    ],
+    "references": [
+      {
+        "title": "NumPy Generator permutation",
+        "url": "https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.permutation.html"
+      },
+      {
+        "title": "Grain DataLoader guide",
+        "url": "https://google-grain.readthedocs.io/en/latest/tutorials/data_loader_tutorial.html"
+      },
+      {
+        "title": "Orbax StandardCheckpointer",
+        "url": "https://orbax.readthedocs.io/en/latest/api_reference/checkpoint.checkpointers.html"
+      },
+      {
+        "title": "Optax Adam",
+        "url": "https://optax.readthedocs.io/en/latest/api/optimizers.html#optax.adam"
+      },
+      {
+        "title": "JAX random key data",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.random.key_data.html"
+      }
+    ],
+    "diagnosis": "Changing batching changes consumption semantics. Refuse the mismatched configuration instead of assuming that training step two corresponds to the same next examples.",
+    "runtime": {
+      "kind": "cpu"
+    },
+    "buildSteps": [
+      {
+        "title": "Prepare the data and state",
+        "instruction": "Create main.py in your course workspace. Use the tested course environment and add this block first.",
+        "code": "import jax\njax.config.update(\"jax_platforms\",\"cpu\")\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport orbax.checkpoint as ocp\nimport tempfile\nimport json\nimport hashlib\nfrom pathlib import Path\ntx = optax.adam(0.05)\ndef initial_state():\n    params = {\"weight\":jnp.array(0.,jnp.float32),\"bias\":jnp.array(0.,jnp.float32)}\n    return {\"params\":params,\"optimizer\":tx.init(params),\n            \"key_data\":jax.random.key_data(jax.random.key(7,impl=\"threefry2x32\")),\n            \"step\":jnp.array(0,jnp.int32)}\ndef pack_bytes(raw,capacity=4096):\n    if len(raw)>capacity:\n        raise ValueError(\"Snapshot exceeds tutorial fixed-byte capacity\")\n    buffer = np.zeros(capacity,dtype=np.uint8)\n    buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)\n    return {\"buffer\":buffer,\"length\":np.array(len(raw),dtype=np.int32)}\ndef unpack_bytes(packed):\n    length = int(packed[\"length\"])\n    if not 0 <= length <= len(packed[\"buffer\"]):\n        raise ValueError(\"Invalid snapshot length\")\n    return np.asarray(packed[\"buffer\"],dtype=np.uint8)[:length].tobytes()\ndef same_tree(left,right):\n    assert jax.tree.structure(left)==jax.tree.structure(right)\n    for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):\n        host_a,host_b = np.asarray(a),np.asarray(b)\n        assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype\n        if np.issubdtype(host_a.dtype,np.integer):\n            np.testing.assert_array_equal(host_a,host_b)\n        else:\n            np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)\ndef step(state,x,y):\n    key = jax.random.wrap_key_data(state[\"key_data\"],impl=\"threefry2x32\")\n    next_key,sample_key = jax.random.split(key)\n    target_noise = 0.01*jax.random.normal(sample_key,y.shape)\n    def objective(params):\n        residual = params[\"weight\"]*x+params[\"bias\"]-(y+target_noise)\n        return jnp.mean(residual**2)\n    value,gradient = jax.value_and_grad(objective)(state[\"params\"])\n    updates,opt_state = tx.update(gradient,state[\"optimizer\"],state[\"params\"])\n    next_state = {\"params\":optax.apply_updates(state[\"params\"],updates),\n                  \"optimizer\":opt_state,\"key_data\":jax.random.key_data(next_key),\n                  \"step\":state[\"step\"]+1}\n    return next_state,value\ndef package_versions():\n    import importlib.metadata\n    return {name:importlib.metadata.version(name) for name in (\"jax\",\"numpy\",\"optax\",\"orbax-checkpoint\")}\ndef encode_contract(contract):\n    return pack_bytes(json.dumps(contract,sort_keys=True).encode())\ndef validate_contract(saved,expected):\n    actual = json.loads(unpack_bytes(saved))\n    if actual != expected:\n        raise ValueError(\"Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions\")\nworkspace = tempfile.TemporaryDirectory()\nroot = Path(workspace.name)\n\nimport numpy as np\nimport grain.python as grain\nclass TutorialSource:\n    def __init__(self,count=12):\n        self.count = count\n    def __len__(self):\n        return self.count\n    def __getitem__(self,index):\n        value = np.float32(index/10)\n        return {\"id\":np.int64(index),\"x\":value,\"y\":np.float32(2*value-1)}\n    def __repr__(self):\n        return f\"TutorialSource(v1,n={self.count})\"\ndef make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):\n    return grain.DataLoader(\n        data_source=TutorialSource(count),\n        sampler=grain.IndexSampler(num_records=count,num_epochs=2,shuffle=True,seed=seed),\n        operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],\n        worker_count=0)",
+        "explanation": "This setup makes the dataset and software assumptions explicit. No external dataset or accelerator is required."
+      },
+      {
+        "title": "Build the pipeline or state transition",
+        "instruction": "Append this block to the same file; follow the named state objects through each function.",
+        "code": "def data_contract(seed=42):\n    source = TutorialSource()\n    values = np.array([[source[i][\"x\"],source[i][\"y\"]] for i in range(len(source))],dtype=np.float32)\n    return {\"schema\":1,\"seed\":seed,\"batch_size\":4,\"count\":12,\"source\":\"TutorialSource(v1,n=12)\",\n            \"sha256\":hashlib.sha256(values.tobytes()).hexdigest(),\n            \"learning_rate\":0.05,\"optimizer\":\"adam\",\"key_impl\":\"threefry2x32\",\n            \"versions\":dict(package_versions(),grain=__import__(\"importlib.metadata\",fromlist=[\"version\"]).version(\"grain\"))}\ndef consume(state,iterator,count):\n    losses=[];orders=[]\n    for _ in range(count):\n        batch = next(iterator)\n        orders.append(batch[\"id\"].copy())\n        state,value = step(state,jnp.asarray(batch[\"x\"]),jnp.asarray(batch[\"y\"]))\n        losses.append(float(value))\n    return state,np.array(losses),orders\ncontract = data_contract()\nreference_iterator = iter(make_loader())\nreference_state,_,_ = consume(initial_state(),reference_iterator,2)\npayload = {\"training\":reference_state,\"pipeline\":pack_bytes(reference_iterator.get_state()),\"contract\":encode_contract(contract)}\nresume_path = root/\"completed_step_2\"\nwith ocp.StandardCheckpointer() as cp:\n    cp.save(resume_path,payload)\n    cp.wait_until_finished()\n    restored_payload = cp.restore(resume_path,target={\"training\":initial_state(),\"pipeline\":pack_bytes(b\"\"),\"contract\":encode_contract(contract)})\nvalidate_contract(restored_payload[\"contract\"],contract)\nresumed_iterator = iter(make_loader())\nresumed_iterator.set_state(unpack_bytes(restored_payload[\"pipeline\"]))",
+        "explanation": "The function boundaries expose which inputs determine the next output and which state must be preserved."
+      },
+      {
+        "title": "Run the comparison",
+        "instruction": "Append the checks, save main.py and run python main.py. Predict what should agree before running.",
+        "code": "reference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)\nresumed_final,resumed_losses,resumed_ids = consume(restored_payload[\"training\"],resumed_iterator,4)\nfor a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)\nnp.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)\nsame_tree(reference_final,resumed_final)\nassert int(resumed_final[\"step\"])==6\nprint(\"Restored next four ID batches:\",[a.tolist() for a in resumed_ids])\nprint(\"Restored next four losses:\",resumed_losses.tolist())\nprint(\"Full state agrees at step six\")",
+        "explanation": "The comparison checks the next behavior, not merely whether a save call succeeded."
+      }
+    ],
+    "visual": {
+      "title": "Data position completes the recovery boundary",
+      "kind": "conceptual",
+      "prediction": "What changes if the model resumes with the wrong next batch?",
+      "reading": "The top boxes bring together model and optimizer state, random state, and dataset identity with iterator position. Their arrows converge on “Restore one shared boundary.” The layout emphasizes that none of these inputs can be recovered independently from a different training step.\n\nThe final box connects the same next batch to the same next transition. An unchanged model is not enough if the resumed iterator supplies different examples: the next gradient can then differ.",
+      "connection": "Think of the boundary as just after a completed update. The parameter values and optimizer history describe that update, the random state identifies the next draws, and the data position identifies the next examples. Dataset identity matters because the same numeric position in a different dataset need not mean the same batch.\n\nThe diagram is conceptual; its box sizes do not measure storage or runtime. The executable checks below compare batch IDs and resulting state. Follow that chain when diagnosing recovery: first establish the same inputs to the update, then compare the update’s outputs.",
+      "alt": "Data position completes the recovery boundary. The top boxes bring together model and optimizer state, random state, and dataset identity with iterator position. Their arrows converge on “Restore one shared boundary.” The layout emphasizes that none of these inputs can be recovered independently from a different training step. The final box connects the same next batch to the same next transition. An unchanged model is not enough if the resumed iterator supplies different examples: the next gradient can then differ.",
+      "nodes": [
+        "Model and optimizer state",
+        "Random state",
+        "Dataset identity and iterator position",
+        "Restore one shared boundary",
+        "Same next batch → same transition"
+      ],
+      "layout": "merge"
+    }
+  }
+}

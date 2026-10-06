@@ -1,0 +1,51 @@
+{
+  "schemaVersion": 1,
+  "status": "passed",
+  "stage": 4,
+  "implementationHash": "9dedaab2b68e7fb9dd396c12d567fa985fbbb36c7e7ce8f8180c4178003f6a19",
+  "checkerHash": "b384bcd7cb86b0deee02a58185b4584aa16b8285c32a7c6440ed1a3a9b427983",
+  "environment": {
+    "python": "3.14.3",
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "backend": "cpu"
+  },
+  "results": [
+    {
+      "method": "reinforce",
+      "trainingSeed": 0,
+      "exact": 0.9521623849868774,
+      "heldOut": 0.9537841081619263
+    },
+    {
+      "method": "reinforce",
+      "trainingSeed": 7,
+      "exact": 0.9508237838745117,
+      "heldOut": 0.9536913633346558
+    },
+    {
+      "method": "reinforce",
+      "trainingSeed": 23,
+      "exact": 0.9493669271469116,
+      "heldOut": 0.9513769149780273
+    },
+    {
+      "method": "ppo",
+      "trainingSeed": 0,
+      "exact": 0.9757839441299438,
+      "heldOut": 0.9759716987609863
+    },
+    {
+      "method": "ppo",
+      "trainingSeed": 7,
+      "exact": 0.9749346971511841,
+      "heldOut": 0.9747216105461121
+    },
+    {
+      "method": "ppo",
+      "trainingSeed": 23,
+      "exact": 0.9756215214729309,
+      "heldOut": 0.9753710627555847
+    }
+  ]
+}

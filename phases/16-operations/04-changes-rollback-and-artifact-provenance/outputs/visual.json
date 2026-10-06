@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-04",
+  "contentHash": "ac9415c0adc49ea3b0a1abc225e345027389102efe37e125d1acec45bff69768",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:46:47.489176+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\nfailed gate kept selection: True rollback restored first: True\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "activate A",
+      "publish B",
+      "activate B",
+      "reject candidate",
+      "rollback"
+    ],
+    "xlabel": "executed local operation",
+    "ylabel": "selected artifact code: 1=A, 2=B",
+    "series": [
+      {
+        "label": "observed active pointer",
+        "y": [
+          1,
+          1,
+          2,
+          2,
+          1
+        ]
+      }
+    ]
+  }
+}

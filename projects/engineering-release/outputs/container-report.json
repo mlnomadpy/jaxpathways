@@ -1,0 +1,30 @@
+{
+  "image_id": "sha256:d49a6e076f1e06457ac3a3b8dc9cc6101a6371ab04c8645959ae027285bc434c",
+  "os": "linux",
+  "architecture": "arm64",
+  "configured_user": "10001:10001",
+  "model_sha256": "31e575d38470fddf821aecd26d0c8bc0a5aa22e9cdaa1f47deae14307b70dfac",
+  "predictions": [
+    0.2599774694442749,
+    0.9999774694442749,
+    5.399977469444275
+  ],
+  "readiness": "ready: artifact verified and prediction completed",
+  "http": {
+    "uid": 10001,
+    "ready": {
+      "ready": true
+    },
+    "response": {
+      "predictions": [
+        0.9999774694442749,
+        2.999977469444275
+      ]
+    },
+    "invalid_request_status": 400
+  },
+  "bad_digest_rejected": true,
+  "source_sha256": "beac280deccb366407bd057d159dddc61c1d2aea5d53c9a0708ed5e102464f8d",
+  "dockerfile_sha256": "b82437ad2ca3a42d44357bd580d7737def22e8877e6ab78e15415b232768fe9d",
+  "scope": "Actual local Docker CPU image, CLI and internal HTTP checks. No published port, cloud rollout or load benchmark."
+}

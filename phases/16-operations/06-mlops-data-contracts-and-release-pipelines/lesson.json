@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "id": "operations-06",
+  "minutes": 70,
+  "content": {
+    "problem": "A candidate looks good on an average dashboard, yet performs badly for a small group of requests. Let’s make an MLOps release decision from data identity, slice counts and independently checked metrics.",
+    "idea": "MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.",
+    "objectives": [
+      "Validate data before the expensive job",
+      "Use a fixed release evaluation",
+      "Separate code CI from model delivery",
+      "Compare distributions without inventing labels"
+    ],
+    "sections": [
+      {
+        "title": "Validate data before the expensive job",
+        "body": "The fixture gives every observation an ID, a source group and a split. Validate names, finite numbers, allowed split values and group separation before training. Two different rows from the same subject or document can leak across splits even when row IDs differ. Hash the accepted manifest; reject unexpected schema changes explicitly. In a feature pipeline, also record event time, transformation version and missing-value rules to diagnose training-serving skew."
+      },
+      {
+        "title": "Use a fixed release evaluation",
+        "body": "We inspect ten squared errors: nine values of \\(0.01\\) and one value of \\(4\\). The count-weighted overall MSE is \\((9\\times0.01+4)/10=0.409\\), below the illustrative limit \\(0.5\\). But the high-input slice has MSE \\(4\\), so the release must fail. An empty required slice also fails: zero observations are missing evidence, not perfect quality.",
+        "math": "\\operatorname{MSE}_{\\mathrm{all}}=\\frac{\\sum_s n_s\\operatorname{MSE}_s}{\\sum_s n_s}"
+      },
+      {
+        "title": "Separate code CI from model delivery",
+        "body": "A practical pipeline validates the schema and source, runs numerical/unit checks, trains or retrieves a candidate, evaluates a frozen versioned set, packages and tests the serving artifact, then promotes a recorded image/model pair. Failed jobs must preserve the previous accepted bundle. The project contains a portable CI example; its MLflow SQLite store is isolated per job, and its container stage never publishes an image. In a team, durable metadata and artifact storage belong outside disposable workers."
+      },
+      {
+        "title": "Compare distributions without inventing labels",
+        "body": "The input mix changes from \\([0.9,0.1]\\) to \\([0.5,0.5]\\) across two declared bins. Total variation is \\(0.4\\). This says the observed input distribution changed under that binning. It does not say the model became inaccurate: labels may arrive later, and seasonal mix changes can be harmless. Track data-quality errors, request volume, latency/error budgets, slice outcomes and delayed labels separately.",
+        "math": "\\operatorname{TV}(p,q)=\\tfrac12\\sum_b|p_b-q_b|"
+      },
+      {
+        "title": "Plan a response instead of a reflex",
+        "body": "An alert should name an owner, a runbook and a decision. Inspect whether a schema change, new population, broken preprocessing or genuine concept shift explains the evidence. Quarantine malformed inputs where appropriate; gather labels and compare a candidate before retraining or rollback. Retraining on corrupted data can make the situation worse. Record sample counts, time windows and alert thresholds; a small window can exaggerate apparent change."
+      },
+      {
+        "title": "Rehearse the failed gate",
+        "body": "The connected project varies errors, rejects nonfinite metrics and absent slices, checks data leakage, and confirms that failed approval cannot change the active pointer. Add representative protected/business slices appropriate to your domain, with minimum counts and uncertainty review. The fixed two-slice exercise teaches the decision mechanism; it is not a fairness audit or production statistical threshold.",
+        "commands": [
+          {
+            "label": "Run the release-policy stage from the extracted workspace",
+            "shell": "bash",
+            "code": "python projects/engineering-release/tests/check.py --implementation solution --stage 1",
+            "expected": "Independent data and slice-gate checks pass, including changed-condition failures."
+          }
+        ]
+      }
+    ],
+    "code": "import hashlib, json, math\n\ndef digest(value):\n    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()\n\ndef validate_rows(rows):\n    \"\"\"An observation has a stable identity, split, group, input and target.\"\"\"\n    if not rows:\n        raise ValueError('empty dataset')\n    ids = set()\n    groups = {}\n    for row in rows:\n        if set(row) != {'id', 'group', 'split', 'x', 'y'}:\n            raise ValueError('schema mismatch')\n        if not isinstance(row['id'], str) or not row['id'] or row['id'] in ids:\n            raise ValueError('duplicate or empty ID')\n        if not isinstance(row['group'], str) or not row['group']:\n            raise ValueError('missing source group')\n        if row['split'] not in {'train', 'validation', 'test'}:\n            raise ValueError('unknown split')\n        for name in ['x', 'y']:\n            if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):\n                raise ValueError('nonfinite or nonnumeric observation')\n        if row['group'] in groups and groups[row['group']] != row['split']:\n            raise ValueError('source group leaks between splits')\n        ids.add(row['id']); groups[row['group']] = row['split']\n    return digest(rows)\n\ndef gate_metrics(errors, slices, limit):\n    \"\"\"Count-weighted MSE plus every required slice; no empty-slice pass.\"\"\"\n    if len(errors) != len(slices) or not errors or not math.isfinite(limit) or limit < 0:\n        raise ValueError('invalid metric contract')\n    if any(not math.isfinite(e) or e < 0 for e in errors):\n        raise ValueError('invalid squared error')\n    if not set(slices) <= {'low', 'high'}:\n        raise ValueError('unknown slice')\n    result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}\n    for name, item in result.items():\n        selected = [e for e, s in zip(errors, slices) if s == name]\n        if selected: item['mse'] = math.fsum(selected) / len(selected)\n    result['overall'] = {'count': len(errors), 'mse': math.fsum(errors) / len(errors)}\n    result['passed'] = all(v['count'] > 0 and v['mse'] <= limit for v in result.values())\n    return result\n\nrows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]\nfingerprint = validate_rows(rows)\nchanged = [dict(r) for r in rows]; changed[-1]['x'] += 1\nassert validate_rows(changed) != fingerprint\nleaked = [dict(r) for r in rows]; leaked[-1]['group'] = rows[0]['group']\ntry: validate_rows(leaked)\nexcept ValueError: pass\nelse: raise AssertionError('cross-split source leakage accepted')\nerrors = [.01] * 9 + [4.]\nslices = ['low'] * 9 + ['high']\nmetrics = gate_metrics(errors, slices, .5)\nassert math.isclose(metrics['overall']['mse'], .409)\nassert metrics['overall']['mse'] < .5 and not metrics['passed']\nassert metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.\nassert not gate_metrics([.01]*9, ['low']*9, .5)['passed']\n# Total variation on two declared bins: changed input mix is a diagnostic, not proof of degraded accuracy.\nreference_mix = [.9, .1]; current_mix = [.5, .5]\nshift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))\nassert math.isclose(shift, .4)\nprint('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])\nprint('Two-bin input total variation:',shift,'(requires investigation; not an automatic retraining order)')\n",
+    "output": "Overall MSE: 0.409 high-slice MSE: 4.0 release: False\nTwo-bin input total variation: 0.4 (requires investigation; not an automatic retraining order)",
+    "exercise": "Show that averaging slice means without counts changes the overall error.",
+    "solution": "wrong=(metrics['low']['mse']+metrics['high']['mse'])/2\nassert math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])\nprint('Unweighted slice average:',wrong)",
+    "experiments": [
+      {
+        "title": "A good aggregate hides a bad slice",
+        "prediction": "Does an overall MSE below 0.5 pass a gate that requires every slice below 0.5?",
+        "code": "assert metrics['overall']['mse'] < .5\nassert metrics['high']['mse'] > .5 and metrics['passed'] is False\nprint('Aggregate-only acceptance would miss the high-slice failure.')",
+        "output": "The overall score passes, but the complete gate fails.",
+        "explanation": "A policy must define both aggregation and required slice evidence. The threshold is illustrative; its purpose must be justified in a real deployment."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Change the population mix",
+        "difficulty": "transfer",
+        "prompt": "Keep the two slice errors, but evaluate nine high-slice examples and one low-slice example.",
+        "hint": "Change counts rather than the model errors.",
+        "solution": "shifted=gate_metrics([.01]+[4.]*9,['low']+['high']*9,.5)\nassert math.isclose(shifted['overall']['mse'],3.601)\nassert shifted['high']['mse']==metrics['high']['mse']\nprint('New population MSE:',shifted['overall']['mse'])",
+        "explanation": "Aggregate performance changes with population mix even when each slice’s error is unchanged. Report both before attributing the change to a model regression."
+      }
+    ],
+    "question": "An input drift alert fired before new labels arrived. What follows?",
+    "options": [
+      "Retrain and automatically replace the active model.",
+      "Investigate the change and gather quality evidence before choosing a response.",
+      "Declare accuracy has decreased by the drift score."
+    ],
+    "answer": 1,
+    "explanation": "MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.",
+    "diagnosis": "Check denominators and slice counts before thresholds. A missing slice, nonfinite metric or changed evaluation manifest should block comparison. Investigate drift and training-serving skew separately from service health.",
+    "takeaways": [
+      "Validate data before the expensive job",
+      "Compare distributions without inventing labels",
+      "Rehearse the failed gate"
+    ],
+    "references": [
+      {
+        "title": "Google Cloud MLOps: continuous delivery and automation",
+        "url": "https://cloud.google.com/architecture/mlops-continuous-delivery-and-automation-pipelines-in-machine-learning"
+      },
+      {
+        "title": "MLflow experiment tracking",
+        "url": "https://mlflow.org/docs/latest/ml/tracking/quickstart/"
+      },
+      {
+        "title": "MLflow model registry workflows",
+        "url": "https://mlflow.org/docs/latest/ml/model-registry/workflow/"
+      }
+    ],
+    "visual": {
+      "title": "An average can conceal the failing slice",
+      "kind": "executed",
+      "prediction": "Which bar would an aggregate-only dashboard hide?",
+      "reading": "The categories are the overall set, the low-input slice and the high-input slice. Heights are squared-error means: \\(0.409\\), \\(0.01\\) and \\(4\\). The second series marks the same illustrative acceptance limit \\(0.5\\) for each category. The high slice crosses its limit even though the overall bar does not. There are nine low examples and only one high example; that imbalance explains the aggregate.",
+      "connection": "The plot comes from the exact errors checked by gate_metrics. The changed-mix exercise makes the overall bar rise while preserving the two slice bars. Counts, uncertainty and domain-specific acceptance rules are necessary before using a similar policy on real data.",
+      "alt": "Overall MSE 0.409 and low-slice MSE 0.01 are below 0.5, while high-slice MSE 4 exceeds it.",
+      "code": "visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel':'evaluation group (count)','ylabel':'mean squared error','series':[{'label':'observed MSE','y':[metrics[k]['mse'] for k in ['overall','low','high']]},{'label':'illustrative limit','y':[.5,.5,.5]}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Prepare the explicit contract",
+        "instruction": "Create main.py and add this setup block. Continue with the next block in the same file.",
+        "code": "import hashlib, json, math",
+        "explanation": "The fixture gives every observation an ID, a source group and a split. Validate names, finite numbers, allowed split values and group separation before training. Two different rows from the same subject or document can leak across splits even when row IDs differ. Hash the accepted manifest; reject unexpected schema changes explicitly. In a feature pipeline, also record event time, transformation version and missing-value rules to diagnose training-serving skew."
+      },
+      {
+        "title": "Run and inspect the controlled experiment",
+        "instruction": "Append this block, run main.py in the course environment, and retain the actual output.",
+        "code": "def digest(value):\n    return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()\n\ndef validate_rows(rows):\n    \"\"\"An observation has a stable identity, split, group, input and target.\"\"\"\n    if not rows:\n        raise ValueError('empty dataset')\n    ids = set()\n    groups = {}\n    for row in rows:\n        if set(row) != {'id', 'group', 'split', 'x', 'y'}:\n            raise ValueError('schema mismatch')\n        if not isinstance(row['id'], str) or not row['id'] or row['id'] in ids:\n            raise ValueError('duplicate or empty ID')\n        if not isinstance(row['group'], str) or not row['group']:\n            raise ValueError('missing source group')\n        if row['split'] not in {'train', 'validation', 'test'}:\n            raise ValueError('unknown split')\n        for name in ['x', 'y']:\n            if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):\n                raise ValueError('nonfinite or nonnumeric observation')\n        if row['group'] in groups and groups[row['group']] != row['split']:\n            raise ValueError('source group leaks between splits')\n        ids.add(row['id']); groups[row['group']] = row['split']\n    return digest(rows)\n\ndef gate_metrics(errors, slices, limit):\n    \"\"\"Count-weighted MSE plus every required slice; no empty-slice pass.\"\"\"\n    if len(errors) != len(slices) or not errors or not math.isfinite(limit) or limit < 0:\n        raise ValueError('invalid metric contract')\n    if any(not math.isfinite(e) or e < 0 for e in errors):\n        raise ValueError('invalid squared error')\n    if not set(slices) <= {'low', 'high'}:\n        raise ValueError('unknown slice')\n    result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}\n    for name, item in result.items():\n        selected = [e for e, s in zip(errors, slices) if s == name]\n        if selected: item['mse'] = math.fsum(selected) / len(selected)\n    result['overall'] = {'count': len(errors), 'mse': math.fsum(errors) / len(errors)}\n    result['passed'] = all(v['count'] > 0 and v['mse'] <= limit for v in result.values())\n    return result\n\nrows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]\nfingerprint = validate_rows(rows)\nchanged = [dict(r) for r in rows]; changed[-1]['x'] += 1\nassert validate_rows(changed) != fingerprint\nleaked = [dict(r) for r in rows]; leaked[-1]['group'] = rows[0]['group']\ntry: validate_rows(leaked)\nexcept ValueError: pass\nelse: raise AssertionError('cross-split source leakage accepted')\nerrors = [.01] * 9 + [4.]\nslices = ['low'] * 9 + ['high']\nmetrics = gate_metrics(errors, slices, .5)\nassert math.isclose(metrics['overall']['mse'], .409)\nassert metrics['overall']['mse'] < .5 and not metrics['passed']\nassert metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.\nassert not gate_metrics([.01]*9, ['low']*9, .5)['passed']\n# Total variation on two declared bins: changed input mix is a diagnostic, not proof of degraded accuracy.\nreference_mix = [.9, .1]; current_mix = [.5, .5]\nshift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))\nassert math.isclose(shift, .4)\nprint('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])\nprint('Two-bin input total variation:',shift,'(requires investigation; not an automatic retraining order)')",
+        "explanation": "The input mix changes from \\([0.9,0.1]\\) to \\([0.5,0.5]\\) across two declared bins. Total variation is \\(0.4\\). This says the observed input distribution changed under that binning. It does not say the model became inaccurate: labels may arrive later, and seasonal mix changes can be harmless. Track data-quality errors, request volume, latency/error budgets, slice outcomes and delayed labels separately."
+      }
+    ]
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "id": "rl",
+  "title": "Learn by interacting",
+  "description": "Train a policy from actual environment interaction, verify its objective against an independent small-state reference, and compare multiple seeded agents on fixed held-out evaluation streams.",
+  "prerequisites": "Shared foundations and basic ML",
+  "outcome": "An evaluated policy",
+  "libraries": "JAX · Optax",
+  "source": "https://github.com/FLAIROx/Jumanji",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "rl"
+  ],
+  "capstone": {
+    "title": "Train and audit a policy from interaction",
+    "status": "authored",
+    "assessment": "Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.",
+    "evidence": [
+      "Verified transitions, terminal masks and reconstructed return targets",
+      "A policy-gradient comparison against independent state enumeration",
+      "Learning curves and fixed held-out evaluation for several trained seeds, with failed trajectories explained"
+    ],
+    "projectId": "policy-evaluation",
+    "assessmentId": "rl",
+    "assessmentDraft": {
+      "id": "rl",
+      "projectId": "policy-evaluation",
+      "title": "Reinforcement-learning synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/rl.md",
+      "url": "assessments/rl.html"
+    }
+  },
+  "audience": "Learners interested in sequential decisions who can already implement and evaluate a neural network.",
+  "firstArtifact": "A tested environment transition table and reproducible batched trajectories.",
+  "focusPhaseIds": [
+    "rl"
+  ],
+  "modalityTrackIds": [],
+  "studyAdvice": "Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly.",
+  "engineeringLessonIds": [
+    "recovery-06",
+    "operations-06"
+  ]
+}

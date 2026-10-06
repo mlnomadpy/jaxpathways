@@ -1,0 +1,140 @@
+{
+  "schemaVersion": 1,
+  "id": "science-03",
+  "minutes": 105,
+  "content": {
+    "problem": "A simulation can produce a convincing curve and an incorrect sensitivity. Before using gradients to infer a physical parameter, how can we tell whether the derivative is right, and whether it describes the continuous equation closely enough?",
+    "idea": "Automatic differentiation differentiates the operations we executed. For a numerical solver that is the discrete method, not the exact differential equation. We will compare against an algebraic derivative of RK4, a finite difference of the observation loss, and the continuous analytic sensitivity. Each comparison tests a different layer.",
+    "objectives": [
+      "Derive an independent discrete solver sensitivity.",
+      "Check an observation-loss gradient at a nonoptimal parameter.",
+      "Separate derivative implementation error from discretization error.",
+      "Explain static-grid differentiation and the limits of this solver."
+    ],
+    "sections": [
+      {
+        "title": "Follow one parameter through every time step",
+        "body": "Changing \\(k\\) changes every state transition. RK4 on this linear equation is multiplication by \\(R(-kh)\\), so the final state after \\(N\\) steps is \\(u_0R(-kh)^N\\). Differentiate that expression with the chain rule. The derivative includes \\(-h\\), which is easy to lose when differentiating the polynomial. For our parameters it is about \\(-0.98638781\\): increasing the rate lowers the remaining temperature.",
+        "math": "\\frac{\\partial u_N}{\\partial k}=u_0N R(-kh)^{N-1}\\left[-h\\left(1-kh+\\frac{(kh)^2}{2}-\\frac{(kh)^3}{6}\\right)\\right]"
+      },
+      {
+        "title": "Check the discrete derivative before asking about physics",
+        "body": "JAX and the polynomial derivative agree to near float64 roundoff. The continuous derivative is \\(-tu_0e^{-kt}\\), approximately \\(-0.98638786\\) at two seconds. Their small difference is expected from the numerical method. A perfect autodiff check cannot remove that bias. Refine the grid and see whether both the state and its sensitivity approach the continuous reference."
+      },
+      {
+        "title": "Turn a trajectory into a scalar objective",
+        "body": "The loss averages squared errors over all forty-one saved times. Its derivative adds each residual multiplied by the sensitivity of that observation, including the factor of two and mean normalization. The initial observation contributes zero rate sensitivity because the initial value is fixed. Evaluate the gradient away from the optimum: at the optimum, both a broken zero gradient and a correct gradient may look similar.",
+        "math": "L(k)=\\frac{1}{N+1}\\sum_{n=0}^N\\left(u_n(k)-y_n\\right)^2"
+      },
+      {
+        "title": "Use a finite-difference window, not one magical epsilon",
+        "body": "A central finite difference probes the change in the whole objective. If the perturbation is too large, curvature biases the estimate; if it is too small, subtracting nearly equal floating-point values loses information. Sweep several perturbations and look for a range of agreement. Keep initial state, observations, grid and precision fixed across the comparison. This lesson uses float64; copying its smallest perturbation into a float32 program requires rechecking tolerances."
+      },
+      {
+        "title": "Know which solver problem you have solved",
+        "body": "The grid is fixed and the output length is static. We have not implemented adaptive error control, event handling, stiffness detection or a custom adjoint. A Python integer controls scan length; a parameter-dependent early exit would introduce a different differentiation problem. For richer systems, Diffrax exposes solver choice, tolerances, saved times and adjoint strategies. Its optional extension belongs in a separately pinned and executed environment; these core CPU checks do not validate that library or an adaptive solver."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Watch derivative discretization error shrink",
+        "prediction": "When doubling the number of RK4 steps, should the gradient become closer to the analytic sensitivity?",
+        "code": "step_counts = np.array([5,10,20,40])\ngradient_errors = []\nfor n in step_counts:\n    numerical = jax.grad(lambda k: solve(k,jnp.array(2.0),int(n),2.0/int(n))[-1])(0.7)\n    gradient_errors.append(abs(float(numerical)-continuous_gradient))\nassert np.all(np.diff(gradient_errors) < 0)\nassert 12 < gradient_errors[-2]/gradient_errors[-1] < 20\nprint(\"Sensitivity errors:\",gradient_errors)",
+        "output": "Errors approximately [2.449e-4, 1.319e-5, 7.654e-7, 4.609e-8].",
+        "explanation": "Fourth-order convergence becomes visible as an error ratio near sixteen when the step is halved. Roundoff will eventually limit this trend."
+      },
+      {
+        "title": "Sweep central-difference perturbations",
+        "prediction": "Will the smallest perturbation necessarily be the most accurate?",
+        "code": "epsilons = [1e-2,1e-3,1e-4,1e-5,1e-6]\nfd_errors=[]\nfor eps in epsilons:\n    fd=(float(objective(probe+eps))-float(objective(probe-eps)))/(2*eps)\n    fd_errors.append(abs(fd-float(derivative)))\nassert min(fd_errors) < 1e-8\nprint(\"Finite-difference absolute errors:\",fd_errors)",
+        "output": "There is a useful agreement window; very small perturbations eventually encounter subtraction error.",
+        "explanation": "Use the measured errors to select a tolerance. Do not require every epsilon to improve monotonically."
+      }
+    ],
+    "exercise": "Change the initial value to \\(3\\) and the rate to \\(0.4\\). Verify the endpoint gradient against the continuous derivative, then check the derivative with respect to the initial value as well.",
+    "solution": "changed_rate, changed_initial = 0.4, 3.0\ng_rate = jax.grad(lambda k: solve(k,jnp.array(changed_initial))[-1])(changed_rate)\ng_initial = jax.grad(lambda u: solve(changed_rate,u)[-1])(changed_initial)\nnp.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8),rtol=1e-7)\nnp.testing.assert_allclose(g_initial,np.exp(-0.8),rtol=1e-8)\nprint(\"Rate and initial-state sensitivities:\",float(g_rate),float(g_initial))",
+    "practice": [
+      {
+        "difficulty": "Practice",
+        "prompt": "Differentiate a weighted observation loss that emphasizes late times. Compare with a NumPy chain-rule reference built from the RK4 polynomial.",
+        "hint": "Weights change the observation importance and must be normalized explicitly.",
+        "solution": "weights=np.linspace(0.2,2.0,41)\ndef weighted_objective(k):\n    residual=solve(k,jnp.array(2.0))-observations\n    return jnp.sum(jnp.asarray(weights)*residual**2)/np.sum(weights)\nk=1.0; h=0.05; n=np.arange(41); z=-k*h\nr=1+z+z*z/2+z**3/6+z**4/24\ndr=-h*(1+z+z*z/2+z**3/6)\nu=2*r**n\nsensitivity=2*n*r**np.maximum(n-1,0)*dr\nreference=np.sum(2*weights*(u-np.asarray(observations))*sensitivity)/weights.sum()\nnp.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol=1e-11,atol=1e-12)\nprint(\"Weighted derivative reference:\",reference)",
+        "explanation": "The independent expression checks reduction normalization and the derivative at every saved time, rather than only the endpoint.",
+        "title": "Weight observations without losing normalization"
+      },
+      {
+        "difficulty": "Challenge",
+        "prompt": "Reproduce an accidentally detached simulation and explain why a finite-difference test catches it.",
+        "hint": "stop_gradient preserves values but removes their derivative.",
+        "solution": "def detached_objective(k):\n    prediction=jax.lax.stop_gradient(solve(k,jnp.array(2.0)))\n    return jnp.mean((prediction-observations)**2)\nassert float(jax.grad(detached_objective)(1.0)) == 0.0\nfd=(float(detached_objective(1.0001))-float(detached_objective(0.9999)))/0.0002\nassert abs(fd)>1e-3\nprint(\"Detached autodiff is zero; actual value sensitivity:\",fd)",
+        "explanation": "A plausible forward curve does not validate backward behavior. Remove an unintended gradient barrier and repeat the independent check.",
+        "title": "Diagnose a detached backward path"
+      }
+    ],
+    "diagnosis": "If the analytic continuous derivative differs from autodiff, first compare with the discrete polynomial derivative. If only the continuous comparison fails, refine the grid. If a finite difference is nonzero but autodiff is zero, inspect stop_gradient or host conversions. If changing the step count also changes the horizon, repair the experiment before interpreting convergence.",
+    "question": "An autodiff derivative matches the discrete RK4 formula, but both differ from the exact ODE derivative. What should you test next?",
+    "options": [
+      "Replace the derivative with zero.",
+      "Refine the grid at fixed horizon and inspect convergence of sensitivity.",
+      "Increase the optimizer learning rate until they match."
+    ],
+    "answer": 1,
+    "explanation": "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.",
+    "visual": {
+      "title": "A solver gradient converges toward the physical sensitivity",
+      "kind": "executed",
+      "prediction": "How much should the gradient error fall when a fourth-order method doubles its steps?",
+      "reading": "The horizontal axis shows the number of updates over the same two-second horizon. The vertical axis is absolute error in the endpoint derivative with respect to rate, on a logarithmic scale. A lower point means closer agreement with the exact continuous derivative, not a smaller temperature or lower training loss.\n\nWith five steps the error is about \\(2.449\\times10^{-4}\\). At ten, twenty and forty steps it is about \\(1.319\\times10^{-5}\\), \\(7.654\\times10^{-7}\\) and \\(4.609\\times10^{-8}\\). The final doubling improves agreement by about \\(16.6\\), consistent with fourth-order convergence in this range.",
+      "connection": "The plotted derivatives come from JAX differentiating scan. The reference is the independently derived continuous sensitivity \\(-tu_0e^{-kt}\\). A separate polynomial check verifies the derivative of the discrete RK4 program to much tighter tolerance.\n\nThe downward trend does not prove convergence for a stiff or discontinuous system, and it cannot continue indefinitely at fixed precision. It shows why checking only autodiff against another differentiation of the same program would miss solver bias.",
+      "alt": "Derivative error decreases rapidly as the fixed-horizon RK4 grid is refined from five to forty steps.",
+      "code": "counts=[5,10,20,40]\nerrors=[abs(float(jax.grad(lambda k: solve(k,jnp.array(2.0),n,2.0/n)[-1])(0.7))+4*np.exp(-1.4)) for n in counts]\nvisual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','ylabel':'absolute endpoint sensitivity error','yscale':'log','series':[{'label':'autodiff versus continuous derivative','y':errors}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Rebuild the differentiable solver",
+        "instruction": "Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.",
+        "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\ndef rk4_step(rate, value, dt):\n    a = -rate*value\n    b = -rate*(value + dt*a/2)\n    c = -rate*(value + dt*b/2)\n    d = -rate*(value + dt*c)\n    return value + dt*(a + 2*b + 2*c + d)/6\n\ndef solve(rate, initial, steps=40, dt=0.05):\n    def advance(value, unused):\n        next_value = rk4_step(rate, value, dt)\n        return next_value, next_value\n    _, tail = jax.lax.scan(advance, initial, None, length=steps)\n    return jnp.concatenate((jnp.atleast_1d(initial), tail))",
+        "explanation": "The solver remains a pure JAX function with a static number of scan steps. No host conversion occurs inside the differentiated calculation."
+      },
+      {
+        "title": "Check the derivative of the discrete endpoint",
+        "instruction": "Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.",
+        "code": "rate, initial, steps, dt = 0.7, jnp.array(2.0), 40, 0.05\nendpoint = lambda k: solve(k,initial,steps,dt)[-1]\nautodiff = float(jax.grad(endpoint)(rate))\nz = -rate*dt\nr = 1+z+z*z/2+z**3/6+z**4/24\ndr_dk = -dt*(1+z+z*z/2+z**3/6)\ndiscrete_gradient = 2.0*steps*r**(steps-1)*dr_dk\ncontinuous_gradient = -2.0*(steps*dt)*np.exp(-rate*steps*dt)\nnp.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,atol=1e-12)\nnp.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)\nprint(\"Autodiff:\",autodiff,\"discrete oracle:\",discrete_gradient,\"continuous oracle:\",continuous_gradient)",
+        "explanation": "Autodiff gives the derivative of the actual RK4 program. Compare first against the discrete polynomial derivative, then assess how closely that approximates the continuous sensitivity."
+      },
+      {
+        "title": "Differentiate an observation loss and check its direction",
+        "instruction": "Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.",
+        "code": "times = jnp.arange(steps+1)*dt\nobservations = 2.0*jnp.exp(-0.7*times)\ndef objective(k):\n    return jnp.mean((solve(k,initial,steps,dt)-observations)**2)\nprobe = 1.0\nvalue, derivative = jax.value_and_grad(objective)(probe)\nepsilon = 1e-4\nfinite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)\nnp.testing.assert_allclose(derivative,finite_difference,rtol=2e-7,atol=1e-10)\nassert float(derivative) > 0\nassert float(objective(probe-0.1*derivative)) < float(value)\nprint(\"Loss:\",float(value),\"gradient:\",float(derivative),\"finite difference:\",finite_difference)",
+        "explanation": "The candidate rate is too large. Its predictions decay too quickly. A positive loss derivative tells gradient descent to decrease the rate, consistent with that physical diagnosis."
+      }
+    ],
+    "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\ndef rk4_step(rate, value, dt):\n    a = -rate*value\n    b = -rate*(value + dt*a/2)\n    c = -rate*(value + dt*b/2)\n    d = -rate*(value + dt*c)\n    return value + dt*(a + 2*b + 2*c + d)/6\n\ndef solve(rate, initial, steps=40, dt=0.05):\n    def advance(value, unused):\n        next_value = rk4_step(rate, value, dt)\n        return next_value, next_value\n    _, tail = jax.lax.scan(advance, initial, None, length=steps)\n    return jnp.concatenate((jnp.atleast_1d(initial), tail))\n\nrate, initial, steps, dt = 0.7, jnp.array(2.0), 40, 0.05\nendpoint = lambda k: solve(k,initial,steps,dt)[-1]\nautodiff = float(jax.grad(endpoint)(rate))\nz = -rate*dt\nr = 1+z+z*z/2+z**3/6+z**4/24\ndr_dk = -dt*(1+z+z*z/2+z**3/6)\ndiscrete_gradient = 2.0*steps*r**(steps-1)*dr_dk\ncontinuous_gradient = -2.0*(steps*dt)*np.exp(-rate*steps*dt)\nnp.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,atol=1e-12)\nnp.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)\nprint(\"Autodiff:\",autodiff,\"discrete oracle:\",discrete_gradient,\"continuous oracle:\",continuous_gradient)\n\ntimes = jnp.arange(steps+1)*dt\nobservations = 2.0*jnp.exp(-0.7*times)\ndef objective(k):\n    return jnp.mean((solve(k,initial,steps,dt)-observations)**2)\nprobe = 1.0\nvalue, derivative = jax.value_and_grad(objective)(probe)\nepsilon = 1e-4\nfinite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)\nnp.testing.assert_allclose(derivative,finite_difference,rtol=2e-7,atol=1e-10)\nassert float(derivative) > 0\nassert float(objective(probe-0.1*derivative)) < float(value)\nprint(\"Loss:\",float(value),\"gradient:\",float(derivative),\"finite difference:\",finite_difference)",
+    "references": [
+      {
+        "title": "JAX scan: fixed carry structure and reverse-mode differentiation",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html"
+      },
+      {
+        "title": "JAX automatic vectorization",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.vmap.html"
+      },
+      {
+        "title": "JAX derivative checking and Jacobian products",
+        "url": "https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html"
+      },
+      {
+        "title": "Diffrax solver terms, saved values and solution inspection",
+        "url": "https://docs.kidger.site/diffrax/usage/getting-started/"
+      }
+    ],
+    "takeaways": [
+      "Follow one parameter through every time step",
+      "Check the discrete derivative before asking about physics",
+      "Turn a trajectory into a scalar objective",
+      "Use a finite-difference window, not one magical epsilon",
+      "Know which solver problem you have solved"
+    ],
+    "output": "Endpoint autodiff approximately -0.9863878097; continuous reference approximately -0.9863878558. The loss gradient agrees with central differences and decreases the loss when subtracted."
+  }
+}

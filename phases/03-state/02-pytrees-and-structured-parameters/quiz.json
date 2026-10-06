@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What structure does `grad(loss)(params)` have?",
+      "options": [
+        "One scalar regardless of parameters",
+        "A pytree corresponding to params",
+        "A list of Python source lines"
+      ],
+      "correct": 1,
+      "explanation": "The differentiated input determines the gradient structure. Each floating-point parameter leaf gets a corresponding gradient leaf."
+    }
+  ]
+}

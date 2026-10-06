@@ -1,0 +1,144 @@
+{
+  "schemaVersion": 1,
+  "id": "internals-02",
+  "minutes": 105,
+  "content": {
+    "problem": "A large model may have millions of inputs or outputs, but you often need only one sensitivity direction. How can we compute the useful product without constructing the full Jacobian—and verify that forward, reverse and higher-order calculations agree?",
+    "idea": "A derivative is a local linear map. A JVP pushes an input perturbation \\(v\\) through that map; a VJP pulls an output weighting \\(u\\) back to the inputs. We will make the full Jacobian only for a tiny reference problem, then use its algebra to check the products and a Hessian-vector product.",
+    "objectives": [
+      "Compute and interpret JVP and VJP products with correct domains and shapes.",
+      "Verify the adjoint dot-product identity against a hand-derived Jacobian.",
+      "Compute an exact Hessian-vector product and distinguish it from a Gauss–Newton approximation."
+    ],
+    "sections": [
+      {
+        "title": "Separate the point from the direction",
+        "body": "For \\(f(a,b)=(ab,\\sin(a)+b^2)\\), the point \\(x=(0.4,-0.7)\\) determines a Jacobian. The direction \\(v=(1.2,-0.3)\\) says how the inputs will move near that point. JVP returns both the original output and \\(J(x)v\\). It does not evaluate the nonlinear function at \\(x+v\\); its approximation becomes meaningful when multiplied by a sufficiently small displacement.",
+        "math": "J(a,b)=\\begin{bmatrix}b&a\\\\\\cos(a)&2b\\end{bmatrix},\\qquad f(x+\\varepsilon v)\\approx f(x)+\\varepsilon J(x)v"
+      },
+      {
+        "title": "A VJP answers a different directional question",
+        "body": "The cotangent \\(u=(0.5,2)\\) weights changes in the two outputs. Pulling it back gives \\(J(x)^\\mathsf{T}u\\), a vector in input space. It is the gradient of the scalar function \\(u^\\mathsf{T}f(x)\\) when \\(u\\) is fixed. The pullback closes over the forward computation at this specific point; it must be rebuilt when the point changes."
+      },
+      {
+        "title": "Check the adjoint identity with independent values",
+        "body": "The scalar \\(u^\\mathsf{T}(Jv)\\) can be computed either by pushing the direction first or pulling the measurement first. The two orders must agree: \\(u^\\mathsf{T}Jv=(J^\\mathsf{T}u)^\\mathsf{T}v\\). Here JVP is approximately \\((-0.96,1.52527)\\), VJP is \\((1.49212,-2.6)\\), and both scalar products are about \\(2.57055\\). This identity alone is insufficient if both rules share a mistake; the explicit Jacobian adds an independent oracle."
+      },
+      {
+        "title": "Count directions before choosing a Jacobian strategy",
+        "body": "Forward mode naturally produces a Jacobian column for each input basis direction; reverse mode produces a row for each output basis direction. Many inputs and one scalar output often favor reverse mode, whereas a small number of input directions may favor forward products. Real runtime also depends on intermediates, batching and device behavior. This lesson verifies mathematical products, not a universal timing rule."
+      },
+      {
+        "title": "Curvature includes the changing Jacobian",
+        "body": "For \\(L(x)=\\frac12\\lVert f(x)\\rVert^2\\), the gradient is \\(J^\\mathsf{T}f\\). Differentiating again gives \\(H=J^\\mathsf{T}J+\\sum_i f_i\\nabla^2f_i\\). The first term is positive semidefinite and is often used as a Gauss–Newton approximation; it is exact only when the residual-weighted term vanishes. Forward-over-reverse differentiation computes \\(Hv\\) without building every Hessian entry.",
+        "math": "Hv=J^\\mathsf{T}(Jv)+\\sum_i f_i(\\nabla^2 f_i)v"
+      },
+      {
+        "title": "Use finite differences as a second perspective",
+        "body": "A central difference of gradients approximates the Hessian-vector product, while a central difference of function outputs approximates the JVP. Sweep perturbations and retain a range of agreement; making the perturbation arbitrarily small causes cancellation. Float64 is explicitly enabled for these CPU comparisons. Non-smooth points and custom derivative rules require their own mathematical interpretation."
+      }
+    ],
+    "output": "JVP [-0.96, 1.52527319], VJP [1.49212199, -2.6], adjoint scalar approximately 2.57054639. The independently derived Hessian-vector product agrees.",
+    "experiments": [
+      {
+        "title": "Reconstruct columns and rows independently",
+        "prediction": "Will mapping JVPs over basis vectors directly produce rows or columns?",
+        "code": "basis=jnp.eye(2)\ncolumns=jax.vmap(lambda direction:jax.jvp(mapping,(x,),(direction,))[1])(basis).T\nrows=jax.vmap(lambda weighting:pullback(weighting)[0])(basis)\nnp.testing.assert_allclose(columns,jacobian,rtol=1e-12)\nnp.testing.assert_allclose(rows,jacobian,rtol=1e-12)\nprint(\"Forward columns and reverse rows agree\")",
+        "output": "Both reconstructed matrices equal the hand-derived Jacobian.",
+        "explanation": "The transpose in the forward construction is necessary: vmap first stacks one directional result per input basis vector."
+      },
+      {
+        "title": "Separate exact curvature from Gauss–Newton",
+        "prediction": "Will the residual-weighted correction vanish at our chosen point?",
+        "code": "gauss_newton=jacobian.T@jacobian\napproximation=gauss_newton@np.asarray(v)\nassert np.linalg.norm(np.asarray(hvp)-approximation)>0.1\neps=1e-4\nfd=(np.asarray(jax.grad(objective)(x+eps*v))-np.asarray(jax.grad(objective)(x-eps*v)))/(2*eps)\nnp.testing.assert_allclose(hvp,fd,rtol=1e-7,atol=1e-8)\nprint(\"Exact HVP:\",np.asarray(hvp),\"Gauss-Newton product:\",approximation)",
+        "output": "The approximation differs visibly; the finite-difference gradient check matches the exact HVP.",
+        "explanation": "Residuals are nonzero, and both output functions have second derivatives. Calling the approximation the Hessian would erase those contributions."
+      }
+    ],
+    "exercise": "Repeat the Jacobian, JVP, VJP and adjoint checks at \\(x=(-0.2,0.8)\\) with \\(v=(-0.5,1.3)\\) and \\(u=(1.1,-0.4)\\). Explain which quantities belong to input and output space.",
+    "solution": "changed_x=jnp.array([-0.2,0.8]);changed_v=jnp.array([-0.5,1.3]);changed_u=jnp.array([1.1,-0.4])\na2,b2=np.asarray(changed_x)\nj2=np.array([[b2,a2],[np.cos(a2),2*b2]])\nfj=jax.jvp(mapping,(changed_x,),(changed_v,))[1]\nrj=jax.vjp(mapping,changed_x)[1](changed_u)[0]\nnp.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)\nnp.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)\nnp.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol=1e-12)\nprint(\"Changed-point adjoint verified\")",
+    "practice": [
+      {
+        "title": "Test linearity at a fixed point",
+        "difficulty": "Practice",
+        "prompt": "Check the JVP of \\(2v-w\\) against the same combination of separate JVPs. Then show why changing the base point is a different operation.",
+        "hint": "A derivative is linear in its direction at a fixed base point.",
+        "solution": "w=jnp.array([-0.6,0.9])\nproduct=lambda direction:jax.jvp(mapping,(x,),(direction,))[1]\nnp.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)\nshifted=jax.jvp(mapping,(x+w,),(v,))[1]\nassert np.linalg.norm(np.asarray(shifted-product(v)))>0.1\nprint(\"Direction linearity holds; the Jacobian changes with the base point\")",
+        "explanation": "Linearity in the tangent is a local property. A nonlinear function need not use the same linear map at different points."
+      },
+      {
+        "title": "Check curvature symmetry without a full Hessian",
+        "difficulty": "Challenge",
+        "prompt": "For two directions \\(v,w\\), verify \\(w^\\mathsf{T}Hv=v^\\mathsf{T}Hw\\), then verify one product with finite differences.",
+        "hint": "Compose jvp with grad and compare scalar products.",
+        "solution": "w=jnp.array([0.2,0.9])\nhw=jax.jvp(jax.grad(objective),(x,),(w,))[1]\nnp.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)\neps=1e-4\nfdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)\nnp.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)\nprint(\"Bilinear Hessian symmetry and finite-difference product verified\")",
+        "explanation": "For this smooth scalar objective, mixed partials agree. Symmetry is a useful invariant, but an independent derivative check is still necessary."
+      }
+    ],
+    "diagnosis": "If a product has the wrong shape, identify whether its seed lives in input or output space. If basis reconstruction is transposed, inspect which index vmap stacks first. If an HVP differs from J-transpose-J times the direction, calculate the residual-weighted second-derivative term before blaming autodiff.",
+    "question": "A VJP is seeded with an output weighting u. What does the returned input cotangent represent?",
+    "options": [
+      "The output at a displaced input x+u.",
+      "The gradient of the scalar weighted output u-transpose f(x), with u fixed.",
+      "A complete Hessian for every possible loss."
+    ],
+    "answer": 1,
+    "explanation": "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point.",
+    "visual": {
+      "title": "Forward and reverse products live in different spaces",
+      "kind": "executed",
+      "prediction": "Should a JVP and VJP have equal coordinates just because this example has two inputs and two outputs?",
+      "reading": "The first panel compares the JVP with the explicit product \\(Jv\\), one bar per output coordinate. The matched values are about \\(-0.96\\) and \\(1.5253\\). These are predicted output changes for the selected input direction, not the function outputs themselves.\n\nThe second panel compares the VJP with \\(J^\\mathsf{T}u\\), one bar per input coordinate. Its matched values are about \\(1.4921\\) and \\(-2.6\\). Both plots happen to contain two coordinates, but their axes refer to different vector spaces.",
+      "connection": "The bars agree within each panel because the hand-derived Jacobian verifies the corresponding JAX product. The two panels should not agree with each other: their seed vectors and meanings differ. Multiplying by the opposite seed gives the common adjoint scalar, about \\(2.5705\\).\n\nAn adjoint equality checks compatibility between two linear maps. The independent Jacobian and changed-point exercises protect against a shared wrong map. The figure does not compare runtime or memory use.",
+      "alt": "Paired bars show JVP matching J times v and VJP matching transpose J times u, with different coordinates in the two panels.",
+      "code": "visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'directional output change','series':[{'label':'JAX JVP','y':np.asarray(jvp).tolist()},{'label':'analytic J v','y':(jacobian@np.asarray(v)).tolist()}]},{'kind':'bar','labels':['input 0','input 1'],'ylabel':'input cotangent','series':[{'label':'JAX VJP','y':np.asarray(vjp).tolist()},{'label':'analytic transpose J u','y':(jacobian.T@np.asarray(u)).tolist()}]}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Define a small vector map and derive its Jacobian",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\ndef mapping(x):\n    a,b=x\n    return jnp.array([a*b,jnp.sin(a)+b*b])\nx=jnp.array([0.4,-0.7])\nv=jnp.array([1.2,-0.3])\nu=jnp.array([0.5,2.0])\na,b=np.asarray(x)\njacobian=np.array([[b,a],[np.cos(a),2*b]])\nexpected_value=np.array([a*b,np.sin(a)+b*b])",
+        "explanation": "The map has two inputs and two outputs. Its Jacobian rows correspond to output coordinates, and columns to input coordinates."
+      },
+      {
+        "title": "Push a direction forward and pull a measurement backward",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "value,jvp=jax.jvp(mapping,(x,),(v,))\nvalue_again,pullback=jax.vjp(mapping,x)\nvjp,=pullback(u)\nnp.testing.assert_allclose(value,expected_value,rtol=1e-12)\nnp.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)\nnp.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)\nleft=float(jnp.vdot(u,jvp));right=float(jnp.vdot(vjp,v))\nnp.testing.assert_allclose(left,right,rtol=1e-12)\nprint(\"Jacobian:\",jacobian)\nprint(\"JVP:\",np.asarray(jvp),\"VJP:\",np.asarray(vjp),\"adjoint pair:\",left,right)",
+        "explanation": "The VJP returns one cotangent per input argument, hence the one-element tuple. The dot-product identity checks that forward and reverse products represent adjoint linear maps."
+      },
+      {
+        "title": "Compute curvature without materializing a Hessian",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "def objective(z):\n    return 0.5*jnp.vdot(mapping(z),mapping(z))\ngradient=jax.grad(objective)(x)\nhvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]\ny=expected_value\nhessian_0=np.array([[0.,1.],[1.,0.]])\nhessian_1=np.array([[-np.sin(a),0.],[0.,2.]])\nhessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1\nnp.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)\nnp.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)\nnp.testing.assert_allclose(hessian,hessian.T,atol=1e-12)\nprint(\"Hessian-vector product:\",np.asarray(hvp))",
+        "explanation": "For squared residuals, the Hessian includes a Jacobian-transpose-Jacobian term and residual-weighted second derivatives. Dropping the latter is an approximation, not the exact Hessian."
+      }
+    ],
+    "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\ndef mapping(x):\n    a,b=x\n    return jnp.array([a*b,jnp.sin(a)+b*b])\nx=jnp.array([0.4,-0.7])\nv=jnp.array([1.2,-0.3])\nu=jnp.array([0.5,2.0])\na,b=np.asarray(x)\njacobian=np.array([[b,a],[np.cos(a),2*b]])\nexpected_value=np.array([a*b,np.sin(a)+b*b])\n\nvalue,jvp=jax.jvp(mapping,(x,),(v,))\nvalue_again,pullback=jax.vjp(mapping,x)\nvjp,=pullback(u)\nnp.testing.assert_allclose(value,expected_value,rtol=1e-12)\nnp.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)\nnp.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)\nleft=float(jnp.vdot(u,jvp));right=float(jnp.vdot(vjp,v))\nnp.testing.assert_allclose(left,right,rtol=1e-12)\nprint(\"Jacobian:\",jacobian)\nprint(\"JVP:\",np.asarray(jvp),\"VJP:\",np.asarray(vjp),\"adjoint pair:\",left,right)\n\ndef objective(z):\n    return 0.5*jnp.vdot(mapping(z),mapping(z))\ngradient=jax.grad(objective)(x)\nhvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]\ny=expected_value\nhessian_0=np.array([[0.,1.],[1.,0.]])\nhessian_1=np.array([[-np.sin(a),0.],[0.,2.]])\nhessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1\nnp.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)\nnp.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)\nnp.testing.assert_allclose(hessian,hessian.T,atol=1e-12)\nprint(\"Hessian-vector product:\",np.asarray(hvp))",
+    "references": [
+      {
+        "title": "JAX automatic differentiation cookbook",
+        "url": "https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html"
+      },
+      {
+        "title": "Custom JVP and VJP rules",
+        "url": "https://docs.jax.dev/en/latest/notebooks/Custom_derivative_rules_for_Python_code.html"
+      },
+      {
+        "title": "Ahead-of-time lowering and compilation",
+        "url": "https://docs.jax.dev/en/latest/aot.html"
+      },
+      {
+        "title": "The jaxpr language",
+        "url": "https://docs.jax.dev/en/latest/601/jaxpr.html"
+      }
+    ],
+    "takeaways": [
+      "Separate the point from the direction",
+      "A VJP answers a different directional question",
+      "Check the adjoint identity with independent values",
+      "Count directions before choosing a Jacobian strategy",
+      "Curvature includes the changing Jacobian",
+      "Use finite differences as a second perspective"
+    ]
+  }
+}

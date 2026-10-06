@@ -1,0 +1,141 @@
+---
+import { inlineMath, renderMath } from '../../lib/math.js';
+import Prose from './Prose.astro';
+import { lessonVisual, lessonExecution } from '../../lib/lesson-visuals.js';
+import type { authoredLessons } from '../../lib/course-data.js';
+interface Props {
+  lesson: (typeof authoredLessons)[number];
+  index: number;
+}
+const { lesson, index } = Astro.props;
+const c = lesson.content!;
+---
+
+<article id={`chapter-${index}`}>
+  <h1>{lesson.title}</h1>
+  <p>{lesson.objective}</p>
+  {c.objectives && (
+    <>
+      <h2>What you will be able to do</h2>
+      <ul>
+        {c.objectives.map((o) => (
+          <li set:html={inlineMath(o)} />
+        ))}
+      </ul>
+    </>
+  )}
+  {c.problem && (
+    <>
+      <h2>The problem</h2>
+      <Prose text={c.problem} />
+    </>
+  )}
+  <h2>The idea</h2>
+  <Prose text={c.idea} />
+  {c.sections?.map((section) => (
+    <>
+      <h2>{section.title}</h2>
+      <Prose text={section.body} />
+      {section.commands?.map((command) => (
+        <>
+          <h3>{command.label}</h3>
+          <pre><code>{command.code}</code></pre>
+          <p>
+            <strong>Expected:</strong>
+          </p>
+          <Prose text={command.expected} />
+        </>
+      ))}
+      <Fragment set:html={section.math ? renderMath(section.math, true) : ''} />
+      {section.formula && <pre><code>{section.formula}</code></pre>}
+    </>
+  ))}
+  <Fragment set:html={lessonVisual(lesson)} />
+  {c.buildSteps?.map((step) => (
+    <>
+      <h2>{step.title}</h2>
+      <Prose text={step.instruction} />
+      <pre><code>{step.code}</code></pre>
+      <Prose text={step.explanation} />
+    </>
+  ))}
+  {c.buildCode && (
+    <>
+      <h2>Build a numerical estimate</h2>
+      <pre><code>{c.buildCode}</code></pre>
+      <Prose text={c.buildOutput} />
+    </>
+  )}
+  <h2>Run the example</h2>
+  <pre><code>{c.code}</code></pre>
+  <Prose text={c.output} />
+  <Fragment set:html={lessonExecution(lesson)} />
+  {c.experiments?.map((experiment) => (
+    <>
+      <h2>{experiment.title}</h2>
+      <p>
+        <strong>Predict before running:</strong>{' '}
+        <span set:html={inlineMath(experiment.prediction)} />
+      </p>
+      <pre><code>{experiment.code}</code></pre>
+      <Prose text={experiment.output} />
+      <Prose text={experiment.explanation} />
+    </>
+  ))}
+  <h2>Your exercise</h2>
+  <Prose text={c.exercise} />
+  <h3>Reference solution</h3>
+  <pre><code>{c.solution}</code></pre>
+  {c.practice?.map((practice) => (
+    <>
+      <h2>{practice.title}</h2>
+      <p>{practice.difficulty}</p>
+      <Prose text={practice.prompt} />
+      <h3>Hint</h3>
+      <Prose text={practice.hint} />
+      <h3>Reference solution</h3>
+      <pre><code>{practice.solution}</code></pre>
+      <Prose text={practice.explanation} />
+    </>
+  ))}
+  <h2>Checkpoint</h2>
+  <Prose text={c.question} />
+  <ol>
+    {c.options.map((option) => (
+      <li set:html={inlineMath(option)} />
+    ))}
+  </ol>
+  <p>
+    <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
+  </p>
+  {c.diagnosis && (
+    <>
+      <h2>Diagnose the result</h2>
+      <Prose text={c.diagnosis} />
+    </>
+  )}
+  {c.takeaways && (
+    <>
+      <h2>Carry forward</h2>
+      <ul>
+        {c.takeaways.map((takeaway) => (
+          <li set:html={inlineMath(takeaway)} />
+        ))}
+      </ul>
+    </>
+  )}
+  <h2>Your evidence</h2>
+  <Prose text={lesson.evidence} />
+  {c.references && (
+    <>
+      <h2>Primary references</h2>
+      <ul>
+        {c.references.map((reference) => (
+          <li>
+            <a href={reference.url}>{reference.title}</a>
+          </li>
+        ))}
+      </ul>
+    </>
+  )}
+</article>

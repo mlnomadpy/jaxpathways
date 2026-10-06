@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "probability-03",
+  "minutes": 140,
+  "content": {
+    "problem": "An approximate inference program returns a long list of weights. Before treating those weights as posterior samples, how can we tell whether its mechanics are correct and whether its chains explored the target? We will build a transparent Hamiltonian Monte Carlo sampler for a correlated Gaussian with a known mean and covariance, then deliberately damage its step size.",
+    "idea": "Hamiltonian Monte Carlo, or HMC, introduces a temporary momentum and follows approximate trajectories through position and momentum space. The gradient of negative log-density guides the path. A Metropolis acceptance decision corrects integration error. This lesson fixes the trajectory length and uses an identity mass matrix; it teaches the mechanism, not a production replacement for adaptive NUTS.",
+    "objectives": [
+      "Implement leapfrog with the correct half-step boundaries",
+      "Check reversibility and an independent analytic gradient",
+      "Compare four seeded chains with a known posterior",
+      "Interpret energy error, acceptance and classical split R-hat without claiming convergence"
+    ],
+    "sections": [
+      {
+        "title": "Turn log-density into potential energy",
+        "body": "For a normal target with mean \\(m\\) and covariance \\(\\Sigma\\), the potential is \\(U(q)=(q-m)^\\top\\Sigma^{-1}(q-m)/2\\), ignoring a constant. Its gradient is \\(\\Sigma^{-1}(q-m)\\), so we have an independent formula for autodiff. Momentum has a standard-normal distribution and kinetic energy \\(p^\\top p/2\\). The combined energy should remain constant along an exact trajectory.",
+        "math": "H(q,p)=U(q)+\\tfrac12p^\\top p,\\qquad \\nabla U(q)=\\Sigma^{-1}(q-m)"
+      },
+      {
+        "title": "Trace the half steps",
+        "body": "First take a half momentum step using the current gradient. Take a full position step with that momentum, then update momentum using the new position. Interior momentum steps are full steps; the final one is a half step. This symmetry gives a reversible integrator up to numerical error. Our check negates the final momentum and integrates again; it should return to the starting position and negative starting momentum. A loop with all full momentum steps fails that boundary test."
+      },
+      {
+        "title": "Correct discretization error in log space",
+        "body": "A proposed trajectory changes energy by \\(\\Delta H\\). Accept with probability \\(\\min(1,e^{-\\Delta H})\\), implemented as \\(\\log u<-\\Delta H\\). A rejected proposal retains the current sample; removing repeated values would change the distribution. Non-finite energy error is rejected. The signed energy error can be negative, so it should not be interpreted as a nonnegative loss. An enormous positive error suggests an integration problem, often a step size too large for target curvature."
+      },
+      {
+        "title": "Read diagnostics as evidence, not a certificate",
+        "body": "We start four chains from dispersed points and discard the first \\(400\\) transitions. This fixed discard is a teaching convention, not automatic warmup adaptation. Classical split R-hat compares between-chain and within-chain variance after splitting each chain. A value near one says those variance estimates agree; chains can still miss a mode together. Modern rank-normalized split R-hat, bulk and tail effective sample size, Monte Carlo standard errors and divergence diagnostics are stronger complementary tools. Our compact implementation is explicitly classical R-hat and does not implement those modern diagnostics."
+      },
+      {
+        "title": "Use the reference model to expose failure",
+        "body": "Here the exact mean, variance and covariance are known. Check all of them: getting both marginal means right can still hide missing correlation. Acceptance alone is insufficient; a tiny step can accept almost everything while exploring slowly. Effective sample size concerns the information in correlated draws, not the number of rows stored. Before using a library such as NumPyro on an unknown posterior, repeat an exact-model validation and inspect its documented diagnostics. This CPU fixture establishes neither multimodal exploration nor accelerator performance."
+      }
+    ],
+    "output": "The pooled mean and covariance approach the stated target within the fixture tolerances. The two classical split R-hat values, one per parameter coordinate, remain near \\(1\\); acceptance is reported separately for each chain.",
+    "exercise": "Increase the step size to 1.2 with the same leapfrog count. Record acceptance and positive energy errors. Explain why keeping more rejected samples is not a repair for unstable integration.",
+    "solution": "bad=chain(jax.random.key(71),starts[0],step_size=1.2,draws=100)\nassert bad[1].mean()<.2\nassert jnp.max(bad[2])>100.\nprint(\"bad acceptance:\",float(bad[1].mean()),\"maximum energy error:\",float(jnp.max(bad[2])))",
+    "question": "Four chains have classical split R-hat close to one. What can we conclude?",
+    "options": [
+      "They have certainly explored every posterior mode",
+      "Their retained draws are independent",
+      "Their within-chain and between-chain variance estimates agree, but additional checks are still necessary"
+    ],
+    "answer": 2,
+    "explanation": "A diagnostic can reveal problems without proving their absence. Here we also compare to exact moments; an unknown target needs several diagnostics and model checks.",
+    "diagnosis": "If acceptance collapses, inspect the finite energy error distribution and reduce the step size. If acceptance is high but traces barely move, inspect trajectory length and autocorrelation. If chains disagree, retain separate traces rather than pooling them into a smooth histogram. If a constant chain produces undefined R-hat, report that failure instead of replacing it with one.",
+    "experiments": [
+      {
+        "title": "Reverse one trajectory",
+        "prediction": "If we reverse momentum after a trajectory, should the integrator return to the starting position?",
+        "code": "q0=jnp.array([.2,-.4]);p0=jnp.array([.3,.7])\nq1,p1=leapfrog(q0,p0,.15,9)\nq2,p2=leapfrog(q1,-p1,.15,9)\nnp.testing.assert_allclose(q2,q0,atol=2e-6)\nnp.testing.assert_allclose(p2,-p0,atol=2e-6)",
+        "output": "The reversed trajectory returns within float32 tolerance.",
+        "explanation": "Reversibility is an integrator invariant, independent of whether a particular chain happened to get a plausible mean."
+      },
+      {
+        "title": "Separate replay from a changed chain",
+        "prediction": "Will changing a key change the sampled path while leaving the target unchanged?",
+        "code": "replay=chain(jax.random.key(9),jnp.zeros(2),draws=50)[0]\nagain=chain(jax.random.key(9),jnp.zeros(2),draws=50)[0]\nchanged=chain(jax.random.key(10),jnp.zeros(2),draws=50)[0]\nassert jnp.array_equal(replay,again)\nassert not jnp.array_equal(replay,changed)",
+        "output": "The same key reproduces the path; another key produces a different path.",
+        "explanation": "Replay tests state ownership. It does not establish distributional correctness by itself."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Catch chains trapped at different levels",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Construct four arrays with similar within-chain variation but means separated by four units. Verify that classical split R-hat flags disagreement.",
+        "hint": "Use independent small noise around four different constants.",
+        "solution": "fake=jax.random.normal(jax.random.key(4),(4,600))*.1+jnp.arange(4)[:,None]*4\nassert split_rhat(fake)>5",
+        "explanation": "Between-chain variation dominates within-chain variation, so pooling would conceal a serious exploration problem."
+      },
+      {
+        "title": "Verify a directional derivative",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "At a nonzero position compare the autodiff directional derivative with the analytic precision-matrix expression. Then compare to a central difference.",
+        "hint": "Use the same direction and a moderate float32 finite-difference step.",
+        "solution": "q=jnp.array([.4,.8]);v=jnp.array([.7,-.2]);eps=.001\nanalytic=(precision@(q-target_mean))@v\nauto=force(q)@v\nfinite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)\nnp.testing.assert_allclose(auto,analytic,rtol=1e-6)\nnp.testing.assert_allclose(finite,analytic,rtol=.005,atol=.002)",
+        "explanation": "A sign error in potential or a transposed geometry can be isolated before tuning the sampler."
+      }
+    ],
+    "takeaways": [
+      "A correct accept/reject rule retains rejected states.",
+      "Check integrator invariants before interpreting chains.",
+      "Near-one R-hat and high acceptance are useful evidence, not proof of convergence."
+    ],
+    "references": [
+      {
+        "title": "JAX scan state contract",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html"
+      },
+      {
+        "title": "Stan posterior analysis and diagnostics",
+        "url": "https://mc-stan.org/docs/reference-manual/analysis.html"
+      },
+      {
+        "title": "NumPyro MCMC diagnostics interface",
+        "url": "https://num.pyro.ai/en/stable/diagnostics.html"
+      }
+    ],
+    "visual": {
+      "title": "Four HMC traces around a known posterior mean",
+      "kind": "executed",
+      "prediction": "Can the chains cross the known mean while still showing successive correlated values?",
+      "reading": "The horizontal axis counts retained transitions after discarding the initial \\(400\\). The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is \\(1\\); the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent.",
+      "connection": "This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean cannot establish exploration of modes absent from this single-Gaussian fixture.",
+      "code": "indices=np.arange(0,400,10)\nvisual_data={\"kind\":\"line\",\"x\":indices.tolist(),\"xlabel\":\"retained transition (after fixed discard)\",\"ylabel\":\"first parameter coordinate\",\"series\":[{\"label\":\"chain \"+str(i+1),\"y\":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}",
+      "alt": "Four HMC traces around a known posterior mean. The horizontal axis counts retained transitions after discarding the initial \\(400\\). The vertical axis is the first coordinate of the sampled parameter. Each colored line is one chain, plotted at every tenth retained transition to keep the figure readable. The target mean is \\(1\\); the chains move on both sides of it. Their paths differ because they use different keys and initial positions. Connecting thinned points helps visual inspection but does not make the underlying draws independent."
+    },
+    "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\ntarget_mean = jnp.array([1.,-1.])\ntarget_cov = jnp.array([[1.,.8],[.8,1.]])\nprecision = jnp.linalg.solve(target_cov,jnp.eye(2))\ndef potential(q):\n    delta=q-target_mean\n    return .5*delta@precision@delta\nforce=jax.grad(potential)\nassert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))\n\ndef leapfrog(q,p,step_size,steps):\n    p=p-.5*step_size*force(q)\n    def step(i,state):\n        q,p=state\n        q=q+step_size*p\n        p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)\n        return q,p\n    return jax.lax.fori_loop(0,steps,step,(q,p))\n\ndef chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):\n    def transition(state,_):\n        q,key=state\n        key,kp,ku=jax.random.split(key,3)\n        p=jax.random.normal(kp,q.shape)\n        proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)\n        error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)\n        accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)\n        next_q=jnp.where(accept,proposal,q)\n        return (next_q,key),(next_q,accept,error)\n    _,record=jax.lax.scan(transition,(initial,key),None,length=draws)\n    return record\n\nstarts=jnp.array([[-4.,-4.],[-4.,4.],[4.,-4.],[4.,4.]])\nrecords=jax.vmap(lambda key,start:chain(key,start))(jax.random.split(jax.random.key(71),4),starts)\nsamples=records[0][:,400:,:]\ndef split_rhat(values):\n    # Classical split R-hat for one scalar coordinate; not rank-normalized.\n    half=values.shape[1]//2\n    split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)\n    within=jnp.var(split,axis=1,ddof=1).mean()\n    between=half*jnp.var(split.mean(axis=1),ddof=1)\n    return jnp.sqrt(((half-1)*within/half+between/half)/within)\nrhats=jax.vmap(split_rhat,in_axes=2)(samples)\npooled=samples.reshape(-1,2)\nassert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15\nassert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2\nassert jnp.all(rhats<1.05)\nprint('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))\nprint('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))",
+    "buildSteps": [
+      {
+        "title": "1. Write a known target and its gradient",
+        "instruction": "Create a fresh main.py. This correlated Gaussian is an exact test target for an inference algorithm, not a new unknown statistical model.",
+        "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\ntarget_mean = jnp.array([1.,-1.])\ntarget_cov = jnp.array([[1.,.8],[.8,1.]])\nprecision = jnp.linalg.solve(target_cov,jnp.eye(2))\ndef potential(q):\n    delta=q-target_mean\n    return .5*delta@precision@delta\nforce=jax.grad(potential)\nassert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))",
+        "explanation": "Potential energy is the negative log-density up to a constant, which cancels in the acceptance ratio."
+      },
+      {
+        "title": "2. Integrate then accept or reject",
+        "instruction": "Append a leapfrog trajectory and a chain. Every transition splits keys for momentum and acceptance; rejection retains the old position.",
+        "code": "def leapfrog(q,p,step_size,steps):\n    p=p-.5*step_size*force(q)\n    def step(i,state):\n        q,p=state\n        q=q+step_size*p\n        p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)\n        return q,p\n    return jax.lax.fori_loop(0,steps,step,(q,p))\n\ndef chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):\n    def transition(state,_):\n        q,key=state\n        key,kp,ku=jax.random.split(key,3)\n        p=jax.random.normal(kp,q.shape)\n        proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)\n        error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)\n        accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)\n        next_q=jnp.where(accept,proposal,q)\n        return (next_q,key),(next_q,accept,error)\n    _,record=jax.lax.scan(transition,(initial,key),None,length=draws)\n    return record",
+        "explanation": "Leapfrog approximates energy conservation. Metropolis correction removes integration bias in the ideal stationary distribution; it does not make a finite chain independent or guarantee exploration."
+      },
+      {
+        "title": "3. Compare chains and an analytic oracle",
+        "instruction": "Append four dispersed starts, discard an explicitly fixed initial segment, and retain all diagnostics. Run python main.py.",
+        "code": "starts=jnp.array([[-4.,-4.],[-4.,4.],[4.,-4.],[4.,4.]])\nrecords=jax.vmap(lambda key,start:chain(key,start))(jax.random.split(jax.random.key(71),4),starts)\nsamples=records[0][:,400:,:]\ndef split_rhat(values):\n    # Classical split R-hat for one scalar coordinate; not rank-normalized.\n    half=values.shape[1]//2\n    split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)\n    within=jnp.var(split,axis=1,ddof=1).mean()\n    between=half*jnp.var(split.mean(axis=1),ddof=1)\n    return jnp.sqrt(((half-1)*within/half+between/half)/within)\nrhats=jax.vmap(split_rhat,in_axes=2)(samples)\npooled=samples.reshape(-1,2)\nassert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15\nassert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2\nassert jnp.all(rhats<1.05)\nprint('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))\nprint('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))",
+        "explanation": "The tolerances test this seeded Gaussian fixture only. Agreement with a known posterior is stronger evidence here than a diagnostic threshold alone."
+      }
+    ]
+  }
+}

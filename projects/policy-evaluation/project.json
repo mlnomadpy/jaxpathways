@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "policy-evaluation",
+  "title": "Train and audit a policy from interaction",
+  "pathwayId": "rl",
+  "status": "authored",
+  "hardware": "CPU",
+  "source": "projects/policy-evaluation/README.md",
+  "requiredLessonIds": [
+    "rl-01",
+    "rl-02",
+    "rl-03",
+    "rl-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Functional environment",
+      "command": "python3 projects/policy-evaluation/tests/check.py --stage 1 --implementation projects/policy-evaluation/my_model.py",
+      "evidence": "Transition table and terminal/timeout trace",
+      "expected": "PASS stage 1",
+      "diagnosis": "Inspect boundary moves, deadline priority and rewards after done."
+    },
+    {
+      "id": "2",
+      "title": "Batched trajectories",
+      "command": "python3 projects/policy-evaluation/tests/check.py --stage 2 --implementation projects/policy-evaluation/my_model.py",
+      "evidence": "Reconstructed episodes, axis diagram and key replay",
+      "expected": "PASS stage 2",
+      "diagnosis": "Check that active describes the state before the successful transition."
+    },
+    {
+      "id": "3",
+      "title": "Policy objectives",
+      "command": "python3 projects/policy-evaluation/tests/check.py --stage 3 --implementation projects/policy-evaluation/my_model.py",
+      "evidence": "Independent enumeration, finite differences and sampled gradient comparison",
+      "expected": "PASS stage 3",
+      "diagnosis": "Keep behavior log probabilities frozen and check both signs of the clipped objective."
+    },
+    {
+      "id": "4",
+      "title": "Training and held-out evaluation",
+      "command": "python3 projects/policy-evaluation/tests/check.py --stage 4 --implementation projects/policy-evaluation/my_model.py",
+      "evidence": "Multi-seed learning histories, baselines and per-agent held-out report",
+      "expected": "PASS stage 4",
+      "diagnosis": "Separate training keys from evaluation streams and preserve raw returns."
+    }
+  ],
+  "rubric": [
+    "Enumerate transition and episode-ending contracts independently",
+    "Keep reset and final observations explicit",
+    "Collect actual randomized trajectories with reproducible independent keys",
+    "Derive the policy gradient and check it against an exact expectation",
+    "Keep old probabilities and targets frozen during clipped updates",
+    "Train multiple agents from fresh interaction",
+    "Evaluate with held-out streams and preserve per-agent variability",
+    "State the fixture limitations and diagnose one failed invariant"
+  ],
+  "workspaceFile": "projects/policy-evaluation/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/policy-evaluation/starter/model.py projects/policy-evaluation/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/policy-evaluation/starter/model.py projects/policy-evaluation/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/policy-evaluation/tests/check.py --stage 4 --implementation solution",
+  "setupNote": "Extract the project ZIP and work from its top folder, which contains requirements-cpu.txt and projects/policy-evaluation. A full checkout is optional.",
+  "assessmentId": "rl"
+}

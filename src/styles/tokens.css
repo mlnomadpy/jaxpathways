@@ -1,0 +1,19 @@
+:root {
+  --bg: #eeebfa;
+  --panel: #fff;
+  --ink: #252139;
+  --muted: #5f5873;
+  --blue: #493193;
+  --mint: #28604f;
+  --line: #cdc5e3;
+  --accent: #6043c4;
+  --ui: 'Avenir Next', 'Trebuchet MS', sans-serif;
+  --paper: var(--panel);
+  --violet: var(--accent);
+  --orange: var(--annotation);
+  --reading: Georgia, 'Times New Roman', serif;
+  --atlas: #30216b;
+  --annotation: #d96828;
+  color-scheme: light;
+  --learning-radius: 14px;
+}

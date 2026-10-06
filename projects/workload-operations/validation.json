@@ -1,0 +1,52 @@
+{
+  "status": "passed",
+  "stage": 5,
+  "python": "3.14.3",
+  "implementationHash": "a1bb0e0bb45e3d65d70673f226dc293352d1fdb5bcd65df0b2befa5632f26b07",
+  "checkerHash": "67f080145cb916b75a7ddbb4c1f699e825506bee1e644b6131edfa534131537e",
+  "results": {
+    "lifecycle": {
+      "completed": 0,
+      "failed": 23,
+      "timed_out": -15
+    },
+    "observability": {
+      "status": "completed",
+      "updates": 8,
+      "examples": 64,
+      "last_step": 8,
+      "checkpoint_step": 8,
+      "uncheckpointed_updates": 0,
+      "update_s": 0.0006901670712977648,
+      "update_examples_per_s": 92731.16997549123,
+      "job_examples_per_s": 75.59841239231856,
+      "update_duty_fraction": 0.0008152427324307368
+    },
+    "recovery": {
+      "restored_step": 2,
+      "replayed_steps": [
+        3,
+        4,
+        5,
+        6,
+        7,
+        8
+      ],
+      "next_update_equal": true
+    },
+    "provenance": {
+      "first": "46d4483fb9d159781588b76fb3daa829ce3d7fb4b6433ee19b43ba6dda6be4be",
+      "rolled_back": true,
+      "failed_validation_rejected": true,
+      "corruption_rejected": true
+    },
+    "capacity": {
+      "offered_worker_hours_per_hour": 0.028219287493266167,
+      "load_fraction": 0.014109643746633083,
+      "minimum_workers_with_reserve": 1,
+      "hourly_budget": 3.0,
+      "hypothetical_cost_per_job": 0.00035274109366582705,
+      "within_reserve": true
+    }
+  }
+}

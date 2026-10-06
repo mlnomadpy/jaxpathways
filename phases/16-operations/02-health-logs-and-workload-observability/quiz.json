@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does update duty fraction establish in this lab?",
+      "options": [
+        "GPU compute-unit occupancy",
+        "Cluster utilization across hosts",
+        "The fraction of this job’s wall time inside the measured synchronized update boundary"
+      ],
+      "correct": 2,
+      "explanation": "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation."
+    }
+  ]
+}

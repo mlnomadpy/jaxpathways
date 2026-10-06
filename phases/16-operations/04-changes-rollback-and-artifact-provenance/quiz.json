@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a matching artifact digest establish?",
+      "options": [
+        "The payload matches its recorded content identity",
+        "The model is accurate on all future data",
+        "The publisher is authenticated and authorized"
+      ],
+      "correct": 0,
+      "explanation": "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls."
+    }
+  ]
+}

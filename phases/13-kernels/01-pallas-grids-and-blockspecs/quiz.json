@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "For block shape (2,4), what does a BlockSpec index map returning (i,j) select?",
+      "options": [
+        "A block whose element origin is (2i,4j).",
+        "One scalar element at (i,j).",
+        "A block whose origin must be multiplied by block sizes again inside the index map."
+      ],
+      "correct": 0,
+      "explanation": "BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows."
+    }
+  ]
+}

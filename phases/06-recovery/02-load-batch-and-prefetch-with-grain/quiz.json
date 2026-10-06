@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What makes a fresh loader resume at the saved next batch?",
+      "options": [
+        "Only using the original seed.",
+        "Restoring compatible iterator state after rebuilding its source/sampler configuration.",
+        "Calling next once regardless of checkpoint position."
+      ],
+      "correct": 1,
+      "explanation": "Seed and source determine order, but iterator state determines where the resumed reader begins."
+    }
+  ]
+}

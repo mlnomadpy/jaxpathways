@@ -1,0 +1,59 @@
+{
+  "id": "foundations",
+  "title": "Start with JAX",
+  "description": "Learn how arrays, derivatives and explicit state fit together by building and checking a regression experiment. Use the deeper math lessons when you need to explain why an update works or fails.",
+  "prerequisites": "Python basics and a little NumPy",
+  "outcome": "A fitted regression model",
+  "libraries": "jax · jax.numpy · optax",
+  "source": "https://docs.jax.dev/en/latest/beginner_guide.html",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization"
+  ],
+  "capstone": {
+    "title": "A fitted regression model",
+    "status": "authored",
+    "assessment": "Show a tested loss, numerically checked gradients, and a reproducible fit.",
+    "evidence": [
+      "A shape contract and independent loss and gradient calculations",
+      "A reproducible fit, held-out predictions and a changed-data experiment",
+      "A diagnosis of a deliberately wrong gradient or broadcasting rule"
+    ],
+    "projectId": "regression-audit",
+    "assessmentDraft": {
+      "id": "foundations",
+      "status": "review-draft",
+      "source": "assessments/foundations.md",
+      "url": "assessments/foundations.html"
+    }
+  },
+  "audience": "Python learners who can write functions and use lists; NumPy experience helps but is not required.",
+  "firstArtifact": "A regression implementation with an independent gradient check and held-out predictions.",
+  "focusPhaseIds": [
+    "arrays",
+    "transforms",
+    "state",
+    "optimization"
+  ],
+  "modalityTrackIds": [
+    "image",
+    "text",
+    "audio",
+    "cross-modal"
+  ],
+  "studyAdvice": "Begin with setup, arrays, transformations and explicit state, completing one foundation-toolkit stage per phase. In Math & optimization, first complete loss intuition, gradient checking, handwritten descent and Optax; then build the regression project. Return for the deeper math sequence and optimizer-audit to explain conditioning, curvature, noisy updates and regularization. Predict each output before running it, then test your explanation with a changed input.",
+  "assessmentExtensions": [
+    {
+      "id": "math",
+      "title": "Math & optimization synthesis",
+      "url": "assessments/math.html",
+      "status": "review-draft"
+    }
+  ],
+  "engineeringLessonIds": [
+    "recovery-06"
+  ]
+}

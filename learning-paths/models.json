@@ -1,0 +1,65 @@
+{
+  "id": "models",
+  "title": "Train neural networks",
+  "description": "Build a classifier, preserve the complete training run through interruption, and verify its exported inference. Study sequence models alongside the image route, then choose a modality harness to connect the full lifecycle.",
+  "prerequisites": "Shared foundations",
+  "outcome": "A recoverable image classifier with verified exported inference",
+  "libraries": "Flax · Optax · Orbax",
+  "source": "https://flax.readthedocs.io/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "recovery",
+    "transformers",
+    "pretraining",
+    "rl",
+    "posttraining",
+    "performance",
+    "deployment"
+  ],
+  "capstone": {
+    "title": "A recoverable image classifier with verified exported inference",
+    "status": "authored",
+    "assessment": "Complete the eight image lifecycle stages and changed-condition synthesis: independent CNN checks, full-state recovery, frozen error analysis, precision, export and measured inference. Transformer-specific evidence belongs to the complementary text harness.",
+    "evidence": [
+      "Training and evaluation splits, seeded configuration and learning curves",
+      "A saved full state whose next update matches an uninterrupted run",
+      "Predictions from the restored model and examples explaining its failures"
+    ],
+    "assessmentDraft": {
+      "id": "models",
+      "projectId": "image-harness",
+      "title": "Classifier and image lifecycle synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/models.md",
+      "url": "assessments/models.html"
+    },
+    "projectId": "image-harness",
+    "assessmentId": "models"
+  },
+  "audience": "Learners who can trace shapes, differentiate a scalar loss and carry state through an update.",
+  "firstArtifact": "A CPU classifier with stable loss, replay checks and count-weighted evaluation.",
+  "focusPhaseIds": [
+    "networks",
+    "recovery",
+    "transformers",
+    "deployment",
+    "pretraining",
+    "posttraining"
+  ],
+  "modalityTrackIds": [
+    "image",
+    "text"
+  ],
+  "studyAdvice": "Build the small classifier first and keep a fixed evaluation split. Add optimizer, random and data-position state before rehearsing interruption. For the image capstone, follow its linked performance and deployment prerequisites before exporting; the project lists the exact lessons. Study attention, masking and generation for the text branch rather than treating image classification as evidence of language-model capability. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
+  "engineeringLessonIds": [
+    "recovery-06",
+    "deployment-07",
+    "operations-06"
+  ]
+}

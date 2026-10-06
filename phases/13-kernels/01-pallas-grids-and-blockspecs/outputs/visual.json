@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "kernels-01",
+  "contentHash": "a0c3437bc6b210fac1831e9025102c0430250808474c7fe3041309828233828d",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:57:52.910477+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Shape and boundary: (5, 11) -3.75 7.050000190734863\nGrid: (3, 3) logical/padded elements: 55 72\nPadding fraction: 0.2361111111111111\n",
+  "data": {
+    "kind": "heatmap",
+    "values": [
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        1,
+        1,
+        1,
+        1,
+        2,
+        2,
+        2
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5
+      ],
+      [
+        3,
+        3,
+        3,
+        3,
+        4,
+        4,
+        4,
+        4,
+        5,
+        5,
+        5
+      ],
+      [
+        6,
+        6,
+        6,
+        6,
+        7,
+        7,
+        7,
+        7,
+        8,
+        8,
+        8
+      ]
+    ],
+    "unit": "program ID (categorical label)",
+    "rows": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "columns": [
+      "0",
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+      "7",
+      "8",
+      "9",
+      "10"
+    ],
+    "xlabel": "logical column",
+    "ylabel": "logical row"
+  }
+}

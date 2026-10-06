@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 1,
+  "id": "networks-04",
+  "minutes": 110,
+  "content": {
+    "problem": "Can a small model tell horizontal bars from vertical bars in noisy images? We’ll create the images locally and train a convolutional classifier on CPU. You’ll then test images from a different random seed and read a confusion matrix. The task is small enough to inspect without downloading a dataset.",
+    "idea": "A convolution reuses one local filter at every image position. Nonlinear activation and spatial pooling turn those local responses into features for a linear classification head. This tiny bar task makes the mechanism inspectable on a CPU; success here does not establish handwritten-digit or natural-image accuracy.",
+    "objectives": [
+      "Generate images with an explicit label rule",
+      "Derive the convolution output shape",
+      "Pool spatial responses and retain class scores",
+      "Read a confusion matrix rather than a success label"
+    ],
+    "sections": [
+      {
+        "title": "Generate images with an explicit label rule",
+        "body": "Our images have height eight, width eight, and one channel. Class zero contains a horizontal bright bar; class one contains a vertical bright bar. The bar position varies among interior rows or columns, and independent Gaussian noise perturbs every pixel. Alternate labels so both splits are balanced. Generate training and held-out sets from different seeds; identical seeds would reproduce images and create leakage. Every observation follows a known rule, so inspect a few images and labels before training. This synthetic distribution contains no occlusion, perspective, or multiple objects and should never be described as realistic vision evaluation."
+      },
+      {
+        "title": "Derive the convolution output shape",
+        "body": "NNX Conv accepts channels-last arrays: batch, height, width, channels. A \\(3\\times3\\) filter with stride one and VALID padding slides only where the whole patch fits. An \\(8\\times8\\) image therefore yields \\(6\\times6\\) spatial outputs. Four output channels mean four independently learned filters; the kernel shape is \\((3, 3, 1, 4)\\), followed by four biases. Each output is a patch dot product plus a bias. Deep-learning convolution uses cross-correlation here: do not reverse the filter in the independent NumPy reference. We check one interior output explicitly before fitting, which catches axis or padding misunderstandings.",
+        "formula": "(B,8,8,1) → Conv3×3/VALID → (B,6,6,4) → ReLU → spatial mean → (B,4) → Linear → (B,2)"
+      },
+      {
+        "title": "Pool spatial responses and retain class scores",
+        "body": "ReLU replaces negative filter responses with zero. Averaging axes one and two summarizes how strongly each learned pattern appears anywhere in the remaining image. Pooling discards exact position, which suits orientation classification but would hurt a task asking for bar location. The classifier head emits two logits per image. softmax_cross_entropy_with_integer_labels consumes those scores and integer labels directly; do not apply softmax beforehand. A stable independent NumPy reference subtracts the largest score before computing log-sum-exp. The objective is averaged over observations, not over classes."
+      },
+      {
+        "title": "Read a confusion matrix rather than a success label",
+        "body": "Use rows for true classes and columns for predicted classes. The diagonal counts correct classifications; off-diagonal cells identify orientation-specific mistakes. A balanced 24-image held-out set contains \\(12\\) examples per class, so a model always predicting horizontal has accuracy \\(0.5\\). After training, print both held-out mean loss and accuracy, along with all four confusion counts. Check that the matrix sums to \\(24\\) and that its trace divided by \\(24\\) equals accuracy. This independent accounting prevents a reduction-axis error from looking like good performance. Keep the split and hyperparameters fixed; a new data distribution is a new experiment, not another chance to select the reported test result."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Generate two disjoint synthetic splits",
+        "instruction": "Create main.py. Print a training image as an \\(8\\times8\\) array if you want to inspect the task before fitting.",
+        "code": "from flax import nnx\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\ndef bars(seed,n,noise=.08):\n    rng=np.random.default_rng(seed)\n    images=np.zeros((n,8,8,1),np.float32)\n    labels=np.arange(n,dtype=np.int32)%2\n    for i,label in enumerate(labels):\n        position=int(rng.integers(2,6))\n        if label==0:images[i,position,:,0]=1.\n        else:images[i,:,position,0]=1.\n    images+=rng.normal(0,noise,images.shape).astype(np.float32)\n    return jnp.array(images),jnp.array(labels)\ntrain_x,train_y=bars(20,48)\ntest_x,test_y=bars(21,24)\nassert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)\nassert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))",
+        "explanation": "Two seeds produce separate examples. Both labels are balanced by construction; noise can make orientation harder as its scale grows."
+      },
+      {
+        "title": "2. Build and independently inspect the convolution",
+        "instruction": "Append the small CNN and the patch dot-product check before defining an optimizer.",
+        "code": "class BarCNN(nnx.Module):\n    def __init__(self):\n        rngs=nnx.Rngs(0)\n        self.conv=nnx.Conv(1,4,(3,3),padding='VALID',rngs=rngs)\n        self.head=nnx.Linear(4,2,rngs=rngs)\n    def __call__(self,x):\n        features=jnp.mean(nnx.relu(self.conv(x)),axis=(1,2))\n        return self.head(features)\nmodel=BarCNN()\nraw=model.conv(train_x[:1])\nassert raw.shape==(1,6,6,4)\npatch=np.asarray(train_x[0,:3,:3,:])\nkernel=np.asarray(model.conv.kernel[...])\nexpected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]\nnp.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)\ndef loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))\noptimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)\n@nnx.jit\ndef train_step(m,o,x,y):\n    value,grads=nnx.value_and_grad(loss)(m,x,y)\n    o.update(m,grads)\n    return value",
+        "explanation": "The first output at \\((0,0)\\) consumes exactly the top-left \\(3\\times3\\) patch. The NumPy result validates filter orientation and layout."
+      },
+      {
+        "title": "3. Fit, then measure the held-out split once",
+        "instruction": "Append \\(80\\) full-batch updates, stable NumPy loss, and confusion accounting. Every update uses only train_x/train_y.",
+        "code": "initial=float(loss(model,train_x,train_y))\nfor _ in range(80):train_step(model,optimizer,train_x,train_y)\nscores=np.asarray(model(test_x));labels=np.asarray(test_y)\npredictions=scores.argmax(axis=-1)\nshifted=scores-scores.max(axis=-1,keepdims=True)\nreference_loss=np.mean(np.log(np.exp(shifted).sum(axis=-1))-shifted[np.arange(len(labels)),labels])\nnp.testing.assert_allclose(loss(model,test_x,test_y),reference_loss,rtol=1e-5,atol=1e-6)\nconfusion=np.zeros((2,2),dtype=int)\nnp.add.at(confusion,(labels,predictions),1)\naccuracy=np.mean(predictions==labels)\nassert confusion.sum()==24 and np.isclose(np.trace(confusion)/24,accuracy)\nassert accuracy>=.9 and float(loss(model,train_x,train_y))<initial*.3\nprint('Held-out loss:',reference_loss,'accuracy:',accuracy,'confusion:\\n',confusion)",
+        "explanation": "The output is a measured CPU result for synthetic bars. No MNIST, TPU, or throughput claim is implied."
+      }
+    ],
+    "code": "from flax import nnx\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\ndef bars(seed,n,noise=.08):\n    rng=np.random.default_rng(seed)\n    images=np.zeros((n,8,8,1),np.float32)\n    labels=np.arange(n,dtype=np.int32)%2\n    for i,label in enumerate(labels):\n        position=int(rng.integers(2,6))\n        if label==0:images[i,position,:,0]=1.\n        else:images[i,:,position,0]=1.\n    images+=rng.normal(0,noise,images.shape).astype(np.float32)\n    return jnp.array(images),jnp.array(labels)\ntrain_x,train_y=bars(20,48)\ntest_x,test_y=bars(21,24)\nassert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)\nassert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))\n\nclass BarCNN(nnx.Module):\n    def __init__(self):\n        rngs=nnx.Rngs(0)\n        self.conv=nnx.Conv(1,4,(3,3),padding='VALID',rngs=rngs)\n        self.head=nnx.Linear(4,2,rngs=rngs)\n    def __call__(self,x):\n        features=jnp.mean(nnx.relu(self.conv(x)),axis=(1,2))\n        return self.head(features)\nmodel=BarCNN()\nraw=model.conv(train_x[:1])\nassert raw.shape==(1,6,6,4)\npatch=np.asarray(train_x[0,:3,:3,:])\nkernel=np.asarray(model.conv.kernel[...])\nexpected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]\nnp.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)\ndef loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))\noptimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)\n@nnx.jit\ndef train_step(m,o,x,y):\n    value,grads=nnx.value_and_grad(loss)(m,x,y)\n    o.update(m,grads)\n    return value\n\ninitial=float(loss(model,train_x,train_y))\nfor _ in range(80):train_step(model,optimizer,train_x,train_y)\nscores=np.asarray(model(test_x));labels=np.asarray(test_y)\npredictions=scores.argmax(axis=-1)\nshifted=scores-scores.max(axis=-1,keepdims=True)\nreference_loss=np.mean(np.log(np.exp(shifted).sum(axis=-1))-shifted[np.arange(len(labels)),labels])\nnp.testing.assert_allclose(loss(model,test_x,test_y),reference_loss,rtol=1e-5,atol=1e-6)\nconfusion=np.zeros((2,2),dtype=int)\nnp.add.at(confusion,(labels,predictions),1)\naccuracy=np.mean(predictions==labels)\nassert confusion.sum()==24 and np.isclose(np.trace(confusion)/24,accuracy)\nassert accuracy>=.9 and float(loss(model,train_x,train_y))<initial*.3\nprint('Held-out loss:',reference_loss,'accuracy:',accuracy,'confusion:\\n',confusion)",
+    "output": "Held-out accuracy is at least \\(0.9\\) for the fixed fixture; confusion counts total \\(24\\). The runnable script prints the actual measured loss and counts.",
+    "experiments": [
+      {
+        "title": "Trace a second patch and a second filter",
+        "prediction": "If the spatial location changes to \\((2,3)\\), which input patch produces that output?",
+        "code": "patch=np.asarray(test_x[0,2:5,3:6,:])\nweights=np.asarray(model.conv.kernel[...])[:,:,:,2]\nexpected=np.sum(patch*weights)+np.asarray(model.conv.bias[...])[2]\nnp.testing.assert_allclose(model.conv(test_x[:1])[0,2,3,2],expected,rtol=1e-5,atol=1e-6)",
+        "output": "The output uses rows \\(2\\)–\\(4\\) and columns \\(3\\)–\\(5\\) of the input.",
+        "explanation": "The same learned filter is reused at each valid location; changing the output coordinate changes the patch, not the filter."
+      },
+      {
+        "title": "Predict the chance classifier",
+        "prediction": "On a balanced held-out split, what is the accuracy of always predicting class zero?",
+        "code": "always_zero=np.zeros_like(labels)\nbaseline=np.mean(always_zero==labels)\nassert baseline==.5\nbaseline_confusion=np.zeros((2,2),dtype=int)\nnp.add.at(baseline_confusion,(labels,always_zero),1)\nnp.testing.assert_array_equal(baseline_confusion,np.array([[12,0],[12,0]]))",
+        "output": "Accuracy is \\(0.5\\) with confusion \\([[12,0]\\),\\([12,0]]\\).",
+        "explanation": "A majority or constant-label baseline is part of evaluation. A good-looking class-specific count alone can hide a useless predictor."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Read a confusion matrix as conditional rates",
+        "difficulty": "Transfer",
+        "prompt": "Normalize each confusion-matrix row by its true-class count. Explain the diagonal and verify that weighting class recalls by class counts reproduces overall accuracy. Then remove a class in a constructed case and report its recall as undefined.",
+        "hint": "Keep the integer counts; a normalized row without a count hides how much evidence supports it.",
+        "solution": "counts=confusion.sum(axis=1)\nrates=np.divide(confusion,counts[:,None],out=np.full(confusion.shape,np.nan),where=counts[:,None]!=0)\nnp.testing.assert_allclose(rates.sum(axis=1),np.ones(2))\nnp.testing.assert_allclose((np.diag(rates)*counts).sum()/counts.sum(),accuracy)\nmissing=np.array([[3,1],[0,0]])\nn=missing.sum(axis=1)\nmissing_rates=np.divide(missing,n[:,None],out=np.full(missing.shape,np.nan),where=n[:,None]!=0)\nassert np.isnan(missing_rates[1]).all()\nprint('True-class counts:',counts,'row-normalized confusion:',rates)\nprint('Absent class recall: undefined, not zero.')",
+        "explanation": "Each row asks where examples of one true class went. A missing class has no observed recall; assigning zero confuses missing evidence with demonstrated failure."
+      },
+      {
+        "title": "Catch a channel-order mistake",
+        "difficulty": "Intermediate",
+        "prompt": "Transpose NHWC images to NCHW and show why this convolution rejects them. Repair the layout and compare predictions.",
+        "hint": "The final axis is the input-channel dimension for NNX Conv.",
+        "solution": "wrong=jnp.transpose(test_x[:2],(0,3,1,2))\ncaught=False\ntry:model(wrong)\nexcept (ValueError,TypeError):caught=True\nassert caught\nrepaired=jnp.transpose(wrong,(0,2,3,1))\nnp.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)",
+        "explanation": "The mistaken array has eight channels where the layer expects one. Explicit layout conversion is the repair; changing the declared channel count would silently change the model task."
+      }
+    ],
+    "exercise": "Apply the trained model to one \\(10\\times10\\) image. Predict intermediate shape and parameter count before executing. Do not claim accuracy from an unlabeled input.",
+    "solution": "larger=jnp.zeros((1,10,10,1));larger=larger.at[0,4,:,0].set(1.)\nassert model.conv(larger).shape==(1,8,8,4)\nassert model(larger).shape==(1,2)\nassert sum(a.size for a in jax.tree.leaves(nnx.state(model,nnx.Param)))==50",
+    "question": "What does spatial mean pooling discard in this classifier?",
+    "options": [
+      "The exact location of local responses",
+      "The number of output channels",
+      "All orientation-sensitive features"
+    ],
+    "answer": 0,
+    "explanation": "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates.",
+    "diagnosis": "Before tuning, inspect sample labels and input layout. Validate a convolution patch numerically, inspect prediction counts, and compare the constant baseline. If all predictions choose one class, examine class balance, score ranges, and per-class errors. If held-out samples equal training samples, repair the split before reporting metrics.",
+    "takeaways": [
+      "Generate images with an explicit label rule",
+      "Derive the convolution output shape",
+      "Pool spatial responses and retain class scores",
+      "Read a confusion matrix rather than a success label"
+    ],
+    "references": [
+      {
+        "title": "Flax NNX Conv API",
+        "url": "https://flax.readthedocs.io/en/latest/api_reference/flax.nnx/nn/linear.html"
+      },
+      {
+        "title": "Optax classification losses",
+        "url": "https://optax.readthedocs.io/en/latest/api/losses.html"
+      }
+    ],
+    "visual": {
+      "title": "See the image task and its classification errors",
+      "kind": "executed",
+      "prediction": "Which axis of the confusion matrix is the actual label?",
+      "reading": "The upper panel is one held-out image, with pixel columns across and rows down. Its dark horizontal stripe is near row \\(3\\); the faint variation elsewhere is added noise. This color bar measures pixel value, so the picture is an input to the classifier.\n\nThe lower panel summarizes all held-out predictions. Rows are actual classes and columns are predicted classes. The two diagonal cells contain \\(12\\) each; both off-diagonal cells contain zero. The lower color bar measures example count, which is a different quantity from pixel intensity.",
+      "connection": "The upper-left confusion cell counts horizontal images classified as horizontal; the lower-right counts vertical images classified as vertical. Off-diagonal counts would identify the two kinds of confusion. Here the \\(24\\) held-out images are all classified correctly.\n\nUse the sample image to understand the task and the confusion matrix to understand the observed errors. The single image cannot establish accuracy, and a zero in the matrix means no observed mistakes of that kind in this set, not that such a mistake is impossible. This is a small synthetic stripe task, not evidence of general image recognition.",
+      "alt": "See the image task and its classification errors. The upper panel is one held-out image, with pixel columns across and rows down. Its dark horizontal stripe is near row \\(3\\); the faint variation elsewhere is added noise. This color bar measures pixel value, so the picture is an input to the classifier. The lower panel summarizes all held-out predictions. Rows are actual classes and columns are predicted classes. The two diagonal cells contain \\(12\\) each; both off-diagonal cells contain zero. The lower color bar measures example count, which is a different quantity from pixel intensity.",
+      "code": "visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-out image 0', 'values': test_x[0, :, :, 0].tolist(), 'unit': 'pixel value'}, {'kind': 'heatmap', 'title': 'Held-out confusion', 'values': confusion.tolist(), 'rows': ['actual horizontal', 'actual vertical'], 'columns': ['pred. horizontal', 'pred. vertical'], 'unit': 'example count'}]}"
+    }
+  }
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The code matches the geometric-sequence reference exactly but differs from the exponential. What have we established?",
+      "options": [
+        "The continuous equation must be wrong.",
+        "Automatic differentiation needs a smaller learning rate.",
+        "The discrete update is implemented correctly; its time-step error still needs assessment."
+      ],
+      "correct": 2,
+      "explanation": "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions."
+    }
+  ]
+}

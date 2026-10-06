@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A step annotation lasts longer than its model annotation. What can this alone establish?",
+      "options": [
+        "The accelerator was idle for the entire difference.",
+        "The whole difference is input loading.",
+        "The step includes time outside the model region; inspect the other regions and lanes to explain it."
+      ],
+      "correct": 2,
+      "explanation": "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence."
+    }
+  ]
+}

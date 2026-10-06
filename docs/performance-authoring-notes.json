@@ -1,0 +1,33 @@
+{
+  "lessons": [
+    {
+      "id": "performance-01",
+      "exercise": "Repeat the synchronized benchmark with 96 rows, then record an independently checked row-energy workload.",
+      "evidence": "Keep benchmark.py, complete observed JSON/sample output, workload shapes/dtypes, numerical tolerance/error, first-call versus warmed boundaries, changed-workload report and repaired timer explanation.",
+      "check": "Distinguish call-plus-wait wall time from compiler/kernel time; reproduce a new workload with an independent reference."
+    },
+    {
+      "id": "performance-02",
+      "exercise": "Extend the signature ledger to sixteen values and diagnose a static branch, masked final batch and runtime Python branch.",
+      "evidence": "Keep the controlled call ledger, actual trace observations labeled as traces, static/dynamic explanation, observed host-consumption intervals, masked-versus-unmasked counterexample and reproduced/repaired tracing failure.",
+      "check": "Explain which argument changes affect specialization; justify masked fixed shapes and host reporting boundaries with numerical evidence."
+    }
+  ],
+  "validation": {
+    "kind": "direct-source CPU execution",
+    "passed": [
+      "performance-01",
+      "performance-02"
+    ],
+    "blocks": "Concatenated incremental builds, complete example, experiments, primary solution, transfer/diagnosis solutions",
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "python": "3.14.3",
+    "generatedCompanions": "Root must rebuild and run smoke runner; direct source execution does not substitute for generated notebook/script receipts."
+  },
+  "limits": [
+    "CPU instructional workloads only; no fixed performance ordering asserted.",
+    "Python ledger observes traces, not compilations.",
+    "No TPU/GPU profiling receipts or complete phase integration project."
+  ]
+}

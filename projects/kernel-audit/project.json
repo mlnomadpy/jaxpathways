@@ -1,0 +1,69 @@
+{
+  "schemaVersion": 1,
+  "id": "kernel-audit",
+  "title": "Audit a Pallas kernel and its target evidence",
+  "pathwayId": "scale",
+  "status": "authored",
+  "hardware": "CPU interpretation/simulation available; real TPU runner requires separately validated TPU hardware",
+  "source": "projects/kernel-audit/README.md",
+  "requiredLessonIds": [
+    "performance-01",
+    "performance-02",
+    "distributed-01",
+    "distributed-02",
+    "kernels-01",
+    "kernels-02",
+    "kernels-03",
+    "kernels-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Grid and precision contract",
+      "command": "python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 1",
+      "evidence": "Independent full-array checks, singleton/tail fixtures, block ownership and rejected input contracts",
+      "expected": "PASS stage 1: actual grid semantics, full and partial tiles, singleton rows, two dtypes and rejected contracts",
+      "diagnosis": "If the last row or column fails, check ceiling division, padding and crop boundaries before changing arithmetic."
+    },
+    {
+      "id": "2",
+      "title": "Fused target-oriented kernel",
+      "command": "python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 2",
+      "evidence": "Bias-axis and activation-boundary checks, two precisions and an explicit no-fallback target guard",
+      "expected": "PASS stage 2: fused broadcast contract, ReLU boundaries, tails, two precisions and no CPU target fallback",
+      "diagnosis": "If interpretation passes but target lowering fails, preserve the target error; interpretation is not a target compilation test."
+    },
+    {
+      "id": "3",
+      "title": "Pipeline semantics and measurement protocol",
+      "command": "python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 3",
+      "evidence": "Synchronous/buffered comparisons, two/three input buffers, representative shapes and guarded target benchmark; target receipts remain separate",
+      "expected": "PASS stage 3: actual pipeline CPU simulation, synchronous/buffered agreement, input buffering, tails/dtypes and guarded target benchmark",
+      "diagnosis": "If buffering changes values, inspect copies and ownership. If hardware is unavailable, keep performance unverified rather than timing simulation."
+    }
+  ],
+  "rubric": [
+    "Verify every output against an independent represented-input oracle across tails and dtypes",
+    "Explain grid coordinates, input windows and unique output ownership",
+    "Preserve an explicit float32 compute and final output-cast policy",
+    "Execute actual synchronous and buffered Pallas pipeline semantics",
+    "Reject unsupported shape, dtype, buffer and target-mode contracts",
+    "Separate CPU simulation metadata from actual target backend evidence",
+    "Use a guarded TPU-only runner with synchronized warm measurements and a strong JAX baseline",
+    "Relate profiling and partitioning decisions to the end-to-end optimization opportunity"
+  ],
+  "workspaceFile": "projects/kernel-audit/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/kernel-audit/starter/model.py projects/kernel-audit/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/kernel-audit/starter/model.py projects/kernel-audit/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/kernel-audit/tests/check.py --implementation solution --stage all",
+  "setupNote": "CPU stages use requirements-cpu.txt with actual Pallas interpretation and TPU-memory simulation. Run from the extracted top folder. The separate target_tpu.py command requires a configured real TPU environment and refuses CPU fallback; no TPU qualification is implied by CPU stage passes.",
+  "assessmentId": "scale"
+}

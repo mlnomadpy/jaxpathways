@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "posttraining-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Should prompt inputs disappear when using response-only loss?",
+      "options": [
+        "No. They remain context; only their target eligibility changes.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "Attention visibility and supervised output positions are separate contracts."
+    }
+  ]
+}

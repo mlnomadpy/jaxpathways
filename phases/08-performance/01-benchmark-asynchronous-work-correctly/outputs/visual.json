@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-01",
+  "contentHash": "b83b877686dcadf3fafc52a191c4f8aa2a3ac1e37979beacced37ea022e433ce",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:38:25.947954+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.03564854199066758,\n  \"warm_samples_seconds\": [\n    4.0624989196658134e-05,\n    1.950003206729889e-05,\n    1.1083902791142464e-05,\n    1.1167023330926895e-05,\n    1.0167015716433525e-05,\n    9.833835065364838e-06,\n    1.037493348121643e-05\n  ],\n  \"warm_median_seconds\": 1.1083902791142464e-05,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
+  "data": {
+    "kind": "panels",
+    "panels": [
+      {
+        "kind": "bar",
+        "title": "First call",
+        "labels": [
+          "first"
+        ],
+        "ylabel": "seconds",
+        "series": [
+          {
+            "label": "synchronized call",
+            "y": [
+              0.03564854199066758
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "line",
+        "title": "Warm calls",
+        "x": [
+          1,
+          2,
+          3,
+          4,
+          5,
+          6,
+          7
+        ],
+        "xlabel": "warm sample",
+        "ylabel": "seconds",
+        "series": [
+          {
+            "label": "synchronized call",
+            "y": [
+              4.0624989196658134e-05,
+              1.950003206729889e-05,
+              1.1083902791142464e-05,
+              1.1167023330926895e-05,
+              1.0167015716433525e-05,
+              9.833835065364838e-06,
+              1.037493348121643e-05
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

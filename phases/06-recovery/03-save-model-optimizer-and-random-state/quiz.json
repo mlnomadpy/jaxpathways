@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which checkpoint supports replaying the next Adam update with stochastic targets?",
+      "options": [
+        "Parameters alone.",
+        "Parameters, Adam state/count, continuation key, step and compatible data/configuration.",
+        "A seed plus the last printed loss."
+      ],
+      "correct": 1,
+      "explanation": "The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state."
+    }
+  ]
+}

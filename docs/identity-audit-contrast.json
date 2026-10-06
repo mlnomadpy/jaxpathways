@@ -1,0 +1,27 @@
+[
+  {
+    "page": "/index.html",
+    "samples": 86,
+    "flags": []
+  },
+  {
+    "page": "/course.html",
+    "samples": 275,
+    "flags": []
+  },
+  {
+    "page": "/notebook.html",
+    "samples": 58,
+    "flags": []
+  },
+  {
+    "page": "/project.html",
+    "samples": 114,
+    "flags": []
+  },
+  {
+    "page": "/assessments/models.html",
+    "samples": 61,
+    "flags": []
+  }
+]

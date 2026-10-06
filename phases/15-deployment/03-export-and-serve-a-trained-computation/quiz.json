@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a successful local export round trip prove?",
+      "options": [
+        "The saved computation matches the tested CPU contract.",
+        "The file is an edge executable on every NPU.",
+        "An HTTP service now exists."
+      ],
+      "correct": 0,
+      "explanation": "A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks."
+    }
+  ]
+}

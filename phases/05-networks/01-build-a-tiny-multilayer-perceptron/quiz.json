@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why does the two-layer XOR model need a nonlinear activation?",
+      "options": [
+        "Without it the composition is still affine",
+        "Two affine layers always separate XOR",
+        "Cross-entropy itself changes the prediction boundary"
+      ],
+      "correct": 0,
+      "explanation": "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features."
+    }
+  ]
+}

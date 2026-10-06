@@ -1,0 +1,78 @@
+{
+  "schemaVersion": 1,
+  "id": "audio-harness",
+  "title": "Build an audio waveform-to-inference harness",
+  "pathwayId": "ship",
+  "status": "authored",
+  "hardware": "CPU; target-edge validation is a separate extension",
+  "source": "projects/audio-harness/README.md",
+  "requiredLessonIds": [
+    "arrays-02",
+    "state-01",
+    "state-02",
+    "optimization-02",
+    "networks-03",
+    "recovery-03",
+    "recovery-04",
+    "deployment-03",
+    "deployment-05",
+    "deployment-06"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Waveform and spectral contract",
+      "command": "python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 1",
+      "evidence": "Recording/split provenance, independent STFT, silence and tone-bin checks, actual WAV loading",
+      "expected": "PASS stage 1: waveform contracts, independent STFT, silence, frequency bins, actual WAV provenance and split isolation",
+      "diagnosis": "Check sample rate, channel axis, crop length, Hann convention and power normalization before changing the classifier."
+    },
+    {
+      "id": "2",
+      "title": "Training, recovery and held-out errors",
+      "command": "python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 2",
+      "evidence": "Analytic gradient, complete fresh-process recovery across an epoch boundary, fixed evaluation, baseline and changed conditions",
+      "expected": "PASS stage 2: gradient oracle, full fresh-process recovery, held-out aggregation, unchanged evaluation state and changed seed/data",
+      "diagnosis": "Compare recording IDs and crop/augmentation state before inspecting loss; keep fitted normalization tied to training data."
+    },
+    {
+      "id": "3",
+      "title": "Precision and complete exported artifacts",
+      "command": "python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 3",
+      "evidence": "Training-only calibration, integer arithmetic reference, six actual exports, fresh-process reload and failed-release rollback",
+      "expected": "PASS stage 3: training-only calibration, integer oracle, six complete exports, fresh-process reload and corruption rejection",
+      "diagnosis": "Inspect activation ranges, accumulator type and restored preprocessing; reject a mismatched or corrupt release."
+    },
+    {
+      "id": "4",
+      "title": "Measured inference and boundary drills",
+      "command": "python3 projects/audio-harness/tests/check.py --implementation projects/audio-harness/my_model.py --stage 4",
+      "evidence": "Actual CPU timing samples, sample-rate/channel/version failures, silence and explicitly unmeasured edge costs",
+      "expected": "PASS stage 4: measured full preprocessing/inference boundary, malformed request drills and silence behavior",
+      "diagnosis": "Separate window accumulation, decoding, preprocessing, model execution and device measurements before claiming end-to-end latency."
+    }
+  ],
+  "rubric": [
+    "Explain sample-rate, waveform, crop and STFT contracts with independent calculations",
+    "Preserve recording identities, groups, licenses and split provenance",
+    "Compare a trained spectral classifier with an energy baseline and inspect actual errors",
+    "Recover optimizer, normalization, RNG, crop and iterator state in a fresh process",
+    "Calibrate on training data and distinguish weight, feature, accumulation and output precision",
+    "Reload genuine exports containing spectral preprocessing and reject failed releases",
+    "Measure completed CPU requests while labeling unmeasured capture, network and device costs",
+    "Complete the bundled audio synthesis tasks with changed-condition evidence"
+  ],
+  "workspaceFile": "projects/audio-harness/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/audio-harness/starter/model.py projects/audio-harness/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/audio-harness/starter/model.py projects/audio-harness/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/audio-harness/tests/check.py --implementation solution --stage all",
+  "setupNote": "Run from the extracted ZIP top folder containing requirements-cpu.txt and projects/audio-harness. The README links executed plots, a connected reference runner and bundled synthesis/reviewer tasks. The fixture classifies synthetic sounds, not speech."
+}

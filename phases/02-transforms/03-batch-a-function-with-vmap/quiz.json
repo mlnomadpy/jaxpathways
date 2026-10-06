@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "For \\(B\\) examples and \\(D\\) shared parameters, what shapes do per-example loss gradients and the mean-loss gradient have?",
+      "options": [
+        "Both have shape \\((B, D)\\).",
+        "Per-example: \\((B, D)\\); mean-loss: \\((D,)\\).",
+        "Per-example: \\((D,)\\); mean-loss: \\((B,)\\)."
+      ],
+      "correct": 1,
+      "explanation": "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape."
+    }
+  ]
+}

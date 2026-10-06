@@ -1,0 +1,125 @@
+{
+  "hero": {
+    "title": ["Learn JAX.", "From arrays", "to models."],
+    "intro": "Understand the functions behind machine learning. Write them, transform them, and build a model—with your AI tutor alongside you.",
+    "note": "Basic Python to begin. A laptop CPU is enough.",
+    "actions": [
+      {
+        "label": "Start with a tutor  ↗",
+        "href": "#tutor"
+      },
+      {
+        "label": "Explore the course",
+        "href": "course.html"
+      }
+    ]
+  },
+  "tutor": {
+    "title": "Your agent. Your JAX tutor.",
+    "hosts": "Codex · Claude Code · Cursor · other skill-enabled agents",
+    "command": "npx skills add . --skill start-learning learn-jax jax-course-guide check-jax",
+    "prompt": "Use start-learning to help me learn JAX from this workspace.",
+    "workspace": "downloads/jax-course-workspace.zip"
+  },
+  "directions": {
+    "title": "Where do you want to take it?",
+    "intro": "Start with the same foundations. Then follow the work that interests you.",
+    "items": [
+      {
+        "title": "Training",
+        "symbol": "∇",
+        "description": "Build training loops, neural networks and small Transformers.",
+        "path": "models",
+        "role": "training-engineer"
+      },
+      {
+        "title": "Inference",
+        "symbol": "→",
+        "description": "Take a trained model toward export, serving and deployment.",
+        "path": "ship",
+        "role": "inference-engineer"
+      },
+      {
+        "title": "Research",
+        "symbol": "ƒ",
+        "description": "Use differentiation for scientific models and numerical experiments.",
+        "path": "science",
+        "role": "scientific-ml"
+      },
+      {
+        "title": "Systems",
+        "symbol": "{}",
+        "description": "Explore profiling, distributed computation and accelerator operations.",
+        "path": "ops",
+        "role": "operations-engineer"
+      }
+    ]
+  },
+  "lessons": {
+    "title": "A look inside the course.",
+    "intro": "Read an explanation, make a prediction, then run and change the code. A few lessons from the journey:",
+    "items": [
+      {
+        "id": "welcome-01",
+        "summary": "Prepare your workspace and run a first example."
+      },
+      {
+        "id": "arrays-01",
+        "summary": "Translate familiar NumPy operations into JAX."
+      },
+      {
+        "id": "first-gradient",
+        "summary": "Differentiate a function and check the result."
+      },
+      {
+        "id": "transforms-03",
+        "summary": "Apply one function across a batch of inputs."
+      },
+      {
+        "id": "transforms-04",
+        "summary": "Compile a function and understand its first call."
+      },
+      {
+        "id": "networks-03",
+        "summary": "Connect training and evaluation in a model workflow."
+      }
+    ]
+  },
+  "projects": {
+    "title": "Put the pieces together.",
+    "intro": "Start with these two projects, then explore the specialist projects as you progress.",
+    "scope": "Staged CPU practice with exercises and checks. Each project states its prerequisites.",
+    "items": [
+      {
+        "id": "regression-audit",
+        "title": "Audit a regression experiment",
+        "description": "Fit a small model, check its gradients, and make the experiment reproducible.",
+        "linkLabel": "Open the regression project ↗",
+        "illustration": "assets/regression-audit.svg",
+        "alt": "A linear model fits a line through observations, then its gradient is checked"
+      },
+      {
+        "id": "mlp-classifier",
+        "title": "Build a neural classifier",
+        "description": "Connect a network, an optimizer, and an evaluation step. Investigate what happens when training goes wrong.",
+        "linkLabel": "Open the classifier project ↗",
+        "illustration": "assets/mlp-classifier.svg",
+        "alt": "Inputs pass through a hidden layer to a classifier output"
+      }
+    ]
+  },
+  "offline": {
+    "title": "Take the course with you.",
+    "intro": "Read away from the browser. Keep the explanations beside your editor, or start with the first lesson online.",
+    "actions": [
+      {
+        "label": "Download EPUB",
+        "href": "downloads/jax-foundations.epub"
+      },
+      {
+        "label": "Printable reader",
+        "href": "downloads/jax-foundations.html"
+      }
+    ]
+  }
+}

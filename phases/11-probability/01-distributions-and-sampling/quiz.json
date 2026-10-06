@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "probability-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which statement explains why a large Monte Carlo sample can have a precise mean while individual readings remain variable?",
+      "options": [
+        "Every sample becomes equal to the mean as sample size increases",
+        "The variance of each reading is divided by the sample size",
+        "The standard error of the average decreases, while the distribution of an individual reading stays the same"
+      ],
+      "correct": 2,
+      "explanation": "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables."
+    }
+  ]
+}

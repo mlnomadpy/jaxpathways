@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "pretraining-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does successful retrieval on the training pairs establish?",
+      "options": [
+        "The encoder solves those pairs under that pairing and augmentation contract.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "It does not establish downstream task quality or robustness to a new data distribution."
+    }
+  ]
+}

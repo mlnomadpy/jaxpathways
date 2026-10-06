@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-04",
+  "contentHash": "f12e24e5f6708e072d5c438e9c24a0cf408e2a0b9f56ad65aee5e3503afaa651",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:32:16.290152+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "training seeds: [0, 7, 23, 41, 59]\nheld-out mean per agent: [0.9759717  0.97472161 0.97537106 0.96944821 0.97455072]\nexact mean per agent: [0.97578394 0.9749347  0.97562152 0.97113729 0.97404611]\nuniform baseline mean: 0.46628910303115845\nacross-agent mean / sample sd: 0.9740126609802247 0.0026129212275767476\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "0",
+      "7",
+      "23",
+      "41",
+      "59"
+    ],
+    "xlabel": "training seed",
+    "ylabel": "mean episode return",
+    "series": [
+      {
+        "label": "held-out sampled",
+        "y": [
+          0.9759716987609863,
+          0.9747216105461121,
+          0.9753710627555847,
+          0.9694482088088989,
+          0.974550724029541
+        ]
+      },
+      {
+        "label": "exact expectation",
+        "y": [
+          0.9757839441299438,
+          0.9749346971511841,
+          0.9756215214729309,
+          0.971137285232544,
+          0.9740461111068726
+        ]
+      },
+      {
+        "label": "uniform baseline (shared)",
+        "y": [
+          0.46628910303115845,
+          0.46628910303115845,
+          0.46628910303115845,
+          0.46628910303115845,
+          0.46628910303115845
+        ]
+      }
+    ]
+  }
+}

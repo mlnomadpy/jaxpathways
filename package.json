@@ -3,8 +3,44 @@
   "private": true,
   "version": "0.1.0",
   "scripts": {
-    "dev": "python3 -m http.server 4173 --directory site",
-    "check": "node --check site/app.js && node --check site/platform.js && node --check site/choices.js && node scripts/validate-curriculum.mjs",
-    "curriculum:docs": "node scripts/render-curriculum.mjs"
+    "dev": "npm run content:build && astro dev",
+    "check": "npm run check:astro && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm test && python3 scripts/check-distribution.py && npm run check:site",
+    "curriculum:docs": "node scripts/render-curriculum.mjs",
+    "smoke:cpu": "python3 scripts/smoke-lessons.py",
+    "build": "npm run content:build && astro build",
+    "test:project": "python3 scripts/check-projects.py",
+    "audit:content": "python3 scripts/audit-content.py",
+    "preview": "astro preview",
+    "content:build": "node scripts/render-curriculum.mjs && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py",
+    "check:astro": "astro check",
+    "lint": "eslint src scripts/*.mjs astro.config.mjs",
+    "format": "prettier --write src astro.config.mjs eslint.config.js",
+    "format:check": "prettier --check src astro.config.mjs eslint.config.js",
+    "test": "node --test scripts/*.test.cjs tests/*.test.mjs",
+    "check:site": "node scripts/check-site.mjs",
+    "check:deployment": "node scripts/check-deployment.mjs",
+    "figures:build": "python3 scripts/render-lesson-figures.py",
+    "audit:visuals": "python3 scripts/audit-visuals.py",
+    "test:math": "python3 assessments/math-reference.py"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@eslint/js": "^10.0.1",
+    "astro": "^7.3.5",
+    "eslint": "^10.12.0",
+    "globals": "^17.13.0",
+    "happy-dom": "^20.14.5",
+    "marked": "^18.0.14",
+    "postcss": "^8.5.29",
+    "prettier": "^3.9.9",
+    "prettier-plugin-astro": "^1.1.0",
+    "typescript": "^6.0.3"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "dependencies": {
+    "katex": "^0.19.0"
   }
 }

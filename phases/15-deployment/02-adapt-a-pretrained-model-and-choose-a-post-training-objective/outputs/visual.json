@@ -1,0 +1,49 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-02",
+  "contentHash": "095001e29082aba726481f6c6b13c4ef85a0351125072911eb87a0a6067e3014",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:43:59.931765+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "{\n  \"pretrained\": {\n    \"held_cross_entropy\": 0.9780182838439941,\n    \"held_brier\": 0.17108705639839172,\n    \"source_cross_entropy\": 0.5451400876045227\n  },\n  \"supervised\": {\n    \"held_cross_entropy\": 0.5554870367050171,\n    \"held_brier\": 0.012093935161828995,\n    \"source_cross_entropy\": 0.7904530763626099\n  },\n  \"teacher\": {\n    \"held_cross_entropy\": 0.5240296125411987,\n    \"held_brier\": 0.00022982103109825402,\n    \"source_cross_entropy\": 1.0046310424804688\n  }\n}\ncheckpoint source hash: f5fb50c38195b46766bee2edaa81a7ad28386523baa850c5294eb71b47f1f84c\n",
+  "data": {
+    "kind": "bar",
+    "x": [
+      0,
+      1,
+      2
+    ],
+    "labels": [
+      "pretrained",
+      "supervised",
+      "teacher"
+    ],
+    "xlabel": "model after training stage",
+    "ylabel": "mean cross-entropy (nats)",
+    "series": [
+      {
+        "label": "held-out target",
+        "y": [
+          0.9780182838439941,
+          0.5554870367050171,
+          0.5240296125411987
+        ]
+      },
+      {
+        "label": "source retention",
+        "y": [
+          0.5451400876045227,
+          0.7904530763626099,
+          1.0046310424804688
+        ]
+      }
+    ]
+  }
+}

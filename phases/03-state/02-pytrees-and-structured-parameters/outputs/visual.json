@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-02",
+  "contentHash": "bf560046289126dcf57859155b521d140b3612e4e0b9ac9f444e263db965cfc4",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:23.598112+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Before/after: 4.0 0.6399999260902405\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "weight[0]",
+      "weight[1]",
+      "bias"
+    ],
+    "ylabel": "parameter value",
+    "series": [
+      {
+        "label": "before",
+        "y": [
+          1.0,
+          -1.0,
+          0.0
+        ]
+      },
+      {
+        "label": "after",
+        "y": [
+          1.399999976158142,
+          -0.800000011920929,
+          0.20000000298023224
+        ]
+      }
+    ]
+  }
+}

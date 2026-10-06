@@ -1,0 +1,283 @@
+[
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif"
+    ],
+    "height": 5230,
+    "page": "/index.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      },
+      {
+        "font": "12px",
+        "height": 32,
+        "text": "Copy code"
+      },
+      {
+        "font": "12px",
+        "height": 35,
+        "text": "Available material"
+      },
+      {
+        "font": "12px",
+        "height": 35,
+        "text": "Available material"
+      },
+      {
+        "font": "12px",
+        "height": 35,
+        "text": "Available material"
+      },
+      {
+        "font": "12px",
+        "height": 35,
+        "text": "Available material"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "ui-monospace, monospace",
+      "Georgia, serif"
+    ],
+    "height": 2787,
+    "page": "/course.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "Georgia, serif"
+    ],
+    "height": 8759,
+    "page": "/pathways.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Learning & career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "ui-monospace, monospace"
+    ],
+    "height": 4726,
+    "page": "/notebook.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "ui-monospace, monospace"
+    ],
+    "height": 3237,
+    "page": "/organizer.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif"
+    ],
+    "height": 5193,
+    "page": "/developer.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "ui-monospace, monospace"
+    ],
+    "height": 5046,
+    "page": "/project.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  },
+  {
+    "fonts": [
+      "\"Trebuchet MS\", \"Avenir Next\", sans-serif",
+      "system-ui, sans-serif",
+      "Georgia, serif"
+    ],
+    "height": 12659,
+    "page": "/assessments/models.html",
+    "smallControls": [
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Course"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Career routes"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "My learning"
+      },
+      {
+        "font": "12px",
+        "height": 38,
+        "text": "Resources"
+      }
+    ],
+    "viewport": 390,
+    "width": 390
+  }
+]

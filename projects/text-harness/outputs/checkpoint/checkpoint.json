@@ -1,0 +1,33 @@
+{
+  "step": 120,
+  "cursor": 96,
+  "epoch": 19,
+  "data_sha256": "609cf1d9cdacf33bf2d97e360f27dc023e164ed5c4ffc6e9b2cdb0812ec32638",
+  "config": {
+    "seed": 3,
+    "batch_size": 16,
+    "rate": 0.006,
+    "beta1": 0.9,
+    "beta2": 0.999,
+    "epsilon": 1e-08,
+    "dropout_keep": 0.9
+  },
+  "tokenizer": {
+    "version": "utf8-byte-v1",
+    "pad_id": 0,
+    "bos_id": 1,
+    "eos_id": 2,
+    "byte_offset": 3,
+    "vocabulary_size": 259,
+    "context_tokens": 12,
+    "normalization": "none",
+    "unknown_policy": "all UTF-8 bytes represented; overlong input rejected"
+  },
+  "jax": "0.9.2",
+  "architecture": {
+    "width": 24,
+    "heads": 2,
+    "blocks": 1
+  },
+  "state_sha256": "942e3b95a8df853fce4c2d9df04b150fd4aea0e4d609f358f37fdf1aea94471b"
+}

@@ -1,0 +1,336 @@
+.resource-item {
+  box-shadow: none;
+  border-color: var(--line);
+}
+.resource-tag {
+  background: #e7def6;
+}
+.resources-intro h1 {
+  color: var(--atlas);
+}
+.resources-page pre {
+  color: #f0ebfa;
+  border-color: #4b405f;
+}
+.resources-page pre {
+  font-size: 14px;
+  line-height: 1.8;
+}
+.resource-code {
+  border: 1px solid #50445f;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #28213e;
+  margin-block: 18px;
+}
+.resources-page .resource-code pre {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+.resources-page .resource-code .copy-status {
+  font: 13px/1.6 var(--ui);
+  color: #a8dec6;
+  margin: 0;
+  padding: 0 16px;
+}
+
+.resources-page .resource-code .terminal-note {
+  color: #d9ccec;
+  padding: 0 16px 12px;
+  font: 13px/1.6 var(--ui);
+}
+.resources-page .resource-code .copy-status[data-state='error'] {
+  color: #ffc09c;
+}
+.resources-page {
+  --mono: ui-monospace, SFMono-Regular, Consolas, monospace;
+}
+.resources-page main {
+  max-width: 1200px;
+}
+.resources-page header nav {
+  flex-wrap: wrap;
+}
+.resources-intro {
+  padding: 58px 0 30px;
+}
+.resources-intro h1 {
+  font-size: clamp(38px, 5vw, 58px);
+}
+.resources-intro .intro {
+  max-width: 720px;
+}
+.resource-jumps {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-top: 26px;
+  font: 14px/1.6 var(--ui);
+}
+.resource-jumps a {
+  padding-block: 8px;
+  color: var(--blue);
+}
+.resources-page .resource-section {
+  padding: 44px 0;
+}
+.resource-heading {
+  max-width: 740px;
+  margin-bottom: 26px;
+}
+.resource-heading .edition {
+  margin-bottom: 10px;
+}
+.resource-heading h2 {
+  font-size: 30px;
+}
+.resource-heading p {
+  font: 16px/1.7 var(--ui);
+  color: var(--muted);
+}
+.resource-heading code,
+.resources-page p code {
+  font-size: 0.9em;
+  overflow-wrap: anywhere;
+}
+.resource-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+.resource-item {
+  border-top: 1px solid var(--line);
+  padding: 22px 0 8px;
+  min-width: 0;
+}
+.resource-tag {
+  font: 12px/1.6 var(--ui);
+  color: var(--mint);
+}
+.resource-item h3 {
+  font-size: 21px;
+  margin-top: 10px;
+}
+.resource-item p {
+  font: 15px/1.7 var(--ui);
+  max-width: 460px;
+}
+.resource-item a {
+  display: block;
+  width: fit-content;
+  font: 14px/1.7 var(--ui);
+  color: var(--blue);
+  padding-block: 7px;
+}
+.resource-link {
+  font-weight: 600 !important;
+}
+.resources-page .resource-note {
+  font: 13px/1.7 var(--ui);
+  color: var(--muted);
+  margin: 12px 0;
+}
+.resource-split {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 48px;
+}
+.resource-downloads {
+  min-width: 0;
+}
+.download-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 20px;
+  gap: 4px 14px;
+  border-top: 1px solid var(--line);
+  padding: 22px 0;
+  font: 15px/1.6 var(--ui);
+}
+.download-row strong {
+  font-size: 17px;
+}
+.download-row span:nth-child(2) {
+  grid-column: 1;
+  color: var(--muted);
+  font-size: 13px;
+}
+.download-row span:last-child {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  align-self: center;
+  color: var(--blue);
+}
+.install-steps {
+  padding-left: 26px;
+  max-width: 960px;
+}
+.install-steps > li {
+  padding: 14px 0 28px 14px;
+}
+.install-steps > li::marker {
+  font: 600 17px var(--ui);
+  color: var(--blue);
+}
+.install-steps h3 {
+  font-size: 20px;
+}
+.install-steps p {
+  font: 15px/1.7 var(--ui);
+}
+.skill-list {
+  margin: 20px 0 0;
+}
+.skill-list > div {
+  display: grid;
+  grid-template-columns: 180px minmax(0, 1fr);
+  gap: 20px;
+  border-bottom: 1px solid var(--line);
+  padding: 12px 0;
+}
+.skill-list dt {
+  font: 13px/1.6 var(--mono);
+}
+.skill-list dd {
+  margin: 0;
+  font: 14px/1.6 var(--ui);
+  color: var(--muted);
+}
+.resource-code {
+  min-width: 0;
+  max-width: 100%;
+}
+.resources-page pre {
+  max-width: 100%;
+  min-width: 0;
+  overflow-x: auto;
+  background: #f3f6fc;
+  border: 1px solid #d9e1ee;
+  border-radius: 8px;
+  padding: 18px;
+  font: 13px/1.8 var(--mono);
+  margin: 16px 0 10px;
+  white-space: pre;
+}
+.resource-code button {
+  font: 13px var(--ui);
+  min-height: 44px;
+  border-radius: 6px;
+  padding: 10px 15px;
+}
+.resource-disclosure {
+  border-top: 1px solid var(--line);
+  margin-top: 18px;
+  padding: 0 0 16px;
+  min-width: 0;
+  max-width: 100%;
+}
+.resource-disclosure summary {
+  cursor: pointer;
+  min-height: 52px;
+  padding: 15px 0;
+  font: 600 15px/1.6 var(--ui);
+  color: var(--blue);
+}
+.resource-disclosure p,
+.resource-disclosure li {
+  font: 15px/1.7 var(--ui);
+}
+.resource-disclosure a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: var(--blue);
+}
+.api-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px 24px;
+  padding-left: 20px;
+}
+.resources-page footer {
+  max-width: 1080px;
+  margin: auto;
+}
+.resources-page #resource-copy-status:empty {
+  display: none;
+}
+.resources-page nav [aria-current='page'] {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 5px;
+}
+@media (max-width: 760px) {
+  .resources-intro {
+    padding-top: 36px;
+  }
+}
+@media (max-width: 760px) {
+  .resource-jumps {
+    gap: 8px 18px;
+  }
+}
+@media (max-width: 760px) {
+  .resources-page .resource-section {
+    padding-block: 32px;
+  }
+}
+@media (max-width: 760px) {
+  .resource-grid,
+  .resource-split {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+}
+@media (max-width: 760px) {
+  .resource-heading {
+    margin-bottom: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .resource-heading h2 {
+    font-size: 26px;
+  }
+}
+@media (max-width: 760px) {
+  .resource-item {
+    padding-top: 18px;
+  }
+}
+@media (max-width: 760px) {
+  .install-steps {
+    padding-left: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .install-steps > li {
+    padding-left: 5px;
+  }
+}
+@media (max-width: 760px) {
+  .skill-list > div {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+@media (max-width: 760px) {
+  .resources-page pre {
+    font-size: 12px;
+    padding: 14px;
+  }
+}
+@media (max-width: 760px) {
+  .api-list {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .resources-page footer {
+    padding-inline: 6%;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 760px) {
+  .resources-page .intro {
+    font-size: 19px;
+  }
+}

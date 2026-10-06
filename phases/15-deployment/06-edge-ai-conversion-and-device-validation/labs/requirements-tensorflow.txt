@@ -1,0 +1,4 @@
+# Verified on macOS arm64 with Python 3.12.13; separate from requirements-cpu.txt.
+tensorflow==2.21.0
+keras==3.15.1
+numpy==2.5.3

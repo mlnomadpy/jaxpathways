@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does spatial mean pooling discard in this classifier?",
+      "options": [
+        "The exact location of local responses",
+        "The number of output channels",
+        "All orientation-sensitive features"
+      ],
+      "correct": 0,
+      "explanation": "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates."
+    }
+  ]
+}

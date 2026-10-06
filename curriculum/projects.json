@@ -1,0 +1,21 @@
+[
+  "projects/regression-audit/project.json",
+  "projects/mlp-classifier/project.json",
+  "projects/scientific-inverse/project.json",
+  "projects/policy-evaluation/project.json",
+  "projects/bayesian-regression/project.json",
+  "projects/derivative-audit/project.json",
+  "projects/deployment-audit/project.json",
+  "projects/workload-operations/project.json",
+  "projects/audio-harness/project.json",
+  "projects/cross-modal-harness/project.json",
+  "projects/kernel-audit/project.json",
+  "projects/image-harness/project.json",
+  "projects/foundation-toolkit/project.json",
+  "projects/sharded-training/project.json",
+  "projects/text-harness/project.json",
+  "projects/optimizer-audit/project.json",
+  "projects/engineering-release/project.json",
+  "projects/training-methods/project.json",
+  "projects/weight-conversion/project.json"
+]

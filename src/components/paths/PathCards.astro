@@ -1,0 +1,45 @@
+---
+import groups from '../../data/path-groups.json';
+import { course } from '../../lib/course-data.js';
+import { careerCoverage, pathwayCoverage } from '../../lib/careers.js';
+import { siteUrl } from '../../lib/urls.js';
+---
+
+{groups.map((group) => (
+  <section class="path-group">
+    <h2>{group.title}</h2>
+    <div class="path-cards">
+      {group.ids.map((id) => {
+        const route = course.pathways.find((route) => route.id === id);
+        if (!route) throw Error(`Unknown path in group: ${id}`);
+        const availability = careerCoverage(route.phaseIds, course);
+        const coverage = pathwayCoverage(route, course);
+        return (
+          <article class="path-card">
+            <h3>{route.title}</h3>
+            <p>{route.description}</p>
+            <p class="availability-label">
+              {availability.planned ? 'Partly available' : 'Available lesson drafts'} ·{' '}
+              {availability.available} lessons
+            </p>
+            <p>
+              <strong>First artifact:</strong> {route.firstArtifact}
+            </p>
+            <p class="soft">
+              {coverage.focus.available} available in the focus phases · {coverage.focus.planned}{' '}
+              planned. Total above includes preparation.
+            </p>
+            <p class="soft">
+              {route.capstone.projectId
+                ? 'Project available: ' + route.capstone.title
+                : 'Final project is planned'}
+            </p>
+            <a class="button" href={siteUrl(`pathways.html?path=${route.id}`)}>
+              Open path
+            </a>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+))}

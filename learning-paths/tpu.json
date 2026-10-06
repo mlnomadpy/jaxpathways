@@ -1,0 +1,69 @@
+{
+  "id": "tpu",
+  "title": "Build a TPU training system",
+  "description": "Build a small Transformer and a restartable training experiment on CPU before extending the workload to accelerators. Learn masking, mixed precision and synchronized measurement with explicit hardware limits.",
+  "prerequisites": "Shared foundations and basic machine learning",
+  "outcome": "From notebook to training system",
+  "libraries": "Flax NNX · Optax · Grain · Orbax · XProf",
+  "source": "https://docs.jax.dev/en/latest/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "recovery",
+    "transformers",
+    "pretraining",
+    "rl",
+    "posttraining",
+    "performance",
+    "distributed",
+    "deployment"
+  ],
+  "capstone": {
+    "title": "Causal Transformer training-system capstone",
+    "status": "authored",
+    "assessment": "Train and recover a byte Transformer, verify cache precision and exported inference, then defend the measurements. CPU synthesis review draft is available; physical TPU and multi-controller qualification remain separate.",
+    "evidence": [
+      "Independent causal-attention and valid-token loss checks on disjoint data",
+      "Fresh-process recovery of parameters, both Adam moments, dropout keys and document position",
+      "FP32/BF16/INT8 cache parity, stored bytes and numerical-error comparisons",
+      "Six serialized prefill/decode endpoints with fresh-process reload and artifact rejection",
+      "A genuine profile and synchronized CPU measurements, plus separate actual-target qualification before any TPU claim"
+    ],
+    "projectId": "text-harness",
+    "assessmentId": "tpu",
+    "assessmentDraft": {
+      "id": "tpu",
+      "projectId": "text-harness",
+      "title": "Training-system synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/tpu.md",
+      "url": "assessments/tpu.html",
+      "pathwayId": "tpu",
+      "phaseId": "transformers"
+    }
+  },
+  "audience": "Model builders who understand minibatches and want to connect sequence models to accelerator engineering.",
+  "firstArtifact": "A tiny language-model run with causal-mask checks, saved state and reproducible generation.",
+  "focusPhaseIds": [
+    "transformers",
+    "performance",
+    "distributed",
+    "pretraining",
+    "posttraining"
+  ],
+  "modalityTrackIds": [
+    "text",
+    "cross-modal"
+  ],
+  "studyAdvice": "Start with the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
+  "engineeringLessonIds": [
+    "recovery-06",
+    "deployment-07",
+    "operations-07"
+  ]
+}

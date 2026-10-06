@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "internals-02",
+  "contentHash": "b16547d6f5e169c41b3617cb72311289d8ade3cafffedc83bde4eb512d380ed2",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:43:34.467286+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Jacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\n",
+  "data": {
+    "panels": [
+      {
+        "kind": "bar",
+        "labels": [
+          "output 0",
+          "output 1"
+        ],
+        "ylabel": "directional output change",
+        "series": [
+          {
+            "label": "JAX JVP",
+            "y": [
+              -0.96,
+              1.525273192803462
+            ]
+          },
+          {
+            "label": "analytic J v",
+            "y": [
+              -0.96,
+              1.525273192803462
+            ]
+          }
+        ]
+      },
+      {
+        "kind": "bar",
+        "labels": [
+          "input 0",
+          "input 1"
+        ],
+        "ylabel": "input cotangent",
+        "series": [
+          {
+            "label": "JAX VJP",
+            "y": [
+              1.4921219880057701,
+              -2.5999999999999996
+            ]
+          },
+          {
+            "label": "analytic transpose J u",
+            "y": [
+              1.4921219880057701,
+              -2.5999999999999996
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

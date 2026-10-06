@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-06",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A LiteRT file converts successfully. What must happen before claiming NPU latency?",
+      "options": [
+        "Run it on the named device, verify execution placement and measure the stated request boundary.",
+        "Divide CPU latency by the weight compression ratio.",
+        "Assume every operator uses the NPU."
+      ],
+      "correct": 0,
+      "explanation": "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement."
+    }
+  ]
+}

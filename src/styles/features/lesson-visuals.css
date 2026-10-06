@@ -1,0 +1,69 @@
+.lesson-visual {
+  margin-block: 2.5rem;
+  padding-block: 1.5rem;
+  border-block: 1px solid var(--line, #d8d1e3);
+}
+.lesson-visual figure {
+  margin: 1.25rem 0;
+}
+.figure-scroll {
+  max-width: 100%;
+  overflow-x: auto;
+  border: 1px solid #dfd8e8;
+  border-radius: 0.75rem;
+  background: white;
+}
+.figure-scroll img {
+  display: block;
+  width: 100%;
+  min-width: 480px;
+  height: auto;
+}
+.figure-scroll:focus-visible,
+.lesson-execution pre:focus-visible {
+  outline: 3px solid #6240ad;
+  outline-offset: 3px;
+}
+.lesson-visual figcaption,
+.execution-meta {
+  margin-top: 0.7rem;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  color: var(--muted, #61586e);
+  overflow-wrap: anywhere;
+}
+.visual-prediction {
+  padding: 0.9rem 1rem;
+  background: #f3eefb;
+  border-left: 3px solid #6240ad;
+  color: #30273e;
+}
+.figure-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem 1.5rem;
+}
+.lesson-execution pre {
+  max-height: 22rem;
+  overflow: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  padding: 1rem;
+  background: #f4f1f8;
+  color: #30273e;
+  border: 1px solid #dfd8e8;
+  border-radius: 0.5rem;
+}
+@media print {
+  .figure-scroll {
+    overflow: visible;
+    border: 0;
+  }
+  .figure-scroll img {
+    min-width: 0;
+  }
+  .lesson-execution pre {
+    max-height: none;
+    overflow: visible;
+  }
+}

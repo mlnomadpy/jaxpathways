@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "welcome-02",
+  "contentHash": "022dd2a05d4ca7030f0eaaf246c25a54a8537ccedfb23858945e7415daa7da7c",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:23:54.074273+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Shape: (2, 3)\nDtype: float32\nDevices: {CpuDevice(id=0)}\nRow sums: [ 3. 12.]\n",
+  "data": {
+    "kind": "heatmap",
+    "values": [
+      [
+        0.0,
+        1.0,
+        2.0
+      ],
+      [
+        3.0,
+        4.0,
+        5.0
+      ]
+    ],
+    "rows": [
+      "row 0",
+      "row 1"
+    ],
+    "columns": [
+      "feature 0",
+      "feature 1",
+      "feature 2"
+    ],
+    "unit": "array value"
+  }
+}

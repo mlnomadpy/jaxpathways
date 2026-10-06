@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 420" role="img" aria-labelledby="title description">
+  <title id="title">One function, three JAX transformations</title>
+  <desc id="description">A pure function branches into grad for derivatives, vmap for batching and jit for compilation. These capabilities come together in a training step.</desc>
+  <rect width="640" height="420" rx="24" fill="#f7f4ff"/>
+  <g fill="none" stroke="#b2a3d3" stroke-width="2">
+    <path d="M169 210h24c35 0 18-130 57-130h21"/>
+    <path d="M169 210h102"/>
+    <path d="M169 210h24c35 0 18 130 57 130h21"/>
+    <path d="M425 80h16c37 0 10 130 47 130h16"/>
+    <path d="M425 210h79"/>
+    <path d="M425 340h16c37 0 10-130 47-130h16"/>
+  </g>
+  <circle cx="108" cy="210" r="61" fill="#30216b"/>
+  <text x="108" y="222" text-anchor="middle" font-family="Georgia,serif" font-style="italic" font-size="46" fill="#fff">f(x)</text>
+  <text x="108" y="300" text-anchor="middle" font-family="Avenir Next,Trebuchet MS,sans-serif" font-size="16" fill="#5f5873">A pure function</text>
+  <g font-family="Avenir Next,Trebuchet MS,sans-serif">
+    <g transform="translate(271 38)"><rect width="154" height="84" rx="14" fill="#fff" stroke="#6043c4" stroke-width="2"/><circle cx="0" cy="42" r="5" fill="#6043c4"/><text x="20" y="34" font-family="monospace" font-size="24" fill="#30216b">grad</text><text x="20" y="62" font-size="14" fill="#5f5873">Find the derivative</text></g>
+    <g transform="translate(271 168)"><rect width="154" height="84" rx="14" fill="#fff" stroke="#6043c4" stroke-width="2"/><circle cx="0" cy="42" r="5" fill="#6043c4"/><text x="20" y="34" font-family="monospace" font-size="24" fill="#30216b">vmap</text><text x="20" y="62" font-size="14" fill="#5f5873">Work across a batch</text></g>
+    <g transform="translate(271 298)"><rect width="154" height="84" rx="14" fill="#fff" stroke="#6043c4" stroke-width="2"/><circle cx="0" cy="42" r="5" fill="#6043c4"/><text x="20" y="34" font-family="monospace" font-size="24" fill="#30216b">jit</text><text x="20" y="62" font-size="14" fill="#5f5873">Compile the function</text></g>
+    <rect x="504" y="168" width="110" height="84" rx="14" fill="#e3daf7"/>
+    <circle cx="504" cy="210" r="5" fill="#d96828"/>
+    <text x="559" y="205" text-anchor="middle" font-size="17" font-weight="600" fill="#30216b">Training</text>
+    <text x="559" y="229" text-anchor="middle" font-size="17" font-weight="600" fill="#30216b">step</text>
+  </g>
+</svg>

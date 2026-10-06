@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transforms-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why wait with block_until_ready when timing a computation?",
+      "options": [
+        "To change its gradient",
+        "To include completion of device work in elapsed time",
+        "To force a different result"
+      ],
+      "correct": 1,
+      "explanation": "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work."
+    }
+  ]
+}

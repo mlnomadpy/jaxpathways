@@ -1,0 +1,82 @@
+---
+import 'katex/dist/katex.min.css';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/features/reader.css';
+import '../../styles/features/assessment.css';
+import '../../styles/features/math.css';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import registry from '../../../public/api/v1/projects.json';
+import { course } from '../../lib/course-data.js';
+import { projectGuide } from '../../lib/project-guide.js';
+import { siteUrl } from '../../lib/urls.js';
+export function getStaticPaths() {
+  return registry.projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+const { project } = Astro.props;
+const content = projectGuide(project, course);
+---
+
+<SiteLayout
+  title={`${project.title} — JAX Pathways`}
+  description={project.rubric[0]}
+  active="projects"
+  skipTarget="#assessment"
+  skipLabel="Skip to project guide"
+>
+  <main id="assessment" class="project-guide">
+    <a href={siteUrl('projects.html')}>All projects</a>
+    <p class="edition">Project guide · {project.hardware}</p>
+    <Fragment set:html={content.heading} />
+    <div class="assessment-actions">
+      <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
+        Open stage workspace
+      </a>
+      <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>
+        Download code and evidence
+      </a>
+    </div>
+    <nav class="assessment-contents" aria-label="Project guide sections">
+      <strong>In this guide</strong>
+      <ol>
+        {content.sections.map((section) => (
+          <li>
+            <a href={`#${section.id}`} set:html={section.label} />
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <article set:html={content.body} />
+    <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
+      Build and check your implementation
+    </a>
+  </main>
+  <script>
+    import '../../scripts/entries/assessment.js';
+  </script>
+</SiteLayout>
+
+<style>
+  .project-guide :global(article img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 2rem auto;
+  }
+  .project-guide :global(article pre) {
+    color: var(--ink);
+  }
+  .project-guide :global(article table) {
+    display: block;
+    max-width: 100%;
+    overflow-x: auto;
+    font: 14px/1.6 var(--ui);
+    border-collapse: collapse;
+  }
+  .project-guide :global(article th),
+  .project-guide :global(article td) {
+    padding: 10px;
+    border: 1px solid var(--line);
+    text-align: left;
+  }
+</style>

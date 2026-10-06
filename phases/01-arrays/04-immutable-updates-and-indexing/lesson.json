@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "id": "arrays-04",
+  "minutes": 45,
+  "content": {
+    "idea": "x.at[index].`set(value)` returns a value with selected entries replaced. x.at[index].`add(value)` returns a value with contributions added at selected positions. The original array value is unchanged. If you need to keep the result, assign or return it; calling the operation and ignoring the result does not update \\(x\\).\n\nThis is the observable functional contract. It does not prove that every expression allocates a fresh physical buffer. Compilers can reuse storage when safe, and later performance features can make ownership more explicit. Reason about values here; measure storage or performance separately when that becomes the question.",
+    "code": "import jax.numpy as jnp\nx = jnp.array([1., 2., 3., 4.])\ny = x.at[1].set(20.)\nz = x.at[jnp.array([0, 2])].add(5.)\nprint(\"Original:\", x)\nprint(\"Set:\", y)\nprint(\"Add:\", z)\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
+    "output": "Original: \\([1., 2., 3., 4.]\\); Set: \\([1., 20., 3., 4.]\\); Add: \\([6., 2., 8., 4.]\\).",
+    "exercise": "Replace the last two elements with zero in a new array. Keep \\(x\\) unchanged.",
+    "solution": "masked = x.at[2:].set(0.)\nassert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))",
+    "question": "After `y = x.at[1].set(20.)`, what happens to \\(x\\)?",
+    "options": [
+      "Its second element becomes \\(20\\)",
+      "Its value remains unchanged",
+      "It becomes a Python list"
+    ],
+    "answer": 1,
+    "explanation": "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value.",
+    "objectives": [
+      "Predict the values returned by functional indexed set and add.",
+      "Distinguish array-value semantics from Python name rebinding and compiler storage choices.",
+      "Accumulate repeated-index contributions with an explicit integer reference.",
+      "Choose a fixed-shape mask when output shape must remain stable."
+    ],
+    "problem": "You want to replace a few array entries, but JAX rejects the NumPy-style assignment. The key idea is small: describe the new array value, then keep the result. We’ll try replacement and addition, check that the original value is still available, and see what happens when an index appears more than once.",
+    "sections": [
+      {
+        "title": "A Python name and an array value are different",
+        "body": "After `y = x.at[1].set(20)`, \\(x\\) still denotes the original array and \\(y\\) denotes the updated value. After `x = x.at[1].set(20)`, the Python name \\(x\\) is rebound to the new value. That spelling does not retroactively change another name holding the original value.\n\nKeep `original = x` before an update when you want a reference for tests. Comparing original and updated makes the semantics visible. Repeatedly inspecting only the newly rebound name can make a functional update look like mutation even though the old value still exists."
+      },
+      {
+        "title": "Set replaces; add accumulates",
+        "body": "Replacing an entry means its old value no longer contributes at that position in the result. Adding a contribution means the old value remains and the contribution is combined with it. Use set for a known replacement and add for a scatter-like accumulation.\n\nRepeated indices need particular care. With add, contributions to the same index are accumulated; their floating-point order may not be guaranteed. With conflicting set values for the same index, do not assume a portable last-write-wins order. Choose unique indices when you need deterministic replacement semantics and test duplicate accumulation with exact small integers before studying floating-point ordering."
+      },
+      {
+        "title": "Choose a mask when you want to keep the shape",
+        "body": "Selecting \\(x\\)[\\(x\\) > threshold] extracts a variable number of elements: its output length depends on values. A masked replacement, `jnp.where(x > threshold, x, 0)`, keeps the original shape. They are different calculations even if both are described casually as filtering.\n\nA fixed-shape representation is useful for staged computation. Later lessons will explain why value-dependent output lengths can fail under jit. Decide whether downstream code expects compacted selected data or an array with masked entries before choosing the operation."
+      },
+      {
+        "title": "Make the index domain part of the contract",
+        "body": "Our examples use explicit in-bounds integer indices and ordinary slices. Indexing behavior at out-of-bounds positions is not a substitute for validating bad input. Negative indexing, duplicate indices, masks, and scatter modes all need deliberate interpretation in a real data pipeline.\n\nA small update test should verify unchanged positions as well as changed positions. Testing only the new value at one index could miss an unintended broadcast across a slice or a mistaken axis in a matrix."
+      },
+      {
+        "title": "Carry functional updates into training state",
+        "body": "A model update is a larger version of the same idea: parameters and gradients produce new parameters. The caller retains or checkpoints state. Functional indexed operations let you describe a selective change without mutating an old array value.\n\nThis lesson prepares you to reason about optimizer and simulation state. It does not establish memory efficiency or a training algorithm; those require broader computations and measurements."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "See name rebinding without old-value mutation",
+        "prediction": "If two names point at the original array and one name is rebound, which values remain available?",
+        "code": "original = x\nrebound = x\nrebound = rebound.at[1].set(20.)\nassert jnp.allclose(original, jnp.array([1., 2., 3., 4.]))\nassert jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))\nignored = x.at[0].set(99.)\nassert jnp.allclose(x, original)\nassert float(ignored[0]) == 99.",
+        "output": "The original remains \\([1, 2, 3, 4]\\); rebound and ignored hold separate returned values.",
+        "explanation": "Assigning a result changes the binding, while ignoring a result leaves the caller using the old value."
+      },
+      {
+        "title": "Accumulate repeated integer contributions",
+        "prediction": "Predict the total at index \\(1\\) after adding contributions \\(2\\) and \\(3\\) there. What differs from replacement?",
+        "code": "import numpy as np\nindices = jnp.array([1, 1, 3])\ncontributions = jnp.array([2, 3, 7], dtype=jnp.int32)\nbase_counts = jnp.zeros(4, dtype=jnp.int32)\ncounts = base_counts.at[indices].add(contributions)\nreference_counts = np.zeros(4, dtype=np.int32)\nfor index, contribution in zip([1, 1, 3], [2, 3, 7]):\n    reference_counts[index] += contribution\nassert jnp.array_equal(counts, reference_counts)\nassert jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))\nassert jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))",
+        "output": "The counts are \\([0, 5, 0, 7]\\); repeated index \\(1\\) receives both contributions.",
+        "explanation": "The integer loop reference makes accumulation explicit. It avoids asserting a floating-point reduction order or conflicting-set behavior."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Replace a region of a matrix",
+        "difficulty": "Practice",
+        "prompt": "Create a \\((3, 3)\\) matrix containing \\(0\\) through \\(8\\). Set its final column to \\(-1\\) in a returned value. Verify the whole result and original matrix.",
+        "hint": "The slice [:, \\(-1\\)] selects every row and the last column. A scalar replacement broadcasts across that slice.",
+        "solution": "matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)\nupdated_matrix = matrix.at[:, -1].set(-1.)\nassert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))\nassert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))",
+        "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract."
+      },
+      {
+        "title": "Keep shape while masking values",
+        "difficulty": "Challenge",
+        "prompt": "Keep only values greater than \\(2\\) from \\(x\\), replacing other positions with zero. Compare with compact selection and explain the shape difference.",
+        "hint": "Use where for the fixed-shape result. Boolean indexing produces selected values, not a shape-preserving mask.",
+        "solution": "fixed_shape = jnp.where(x > 2., x, 0.)\nselected = x[x > 2.]\nassert fixed_shape.shape == (4,)\nassert selected.shape == (2,)\nassert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))\nassert jnp.allclose(selected, jnp.array([3., 4.]))",
+        "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate."
+      }
+    ],
+    "diagnosis": "If nothing changes, check whether the returned update was discarded. If old values seem changed, distinguish name rebinding from mutation and inspect mutable containers around the array. If duplicate replacements are surprising, do not assume last-write-wins order; use an explicit unique-index policy. If a mask later fails under jit, inspect whether its output length depends on runtime values.",
+    "takeaways": [
+      "Indexed updates return values; retaining them is the caller’s responsibility.",
+      "Name rebinding and mutation are different operations.",
+      "Repeated-index add accumulates contributions, while conflicting set needs a deliberate policy.",
+      "A shape-preserving mask and compact selection express different computations."
+    ],
+    "references": [
+      {
+        "title": "JAX: indexed update API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.numpy.ndarray.at.html"
+      },
+      {
+        "title": "JAX: immutability and array updates",
+        "url": "https://docs.jax.dev/en/latest/notebooks/Common_Gotchas_in_JAX.html#in-place-updates"
+      }
+    ],
+    "visual": {
+      "title": "An update returns a new array",
+      "kind": "executed",
+      "prediction": "Which cells change after set, and which after add?",
+      "reading": "Columns are array indices. The top row is the original array, and each lower row is a separate result created from that original. The cell colors encode stored values; the dark cell containing \\(20\\) makes the replacement easy to locate.\n\nThe middle row replaces only index \\(1\\): \\((1,2,3,4)\\) becomes \\((1,20,3,4)\\). The bottom row instead adds \\(5\\) at indices \\(0\\) and \\(2\\), giving \\((6,2,8,4)\\).",
+      "connection": "The bottom row still contains \\(2\\) at index \\(1\\). This is the visual clue that the two updates branch from the original; the second operation did not continue from the middle row. In both cases, the top row remains unchanged.\n\nAn immutable update returns a new value. To make changes accumulate, pass the returned array into the next update. If these operations were chained, the final array would be \\((6,20,8,4)\\), which is deliberately not the bottom row shown here.",
+      "alt": "An update returns a new array. Columns are array indices. The top row is the original array, and each lower row is a separate result created from that original. The cell colors encode stored values; the dark cell containing \\(20\\) makes the replacement easy to locate. The middle row replaces only index \\(1\\): \\((1,2,3,4)\\) becomes \\((1,20,3,4)\\). The bottom row instead adds \\(5\\) at indices \\(0\\) and \\(2\\), giving \\((6,2,8,4)\\).",
+      "code": "visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows': ['original', 'set index 1', 'add at 0 and 2'], 'columns': ['0', '1', '2', '3'], 'unit': 'stored value'}"
+    }
+  }
+}

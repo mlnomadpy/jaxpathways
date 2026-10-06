@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-02",
+  "contentHash": "dbafb2107e8c27431ee117b3a44ed03a4b77e9e593b1a64b47682baa6b80e3ec",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T22:15:38.127419+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "First IDs: [8, 6, 7, 9]\nNext IDs: [0, 5, 1, 2]\nIterator state bytes: 329\nRestored next batch matches\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "slot 0",
+      "slot 1",
+      "slot 2",
+      "slot 3"
+    ],
+    "ylabel": "example ID",
+    "series": [
+      {
+        "label": "first batch",
+        "y": [
+          8,
+          6,
+          7,
+          9
+        ]
+      },
+      {
+        "label": "next batch",
+        "y": [
+          0,
+          5,
+          1,
+          2
+        ]
+      },
+      {
+        "label": "restored next",
+        "y": [
+          0,
+          5,
+          1,
+          2
+        ]
+      }
+    ]
+  }
+}

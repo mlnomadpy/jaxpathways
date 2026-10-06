@@ -1,0 +1,46 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-02",
+  "contentHash": "ab63d497fd3551a9714aa81b09c9c56dd776132f146604c116908a4e9f4a5f8b",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:32:13.918332+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "return mean: 0.5848437547683716\nactive environments by transition: [64 64 58 53 47 44 39 29]\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "xlabel": "transition index",
+    "ylabel": "active environments before transition",
+    "series": [
+      {
+        "label": "uniform random policy",
+        "y": [
+          64,
+          64,
+          58,
+          53,
+          47,
+          44,
+          39,
+          29
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,48 @@
+{
+  "id": "science",
+  "title": "Simulate and discover",
+  "description": "Simulate physical dynamics, check numerical and derivative accuracy, and recover unknown parameters with held-out evidence. Build a reusable CPU inverse-problem audit before extending to adaptive solvers or accelerators.",
+  "prerequisites": "Shared foundations and calculus",
+  "outcome": "A scientific inverse problem",
+  "libraries": "JAX · NumPy; optional Diffrax ecosystem extension",
+  "source": "https://docs.kidger.site/diffrax/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "science"
+  ],
+  "capstone": {
+    "title": "Audit a differentiable scientific inverse problem",
+    "status": "authored",
+    "assessment": "Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.",
+    "evidence": [
+      "Convergence against the analytic solution at multiple rates and time grids",
+      "Solver sensitivities checked by independent finite differences",
+      "Parameter recovery, held-out errors and a diagnosis of numerical bias or non-identifiability"
+    ],
+    "projectId": "scientific-inverse",
+    "assessmentId": "science",
+    "assessmentDraft": {
+      "id": "science",
+      "projectId": "scientific-inverse",
+      "title": "Scientific inverse-problem synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/science.md",
+      "url": "assessments/science.html"
+    }
+  },
+  "audience": "Scientists and engineers with a domain model to test; calculus is introduced in the shared math lessons.",
+  "firstArtifact": "A cooling simulator with a convergence table and an independent sensitivity check.",
+  "focusPhaseIds": [
+    "science"
+  ],
+  "modalityTrackIds": [],
+  "studyAdvice": "Work from the cooling model through batched trajectories, sensitivities and parameter fitting. At each step compare against the analytic solution before changing the physical rate or time grid. Use the deeper linear algebra and curvature lessons when parameters are hard to identify. Finish the inverse-problem project, then attempt the two-compartment assessment with its independent conservation check.",
+  "engineeringLessonIds": [
+    "recovery-06"
+  ]
+}

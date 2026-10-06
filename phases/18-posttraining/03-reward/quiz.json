@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "posttraining-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What do pairwise preferences identify directly?",
+      "options": [
+        "Reward differences under the chosen comparison model, not an absolute universal utility.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "A shared additive offset cancels from every pairwise probability."
+    }
+  ]
+}

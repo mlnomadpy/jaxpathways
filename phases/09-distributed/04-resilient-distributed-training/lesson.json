@@ -1,0 +1,159 @@
+{
+  "schemaVersion": 1,
+  "id": "distributed-04",
+  "minutes": 105,
+  "content": {
+    "problem": "A restarted sharded run loads the right weights, yet its next update differs. Which missing state could explain that? We will checkpoint a real sharded training step, restore its parameters, momentum, random key and data position, then compare three subsequent updates across an epoch boundary.",
+    "idea": "A recovery point is a consistent boundary in a state machine. Every value needed to choose the next batch and compute the next update belongs to that boundary. Sharding adds a placement contract and multi-controller execution adds coordination; neither makes a weights-only checkpoint sufficient.",
+    "runtime": {
+      "kind": "virtual-cpu",
+      "deviceCount": 4
+    },
+    "objectives": [
+      "Restore a complete training state with explicit target sharding.",
+      "Compare next sample IDs, optimizer state and losses across an epoch boundary.",
+      "Explain single-controller evidence and the additional requirements of a real multi-controller restart."
+    ],
+    "sections": [
+      {
+        "title": "Name the values that determine the next transition",
+        "body": "The state contains weights \\(w\\), momentum \\(v\\), a random key, the current example permutation, the cursor into that permutation and the completed step. A batch is selected from the saved order, then a global mean gradient updates momentum and weights. After the final batch in an epoch, a new split key creates the next order. Saving only the current permutation can therefore reproduce the first resumed batch but fail at the next epoch.",
+        "math": "v_{t+1}=0.8v_t+\\nabla L_t(w_t),\\qquad w_{t+1}=w_t-0.04v_{t+1}"
+      },
+      {
+        "title": "Checkpoint one completed global step",
+        "body": "The example partitions examples across four logical CPU devices and keeps its small parameter state replicated. It waits for the step loss, saves the entire state with a real Orbax StandardCheckpointer, waits for saving to finish and restores against a target whose arrays carry the intended mesh and sharding. Every restored leaf is compared with the saved snapshot.\n\nThe dataset is a deterministic tiny NumPy fixture. Every controller can reconstruct it from the same declared seed, dimensions and target rule. Real input systems need data identity, preprocessing configuration and iterator recovery, as covered in the recovery phase; matching a seed alone is not enough for a changing dataset. Changing the number of devices here changes fixture dimensions and is deliberately outside this restart contract."
+      },
+      {
+        "title": "Prove the next updates, including the next epoch",
+        "body": "After restoring step one, run the uninterrupted and resumed states through three transitions. Compare sample IDs before comparing losses. Then compare every state leaf after each transition. The first resumed batch finishes the existing epoch, and the next transition draws a new permutation; this exercises saved random state as well as the current data cursor.\n\nEach update also checks the global gradient with a separate NumPy formula. Agreement between two runs would not detect an identical bug in both runs. Independent arithmetic establishes the update; replay establishes the restore boundary. Float32 reduction order can vary, so numerical arrays use a stated tolerance while sample order must match exactly.\n\nTo check a real new process on CPU, save the assembled program as main.py, run it once and copy the printed checkpoint parent folder. Run `COURSE_RESUME=1 COURSE_CHECKPOINT_DIR=/your/printed/folder python main.py` from a new terminal process. This loads the existing file; it does not save a replacement. An incorrect path is rejected. Keep both reports."
+      },
+      {
+        "title": "Move the protocol to multiple controllers explicitly",
+        "body": "The default run has one controller and four logical CPU devices. It does not kill a worker or test cross-host storage failure. The optional COURSE_MULTIPROCESS branch calls jax.distributed.initialize before any device query and builds a global mesh. Every controller must run the same script, take the same branches and call save and restore in the same order. The tiny fixture is intentionally duplicated on each host; the callback supplies only the slices required by each addressable shard.\n\nOn a supported existing multi-host TPU environment, give every worker the same new shared checkpoint directory and run the command below on every worker. The launcher must supply the environment that JAX uses for initialization. A path local to only one worker is not shared storage. For a fresh-process restart of this drill, run every controller again with COURSE_RESUME=1 and the same checkpoint directory. Resume skips saving and restores the existing accepted step-one snapshot; the script recomputes the deterministic step-one baseline only to verify this teaching fixture. A general training job must select and validate its own accepted step. Restart the whole worker group according to your job manager; this lesson does not implement elastic membership or automatic worker replacement. This target branch is executable but has not been run on a multi-host cluster here.",
+        "commands": [
+          {
+            "label": "On every worker of an existing supported TPU job",
+            "shell": "bash",
+            "code": "COURSE_MULTIPROCESS=1 JAX_PLATFORMS=tpu COURSE_CHECKPOINT_DIR=/shared/new-recovery-run python main.py",
+            "expected": "All workers coordinate, save and restore through the same new shared path, and report tpu with a process count greater than one. This command needs a configured distributed launch environment and has not been validated on a cluster here."
+          },
+          {
+            "label": "Resume the same accepted checkpoint on every worker",
+            "shell": "bash",
+            "code": "COURSE_MULTIPROCESS=1 COURSE_RESUME=1 JAX_PLATFORMS=tpu COURSE_CHECKPOINT_DIR=/shared/new-recovery-run python main.py",
+            "expected": "The group loads its existing step-one checkpoint without overwriting it, then verifies subsequent updates. CPU fresh-process replay of this branch is checked separately; multi-host TPU execution remains unverified."
+          }
+        ]
+      },
+      {
+        "title": "Reject an inconsistent recovery point",
+        "body": "An existing checkpoint directory is rejected to avoid overwriting evidence from a previous experiment. Use a new directory for each drill. In a production system, the accepted checkpoint also needs a matching code/configuration version and data manifest. A readable checkpoint with the wrong schema, data stream or step counter must not become a successful recovery report.\n\nThe controlled failures below replace only momentum or only the random key. The first changes the very next update; the second can remain hidden until an epoch transition. These are fault-injected restore experiments, not claims that a live multi-host process failure was tested. The operations project separately exercises real local worker termination and a restart runbook."
+      }
+    ],
+    "code": "import os\nimport tempfile\nfrom pathlib import Path\nimport jax\nmulti = os.environ.get('COURSE_MULTIPROCESS') == '1'\nresume = os.environ.get('COURSE_RESUME') == '1'\nif multi:\n    # Every controller runs this before querying devices or creating arrays.\n    jax.distributed.initialize()\nelse:\n    jax.config.update('jax_platforms', 'cpu')\n    jax.config.update('jax_num_cpu_devices', 4)\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\nfrom jax.sharding import Mesh, NamedSharding, PartitionSpec as P\n\ncount = jax.device_count()\nassert count >= 2, 'Use at least two devices for the placement exercise'\nmesh = Mesh(np.asarray(jax.devices()), ('data',))\nrep = NamedSharding(mesh, P())\nrow = NamedSharding(mesh, P('data', None))\nlabel = NamedSharding(mesh, P('data'))\nbatch_size, size, width = 2 * count, 4 * count, 2 * count\n# Identical tiny synthetic fixture on each controller; not distributed data ingestion.\ndata = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)\ntruth = np.linspace(-0.3, 0.4, width, dtype=np.float32)\ntargets = data @ truth\n\ndef placed(value, sharding=rep):\n    a = np.asarray(value)\n    return jax.make_array_from_callback(a.shape, sharding, lambda index: a[index])\n\ndef initial():\n    key, order_key = jax.random.split(jax.random.PRNGKey(17))\n    return { 'weights': placed(np.zeros(width, np.float32)),\n             'momentum': placed(np.zeros(width, np.float32)),\n             'key': placed(np.asarray(key)),\n             'order': placed(np.asarray(jax.random.permutation(order_key, size))),\n             'cursor': placed(np.int32(0)), 'step': placed(np.int32(0)) }\n\n@jax.jit\ndef update(w, velocity, x, y):\n    loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)\n    v = 0.8 * velocity + grad\n    return w - 0.04 * v, v, loss\n\ndef transition(state):\n    cursor = int(state['cursor'])\n    order = np.asarray(state['order'])\n    key = state['key']\n    if cursor == size:\n        key, shuffle_key = jax.random.split(key)\n        order = np.asarray(jax.random.permutation(shuffle_key, size))\n        cursor = 0\n    ids = order[cursor:cursor + batch_size]\n    x, y = placed(data[ids], row), placed(targets[ids], label)\n    w, v, loss = update(state['weights'], state['momentum'], x, y)\n    loss.block_until_ready()\n    # Independent global derivative and momentum update on the host.\n    old_w, old_v = np.asarray(state['weights']), np.asarray(state['momentum'])\n    g = 2 * data[ids].T @ (data[ids] @ old_w - targets[ids]) / batch_size\n    np.testing.assert_allclose(np.asarray(v), 0.8 * old_v + g, rtol=2e-5, atol=2e-6)\n    np.testing.assert_allclose(np.asarray(w), old_w - 0.04 * np.asarray(v), rtol=2e-5, atol=2e-6)\n    new = dict(weights=w, momentum=v, key=placed(np.asarray(key)),\n               order=placed(order), cursor=placed(np.int32(cursor+batch_size)),\n               step=placed(np.int32(int(state['step'])+1)))\n    return new, ids.copy(), float(loss)\n\nstate = initial()\nstate, first_ids, _ = transition(state)\n# Shared path is mandatory for real multi-controller execution.\nif multi:\n    root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve()\nelse:\n    root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve() if os.environ.get('COURSE_CHECKPOINT_DIR') else Path(tempfile.mkdtemp(prefix='jax-distributed-recovery-'))\ncheckpoint_path = root / 'step-one'\nif resume and not checkpoint_path.exists():\n    raise FileNotFoundError('Resume needs an existing step-one checkpoint')\nif not resume and checkpoint_path.exists():\n    raise FileExistsError('Use a new folder or set COURSE_RESUME=1 for the accepted checkpoint')\nwith ocp.StandardCheckpointer() as checkpointer:\n    if not resume:\n        checkpointer.save(checkpoint_path, state)\n        checkpointer.wait_until_finished()\n    # Target carries the current mesh/sharding, rather than inferring it from old metadata.\n    restored = checkpointer.restore(checkpoint_path, target=initial())\n    for name in state:\n        np.testing.assert_array_equal(np.asarray(restored[name]), np.asarray(state[name]))\n    baseline, resumed = state, restored\n    baseline_losses, resumed_losses, replay_ids = [], [], []\n    for _ in range(3):\n        baseline, ids_a, loss_a = transition(baseline)\n        resumed, ids_b, loss_b = transition(resumed)\n        np.testing.assert_array_equal(ids_a, ids_b)\n        for name in baseline:\n            np.testing.assert_allclose(np.asarray(baseline[name]), np.asarray(resumed[name]), rtol=2e-5, atol=2e-6)\n        baseline_losses.append(loss_a)\n        resumed_losses.append(loss_b)\n        replay_ids.append(ids_a.tolist())\nprint('Recorded backend/processes/devices:', jax.default_backend(), jax.process_count(), count)\nprint('Restored step/cursor:', int(restored['step']), int(restored['cursor']))\nprint('Next sample IDs across epoch boundary:', replay_ids)\nprint('Uninterrupted losses:', baseline_losses)\nprint('Restored losses:', resumed_losses)\nprint('Checkpoint:', checkpoint_path)\n",
+    "output": "On the four-device CPU fixture, restoration starts at completed step 1 with cursor 8. The next three sample-ID lists and complete states agree with uninterrupted execution. Reference losses are approximately 0.5070, 0.1964 and 0.1798. The real checkpoint path is printed.",
+    "experiments": [
+      {
+        "title": "Keep weights but discard momentum",
+        "prediction": "Will restoring the correct weights be enough to reproduce the very next update?",
+        "code": "incomplete = {**restored, 'momentum': placed(np.zeros(width, np.float32))}\nwrong_next, wrong_ids, _ = transition(incomplete)\nright_next, right_ids, _ = transition(restored)\nnp.testing.assert_array_equal(wrong_ids, right_ids)\nweight_gap = float(np.max(np.abs(np.asarray(wrong_next['weights']) - np.asarray(right_next['weights']))))\nassert weight_gap > 1e-5\nprint('Same next sample IDs, different weights after missing momentum:', weight_gap)",
+        "output": "The next sample IDs match but the updated weights differ.",
+        "explanation": "The data stream is correct in this injected failure. The missing optimizer memory explains the different update, so restarting the data loader would not repair it."
+      }
+    ],
+    "exercise": "Extend uninterrupted and restored execution by two additional steps. Verify sample IDs, complete state and every local parameter replica. Explain which comparison would fail if a single replica held a different parameter vector.",
+    "solution": "for _ in range(2):\n    baseline, ids_a, _ = transition(baseline)\n    resumed, ids_b, _ = transition(resumed)\n    np.testing.assert_array_equal(ids_a, ids_b)\n    for name in baseline:\n        np.testing.assert_allclose(np.asarray(baseline[name]), np.asarray(resumed[name]), rtol=2e-5, atol=2e-6)\n    for shard in resumed['weights'].addressable_shards:\n        np.testing.assert_allclose(np.asarray(shard.data), np.asarray(baseline['weights']), rtol=2e-5, atol=2e-6)\nassert int(resumed['step']) == 6\nprint('Five resumed transitions and all addressable parameter replicas agree.')",
+    "practice": [
+      {
+        "title": "Find a delayed random-state failure",
+        "difficulty": "Transfer",
+        "prompt": "Restore the saved order and cursor but replace the saved key with a different key. Compare the first resumed batch and the following epoch’s first batch. Predict where replay will first fail.",
+        "hint": "The saved order supplies the remaining current-epoch batch. The key is consumed when the next permutation is generated.",
+        "solution": "wrong_key_state = {**restored, 'key': placed(np.asarray(jax.random.PRNGKey(999)))}\ncorrect_a, ids_a, _ = transition(restored)\nwrong_a, ids_b, _ = transition(wrong_key_state)\nnp.testing.assert_array_equal(ids_a, ids_b)\nnp.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a['weights']), rtol=2e-5, atol=2e-6)\ncorrect_b, ids_c, _ = transition(correct_a)\nwrong_b, ids_d, _ = transition(wrong_a)\nassert not np.array_equal(ids_c, ids_d)\nprint('Current-epoch batch matches; next-epoch batch exposes the wrong key.')",
+        "explanation": "A successful first resumed update does not establish future replay when later branches consume state that was not yet used. Crossing the epoch boundary reveals the changed key."
+      }
+    ],
+    "question": "The first resumed batch and update match, but sample IDs differ at the next epoch. Which saved value should you inspect first?",
+    "options": [
+      "Only the learning-rate constant.",
+      "The random key used to construct the next permutation.",
+      "The display formatting of the loss."
+    ],
+    "answer": 1,
+    "explanation": "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary.",
+    "diagnosis": "Matching IDs with differing weights suggests parameter or optimizer-state mismatch. Differing IDs suggests order, cursor, data identity or shuffle-key mismatch. On multiple hosts also inspect consistent configuration, shared checkpoint access and collective call order; a local CPU pass cannot establish those conditions.",
+    "takeaways": [
+      "Restore parameters, optimizer, random and input-position state together.",
+      "Compare more than one resumed update and cross a state-consuming boundary.",
+      "Keep single-host correctness evidence separate from multi-host fault-tolerance evidence."
+    ],
+    "references": [
+      {
+        "title": "Orbax checkpointing",
+        "url": "https://orbax.readthedocs.io/en/latest/guides/checkpoint/orbax_checkpoint_101.html"
+      },
+      {
+        "title": "JAX multi-controller execution",
+        "url": "https://docs.jax.dev/en/latest/multi_process.html"
+      },
+      {
+        "title": "JAX distributed data loading",
+        "url": "https://docs.jax.dev/en/latest/distributed_data_loading.html"
+      }
+    ],
+    "visual": {
+      "title": "Restored updates reproduce the reference trajectory",
+      "kind": "executed",
+      "prediction": "Where might two apparently equal restarts first diverge if the next epoch needs an unsaved random key?",
+      "reading": "The horizontal axis counts the three updates after the checkpoint, starting at \\(1\\). The vertical axis is the batch mean squared loss before each update. The uninterrupted and restored lines overlap at about \\(0.5070\\), \\(0.1964\\) and \\(0.1798\\) on the recorded CPU fixture. These are different mini-batches, so the downward sequence should not be interpreted as a full-data convergence guarantee.",
+      "connection": "The second plotted update begins a newly shuffled epoch. Its agreement exercises the restored key in addition to the saved order and cursor. The code checks sample IDs and complete state; line overlap alone would not establish those facts. The wrong-key practice deliberately reproduces the first batch and then diverges at the next shuffle. No device throughput or multi-host failure timing is shown.",
+      "alt": "Uninterrupted and restored batch-loss curves overlap for three updates, including a new epoch.",
+      "code": "visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabel':'batch mean squared loss','series':[{'label':'uninterrupted','y':baseline_losses},{'label':'restored','y':resumed_losses}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Initialize the runtime before device access",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "import os\nimport tempfile\nfrom pathlib import Path\nimport jax\nmulti = os.environ.get('COURSE_MULTIPROCESS') == '1'\nresume = os.environ.get('COURSE_RESUME') == '1'\nif multi:\n    # Every controller runs this before querying devices or creating arrays.\n    jax.distributed.initialize()\nelse:\n    jax.config.update('jax_platforms', 'cpu')\n    jax.config.update('jax_num_cpu_devices', 4)\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\nfrom jax.sharding import Mesh, NamedSharding, PartitionSpec as P",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Define the global fixture and placements",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "count = jax.device_count()\nassert count >= 2, 'Use at least two devices for the placement exercise'\nmesh = Mesh(np.asarray(jax.devices()), ('data',))\nrep = NamedSharding(mesh, P())\nrow = NamedSharding(mesh, P('data', None))\nlabel = NamedSharding(mesh, P('data'))\nbatch_size, size, width = 2 * count, 4 * count, 2 * count\n# Identical tiny synthetic fixture on each controller; not distributed data ingestion.\ndata = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)\ntruth = np.linspace(-0.3, 0.4, width, dtype=np.float32)\ntargets = data @ truth",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Carry complete transition state",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "def placed(value, sharding=rep):\n    a = np.asarray(value)\n    return jax.make_array_from_callback(a.shape, sharding, lambda index: a[index])",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Checkpoint and verify replay",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "def initial():\n    key, order_key = jax.random.split(jax.random.PRNGKey(17))\n    return { 'weights': placed(np.zeros(width, np.float32)),\n             'momentum': placed(np.zeros(width, np.float32)),\n             'key': placed(np.asarray(key)),\n             'order': placed(np.asarray(jax.random.permutation(order_key, size))),\n             'cursor': placed(np.int32(0)), 'step': placed(np.int32(0)) }",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Checkpoint and verify replay",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "@jax.jit\ndef update(w, velocity, x, y):\n    loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)\n    v = 0.8 * velocity + grad\n    return w - 0.04 * v, v, loss",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Checkpoint and verify replay",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "def transition(state):\n    cursor = int(state['cursor'])\n    order = np.asarray(state['order'])\n    key = state['key']\n    if cursor == size:\n        key, shuffle_key = jax.random.split(key)\n        order = np.asarray(jax.random.permutation(shuffle_key, size))\n        cursor = 0\n    ids = order[cursor:cursor + batch_size]\n    x, y = placed(data[ids], row), placed(targets[ids], label)\n    w, v, loss = update(state['weights'], state['momentum'], x, y)\n    loss.block_until_ready()\n    # Independent global derivative and momentum update on the host.\n    old_w, old_v = np.asarray(state['weights']), np.asarray(state['momentum'])\n    g = 2 * data[ids].T @ (data[ids] @ old_w - targets[ids]) / batch_size\n    np.testing.assert_allclose(np.asarray(v), 0.8 * old_v + g, rtol=2e-5, atol=2e-6)\n    np.testing.assert_allclose(np.asarray(w), old_w - 0.04 * np.asarray(v), rtol=2e-5, atol=2e-6)\n    new = dict(weights=w, momentum=v, key=placed(np.asarray(key)),\n               order=placed(order), cursor=placed(np.int32(cursor+batch_size)),\n               step=placed(np.int32(int(state['step'])+1)))\n    return new, ids.copy(), float(loss)",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      },
+      {
+        "title": "Checkpoint and verify replay",
+        "instruction": "Add this block after the preceding block in main.py and run the assembled file in a fresh process.",
+        "code": "state = initial()\nstate, first_ids, _ = transition(state)\n# Shared path is mandatory for real multi-controller execution.\nif multi:\n    root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve()\nelse:\n    root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve() if os.environ.get('COURSE_CHECKPOINT_DIR') else Path(tempfile.mkdtemp(prefix='jax-distributed-recovery-'))\ncheckpoint_path = root / 'step-one'\nif resume and not checkpoint_path.exists():\n    raise FileNotFoundError('Resume needs an existing step-one checkpoint')\nif not resume and checkpoint_path.exists():\n    raise FileExistsError('Use a new folder or set COURSE_RESUME=1 for the accepted checkpoint')\nwith ocp.StandardCheckpointer() as checkpointer:\n    if not resume:\n        checkpointer.save(checkpoint_path, state)\n        checkpointer.wait_until_finished()\n    # Target carries the current mesh/sharding, rather than inferring it from old metadata.\n    restored = checkpointer.restore(checkpoint_path, target=initial())\n    for name in state:\n        np.testing.assert_array_equal(np.asarray(restored[name]), np.asarray(state[name]))\n    baseline, resumed = state, restored\n    baseline_losses, resumed_losses, replay_ids = [], [], []\n    for _ in range(3):\n        baseline, ids_a, loss_a = transition(baseline)\n        resumed, ids_b, loss_b = transition(resumed)\n        np.testing.assert_array_equal(ids_a, ids_b)\n        for name in baseline:\n            np.testing.assert_allclose(np.asarray(baseline[name]), np.asarray(resumed[name]), rtol=2e-5, atol=2e-6)\n        baseline_losses.append(loss_a)\n        resumed_losses.append(loss_b)\n        replay_ids.append(ids_a.tolist())\nprint('Recorded backend/processes/devices:', jax.default_backend(), jax.process_count(), count)\nprint('Restored step/cursor:', int(restored['step']), int(restored['cursor']))\nprint('Next sample IDs across epoch boundary:', replay_ids)\nprint('Uninterrupted losses:', baseline_losses)\nprint('Restored losses:', resumed_losses)\nprint('Checkpoint:', checkpoint_path)\n",
+        "explanation": "Every controller must use consistent state, data and collective order; the default exercise runs on four logical CPU devices."
+      }
+    ]
+  }
+}

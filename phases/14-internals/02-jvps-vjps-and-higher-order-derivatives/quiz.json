@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "internals-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A VJP is seeded with an output weighting u. What does the returned input cotangent represent?",
+      "options": [
+        "The output at a displaced input x+u.",
+        "The gradient of the scalar weighted output u-transpose f(x), with u fixed.",
+        "A complete Hessian for every possible loss."
+      ],
+      "correct": 1,
+      "explanation": "The pullback applies the transpose Jacobian to the output weighting. It maps an output cotangent into the input space at the stored base point."
+    }
+  ]
+}

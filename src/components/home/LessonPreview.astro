@@ -1,0 +1,63 @@
+---
+import '../../styles/home/lessons.css';
+import { lessons } from '../../data/home.json';
+import { course, inventory } from '../../lib/course-data.js';
+import { siteUrl } from '../../lib/urls.js';
+import SectionHeading from '../shared/SectionHeading.astro';
+---
+
+<section id="course-overview" class="curriculum-section" aria-labelledby="curriculum-title">
+  <SectionHeading
+    id="curriculum-title"
+    title={lessons.title}
+    intro={lessons.intro}
+    href="course.html"
+    linkLabel="View the full curriculum ↗"
+  />
+  <ol class="lesson-preview">
+    {lessons.items.map((preview) => {
+      const phase = course.phases.find((phase) =>
+        phase.lessons.some((lesson) => lesson.id === preview.id),
+      );
+      const index = phase?.lessons.findIndex((lesson) => lesson.id === preview.id);
+      const lesson = phase?.lessons[index ?? -1];
+      if (!phase || index === undefined || !lesson || lesson.status !== 'authored')
+        throw Error(`Unavailable home lesson: ${preview.id}`);
+      return (
+        <li>
+          <a href={siteUrl(`lesson.html?lesson=${lesson.id}`)}>
+            <span class="lesson-number">
+              {phase.number}.{String(index + 1).padStart(2, '0')}
+            </span>
+            <span>
+              <span class="lesson-title">{lesson.title}</span>
+              <span class="lesson-summary">{preview.summary}</span>
+            </span>
+            <span class="lesson-time">{lesson.minutes} min</span>
+            <span class="lesson-arrow" aria-hidden="true">
+              ↗
+            </span>
+          </a>
+        </li>
+      );
+    })}
+  </ol>
+  <dl class="course-inventory">
+    <div>
+      <dt>available lesson drafts</dt>
+      <dd data-course-count="authored">{inventory.authored}</dd>
+    </div>
+    <div>
+      <dt>integration projects</dt>
+      <dd data-course-count="projects">{inventory.projects}</dd>
+    </div>
+    <div>
+      <dt>planned lessons</dt>
+      <dd data-course-count="planned">{inventory.planned}</dd>
+    </div>
+  </dl>
+  <p class="availability-note">
+    The course is in development. Available exercises run on CPU; planned material is labeled in
+    each path.
+  </p>
+</section>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "With row sharding, why does a global column sum need results from other devices?",
+      "options": [
+        "Each device initially holds only some rows.",
+        "Every sum requires host Python.",
+        "Partitioning changes the mathematical definition of sum."
+      ],
+      "correct": 0,
+      "explanation": "The reduction spans the partitioned row dimension, so partial contributions must be combined."
+    }
+  ]
+}

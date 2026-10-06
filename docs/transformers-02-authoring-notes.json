@@ -1,0 +1,6 @@
+{
+  "id": "transformers-02",
+  "exercise": "Encode abcab with a three-character vocabulary. Create shifted inputs/targets, and a loss-eligibility vector for packed segments [0,0,0,1,1] that excludes a cross-segment next-token target.",
+  "evidence": "Keep token/target alignment, the two masks, future perturbation, segment-leakage comparison and all-masked-row repair. Verify that masks and ignored loss positions enforce the same boundaries.",
+  "check": "What must a packed causal mask enforce?"
+}

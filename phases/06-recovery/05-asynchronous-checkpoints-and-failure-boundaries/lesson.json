@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "id": "recovery-05",
+  "minutes": 90,
+  "content": {
+    "problem": "Your training loop says “saved,” then the process disappears. Which step can you safely resume? We will separate an asynchronous save request, completed storage work and the application’s announcement of a recoverable checkpoint. You will interrupt publication deliberately and show which state recovery selects.",
+    "idea": "A request to save and permission to forget the previous checkpoint are different events. We use a real Orbax asynchronous writer, keep its snapshot separate from the continuing state, wait for completion, verify restoration, and only then update a small application manifest. The manifest is a teaching example of acceptance policy; it does not replace Orbax’s checkpoint format or establish crash durability on every filesystem.",
+    "objectives": [
+      "Distinguish requested, completed, verified and published checkpoint state.",
+      "Continue a functional update while an asynchronous writer is alive.",
+      "Recover from the last accepted checkpoint after an interrupted publication.",
+      "Surface an asynchronous failure before announcing a checkpoint."
+    ],
+    "sections": [
+      {
+        "title": "Define a completed training boundary",
+        "body": "Let the completed training step be \\(s\\). Our state contains a weight vector and that step counter. A snapshot at \\(s=1\\) must restore the vector belonging to that step, even if the live computation advances to \\(s=2\\). The example adds the same known increment to every weight, so an independent array comparison can identify the snapshot without relying on a decreasing training loss.\n\nA real training snapshot also includes optimizer memory, random state and input position from the preceding lessons. Asynchronous writing changes when storage finishes; it does not reduce the state that must be captured."
+      },
+      {
+        "title": "Separate save latency from acceptance",
+        "body": "The timer before and after save measures the blocking part of the call. A second interval includes our continuing update and the remaining completion wait. These intervals are adjacent in one run, so their sum describes this application’s request-to-completion boundary. Neither isolates disk throughput.\n\nKeep the checkpointer alive until its work finishes. A quickly returned call can already be finished for a small snapshot; do not require a race to reproduce. The invariant we control is that the application does not update its accepted-checkpoint manifest before completion and restoration checks."
+      },
+      {
+        "title": "Publish a checkpoint you can actually restore",
+        "body": "After waiting, restore against an explicit target and compare the step and every saved value with the snapshot. Write a new manifest to a temporary sibling and replace the old manifest only after the checks pass. On the local filesystem used here this avoids a reader seeing a half-written JSON file.\n\nA rename alone is not a universal durability or distributed-consistency protocol. Object stores, power failures, concurrent writers and multiple hosts need storage-specific guarantees. Our local manifest is an instructional boundary around a single writer, not a replacement for a production checkpoint manager."
+      },
+      {
+        "title": "Practice interruption without relying on lucky timing",
+        "body": "The second checkpoint is fully written, but an injected exception prevents application publication. Recovery still selects step one through the unchanged manifest. Step two exists on disk yet is not selected by this application. This distinction explains why “directory exists” is a weak recovery test.\n\nThe extra failure experiment injects an exception in a finalization callback. The exception is observed when waiting; no manifest is published for that attempt. It exercises error propagation after finalization, not a claim to reproduce every disk failure. Preserve the old accepted checkpoint until the new one is accepted."
+      },
+      {
+        "title": "Translate the boundary into an operational rule",
+        "body": "Log the requested step, completed step and accepted step separately. If a job exits with an outstanding save, wait during orderly shutdown; if it dies abruptly, resume from the last accepted artifact and expect to repeat work after that step. Record the replay policy rather than silently claiming no work was lost.\n\nWhen a restore differs, compare sample IDs and state before tuning tolerances. A different next batch, reset optimizer or mismatched package/data contract is a different trajectory, even if the restored weights look reasonable."
+      }
+    ],
+    "output": "The accepted step remains \\(1\\) while the live state reaches \\(2\\). A real local checkpoint restores the saved vector. Both timing intervals are observed and vary by machine.",
+    "experiments": [
+      {
+        "title": "Trigger an asynchronous error",
+        "prediction": "If finalization reports an error, should directory existence justify announcing success?",
+        "code": "def injected_failure():\n    raise RuntimeError('injected finalization callback failure')\nfailed_path=root/'callback_failure'\ncp=ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler(),async_options=ocp.options.AsyncOptions(post_finalization_callback=injected_failure))\ntry:\n    cp.save(failed_path,args=ocp.args.StandardSave(live))\n    try:\n        cp.wait_until_finished()\n    except RuntimeError as error:\n        assert 'injected' in str(error)\n        print('Expected background failure surfaced:',error)\n    else:\n        raise AssertionError('background error was hidden')\nfinally:\n    cp.close()\nassert accepted()['step']==1\n",
+        "output": "An intentional error log and caught RuntimeError; the accepted step is unchanged.",
+        "explanation": "The controlled failure happens in the finalization callback. Some storage may already exist; the application still requires successful completion and verification before accepting it."
+      }
+    ],
+    "exercise": "Verify and publish the already written second checkpoint. Restore it and compare the next functional transition against the live state. Keep the original snapshot unchanged.",
+    "solution": "with ocp.StandardCheckpointer() as cp:\n    verified=cp.restore(unpublished,target=live)\nnp.testing.assert_array_equal(verified['weight'],live['weight'])\nassert int(verified['step'])==2\npublish(unpublished,2)\nnp.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])\nassert accepted()['step']==2 and int(snapshot['step'])==1\nprint('Step two verified and accepted; next transition agrees.')",
+    "practice": [
+      {
+        "title": "Keep only a genuinely accepted target",
+        "difficulty": "Transfer",
+        "prompt": "Create a manifest pointing to a nonexistent checkpoint in a disposable variable. Write a preflight that rejects it without replacing the real accepted manifest. Explain why a preflight alone cannot prove numerical correctness.",
+        "hint": "Check path existence and the declared step before restoration; still compare restored contents afterward.",
+        "solution": "def preflight(record):\n    if not Path(record['path']).is_dir() or int(record['step'])<0:\n        raise ValueError('checkpoint target unavailable')\n    return record\nbefore=accepted()\ntry:preflight({'path':str(root/'never_saved'),'step':99})\nexcept ValueError:pass\nelse:raise AssertionError('missing target accepted')\nassert accepted()==before\npreflight(before)\nprint('Missing target rejected; accepted checkpoint unchanged.')",
+        "explanation": "File presence is a necessary local preflight, not proof that metadata, data or training state is correct. The restore comparison supplies the stronger check."
+      }
+    ],
+    "question": "A new checkpoint directory exists but the completion wait raises an exception. Which recovery decision follows this lesson’s protocol?",
+    "options": [
+      "Accept the newest directory immediately.",
+      "Delete the previous checkpoint because save returned.",
+      "Retain the previous accepted checkpoint and investigate the failed attempt."
+    ],
+    "answer": 2,
+    "explanation": "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point.",
+    "diagnosis": "If the accepted step is ahead of the restored state, inspect publication order and the saved step counter. If wait raises, keep that error and the last accepted manifest; do not suppress the error and publish anyway.",
+    "takeaways": [
+      "Record save request, completion and acceptance separately.",
+      "Keep the asynchronous writer alive until completion or reported failure.",
+      "Verify a restored next transition before replacing the accepted recovery point."
+    ],
+    "references": [
+      {
+        "title": "Orbax asynchronous checkpointing",
+        "url": "https://orbax.readthedocs.io/en/latest/guides/checkpoint/async_checkpointing.html"
+      }
+    ],
+    "visual": {
+      "title": "A live step can be ahead of the accepted checkpoint",
+      "kind": "executed",
+      "prediction": "After the publication interruption, which step will application recovery select?",
+      "reading": "The horizontal labels name three different state positions; the vertical axis is a completed-step count, not elapsed time. The saved snapshot and accepted checkpoint both have height \\(1\\), while the live computation reaches \\(2\\). Equal bars here mean equal step counters.\n\nThe gap of one step is intentional. It shows work that the live process has completed but the application has not accepted as its recovery point. The failed publication does not move the accepted bar to two merely because a newer directory is present.",
+      "connection": "The code verifies the saved vector and then injects an interruption before publishing the next checkpoint. Recovery consults the earlier manifest and restores the earlier vector. The full state comparison, rather than bar height alone, establishes which values were restored.\n\nThis plot is a local controlled failure experiment. It does not measure checkpoint bandwidth, simulate power loss or establish multi-host atomicity. Inspect the separately recorded timing intervals and exception output for those different questions.",
+      "alt": "Completed-step bars: snapshot one, live two, accepted one after interrupted publication.",
+      "code": "visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted checkpoint'],'ylabel':'completed step','series':[{'label':'local publication experiment','y':[int(snapshot[\"step\"]),int(live[\"step\"]),report[\"accepted_step\"]]}]}"
+    },
+    "runtime": {
+      "kind": "cpu"
+    },
+    "code": "import json\nimport tempfile\nimport time\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\nroot=Path(tempfile.mkdtemp(prefix='jax-async-lesson-'))\ndef transition(state):\n    return {'weight':state['weight']+.25,'step':state['step']+1}\ndef publish(path, step):\n    pending=root/'LATEST.pending'\n    pending.write_text(json.dumps({'path':str(path),'step':step}))\n    pending.replace(root/'LATEST.json')\ndef accepted():\n    return json.loads((root/'LATEST.json').read_text())\n\nstate={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}\nsnapshot=transition(state)\npath=root/'step_1'\nt0=time.perf_counter()\nwith ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:\n    cp.save(path,args=ocp.args.StandardSave(snapshot))\n    returned=time.perf_counter()\n    assert not (root/'LATEST.json').exists()\n    live=transition(snapshot)\n    cp.wait_until_finished()\n    committed=time.perf_counter()\n    restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))\n    np.testing.assert_array_equal(restored['weight'],snapshot['weight'])\n    assert int(restored['step'])==1 and int(live['step'])==2\n    publish(path,1)\nreport={'save_call_seconds':returned-t0,'remaining_work_and_wait_seconds':committed-returned,\n        'accepted_step':accepted()['step'],'live_step':int(live['step'])}\nassert report['accepted_step']==1\n\n# A deliberately interrupted application publication leaves the previous commit selected.\nunpublished=root/'step_2'\nwith ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:\n    cp.save(unpublished,args=ocp.args.StandardSave(live))\n    cp.wait_until_finished()\n    try:\n        raise RuntimeError('injected interruption before updating LATEST')\n    except RuntimeError:\n        pass\nassert accepted()['step']==1\nwith ocp.StandardCheckpointer() as cp:\n    previous=cp.restore(accepted()['path'],target=snapshot)\nnp.testing.assert_array_equal(previous['weight'],snapshot['weight'])\nassert int(previous['step'])==1\nprint('Checkpoint workspace:',root)\nprint(json.dumps(report,indent=2))\nprint('Unpublished step 2 exists; application recovery still selects verified step 1.')\n",
+    "buildSteps": [
+      {
+        "title": "Define functional state and publication",
+        "instruction": "Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.",
+        "code": "import json\nimport tempfile\nimport time\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\nroot=Path(tempfile.mkdtemp(prefix='jax-async-lesson-'))\ndef transition(state):\n    return {'weight':state['weight']+.25,'step':state['step']+1}\ndef publish(path, step):\n    pending=root/'LATEST.pending'\n    pending.write_text(json.dumps({'path':str(path),'step':step}))\n    pending.replace(root/'LATEST.json')\ndef accepted():\n    return json.loads((root/'LATEST.json').read_text())",
+        "explanation": "The manifest has its own acceptance boundary. State updates return new arrays so later work cannot redefine the snapshot."
+      },
+      {
+        "title": "Save, continue and verify",
+        "instruction": "Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.",
+        "code": "state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}\nsnapshot=transition(state)\npath=root/'step_1'\nt0=time.perf_counter()\nwith ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:\n    cp.save(path,args=ocp.args.StandardSave(snapshot))\n    returned=time.perf_counter()\n    assert not (root/'LATEST.json').exists()\n    live=transition(snapshot)\n    cp.wait_until_finished()\n    committed=time.perf_counter()\n    restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))\n    np.testing.assert_array_equal(restored['weight'],snapshot['weight'])\n    assert int(restored['step'])==1 and int(live['step'])==2\n    publish(path,1)\nreport={'save_call_seconds':returned-t0,'remaining_work_and_wait_seconds':committed-returned,\n        'accepted_step':accepted()['step'],'live_step':int(live['step'])}\nassert report['accepted_step']==1",
+        "explanation": "Wait on the real background writer, restore against the snapshot contract and publish only after the comparison passes."
+      },
+      {
+        "title": "Interrupt publication deliberately",
+        "instruction": "Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.",
+        "code": "# A deliberately interrupted application publication leaves the previous commit selected.\nunpublished=root/'step_2'\nwith ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:\n    cp.save(unpublished,args=ocp.args.StandardSave(live))\n    cp.wait_until_finished()\n    try:\n        raise RuntimeError('injected interruption before updating LATEST')\n    except RuntimeError:\n        pass\nassert accepted()['step']==1\nwith ocp.StandardCheckpointer() as cp:\n    previous=cp.restore(accepted()['path'],target=snapshot)\nnp.testing.assert_array_equal(previous['weight'],snapshot['weight'])\nassert int(previous['step'])==1\nprint('Checkpoint workspace:',root)\nprint(json.dumps(report,indent=2))\nprint('Unpublished step 2 exists; application recovery still selects verified step 1.')\n",
+        "explanation": "The injected application interruption leaves the old accepted checkpoint intact even though a newer directory exists."
+      }
+    ]
+  }
+}

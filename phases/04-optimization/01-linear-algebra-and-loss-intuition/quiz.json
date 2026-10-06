@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What shape should one scalar target per observation have for predictions of shape \\((n,)\\)?",
+      "options": [
+        "\\((n, 1)\\)",
+        "\\((n,)\\)",
+        "\\((d,)\\)"
+      ],
+      "correct": 1,
+      "explanation": "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals."
+    }
+  ]
+}

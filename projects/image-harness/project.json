@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 1,
+  "id": "image-harness",
+  "title": "Build a recoverable image classifier through exported inference",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU; target-device extension requires separate validation",
+  "source": "projects/image-harness/README.md",
+  "requiredLessonIds": [
+    "networks-01",
+    "networks-02",
+    "networks-03",
+    "networks-04",
+    "networks-05",
+    "recovery-01",
+    "recovery-02",
+    "recovery-03",
+    "recovery-04",
+    "deployment-01",
+    "deployment-03",
+    "deployment-05",
+    "deployment-06",
+    "performance-01",
+    "performance-02"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Image data and preprocessing",
+      "command": "python3 projects/image-harness/tests/check.py --stage 1 --implementation projects/image-harness/my_model.py",
+      "evidence": "Channel/range/layout references, PNG ingestion, source-group split manifest",
+      "expected": "PASS stage 1",
+      "diagnosis": "Reject ambiguous input ranges and review source groups before fitting."
+    },
+    {
+      "id": "2",
+      "title": "Transparent CNN baseline",
+      "command": "python3 projects/image-harness/tests/check.py --stage 2 --implementation projects/image-harness/my_model.py",
+      "evidence": "Shape trace, independent receptive field, parameter count and finite difference",
+      "expected": "PASS stage 2",
+      "diagnosis": "Check NHWC/HWIO axes and preserve singleton batches."
+    },
+    {
+      "id": "3",
+      "title": "Actual augmented training",
+      "command": "python3 projects/image-harness/tests/check.py --stage 3 --implementation projects/image-harness/my_model.py",
+      "evidence": "Tiny-set fit, post-update train/held-out curves, seed replay",
+      "expected": "PASS stage 3",
+      "diagnosis": "Distinguish augmented minibatch pre-update loss from unaugmented full-set evaluation."
+    },
+    {
+      "id": "4",
+      "title": "Full-state recovery",
+      "command": "python3 projects/image-harness/tests/check.py --stage 4 --implementation projects/image-harness/my_model.py",
+      "evidence": "Fresh-process next IDs, augmented inputs, losses and optimizer/key/cursor equality",
+      "expected": "PASS stage 4",
+      "diagnosis": "Weights alone omit momentum, randomness and the next sampler position."
+    },
+    {
+      "id": "5",
+      "title": "Frozen evaluation and errors",
+      "command": "python3 projects/image-harness/tests/check.py --stage 5 --implementation projects/image-harness/my_model.py",
+      "evidence": "Unequal-batch metric parity, confusion counts and aligned corruption errors",
+      "expected": "PASS stage 5",
+      "diagnosis": "Read rows as truth, columns as predictions; inspect removed information before explaining failure."
+    },
+    {
+      "id": "6",
+      "title": "Calibrated precision",
+      "command": "python3 projects/image-harness/tests/check.py --stage 6 --implementation projects/image-harness/my_model.py",
+      "evidence": "Training-only scales, actual integer accumulations, clipping, logit errors and byte counts",
+      "expected": "PASS stage 6",
+      "diagnosis": "Separate weight, activation, accumulation and float intermediate operations."
+    },
+    {
+      "id": "7",
+      "title": "Serialized inference artifact",
+      "command": "python3 projects/image-harness/tests/check.py --stage 7 --implementation projects/image-harness/my_model.py",
+      "evidence": "Actual JAX graph reload in a fresh interpreter, signatures and contract guards",
+      "expected": "PASS stage 7",
+      "diagnosis": "Verify payload hashes and preprocessing/class mappings before inference."
+    },
+    {
+      "id": "8",
+      "title": "Measured serving adapter",
+      "command": "python3 projects/image-harness/tests/check.py --stage 8 --implementation projects/image-harness/my_model.py",
+      "evidence": "Warmup, repeated completed CPU inference, failed candidate and rollback trace",
+      "expected": "PASS stage 8",
+      "diagnosis": "State decoding exclusions, actual device and timing units; avoid unsupported target speed claims."
+    }
+  ],
+  "rubric": [
+    "Validate raw image channels/layout/range and external-file provenance without split leakage",
+    "Verify convolution/pooling/head independently and check a parameter derivative",
+    "Train an actual image model with isolated augmentation and reproducible input order",
+    "Restore complete optimizer/random/sampler state in a fresh process and compare next updates",
+    "Explain frozen confusion counts and aligned corrupted-image failures",
+    "Calibrate training-only weight/activation scales and execute int32 accumulation with clipping evidence",
+    "Deserialize actual exported computation and preserve preprocessing/class/signature parity",
+    "Rehearse failed-candidate handling and rollback before reporting completed CPU timings"
+  ],
+  "workspaceFile": "projects/image-harness/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/image-harness/starter/model.py projects/image-harness/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/image-harness/starter/model.py projects/image-harness/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/image-harness/tests/check.py --stage 8 --implementation solution",
+  "setupNote": "Use the extracted top-level folder containing requirements-cpu.txt and projects/image-harness. The synthetic image fixture needs no download; an optional manifest loads existing local image files. Export and restore checks launch bounded fresh CPU interpreters.",
+  "assessmentId": "models"
+}

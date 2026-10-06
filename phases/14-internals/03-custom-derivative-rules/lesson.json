@@ -1,0 +1,145 @@
+{
+  "schemaVersion": 1,
+  "id": "internals-03",
+  "minutes": 120,
+  "content": {
+    "problem": "Sometimes you know a stable formula for a derivative, or need to control what a reverse pass saves. How do you replace JAX’s default differentiation without quietly changing the mathematics? We will write two exact custom rules, check higher derivatives, and catch a deliberately plausible wrong rule.",
+    "idea": "A custom derivative is a mathematical contract attached to a primal function. The primal still computes its original value. The rule must describe its true local derivative, with correct shapes and linear dependence on tangent or cotangent seeds. We use softplus and log-sum-exp because their stable derivatives have compact independent formulas.",
+    "objectives": [
+      "Implement actual custom_jvp and custom_vjp rules with correct return and residual contracts.",
+      "Verify seed linearity, stable extreme values and second derivatives.",
+      "Detect a wrong but linear derivative rule using independent numerical checks.",
+      "Explain the forward-mode limitation of a custom_vjp function."
+    ],
+    "sections": [
+      {
+        "title": "Keep the primal stable before customizing its derivative",
+        "body": "Softplus is \\(s(x)=\\log(1+e^x)\\). Direct exponentiation overflows for a large positive input, even though the correct output is approximately \\(x\\). logaddexp computes the same mathematical function without forming the dangerous exponential. Its derivative is the sigmoid \\(\\sigma(x)\\), and its second derivative is \\(\\sigma(x)(1-\\sigma(x))\\). We use these identities as checks, not as permission to ignore the primal calculation.",
+        "math": "s(x)=\\log(1+e^x),\\qquad s\\prime(x)=\\sigma(x),\\qquad s\\prime\\prime(x)=\\sigma(x)(1-\\sigma(x))"
+      },
+      {
+        "title": "A custom JVP must remain linear in its tangent",
+        "body": "The JVP receives tuples of primal arguments and tangent arguments. For one scalar input, it returns \\((s(x),\\sigma(x)\\dot{x})\\). The coefficient depends on the primal point; the expression is linear in the tangent \\(\\dot{x}\\). Squaring the tangent would not represent a derivative and would prevent a valid linear transpose. Multiplying by an incorrect constant remains linear but is still mathematically wrong, so linearity checks alone cannot establish correctness."
+      },
+      {
+        "title": "Choose residuals for a custom reverse pass",
+        "body": "For \\(\\ell(x)=\\log\\sum_i e^{x_i}\\), the gradient is softmax \\(p\\). The forward rule returns the scalar primal and saves \\(p\\) as the residual. The backward rule receives that residual and a scalar output cotangent \\(g\\), then returns the input cotangent \\(gp\\) inside a one-element tuple. Saving probabilities is a deliberate memory/recomputation choice in this small example; it is not a universal optimal residual policy.",
+        "math": "\\frac{\\partial\\ell}{\\partial x_i}=p_i,\\qquad p_i=\\frac{e^{x_i}}{\\sum_j e^{x_j}}"
+      },
+      {
+        "title": "Higher-order behavior is part of the promise",
+        "body": "Differentiating the softplus rule again should give curvature \\(0.25\\) at zero. Differentiating the log-sum-exp reverse gradient gives \\(\\operatorname{diag}(p)-pp^\\mathsf{T}\\), a symmetric Hessian whose rows sum to zero because adding a common constant changes the value linearly. The reference checks use these formulas. A stop_gradient inserted into a residual path might preserve first derivatives while breaking these higher-order checks."
+      },
+      {
+        "title": "Custom reverse mode has a transformation boundary",
+        "body": "Applying jvp directly to a custom_vjp function is unsupported in the tested JAX API. We reproduce that boundary and report it explicitly. Reverse-over-reverse differentiation of this smooth, correctly implemented rule works and is checked. If forward-mode composition is needed, use an appropriate custom_jvp or ordinary JAX implementation rather than assuming every derivative decorator is interchangeable."
+      },
+      {
+        "title": "An intentionally different gradient needs a different claim",
+        "body": "A straight-through or surrogate rule can be useful in a modeling method, but it is not the exact derivative of the reported primal. This lesson teaches exact custom derivatives. We deliberately halve a correct derivative to show that a smooth-looking result and seed linearity do not make it true. A finite-difference comparison away from flat or saturated regions exposes the error."
+      }
+    ],
+    "output": "Softplus derivatives at zero are 0.5 and 0.25. Stable values at [-1000, 0, 1000] are [0, log(2), 1000]; the naive positive extreme overflows. The custom reverse Hessian matches diag(p)-p p-transpose.",
+    "experiments": [
+      {
+        "title": "Expose a wrong but linear rule",
+        "prediction": "Would halving the derivative violate seed linearity? Would it still be the derivative of softplus?",
+        "code": "@jax.custom_jvp\ndef wrong_softplus(z):\n    return jnp.logaddexp(0.0,z)\n@wrong_softplus.defjvp\ndef wrong_rule(primals,tangents):\n    z,=primals;dz,=tangents\n    return wrong_softplus(z),0.5*jax.nn.sigmoid(z)*dz\nprobe=0.4;eps=1e-5\nfinite=(np.logaddexp(0,probe+eps)-np.logaddexp(0,probe-eps))/(2*eps)\nwrong=float(jax.grad(wrong_softplus)(probe))\nright=float(jax.grad(stable_softplus)(probe))\nassert abs(wrong-finite)>0.2\nnp.testing.assert_allclose(right,finite,rtol=1e-9)\nprint(\"Wrong/correct/finite-difference derivative:\",wrong,right,finite)",
+        "output": "Wrong derivative approximately 0.29934; correct and finite-difference derivatives approximately 0.59869.",
+        "explanation": "The wrong tangent expression is linear, so transposition can still work. Only an independent mathematical or numerical oracle detects its incorrect coefficient."
+      },
+      {
+        "title": "Exercise the custom VJP boundary",
+        "prediction": "Can a custom reverse rule automatically supply a direct forward-mode product?",
+        "code": "rejected=False\ntry:\n    jax.jvp(stable_logsumexp,(x,),(jnp.ones_like(x),))\nexcept TypeError as error:\n    rejected=True\n    print(\"Expected custom_vjp forward-mode boundary:\",str(error).splitlines()[0])\nassert rejected\nordinary=lambda z:jax.scipy.special.logsumexp(z)\nordinary_direction=jax.jvp(ordinary,(x,),(jnp.ones_like(x),))[1]\nnp.testing.assert_allclose(ordinary_direction,1.0,atol=1e-12)\nprint(\"Ordinary JAX common-shift JVP:\",float(ordinary_direction))",
+        "output": "The custom_vjp direct JVP is rejected; the ordinary function gives directional derivative 1.",
+        "explanation": "Adding the same constant to all logits shifts log-sum-exp by that constant. The mathematical derivative exists; the limitation belongs to the custom_vjp transformation interface."
+      }
+    ],
+    "exercise": "Check the custom log-sum-exp gradient on \\((-3,0.2,2,5)\\) against an independent stable softmax and central differences along two directions. Keep the output cotangent explicit.",
+    "solution": "changed=jnp.array([-3.,0.2,2.,5.])\nhost=np.asarray(changed);p=np.exp(host-host.max());p/=p.sum()\nactual=jax.grad(stable_logsumexp)(changed)\nnp.testing.assert_allclose(actual,p,rtol=1e-12)\nfor direction in (np.array([1.,-.5,.2,0.]),np.array([0.,1.,-1.,.3])):\n    eps=1e-5\n    reference=lambda z:np.max(z)+np.log(np.exp(z-np.max(z)).sum())\n    fd=(reference(host+eps*direction)-reference(host-eps*direction))/(2*eps)\n    np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol=1e-8,atol=1e-10)\nnp.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol=1e-12)\nprint(\"Changed-size gradient and cotangent scaling verified\")",
+    "practice": [
+      {
+        "title": "Check common-shift invariance of curvature",
+        "difficulty": "Practice",
+        "prompt": "Add a common constant of \\(1000\\) to every logit. Verify the value shift, unchanged gradient, and Hessian row sums.",
+        "hint": "Use stable references and avoid direct exponentiation of the shifted logits.",
+        "solution": "shift=1000.0\nnp.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)\nnp.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)\nhess=jax.jacrev(jax.grad(stable_logsumexp))(x+shift)\nnp.testing.assert_allclose(jnp.sum(hess,axis=1),0.,atol=1e-12)\nprint(\"Stable shift invariance and zero common-direction curvature verified\")",
+        "explanation": "The common shift leaves probabilities unchanged. Zero curvature in that direction is a structural identity, not a numerical accident."
+      },
+      {
+        "title": "Audit a nonlinear seed rule before registering it",
+        "difficulty": "Challenge",
+        "prompt": "A proposed JVP returns \\(\\sigma(x)\\dot{x}^2\\). Show explicitly why it cannot be the derivative map, then repair it and test a mixed linear combination.",
+        "hint": "At fixed x, compare the response to twice a tangent with twice the response.",
+        "solution": "coefficient=float(jax.nn.sigmoid(0.4))\nbad=lambda tangent:coefficient*tangent*tangent\nassert not np.isclose(bad(2.0),2*bad(1.0))\ngood=lambda tangent:jax.jvp(stable_softplus,(jnp.array(0.4),),(jnp.array(tangent),))[1]\nnp.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)\nprint(\"Nonlinear seed rule rejected by its contract; repaired JVP is linear\")",
+        "explanation": "Linearity follows from the definition of a derivative at a fixed primal point. API acceptance is not a substitute for this mathematical check."
+      }
+    ],
+    "diagnosis": "If first derivatives pass but second derivatives fail, inspect whether residuals or derivative coefficients have been detached. If extreme values are nonfinite, inspect both primal and derivative expressions. If a custom VJP direct JVP fails, treat that as an interface boundary. If a plausible custom gradient differs from finite differences, do not relabel it exact without a valid derivation.",
+    "question": "A custom derivative is linear in its tangent and returns finite values. What additional evidence is necessary before calling it exact?",
+    "options": [
+      "Agreement with the actual primal derivative through an independent derivation or numerical check.",
+      "A larger batch size so its bars look smoother.",
+      "No additional evidence: linearity guarantees the coefficient is correct."
+    ],
+    "answer": 0,
+    "explanation": "Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.",
+    "visual": {
+      "title": "A stable custom rule preserves both slope and curvature",
+      "kind": "executed",
+      "prediction": "Where should softplus have the greatest curvature, and what happens far into either tail?",
+      "reading": "The upper panel plots the first derivative of the custom softplus against its scalar input. It rises smoothly from near zero to near one and passes through \\(0.5\\) at zero. This is sensitivity, not the softplus value itself.\n\nThe lower panel plots the second derivative on the same input range. It reaches \\(0.25\\) at zero and falls to about \\(0.01766\\) at both \\(-4\\) and \\(4\\). The curvature is symmetric even though the first derivative is not.",
+      "connection": "The plotted values come from differentiating the registered custom rule, including differentiating it twice. Independent sigmoid and sigmoid-times-one-minus-sigmoid formulas check the numerical values at named points. The high-curvature central region is useful for detecting a wrong coefficient.\n\nThe separate extreme-input test reaches magnitude one thousand, beyond this display, to check overflow behavior. A smooth curve here cannot establish correctness in every transform or dtype; the VJP interface-boundary experiment and changed-size practice test other parts of the contract.",
+      "alt": "Softplus slope changes from zero to one; its curvature is a symmetric peak of one quarter at zero.",
+      "code": "grid=jnp.linspace(-8.,8.,65)\nslopes=np.asarray(jax.vmap(jax.grad(stable_softplus))(grid))\ncurvatures=np.asarray(jax.vmap(jax.grad(jax.grad(stable_softplus)))(grid))\nvisual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'input x','ylabel':'first derivative','series':[{'label':'custom softplus slope','y':slopes.tolist()}]},{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'input x','ylabel':'second derivative','series':[{'label':'custom softplus curvature','y':curvatures.tolist()}]}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Write stable primal functions and exact derivative contracts",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\n@jax.custom_jvp\ndef stable_softplus(x):\n    return jnp.logaddexp(0.0,x)\n\n@stable_softplus.defjvp\ndef softplus_jvp(primals,tangents):\n    x,=primals\n    dx,=tangents\n    return stable_softplus(x),jax.nn.sigmoid(x)*dx\n\n@jax.custom_vjp\ndef stable_logsumexp(x):\n    return jax.scipy.special.logsumexp(x)\n\ndef logsumexp_fwd(x):\n    value=stable_logsumexp(x)\n    weights=jax.nn.softmax(x)\n    return value,weights\n\ndef logsumexp_bwd(weights,cotangent):\n    return (cotangent*weights,)\n\nstable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)",
+        "explanation": "The JVP rule returns primal and tangent; the VJP forward rule returns primal and residual, and its backward rule returns one cotangent per original input. Both preserve linearity in the directional seed."
+      },
+      {
+        "title": "Check first and second derivatives independently",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "points=jnp.array([-4.,0.,3.])\nvalues=jax.vmap(stable_softplus)(points)\nfirst=jax.vmap(jax.grad(stable_softplus))(points)\nsecond=jax.vmap(jax.grad(jax.grad(stable_softplus)))(points)\nreference_first=1/(1+np.exp(-np.asarray(points)))\nreference_second=reference_first*(1-reference_first)\nnp.testing.assert_allclose(values,np.logaddexp(0,np.asarray(points)),rtol=1e-12)\nnp.testing.assert_allclose(first,reference_first,rtol=1e-12)\nnp.testing.assert_allclose(second,reference_second,rtol=1e-12)\nx=jnp.array([-0.8,0.4,1.1])\nweights=np.exp(np.asarray(x)-np.max(np.asarray(x)));weights/=weights.sum()\nhessian_reference=np.diag(weights)-np.outer(weights,weights)\nnp.testing.assert_allclose(jax.grad(stable_logsumexp)(x),weights,rtol=1e-12)\nnp.testing.assert_allclose(jax.jacrev(jax.grad(stable_logsumexp))(x),hessian_reference,rtol=1e-12,atol=1e-12)\nprint(\"Softplus first/second:\",np.asarray(first),np.asarray(second))\nprint(\"Logsumexp gradient:\",weights)",
+        "explanation": "An exact first derivative can still hide mistakes in a higher-order rule. The softplus curvature and logsumexp Hessian are independently derived here."
+      },
+      {
+        "title": "Exercise extremes and seed linearity",
+        "instruction": "Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.",
+        "code": "extremes=jnp.array([-1000.,0.,1000.])\nextreme_values=jax.vmap(stable_softplus)(extremes)\nextreme_gradients=jax.vmap(jax.grad(stable_softplus))(extremes)\nassert np.isfinite(extreme_values).all() and np.isfinite(extreme_gradients).all()\nnp.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol=1e-12)\nwith np.errstate(over='ignore'):\n    naive=np.log1p(np.exp(np.asarray(extremes)))\nassert not np.isfinite(naive[-1])\n_,pullback=jax.vjp(stable_logsumexp,x)\nnp.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol=1e-12)\nprint(\"Stable extreme values:\",np.asarray(extreme_values),\"naive positive extreme:\",naive[-1])",
+        "explanation": "Numerical stability must hold in both the primal and derivative path. Backward seed linearity is a contract of a true pullback, not an optional aesthetic property."
+      }
+    ],
+    "code": "import jax\njax.config.update(\"jax_enable_x64\", True)\nimport jax.numpy as jnp\nimport numpy as np\n\n@jax.custom_jvp\ndef stable_softplus(x):\n    return jnp.logaddexp(0.0,x)\n\n@stable_softplus.defjvp\ndef softplus_jvp(primals,tangents):\n    x,=primals\n    dx,=tangents\n    return stable_softplus(x),jax.nn.sigmoid(x)*dx\n\n@jax.custom_vjp\ndef stable_logsumexp(x):\n    return jax.scipy.special.logsumexp(x)\n\ndef logsumexp_fwd(x):\n    value=stable_logsumexp(x)\n    weights=jax.nn.softmax(x)\n    return value,weights\n\ndef logsumexp_bwd(weights,cotangent):\n    return (cotangent*weights,)\n\nstable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)\n\npoints=jnp.array([-4.,0.,3.])\nvalues=jax.vmap(stable_softplus)(points)\nfirst=jax.vmap(jax.grad(stable_softplus))(points)\nsecond=jax.vmap(jax.grad(jax.grad(stable_softplus)))(points)\nreference_first=1/(1+np.exp(-np.asarray(points)))\nreference_second=reference_first*(1-reference_first)\nnp.testing.assert_allclose(values,np.logaddexp(0,np.asarray(points)),rtol=1e-12)\nnp.testing.assert_allclose(first,reference_first,rtol=1e-12)\nnp.testing.assert_allclose(second,reference_second,rtol=1e-12)\nx=jnp.array([-0.8,0.4,1.1])\nweights=np.exp(np.asarray(x)-np.max(np.asarray(x)));weights/=weights.sum()\nhessian_reference=np.diag(weights)-np.outer(weights,weights)\nnp.testing.assert_allclose(jax.grad(stable_logsumexp)(x),weights,rtol=1e-12)\nnp.testing.assert_allclose(jax.jacrev(jax.grad(stable_logsumexp))(x),hessian_reference,rtol=1e-12,atol=1e-12)\nprint(\"Softplus first/second:\",np.asarray(first),np.asarray(second))\nprint(\"Logsumexp gradient:\",weights)\n\nextremes=jnp.array([-1000.,0.,1000.])\nextreme_values=jax.vmap(stable_softplus)(extremes)\nextreme_gradients=jax.vmap(jax.grad(stable_softplus))(extremes)\nassert np.isfinite(extreme_values).all() and np.isfinite(extreme_gradients).all()\nnp.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol=1e-12)\nwith np.errstate(over='ignore'):\n    naive=np.log1p(np.exp(np.asarray(extremes)))\nassert not np.isfinite(naive[-1])\n_,pullback=jax.vjp(stable_logsumexp,x)\nnp.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol=1e-12)\nprint(\"Stable extreme values:\",np.asarray(extreme_values),\"naive positive extreme:\",naive[-1])",
+    "references": [
+      {
+        "title": "JAX automatic differentiation cookbook",
+        "url": "https://docs.jax.dev/en/latest/notebooks/autodiff_cookbook.html"
+      },
+      {
+        "title": "Custom JVP and VJP rules",
+        "url": "https://docs.jax.dev/en/latest/notebooks/Custom_derivative_rules_for_Python_code.html"
+      },
+      {
+        "title": "Ahead-of-time lowering and compilation",
+        "url": "https://docs.jax.dev/en/latest/aot.html"
+      },
+      {
+        "title": "The jaxpr language",
+        "url": "https://docs.jax.dev/en/latest/601/jaxpr.html"
+      }
+    ],
+    "takeaways": [
+      "Keep the primal stable before customizing its derivative",
+      "A custom JVP must remain linear in its tangent",
+      "Choose residuals for a custom reverse pass",
+      "Higher-order behavior is part of the promise",
+      "Custom reverse mode has a transformation boundary",
+      "An intentionally different gradient needs a different claim"
+    ]
+  }
+}

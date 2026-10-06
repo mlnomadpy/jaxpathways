@@ -1,0 +1,44 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-06",
+  "contentHash": "b2ae8bf77e153af7ce4dd2d6be963fc2e01e93dc846c4d952223158a80e9f05a",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-06T00:43:11.587353+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Overall MSE: 0.409 high-slice MSE: 4.0 release: False\nTwo-bin input total variation: 0.4 (requires investigation; not an automatic retraining order)\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "overall (10)",
+      "low (9)",
+      "high (1)"
+    ],
+    "xlabel": "evaluation group (count)",
+    "ylabel": "mean squared error",
+    "series": [
+      {
+        "label": "observed MSE",
+        "y": [
+          0.409,
+          0.01,
+          4.0
+        ]
+      },
+      {
+        "label": "illustrative limit",
+        "y": [
+          0.5,
+          0.5,
+          0.5
+        ]
+      }
+    ]
+  }
+}

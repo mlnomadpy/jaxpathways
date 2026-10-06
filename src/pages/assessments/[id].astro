@@ -1,0 +1,55 @@
+---
+import 'katex/dist/katex.min.css';
+import '../../styles/features/math.css';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import AssessmentActions from '../../components/shared/AssessmentActions.astro';
+import assessments from '../../../curriculum/assessments.json';
+import { assessmentContent } from '../../lib/assessment-content.js';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/features/reader.css';
+import '../../styles/features/assessment.css';
+export function getStaticPaths() {
+  return assessments.map((assessment) => ({
+    params: { id: assessment.id },
+    props: { assessment },
+  }));
+}
+const { assessment } = Astro.props;
+const content = assessmentContent(assessment.source);
+---
+
+<SiteLayout
+  title={`${assessment.title} — JAX Pathways`}
+  description="A project synthesis assessment with explicit evidence requirements."
+  active="course"
+  skipTarget="#assessment"
+  skipLabel="Skip to assessment"
+>
+  <main id="assessment">
+    <p class="edition">Synthesis assessment · CPU · editorial review draft</p>
+    <Fragment set:html={content.heading} />
+    <AssessmentActions assessment={assessment} />
+    <nav class="assessment-contents" aria-label="Assessment sections">
+      <strong>In this assessment</strong>
+      <ol>
+        {content.sections.map((section) => (
+          <li>
+            <a href={`#${section.id}`} set:html={section.label} />
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <article set:html={content.body} />
+    <AssessmentActions assessment={assessment} />
+    <footer>
+      <p>
+        Public reference checks, learner reports and reviewer decisions are separate. No automated
+        certificate is awarded.
+      </p>
+    </footer>
+  </main>
+  <script>
+    import '../../scripts/entries/assessment.js';
+  </script>
+</SiteLayout>

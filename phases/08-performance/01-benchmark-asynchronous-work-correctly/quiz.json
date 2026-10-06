@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does the synchronized warmed timer in this lesson measure?",
+      "options": [
+        "Only the accelerator kernel, with all dispatch overhead removed",
+        "A warmed call including dispatch and waiting for output readiness, excluding prior input placement",
+        "Exactly the compiler duration"
+      ],
+      "correct": 1,
+      "explanation": "The boundary includes the call and its completion wait. It excludes input placement and does not isolate compiler or kernel stages."
+    }
+  ]
+}

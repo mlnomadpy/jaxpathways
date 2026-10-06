@@ -1,0 +1,66 @@
+{
+  "id": "ops",
+  "title": "Operate JAX workloads",
+  "description": "Operate reproducible model workloads from tracked experiments to containerized inference. Practice failure recovery, MLOps release gates, LLMOps evaluation and tracing, and ModelOps ownership, approval and rollback.",
+  "prerequisites": "Shared foundations and a runnable training system",
+  "outcome": "An observable, restartable local workload",
+  "libraries": "JAX distributed · Grain · Orbax · XProf · MLflow · Docker",
+  "source": "https://docs.jax.dev/en/latest/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "networks",
+    "recovery",
+    "performance",
+    "distributed",
+    "deployment",
+    "operations"
+  ],
+  "capstone": {
+    "title": "An observable, restartable local workload",
+    "status": "authored",
+    "assessment": "Diagnose real local subprocess failures and timeouts, restore the accepted complete state, reject a degraded artifact and defend rollback and capacity decisions. Accelerator and cluster operation require additional target evidence.",
+    "evidence": [
+      "Versioned configuration, structured progress signals and an incident timeline",
+      "A controlled failure followed by a verified restore of the next update",
+      "An accepted artifact, rollback criteria and capacity calculations separating measurements from assumptions"
+    ],
+    "projectId": "workload-operations",
+    "assessmentId": "ops",
+    "assessmentDraft": {
+      "id": "ops",
+      "projectId": "workload-operations",
+      "title": "Workload operations synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/ops.md",
+      "url": "assessments/ops.html"
+    }
+  },
+  "audience": "Engineers interested in reproducibility, failure recovery and operating accelerator workloads.",
+  "firstArtifact": "An interrupted CPU run whose next data batches, losses and full state match uninterrupted execution.",
+  "focusPhaseIds": [
+    "recovery",
+    "performance",
+    "distributed",
+    "operations",
+    "deployment"
+  ],
+  "modalityTrackIds": [
+    "image",
+    "text",
+    "audio",
+    "cross-modal"
+  ],
+  "studyAdvice": "First reproduce the next update after a local interruption. Then inspect workload traces and placement so an incident has interpretable signals. Work through the operations project’s process, event, restore, release and capacity stages. Keep a runbook naming the accepted checkpoint and rollback decision; validate an actual cluster separately before claiming accelerator operations experience. After the deployment bridge, complete engineering-release to connect MLflow, a verified container and application/release policy. Keep local Docker evidence separate from cloud and accelerator qualification.",
+  "engineeringLessonIds": [
+    "recovery-06",
+    "deployment-07",
+    "operations-06",
+    "operations-07",
+    "operations-08"
+  ]
+}

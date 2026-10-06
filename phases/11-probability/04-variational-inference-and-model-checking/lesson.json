@@ -1,0 +1,134 @@
+{
+  "schemaVersion": 1,
+  "id": "probability-04",
+  "minutes": 125,
+  "content": {
+    "problem": "A variational optimizer finishes with a stable objective, and its posterior mean agrees with a reference. Can its uncertainty still be wrong? We will optimize a diagonal Gaussian against a correlated exact target, then check a prediction under a deliberately misspecified observation model. These are two different failure sources: an inference approximation and a model assumption.",
+    "idea": "Variational inference chooses a tractable family \\(q\\) and adjusts it to approximate a posterior \\(p\\). Our objective is \\(\\operatorname{KL}(q\\Vert p)\\), available exactly for this Gaussian fixture. In a general model the evidence lower bound, or ELBO, replaces the unknown posterior normalization. A successful optimizer can only find distributions inside its chosen family.",
+    "objectives": [
+      "Derive the diagonal Gaussian variational optimum for a correlated target",
+      "Separate optimization error from variational-family error",
+      "Use reparameterization to inspect a Monte Carlo objective",
+      "Diagnose mean-function mismatch using predictive residuals"
+    ],
+    "sections": [
+      {
+        "title": "Name the approximation and the KL direction",
+        "body": "The target covariance has unit marginal variances and correlation \\(0.8\\). Our variational family has a location \\(a\\) and diagonal covariance \\(D\\). It cannot tilt its uncertainty ellipse. The KL direction matters: minimizing \\(\\operatorname{KL}(q\\Vert p)\\) penalizes placing probability where the target density is low. For this Gaussian target, optimizing over diagonal \\(D\\) gives \\(a=m\\) and \\(D_{ii}=1/P_{ii}\\), where \\(P=\\Sigma^{-1}\\). Those are conditional-variance quantities, not the target marginal variances.",
+        "math": "\\operatorname{KL}(q\\Vert p)=\\frac12\\left[\\operatorname{tr}(PD)+(a-m)^\\top P(a-m)-d+\\log|\\Sigma|-\\log|D|\\right]"
+      },
+      {
+        "title": "Work through the remaining error",
+        "body": "For correlation \\(0.8\\), the covariance determinant is \\(1-0.8^2=0.36\\), and each diagonal precision is \\(1/0.36\\). The optimal diagonal variance is therefore \\(0.36\\). Each standard deviation is \\(0.6\\), whereas the target marginal standard deviations are \\(1\\). The means can be right while uncertainty is too narrow. At this optimum the KL is about \\(0.5108\\), not zero. More optimization cannot remove that family restriction."
+      },
+      {
+        "title": "Connect the exact objective to an ELBO",
+        "body": "In a model with data \\(y\\) and latent parameters \\(w\\), the ELBO is the expectation of \\(\\log p(y,w)-\\log q(w)\\) under \\(q\\). The gap to log evidence is \\(\\operatorname{KL}(q\\Vert p(w\\mid y))\\). Reparameterize a diagonal normal as \\(w=a+\\exp(s)\\odot\\epsilon\\), with standard-normal \\(\\epsilon\\), to differentiate an estimated objective with respect to \\(a,s\\). Our exact objective avoids Monte Carlo noise so the family restriction is clear. The experiment below estimates the same KL with independent random draws and compares it to the analytic value.",
+        "math": "\\log p(y)-\\operatorname{ELBO}(q)=\\operatorname{KL}(q(w)\\Vert p(w\\mid y))"
+      },
+      {
+        "title": "Inspect what the model predicts, not only its optimizer",
+        "body": "A posterior predictive check draws plausible replicated observations and compares meaningful features with the observed data. Choose a discrepancy such as residual curvature, outlier count or group-specific spread; a single global mean can conceal a failure. Our stress fixture uses a zero linear mean and noise standard deviation \\(0.25\\), then supplies targets \\(x^2-1\\). Positive residuals at both ends and negative residuals near the center reveal curvature missing from the mean model. Narrower intervals cannot repair that pattern."
+      },
+      {
+        "title": "Keep inference and model errors separate",
+        "body": "The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but do not certify model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. A NumPyro SVI or NUTS implementation is an ecosystem bridge; this lesson does not claim those optional APIs were executed."
+      }
+    ],
+    "output": "The optimized variances are \\((0.36,0.36)\\), compared with target marginal variances \\((1,1)\\). Remaining KL is approximately \\(0.5108\\). The curved stress fixture has visibly structured residuals and low nominal interval coverage.",
+    "exercise": "Replace the target correlation by zero and rederive the optimal diagonal variances and minimum KL. Verify that the diagonal family can now represent the target exactly.",
+    "solution": "def independent_kl(location,log_scale):\n    return .5*(jnp.sum(jnp.exp(2*log_scale))+jnp.sum((location-mu)**2)-2-jnp.sum(2*log_scale))\nassert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)",
+    "question": "The variational mean is correct and the optimization gradient is tiny. Why can posterior intervals still be too narrow?",
+    "options": [
+      "The diagonal family cannot represent the correlated target, even at its optimum",
+      "Any Gaussian model necessarily produces wrong uncertainty",
+      "The number of optimizer iterations defines posterior variance"
+    ],
+    "answer": 0,
+    "explanation": "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.",
+    "diagnosis": "If the objective has stopped improving, compare to the independent analytic optimum before adding iterations. If parameter uncertainty looks plausible but residuals show a U-shaped trend, investigate the mean model. If only one group is poorly covered, keep group-specific checks instead of relying on aggregate coverage.",
+    "experiments": [
+      {
+        "title": "Monte Carlo KL through reparameterization",
+        "prediction": "Will an estimate from diagonal-normal draws approach the exact KL even though the approximation is imperfect?",
+        "code": "eps=jax.random.normal(jax.random.key(52),(40000,2))\nz=location+jnp.exp(log_scale)*eps\ndelta=z-mu\nlogp=-.5*(jnp.einsum('ni,ij,nj->n',delta,P,delta)+2*jnp.log(2*jnp.pi)+jnp.linalg.slogdet(Sigma)[1])\nlogq=-.5*jnp.sum(eps**2,axis=1)-jnp.sum(log_scale)-jnp.log(2*jnp.pi)\nestimate=jnp.mean(logq-logp)\nassert abs(float(estimate-kl(params)))<.03\nprint('Monte Carlo KL:',float(estimate))",
+        "output": "The estimate is close to the exact nonzero KL of \\(0.5108\\).",
+        "explanation": "Matching the exact KL validates this estimator on the fixture; it does not imply the approximate posterior is exact."
+      },
+      {
+        "title": "Count model-generated intervals",
+        "prediction": "Under the stated zero-mean normal model, what fraction of many replicated observations lies within 1.96 noise scales?",
+        "code": "replicated=.25*jax.random.normal(jax.random.key(83),(40000,))\nmodel_coverage=jnp.mean(jnp.abs(replicated)<=1.96*.25)\nassert .94<model_coverage<.96\nprint(\"model self-coverage:\",float(model_coverage))",
+        "output": "Approximately \\(95\\%\\) lie inside their model interval.",
+        "explanation": "Self-coverage checks interval arithmetic under the model. It cannot establish coverage under the curved alternative."
+      }
+    ],
+    "practice": [
+      {
+        "title": "A correct diagonal is not a correct covariance",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Compare the variance of the sum of two target coordinates with that under the optimized diagonal approximation.",
+        "hint": "Retain the off-diagonal covariance terms in the target calculation.",
+        "solution": "direction=jnp.ones(2)\ntrue_sum_var=direction@Sigma@direction\napprox_sum_var=jnp.sum(variance)\nassert jnp.allclose(true_sum_var,3.6)\nassert jnp.allclose(approx_sum_var,.72,atol=1e-5)",
+        "explanation": "Joint predictions can reveal approximation error that examining means alone completely misses."
+      },
+      {
+        "title": "Repair the changed mean without hiding noise",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Replace the zero mean by the known curved mean in the stress fixture. Draw fresh noisy targets and compare residual spread to the stated noise scale.",
+        "hint": "The fixture supplies the true curvature; real data would require fitting and held-out evaluation.",
+        "solution": "truth=jnp.linspace(-2,2,20000)**2-1\nfresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))\nresidual=fresh-truth\nassert abs(float(residual.std())-.25)<.01\nassert abs(float(residual.mean()))<.01",
+        "explanation": "Correcting the mean removes systematic residual structure in this known simulation; observation noise remains."
+      }
+    ],
+    "takeaways": [
+      "An optimized approximation can still miss posterior covariance.",
+      "Model self-coverage is weaker than evaluation under changed observations.",
+      "Keep inference diagnostics and posterior predictive checks as separate evidence."
+    ],
+    "references": [
+      {
+        "title": "Stan variational inference",
+        "url": "https://mc-stan.org/docs/reference-manual/variational.html"
+      },
+      {
+        "title": "Stan posterior predictive checks",
+        "url": "https://mc-stan.org/docs/stan-users-guide/posterior-predictive-checks.html"
+      },
+      {
+        "title": "NumPyro SVI interface",
+        "url": "https://num.pyro.ai/en/stable/svi.html"
+      }
+    ],
+    "visual": {
+      "title": "An accurate mean can coexist with underestimated uncertainty",
+      "kind": "executed",
+      "prediction": "Will optimizing a diagonal approximation recover the full target marginal variances?",
+      "reading": "The horizontal categories identify three quantities: variance of the first weight, variance of the second weight and variance of their sum. The vertical axis is variance in squared parameter units. The target bars are \\(1,1,3.6\\). The optimized diagonal approximation gives \\(0.36,0.36,0.72\\). The especially large gap for the sum comes from both smaller marginal variances and missing positive covariance.",
+      "connection": "The code checks that the optimizer reaches the analytic variational optimum. The remaining gap therefore comes from the chosen diagonal family and KL direction on this particular Gaussian target. It is not evidence that every variational approximation has the same bias; a full-covariance Gaussian can represent this target.",
+      "code": "visual_data={\"kind\":\"bar\",\"x\":[0,1,2],\"labels\":[\"weight 1\",\"weight 2\",\"sum of weights\"],\"xlabel\":\"quantity\",\"ylabel\":\"variance (squared parameter units)\",\"series\":[{\"label\":\"exact target\",\"y\":[1.,1.,3.6]},{\"label\":\"optimized diagonal q\",\"y\":[float(variance[0]),float(variance[1]),float(variance.sum())]}]}",
+      "alt": "An accurate mean can coexist with underestimated uncertainty. The horizontal categories identify three quantities: variance of the first weight, variance of the second weight and variance of their sum. The vertical axis is variance in squared parameter units. The target bars are \\(1,1,3.6\\). The optimized diagonal approximation gives \\(0.36,0.36,0.72\\). The especially large gap for the sum comes from both smaller marginal variances and missing positive covariance."
+    },
+    "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\nmu=jnp.array([1.,-1.])\nSigma=jnp.array([[1.,.8],[.8,1.]])\nP=jnp.linalg.solve(Sigma,jnp.eye(2))\ndef kl(params):\n    location,log_scale=params\n    variance=jnp.exp(2*log_scale)\n    delta=location-mu\n    return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))\n\ndef update(params,_):\n    grads=jax.grad(kl)(params)\n    new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)\n    return new,kl(new)\nparams,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)\nlocation,log_scale=params\nvariance=jnp.exp(2*log_scale)\nassert jnp.allclose(location,mu,atol=1e-4)\nassert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)\nassert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)\nassert kl(params)>0.4\nprint('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))\n\nx=jnp.linspace(-2,2,9)\nlinear_mean=jnp.zeros_like(x)\nnoise_scale=.25\ncurved_targets=x**2-1.\nstandardized_residual=(curved_targets-linear_mean)/noise_scale\ncoverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)\nassert coverage<.4\nassert standardized_residual[0]>10\nprint('synthetic nominal-95% interval coverage:',float(coverage))\nprint('standardized residuals:',standardized_residual)",
+    "buildSteps": [
+      {
+        "title": "1. Specify a correlated target and a simpler approximation",
+        "instruction": "Create a fresh main.py. Our target is an exactly known Gaussian so approximation error can be measured independently of optimization error.",
+        "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\nmu=jnp.array([1.,-1.])\nSigma=jnp.array([[1.,.8],[.8,1.]])\nP=jnp.linalg.solve(Sigma,jnp.eye(2))\ndef kl(params):\n    location,log_scale=params\n    variance=jnp.exp(2*log_scale)\n    delta=location-mu\n    return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))",
+        "explanation": "KL here means KL(q || p). The full covariance of p is retained, while q has independent coordinates."
+      },
+      {
+        "title": "2. Optimize and compare to the exact variational optimum",
+        "instruction": "Append a scan of gradient updates. The analytic optimum uses inverse diagonal precision, which differs from the target marginal variances.",
+        "code": "def update(params,_):\n    grads=jax.grad(kl)(params)\n    new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)\n    return new,kl(new)\nparams,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)\nlocation,log_scale=params\nvariance=jnp.exp(2*log_scale)\nassert jnp.allclose(location,mu,atol=1e-4)\nassert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)\nassert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)\nassert kl(params)>0.4\nprint('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))",
+        "explanation": "Optimization has found the best diagonal Gaussian in this KL direction, yet it cannot reproduce target correlation."
+      },
+      {
+        "title": "3. Check a prediction under a changed data-generating process",
+        "instruction": "Append an explicit model-mismatch experiment. The fitted line predicts zero, but new synthetic targets have curvature. Standardized residuals expose the missing structure.",
+        "code": "x=jnp.linspace(-2,2,9)\nlinear_mean=jnp.zeros_like(x)\nnoise_scale=.25\ncurved_targets=x**2-1.\nstandardized_residual=(curved_targets-linear_mean)/noise_scale\ncoverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)\nassert coverage<.4\nassert standardized_residual[0]>10\nprint('synthetic nominal-95% interval coverage:',float(coverage))\nprint('standardized residuals:',standardized_residual)",
+        "explanation": "This is a deterministic stress fixture with nine targets, not an estimate of population coverage. It isolates a mean-function mismatch that more posterior draws cannot repair."
+      }
+    ]
+  }
+}

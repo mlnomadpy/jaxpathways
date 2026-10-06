@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Rematerialization reduces the number of saved residual descriptions but the compiled temporary-byte estimates are equal. What is the supported conclusion?",
+      "options": [
+        "The compiler’s report must be wrong.",
+        "The differentiation strategy changed, but this evidence does not show reduced compiled temporary storage.",
+        "The model must train faster because fewer values were listed."
+      ],
+      "correct": 1,
+      "explanation": "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit."
+    }
+  ]
+}

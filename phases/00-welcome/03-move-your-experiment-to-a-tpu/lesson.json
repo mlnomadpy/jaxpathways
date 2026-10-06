@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "id": "welcome-03",
+  "minutes": 45,
+  "content": {
+    "problem": "Your notebook imports JAX successfully, but is the prediction actually running on a TPU? We will build a portable device check with an independent numerical answer, then require the requested backend so an unavailable accelerator cannot silently become a successful CPU demonstration.",
+    "idea": "Moving to an accelerator has three separate checks: the runtime can discover the requested device, the inputs and completed result live there, and the arithmetic agrees with a reference. We execute the small CPU reference here and supply the exact TPU execution path for an existing supported runtime.",
+    "objectives": [
+      "Verify the device of a completed prediction and its independent numerical reference.",
+      "Run an explicit TPU target path that fails when TPU is unavailable.",
+      "Separate installation, placement and numerical evidence in a reproducibility report."
+    ],
+    "sections": [
+      {
+        "title": "Carry a prediction, not just an installation",
+        "body": "We will move one small function between runtimes: a matrix-vector prediction with a scalar bias. Each row is an observation; three columns are three features. The weights are fixed so we can calculate the answer independently. For the first row, \\([0,1/8,2/8]\\), the prediction is \\(0-1/32+1/4+1/8=11/32\\). A working package import is useful, but it does not establish where this computation finished.",
+        "math": "\\hat y_i=\\sum_{j=1}^{3}x_{ij}w_j+b,\\qquad X\\in\\mathbb{R}^{8\\times3},\\quad w\\in\\mathbb{R}^{3},\\quad b=1/8"
+      },
+      {
+        "title": "Establish the CPU reference first",
+        "body": "Save the assembled code as main.py in your course workspace and run it in a fresh process. By default COURSE_EXPECT_PLATFORM is cpu. The program selects that backend explicitly, places both inputs on its first device and waits for the compiled prediction to finish. NumPy independently calculates the same arithmetic. Keep the environment report and predictions.\n\nThe tolerance allows small floating-point differences; a successful comparison means this prediction agrees within that tolerance. It does not establish accuracy for a larger model. We use float32 inputs deliberately. Implicit dtype changes and reduced-precision matrix multiplication should be separate experiments after the placement check.",
+        "commands": [
+          {
+            "label": "Run the CPU reference",
+            "shell": "bash",
+            "code": "python main.py",
+            "expected": "The report names cpu, shape [8], float32, a completed output device and a small maximum absolute error. The first prediction is 0.34375."
+          }
+        ]
+      },
+      {
+        "title": "Run the same file on an existing TPU runtime",
+        "body": "Use a supported TPU runtime you already have access to. The install command below belongs inside its Python environment; installing a TPU package on your laptop does not create an accelerator. Keep the interpreter and installed package versions in your report. Start a fresh Python process after installation.\n\nSet COURSE_EXPECT_PLATFORM to tpu when running the same file. The call to jax.devices requests TPU explicitly and should fail when that backend is unavailable. The program checks the output array’s actual device after completion. Keep that report beside the CPU report. This course has executed the CPU path; a TPU run and its numerical result remain unverified here.\n\nThis is a single-controller, single-device placement check even if the runtime lists multiple devices. A multi-host launch needs coordinated initialization before querying devices and belongs to the distributed course. No throughput comparison is meaningful for this tiny setup check.",
+        "commands": [
+          {
+            "label": "Inside an existing supported TPU environment",
+            "shell": "bash",
+            "code": "python -m pip install \"jax[tpu]\"",
+            "expected": "The TPU environment installs compatible JAX and TPU runtime packages. Record the resolved versions; installation alone is not the execution check."
+          },
+          {
+            "label": "Require TPU execution",
+            "shell": "bash",
+            "code": "COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu python main.py",
+            "expected": "On a functioning TPU runtime the report names tpu and all assertions pass. An unavailable TPU must raise an error instead of producing a CPU success report."
+          }
+        ]
+      },
+      {
+        "title": "Diagnose the boundary that failed",
+        "body": "If import fails, check the interpreter and installation. If explicit backend selection fails, check whether you are in the intended runtime and whether its TPU service is available. If device placement succeeds but the independent comparison fails, inspect shapes, dtype, precision and the arithmetic. Do not widen tolerance just to hide a large error.\n\nAn old notebook kernel may retain an initialized CPU backend or stale variables. Restart it, set runtime choices before the first device operation and run every cell. A CPU plot from the recorded course run remains a CPU plot when viewed on a machine that happens to have TPU access; only a fresh recorded execution supplies new evidence."
+      }
+    ],
+    "code": "import os\nimport json\nimport platform\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\nexpected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')\nif expected not in {'cpu', 'tpu'}:\n    raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')\n# Selecting a requested backend must fail when it is unavailable.\ndevices = jax.devices(expected)\nassert devices and all(d.platform == expected for d in devices)\nx_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8\nw_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)\nx = jax.device_put(x_host, devices[0])\nw = jax.device_put(w_host, devices[0])\npredict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))\ny = predict(x, w)\ny.block_until_ready()\nreference = x_host @ w_host + np.float32(0.125)\nnp.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)\nassert {d.platform for d in y.devices()} == {expected}\nreport = dict(expected=expected, output_devices=[str(d) for d in y.devices()],\n              platform=next(iter(y.devices())).platform, jax=jax.__version__,\n              python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),\n              max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),\n              process_index=jax.process_index(), process_count=jax.process_count())\nprint(json.dumps(report, indent=2))\nprint('Completed prediction:', np.asarray(y).tolist())\n",
+    "runtime": {
+      "kind": "cpu"
+    },
+    "output": "The recorded CPU reference predicts [0.34375, 0.8125, 1.28125, 1.75, 2.21875, 2.6875, 3.15625, 3.625]. Its report names the actual output device. There is no recorded TPU result.",
+    "experiments": [
+      {
+        "title": "Reject a mismatched report",
+        "prediction": "Would a correct numeric answer be enough if the report says CPU but the requested target is TPU?",
+        "code": "def verify_report(record, required):\n    if record['platform'] != required or record['expected'] != required:\n        raise ValueError('requested and observed platform disagree')\n    if record['shape'] != [8] or record['dtype'] != 'float32':\n        raise ValueError('prediction contract changed')\n    return True\nassert verify_report(report, expected)\nwrong = {**report, 'platform': 'cpu' if expected == 'tpu' else 'tpu'}\ntry:\n    verify_report(wrong, expected)\nexcept ValueError:\n    print('Mismatched platform report rejected.')\nelse:\n    raise AssertionError('a mismatched report was accepted')",
+        "output": "The deliberately inconsistent report raises ValueError; the actual report passes.",
+        "explanation": "Numerical agreement and requested placement are separate requirements. This experiment tests report validation; the main program performs the actual backend selection and array-placement check."
+      }
+    ],
+    "exercise": "Predict the effect of replacing the bias by minus one quarter. Run a second compiled prediction on the selected device. Compare against the original prediction plus the expected constant shift and an independent NumPy calculation.",
+    "solution": "changed_predict = jax.jit(lambda a, b: a @ b - jnp.float32(0.25))\nchanged = changed_predict(x, w)\nchanged.block_until_ready()\nnp.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)\nnp.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)\nassert {d.platform for d in changed.devices()} == {expected}\nprint('Changed bias, first prediction:', float(changed[0]))",
+    "practice": [
+      {
+        "title": "Test row order without changing the model",
+        "difficulty": "Transfer",
+        "prompt": "Reverse the observation rows and predict the result order before execution. Verify the first and last values, the complete vector and device placement. Explain why this is a stronger check than only comparing the vector sum.",
+        "hint": "A row-wise affine prediction commutes with row permutation. A sum would conceal an ordering bug.",
+        "solution": "reversed_x = jax.device_put(x_host[::-1].copy(), devices[0])\nreversed_y = predict(reversed_x, w)\nreversed_y.block_until_ready()\nnp.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)\nassert {d.platform for d in reversed_y.devices()} == {expected}\nassert np.isclose(float(reversed_y[0]), 3.625)\nassert np.isclose(float(reversed_y[-1]), 0.34375)\nprint('Row reversal preserved values and requested placement.')",
+        "explanation": "Reversing rows should reverse predictions because each observation is evaluated independently. Matching a sum would not reveal a misplaced or reordered prediction."
+      }
+    ],
+    "question": "The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?",
+    "options": [
+      "The TPU installation and its execution are validated.",
+      "The arithmetic matches the reference, but the requested TPU execution has not been validated.",
+      "The model must be numerically wrong."
+    ],
+    "answer": 1,
+    "explanation": "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
+    "diagnosis": "Read the first failing boundary: interpreter/import, explicit backend discovery, output placement or numerical comparison. Keep the original error and requested platform in the report. Restart a stale notebook kernel before trying the target again.",
+    "takeaways": [
+      "Check an actual completed array, not only the installed package.",
+      "Request TPU explicitly so its absence produces an error.",
+      "Retain separate CPU and TPU evidence with versions and dtype."
+    ],
+    "references": [
+      {
+        "title": "JAX installation and TPU support",
+        "url": "https://docs.jax.dev/en/latest/installation.html"
+      },
+      {
+        "title": "JAX device placement",
+        "url": "https://docs.jax.dev/en/latest/sharded-computation.html"
+      }
+    ],
+    "visual": {
+      "title": "The same prediction checked two ways",
+      "kind": "executed",
+      "prediction": "Should the JAX line overlap the independent NumPy points, and would overlap alone prove TPU execution?",
+      "reading": "The horizontal axis is the observation row index, starting at \\(0\\). The vertical axis is the scalar prediction. The two series use the same inputs and weights: one comes from the completed JAX array, the other from NumPy. They overlap in this recorded CPU example. The first value is \\(11/32\\); the constant rise of \\(15/32\\) follows from increasing every feature by \\(3/8\\) while the weights sum to \\(5/4\\).",
+      "connection": "The line is a check of arithmetic and ordering for these eight observations. Read the printed platform report to determine placement; a curve cannot identify the device that produced it. The changed-bias exercise translates this line downward, while row reversal changes the order. This recorded figure comes from the CPU path and carries no TPU timing or correctness claim.",
+      "alt": "JAX and NumPy predictions overlap from 0.34375 at row zero to 3.625 at row seven in the CPU reference.",
+      "code": "visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel':'prediction','series':[{'label':'JAX: '+expected,'y':np.asarray(y).tolist()},{'label':'NumPy reference','y':reference.tolist()}]}"
+    },
+    "buildSteps": [
+      {
+        "title": "Choose the requested platform",
+        "instruction": "Add this block to main.py after the preceding block. Run the assembled file in a fresh process.",
+        "code": "import os\nimport json\nimport platform\nimport numpy as np\nimport jax\nimport jax.numpy as jnp",
+        "explanation": "Keep the requested backend, observed output placement and independent arithmetic check together in the final report."
+      },
+      {
+        "title": "Place inputs and compare a completed prediction",
+        "instruction": "Add this block to main.py after the preceding block. Run the assembled file in a fresh process.",
+        "code": "expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')\nif expected not in {'cpu', 'tpu'}:\n    raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')\n# Selecting a requested backend must fail when it is unavailable.\ndevices = jax.devices(expected)\nassert devices and all(d.platform == expected for d in devices)\nx_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8\nw_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)\nx = jax.device_put(x_host, devices[0])\nw = jax.device_put(w_host, devices[0])\npredict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))\ny = predict(x, w)\ny.block_until_ready()\nreference = x_host @ w_host + np.float32(0.125)\nnp.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)\nassert {d.platform for d in y.devices()} == {expected}\nreport = dict(expected=expected, output_devices=[str(d) for d in y.devices()],\n              platform=next(iter(y.devices())).platform, jax=jax.__version__,\n              python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),\n              max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),\n              process_index=jax.process_index(), process_count=jax.process_count())\nprint(json.dumps(report, indent=2))\nprint('Completed prediction:', np.asarray(y).tolist())\n",
+        "explanation": "Keep the requested backend, observed output placement and independent arithmetic check together in the final report."
+      }
+    ]
+  }
+}

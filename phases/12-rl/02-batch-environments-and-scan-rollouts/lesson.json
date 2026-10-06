@@ -1,0 +1,139 @@
+{
+  "schemaVersion": 1,
+  "id": "rl-02",
+  "minutes": 85,
+  "content": {
+    "problem": "One episode is easy to inspect, but an agent needs many experiences. How do we collect a batch without mixing time, environments or random streams? We will turn the previous transition into a fixed-shape rollout and prove that its padded rows cannot become training evidence.",
+    "idea": "Use vmap for independent environments and scan for dependent time steps. Each environment owns a state; each time step consumes new action keys. The rollout has a time axis and an environment axis, written \\((T,B)\\). We keep finished episodes in place until the batch horizon ends, recording an active mask before each transition. This makes one array represent exactly \\(B\\) episodes.",
+    "objectives": [
+      "Build a scan over vmapped transitions with explicit key ownership.",
+      "Reconstruct episode returns and reward-to-go from padded trajectories.",
+      "Verify the live-transition mask and distinguish batch dimensions from time dimensions."
+    ],
+    "sections": [
+      {
+        "title": "Give each axis one meaning",
+        "body": "For \\(T=8\\) and \\(B=64\\), the reward array has shape \\((8,64)\\). Summing axis zero gives one return per episode. Summing axis one gives total reward at each time index across the batch, a different statistic. vmap maps reset and step over environments; scan threads the complete batch of states through time. The carry has the same structure, shapes and dtypes at every iteration."
+      },
+      {
+        "title": "Split randomness where ownership changes",
+        "body": "First split a reset key from an action key. Split reset keys across the \\(B\\) environments. Split action keys across the \\(T\\) time steps, then across environments. A scalar reset key broadcast to all environments would create correlated starts. An action key reused at every step would replay draws. Deterministic transitions do not need an extra key, so their signature stays simple."
+      },
+      {
+        "title": "Store the behavior policy before changing it",
+        "body": "Each position has a policy logit \\(\\theta_s\\). Applying the sigmoid gives the probability of moving right; the left probability is its complement. A sampled action is discrete, so we will not differentiate through action sampling. Instead, we store its log probability under the behavior policy. Stable log-sigmoid avoids taking a logarithm of a probability rounded to zero.",
+        "math": "\\pi_\\theta(1\\mid s)=\\sigma(\\theta_s),\\qquad \\log\\pi_\\theta(a\\mid s)=a\\log\\sigma(\\theta_s)+(1-a)\\log\\sigma(-\\theta_s)"
+      },
+      {
+        "title": "A final transition is still a learning example",
+        "body": "The active mask is computed from the state before step. Therefore the action that reaches the goal is active and retains its reward. Only subsequent rows are padding. Masking with the next state would delete the successful action itself. We store the final observation in the returned state and do not replace it with a fresh start. This collector handles one finite episode per environment, not an endless auto-reset stream."
+      },
+      {
+        "title": "Credit each action with rewards that follow it",
+        "body": "Reward-to-go sums rewards from the current time onward. For rewards \\((-0.01,-0.01,1,0)\\), targets are \\((0.98,0.99,1,0)\\). The first action can influence all later rewards; the last successful action is credited with the goal reward only. We reverse the time axis, take a cumulative sum, and reverse it back. There is no value bootstrap here because these are complete finite-horizon episodes.",
+        "math": "G_{t,b}=\\sum_{u=t}^{T-1}r_{u,b}"
+      }
+    ],
+    "output": "The trajectory has the stated time and environment axes, exactly one ending event per episode, and zero reward on every padded row.",
+    "experiments": [
+      {
+        "title": "Replay the entire collector",
+        "prediction": "Does replay require restoring only the environment state?",
+        "code": "again = rollout(theta, jax.random.key(5), 64, 8)[1]\nfor name in records:\n    assert jnp.array_equal(records[name], again[name])\nchanged = rollout(theta, jax.random.key(6), 64, 8)[1]\nassert not jnp.array_equal(records['action'], changed['action'])",
+        "output": "Every field replays for the same configuration and key; another key changes actions.",
+        "explanation": "The random stream is part of the experiment state. Replay in this environment is not a promise of identical outputs across arbitrary library versions or devices."
+      },
+      {
+        "title": "Reward-to-go by hand",
+        "prediction": "Predict the four targets for rewards \\((-0.01,-0.01,1,0)\\).",
+        "code": "r = jnp.array([[-.01],[-.01],[1.],[0.]])\ng = returns_to_go(r)\nassert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))\nprint('reward-to-go:', g[:,0])",
+        "output": "The targets are \\((0.98,0.99,1,0)\\).",
+        "explanation": "Zero padded rewards preserve the finite-episode sum, while the active mask removes meaningless log probabilities."
+      }
+    ],
+    "exercise": "Change the batch to \\(7\\) environments and the horizon to \\(5\\). Verify array shapes, one ending event per episode and zero rewards after finishing.",
+    "solution": "final7, r7 = rollout(theta, jax.random.key(17), 7, 5)\nassert r7['reward'].shape == (5,7)\nassert bool(final7.done.all())\nassert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))\nassert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward']) == 0.))",
+    "practice": [
+      {
+        "title": "Catch a shifted mask",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Construct a two-action success from position \\(1\\). Compare masking by the pre-transition done flag with masking by the post-transition done flag.",
+        "hint": "Record the mask before calling step; the successful transition still belongs to the episode.",
+        "solution": "s = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))\ncorrect, broken = 0., 0.\nfor a in [1,1]:\n    active = ~s.done\n    s, reward, _, _ = step(s,jnp.int32(a))\n    correct += float(reward*active)\n    broken += float(reward*(~s.done))\nassert abs(correct-.99) < 1e-6\nassert abs(broken+.01) < 1e-6",
+        "explanation": "The broken mask removes the action responsible for success, leaving only a cost."
+      },
+      {
+        "title": "Check a deterministic policy limit",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Use very large positive logits and verify that every episode follows a shortest route.",
+        "hint": "The two start states need different numbers of actions. Compare each return against its own initial position.",
+        "solution": "_, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)\nexpected = jnp.where(easy['observation'][0] == 0,.98,.99)\nassert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)\nassert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])",
+        "explanation": "The expected return is calculated from the initial position rather than copied from the collector."
+      }
+    ],
+    "question": "Which axis should be summed to obtain one return per environment from a time-major reward array?",
+    "options": [
+      "The time axis",
+      "The environment axis",
+      "Both axes before averaging by live transitions"
+    ],
+    "answer": 0,
+    "explanation": "Summing over time leaves one scalar for each episode. Averaging these episode returns gives the finite-episode performance objective.",
+    "diagnosis": "If reported return changes merely by padding an already finished trajectory, inspect reward masking. If success disappears from the objective, check whether active was recorded before step. If trajectories match too often, inspect broadcast or reused keys before increasing the batch.",
+    "takeaways": [
+      "vmap handles independent environments; scan handles the dependent time sequence.",
+      "Store behavior log probabilities and live-transition masks with rewards."
+    ],
+    "visual": {
+      "title": "The live batch shrinks while the array shape stays fixed",
+      "kind": "executed",
+      "prediction": "Should every row contain the same number of active environments?",
+      "reading": "The horizontal axis is the transition index; the vertical axis counts environments active before that transition. The first value is \\(64\\). The count never rises because we do not reset inside a rollout. Decreases show episodes reaching the goal; episodes still active on the final row will either finish or time out on that row. In the recorded seed, the first two counts are both \\(64\\): even the nearer starting position needs two actions to reach the goal. The third count is \\(58\\), and the last is \\(29\\). The unchanged first pair is therefore expected, not a stalled loop.",
+      "connection": "This curve is not reward or policy quality: a fast-ending policy could succeed, fail or exploit a termination bug in a different task. Here the transition tests establish that early endings are goals. The fixed \\((8,64)\\) reward array retains later rows, but their active flags are false. Changing the seed can move individual counts while preserving these invariants.",
+      "alt": "The live batch shrinks while the array shape stays fixed. The horizontal axis is the transition index; the vertical axis counts environments active before that transition. The first value is \\(64\\). The count never rises because we do not reset inside a rollout. Decreases show episodes reaching the goal; episodes still active on the final row will either finish or time out on that row. In the recorded seed, the first two counts are both \\(64\\): even the nearer starting position needs two actions to reach the goal. The third count is \\(58\\), and the last is \\(29\\). The unchanged first pair is therefore expected, not a stalled loop.",
+      "code": "visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','ylabel':'active environments before transition','series':[{'label':'uniform random policy','y':records['active'].sum(1).tolist()}]}"
+    },
+    "runtime": {
+      "kind": "cpu"
+    },
+    "references": [
+      {
+        "title": "JAX: explicit pseudorandom keys",
+        "url": "https://docs.jax.dev/en/latest/random-numbers.html"
+      },
+      {
+        "title": "JAX scan: fixed-shape carry",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.lax.scan.html"
+      },
+      {
+        "title": "Schulman et al.: Proximal Policy Optimization Algorithms",
+        "url": "https://arxiv.org/abs/1707.06347"
+      },
+      {
+        "title": "Gymnasium: termination and truncation",
+        "url": "https://gymnasium.farama.org/tutorials/gymnasium_basics/handling_time_limits/"
+      }
+    ],
+    "code": "\"\"\"Finite-horizon tabular policy training. CPU teaching environment, not a benchmark.\"\"\"\nfrom functools import partial\nfrom typing import NamedTuple\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\nclass State(NamedTuple):\n    position: jax.Array\n    elapsed: jax.Array\n    done: jax.Array\n\n\ndef reset(key):\n    \"\"\"Start uniformly at position 0 or 1; goal is position 3.\"\"\"\n    return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))\n\n\ndef step(state, action, horizon=8):\n    \"\"\"Action 0: left, 1: right. Caller supplies binary action and positive horizon.\n\n    Returns next state, reward, termination event, truncation event. Finished\n    states absorb without more rewards/events. No implicit reset or lost final observation.\n    \"\"\"\n    active = ~state.done\n    proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)\n    position = jnp.where(active, proposed, state.position)\n    elapsed = state.elapsed + active.astype(jnp.int32)\n    terminated = active & (position == 3)\n    truncated = active & ~terminated & (elapsed >= horizon)\n    reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)\n    return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated\n\ndef log_probability(theta, observations, actions):\n    logits = theta[jnp.minimum(observations, 2)]\n    return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))\n\n\n@partial(jax.jit, static_argnames=('batch_size', 'horizon'))\ndef rollout(theta, key, batch_size=256, horizon=8):\n    reset_key, action_key = jax.random.split(key)\n    states = jax.vmap(reset)(jax.random.split(reset_key, batch_size))\n    time_keys = jax.random.split(action_key, horizon)\n    def body(states, time_key):\n        observations = states.position\n        keys = jax.random.split(time_key, batch_size)\n        probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])\n        actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)\n        next_states, rewards, terminated, truncated = jax.vmap(\n            lambda s, a: step(s, a, horizon))(states, actions)\n        record = dict(observation=observations, action=actions, reward=rewards,\n                      active=~states.done, terminated=terminated, truncated=truncated,\n                      old_logp=log_probability(theta, observations, actions))\n        return next_states, record\n    final, records = jax.lax.scan(body, states, time_keys)\n    return final, records\n\n\ndef returns_to_go(rewards):\n    \"\"\"Undiscounted finite-episode objective; rewards after done are already zero.\"\"\"\n    return jnp.cumsum(rewards[::-1], axis=0)[::-1]\n\ntheta = jnp.zeros(3)\nfinal, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)\nassert records['reward'].shape == (8, 64)\nassert bool(final.done.all())\nassert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))\nassert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))\nepisode_returns = records['reward'].sum(axis=0)\nprint('return mean:', float(episode_returns.mean()))\nprint('active environments by transition:', records['active'].sum(axis=1))",
+    "buildSteps": [
+      {
+        "title": "Reuse the verified environment",
+        "instruction": "Create main.py with this block. Run python3 main.py in the course CPU environment.",
+        "code": "\"\"\"Finite-horizon tabular policy training. CPU teaching environment, not a benchmark.\"\"\"\nfrom functools import partial\nfrom typing import NamedTuple\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n\nclass State(NamedTuple):\n    position: jax.Array\n    elapsed: jax.Array\n    done: jax.Array\n\n\ndef reset(key):\n    \"\"\"Start uniformly at position 0 or 1; goal is position 3.\"\"\"\n    return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))\n\n\ndef step(state, action, horizon=8):\n    \"\"\"Action 0: left, 1: right. Caller supplies binary action and positive horizon.\n\n    Returns next state, reward, termination event, truncation event. Finished\n    states absorb without more rewards/events. No implicit reset or lost final observation.\n    \"\"\"\n    active = ~state.done\n    proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)\n    position = jnp.where(active, proposed, state.position)\n    elapsed = state.elapsed + active.astype(jnp.int32)\n    terminated = active & (position == 3)\n    truncated = active & ~terminated & (elapsed >= horizon)\n    reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)\n    return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated",
+        "explanation": "Keep the state and ending contract identical to the previous lesson."
+      },
+      {
+        "title": "Collect a batch and compute targets",
+        "instruction": "Append this block to main.py. Run python3 main.py in the course CPU environment.",
+        "code": "def log_probability(theta, observations, actions):\n    logits = theta[jnp.minimum(observations, 2)]\n    return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))\n\n\n@partial(jax.jit, static_argnames=('batch_size', 'horizon'))\ndef rollout(theta, key, batch_size=256, horizon=8):\n    reset_key, action_key = jax.random.split(key)\n    states = jax.vmap(reset)(jax.random.split(reset_key, batch_size))\n    time_keys = jax.random.split(action_key, horizon)\n    def body(states, time_key):\n        observations = states.position\n        keys = jax.random.split(time_key, batch_size)\n        probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])\n        actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)\n        next_states, rewards, terminated, truncated = jax.vmap(\n            lambda s, a: step(s, a, horizon))(states, actions)\n        record = dict(observation=observations, action=actions, reward=rewards,\n                      active=~states.done, terminated=terminated, truncated=truncated,\n                      old_logp=log_probability(theta, observations, actions))\n        return next_states, record\n    final, records = jax.lax.scan(body, states, time_keys)\n    return final, records\n\n\ndef returns_to_go(rewards):\n    \"\"\"Undiscounted finite-episode objective; rewards after done are already zero.\"\"\"\n    return jnp.cumsum(rewards[::-1], axis=0)[::-1]",
+        "explanation": "scan emits time-major arrays; vmap keeps environments independent within each time step."
+      },
+      {
+        "title": "Check shapes and episode boundaries",
+        "instruction": "Append this block to main.py. Run python3 main.py in the course CPU environment.",
+        "code": "theta = jnp.zeros(3)\nfinal, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)\nassert records['reward'].shape == (8, 64)\nassert bool(final.done.all())\nassert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))\nassert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))\nepisode_returns = records['reward'].sum(axis=0)\nprint('return mean:', float(episode_returns.mean()))\nprint('active environments by transition:', records['active'].sum(axis=1))",
+        "explanation": "Exactly one ending event and zero padded rewards are stronger checks than a plausible mean return."
+      }
+    ]
+  }
+}

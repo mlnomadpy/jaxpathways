@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-08",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "An approval record contains a reviewer name and a matching hash. Does that authenticate the reviewer?",
+      "options": [
+        "Yes, a hash verifies the reviewer identity.",
+        "No. The fixture checks binding and expiry; trusted identity and authorization are separate requirements.",
+        "Only if the model has low validation loss."
+      ],
+      "correct": 1,
+      "explanation": "Here ModelOps means the operational ownership of models across their lifecycle: inventory, intended use, review, deployment status, monitoring, incident response and retirement. Teams use overlapping MLOps and ModelOps terms; the useful distinction is the responsibility and evidence each process owns."
+    }
+  ]
+}

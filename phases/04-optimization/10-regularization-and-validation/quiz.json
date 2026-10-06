@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-10",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which loss should select the penalty in this exercise?",
+      "options": [
+        "The penalized training objective alone",
+        "Unpenalized validation prediction loss",
+        "A repeatedly inspected final test loss"
+      ],
+      "correct": 1,
+      "explanation": "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection."
+    }
+  ]
+}

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-08",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A smooth function has zero gradient at a point. What can we conclude?",
+      "options": [
+        "It is a global minimum",
+        "It is stationary; curvature or other evidence is needed",
+        "The optimizer implementation is broken"
+      ],
+      "correct": 1,
+      "explanation": "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions."
+    }
+  ]
+}

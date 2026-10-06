@@ -1,0 +1,4185 @@
+[
+  {
+    "page": "/index.html",
+    "pairs": [
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Skip to content",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(248, 246, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Continue learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "12px",
+        "text": "Continue lesson",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(248, 246, 253)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "View the course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "18px",
+        "text": "JAX, from the inside out.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "A hands-on guide to the ideas behind JAX. Start with a small function. Follow it into trai",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "14px",
+        "text": "Start with your first experiment",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Find your learning route",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Practice on your laptop CPU, then use logical CPU devices to learn placement and partition",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Same function. A different capability.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "12px",
+        "text": "Open the gradient lesson",
+        "weight": "500"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Differentiate",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Batch",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Compile",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "12px",
+        "text": "x = 3.0",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "grad(f)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "12px",
+        "text": "slope = 6.0",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "13px",
+        "text": "Inspect the Python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "12px",
+        "text": "first_gradient.py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy code",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "from",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "import",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "def",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "f",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "return",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "14px",
+        "text": "2",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "print",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "grad",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "14px",
+        "text": "3.0",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(182, 174, 201)",
+        "font": "14px",
+        "text": "# 6.0",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "A derivative tells you how the output changes near an input. Here, the slope of x² at 3 is",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "11px",
+        "text": "Illustrative code preview. Run the lesson’s Python example to verify it.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Choose a domain to see the skills, projects, and roles it leads to. Every route uses the s",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Move from a loss and a handwritten update to neural networks, Transformers, reproducible d",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "Available material",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "35 available lessons · 5 unwritten · 2 staged projectsApplied material: 15 available, 4 un",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Build: A trained, evaluated model with reproducible state recovery.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "15px",
+        "text": "ML & training engineer · RL engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "ML & training engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "RL engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Explore domain",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Start path",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Adapt models, export computations, verify predictions, and plan serving capacity using mea",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "Available material",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "31 available lessons · 9 unwritten · 2 staged projectsApplied material: 11 available, 8 un",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Build: A verified inference artifact and a measured serving plan.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Inference & deployment engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Explore domain",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Start path",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Operate jobs, trace bottlenecks, recover from failures, shard across devices, and optimize",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "Available material",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "33 available lessons · 12 unwritten · 2 staged projectsApplied material: 13 available, 11 ",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Build: An observable workload, a recovery runbook, and a performance report.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "15px",
+        "text": "JAX / accelerator operations engineer · Accelerator & performance engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "JAX / accelerator operations engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Accelerator & performance engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Explore domain",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Start path",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Differentiate simulations, model uncertainty, inspect transformed programs, and validate m",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "Available material",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "20 available lessons · 5 unwritten · 1 staged projectsApplied material: 0 available, 4 unw",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Build: A validated simulation, inverse problem, or research experiment.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "15px",
+        "text": "Scientific ML engineer · Research engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Scientific ML engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Research engineer",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Explore domain",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "13px",
+        "text": "Start path",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Pick the work you want to practice. See its skills, milestones, and portfolio project.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Browse all seven career routes",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(200, 184, 239)",
+        "font": "13px",
+        "text": "A project you can build now",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(224, 216, 244)",
+        "font": "16px",
+        "text": "Build a regression experiment, check its gradients, train it, and test it on data it has n",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Open the regression project",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "13px",
+        "text": "Build a neural classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Start with arrays and transformations, then build toward your chosen work. Available lesso",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Browse the course",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "An independent learning project. Curriculum in development.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "JAX documentation ↗",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "GitHub source ↗",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Design inspiration: AI Engineering from Scratch. Original JAX curriculum and implementatio",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "AI Engineering from Scratch",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "page": "/course.html",
+    "pairs": [
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Skip to course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(73, 49, 147)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Home",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "20px",
+        "text": "Learn connected ideas, build an experiment, and keep the evidence.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "16px",
+        "text": "17 phases · 38 lessons available · 35 planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Choose your routeAll phasesStart with JAXTrain neural networksSimulate and discoverModel u",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Find a topic",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Practice environmentAll available environmentsLaptop CPULogical CPU devices",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "0/38 checkpoints · 0/38 exercises self-reported",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Include unwritten roadmap",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Logical CPU devices let you practice partitioning on one machine. TPU performance requires",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Each phase teaches a connected set of ideas, then asks you to build and explain something.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "38 available lesson drafts in 11 phases. Unwritten roadmap entries are hidden.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "00",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Setup & first stepsStart here",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Start here",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "3 available · 1 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Start after: No previous JAX experience needed. Begin with the guided setup.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU and logical CPU devices; TPU bridge re",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "00.01Set up your learning workspaceCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "00.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "00.02Meet your arrays and devicesCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "00.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "00.03Practice with four virtual CPU devicesLogical CPU devices",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "00.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Logical CPU devices",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Explain which device ran your code and reproduce the result in a fresh environ",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "01",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Arrays & pure functionsShared foundations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Shared foundations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "4 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "00 Setup & first steps",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "01.01From NumPy to jax.numpyCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "01.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "01.02Shapes, broadcasting, and dtypesCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "01.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "01.03Pure functions and explicit inputsCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "01.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "01.04Immutable updates and indexingCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "01.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Predict output shapes and explain why a pure function is easier to transform.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "02",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "JAX transformationsShared foundations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Shared foundations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "5 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "01 Arrays & pure functions",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "02.01Your first gradientCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "02.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "02.02Losses and value_and_gradCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "02.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "02.03Batch a function with vmapCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "02.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "02.04Compile a function with jitCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "02.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "02.05Tracing, static arguments, and recompilationCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "02.05",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Compose grad, vmap, and jit; explain what each transformation changes.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "03",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "State, randomness & control flowShared foundations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Shared foundations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "4 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "02 JAX transformations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "03.01Random keys without surprisesCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "03.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "03.02Pytrees and structured parametersCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "03.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "03.03Compiled loops with lax.scanCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "03.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "03.04Branches with lax.condCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "03.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Replay the same experiment with saved state and keys; explain the update order",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "04",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Math & optimizationShared foundations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Shared foundations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "4 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "03 State, randomness & control flow",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "04.01Linear algebra and loss intuitionCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "04.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "04.02Gradient checking and numerical accuracyCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "04.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "04.03Write gradient descent yourselfCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "04.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "04.04Optimize with OptaxCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "04.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Explain the loss, check a gradient numerically, and justify one optimization c",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "13px",
+        "text": "Open the staged project",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "05",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Neural network trainingTraining systems",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Training systems",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "5 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "04 Math & optimization",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU first; accelerator for larger experime",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "05.01Build a tiny multilayer perceptronCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "05.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "05.02Model and state with Flax NNXCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "05.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "05.03A compiled train and evaluation stepCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "05.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "05.04Train a CNN on a small datasetCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "05.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "05.05Debug unstable learningCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "05.05",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Keep train and evaluation behavior separate and reproduce metrics from a saved",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "13px",
+        "text": "Open the staged project",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "06",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Data & checkpoint recoveryTraining systems",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Training systems",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "4 available · 1 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "05 Neural network training",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU first; TPU for system measurements",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "06.01Design an input pipelineCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "06.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "06.02Load, batch, and checkpoint order with GrainCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "06.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "06.03Save model, optimizer, and random stateCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "06.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "06.04Recover data position and resumeCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "06.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Compare resumed and uninterrupted runs under a stated determinism tolerance.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "07",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Transformers & language modelsTraining systems",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Training systems",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "4 available · 0 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "06 Data & checkpoint recovery",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU for small blocks; TPU or GPU for train",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "07.01Attention from small piecesCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "07.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "07.02Masking, tokenization, and sequence packingCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "07.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "07.03A Transformer block and mixed precisionCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "07.03",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "07.04Train, checkpoint, and generateCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "07.04",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Verify masking, sequence handling, restoration, and generation before comparin",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "08",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Performance diagnosisTraining systems",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Training systems",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "2 available · 3 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "05 Neural network training",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU for timing concepts; TPU or GPU for pr",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "08.01Benchmark asynchronous work correctlyCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "08.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "08.02Diagnose recompilation and host synchronizationCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "08.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Separate compilation, execution, input stalls, and synchronization before clai",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "09",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Distributed trainingSpecializations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Specializations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "2 available · 2 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "06 Data & checkpoint recovery",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "08 Performance diagnosis",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: Logical CPU devices for sharding practice;",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "09.01Arrays, meshes, and shardingLogical CPU devices",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "09.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Logical CPU devices",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "09.02A sharded training stepLogical CPU devices",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "09.02",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Logical CPU devices",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Explain partitioning, communication costs, and recovery behavior with measured",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "22px",
+        "text": "14",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "17px",
+        "text": "Autodiff & JAX internalsSpecializations",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Specializations",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "1 available · 3 unwritten",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(73, 49, 147)",
+        "font": "12px",
+        "text": "04 Math & optimization",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Phase hardware guidance, including future work: CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "14.01Read your first jaxprCPU practice",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "14.01",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "CPU practice",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(40, 96, 79)",
+        "font": "12px",
+        "text": "Open lesson ↗",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(73, 49, 147)",
+        "font": "10px",
+        "text": "Bring the phase together",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Checkpoint: Explain tracing and verify the derivative rule numerically.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Project brief · planned",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "38 lesson drafts with CPU companions; 35 topics have no lesson material. 2 staged projects",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "JAX Pathways",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Independent learning project. Available drafts and unwritten topics are shown separately.",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "page": "/notebook.html",
+    "pairs": [
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Skip to content",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(73, 49, 147)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "JAX Pathways / Home",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Your local workspace",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Return to your reading, keep the work you can explain, and take your progress with you.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(244, 247, 252)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Resume your reading",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "14px",
+        "text": "Continue from your saved section",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(244, 247, 252)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "Reading position is separate from completing an exercise.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(244, 247, 252)",
+        "color": "rgb(95, 88, 115)",
+        "font": "15px",
+        "text": "0 / 20 available exercises self-reported · 0 formative checkpoints passed",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(244, 247, 252)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Next unmarked exercise on Start with JAX: Set up your learning workspace",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Your selected pathway",
+        "weight": "650"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "A fitted regression model",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "View the pathway map",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Build a regression training audit · 0 / 4 stages self-reported",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Build a regression training audit",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Build a reproducible classifier audit · 0 / 3 stages self-reported",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Build a reproducible classifier audit",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Reading position, formative quiz results, exercise ticks, project stages, and artifacts ar",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Build your evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "16px",
+        "text": "Attach code, an output, and the change you verified to a lesson or project.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "PathwayStart with JAXTrain neural networksSimulate and discoverModel uncertaintyLearn by i",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Related lesson (optional)No lesson associationSet up your learning workspaceMeet your arra",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "(optional)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Related project (optional)No project associationBuild a regression training auditBuild a r",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "(optional)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Project stage (optional)Whole project / no stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "(optional)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Artifact title",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Artifact link (optional)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "(optional)",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "What did you verify?",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "14px",
+        "text": "Save artifact",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "0 artifacts · self-reported; not reviewed",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Filter by pathwayAll pathwaysStart with JAXTrain neural networksSimulate and discoverModel",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Filter by associationAll artifactsLesson artifactsProject artifactsGeneral experiments",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "0 shown. Saving an artifact does not tick lesson exercises or project stages.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(72, 90, 112)",
+        "font": "16px",
+        "text": "Save an experiment with the code, output, and one verified change.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Prepare for human feedback",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Download the artifacts currently shown above as a Markdown document. It includes your repo",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "0 artifacts will be included using the filters above.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Download review packet",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(250, 251, 253)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "You choose whether and where to share this file. Preparing it does not send a review reque",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(245, 248, 252)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Take your work with you",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(245, 248, 252)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "This browser stores your records locally. A version-2 JSON backup includes artifacts, less",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Download backup",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Import JSON backup",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(245, 248, 252)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Links in a backup do not copy the linked code or notebooks. Keep those files separately. C",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Use actual lesson estimates and see work that does not fit the schedule.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Open the learning club planner →",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Independent curriculum in development. Local learning records are self-reported.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      }
+    ]
+  },
+  {
+    "page": "/project.html",
+    "pairs": [
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Skip to project",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Course / models",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Integration project · CPU",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Build your implementation, check each stage, and explain the evidence.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(48, 33, 107)",
+        "color": "rgb(255, 255, 255)",
+        "font": "14px",
+        "text": "Download project workspace",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Learn the prerequisites",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Required lessons",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "networks-01",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "networks-02",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "networks-03",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "networks-04",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "networks-05",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and project",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "12px",
+        "text": "Terminal instructions",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Terminal · extracted top folder",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python3",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "13px",
+        "text": "14",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-m",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "source",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-m",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "pip",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-r",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-cpu",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Use the environment interpreter for every check. The CPU examples were tested with Python ",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Work in projects/mlp-classifier/my_model.py. Implement the TODO functions before running t",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "macOS / Linux",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "cp",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Windows PowerShell",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "Copy",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-Item",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "Check the reference implementation separately",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Reference command",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "13px",
+        "text": "3",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--implementation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "This checks the provided solution. It does not establish that your own implementation pass",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep: Shape diagram, independent forward calculation, parameter count",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Stage 1 · activated terminal",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "13px",
+        "text": "1",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--implementation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(237, 246, 241)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Successful check:PASS stage 1: shape, wiring, parameter count, seeded initializationThe pr",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "If this stage fails",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "If shapes differ, inspect the model output and target axes before changing the loss reduct",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep the command and the final error line. A missing module usually means the selected int",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "I ran this stage on my implementation and kept its evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Attach stage 1 evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep: Independent stable loss, two finite-difference checks, malformed-label diagnosis",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Stage 2 · activated terminal",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "13px",
+        "text": "2",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--implementation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(237, 246, 241)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Successful check:PASS stage 2: independent loss, two-seed finite differences, label contra",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "If this stage fails",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "If the derivative check fails, compare the stable independent loss and finite-difference t",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep the command and the final error line. A missing module usually means the selected int",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "I ran this stage on my implementation and kept its evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Attach stage 2 evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep: Held-out metrics, full replay, evaluation isolation, count-weighted aggregation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(53, 43, 79)",
+        "color": "rgb(217, 204, 236)",
+        "font": "13px",
+        "text": "Stage 3 · activated terminal",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(73, 56, 95)",
+        "color": "rgb(247, 242, 255)",
+        "font": "12px",
+        "text": "Copy command",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "13px",
+        "text": "3",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "--implementation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "13px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "13px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(237, 246, 241)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Successful check:PASS stage 3: held-out metrics, unequal-batch aggregation, evaluation iso",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "If this stage fails",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "If training fails, inspect the complete loss history and explicit state transition. Keep t",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Keep the command and the final error line. A missing module usually means the selected int",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "15px",
+        "text": "I ran this stage on my implementation and kept its evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Attach stage 3 evidence",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(40, 96, 79)",
+        "font": "16px",
+        "text": "0/3 stages self-reported. Your evidence stays separate from reviewed capability.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Use changed inputs, independent calculations and deliberate failures to assess the combine",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Open synthesis assessment",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Editorial review draft. A reviewer must inspect your actual evidence; stage ticks do not a",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Stage ticks record your report of practice. Public checks establish the specified syntheti",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Add project evidence",
+        "weight": "600"
+      }
+    ]
+  },
+  {
+    "page": "/assessments/models.html",
+    "pairs": [
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "16px",
+        "text": "Skip to assessment",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(48, 33, 107)",
+        "font": "21px",
+        "text": "JAX Pathways",
+        "weight": "700"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Course",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Career routes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(37, 33, 57)",
+        "font": "14px",
+        "text": "Resources",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "13px",
+        "text": "Synthesis assessment · CPU · editorial review draft",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Open project workspace",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Download assignment",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Keep assessment evidence",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Prepare an assessment workspace",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Task 1: transfer the model to a new width and singleton input",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Task 2: defend the objective at extreme logits",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Task 3: separate fitting, evaluation and reproducibility",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Task 4: diagnose unequal-batch metrics",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Task 5: reject malformed labels without hiding the axis bug",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(229, 221, 245)",
+        "color": "rgb(37, 33, 57)",
+        "font": "12px",
+        "text": "Evidence package and reviewer decision",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Scope: a small Flax NNX classifier, stable objective, parameter derivatives, compiled upda",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Open the project workspace. Keep your evidence in My learning. This assesses the classifie",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Open the project workspace",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "My learning",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Complete networks-01 through networks-05 and the project in projects/mlp-classifier/README",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Use the tested CPU environment and record Python, JAX, NumPy, Flax and Optax versions, act",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "python",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "--stage",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(255, 192, 156)",
+        "font": "14px",
+        "text": "3",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "--implementation",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(222, 183, 255)",
+        "font": "14px",
+        "text": "-classifier",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(40, 33, 62)",
+        "color": "rgb(160, 216, 239)",
+        "font": "14px",
+        "text": "py",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "This project checker accepts an implementation path. If your file has another name, replac",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Build the same two-layer tanh model at hidden width five, rather than the project’s defaul",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Derive the parameter count and identify every kernel/bias shape. Verify it against NNX par",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "On a fresh disposable model, assign these explicit parameters so the forward calculation i",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Write the five pre-activations, their tanh values and the final logit by hand or an indepe",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Keep: shape diagram, parameter derivation, known-parameter forward calculation, NNX compar",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "For logits [-100,0,100] and labels [0,1,1], derive the stable mean binary cross-entropy:",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Explain what the zero-logit observation contributes. Predict the derivative when one scala",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "In a disposable diagnostic function, compute sigmoid probabilities and then -label*log(p)-",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Finally, on a newly initialized width-five NNX model, compare the derivative of the output",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Keep: scalar derivation, bias-shift derivative, stable/unstable results and two seeded par",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Train your width-five model on the four XOR corners. Use seeds 2 and 5, learning rate 0.03",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Define two held-out sets before fitting:",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Evaluate all four seed × held-out combinations. Verify loss and accuracy against independe",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "A newly changed width/seed/noise fixture has no guaranteed accuracy threshold in this asse",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Snapshot every NNX model-state leaf before and after evaluation and verify exact equality.",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Keep: the frozen held-out generation rule, seed/configuration table, histories, replay com",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "An evaluator processed one batch with 7 rows and 6 correct predictions, and another with 3",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Keep: independent arithmetic, the constructed wrong result, full-vs-partitioned model eval",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Give the classifier predictions of shape (B,) and labels of shape (B,1) for B=3. Predict t",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "For an intentionally column-shaped input format, validate that there is exactly one label ",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Keep: shapes, the expected error, caller conversion, equality check and multi-column/singl",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Submit your model implementation, assessment harness, environment/commands and report. Dis",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Use accept, revise, or not demonstrated per task and name the missing evidence. An overall",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "Reviewer numerical references are separate. After your attempt, download the reviewer note",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(37, 33, 57)",
+        "font": "19px",
+        "text": "download the reviewer notes",
+        "weight": "400"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Open project workspace",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Download assignment",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(255, 255, 255)",
+        "color": "rgb(48, 33, 107)",
+        "font": "14px",
+        "text": "Keep assessment evidence",
+        "weight": "600"
+      },
+      {
+        "background": "rgb(238, 235, 250)",
+        "color": "rgb(95, 88, 115)",
+        "font": "14px",
+        "text": "Public reference checks, learner reports and reviewer decisions are separate. No automated",
+        "weight": "400"
+      }
+    ]
+  }
+]

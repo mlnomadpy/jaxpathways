@@ -1,0 +1,22 @@
+# Tested CPU lesson environment; not a TPU installer.
+jax==0.9.2
+numpy==2.4.4
+optax==0.2.8
+flax==0.12.6
+grain==0.2.16
+orbax-checkpoint==0.11.34
+
+# JAX export serialization
+flatbuffers==25.12.19
+
+# Reproducible lesson plots and notebook figure outputs
+matplotlib==3.10.8
+
+# Reproducible local image decoding for the image harness
+Pillow==12.2.0
+
+# Local experiment tracking, registry and LLMOps tracing labs
+mlflow==3.16.1
+
+# Actual PyTorch-to-Flax CPU architecture conversion lab
+torch==2.11.0

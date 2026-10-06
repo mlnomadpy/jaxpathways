@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "id": "posttraining-02",
+  "minutes": 75,
+  "content": {
+    "problem": "A trained dense layer already works, but the task changes. Can we fit the change while leaving the original weights untouched? We will first train a base, then learn and audit a low-rank update.",
+    "idea": "LoRA parameterizes a weight change as two smaller matrices. It reduces trainable parameter and optimizer-state counts for selected layers; it does not eliminate activation memory or guarantee a latency improvement. Our changed target is deliberately rank one, which makes the adaptation test exact and interpretable.",
+    "objectives": [
+      "Separate the frozen base from trainable adapters",
+      "Understand initialization and the first gradient",
+      "Verify the changed-condition exercise and explain the limits of this fixture."
+    ],
+    "sections": [
+      {
+        "title": "Separate the frozen base from trainable adapters",
+        "body": "For input-by-output weights \\(W_0\\), let \\(A\\) have shape \\((d,r)\\) and \\(B\\) shape \\((r,k)\\). Compute the base output plus the scaled adapter output. Only the adapter tuple is passed to the gradient function. Keep a copy of \\(W_0\\) and compare it exactly after training.",
+        "math": "Y=XW_0+\\frac{\\alpha}{r}XAB"
+      },
+      {
+        "title": "Understand initialization and the first gradient",
+        "body": "Initialize \\(A\\) randomly and \\(B\\) to zero. The initial adapter output is zero, so predictions match the base. At this first step the gradient with respect to \\(A\\) is zero because it multiplies \\(B\\); the gradient for \\(B\\) can be nonzero. Initializing both factors to zero would block both gradients for this bilinear update."
+      },
+      {
+        "title": "Count the right kind of savings",
+        "body": "The fixture has \\(6\\times4=24\\) base weights and rank \\(1\\), giving \\(6+4=10\\) trainable adapter scalars. The base remains resident. Real memory includes gradients, optimizer state, activations and runtime buffers. A low-bit frozen base plus adapters also needs a quantization policy and supported kernels; this lab does not implement QLoRA."
+      },
+      {
+        "title": "Merge only under an explicit serving contract",
+        "body": "Without adapter dropout, an inference merge computes \\(W_{\\mathrm{merged}}=W_0+(\\alpha/r)AB\\). Check outputs on changed inputs before deleting or replacing anything. Keep the unmerged base, adapter and scaling metadata; a second accidental merge adds the update twice. Packed or quantized bases require dequantization/requantization rules rather than a blind in-place add."
+      },
+      {
+        "title": "Save the adaptation identity",
+        "body": "An adapter artifact needs the base checkpoint hash, target module names, rank, alpha, dtype and exact factor arrays. Match all of these on load. Compare the adapted task and original task separately; low rank does not prevent forgetting, and this rank-one teacher does not predict the rank required by a real task."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef lora_forward(x, base, a, b, alpha=1.):\n    rank = a.shape[1]\n    return x @ base + (alpha/rank) * (x @ a @ b)\n\nx=jnp.asarray(np.random.default_rng(4).normal(size=(24,6)),jnp.float32)\nsource_w=jnp.arange(24,dtype=jnp.float32).reshape(6,4)/40\nbase=jnp.zeros_like(source_w)\nbase_step=jax.jit(jax.grad(lambda w:jnp.mean((x@w-x@source_w)**2)))\nfor _ in range(150):base=base-.15*base_step(base)\nassert float(jnp.mean((x@base-x@source_w)**2))<1e-4\nfrozen=np.asarray(base).copy()\nu=jnp.array([[.2],[-.3],[.1],[.2],[-.1],[.4]])\nv=jnp.array([[.5,-.2,.3,.1]])\ntarget=x@(base+u@v)\na=jax.random.normal(jax.random.key(4),(6,1))*.1;b=jnp.zeros((1,4));params=(a,b)\nloss=lambda ab:jnp.mean((lora_forward(x,base,*ab,alpha=1.)-target)**2)\nstep=jax.jit(jax.value_and_grad(loss));history=[]\ninitial_grads=step(params)[1]\nnp.testing.assert_array_equal(initial_grads[0],np.zeros((6,1)))\nassert np.linalg.norm(initial_grads[1])>0\nfor _ in range(250):\n    value,g=step(params);history.append(float(value));params=jax.tree.map(lambda a,b:a-.4*b,params,g)\na,b=params\nassert history[-1]<history[0]*.02\nnp.testing.assert_array_equal(base,frozen)\nmerged=base+a@b\nnp.testing.assert_allclose(lora_forward(x,base,a,b),x@merged,rtol=1e-5,atol=1e-6)\nprint('LoRA initial/final:',history[0],history[-1],'; trainable:',a.size+b.size,'base:',base.size)\n",
+    "output": "The trained base stays unchanged; 10 adapter scalars fit the rank-one change and merge equivalently.",
+    "experiments": [
+      {
+        "title": "Show why two zero factors cannot start learning",
+        "prediction": "If both factors start at zero, can this first-order update move either one?",
+        "code": "zero=(jnp.zeros_like(a),jnp.zeros_like(b))\nzero_grad=jax.grad(loss)(zero)\nassert all(np.array_equal(np.asarray(g),np.zeros(g.shape)) for g in zero_grad)\nprint('Both zero factors produce zero first gradients.')",
+        "output": "Both factor gradients are exactly zero.",
+        "explanation": "Each factor’s derivative contains the other factor. Randomizing one and zeroing the other preserves the initial base output without blocking the whole update."
+      }
+    ],
+    "exercise": "Save both adapter factors and their rank/scaling metadata, reload them and check merged versus unmerged predictions.",
+    "solution": "import tempfile\nfrom pathlib import Path\nwith tempfile.TemporaryDirectory() as folder:\n    path=Path(folder)/'adapter.npz'\n    np.savez(path,a=np.asarray(a),b=np.asarray(b),alpha=np.array(1.),rank=np.array(1))\n    with np.load(path,allow_pickle=False) as z:\n        assert int(z['rank'])==z['a'].shape[1]\n        np.testing.assert_allclose(lora_forward(x,base,z['a'],z['b'],float(z['alpha'])),x@merged,atol=1e-6,rtol=1e-5)\nprint('Adapter round trip and merge checked.')",
+    "practice": [
+      {
+        "title": "Check the merge on new inputs",
+        "difficulty": "Transfer",
+        "prompt": "Draw a new input batch and compare the merged layer with the adapter path.",
+        "hint": "The equivalence is algebraic, so a new input should still agree.",
+        "solution": "new_x=jnp.asarray(np.random.default_rng(91).normal(size=(7,6)),jnp.float32)\nnp.testing.assert_allclose(lora_forward(new_x,base,a,b),new_x@merged,atol=1e-6,rtol=1e-5)\nassert np.linalg.norm(np.asarray(new_x@(base+2*a@b)-new_x@merged))>1e-3\nprint('New-input merge passes; accidental double merge changes outputs.')",
+        "explanation": "The second check detects an operational merge error that training loss alone would not reveal."
+      }
+    ],
+    "question": "Does LoRA require updating the base weights during adapter training?",
+    "options": [
+      "No. The base is frozen; the selected adapter parameters receive updates.",
+      "A lower training loss by itself proves the full application is ready.",
+      "Matching shapes alone establishes the required behavior."
+    ],
+    "answer": 0,
+    "explanation": "Freeze ownership should be checked in code, not inferred from an adapter-shaped parameter name.",
+    "diagnosis": "If neither factor moves, inspect initialization. If merged predictions drift, check factor orientation, rank scaling, dropout, base identity and accidental repeated merges.",
+    "references": [
+      {
+        "title": "LoRA",
+        "url": "https://arxiv.org/abs/2106.09685"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "LoRA: adapt, save and merge low-rank updates — recorded experiment",
+      "kind": "executed",
+      "prediction": "Predict what should change during training and what this curve cannot establish.",
+      "reading": "The plot is adaptation MSE before each update, falling from about \\(0.044\\) to below \\(10^{-6}\\). It does not include the preceding base-training run. The target update was constructed to have rank one, so this is an achievable representation test rather than a universal LoRA performance claim.",
+      "connection": "The first adapter update affects B; later updates can train both factors. The unchanged-base assertion, reloaded adapter and new-input merge comparison are separate evidence from the falling training line.",
+      "alt": "The plot is adaptation MSE before each update, falling from about \\(0.044\\) to below \\(10^{-6}\\). It does not include the preceding base-training run. The target update was constructed to have rank one, so this is an achievable representation test rather than a universal LoRA performance claim.",
+      "code": "visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'training objective','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}\nfor panel in visual_data.get('panels',[visual_data]):\n    panel['x']=panel['series'][0]['x']\n"
+    }
+  }
+}

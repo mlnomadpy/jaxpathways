@@ -1,0 +1,210 @@
+.tutor-band {
+  background: var(--atlas);
+  color: #f2ecff;
+  border-radius: 16px;
+  padding: 26px 30px;
+  scroll-margin-top: 24px;
+}
+.tutor-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 18px;
+}
+.tutor-heading h2 {
+  font-size: 23px;
+  color: #fff;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+.tutor-heading p {
+  font-size: 12px;
+  margin: 0;
+  color: #d4c8ed;
+}
+.tutor-heading a {
+  color: white;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.command-line {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: space-between;
+  border-block: 1px solid #68558f;
+  padding: 14px 0;
+}
+.command-line pre {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  font:
+    14px/1.8 ui-monospace,
+    monospace;
+  min-width: 0;
+}
+.command-line button,
+.prompt-line button {
+  flex-shrink: 0;
+  min-height: 44px;
+  padding: 9px 15px;
+  border: 1px solid #a191c2;
+  border-radius: 5px;
+  background: transparent;
+  color: #fff;
+  font-size: 13px;
+}
+.command-line button:hover,
+.prompt-line button:hover {
+  background: #513985;
+}
+.tutor-prereq {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 0 0 12px;
+  color: #e1d6f2;
+}
+.tutor-prereq a {
+  color: #fff;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+.prompt-line {
+  display: flex;
+  gap: 18px;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12px;
+}
+.prompt-line p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+}
+.prompt-line code {
+  font-size: 13px;
+  color: #fff;
+}
+.prompt-line .prompt-label {
+  color: #d4c8ed;
+  margin-right: 8px;
+}
+.copy-result {
+  font-size: 12px;
+  line-height: 1.5;
+  color: #e0d4f4;
+  margin: 0;
+}
+.copy-result:not(:empty) {
+  padding-top: 8px;
+}
+.tutor-more {
+  margin-top: 10px;
+}
+.tutor-more summary {
+  font-size: 12px;
+  color: #d4c8ed;
+  cursor: pointer;
+  min-height: 36px;
+  padding: 7px 0;
+}
+.tutor-more p {
+  font-size: 13px;
+  line-height: 1.65;
+  margin: 8px 0;
+  color: #e3d9f3;
+}
+.tutor-more a {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  color: white;
+}
+@media (max-width: 1050px) {
+  .tutor-heading {
+    align-items: start;
+  }
+}
+@media (max-width: 1050px) {
+  .tutor-heading p {
+    max-width: 32ch;
+  }
+}
+@media (max-width: 760px) {
+  .tutor-band {
+    padding: 22px 20px;
+    border-radius: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .tutor-heading {
+    display: block;
+    margin-bottom: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .tutor-heading h2 {
+    font-size: 22px;
+    margin-bottom: 9px;
+  }
+}
+@media (max-width: 760px) {
+  .tutor-heading p {
+    max-width: none;
+  }
+}
+@media (max-width: 760px) {
+  .tutor-prereq {
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .command-line {
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .command-line pre {
+    font-size: 12px;
+    line-height: 1.8;
+  }
+}
+@media (max-width: 760px) {
+  .command-line button,
+  .prompt-line button {
+    padding: 9px 11px;
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .prompt-line {
+    align-items: flex-start;
+    gap: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .prompt-line p,
+  .prompt-line code {
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .prompt-label {
+    display: block;
+  }
+}
+@media (max-width: 380px) {
+  .command-line,
+  .prompt-line {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}
+@media (max-width: 380px) {
+  .command-line button,
+  .prompt-line button {
+    align-self: flex-end;
+  }
+}

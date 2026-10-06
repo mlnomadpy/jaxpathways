@@ -1,0 +1,68 @@
+{
+  "tensorflow": "2.21.0",
+  "device_validated": false,
+  "variants": [
+    {
+      "name": "dense-fp32",
+      "bytes": 1000,
+      "input_dtype": "<class 'numpy.float32'>",
+      "output_dtype": "<class 'numpy.float32'>",
+      "input_quantization": [
+        0.0,
+        0
+      ],
+      "output_quantization": [
+        0.0,
+        0
+      ],
+      "max_abs_error": 2.384185791015625e-07,
+      "tolerance": 2e-06
+    },
+    {
+      "name": "dense-int8",
+      "bytes": 1152,
+      "input_dtype": "<class 'numpy.int8'>",
+      "output_dtype": "<class 'numpy.int8'>",
+      "input_quantization": [
+        0.007843137718737125,
+        -1
+      ],
+      "output_quantization": [
+        0.021321117877960205,
+        9
+      ],
+      "max_abs_error": 0.01541242003440857,
+      "tolerance": 0.08
+    }
+  ],
+  "validatedAt": "2026-10-05T15:39:41.010167+00:00",
+  "platform": "macOS-26.5.1-arm64-arm-64bit-Mach-O",
+  "tensorflowPython": "3.12.13",
+  "tensorflowKeras": "3.15.1",
+  "corePython": "3.14.3",
+  "kerasBackends": [
+    {
+      "backend": "jax",
+      "keras": "3.14.1",
+      "backendVersion": "0.9.2",
+      "status": "passed"
+    },
+    {
+      "backend": "torch",
+      "keras": "3.14.1",
+      "backendVersion": "2.11.0",
+      "status": "passed"
+    },
+    {
+      "backend": "tensorflow",
+      "keras": "3.15.1",
+      "backendVersion": "2.21.0",
+      "status": "passed"
+    }
+  ],
+  "scope": "Dense-layer numerical equivalence, Keras mixed_float16/mixed_bfloat16 policies, native torch Linear layout, and desktop TensorFlow LiteRT FP32/INT8 conversion. No device delegate, latency, power, general-model accuracy or universal compatibility claim.",
+  "sourceHashes": {
+    "phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/labs/keras_backends.py": "2449ce5615be7d57616052a42bece1bd8f0952a834bfdd60280870ce3ca34a82",
+    "phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/tensorflow_litert.py": "367b8c5b50ae01192e8b52ff57d6ac5a33b8d0931a266b2d5950222f848bce25"
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "phaseId": "networks",
+  "dependencies": {
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "flax": "0.12.6",
+    "optax": "0.2.8"
+  },
+  "hardware": "CPU",
+  "lessons": [
+    {
+      "id": "networks-01",
+      "exercise": "Complement XOR class labels by negating the output layer; verify logits and predictions on new coordinates. Diagnose pairwise loss broadcasting.",
+      "evidence": "Keep the 33-parameter shape calculation, independent NumPy cross-entropy, train and held-out seeds, initial/final loss, nearby held-out accuracy, and one repaired score/label shape failure.",
+      "check": "Explain why removing tanh makes two affine layers collapse to a linear XOR boundary, then verify a changed label convention."
+    },
+    {
+      "id": "networks-02",
+      "exercise": "Separate nnx.Param and nonparameter state; make an independent copied-state snapshot and diagnose shared-variable mutation.",
+      "evidence": "Keep the NumPy forward comparison, count of 13 trainable scalars and one diagnostic counter, counter independence after copying state, and logits for batch size one and five.",
+      "check": "Explain why exclusion from Param gradients does not prevent forward state mutation, and demonstrate safe snapshot independence."
+    },
+    {
+      "id": "networks-03",
+      "exercise": "Compile separate training and evaluation functions, replay 80 updates, and reconstruct held-out metrics from equal-size chunks without changing state.",
+      "evidence": "Keep pre/post parameter snapshots around evaluation, optimizer step count 80, independent held-out loss and accuracy, complete replay comparison, and a deliberately bad held-out update on an isolated clone.",
+      "check": "Identify which weights a pre-update loss describes and prove evaluation changes neither parameters nor optimizer step count."
+    },
+    {
+      "id": "networks-04",
+      "exercise": "Verify a convolution patch manually, train the noisy-bar CNN on a fixed split, transfer to 10-by-10 input shapes, and repair NCHW/NHWC confusion.",
+      "evidence": "Keep the 8-by-8-to-6-by-6 shape diagram, NumPy patch dot product, seeds 20/21, independent held-out cross-entropy, 24-observation confusion matrix, constant-class baseline, and layout failure repair.",
+      "check": "Explain what global spatial mean pooling discards and verify that confusion counts and trace reproduce the reported held-out accuracy."
+    },
+    {
+      "id": "networks-05",
+      "exercise": "Derive the curvature-dependent stable rate, reproduce an alternating divergent trajectory, and distinguish scaled features and corrupted inputs.",
+      "evidence": "Keep the analytic error recurrence, per-step weight/loss/gradient norm for rates 0.1 and 0.3, observed 3.24 loss multiplier, changed-scale comparison, clipping bound, and one repaired nonfinite-input case.",
+      "check": "Derive why scaling features and targets by ten changes this squared-loss curvature by 100 without treating that bound as universal."
+    }
+  ]
+}

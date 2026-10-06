@@ -1,0 +1,50 @@
+---
+import '../../styles/home/offline.css';
+import { offline } from '../../data/home.json';
+import { siteUrl } from '../../lib/urls.js';
+---
+
+<section id="other-ways" class="offline-section" aria-labelledby="offline-title">
+  <div class="course-book" aria-hidden="true">
+    <span class="book-title">
+      JAX
+      <br />
+      Foundations
+    </span>
+    <svg viewBox="0 0 110 60">
+      <g fill="none" stroke="#baaae7" stroke-width="2">
+        <path d="M12 30h25c18 0 10-20 30-20h27M37 30h57M37 30c18 0 10 20 30 20h27" />
+      </g>
+      <g fill="#fff">
+        <circle cx="12" cy="30" r="5" />
+        <circle cx="94" cy="10" r="4" />
+        <circle cx="94" cy="30" r="4" />
+        <circle cx="94" cy="50" r="4" />
+      </g>
+    </svg>
+    <span class="book-subtitle">
+      The offline course reader
+      <br />
+      JAX Pathways
+    </span>
+  </div>
+  <div class="offline-copy">
+    <h2 id="offline-title">{offline.title}</h2>
+    <p>{offline.intro}</p>
+    <div class="actions">
+      {offline.actions.map((action, index) => (
+        <a
+          class:list={['button', { primary: index === 0 }]}
+          href={siteUrl(action.href)}
+          download={action.href.endsWith('.epub')}
+        >
+          {action.label}
+        </a>
+      ))}
+    </div>
+    <p class="small">
+      The printable reader can be saved as a PDF from your browser.{' '}
+      <a href={siteUrl('lesson.html?lesson=welcome-01')}>Read the first lesson online ↗</a>
+    </p>
+  </div>
+</section>

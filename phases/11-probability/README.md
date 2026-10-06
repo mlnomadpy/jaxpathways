@@ -2,51 +2,111 @@
 
 Specializations.
 
+Specify probability models, derive exact Bayesian regression, implement and diagnose HMC, and compare variational approximations with predictive evidence.
+
+Start with likelihoods, stable losses and explicit random keys. Check a known posterior before trusting a sampler, then separate inference error from model mismatch.
+
 **Prerequisites:** 04: Math & optimization.
 
-**Hardware:** CPU.
+**Hardware:** CPU; transparent JAX samplers with an optional NumPyro ecosystem bridge.
+
+## Study guide: Which uncertainty does your model actually represent?
+
+Use an exactly solvable Bayesian regression to check inference. Separate uncertainty about weights, uncertainty about a future observation, and mismatch between the assumed likelihood and the data.
+
+### Check your starting point
+
+Should an interval for a new noisy observation equal an interval for the latent mean prediction?
+
+<details><summary>Compare your reasoning</summary>
+
+No. The observation includes additional likelihood noise. Under the independent Gaussian model, add its variance to the latent predictive variance before taking a square root.
+
+</details>
+
+Review: [Build a Bayesian regression](02-build-a-bayesian-regression/docs/en.md).
+
+### Build in stages
+
+1. **Build an exact reference.** Keep distribution units and normalization, derive a posterior in a small solvable case and compare latent versus observation uncertainty.
+
+   Lessons: [Distributions and sampling](01-distributions-and-sampling/docs/en.md) · [Build a Bayesian regression](02-build-a-bayesian-regression/docs/en.md).
+
+2. **Challenge approximate inference.** Compare sampler moments with the exact target, inspect multiple-chain diagnostics and measure the covariance lost by a diagonal approximation. Use predictive residuals to challenge the likelihood itself.
+
+   Lessons: [Hamiltonian Monte Carlo and sampler diagnostics](03-hamiltonian-monte-carlo-and-sampler-diagnostics/docs/en.md) · [Variational inference and model checking](04-variational-inference-and-model-checking/docs/en.md).
+
+### Try a changed condition
+
+Chains agree closely, but prediction residuals bend systematically with the input. What should be changed first?
+
+<details><summary>Compare an approach</summary>
+
+Investigate the model’s mean function and observation assumptions. Agreement between chains concerns exploration of the chosen posterior; it does not certify that the chosen model describes the data.
+
+</details>
+
+**Symptom:** Intervals are narrow and diagnostics look reassuring despite poor predictions.
+
+**Check next:** Check whether you plotted latent or observation uncertainty, and whether the likelihood or mean function misses structure.
+
+### Decide what is ready
+
+Use bayesian-regression. Retain analytic posterior checks, sampler/approximation diagnostics and a predictive model-mismatch case, with uncertainty assumptions stated.
+
+### Further work
+
+General hierarchical models and robust modern diagnostic workflows need further examples. The instructional sampler is not a replacement for validated inference libraries.
 
 ## Lesson sequence
 
 ### 11.01 Distributions and sampling
 
-Status: planned brief.
+[Read the lesson](01-distributions-and-sampling/docs/en.md) · [Run the code](01-distributions-and-sampling/code/main.py)
 
-**Learn and build:** Generate samples and compare empirical moments with a known distribution.
+Status: authored lesson with CPU exercise.
 
-**Evidence:** A reproducible experiment for “Distributions and sampling”: code, environment, observed output, and an explanation of one deliberate change.
+**Intended outcome:** Distinguish samples, density, variance and standard error Check normal moments against independent analytic expectations
 
-**Checkpoint:** Explain your result for “Distributions and sampling”, identify one failure case, and show how you verified the fix.
+**Evidence:** Seeded arrays, independent density values, moment discrepancies and underflow diagnosis. Keep the environment, observed outputs and your explanation of the figure.
+
+**Checkpoint:** Which statement explains why a large Monte Carlo sample can have a precise mean while individual readings remain variable?
 
 ### 11.02 Build a Bayesian regression
 
-Status: planned brief.
+[Read the lesson](02-build-a-bayesian-regression/docs/en.md) · [Run the code](02-build-a-bayesian-regression/code/main.py)
 
-**Learn and build:** Specify a prior and likelihood and inspect posterior predictions.
+Status: authored lesson with CPU exercise.
 
-**Evidence:** A reproducible experiment for “Build a Bayesian regression”: code, environment, observed output, and an explanation of one deliberate change.
+**Intended outcome:** State the prior, likelihood and observation-noise assumptions Derive posterior precision and check a closed-form special case
 
-**Checkpoint:** Explain your result for “Build a Bayesian regression”, identify one failure case, and show how you verified the fix.
+**Evidence:** Precision derivation, exact fractional reference, host solve and predictive variance plot. Keep the environment, observed outputs and your explanation of the figure.
+
+**Checkpoint:** Which variance describes a new noisy reading at a given input?
 
 ### 11.03 Hamiltonian Monte Carlo and sampler diagnostics
 
-Status: planned brief.
+[Read the lesson](03-hamiltonian-monte-carlo-and-sampler-diagnostics/docs/en.md) · [Run the code](03-hamiltonian-monte-carlo-and-sampler-diagnostics/code/main.py)
 
-**Learn and build:** Run inference and diagnose convergence before trusting summaries.
+Status: authored lesson with CPU exercise.
 
-**Evidence:** A reproducible experiment for “Hamiltonian Monte Carlo and sampler diagnostics”: code, environment, observed output, and an explanation of one deliberate change.
+**Intended outcome:** Implement leapfrog with the correct half-step boundaries Check reversibility and an independent analytic gradient
 
-**Checkpoint:** Explain your result for “Hamiltonian Monte Carlo and sampler diagnostics”, identify one failure case, and show how you verified the fix.
+**Evidence:** Reversibility check, four traces, two-dimensional moments, key replay and classical split R-hat with limitations. Keep the environment, observed outputs and your explanation of the figure.
+
+**Checkpoint:** Four chains have classical split R-hat close to one. What can we conclude?
 
 ### 11.04 Variational inference and model checking
 
-Status: planned brief.
+[Read the lesson](04-variational-inference-and-model-checking/docs/en.md) · [Run the code](04-variational-inference-and-model-checking/code/main.py)
 
-**Learn and build:** Compare an approximate posterior and test posterior predictions.
+Status: authored lesson with CPU exercise.
 
-**Evidence:** A reproducible experiment for “Variational inference and model checking”: code, environment, observed output, and an explanation of one deliberate change.
+**Intended outcome:** Derive the diagonal Gaussian variational optimum for a correlated target Separate optimization error from variational-family error
 
-**Checkpoint:** Explain your result for “Variational inference and model checking”, identify one failure case, and show how you verified the fix.
+**Evidence:** Analytic and optimized KL, variance comparison, Monte Carlo estimate and explained residual stress fixture. Keep the environment, observed outputs and your explanation of the figure.
+
+**Checkpoint:** The variational mean is correct and the optimization gradient is tiny. Why can posterior intervals still be too narrow?
 
 ## Phase project
 
@@ -54,6 +114,8 @@ A Bayesian model with diagnostic evidence.
 
 **Demonstrate:** Report sampler diagnostics and distinguish uncertainty from predictive error.
 
-Project status: planned brief.
+Project status: implemented staged practice · [Open source](../../projects/bayesian-regression/README.md).
+
+
 
 [Primary documentation](https://num.pyro.ai/en/stable/).

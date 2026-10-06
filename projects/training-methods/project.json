@@ -1,0 +1,108 @@
+{
+  "schemaVersion": 1,
+  "id": "training-methods",
+  "title": "Audit pretraining and post-training objectives",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU; original synthetic fixtures and public reference checks",
+  "source": "projects/training-methods/README.md",
+  "requiredLessonIds": [
+    "pretraining-01",
+    "pretraining-02",
+    "pretraining-03",
+    "posttraining-01",
+    "posttraining-02",
+    "posttraining-03",
+    "posttraining-04",
+    "posttraining-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Masked language modeling",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1",
+      "evidence": "Masked-target reduction, input corruption, uniform baseline and changed mask",
+      "expected": "PASS stage 1: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "2",
+      "title": "Masked image reconstruction",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 2",
+      "evidence": "Rectangular multichannel patch order, visible-only features and hidden-patch reduction",
+      "expected": "PASS stage 2: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "3",
+      "title": "Paired contrastive learning",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 3",
+      "evidence": "Independent symmetric loss, collapsed baseline and broken pair mapping",
+      "expected": "PASS stage 3: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "4",
+      "title": "Response-only SFT",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4",
+      "evidence": "Shifted target masks, independent sequence sums and actual table training",
+      "expected": "PASS stage 4: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "5",
+      "title": "Frozen-base LoRA",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 5",
+      "evidence": "Two ranks and nonunit alpha, frozen base, trained adapter and merged outputs",
+      "expected": "PASS stage 5: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "6",
+      "title": "Preference reward model",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 6",
+      "evidence": "Stable pairwise likelihood, independent finite-difference gradient and learned ordering",
+      "expected": "PASS stage 6: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "7",
+      "title": "Learned-reward PPO",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 7",
+      "evidence": "Signed clipped ratios, exact KL, actual sampled rollouts and frozen reference",
+      "expected": "PASS stage 7: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "8",
+      "title": "Direct preference optimization",
+      "command": "python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 8",
+      "evidence": "Reference correction, independent stable loss and trained positive margins",
+      "expected": "PASS stage 8: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    }
+  ],
+  "rubric": [
+    "Masked-target reduction, input corruption, uniform baseline and changed mask",
+    "Rectangular multichannel patch order, visible-only features and hidden-patch reduction",
+    "Independent symmetric loss, collapsed baseline and broken pair mapping",
+    "Shifted target masks, independent sequence sums and actual table training",
+    "Two ranks and nonunit alpha, frozen base, trained adapter and merged outputs",
+    "Stable pairwise likelihood, independent finite-difference gradient and learned ordering",
+    "Signed clipped ratios, exact KL, actual sampled rollouts and frozen reference",
+    "Reference correction, independent stable loss and trained positive margins"
+  ],
+  "workspaceFile": "projects/training-methods/my_methods.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/training-methods/starter/methods.py projects/training-methods/my_methods.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/training-methods/starter/methods.py projects/training-methods/my_methods.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/training-methods/tests/check.py --implementation solution --stage all",
+  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review."
+}

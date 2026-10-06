@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-01",
+  "contentHash": "68a054c2483e4706e0be0d5be0d473691e701c55d3768e782fae8ac02c157624",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:32:35.343366+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Euler final: 0.3570125000000001 analytic final: 0.493193927883213\nEndpoint errors: [0.13618143 0.06399208 0.03107265 0.0153167 ]\nLast refinement ratio: 2.0286780018480166\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      0.0,
+      0.5,
+      1.0,
+      1.5,
+      2.0
+    ],
+    "xlabel": "time (seconds)",
+    "ylabel": "excess temperature",
+    "series": [
+      {
+        "label": "Euler h=0.5",
+        "y": [
+          2.0,
+          1.3,
+          0.8450000000000001,
+          0.5492500000000001,
+          0.3570125000000001
+        ]
+      },
+      {
+        "label": "Euler h=0.25 (sampled)",
+        "y": [
+          2.0,
+          1.3612499999999998,
+          0.9265007812499999,
+          0.6305995942382813,
+          0.4292018488284302
+        ]
+      },
+      {
+        "label": "analytic exponential",
+        "y": [
+          2.0,
+          1.4093761794374269,
+          0.993170607582819,
+          0.6998754982223109,
+          0.493193927883213
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,149 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "JAX Pathways course resources",
+    "version": "1.0.0",
+    "description": "Static, read-only JSON resources generated from the course source. No hosted execution, authentication, write API, or learner-data service. Planned lessons are labeled; notebook quiz answers are formative, not secured exams."
+  },
+  "servers": [
+    {
+      "url": "./",
+      "description": "Relative to the deployed site root"
+    }
+  ],
+  "paths": {
+    "/api/v1/catalog.json": {
+      "get": {
+        "summary": "Read all phases and lesson metadata",
+        "responses": {
+          "200": {
+            "description": "Generated read-only JSON resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schemaVersion"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource exists for that identifier"
+          }
+        }
+      }
+    },
+    "/api/v1/pathways.json": {
+      "get": {
+        "summary": "Read ordered learning pathways",
+        "responses": {
+          "200": {
+            "description": "Generated read-only JSON resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schemaVersion"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource exists for that identifier"
+          }
+        }
+      }
+    },
+    "/api/v1/roles.json": {
+      "get": {
+        "summary": "Read career routes and core domains",
+        "responses": {
+          "200": {
+            "description": "Generated read-only JSON resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schemaVersion"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource exists for that identifier"
+          }
+        }
+      }
+    },
+    "/api/v1/lessons/{lessonId}.json": {
+      "get": {
+        "summary": "Read an authored lesson or explicitly planned brief",
+        "responses": {
+          "200": {
+            "description": "Generated read-only JSON resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schemaVersion"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource exists for that identifier"
+          }
+        },
+        "parameters": [
+          {
+            "name": "lessonId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Canonical lesson ID from catalog.json"
+          }
+        ]
+      }
+    },
+    "/api/v1/projects.json": {
+      "get": {
+        "summary": "Read staged integration projects",
+        "responses": {
+          "200": {
+            "description": "Project stages, required lessons, and evidence rubric"
+          }
+        }
+      }
+    }
+  }
+}

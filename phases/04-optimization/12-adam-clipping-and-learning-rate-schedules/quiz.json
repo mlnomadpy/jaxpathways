@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-12",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Does clipping gradients before Adam guarantee that final updates obey the same norm threshold?",
+      "options": [
+        "Yes, every later transformation preserves that bound",
+        "No; Adam subsequently rescales coordinates",
+        "Only if the loss is a scalar"
+      ],
+      "correct": 1,
+      "explanation": "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update."
+    }
+  ]
+}

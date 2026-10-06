@@ -1,0 +1,32 @@
+[
+  {
+    "id": "course",
+    "label": "Course",
+    "href": "course.html"
+  },
+  {
+    "id": "pathways",
+    "label": "Learning paths",
+    "href": "pathways.html"
+  },
+  {
+    "id": "projects",
+    "label": "Projects",
+    "href": "projects.html"
+  },
+  {
+    "id": "careers",
+    "label": "Careers",
+    "href": "careers.html"
+  },
+  {
+    "id": "notebook",
+    "label": "My learning",
+    "href": "notebook.html"
+  },
+  {
+    "id": "developer",
+    "label": "Resources",
+    "href": "developer.html"
+  }
+]

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "state-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What must remain consistent across scan steps?",
+      "options": [
+        "The numerical value of the carry",
+        "The carry structure, shapes, and dtypes",
+        "Every recorded output must be zero"
+      ],
+      "correct": 1,
+      "explanation": "The carry value changes through time, but its structural and array type properties must remain consistent."
+    }
+  ]
+}

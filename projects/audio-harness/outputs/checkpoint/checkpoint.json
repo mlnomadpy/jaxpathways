@@ -1,0 +1,27 @@
+{
+  "step": 40,
+  "cursor": 96,
+  "epoch": 4,
+  "config": {
+    "seed": 3,
+    "batch_size": 12,
+    "rate": 0.04,
+    "momentum": 0.85
+  },
+  "dataset_sha256": "5fb78aec334f1100c02bf036c12daaa00f005f5f40d701a89f2c7b6c6fd3288b",
+  "preprocessing": {
+    "version": "audio-stft-v1",
+    "sample_rate": 8000,
+    "channels": 1,
+    "samples": 1024,
+    "clip_samples": 1280,
+    "window": 128,
+    "hop": 64,
+    "window_function": "symmetric Hann",
+    "spectrum": "rfft magnitude squared / sum(window squared)",
+    "feature": "mean over frames of log1p(power); 65 frequency bins",
+    "normalization": "training mean and std; std floor 0.05"
+  },
+  "jax": "0.9.2",
+  "state_sha256": "cb2f83f002f3b5e552bdaed0b8398efde66890b4346636c384577e0f925115ff"
+}

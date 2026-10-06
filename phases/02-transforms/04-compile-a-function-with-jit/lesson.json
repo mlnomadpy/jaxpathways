@@ -1,0 +1,114 @@
+{
+  "schemaVersion": 1,
+  "id": "transforms-04",
+  "minutes": 55,
+  "content": {
+    "idea": "jit transforms a compatible numerical function into a compiled callable. On a first relevant call, JAX traces Python execution with abstract inputs, stages array operations, and obtains a compiled executable. Later compatible calls can reuse it. Python still invokes the callable, but the numerical work can run as a compiled computation.\n\nThe worked loss is intentionally small. Its point is to verify correctness and understand measurement, not to guarantee a speedup. On a tiny CPU workload, Python-call and dispatch overhead can be a substantial fraction of the time. On a large accelerator workload, completion of device work matters. Report the actual device and workload before interpreting results.",
+    "code": "import time\nimport jax\nimport jax.numpy as jnp\ndef loss(w, x, y):\n    return jnp.mean((x @ w - y) ** 2)\nx = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.\nw = jnp.array([1., 2., -1.])\ny = jnp.ones(4)\ncompiled = jax.jit(loss)\nt0 = time.perf_counter()\nfirst = compiled(w, x, y).block_until_ready()\nfirst_seconds = time.perf_counter() - t0\nt0 = time.perf_counter()\nsecond = compiled(w, x, y).block_until_ready()\nrepeat_seconds = time.perf_counter() - t0\nprint(\"Loss:\", float(second))\nprint(\"First/repeat seconds:\", first_seconds, repeat_seconds)\nassert jnp.allclose(first, loss(w, x, y))\nassert jnp.allclose(second, first)",
+    "output": "Loss ≈ \\(0.46\\). Timings depend on the device, process, and workload; no speed threshold is required.",
+    "exercise": "Foundation · Compile `value_and_grad(loss)`, check the loss and gradient against both the eager transform and the manual matrix formula, and explain how you would synchronize a benchmark of its two outputs.",
+    "solution": "compiled_step = jax.jit(jax.value_and_grad(loss))\nv, g = compiled_step(w, x, y)\nexpected_v, expected_g = jax.value_and_grad(loss)(w, x, y)\nassert jnp.allclose(v, expected_v)\nassert jnp.allclose(g, expected_g)",
+    "question": "Why wait with block_until_ready when timing a computation?",
+    "options": [
+      "To change its gradient",
+      "To include completion of device work in elapsed time",
+      "To force a different result"
+    ],
+    "answer": 1,
+    "explanation": "Without waiting, elapsed time can primarily measure dispatch rather than the completion of the numerical work.",
+    "objectives": [
+      "Explain tracing, compilation, dispatch, and synchronization as separate work.",
+      "Validate a compiled numerical function against its eager and analytic results.",
+      "Measure first-call latency and repeated-call latency with explicit completion.",
+      "Compile a value-and-gradient computation without claiming a universal speedup."
+    ],
+    "problem": "Your calculation is correct, and now you want to run it many times. What does compilation actually change? We’ll compare the original function with its jitted version, separate the first call from later calls, and wait for the result before stopping the timer. A small CPU example is enough to learn a fair comparison; a speedup is not guaranteed.",
+    "sections": [
+      {
+        "title": "Separate the work hidden in one call",
+        "body": "The first call can involve tracing, lowering, compilation, dispatch, and execution. Calling the same compiled function on compatible inputs can avoid much of the setup, but still involves a Python invocation, dispatch, and execution. A persistent cache or earlier compilation can also affect what first means.\n\nDefine the scope: first call to this callable in this process with these input shapes/dtypes. Do not label it cold-machine startup, pure compilation time, or kernel execution time unless your experiment actually isolates those quantities.",
+        "formula": "first relevant call → trace / compile / dispatch / execute\ncompatible repeated call → reuse / dispatch / execute"
+      },
+      {
+        "title": "Check values before timing",
+        "body": "Our input matrix has shape \\((4, 3)\\), weights have shape \\((3,)\\), and targets have shape \\((4,)\\). Predictions are \\([0, 0.6, 1.2, 1.8]\\). Residuals are \\([-1, -0.4, 0.2, 0.8]\\). Squaring and averaging yields \\(0.46\\). Compute this independently so that two implementations agreeing on an unintended broadcast is not mistaken for correctness.\n\nCompilation should preserve the intended numerical calculation within suitable tolerance. Floating-point transformations and reduction ordering can change last bits; exact equality is often too strong. Choose tolerance using dtype and scale, and do not suppress large discrepancies with a very loose allclose check."
+      },
+      {
+        "title": "Wait for the quantity you are timing",
+        "body": "JAX can return an array object while device computation is still pending. Timing only the Python call can therefore measure dispatch rather than completed work. block_until_ready waits for the array result without needing to print it or convert it to NumPy.\n\nA function returning a tuple or a parameter tree needs a completion strategy for all relevant leaves. A scalar loss is convenient for this introductory experiment because waiting on it marks that result complete. Keep data creation and transfers outside the interval when measuring a prepared numerical invocation; include them deliberately when measuring end-to-end latency."
+      },
+      {
+        "title": "Use repetitions and report a distribution",
+        "body": "One repeated call is easy to distort with scheduling noise. Warm the exact callable and input signature, collect multiple completion-synchronized durations, and report a median plus range and repeat count. Use the same prepared arrays and comparable waiting behavior for eager and compiled calls.\n\nThis measures invocation latency under the stated conditions, including Python overhead. It is not a throughput measurement for queued training steps, and it does not isolate accelerator kernels. A median for a small toy workload cannot justify a performance claim about your future model or a different device."
+      },
+      {
+        "title": "Compile the computation you intend to repeat",
+        "body": "For training, loss and parameter gradients are often consumed together. `jit(value_and_grad(loss))` expresses a compiled transformed computation that returns both. Check the value against the loss and the gradient against an independent formula before using it as part of an update.\n\nAvoid creating a fresh jitted lambda inside every iteration. Reusing a stable transformed callable gives compilation reuse a chance. A useful compilation boundary often surrounds a complete step rather than every scalar operation, but the correct boundary depends on the workload, state, and integration constraints. We will make state explicit before building that larger step."
+      },
+      {
+        "title": "Decide when compilation is worth its setup",
+        "body": "A long compilation can be worthwhile if a computation runs many times. A one-off small calculation might never recover its setup cost. You need both setup latency and steady-state measurements to reason about break-even behavior.\n\nThis lesson does not measure TPU execution, multi-device scaling, or a model training speedup. Its artifact is a reproducible correctness/timing report that records the backend, shapes, dtype, synchronization policy, warmup, repeat count, and observed durations."
+      }
+    ],
+    "experiments": [
+      {
+        "title": "Derive predictions and gradients outside the transform",
+        "prediction": "Predict the loss \\(0.46\\) and derive \\(\\frac{2}{N}X^\\mathsf{T}(Xw-y)\\). Does the compiled result match both independent quantities?",
+        "code": "expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])\nassert jnp.allclose(x @ w, expected_predictions, atol=1e-6)\nassert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)\nmanual_gradient = (2. / len(y)) * x.T @ (x @ w - y)\ncompiled_value_gradient = jax.jit(jax.value_and_grad(loss))\nchecked_value, checked_gradient = compiled_value_gradient(w, x, y)\nassert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)",
+        "output": "The loss is \\(0.46\\); the gradient matches the independent matrix expression.",
+        "explanation": "The analytic value check detects mistakes that eager-versus-compiled equality alone would miss."
+      },
+      {
+        "title": "Collect a synchronized latency sample",
+        "prediction": "Which costs are included in these measurements? Predict whether the tiny compiled loss must be faster, then report what you actually observe.",
+        "code": "import statistics\ndef completed_samples(function, repeats=20):\n    function(w, x, y).block_until_ready()\n    durations = []\n    for _ in range(repeats):\n        start = time.perf_counter()\n        function(w, x, y).block_until_ready()\n        durations.append(time.perf_counter() - start)\n    return durations\nfor name, function in ((\"eager\", loss), (\"compiled\", compiled)):\n    samples = completed_samples(function)\n    print(name, \"median / min / max seconds:\", statistics.median(samples), min(samples), max(samples))\nprint(\"backend / shapes / dtype:\", jax.default_backend(), x.shape, w.shape, y.shape, x.dtype)",
+        "output": "Twenty completed calls are measured after a warmup for each callable. Durations vary; no speed threshold is asserted.",
+        "explanation": "The report includes Python invocation and completed numerical work on already prepared data. It is a bounded latency observation, not a universal accelerator benchmark."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Check that a new value remains runtime data",
+        "difficulty": "Practice",
+        "prompt": "Keep shapes and dtypes fixed, change \\(w\\), and compare the compiled loss against an independently computed residual mean. Explain why a different numerical answer does not itself imply a new compilation.",
+        "hint": "Compilation specializes to relevant properties, not each ordinary array element value.",
+        "solution": "for new_w in (w, w + 0.25):\n    expected = jnp.mean((x @ new_w - y) ** 2)\n    observed = compiled(new_w, x, y)\n    assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)",
+        "explanation": "The same computation accepts different runtime values. The next lesson inspects tracing explicitly rather than inferring it from timing noise."
+      },
+      {
+        "title": "Build a report whose timing claim can be checked",
+        "difficulty": "Challenge",
+        "prompt": "Benchmark the compiled value-and-gradient function for \\(20\\) calls after warmup, waiting on every output leaf. Include backend, input shapes, dtype, and median. State what your measurement excludes.",
+        "hint": "Use `jax.tree.map` to block on every returned array, then stop the timer.",
+        "solution": "def wait_for_outputs(outputs):\n    return jax.tree.map(lambda array: array.block_until_ready(), outputs)\nwait_for_outputs(compiled_value_gradient(w, x, y))\ngradient_times = []\nfor _ in range(20):\n    started = time.perf_counter()\n    wait_for_outputs(compiled_value_gradient(w, x, y))\n    gradient_times.append(time.perf_counter() - started)\nprint(\"compiled value-and-grad median seconds:\", statistics.median(gradient_times))\nassert len(gradient_times) == 20",
+        "explanation": "The measurement excludes input construction and first compilation, and includes repeated invocation and completion. It cannot be compared with another report without matching those boundaries."
+      }
+    ],
+    "diagnosis": "A suspiciously tiny time may measure dispatch only; inspect synchronization. A slow first call followed by faster calls may reflect setup, but timing alone does not identify which setup stage. Inconsistent eager/compiled results call for shape, dtype, and tolerance checks before performance tuning. Repeatedly slow setup can come from recreating transformed functions or changing specialization inputs; the next lesson tests those hypotheses directly.",
+    "takeaways": [
+      "Compilation setup and repeated invocation are different measurements.",
+      "Correctness needs independent numerical checks before performance interpretation.",
+      "Asynchronous execution requires completion synchronization.",
+      "A useful report records workload, backend, dtype, warmup, repetitions, and timing boundaries."
+    ],
+    "references": [
+      {
+        "title": "JAX: just-in-time compilation",
+        "url": "https://docs.jax.dev/en/latest/jit-compilation.html"
+      },
+      {
+        "title": "JAX: benchmarking",
+        "url": "https://docs.jax.dev/en/latest/benchmarking.html"
+      }
+    ],
+    "visual": {
+      "title": "Compilation preserves the result",
+      "kind": "executed",
+      "prediction": "Should compilation change the loss value?",
+      "reading": "The three categories are eager execution, the first compiled call, and a repeated compiled call. The vertical axis is mean squared loss. Each bar reaches approximately \\(0.46\\), so all three execution paths return the same numerical result for this input.\n\nThese are separate bars with equal heights. The first compiled call has not disappeared, and its bar is not a measurement of compilation time.",
+      "connection": "Compilation changes how the computation runs while preserving its intended result. The agreement here is the correctness check to make before asking whether compilation improved performance. Small floating-point differences should be assessed with the example’s numerical tolerance.\n\nTo measure speed, you need a time axis, synchronization, warm-up, and repeated measurements. None of those can be inferred from these loss bars. A useful next check is to change the input values and confirm that eager and compiled results still agree.",
+      "alt": "Compilation preserves the result. The three categories are eager execution, the first compiled call, and a repeated compiled call. The vertical axis is mean squared loss. Each bar reaches approximately \\(0.46\\), so all three execution paths return the same numerical result for this input. These are separate bars with equal heights. The first compiled call has not disappeared, and its bar is not a measurement of compilation time.",
+      "code": "visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat compiled'], 'ylabel': 'mean squared loss', 'series': [{'label': 'evaluated loss', 'y': [float(loss(w, x, y)), float(first), float(second)]}]}"
+    }
+  }
+}

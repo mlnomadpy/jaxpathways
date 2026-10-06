@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "bayesian-regression",
+  "title": "Audit a Bayesian regression model",
+  "pathwayId": "probability",
+  "status": "authored",
+  "hardware": "CPU",
+  "source": "projects/bayesian-regression/README.md",
+  "requiredLessonIds": [
+    "probability-01",
+    "probability-02",
+    "probability-03",
+    "probability-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Exact posterior and density",
+      "command": "python3 projects/bayesian-regression/tests/check.py --stage 1 --implementation projects/bayesian-regression/my_model.py",
+      "evidence": "Model statement, posterior derivation, independent NumPy oracle and gradient check",
+      "expected": "PASS stage 1: posterior oracle, non-centered/rank-deficient data, log density, derivatives, input contracts",
+      "diagnosis": "Check target shape and scale versus variance conventions before changing the solver."
+    },
+    {
+      "id": "2",
+      "title": "Sampler and diagnostic audit",
+      "command": "python3 projects/bayesian-regression/tests/check.py --stage 2 --implementation projects/bayesian-regression/my_model.py",
+      "evidence": "Four traces, seeded replay, exact moment comparison, signed energy errors and classical split R-hat",
+      "expected": "PASS stage 2: two-seed moments, replay, changed keys, R-hat oracle, stuck and unstable chains",
+      "diagnosis": "Inspect leapfrog half steps, retained rejected states and independent key ownership."
+    },
+    {
+      "id": "3",
+      "title": "Predictive uncertainty and mismatch",
+      "command": "python3 projects/bayesian-regression/tests/check.py --stage 3 --implementation projects/bayesian-regression/my_model.py",
+      "evidence": "Latent versus observation variance plot, simulation check and shifted-outcome diagnosis",
+      "expected": "PASS stage 3: independent predictive variance, noise simulation, extrapolation, shifted-outcome check",
+      "diagnosis": "Separate full weight covariance from noise variance; inspect systematic residuals before tuning inference."
+    }
+  ],
+  "rubric": [
+    "State a prior, likelihood and known-noise assumption",
+    "Derive the conjugate posterior and verify independent numerical references",
+    "Check gradients before tuning an HMC sampler",
+    "Record replay, changed-seed behavior and retained rejected states",
+    "Explain classical split R-hat and its limitations",
+    "Separate latent uncertainty from observation noise",
+    "Diagnose deliberate model mismatch and avoid real-data calibration claims"
+  ],
+  "workspaceFile": "projects/bayesian-regression/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/bayesian-regression/starter/model.py projects/bayesian-regression/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/bayesian-regression/starter/model.py projects/bayesian-regression/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/bayesian-regression/tests/check.py --stage all --implementation solution",
+  "setupNote": "Extract the ZIP into a fresh folder. Its top folder contains requirements-cpu.txt and projects/bayesian-regression; run commands from that top folder in the activated environment.",
+  "assessmentId": "probability"
+}

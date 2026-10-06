@@ -1,0 +1,832 @@
+[
+  {
+    "id": "welcome-01",
+    "phase": "welcome",
+    "title": "Set up your learning workspace",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 8,
+    "experiments": 0
+  },
+  {
+    "id": "welcome-02",
+    "phase": "welcome",
+    "title": "Meet your arrays and devices",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "welcome-cpu",
+    "phase": "welcome",
+    "title": "Practice with four virtual CPU devices",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "welcome-03",
+    "phase": "welcome",
+    "title": "Move your experiment to a TPU",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "arrays-01",
+    "phase": "arrays",
+    "title": "From NumPy to jax.numpy",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "arrays-02",
+    "phase": "arrays",
+    "title": "Shapes, broadcasting, and dtypes",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "arrays-03",
+    "phase": "arrays",
+    "title": "Pure functions and explicit inputs",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "arrays-04",
+    "phase": "arrays",
+    "title": "Immutable updates and indexing",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "first-gradient",
+    "phase": "transforms",
+    "title": "Your first gradient",
+    "status": "authored",
+    "interactiveFigure": "gradient",
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "transforms-02",
+    "phase": "transforms",
+    "title": "Losses and value_and_grad",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "transforms-03",
+    "phase": "transforms",
+    "title": "Batch a function with vmap",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 6,
+    "experiments": 2
+  },
+  {
+    "id": "transforms-04",
+    "phase": "transforms",
+    "title": "Compile a function with jit",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 6,
+    "experiments": 2
+  },
+  {
+    "id": "transforms-05",
+    "phase": "transforms",
+    "title": "Tracing, static arguments, and recompilation",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 6,
+    "experiments": 2
+  },
+  {
+    "id": "state-01",
+    "phase": "state",
+    "title": "Random keys without surprises",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "state-02",
+    "phase": "state",
+    "title": "Pytrees and structured parameters",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "state-03",
+    "phase": "state",
+    "title": "Compiled loops with lax.scan",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "state-04",
+    "phase": "state",
+    "title": "Branches with lax.cond",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-05",
+    "phase": "optimization",
+    "title": "Vectors, norms, and projections",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-01",
+    "phase": "optimization",
+    "title": "Linear algebra and loss intuition",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 3
+  },
+  {
+    "id": "optimization-06",
+    "phase": "optimization",
+    "title": "Least squares, rank, and conditioning",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-07",
+    "phase": "optimization",
+    "title": "The chain rule, Jacobians, and directions",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-02",
+    "phase": "optimization",
+    "title": "Gradient checking and numerical accuracy",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 3
+  },
+  {
+    "id": "optimization-08",
+    "phase": "optimization",
+    "title": "Curvature, Hessians, and learning rates",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-03",
+    "phase": "optimization",
+    "title": "Write gradient descent yourself",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 3
+  },
+  {
+    "id": "optimization-09",
+    "phase": "optimization",
+    "title": "Probability, likelihood, and stable losses",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-10",
+    "phase": "optimization",
+    "title": "Regularization and honest validation",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-11",
+    "phase": "optimization",
+    "title": "Minibatches, expectation, and gradient noise",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "optimization-04",
+    "phase": "optimization",
+    "title": "Optimize with Optax",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 3
+  },
+  {
+    "id": "optimization-12",
+    "phase": "optimization",
+    "title": "Adam, clipping, and learning-rate schedules",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "networks-01",
+    "phase": "networks",
+    "title": "Build a tiny multilayer perceptron",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "networks-02",
+    "phase": "networks",
+    "title": "Model and state with Flax NNX",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "networks-03",
+    "phase": "networks",
+    "title": "A compiled train and evaluation step",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "networks-04",
+    "phase": "networks",
+    "title": "Train a CNN on a small dataset",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "networks-05",
+    "phase": "networks",
+    "title": "Debug unstable learning",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "recovery-01",
+    "phase": "recovery",
+    "title": "Design an input pipeline",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "recovery-02",
+    "phase": "recovery",
+    "title": "Load, batch, and checkpoint order with Grain",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "recovery-03",
+    "phase": "recovery",
+    "title": "Save model, optimizer, and random state",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "recovery-04",
+    "phase": "recovery",
+    "title": "Recover data position and resume",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "recovery-05",
+    "phase": "recovery",
+    "title": "Asynchronous checkpoints and failure boundaries",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "transformers-01",
+    "phase": "transformers",
+    "title": "Attention from small pieces",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "transformers-02",
+    "phase": "transformers",
+    "title": "Masking, tokenization, and sequence packing",
+    "status": "authored",
+    "interactiveFigure": "attention-mask",
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "transformers-03",
+    "phase": "transformers",
+    "title": "A Transformer block and mixed precision",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "transformers-04",
+    "phase": "transformers",
+    "title": "Train, checkpoint, and generate",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 5,
+    "experiments": 2
+  },
+  {
+    "id": "performance-01",
+    "phase": "performance",
+    "title": "Benchmark asynchronous work correctly",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "performance-02",
+    "phase": "performance",
+    "title": "Diagnose recompilation and host synchronization",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "performance-03",
+    "phase": "performance",
+    "title": "Read an XProf trace",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "performance-04",
+    "phase": "performance",
+    "title": "Reason with HLO and the roofline model",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "performance-05",
+    "phase": "performance",
+    "title": "Memory, rematerialization, and optimization tradeoffs",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "distributed-01",
+    "phase": "distributed",
+    "title": "Arrays, meshes, and sharding",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "distributed-02",
+    "phase": "distributed",
+    "title": "A sharded training step",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 1,
+    "sections": 4,
+    "experiments": 2
+  },
+  {
+    "id": "distributed-03",
+    "phase": "distributed",
+    "title": "Communication-efficient algorithms",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "distributed-04",
+    "phase": "distributed",
+    "title": "Resilient distributed training",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "science-01",
+    "phase": "science",
+    "title": "A functional physical simulation",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "science-02",
+    "phase": "science",
+    "title": "Vectorize trajectories and scan time",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "science-03",
+    "phase": "science",
+    "title": "Differentiate through a solver",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "science-04",
+    "phase": "science",
+    "title": "Fit parameters and scale the simulation",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "probability-01",
+    "phase": "probability",
+    "title": "Distributions and sampling",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "probability-02",
+    "phase": "probability",
+    "title": "Build a Bayesian regression",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "probability-03",
+    "phase": "probability",
+    "title": "Hamiltonian Monte Carlo and sampler diagnostics",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "probability-04",
+    "phase": "probability",
+    "title": "Variational inference and model checking",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "rl-01",
+    "phase": "rl",
+    "title": "Write a functional environment",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "rl-02",
+    "phase": "rl",
+    "title": "Batch environments and scan rollouts",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "rl-03",
+    "phase": "rl",
+    "title": "Policy gradients and PPO",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "rl-04",
+    "phase": "rl",
+    "title": "Evaluate agents across seeds",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "kernels-01",
+    "phase": "kernels",
+    "title": "Pallas grids and BlockSpecs",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "kernels-02",
+    "phase": "kernels",
+    "title": "A first TPU kernel",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "kernels-03",
+    "phase": "kernels",
+    "title": "Tiling, memory, and pipelining",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "kernels-04",
+    "phase": "kernels",
+    "title": "Iterate with correctness and performance evidence",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "internals-01",
+    "phase": "internals",
+    "title": "Read your first jaxpr",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 2,
+    "sections": 6,
+    "experiments": 2
+  },
+  {
+    "id": "internals-02",
+    "phase": "internals",
+    "title": "JVPs, VJPs, and higher-order derivatives",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "internals-03",
+    "phase": "internals",
+    "title": "Custom derivative rules",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "internals-04",
+    "phase": "internals",
+    "title": "Lowering, compilation, and a tiny transformation",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "deployment-01",
+    "phase": "deployment",
+    "title": "Move models between JAX, Keras, TensorFlow and PyTorch",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 6,
+    "experiments": 1
+  },
+  {
+    "id": "deployment-03",
+    "phase": "deployment",
+    "title": "Export a computation and verify its serving contract",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 5,
+    "experiments": 1
+  },
+  {
+    "id": "deployment-05",
+    "phase": "deployment",
+    "title": "Choose weight, activation and accumulation precision",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 7,
+    "experiments": 1
+  },
+  {
+    "id": "deployment-06",
+    "phase": "deployment",
+    "title": "Deploy at the edge: conversion, budgets and device checks",
+    "status": "authored",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 6,
+    "experiments": 1
+  },
+  {
+    "id": "deployment-02",
+    "phase": "deployment",
+    "title": "Adapt a pretrained model and choose a post-training objective",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "deployment-04",
+    "phase": "deployment",
+    "title": "Inference capacity, batching, and autoscaling",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "operations-01",
+    "phase": "operations",
+    "title": "Accelerator jobs and runtime lifecycle",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "operations-02",
+    "phase": "operations",
+    "title": "Health, logs, and workload observability",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "operations-03",
+    "phase": "operations",
+    "title": "Failure recovery and operational runbooks",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "operations-04",
+    "phase": "operations",
+    "title": "Changes, rollback, and artifact provenance",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  },
+  {
+    "id": "operations-05",
+    "phase": "operations",
+    "title": "Capacity, utilization, and operating cost",
+    "status": "planned",
+    "interactiveFigure": null,
+    "shapeSketches": 0,
+    "sections": 0,
+    "experiments": 0
+  }
+]

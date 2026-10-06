@@ -1,0 +1,138 @@
+{
+  "schemaVersion": 1,
+  "id": "optimization-12",
+  "minutes": 90,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "An optimizer can lower the loss while hiding several choices: how it averages gradients, rescales coordinates, clips large values, and changes the step size. We will expose those choices one at a time before running a controlled comparison. The goal is to explain a training decision, not to crown a universal winner.",
+    "idea": "Adam retains moving averages of gradients and squared gradients. It corrects the initial bias caused by starting those averages at zero, then scales each coordinate. Clipping and learning-rate schedules are separate transformations. Their position, state and step count are part of the algorithm and must be recorded with the run.",
+    "objectives": [
+      "Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.",
+      "Calculate the first two Adam steps",
+      "Clip a direction without rotating it",
+      "Make the schedule clock explicit",
+      "Compare decisions with evidence",
+      "Bring the phase together in a training audit"
+    ],
+    "sections": [
+      {
+        "title": "Calculate the first two Adam steps",
+        "body": "Let \\(g_t\\) be the gradient at update \\(t\\). Adam tracks a first moment \\(m_t\\) and a second raw moment \\(v_t\\), using decay rates \\(\\beta_1\\) and \\(\\beta_2\\). Starting at zero makes the early averages small; divide by \\(1-\\beta_1^t\\) and \\(1-\\beta_2^t\\) to correct that bias. At the first step, corrected moments are \\(g_1\\) and \\(g_1^2\\). With a small \\(\\epsilon\\), each nonzero coordinate initially moves close to the learning rate in the opposite sign direction. This does not mean later steps ignore magnitude.",
+        "math": "\\begin{aligned}m_t&=\\beta_1m_{t-1}+(1-\\beta_1)g_t\\\\v_t&=\\beta_2v_{t-1}+(1-\\beta_2)g_t^2\\\\\\hat m_t&=m_t/(1-\\beta_1^t),\\quad \\hat v_t=v_t/(1-\\beta_2^t)\\\\\\Delta w_t&=-\\eta_t\\frac{\\hat m_t}{\\sqrt{\\hat v_t}+\\epsilon}\\end{aligned}"
+      },
+      {
+        "title": "Clip a direction without rotating it",
+        "body": "Global norm clipping rescales a gradient only when its length exceeds a threshold \\(c\\). For \\(g=(3,4)\\), the norm is \\(5\\), so clipping at \\(c=1\\) gives \\((0.6,0.8)\\). Coordinate-wise clipping to the same threshold instead gives \\((1,1)\\), changing direction. Clipping before Adam limits the gradient entering its moments; it does not impose that same bound on the final parameter update. Clipping cannot repair NaNs, wrong labels or a wrong objective.",
+        "math": "\\tilde g=g\\min\\!\\left(1,\\frac{c}{\\|g\\|_2}\\right)\\quad\\text{for }\\|g\\|_2>0"
+      },
+      {
+        "title": "Make the schedule clock explicit",
+        "body": "A schedule maps an optimizer update count to a learning rate. Our linear example goes from \\(0.1\\) at count \\(0\\) to \\(0.01\\) at count \\(4\\), then stays there. Count \\(0\\) is the first update, not an epoch. Gradient accumulation changes how many optimizer updates occur per data pass. Restoring only model weights loses the moments and schedule position; retain optimizer state to continue the same run."
+      },
+      {
+        "title": "Compare decisions with evidence",
+        "body": "Use the same objective, initialization, data and number of updates when comparing SGD, momentum and Adam. Report the loss history and chosen rates; equal updates are not equal wall-clock time, and one rate per method is not a thorough tuning study. An adaptive method does not make scaling or validation irrelevant. Adding an \\(L_2\\) penalty to an Adam loss also differs from decoupled weight decay in AdamW: the penalty gradient is transformed by Adam’s moments, while decoupled decay acts separately on the weights."
+      },
+      {
+        "title": "Bring the phase together in a training audit",
+        "body": "For the regression audit project, first document feature and target shapes, loss reduction and dtype. Use a direct least-squares fit as a reference when its assumptions match. Check gradients at more than one point, inspect feature scales, and preserve optimizer state for replay. If you introduce a penalty or change the batch size, state how that changes the objective or noise. Finish with separate training and held-out losses, an unstable run, and a short explanation of your choice. The existing project checks a subset of these skills; keep the new lesson evidence alongside it rather than treating a project pass as assessment of all twelve lessons."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "Build a transparent Adam reference",
+        "instruction": "Create main.py. Use an explicit two-gradient sequence to inspect the optimizer independently of a training loop.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport optax\nparams = jnp.zeros(2)\nadam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)\nstate = adam.init(params)\nm = jnp.zeros(2)\nv = jnp.zeros(2)\ngradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]",
+        "explanation": "The supplied gradients isolate optimizer arithmetic; they are not presented as a model’s measured training gradients."
+      },
+      {
+        "title": "Verify both moment updates",
+        "instruction": "Append the manual recurrences and compare each update with Optax.",
+        "code": "for t, g in enumerate(gradients, start=1):\n    m = 0.9 * m + 0.1 * g\n    v = 0.99 * v + 0.01 * g * g\n    expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)\n    update, state = adam.update(g, state, params)\n    assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)\n    params = optax.apply_updates(params, update)\n    print('step / update:', t, update)",
+        "explanation": "The first update is near \\((-0.1,0.1)\\); the next depends on both gradients."
+      },
+      {
+        "title": "Inspect one clipped update",
+        "instruction": "Append a global clipping plus SGD chain and run python main.py.",
+        "code": "g = jnp.array([3.0, 4.0])\nclip = optax.clip_by_global_norm(1.0)\nclipped, _ = clip.update(g, clip.init(jnp.zeros(2)))\nassert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)\nchain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))\nupdate, _ = chain.update(g, chain.init(jnp.zeros(2)))\nassert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)",
+        "explanation": "For this SGD chain, the update norm is \\(0.1\\). That bound does not automatically apply to a chain containing Adam."
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport optax\nparams = jnp.zeros(2)\nadam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)\nstate = adam.init(params)\nm = jnp.zeros(2)\nv = jnp.zeros(2)\ngradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]\n\nfor t, g in enumerate(gradients, start=1):\n    m = 0.9 * m + 0.1 * g\n    v = 0.99 * v + 0.01 * g * g\n    expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)\n    update, state = adam.update(g, state, params)\n    assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)\n    params = optax.apply_updates(params, update)\n    print('step / update:', t, update)\n\ng = jnp.array([3.0, 4.0])\nclip = optax.clip_by_global_norm(1.0)\nclipped, _ = clip.update(g, clip.init(jnp.zeros(2)))\nassert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)\nchain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))\nupdate, _ = chain.update(g, chain.init(jnp.zeros(2)))\nassert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)",
+    "output": "Two Adam updates match the manual moment calculation; the clipped SGD update is \\((-0.06,-0.08)\\).",
+    "experiments": [
+      {
+        "title": "Inspect the schedule boundary",
+        "prediction": "List the rates used by the first five updates. Is the fifth rate already the final value?",
+        "code": "schedule = optax.linear_schedule(init_value=0.1, end_value=0.01, transition_steps=4)\nrates = jnp.array([schedule(i) for i in range(6)])\nassert jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)\ntx = optax.sgd(schedule)\np = jnp.array(0.0)\ns = tx.init(p)\nfor _ in range(5):\n    delta, s = tx.update(jnp.array(1.0), s, p)\n    p = optax.apply_updates(p, delta)\nassert jnp.allclose(p, -0.275, atol=1e-06)\nprint('schedule rates:', rates)",
+        "output": "The fifth update uses count \\(4\\) and rate \\(0.01\\).",
+        "explanation": "A schedule is indexed by optimizer updates. Recording only the number of epochs leaves its behavior ambiguous."
+      },
+      {
+        "title": "Compare a fixed update budget",
+        "prediction": "Will every optimizer produce the same path on a bowl with unequal curvature?",
+        "code": "def bowl(w):\n    return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)\nstart = jnp.array([1.0, 1.0])\noptimizers = {'sgd': optax.sgd(0.05), 'momentum': optax.sgd(0.05, momentum=0.9), 'adam': optax.adam(0.1)}\ntraces = {}\nfor name, tx in optimizers.items():\n\n    def step(carry, _):\n        p, s = carry\n        delta, s = tx.update(jax.grad(bowl)(p), s, p)\n        p = optax.apply_updates(p, delta)\n        return ((p, s), bowl(p))\n    (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)\n    assert jnp.all(jnp.isfinite(history))\n    assert history[-1] < bowl(start)\n    traces[name] = history\n    print(name, 'initial / final loss:', bowl(start), history[-1])\nassert not jnp.allclose(traces['sgd'], traces['adam'])",
+        "output": "All three reduce the loss for these specified settings; the trajectories differ.",
+        "explanation": "This is a controlled demonstration at stated rates and update counts, not evidence that one optimizer universally wins."
+      }
+    ],
+    "exercise": "Compare global norm clipping with coordinate-wise clipping on \\((3,4)\\). Check which preserves the ratio of the coordinates.",
+    "solution": "coordinate = jnp.clip(g, -1.0, 1.0)\nassert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))\nassert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])\nassert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])",
+    "practice": [
+      {
+        "title": "Catch schedule restart",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "After five scheduled SGD steps with constant gradient \\(1\\), compare a retained optimizer state with a freshly initialized state for the next update.",
+        "hint": "The retained count has reached the final rate; a reset count starts at \\(0\\).",
+        "solution": "tx = optax.sgd(schedule)\np = jnp.array(0.0)\ns = tx.init(p)\nfor _ in range(5):\n    delta, s = tx.update(jnp.array(1.0), s, p)\n    p = optax.apply_updates(p, delta)\ncontinued, _ = tx.update(jnp.array(1.0), s, p)\nrestarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)\nassert jnp.allclose(continued, -0.01, atol=1e-06)\nassert jnp.allclose(restarted, -0.1, atol=1e-06)",
+        "explanation": "Restoring weights without optimizer state can silently restart the learning-rate schedule."
+      },
+      {
+        "title": "Check transformation order",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "For gradient \\((3,4)\\), compare clipping before SGD at rate \\(0.1\\) with clipping after it. Write a decision memo explaining which quantity you intended to bound.",
+        "hint": "The un-clipped SGD update already has norm \\(0.5\\), below the threshold \\(1\\).",
+        "solution": "before = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))\nafter = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))\nu_before, _ = before.update(g, before.init(jnp.zeros(2)))\nu_after, _ = after.update(g, after.init(jnp.zeros(2)))\nassert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)\nassert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)",
+        "explanation": "Transformation order changes the algorithm. State whether the bound applies to the raw gradient or the parameter update, and retain the observed evidence."
+      }
+    ],
+    "question": "Does clipping gradients before Adam guarantee that final updates obey the same norm threshold?",
+    "options": [
+      "Yes, every later transformation preserves that bound",
+      "No; Adam subsequently rescales coordinates",
+      "Only if the loss is a scalar"
+    ],
+    "answer": 1,
+    "explanation": "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.",
+    "diagnosis": "If a restart changes the trajectory, compare optimizer moments and schedule count. If a clipped run still jumps, measure both gradient and update norms and inspect transformation order. Record rates, reductions, dtype and validation behavior before recommending a method.",
+    "takeaways": [
+      "A schedule is indexed by optimizer updates. Recording only the number of epochs leaves its behavior ambiguous.",
+      "This is a controlled demonstration at stated rates and update counts, not evidence that one optimizer universally wins."
+    ],
+    "references": [
+      {
+        "title": "Optax Adam",
+        "url": "https://optax.readthedocs.io/en/latest/api/optimizers.html#optax.adam"
+      },
+      {
+        "title": "Optax transformations",
+        "url": "https://optax.readthedocs.io/en/latest/api/transformations.html"
+      },
+      {
+        "title": "Optax schedules",
+        "url": "https://optax.readthedocs.io/en/latest/api/optimizer_schedules.html"
+      }
+    ],
+    "visual": {
+      "title": "Compare optimizer paths under a fixed update budget",
+      "kind": "executed",
+      "prediction": "Will equal update counts produce equal loss histories?",
+      "reading": "Start with the axes. The horizontal axis counts completed parameter updates; \\(0\\) is the shared starting point. The vertical axis is the objective \\(L(w)=\\tfrac12(w_0^2+10w_1^2)\\), so lower is better. It is logarithmic: falling from \\(10^{-2}\\) to \\(10^{-3}\\) means a tenfold reduction, not a decrease of one unit. Zero cannot appear on this scale.\n\nAll three methods begin at \\(w=(1,1)\\), with loss \\(5.5\\). The solid SGD curve drops smoothly and then develops a slower tail. With learning rate \\(0.05\\), each update multiplies the two coordinates by \\(0.95\\) and \\(0.5\\). The steep direction shrinks quickly; the flatter direction accounts for the slow remaining progress.",
+      "connection": "Now follow the dashed momentum curve. Its loss falls to about \\(0.568\\) at update \\(2\\), then rises to about \\(3.714\\) at update \\(4\\). Momentum retains past gradients, so a favorable current position does not guarantee a favorable next step: the accumulated update can carry the parameters past the minimum. The repeated dips and rebounds occur under a generally declining envelope. They are deterministic optimizer behavior in this example, not noise from shuffled minibatches.\n\nThe dash-dot Adam curve makes the same caution especially clear. It reaches about \\(1.45\\times10^{-4}\\) at update \\(11\\), then rises to about \\(0.410\\) by update \\(19\\). Adam adapts coordinate-wise update sizes using gradient history, but that history can still move parameters away after a close approach. A deep dip means the current parameters are near the minimum; it does not mean subsequent updates will stay there. The scalar loss alone does not tell us which side of the minimum each coordinate occupies.\n\nAt update \\(50\\), the losses are approximately \\(1.28\\times10^{-4}\\) for Adam, \\(2.96\\times10^{-3}\\) for SGD, and \\(2.49\\times10^{-2}\\) for momentum. Adam finishes lowest under these settings, although it was not lowest at every earlier update. Compare the same update budget, read the endpoint as well as the dips, and remember that equal update counts do not imply equal runtime. This figure uses fixed rates without clipping or a schedule; the later experiments examine those separate choices.",
+      "alt": "Compare optimizer paths under a fixed update budget. Start with the axes. The horizontal axis counts completed parameter updates; \\(0\\) is the shared starting point. The vertical axis is the objective \\(L(w)=\\tfrac12(w_0^2+10w_1^2)\\), so lower is better. It is logarithmic: falling from \\(10^{-2}\\) to \\(10^{-3}\\) means a tenfold reduction, not a decrease of one unit. Zero cannot appear on this scale. All three methods begin at \\(w=(1,1)\\), with loss \\(5.5\\). The solid SGD curve drops smoothly and then develops a slower tail. With learning rate \\(0.05\\), each update multiplies the two coordinates by \\(0.95\\) and \\(0.5\\). The steep direction shrinks quickly; the flatter direction accounts for the slow remaining progress.",
+      "code": "def plot_bowl(z):\n    return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)\nseries = []\nfor name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]:\n    p_plot = jnp.array([1.0, 1.0])\n    s_plot = tx.init(p_plot)\n    vals = [float(plot_bowl(p_plot))]\n    for _ in range(50):\n        delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)\n        p_plot = optax.apply_updates(p_plot, delta)\n        vals.append(float(plot_bowl(p_plot)))\n    series.append({'label': name, 'y': vals})\nvisual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update', 'ylabel': 'objective', 'yscale': 'log', 'series': series}"
+    }
+  }
+}

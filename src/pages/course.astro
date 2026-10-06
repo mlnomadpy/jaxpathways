@@ -1,0 +1,73 @@
+---
+import '../styles/features/lesson-list.css';
+import PhaseCard from '../components/course/PhaseCard.astro';
+import { course, inventory } from '../lib/course-data.js';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/catalog.css';
+import '../styles/features/paths.css';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import { siteUrl } from '../lib/urls.js';
+import pages from '../data/pages.json';
+---
+
+<SiteLayout {...pages.course}>
+  <main id="main">
+    <div class="page-intro">
+      <a href={siteUrl('index.html')}>Home</a>
+      <h1>Your route through JAX.</h1>
+      <p class="intro">Open a lesson. Build something you can explain.</p>
+      <p id="counts" class="catalog-counts">
+        {course.phases.length} phases · {inventory.authored} lessons available · {inventory.planned}{' '}
+        planned
+      </p>
+    </div>
+    <section id="curriculum">
+      <div class="course-access">
+        <div>
+          <p id="progress" class="soft" aria-live="polite"></p>
+          <p>Open a step to see its lessons. You can start anywhere.</p>
+        </div>
+        <div class="actions">
+          <a
+            class="button primary"
+            id="course-start"
+            href={siteUrl('lesson.html?lesson=welcome-01')}
+          >
+            Start learning
+          </a>
+          <a href={siteUrl('pathways.html')}>Explore paths</a>
+          <a href={siteUrl('projects.html#modality-tracks')}>Connect lessons in a project guide</a>
+        </div>
+      </div>
+      <div id="path-summary" class="path-summary" hidden></div>
+      <p id="course-view-status" class="edition" aria-live="polite"></p>
+      <div id="phases" class="phase-grid">
+        {course.phases.map((phase) => (
+          <PhaseCard phase={phase} />
+        ))}
+      </div>
+      <details class="course-jump-disclosure">
+        <summary>Jump to a course step</summary>
+        <div class="course-jumps" id="course-jumps"></div>
+      </details>
+      <div class="availability-controls">
+        <label class="roadmap-toggle">
+          <input type="checkbox" id="show-roadmap" /> Show planned topics
+        </label>
+      </div>
+      <p id="content-status" class="soft">
+        {inventory.authored} lesson drafts with CPU companions; {inventory.planned} topics are
+        planned.
+      </p>
+      <p id="empty" hidden>
+        No available lessons in this view.
+      </p>
+    </section>
+    <SiteFooter />
+  </main>
+  <script>
+    import '../scripts/entries/course.js';
+  </script>
+</SiteLayout>

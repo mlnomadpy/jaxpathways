@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "A new checkpoint directory exists but the completion wait raises an exception. Which recovery decision follows this lesson’s protocol?",
+      "options": [
+        "Accept the newest directory immediately.",
+        "Delete the previous checkpoint because save returned.",
+        "Retain the previous accepted checkpoint and investigate the failed attempt."
+      ],
+      "correct": 2,
+      "explanation": "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point."
+    }
+  ]
+}

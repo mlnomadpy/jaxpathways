@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "pretraining-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why are visible input tokens useful even when their output positions are excluded from the loss?",
+      "options": [
+        "They supply context to predictions at selected positions through the encoder.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "The mask controls the supervised outputs, while attention controls how input context influences them."
+    }
+  ]
+}

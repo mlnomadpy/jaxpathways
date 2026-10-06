@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What must a deployment policy specify beyond “INT8 weights”?",
+      "options": [
+        "Activation, accumulator and output formats, scales, calibration and supported kernels.",
+        "Only the filename extension.",
+        "Nothing; INT8 guarantees acceleration."
+      ],
+      "correct": 0,
+      "explanation": "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit."
+    }
+  ]
+}

@@ -1,0 +1,133 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-02",
+  "minutes": 125,
+  "content": {
+    "problem": "A model already learned one task. You now have a small adaptation set and a teacher that supplies probabilities. Should you optimize the observed labels or imitate the teacher? We will actually pretrain, save and reload a tiny model, adapt it both ways, and compare the resulting predictions on an untouched evaluation split. The model is deliberately small so every objective and derivative can be inspected.",
+    "idea": "Post-training changes a learned model using a new objective or dataset. Supervised fine-tuning uses observed targets. Distillation uses teacher predictions as targets; it inherits the teacher’s strengths and errors. Preference learning instead compares alternatives, while reinforcement learning requires a reward and interaction or rollout assumptions. These are different data contracts, not interchangeable labels for an optimizer.",
+    "objectives": [
+      "Pretrain and reload an artifact with recorded data and checkpoint hashes",
+      "Compare supervised adaptation and teacher distillation from the same starting weights",
+      "Verify both objective gradients independently",
+      "Report target-task gains and source-task retention without leaking held-out data"
+    ],
+    "sections": [
+      {
+        "title": "Define the tasks before choosing an objective",
+        "body": "The input has two measured features plus a constant intercept feature. The source task uses one synthetic probability rule; the target task uses another. Source training sees \\(256\\) rows. Adaptation sees only \\(48\\) different rows. The final target report uses \\(512\\) separately generated rows. These are disjoint generated splits with separate keys, not a real benchmark. Binary adaptation labels are sampled from the target probabilities; the teacher supplies the probabilities themselves. That privileged teacher is declared explicitly rather than presented as a generally superior model."
+      },
+      {
+        "title": "Understand hard labels and soft targets",
+        "body": "For logit \\(z=x^\\top w\\), cross-entropy is \\(\\log(1+e^z)-tz\\), where \\(t\\) is either a binary observed label or a teacher probability between zero and one. Differentiating gives \\((\\operatorname{sigmoid}(z)-t)x\\). Averaging over rows gives the gradient in our host reference. A soft target contains uncertainty that a single sampled binary label does not. If the teacher is wrong, faithfully matching that uncertainty can also preserve its mistakes.",
+        "math": "L(w)=\\frac1N\\sum_i[\\operatorname{softplus}(x_i^\\top w)-t_i x_i^\\top w],\\qquad \\nabla L=\\frac1N X^\\top(\\operatorname{sigmoid}(Xw)-t)"
+      },
+      {
+        "title": "Make pretrained mean previously trained",
+        "body": "We start from zero, optimize the source objective for \\(300\\) updates and check that the source loss falls. We save those resulting weights, hash the checkpoint bytes and record the source-array hash, objective, dtype, version and training recipe. Adaptation uses only the reloaded artifact. This establishes a small reproducibly pretrained fixture; it is not a foundation model, a downloaded checkpoint or a random frozen feature masquerading as pretraining. The artifact omits optimizer state, so no exact-resume claim is made."
+      },
+      {
+        "title": "Choose a fair comparison",
+        "body": "Both adaptation branches receive identical initial weights, adaptation inputs, update count and rate. Their training losses are not directly a competition because their targets differ. We evaluate both on one common target cross-entropy and probability squared error, using held-out generating probabilities unavailable to training. We also evaluate source loss to expose forgetting. Do not select a learning rate using this final report; add a separate validation split for model selection. One seeded synthetic result does not establish which objective will win on another task."
+      },
+      {
+        "title": "Locate preference and reinforcement objectives",
+        "body": "A pairwise preference objective asks which of two responses is preferred; its supervision consists of prompt, chosen response and rejected response, with a defined sampling and reference policy. A teacher cross-entropy uses distributions over labels or tokens and does not require preference pairs. An RL objective uses a reward and a policy whose generated actions affect the training samples. This lab executes supervised adaptation and distillation only. Renaming teacher probabilities “rewards” would not create an RL experiment."
+      },
+      {
+        "title": "Carry the contract to a real pretrained model",
+        "body": "Choose an actual model checkpoint under its license, record repository and exact revision, tokenizer or feature preprocessing, architecture configuration, file hashes and base precision. First verify a golden inference example before changing weights. Build disjoint training, validation and final evaluation sets, with no overlap from teacher-generation or calibration data. Start with a small controlled adapter or declared trainable parameter subset; record what remains frozen and save adapter/base identities together. Define the task and source-retention criteria before optimization. Recheck export, precision and target-runtime parity after adaptation. This extension is an execution plan, not a claim that a large external model ran in this CPU lesson."
+      }
+    ],
+    "output": "Both adapted branches reduce the common held-out target cross-entropy relative to the reloaded source model. The printed table also reports probability error and source-task retention; inspect all three quantities.",
+    "exercise": "Adapt for zero steps and verify that predictions exactly match the reloaded checkpoint. Then run a short adaptation and show that the saved base is unchanged while the adapted parameters differ.",
+    "solution": "unchanged,_=train(restored,adapt_X,hard_targets,steps=0)\nnp.testing.assert_array_equal(unchanged,restored)\nshort,_=train(restored,adapt_X,hard_targets,steps=10)\nassert not jnp.array_equal(short,restored)\nnp.testing.assert_array_equal(restored,frozen)",
+    "question": "Why should the two adaptation branches be compared using a common held-out criterion rather than their own training losses?",
+    "options": [
+      "Teacher targets always make training loss zero",
+      "Their supervision differs, so their training losses answer different questions",
+      "Using the evaluation split during every update guarantees fairness"
+    ],
+    "answer": 1,
+    "explanation": "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.",
+    "diagnosis": "If target performance improves but source loss rises, inspect task conflict before blaming checkpoint corruption. If the initial adapted output differs before any update, compare checkpoint hash, preprocessing and precision. If a distillation result looks implausibly strong, verify that teacher labels and evaluation labels were not generated from the same held-out examples.",
+    "experiments": [
+      {
+        "title": "Check a stable extreme logit",
+        "prediction": "Can a logit of \\(1000\\) be evaluated without exponentiating it directly?",
+        "code": "extreme=objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zeros(1))\nassert jnp.isfinite(extreme) and jnp.allclose(extreme,1000.)",
+        "output": "The wrong confident prediction has finite loss \\(1000\\).",
+        "explanation": "logaddexp evaluates softplus stably; a naive log(1+exp(z)) can overflow."
+      },
+      {
+        "title": "Reveal teacher error",
+        "prediction": "If a teacher flips every target probability, does matching it still solve the original task?",
+        "code": "wrong,_=train(restored,adapt_X,1-soft_targets,steps=200)\nassert objective(wrong,held_X,held_prob)>objective(distilled,held_X,held_prob)\nprint(\"wrong-teacher held loss:\",float(objective(wrong,held_X,held_prob)))",
+        "output": "The deliberately wrong teacher produces worse target evaluation than the correct teacher.",
+        "explanation": "Distillation optimizes fidelity to its teacher, which is not automatically fidelity to the desired task."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Keep source-task evidence",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Measure source cross-entropy before and after both adaptation objectives. Explain any forgetting using the different source and target probability rules.",
+        "hint": "Report the actual values; target improvement is not a source-retention guarantee.",
+        "solution": "retention=[float(objective(w,source_X,source_targets)) for w in (restored,sft,distilled)]\nassert retention[1]>retention[0] and retention[2]>retention[0]\nprint(\"source retention losses:\",retention)",
+        "explanation": "The two tasks prefer different parameters; the measurement exposes that tradeoff."
+      },
+      {
+        "title": "Check the loss without autodiff",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Compare the soft-target loss with a host float64 logaddexp expression on new weights.",
+        "hint": "Use the same logits, reduction and targets; this check does not call the JAX loss as its oracle.",
+        "solution": "probe=np.array([-.4,.2,.3])\nz=host_X@probe\nexpected=np.mean(np.logaddexp(0,z)-np.asarray(soft_targets)*z)\nnp.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol=1e-6)",
+        "explanation": "Independent algebra checks normalization and reduction as well as stability."
+      }
+    ],
+    "takeaways": [
+      "A post-training comparison begins with an identifiable trained artifact.",
+      "Choose an objective according to the supervision actually available.",
+      "Compare target quality, source retention and provenance before exporting a new version."
+    ],
+    "references": [
+      {
+        "title": "Knowledge distillation: original paper",
+        "url": "https://arxiv.org/abs/1503.02531"
+      },
+      {
+        "title": "JAX automatic differentiation",
+        "url": "https://docs.jax.dev/en/latest/automatic-differentiation.html"
+      }
+    ],
+    "visual": {
+      "title": "Two adaptation objectives evaluated on the same held-out target",
+      "kind": "executed",
+      "prediction": "Will improving the new task necessarily preserve performance on the source task?",
+      "reading": "The horizontal categories are the reloaded pretrained model, supervised adaptation and teacher distillation. The vertical axis is mean cross-entropy in nats. One series evaluates the same held-out target probabilities for every model; the other evaluates source-task probabilities. Lower is better within each series. The two adapted models improve target-task loss while their source-task loss increases. These bars are evaluations of the resulting weights, not the branches’ incomparable training objectives. In this seeded run the held-out target bars are approximately \\(0.978,0.555,0.524\\), while the source bars are \\(0.545,0.790,1.005\\), in the same model order. Teacher adaptation gives the lowest target loss here but also the largest source-retention loss.",
+      "connection": "The teacher exactly matches the declared synthetic target generator, making this an especially favorable distillation case. The held-out comparison demonstrates an objective tradeoff on this fixture. It neither establishes that a real teacher is correct nor that one adaptation recipe is generally best. The failure experiment makes the teacher wrong and rechecks the target criterion.",
+      "code": "names=[\"pretrained\",\"supervised\",\"teacher\"]\nvisual_data={\"kind\":\"bar\",\"x\":[0,1,2],\"labels\":names,\"xlabel\":\"model after training stage\",\"ylabel\":\"mean cross-entropy (nats)\",\"series\":[{\"label\":\"held-out target\",\"y\":[metrics[n][\"held_cross_entropy\"] for n in names]},{\"label\":\"source retention\",\"y\":[metrics[n][\"source_cross_entropy\"] for n in names]}]}",
+      "alt": "Two adaptation objectives evaluated on the same held-out target. The horizontal categories are the reloaded pretrained model, supervised adaptation and teacher distillation. The vertical axis is mean cross-entropy in nats. One series evaluates the same held-out target probabilities for every model; the other evaluates source-task probabilities. Lower is better within each series. The two adapted models improve target-task loss while their source-task loss increases. These bars are evaluations of the resulting weights, not the branches’ incomparable training objectives. In this seeded run the held-out target bars are approximately \\(0.978,0.555,0.524\\), while the source bars are \\(0.545,0.790,1.005\\), in the same model order. Teacher adaptation gives the lowest target loss here but also the largest source-retention loss."
+    },
+    "code": "import hashlib\nimport json\nimport tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef design(key,n):\n    features=jax.random.normal(key,(n,2))\n    return jnp.concatenate([features,jnp.ones((n,1))],axis=1)\nsource_X=design(jax.random.key(10),256)\nsource_targets=jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))\nadapt_X=design(jax.random.key(11),48)\nheld_X=design(jax.random.key(12),512)\nteacher=jnp.array([.6,1.4,-.3])\nsoft_targets=jax.nn.sigmoid(adapt_X@teacher)\nhard_targets=jax.random.bernoulli(jax.random.key(13),soft_targets).astype(jnp.float32)\nheld_prob=jax.nn.sigmoid(held_X@teacher)\ndef objective(w,X,targets):\n    logits=X@w\n    return jnp.mean(jnp.logaddexp(0.,logits)-targets*logits)\ndef train(initial,X,targets,steps=300,rate=.15):\n    def step(w,_):\n        loss,grad=jax.value_and_grad(objective)(w,X,targets)\n        return w-rate*grad,loss\n    return jax.lax.scan(step,initial,None,length=steps)\nbase,pretrain_history=train(jnp.zeros(3),source_X,source_targets)\nassert pretrain_history[-1]<pretrain_history[0]-.1\nsource_hash=hashlib.sha256(np.asarray(source_X).tobytes()+np.asarray(source_targets).tobytes()).hexdigest()\n\nwith tempfile.TemporaryDirectory() as directory:\n    checkpoint=Path(directory)/'pretrained.npz'\n    np.savez(checkpoint,weights=np.asarray(base))\n    digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()\n    manifest={'model':'three-parameter logistic synthetic fixture','source_data_sha256':source_hash,\n              'weights_sha256':digest,'source_seed':10,'pretrain_steps':300,'learning_rate':.15,\n              'objective':'binary cross entropy with synthetic source probabilities',\n              'jax':jax.__version__,'dtype':'float32','optimizer_state_included':False}\n    manifest_path=Path(directory)/'manifest.json'\n    manifest_path.write_text(json.dumps(manifest))\n    recorded=json.loads(manifest_path.read_text())\n    assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']\n    with np.load(checkpoint,allow_pickle=False) as saved:\n        restored=jnp.asarray(saved['weights'])\nnp.testing.assert_array_equal(restored,base)\nfrozen=np.array(restored,copy=True)\nsft,sft_history=train(restored,adapt_X,hard_targets,steps=200)\ndistilled,distill_history=train(restored,adapt_X,soft_targets,steps=200)\nnp.testing.assert_array_equal(restored,frozen)\n\nw_check=jnp.array([.2,-.3,.1])\nhost_X=np.asarray(adapt_X,dtype=np.float64)\nhost_w=np.asarray(w_check,dtype=np.float64)\nhost_p=1/(1+np.exp(-(host_X@host_w)))\nfor targets in (hard_targets,soft_targets):\n    expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)\n    np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)\nmetrics={}\nfor name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:\n    metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),\n                   'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),\n                   'source_cross_entropy':float(objective(weights,source_X,source_targets))}\nassert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nassert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nprint(json.dumps(metrics,indent=2))\nprint('checkpoint source hash:',source_hash)",
+    "buildSteps": [
+      {
+        "title": "1. Pretrain a small model and retain its source data identity",
+        "instruction": "Create main.py in the CPU environment. These are explicit synthetic classification tasks; the source model is genuinely optimized before it is saved.",
+        "code": "import hashlib\nimport json\nimport tempfile\nfrom pathlib import Path\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef design(key,n):\n    features=jax.random.normal(key,(n,2))\n    return jnp.concatenate([features,jnp.ones((n,1))],axis=1)\nsource_X=design(jax.random.key(10),256)\nsource_targets=jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))\nadapt_X=design(jax.random.key(11),48)\nheld_X=design(jax.random.key(12),512)\nteacher=jnp.array([.6,1.4,-.3])\nsoft_targets=jax.nn.sigmoid(adapt_X@teacher)\nhard_targets=jax.random.bernoulli(jax.random.key(13),soft_targets).astype(jnp.float32)\nheld_prob=jax.nn.sigmoid(held_X@teacher)\ndef objective(w,X,targets):\n    logits=X@w\n    return jnp.mean(jnp.logaddexp(0.,logits)-targets*logits)\ndef train(initial,X,targets,steps=300,rate=.15):\n    def step(w,_):\n        loss,grad=jax.value_and_grad(objective)(w,X,targets)\n        return w-rate*grad,loss\n    return jax.lax.scan(step,initial,None,length=steps)\nbase,pretrain_history=train(jnp.zeros(3),source_X,source_targets)\nassert pretrain_history[-1]<pretrain_history[0]-.1\nsource_hash=hashlib.sha256(np.asarray(source_X).tobytes()+np.asarray(source_targets).tobytes()).hexdigest()",
+        "explanation": "The same stable cross-entropy accepts binary labels or teacher probabilities. Those targets express different supervision, even though the algebra is shared."
+      },
+      {
+        "title": "2. Save and reload before adapting",
+        "instruction": "Append this artifact boundary. The manifest names the model, synthetic source split, objective and training recipe; adaptation starts from reloaded weights.",
+        "code": "with tempfile.TemporaryDirectory() as directory:\n    checkpoint=Path(directory)/'pretrained.npz'\n    np.savez(checkpoint,weights=np.asarray(base))\n    digest=hashlib.sha256(checkpoint.read_bytes()).hexdigest()\n    manifest={'model':'three-parameter logistic synthetic fixture','source_data_sha256':source_hash,\n              'weights_sha256':digest,'source_seed':10,'pretrain_steps':300,'learning_rate':.15,\n              'objective':'binary cross entropy with synthetic source probabilities',\n              'jax':jax.__version__,'dtype':'float32','optimizer_state_included':False}\n    manifest_path=Path(directory)/'manifest.json'\n    manifest_path.write_text(json.dumps(manifest))\n    recorded=json.loads(manifest_path.read_text())\n    assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']\n    with np.load(checkpoint,allow_pickle=False) as saved:\n        restored=jnp.asarray(saved['weights'])\nnp.testing.assert_array_equal(restored,base)\nfrozen=np.array(restored,copy=True)\nsft,sft_history=train(restored,adapt_X,hard_targets,steps=200)\ndistilled,distill_history=train(restored,adapt_X,soft_targets,steps=200)\nnp.testing.assert_array_equal(restored,frozen)",
+        "explanation": "Both branches begin with identical pretrained parameters and a fresh stateless SGD update rule. This is adaptation, not exact optimizer-state resumption."
+      },
+      {
+        "title": "3. Compare on a held-out criterion shared by both objectives",
+        "instruction": "Append the independent derivative and final evaluation. Neither optimization branch receives held_X or held_prob.",
+        "code": "w_check=jnp.array([.2,-.3,.1])\nhost_X=np.asarray(adapt_X,dtype=np.float64)\nhost_w=np.asarray(w_check,dtype=np.float64)\nhost_p=1/(1+np.exp(-(host_X@host_w)))\nfor targets in (hard_targets,soft_targets):\n    expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)\n    np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)\nmetrics={}\nfor name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:\n    metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),\n                   'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),\n                   'source_cross_entropy':float(objective(weights,source_X,source_targets))}\nassert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nassert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nprint(json.dumps(metrics,indent=2))\nprint('checkpoint source hash:',source_hash)",
+        "explanation": "The teacher is the known generating rule in this fixture, so matching it is an especially favorable distillation setting. Report source retention as well as target-task improvement."
+      }
+    ]
+  }
+}

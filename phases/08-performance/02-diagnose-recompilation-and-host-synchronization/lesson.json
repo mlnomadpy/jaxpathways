@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "id": "performance-02",
+  "minutes": 80,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "A new batch size makes one call pause; reading a metric makes another loop wait. Those delays can look similar, but they have different causes. We’ll record the shapes, dtypes and static choices of each call, then inspect where Python asks for device values. The evidence will guide the change.",
+    "idea": "A jitted program is specialized to argument properties such as shape and dtype and to values explicitly declared static. Changing array contents while keeping their signature usually reuses an existing specialization; changing shape or static metadata can require a new one. A Python diagnostic inside the function observes tracing, not device execution or the number of compiled executables.\n\nA host read such as `float(array)` needs the scalar value and therefore introduces a completion boundary. Moving that read changes what can remain in a device-side computation chain. It does not guarantee faster execution on this small CPU example.",
+    "objectives": [
+      "Record shapes, dtypes and dynamic/static choices beside observed tracing.",
+      "Separate Python trace diagnostics from compilation evidence.",
+      "Keep ordinary numerical hyperparameters dynamic when their values need not determine program structure.",
+      "Compare per-step host consumption with one final host consumption while checking equivalent results."
+    ],
+    "sections": [
+      {
+        "title": "A call signature is different from its numerical data",
+        "body": "Our score is the sum of squared scaled inputs. With \\(x=[0, \\ldots, 7]\\) and gain \\(1\\), the answer is \\(140\\); with gain \\(2\\) it becomes \\(560\\). Passing a float32 scalar gain keeps its abstract shape and dtype unchanged when the value changes. The transformed computation can read that value at execution time.\n\nAn array of twelve elements has a different shape from the eight-element array. Ordinary jit specializes to these shapes, so this is a plausible cause of new staging work. A ledger records the actual calls before attributing a pause. Sharding, compiler options, callable identity and other context can matter too; the ledger is a diagnosis aid, not a full cache-key specification.",
+        "formula": "call → (shape, dtype, static choices) → specialization\n             dynamic values → execution of that program"
+      },
+      {
+        "title": "Observe tracing without mislabeling compilation",
+        "body": "The score function appends its input signature to a Python list. This is a deliberate authoring diagnostic: Python runs while JAX traces the function, whereas the compiled numerical operations can run later without replaying that Python append. Never use this list as optimizer state or a reliable callback from accelerator execution.\n\nWe log the change in list length around each call, but assert numerical answers rather than a fixed event count. Cache state and implementation details affect observations. A trace event does not prove that a new executable was compiled, and absence of an event is not proof that no compiler activity occurred. Enable public jax_log_compiles diagnostics or obtain a profiler trace for stronger evidence, recording exactly which log event supports a claim.",
+        "commands": [
+          {
+            "label": "Capture public compilation diagnostics on macOS/Linux",
+            "shell": "POSIX shell",
+            "code": "JAX_LOG_COMPILES=1 python diagnosis.py 2> compile.log",
+            "expected": "The usual ledger appears in the terminal. compile.log contains JAX diagnostics, including tracing and compilation messages when observed. Read the named stage in each line; do not count every line as a compile."
+          },
+          {
+            "label": "Capture diagnostics in PowerShell",
+            "shell": "PowerShell",
+            "code": "$env:JAX_LOG_COMPILES=\"1\"\npython diagnosis.py 2> compile.log\nRemove-Item Env:JAX_LOG_COMPILES",
+            "expected": "The ledger appears in the terminal and diagnostics are captured in compile.log. Removing the environment variable restores the shell setting after the run."
+          }
+        ]
+      },
+      {
+        "title": "Choose static arguments for structure rather than convenience",
+        "body": "A Boolean selecting one of two Python branches can be static so tracing selects the branch. Its value then becomes part of specialization, so changing that choice can trigger staging. Static arguments must be hashable and are unsuitable for arbitrary numerical array data. Avoid declaring a rapidly changing scalar gain static just to make Python logic convenient.\n\nIf the gain only participates in arithmetic, pass it as a typed scalar array as we did. If a runtime Boolean chooses arithmetic, express the selection with lax.cond or another appropriate array operation. Static metadata and dynamic numerical values serve different purposes; changing one into the other can change the number of specializations and the program itself."
+      },
+      {
+        "title": "A host metric is an explicit synchronization boundary",
+        "body": "`float(score)` needs the scalar contents in Python. That read waits for any outstanding work needed to produce it. Keeping a scalar loss as a JAX array allows later device computations to consume it without Python inspecting its value. A chain can then be synchronized once at the final output.\n\nThe exercise compares six dependent updates with host consumption after each step against six updates with a final wait. Both variants must produce the same scalar. Their wall-clock boundaries include different waits and conversion overhead; we record both but assert no speed ordering. Removing intermediate logging also removes observability, so production systems may use bounded logging intervals instead of silently dropping metrics."
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "Prepare a trace ledger",
+        "instruction": "Create diagnosis.py in your activated course environment and add this block.",
+        "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\ncpu = jax.devices(\"cpu\")[0]\ntrace_events = []\ndef score(x, gain):\n    # Authoring diagnostic: this Python effect happens during tracing.\n    # It is NOT model state and does not count executable compilations.\n    trace_events.append({\"shape\": list(x.shape), \"dtype\": str(x.dtype)})\n    return jnp.sum((x * gain)**2)\ncompiled_score = jax.jit(score)\nx8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)\nx12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)\njax.block_until_ready((x8, x12))\n",
+        "explanation": "This CPU experiment deliberately keeps the trace ledger outside numerical state. Run it in a fresh process when comparing observations."
+      },
+      {
+        "title": "Record call signatures and observed traces",
+        "instruction": "Append this block to the same file. Run the assembled file with python diagnosis.py.",
+        "code": "call_rows = []\ndef observed_call(label, x, gain):\n    before = len(trace_events)\n    result = compiled_score(x, jax.device_put(np.float32(gain), cpu))\n    result.block_until_ready()\n    expected = np.sum((np.asarray(x) * np.float32(gain))**2)\n    np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)\n    call_rows.append({\"label\": label, \"shape\": list(x.shape), \"dtype\": str(x.dtype),\n                      \"observed_trace_delta\": len(trace_events) - before,\n                      \"result\": float(result)})\n    return result\n",
+        "explanation": "The ledger relates each controlled signature change to the observed Python event delta, with an independent NumPy value check."
+      },
+      {
+        "title": "Run the controlled call sequence",
+        "instruction": "Append this block to the same file. Run the assembled file with python diagnosis.py.",
+        "code": "observed_call(\"initial signature\", x8, 1.)\nobserved_call(\"same signature changed data\", x8 + 1., 1.)\nobserved_call(\"same signature changed dynamic gain\", x8, 2.)\nobserved_call(\"different input shape\", x12, 1.)\nprint(json.dumps({\"jax\": jax.__version__, \"backend\": str(cpu),\n                  \"calls\": call_rows, \"python_trace_events\": trace_events}, indent=2))\nassert call_rows[0][\"result\"] == 140.\nassert call_rows[2][\"result\"] == 560.\nassert call_rows[3][\"result\"] == 506.\n",
+        "explanation": "Inspect the event deltas on your own environment. The required outputs are checked numeric scores, not a fabricated trace or compilation count."
+      }
+    ],
+    "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\ncpu = jax.devices(\"cpu\")[0]\ntrace_events = []\ndef score(x, gain):\n    # Authoring diagnostic: this Python effect happens during tracing.\n    # It is NOT model state and does not count executable compilations.\n    trace_events.append({\"shape\": list(x.shape), \"dtype\": str(x.dtype)})\n    return jnp.sum((x * gain)**2)\ncompiled_score = jax.jit(score)\nx8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)\nx12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)\njax.block_until_ready((x8, x12))\n\ncall_rows = []\ndef observed_call(label, x, gain):\n    before = len(trace_events)\n    result = compiled_score(x, jax.device_put(np.float32(gain), cpu))\n    result.block_until_ready()\n    expected = np.sum((np.asarray(x) * np.float32(gain))**2)\n    np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)\n    call_rows.append({\"label\": label, \"shape\": list(x.shape), \"dtype\": str(x.dtype),\n                      \"observed_trace_delta\": len(trace_events) - before,\n                      \"result\": float(result)})\n    return result\n\nobserved_call(\"initial signature\", x8, 1.)\nobserved_call(\"same signature changed data\", x8 + 1., 1.)\nobserved_call(\"same signature changed dynamic gain\", x8, 2.)\nobserved_call(\"different input shape\", x12, 1.)\nprint(json.dumps({\"jax\": jax.__version__, \"backend\": str(cpu),\n                  \"calls\": call_rows, \"python_trace_events\": trace_events}, indent=2))\nassert call_rows[0][\"result\"] == 140.\nassert call_rows[2][\"result\"] == 560.\nassert call_rows[3][\"result\"] == 506.\n",
+    "output": "A JSON ledger of four calls and observed Python trace events. Checked scores include \\(140\\), \\(560\\) and \\(506\\); event deltas are recorded rather than fixed by the lesson.",
+    "experiments": [
+      {
+        "title": "Contrast static branch metadata with a dynamic gain",
+        "prediction": "Which changes require a different Python branch to be selected while tracing? Is that the same as changing gain from \\(1\\) to \\(2\\)?",
+        "code": "branch_events = []\ndef branch_score(x, square):\n    branch_events.append({\"shape\": list(x.shape), \"square\": square})\n    return jnp.sum(x**2) if square else jnp.sum(x)\nstatic_score = jax.jit(branch_score, static_argnames=(\"square\",))\nfor square in [True, True, False]:\n    out = static_score(x8, square=square)\n    np.testing.assert_allclose(np.asarray(out), 140. if square else 28.)\nprint(\"Static branch trace observations:\", branch_events)\n",
+        "output": "Correct scores for both branches, plus the trace events observed in this process.",
+        "explanation": "The static Boolean controls Python program structure. The earlier numerical gain was dynamic arithmetic data. These are distinct specialization choices; the printed diagnostic is not an executable compilation count."
+      },
+      {
+        "title": "Keep a metric on device until the reporting boundary",
+        "prediction": "Will six per-step host reads and one final read produce the same value? Must one be faster on this CPU?",
+        "code": "update = jax.jit(lambda value: 0.9 * value + 1.)\ninitial = jax.device_put(np.float32(0.), cpu)\nupdate(initial).block_until_ready()\ndef metric_run(read_each):\n    value = initial\n    observed = []\n    start = time.perf_counter()\n    for _ in range(6):\n        value = update(value)\n        if read_each:\n            observed.append(float(value))\n    value.block_until_ready()\n    elapsed = time.perf_counter() - start\n    return value, elapsed, observed\nread_result, read_seconds, metrics = metric_run(True)\nfinal_result, final_seconds, _ = metric_run(False)\nreference_value = 10. * (1. - 0.9**6)\nnp.testing.assert_allclose(np.asarray(read_result), reference_value, rtol=2e-5)\nnp.testing.assert_allclose(np.asarray(final_result), reference_value, rtol=2e-5)\nassert len(metrics) == 6\nprint(\"Per-step host reads seconds:\", read_seconds)\nprint(\"Final-only wait seconds:\", final_seconds)\n",
+        "output": "Equivalent final values near \\(4.68559\\) and two measured intervals; no required speed ordering.",
+        "explanation": "The geometric-series result checks the computation independently. Moving host consumption changes the measurement/observability boundary, so keep that difference beside both times."
+      }
+    ],
+    "exercise": "Add a call with sixteen float32 elements. Calculate its expected score independently and extend the signature ledger without labeling a trace event as a compilation.",
+    "solution": "x16 = jax.device_put(np.arange(16, dtype=np.float32), cpu)\nobserved_call(\"new length sixteen\", x16, 1.)\nassert call_rows[-1][\"result\"] == sum(i*i for i in range(16))\nprint(\"Added ledger row:\", call_rows[-1])\n",
+    "practice": [
+      {
+        "title": "Pad a final batch while preserving the objective",
+        "difficulty": "Transfer",
+        "prompt": "A final batch has five values while other batches have eight. Pad to eight and use an explicit validity mask in a dynamic array. Compare the masked sum of squares to an ordinary five-value calculation. Explain why padding without masking changes objectives with offsets.",
+        "hint": "Use a fixed-size input and mask; compute the offset transformation before masking.",
+        "solution": "masked_score = jax.jit(lambda values, mask: jnp.sum(jnp.where(mask, (values + 1.)**2, 0.)))\nfive = np.arange(5, dtype=np.float32)\npadded = jax.device_put(np.pad(five, (0, 3)), cpu)\nmask = jax.device_put(np.arange(8) < 5, cpu)\nmasked = masked_score(padded, mask)\nnp.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))\nwrong = jnp.sum((padded + 1.)**2)\nassert float(wrong) == float(masked) + 3.\nprint(\"Masked versus unmasked padded objective:\", float(masked), float(wrong))\n",
+        "explanation": "The mask removes three synthetic rows. Zero padding alone adds three ones after the offset, so a fixed shape is useful only if it retains the original mathematical objective."
+      },
+      {
+        "title": "Reproduce and repair runtime Python branching",
+        "difficulty": "Diagnosis",
+        "prompt": "Write a jitted function using if gain > \\(1\\) on a scalar array. Capture its tracing failure and replace the branch with lax.cond. Verify both branches against independent arithmetic.",
+        "hint": "A runtime scalar predicate is a tracer, so Python cannot decide its truth value during tracing.",
+        "solution": "def broken_branch(values, gain):\n    if gain > 1.:\n        return jnp.sum(values**2)\n    return jnp.sum(values)\ntry:\n    jax.jit(broken_branch)(x8, jax.device_put(np.float32(2.), cpu))\nexcept jax.errors.TracerBoolConversionError:\n    print(\"Observed runtime-Python-branch tracing failure\")\nelse:\n    raise AssertionError(\"runtime branch unexpectedly accepted\")\nrepaired = jax.jit(lambda values, gain: jax.lax.cond(gain > 1., lambda v:jnp.sum(v**2), lambda v:jnp.sum(v), values))\nfor gain, expected in [(0.5, 28.), (2., 140.)]:\n    result = repaired(x8, jax.device_put(np.float32(gain), cpu))\n    np.testing.assert_allclose(np.asarray(result), expected)\n",
+        "explanation": "The failure identifies a mismatch between Python control flow and runtime numerical data. lax.cond preserves a dynamic choice; declaring gain static would choose a different specialization contract instead."
+      }
+    ],
+    "question": "What does an append to a Python list inside a jitted function demonstrate?",
+    "options": [
+      "One recorded event per device execution",
+      "An observed Python tracing event, which is not an executable compilation count",
+      "An exact measure of compiler duration"
+    ],
+    "answer": 1,
+    "explanation": "Python executes during tracing; compiled array computation may run repeatedly without that append. Correlate with public compiler logs or traces before claiming recompilation.",
+    "diagnosis": "If pauses correlate with varying batch lengths, record their signatures and check an explicitly masked fixed-size alternative. If host reads appear inside every update, first specify the reporting boundary and verify numerical equivalence before comparing synchronized observations.",
+    "takeaways": [
+      "Record observed staging diagnostics without inventing compilation counts.",
+      "Static metadata changes program specialization; ordinary arithmetic values can remain dynamic.",
+      "Padding needs an objective-preserving mask.",
+      "Host metrics provide useful observability and introduce completion boundaries."
+    ],
+    "references": [
+      {
+        "title": "Just-in-time compilation and caching",
+        "url": "https://docs.jax.dev/en/latest/jit-compilation.html"
+      },
+      {
+        "title": "jax.jit static arguments",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.jit.html"
+      },
+      {
+        "title": "Asynchronous dispatch",
+        "url": "https://docs.jax.dev/en/latest/async_dispatch.html"
+      }
+    ],
+    "visual": {
+      "title": "A new value is not necessarily a new trace",
+      "kind": "executed",
+      "prediction": "Which call changes the input signature?",
+      "reading": "Each bar reports the additional Python tracing events observed during one call category. The sequence is \\((1,0,0,1)\\): the initial call traces, new array values do not, a new dynamic gain does not, and a new input shape triggers another trace.\n\nThe two zero-height bars are meaningful observations. The calls still execute and can return changed values; zero means the trace counter did not increase for those calls.",
+      "connection": "The existing specialization can accept compatible dynamic values without rerunning the traced Python body. Changing the example’s shape from length \\(8\\) to length \\(12\\) changes the abstract input signature, so a new trace is observed. This isolates shape from ordinary value changes.\n\nThe vertical axis counts Python traces, not seconds, device kernels, or an exact count of backend compilations. To diagnose runtime overhead, combine this kind of counter with synchronized measurements or a profiler. A changed answer alone is not evidence of retracing.",
+      "alt": "A new value is not necessarily a new trace. Each bar reports the additional Python tracing events observed during one call category. The sequence is \\((1,0,0,1)\\): the initial call traces, new array values do not, a new dynamic gain does not, and a new input shape triggers another trace. The two zero-height bars are meaningful observations. The calls still execute and can return changed values; zero means the trace counter did not increase for those calls.",
+      "code": "visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}"
+    }
+  }
+}

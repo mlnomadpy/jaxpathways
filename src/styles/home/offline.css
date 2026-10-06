@@ -1,0 +1,153 @@
+.offline-section {
+  display: grid;
+  grid-template-columns: 230px 1fr;
+  gap: 60px;
+  align-items: center;
+  padding: 70px 0;
+}
+.course-book {
+  width: 200px;
+  min-height: 265px;
+  background: var(--atlas);
+  color: #fff;
+  border-radius: 3px 12px 12px 3px;
+  padding: 28px 24px 24px 30px;
+  position: relative;
+  box-shadow: 8px 8px 0 #d1c8e7;
+  border-left: 7px solid #49318d;
+}
+.course-book:after {
+  content: '';
+  position: absolute;
+  right: 7px;
+  top: 8px;
+  bottom: 8px;
+  border-right: 1px solid #7c64aa;
+}
+.book-title {
+  display: block;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.12;
+  margin-bottom: 24px;
+}
+.course-book svg {
+  width: 105px;
+  height: 60px;
+  display: block;
+  margin: 20px 0;
+}
+.book-subtitle {
+  font-size: 12px;
+  color: #d9cdef;
+}
+.offline-copy h2 {
+  font-size: 38px;
+  margin-bottom: 18px;
+}
+.offline-copy > p {
+  font: 18px/1.7 var(--reading);
+  max-width: 51ch;
+  color: var(--muted);
+}
+.offline-copy .small {
+  font: 12px/1.6 var(--ui);
+  margin: 14px 0 0;
+}
+.offline-copy a:not(.button) {
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+@media (max-width: 1050px) {
+  .offline-section {
+    gap: 35px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-section {
+    grid-template-columns: 110px 1fr;
+    gap: 24px;
+    padding: 42px 0;
+  }
+}
+@media (max-width: 760px) {
+  .course-book {
+    width: 110px;
+    min-height: 164px;
+    padding: 16px 12px;
+    border-left-width: 4px;
+    box-shadow: 5px 5px 0 #d1c8e7;
+  }
+}
+@media (max-width: 760px) {
+  .book-title {
+    font-size: 20px;
+    margin-bottom: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .course-book svg {
+    width: 65px;
+    height: 38px;
+    margin: 10px 0;
+  }
+}
+@media (max-width: 760px) {
+  .book-subtitle {
+    font-size: 9px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-copy h2 {
+    font-size: 29px;
+    margin-bottom: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-copy > p {
+    font-size: 15px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-copy .actions {
+    gap: 6px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-copy .button {
+    padding: 10px 12px;
+  }
+}
+@media (max-width: 760px) {
+  .offline-copy .small {
+    font-size: 11px;
+  }
+}
+@media (max-width: 380px) {
+  .offline-section {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 380px) {
+  .course-book {
+    width: 160px;
+    min-height: 210px;
+    padding: 22px;
+  }
+}
+@media (max-width: 380px) {
+  .book-title {
+    font-size: 25px;
+  }
+}
+@media (max-width: 380px) {
+  .course-book svg {
+    width: 90px;
+  }
+}
+@media (max-width: 380px) {
+  .book-subtitle {
+    font-size: 11px;
+  }
+}

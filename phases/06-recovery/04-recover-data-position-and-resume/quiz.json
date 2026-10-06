@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which evidence supports a consistent restart boundary?",
+      "options": [
+        "The checkpoint directory exists.",
+        "The next IDs, losses and full training state match the uninterrupted future under a compatible contract.",
+        "The final loss eventually decreases."
+      ],
+      "correct": 1,
+      "explanation": "A consistent restart preserves both data position and transition state, not just a readable file or a favorable metric."
+    }
+  ]
+}

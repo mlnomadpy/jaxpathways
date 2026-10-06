@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-07",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which object does a reverse-mode pullback map to input sensitivity?",
+      "options": [
+        "An output sensitivity vector",
+        "An arbitrary input direction",
+        "Only a scalar learning rate"
+      ],
+      "correct": 0,
+      "explanation": "A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward."
+    }
+  ]
+}

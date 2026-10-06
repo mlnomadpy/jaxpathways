@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-08",
+  "contentHash": "7f6ef6f1278c327584347b150deaf5e3a7b62f0ccd2bb0a02e07427eb4d78858",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-06T00:43:14.470386+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "reviewed",
+      "changed model",
+      "expired",
+      "wrong target"
+    ],
+    "xlabel": "attempted transition",
+    "ylabel": "accepted (1) or rejected (0)",
+    "series": [
+      {
+        "label": "observed policy result",
+        "y": [
+          1,
+          0,
+          0,
+          0
+        ]
+      }
+    ]
+  }
+}

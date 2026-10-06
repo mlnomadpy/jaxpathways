@@ -1,0 +1,57 @@
+{
+  "schemaVersion": 1,
+  "id": "weight-conversion",
+  "title": "Convert PyTorch weights and audit Flax architecture parity",
+  "pathwayId": "ship",
+  "status": "authored",
+  "hardware": "CPU; original synthetic fixtures and public reference checks",
+  "source": "projects/weight-conversion/README.md",
+  "requiredLessonIds": [
+    "deployment-01",
+    "deployment-08"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Map and compare real frameworks",
+      "command": "python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 1",
+      "evidence": "Multiple seeds, asymmetric layers, input gradients and rejected malformed tensors",
+      "expected": "PASS stage 1: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "2",
+      "title": "Locate numerical disagreement",
+      "command": "python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 2",
+      "evidence": "Independent absolute/relative errors, near-zero tolerances and injected epsilon failure",
+      "expected": "PASS stage 2: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    },
+    {
+      "id": "3",
+      "title": "Reload converted weights independently",
+      "command": "python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 3",
+      "evidence": "Fresh-process inference from the converted artifact and incomplete-archive rejection",
+      "expected": "PASS stage 3: independent contract checks and bounded CPU execution",
+      "diagnosis": "Compare the first failing independent contract before tuning training. The guide identifies the API and expected invariants for this stage."
+    }
+  ],
+  "rubric": [
+    "Multiple seeds, asymmetric layers, input gradients and rejected malformed tensors",
+    "Independent absolute/relative errors, near-zero tolerances and injected epsilon failure",
+    "Fresh-process inference from the converted artifact and incomplete-archive rejection"
+  ],
+  "workspaceFile": "projects/weight-conversion/my_bridge.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/weight-conversion/starter/bridge.py projects/weight-conversion/my_bridge.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/weight-conversion/starter/bridge.py projects/weight-conversion/my_bridge.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/weight-conversion/tests/check.py --implementation solution --stage all",
+  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review."
+}

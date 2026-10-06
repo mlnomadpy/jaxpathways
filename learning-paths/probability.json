@@ -1,0 +1,48 @@
+{
+  "id": "probability",
+  "title": "Model uncertainty",
+  "description": "Express assumptions as probability models, verify a known posterior, then implement HMC and variational inference with explicit diagnostics. Use predictive checks to distinguish a sampler problem from a model that does not explain the data.",
+  "prerequisites": "Shared foundations and probability",
+  "outcome": "A checked Bayesian regression",
+  "libraries": "JAX · NumPy; optional NumPyro ecosystem extension",
+  "source": "https://num.pyro.ai/en/stable/",
+  "phaseIds": [
+    "welcome",
+    "arrays",
+    "transforms",
+    "state",
+    "optimization",
+    "probability"
+  ],
+  "capstone": {
+    "title": "Audit a Bayesian regression model",
+    "status": "authored",
+    "assessment": "Defend the prior and likelihood, verify posterior and sampler calculations independently, distinguish latent and observation uncertainty, and diagnose changed-condition predictive failures. The synthesis remains a public review draft.",
+    "evidence": [
+      "Prior, likelihood and posterior calculations checked against an independent reference",
+      "Multiple seeded chains with trace, acceptance and between-chain diagnostics",
+      "Predictive intervals separating latent and observation variance, including a model-mismatch example"
+    ],
+    "projectId": "bayesian-regression",
+    "assessmentId": "probability",
+    "assessmentDraft": {
+      "id": "probability",
+      "projectId": "bayesian-regression",
+      "title": "Bayesian regression synthesis",
+      "status": "review-draft",
+      "scope": "project-synthesis",
+      "source": "assessments/probability.md",
+      "url": "assessments/probability.html"
+    }
+  },
+  "audience": "Learners who want to move beyond a point prediction and explain assumptions and uncertainty.",
+  "firstArtifact": "An exact Bayesian regression posterior checked against an independent host calculation.",
+  "focusPhaseIds": [
+    "probability"
+  ],
+  "modalityTrackIds": [],
+  "studyAdvice": "Start with distributions and the exact regression posterior so you have a reference for approximate inference. Run multiple HMC chains and deliberately inspect an unstable sampler before studying variational inference. Compare latent uncertainty with uncertainty in a future observation. Complete the Bayesian project with a changed prior and held-out data before moving to an optional NumPyro model.",
+  "engineeringLessonIds": [
+    "recovery-06"
+  ]
+}

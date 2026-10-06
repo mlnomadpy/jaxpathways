@@ -50,3 +50,7 @@ A question or practical task that tests the objective. Put solutions behind a re
 Previous lesson, next lesson, phase project, and links to primary references.
 
 A notebook is the companion experiment, not the entire lesson. A notebook link remains unavailable until its file exists and its execution status is stated.
+
+## Writing and notation
+
+Follow [the learner writing and math guide](docs/learner-writing-and-math.md): intuition → worked numbers → named symbols → code → changed condition. Use inline `\( ... \)` and section `math` fields for LaTeX. Keep shape diagrams in `formula` and executable code unchanged. Define every new symbol; invite a prediction and explain what to inspect when the answer differs.

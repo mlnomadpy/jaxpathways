@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "welcome-cpu",
+  "minutes": 60,
+  "content": {
+    "problem": "You can explore how JAX splits an array across devices using just your laptop. We’ll create four logical CPU devices, give each one a piece of an array, and compare the result with NumPy. Start with the setup and array/device lessons. These logical devices share your CPU: they help us learn placement, but they do not reproduce accelerator speed or memory.",
+    "idea": "Virtual CPU devices let one Python process exercise JAX placement APIs without renting an accelerator. The devices are logical execution targets backed by the same host. You can practice global shapes, local shards, replicated inputs and shape constraints. They do not reproduce TPU memory, interconnect bandwidth, accelerator instructions, multi-host failures or performance.",
+    "sections": [
+      {
+        "title": "Configure the runtime before it exists",
+        "body": "Open the lesson workspace from setup and create main.py. The first block imports JAX, chooses CPU, and requests four CPU devices. Importing jax is allowed before the configuration; querying devices or creating an array can initialize the backend. That initialization is the boundary after which changing the count is too late.\n\nRun python main.py as a fresh process. In Jupyter or Colab, restart the kernel/runtime and use Run all so this configuration is the first JAX operation. If you already ran an earlier lesson in that kernel, merely rerunning this cell cannot reliably rebuild the runtime. The explicit count check gives you a repair instruction instead of silently proceeding with one device. A terminal alternative is `JAX_PLATFORMS=cpu JAX_NUM_CPU_DEVICES=4 python main.py`; Windows PowerShell uses `$env:JAX_PLATFORMS=\"cpu\"` and `$env:JAX_NUM_CPU_DEVICES=\"4\"` before python main.py."
+      },
+      {
+        "title": "Distinguish logical devices from your CPU hardware",
+        "body": "Four reported CPU devices do not mean you bought four CPUs or reserved four isolated cores. They share your computer and its resources. Each is a target JAX can place an array on. Keep the actual JAX version, device platform, process count and device count in your report so readers know what was tested.\n\nThis exercise has one controller process and four addressable devices. Multi-host JAX involves additional processes and coordination; this exercise does not test those. Even if you time an operation here, the observation belongs to this CPU setup and workload. It cannot establish whether the same partitioning is fast on a TPU."
+      },
+      {
+        "title": "A global array contains local pieces",
+        "body": "The host array has shape \\((4,2)\\): four examples with two values each. Mesh assigns the four devices the named axis data. `P(\"data\",None)` maps the first array dimension to that mesh axis and leaves the feature dimension unpartitioned. Each local shard therefore has shape \\((1,2)\\).\n\nUse shard.index to identify its slice in the global array and shard.data to inspect its values. The global x.shape stays \\((4,2)\\); it does not become \\((1,2)\\) just because each device holds one row. Conversion with `np.asarray(x)` gathers the fully addressable global array to the host in this small single-process exercise.",
+        "formula": "Global rows [0,1] [2,3] [4,5] [6,7]\n             ↓     ↓     ↓     ↓\nCPU device   0     1     2     3\nlocal shape (1,2) on every device; global shape (4,2)"
+      },
+      {
+        "title": "Check arithmetic separately from placement",
+        "body": "The function \\(2x+1\\) is elementwise: a row does not need a value from a different row. For the first row \\([0,1]\\), predict \\([1,3]\\); for the final row \\([6,7]\\), predict \\([13,15]\\). The jit contract declares input and output placement explicitly. The NumPy check verifies all values, and shard inspections verify the intended partition. Neither alone verifies both.\n\nblock_until_ready waits for the result before reporting. It is useful when observing execution and essential for a future synchronized timing experiment, but no timings are claimed here. Four-way row partitioning requires a row count divisible by four. Try five rows deliberately, read the shape error, and choose a repair that preserves what your experiment means."
+      }
+    ],
+    "code": "import jax\n# Run this file in a fresh process; in a notebook restart the kernel first.\njax.config.update(\"jax_platforms\", \"cpu\")\njax.config.update(\"jax_num_cpu_devices\", 4)\nimport jax.numpy as jnp\nimport numpy as np\nfrom jax.sharding import Mesh, NamedSharding, PartitionSpec as P\ndevices = jax.devices(\"cpu\")\nif len(devices) != 4:\n    raise RuntimeError(\"Expected four CPU devices. Restart the notebook kernel, then Run all; do not run an earlier JAX cell first.\")\nmesh = Mesh(np.array(devices), (\"data\",))\nrows = NamedSharding(mesh, P(\"data\", None))\nreplicated = NamedSharding(mesh, P())\n\nhost = np.arange(8, dtype=np.float32).reshape(4, 2)\nx = jax.device_put(host, rows)\ny = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)\ny.block_until_ready()\n\nprint(\"JAX version:\", jax.__version__)\nprint(\"CPU devices:\", len(devices))\nfor shard in x.addressable_shards:\n    print(\"Device\", shard.device.id, \"index\", shard.index, \"values\", np.asarray(shard.data))\nnp.testing.assert_array_equal(np.asarray(y), 2 * host + 1)\nassert len(x.addressable_shards) == 4\nassert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)\nprint(\"Global shape:\", x.shape, \"result:\", np.asarray(y).tolist())",
+    "output": "CPU devices: \\(4\\). Four input shards of shape \\((1,2)\\). Global shape \\((4,2)\\); result \\([[1,3]\\),\\([5,7]\\),\\([9,11]\\),\\([13,15]]\\). Device repr and JAX version vary.",
+    "experiments": [
+      {
+        "title": "Keep the shape, change the values",
+        "prediction": "If every input value becomes negative, do the number of devices or local shard shapes change?",
+        "code": "negative = -host - 2\nnegative_x = jax.device_put(negative, rows)\nnegative_y = jax.jit(lambda a: 2*a+1, in_shardings=rows, out_shardings=rows)(negative_x)\nnp.testing.assert_array_equal(np.asarray(negative_y), 2*negative+1)\nassert all(s.data.shape == (1,2) for s in negative_x.addressable_shards)\nprint(\"Negative input result:\", np.asarray(negative_y).tolist())",
+        "output": "Result \\([[-3,-5]\\),\\([-7,-9]\\),\\([-11,-13]\\),\\([-15,-17]]\\); local shapes remain \\((1,2)\\).",
+        "explanation": "Placement follows the declared shape/specification, not the signs or magnitudes of array elements."
+      },
+      {
+        "title": "Replicate instead of partitioning",
+        "prediction": "With `P()`, which values should each CPU device receive?",
+        "code": "copies = jax.device_put(host, replicated)\nassert copies.is_fully_replicated\nassert len(copies.addressable_shards) == 4\nfor shard in copies.addressable_shards:\n    np.testing.assert_array_equal(np.asarray(shard.data), host)\nprint(\"Replicated local shapes:\", [s.data.shape for s in copies.addressable_shards])",
+        "output": "Four local arrays of shape \\((4,2)\\), each containing the entire input.",
+        "explanation": "Replication stores full copies. A global array shape alone cannot tell you how much of it lives on each device."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Move from four rows to twelve",
+        "difficulty": "Challenge",
+        "prompt": "Create twelve two-feature rows with values \\(0\\) through \\(23\\). Predict shard shape and check every slice of a squared output.",
+        "hint": "Use each shard index to select the corresponding NumPy reference slice.",
+        "solution": "twelve = np.arange(24,dtype=np.float32).reshape(12,2)\nz = jax.device_put(twelve, rows)\nz2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)\nassert all(s.data.shape == (3,2) for s in z2.addressable_shards)\nfor shard in z2.addressable_shards:\n    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])",
+        "explanation": "The twelve rows split into four groups of three. Index-based comparisons establish that the right values occupy each piece, rather than checking only a total."
+      },
+      {
+        "title": "Repair a batch that does not divide evenly",
+        "difficulty": "Challenge",
+        "prompt": "Place a \\((5,2)\\) array with the same row sharding. Capture the failure. Repair this placement demonstration by replicating it, and explain why that does not prove the partitioned algorithm supports uneven batches.",
+        "hint": "Do not drop a row to hide the error.",
+        "solution": "uneven = np.arange(10,dtype=np.float32).reshape(5,2)\ntry:\n    jax.device_put(uneven, rows)\nexcept ValueError:\n    print(\"Expected indivisible row dimension\")\nelse:\n    raise AssertionError(\"Expected divisibility failure\")\nfixed = jax.device_put(uneven, replicated)\nnp.testing.assert_array_equal(np.asarray(fixed), uneven)\nassert fixed.is_fully_replicated",
+        "explanation": "Five rows cannot be evenly split across the four-way data axis. Replication preserves all observations but changes the memory/communication plan; padding requires a mask when computing means."
+      }
+    ],
+    "question": "What does a \\((12,2)\\) global array sharded with `P(\"data\",None)` over four devices mean?",
+    "options": [
+      "Each device holds a \\((3,2)\\) slice and the global array remains \\((12,2)\\).",
+      "Each device holds the complete array.",
+      "Each device represents a separate TPU chip."
+    ],
+    "answer": 0,
+    "explanation": "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.",
+    "exercise": "Predict and verify the per-device shapes for twelve rows, then demonstrate how replication repairs an indivisible five-row placement without deleting data.",
+    "solution": "twelve = np.arange(24,dtype=np.float32).reshape(12,2)\nz = jax.device_put(twelve, rows)\nz2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)\nassert all(s.data.shape == (3,2) for s in z2.addressable_shards)\nfor shard in z2.addressable_shards:\n    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])\n\nuneven = np.arange(10,dtype=np.float32).reshape(5,2)\ntry:\n    jax.device_put(uneven, rows)\nexcept ValueError:\n    print(\"Expected indivisible row dimension\")\nelse:\n    raise AssertionError(\"Expected divisibility failure\")\nfixed = jax.device_put(uneven, replicated)\nnp.testing.assert_array_equal(np.asarray(fixed), uneven)\nassert fixed.is_fully_replicated",
+    "objectives": [
+      "Start four virtual CPU devices in a fresh process.",
+      "Explain global shape, shard index and local shape.",
+      "Compare row partitioning with replication.",
+      "Diagnose divisibility and distinguish CPU practice from TPU evidence."
+    ],
+    "takeaways": [
+      "Configure the runtime before it exists",
+      "Distinguish logical devices from your CPU hardware",
+      "A global array contains local pieces",
+      "Check arithmetic separately from placement"
+    ],
+    "references": [
+      {
+        "title": "JAX CPU device configuration (set before initialization)",
+        "url": "https://docs.jax.dev/en/latest/config_options.html#num-cpu-devices"
+      },
+      {
+        "title": "Distributed arrays and automatic parallelization",
+        "url": "https://docs.jax.dev/en/latest/201/sharding.html"
+      }
+    ],
+    "runtime": {
+      "kind": "virtual-cpu",
+      "deviceCount": 4
+    },
+    "diagnosis": "Five rows cannot be evenly split across the four-way data axis. Replication preserves all observations but changes the memory/communication plan; padding requires a mask when computing means.",
+    "buildSteps": [
+      {
+        "title": "Start a fresh CPU runtime",
+        "instruction": "Create main.py in your course workspace. Paste this block first. If using a notebook, restart its kernel before running any cell.",
+        "code": "import jax\n# Run this file in a fresh process; in a notebook restart the kernel first.\njax.config.update(\"jax_platforms\", \"cpu\")\njax.config.update(\"jax_num_cpu_devices\", 4)\nimport jax.numpy as jnp\nimport numpy as np\nfrom jax.sharding import Mesh, NamedSharding, PartitionSpec as P\ndevices = jax.devices(\"cpu\")\nif len(devices) != 4:\n    raise RuntimeError(\"Expected four CPU devices. Restart the notebook kernel, then Run all; do not run an earlier JAX cell first.\")\nmesh = Mesh(np.array(devices), (\"data\",))\nrows = NamedSharding(mesh, P(\"data\", None))\nreplicated = NamedSharding(mesh, P())",
+        "explanation": "Configuration happens before `devices()` or array creation initializes a backend. This file explicitly chooses CPU even on a GPU machine."
+      },
+      {
+        "title": "Place and compute",
+        "instruction": "Append this block in the same file. Predict the shapes and values before running.",
+        "code": "host = np.arange(8, dtype=np.float32).reshape(4, 2)\nx = jax.device_put(host, rows)\ny = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)\ny.block_until_ready()",
+        "explanation": "Mesh axis names describe placement. They are separate from the numerical array dimensions."
+      },
+      {
+        "title": "Inspect and verify",
+        "instruction": "Append the checks, save the file and run python main.py with the setup lesson environment.",
+        "code": "print(\"JAX version:\", jax.__version__)\nprint(\"CPU devices:\", len(devices))\nfor shard in x.addressable_shards:\n    print(\"Device\", shard.device.id, \"index\", shard.index, \"values\", np.asarray(shard.data))\nnp.testing.assert_array_equal(np.asarray(y), 2 * host + 1)\nassert len(x.addressable_shards) == 4\nassert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)\nprint(\"Global shape:\", x.shape, \"result:\", np.asarray(y).tolist())",
+        "explanation": "Assertions compare against host calculations or hand-derived values; printing a sharding object alone does not establish correctness."
+      }
+    ],
+    "visual": {
+      "title": "Four logical devices own four different rows",
+      "kind": "executed",
+      "prediction": "Does each device hold the full array or one row?",
+      "reading": "Each cell represents a position in the global array, and its number identifies the logical CPU device that owns that position. The colors are categories: device \\(3\\) is not “more powerful” than device \\(0\\).\n\nBoth cells in row \\(0\\) belong to device \\(0\\); both cells in row \\(1\\) belong to device \\(1\\), and the same pattern continues through row \\(3\\). Horizontal bands show that this layout partitions rows while keeping each row’s features together.",
+      "connection": "The global shape is \\((4,2)\\), so splitting its first axis across four devices gives each device a local piece with shape \\((1,2)\\). This is the spatial meaning of the row partition in the code. The numbers in the figure are ownership labels, not the original array’s contents.\n\nYou can check the interpretation by locating row \\(2\\), feature \\(1\\): its owner is device \\(2\\). These logical devices share the host CPU. The figure establishes where values are placed, not a measured speedup or the behavior of four physical accelerators.",
+      "alt": "Four logical devices own four different rows. Each cell represents a position in the global array, and its number identifies the logical CPU device that owns that position. The colors are categories: device \\(3\\) is not “more powerful” than device \\(0\\). Both cells in row \\(0\\) belong to device \\(0\\); both cells in row \\(1\\) belong to device \\(1\\), and the same pattern continues through row \\(3\\). Horizontal bands show that this layout partitions rows while keeping each row’s features together.",
+      "code": "owners = np.empty(host.shape, dtype=int)\nfor s in x.addressable_shards:\n    owners[s.index] = s.device.id\nvisual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CPU device ID', 'rows': ['row ' + str(i) for i in range(4)], 'columns': ['feature 0', 'feature 1']}"
+    }
+  }
+}

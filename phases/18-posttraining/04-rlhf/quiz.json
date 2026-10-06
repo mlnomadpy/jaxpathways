@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "posttraining-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which policy is refreshed for the next rollout batch?",
+      "options": [
+        "The behavior policy follows the current policy; the reference policy remains frozen.",
+        "A lower training loss by itself proves the full application is ready.",
+        "Matching shapes alone establishes the required behavior."
+      ],
+      "correct": 0,
+      "explanation": "Behavior identity belongs to the collected data. Reference identity belongs to the regularized objective."
+    }
+  ]
+}

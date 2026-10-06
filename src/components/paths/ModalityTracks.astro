@@ -1,0 +1,28 @@
+---
+import manifest from '../../../curriculum/modality-tracks.json';
+import { siteUrl } from '../../lib/urls.js';
+import '../../styles/features/tracks.css';
+---
+
+<section class="modality-section" id="modality-tracks" aria-labelledby="modality-heading">
+  <p class="edition">Connect the lessons</p>
+  <h2 id="modality-heading">Choose the system you want to build.</h2>
+  <p class="track-lede">
+    Follow training, recovery, evaluation and deployment in one project. Each guide identifies its
+    runnable harness, available preparation and remaining target-runtime work.
+  </p>
+  <div class="modality-grid">
+    {manifest.tracks.map((track, index) => (
+      <article class="modality-card">
+        <p class="edition">
+          0{index + 1} / {track.status === 'authored' ? 'Runnable harness' : 'Guided plan'}
+        </p>
+        <h3>{track.title}</h3>
+        <p>{track.summary}</p>
+        <a class="button" href={siteUrl(`tracks/${track.id}.html`)}>
+          Explore the {track.id} guide
+        </a>
+      </article>
+    ))}
+  </div>
+</section>

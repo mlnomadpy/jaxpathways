@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "networks-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does excluding the counter from `nnx.Param` guarantee?",
+      "options": [
+        "It is excluded from parameter gradients, but may still change in a forward pass",
+        "It can never change",
+        "It is automatically saved to disk"
+      ],
+      "correct": 0,
+      "explanation": "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates."
+    }
+  ]
+}

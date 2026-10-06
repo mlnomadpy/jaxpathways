@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Does doubling a nonzero direction double the projection onto its line?",
+      "options": [
+        "Yes, because the dot product doubles",
+        "No; the coefficient and direction rescale in opposite ways",
+        "Only when the vectors are perpendicular"
+      ],
+      "correct": 1,
+      "explanation": "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling."
+    }
+  ]
+}

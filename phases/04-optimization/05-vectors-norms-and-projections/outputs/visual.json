@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-05",
+  "contentHash": "bfa7625964b6df4524aeef35dc818ed6bbfc289af1ab9522ddc40a27fa9f2c1c",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:26.265059+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "projection / residual: [3. 0.] [0. 4.]\n",
+  "data": {
+    "kind": "vectors",
+    "arrows": [
+      {
+        "label": "input u",
+        "start": [
+          0,
+          0
+        ],
+        "end": [
+          3.0,
+          4.0
+        ]
+      },
+      {
+        "label": "projection p",
+        "start": [
+          0,
+          0
+        ],
+        "end": [
+          3.0,
+          0.0
+        ]
+      },
+      {
+        "label": "residual r",
+        "start": [
+          3.0,
+          0.0
+        ],
+        "end": [
+          3.0,
+          4.0
+        ]
+      }
+    ]
+  }
+}

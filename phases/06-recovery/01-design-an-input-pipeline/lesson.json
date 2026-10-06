@@ -1,0 +1,130 @@
+{
+  "schemaVersion": 1,
+  "id": "recovery-01",
+  "minutes": 70,
+  "content": {
+    "problem": "Your dataset has eleven examples, but your model takes batches of four. What happens to the last three? We’ll build a small input pipeline and follow example IDs through shuffling and batching. That lets us catch missing examples or mismatched labels before a model’s loss hides the problem.",
+    "idea": "An input pipeline defines membership, order, transformation, batching and transfer. Model parameters do not encode those choices. Record stable example IDs alongside data and use a deterministic epoch ordering rule. Then check coverage, alignment and final-batch semantics independently of a model loss.",
+    "sections": [
+      {
+        "title": "Preserve identity across every transformation",
+        "body": "The dataset has IDs \\(0\\) through \\(10\\). Each ID maps to \\(x=\\mathrm{id}/10\\) and \\(y=2x-1\\), giving a direct alignment reference. Shuffle indices, then use the same indices for IDs, features and labels. Shuffling feature and target arrays separately creates plausible shapes with the wrong learning problem.\n\nAn ID can identify an original record even when a transform changes its values. For a real dataset, choose stable identifiers and retain the data revision. Our digest includes shape, dtype and bytes of features and labels. It detects changes to this exact tiny dataset; it is not a substitute for a versioned data source contract.",
+        "formula": "record identity → shared index → {id,x,y}\nshuffle index, not independent x and y arrays"
+      },
+      {
+        "title": "Make epoch ordering a pure decision",
+        "body": "epoch_order takes seed and epoch as inputs. `SeedSequence([seed,epoch])` supplies a deterministic generator state for that epoch. Reconstructing epoch \\(0\\) with the same versions gives the same permutation; epoch \\(1\\) is a separate decision. We do not hardcode a specific permutation as a cross-version promise.\n\nA seed alone cannot express how much of an epoch has been consumed. To resume mid-epoch, you also need position or a stateful iterator snapshot. Changing batch size changes how a position measured in batches maps to records. The final recovery lesson saves the actual Grain iterator state and checks the next IDs rather than guessing from step count."
+      },
+      {
+        "title": "Choose a deliberate policy for the last batch",
+        "body": "Eleven observations grouped by four produce lengths \\(4\\),\\(4\\),\\(3\\). Keeping the final partial batch preserves all examples but changes its shape, which can matter for compilation caching. drop_last instead produces \\(4\\),\\(4\\) and omits three examples. Neither policy is automatically correct: choose based on training/evaluation needs and report what was excluded.\n\nAnother option pads the last batch to a fixed shape and carries a mask. A mean must then divide by the number of real observations, not padded length. The practice checks this with known labels. Do not introduce artificial repeated examples without accounting for their statistical weight.",
+        "formula": "11 records → [4] [4] [3]\ndrop remainder → [4] [4] + 3 omitted\npad/mask → [4] [4] [3 real + 1 masked]"
+      },
+      {
+        "title": "Measure what the stopwatch surrounds",
+        "body": "The local perf_counter interval covers shuffling, host indexing and materializing three NumPy batches. It does not include compilation, device execution, storage I/O, decoding or asynchronous transfer. This microsecond-scale toy observation may be dominated by overhead and is not a throughput benchmark.\n\nFor a useful pipeline benchmark, first define a representative dataset and transforms. Warm up caches deliberately, measure multiple windows, and report examples per second together with batch shapes, worker settings and storage conditions. Here the useful result is the audited membership and order, not a claim that this sampler is fast."
+      }
+    ],
+    "code": "import numpy as np\nimport hashlib\nimport time\nids = np.arange(11,dtype=np.int64)\nfeatures = (ids/10).astype(np.float32)\nlabels = (2*features-1).astype(np.float32)\ndef dataset_digest(x,y):\n    digest = hashlib.sha256()\n    for array in (x,y):\n        digest.update(str(array.dtype).encode())\n        digest.update(str(array.shape).encode())\n        digest.update(array.tobytes())\n    return digest.hexdigest()\nfingerprint = dataset_digest(features,labels)\ndef epoch_order(seed,epoch):\n    return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))\n\ndef make_batches(seed,epoch,batch_size=4,drop_last=False):\n    if batch_size <= 0:\n        raise ValueError(\"batch_size must be positive\")\n    order = epoch_order(seed,epoch)\n    for start in range(0,len(order),batch_size):\n        chosen = order[start:start+batch_size]\n        if drop_last and len(chosen) < batch_size:\n            break\n        yield {\"id\":ids[chosen],\"x\":features[chosen],\"y\":labels[chosen]}\nstart_time = time.perf_counter()\nbatches = list(make_batches(seed=17,epoch=0))\nelapsed = time.perf_counter()-start_time\nseen = np.concatenate([b[\"id\"] for b in batches])\n\nassert [len(b[\"id\"]) for b in batches] == [4,4,3]\nnp.testing.assert_array_equal(np.sort(seen),ids)\nassert len(np.unique(seen)) == len(ids)\nfor batch in batches:\n    np.testing.assert_allclose(batch[\"y\"],2*batch[\"x\"]-1,atol=1e-7)\nrepeated = np.concatenate([b[\"id\"] for b in make_batches(17,0)])\nnp.testing.assert_array_equal(seen,repeated)\nprint(\"Batch sizes:\",[len(b[\"id\"]) for b in batches])\nprint(\"Example order:\",seen.tolist())\nprint(\"Preparation seconds (local observation only):\",elapsed)\nprint(\"Dataset SHA256:\",fingerprint)",
+    "output": "Batch sizes \\([4,4,3]\\); eleven distinct IDs exactly once, aligned labels and repeated order. Preparation time and digest are local observed values.",
+    "experiments": [
+      {
+        "title": "Compare epochs without a hard-coded order",
+        "prediction": "What should remain the same when changing epoch from zero to one?",
+        "code": "epoch_one = np.concatenate([b[\"id\"] for b in make_batches(17,1)])\nnp.testing.assert_array_equal(np.sort(epoch_one),ids)\nassert not np.array_equal(epoch_one,seen)\nprint(\"Epoch one order:\",epoch_one.tolist())",
+        "output": "Same eleven IDs exactly once, different ordering for this tested seed/dataset.",
+        "explanation": "Coverage is an invariant; ordering is a deterministic epoch-specific output. A changed order alone does not imply data loss."
+      },
+      {
+        "title": "Expose dropped records",
+        "prediction": "Predict the count when `drop_last=True` with batch size four.",
+        "code": "dropped = list(make_batches(17,0,drop_last=True))\ndropped_ids = np.concatenate([b[\"id\"] for b in dropped])\nassert len(dropped_ids)==8\nomitted = np.setdiff1d(ids,dropped_ids)\nassert len(omitted)==3\nprint(\"Omitted IDs:\",omitted.tolist())",
+        "output": "Eight retained IDs and three explicitly identified omissions.",
+        "explanation": "Logging just the number of batches hides exclusions. An ID audit exposes which observations were not processed."
+      }
+    ],
+    "practice": [
+      {
+        "title": "Fingerprint meaning, not just a row count",
+        "difficulty": "Transfer",
+        "prompt": "Reorder features and labels together, then change one label without changing any shape. Verify that both changes alter the dataset fingerprint while copying unchanged arrays preserves it. Explain why a new iterator order differs from a changed source dataset.",
+        "hint": "The fingerprint includes dtype, shape and array bytes.",
+        "solution": "same=dataset_digest(features.copy(),labels.copy())\nreversed_digest=dataset_digest(features[::-1],labels[::-1])\nchanged_labels=labels.copy();changed_labels[0]+=0.1\nchanged_digest=dataset_digest(features,changed_labels)\nassert same==fingerprint\nassert reversed_digest!=fingerprint and changed_digest!=fingerprint\nprint('Copy preserves fingerprint; reordered source and edited labels invalidate it.')",
+        "explanation": "A sampler permutation can be reproduced against a fixed source. Reordering the source changes which example an index identifies, so restoring only the sampler position would no longer have the same meaning."
+      },
+      {
+        "title": "Catch a feature/label shuffle mismatch",
+        "difficulty": "Challenge",
+        "prompt": "Reverse the target order inside a batch but keep features unchanged. Reject this batch with an independent alignment check, then repair shared indexing.",
+        "hint": "The known relation \\(y=2x-1\\) provides a stronger oracle than a falling training loss.",
+        "solution": "batch = batches[0]\nwrong_labels = batch[\"y\"][::-1]\nassert not np.allclose(wrong_labels,2*batch[\"x\"]-1)\nfixed = labels[batch[\"id\"]]\nnp.testing.assert_allclose(fixed,2*batch[\"x\"]-1,atol=1e-7)\nchanged_labels = labels.copy(); changed_labels[0]+=1\nassert dataset_digest(features,changed_labels)!=fingerprint",
+        "explanation": "Wrong alignment can preserve shapes and numeric ranges. Keep common record IDs through transformations, and record dataset identity so restoring an old cursor does not silently select new content."
+      }
+    ],
+    "question": "What information is missing from a model-only checkpoint for mid-epoch recovery?",
+    "options": [
+      "The order/cursor and dataset/configuration identity.",
+      "The number of input columns is always enough.",
+      "Nothing: parameters reveal consumed example IDs."
+    ],
+    "answer": 0,
+    "explanation": "Model state cannot reconstruct which records should be read next.",
+    "exercise": "Pad the final three-label batch to four elements with zero. Show that an unmasked mean differs, then derive the correct masked mean.",
+    "solution": "last = batches[-1][\"y\"]\npadded_labels = np.pad(last,(0,4-len(last)))\nmask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)\nmasked = (padded_labels*mask).sum()/mask.sum()\nnp.testing.assert_allclose(masked,last.mean(),atol=1e-7)\nassert not np.isclose(padded_labels.mean(),last.mean())",
+    "objectives": [
+      "Build and audit a deterministic batched host pipeline.",
+      "Distinguish membership, order, alignment and final-batch policies.",
+      "Use masks to preserve statistics after padding.",
+      "State what a preparation timing does and does not measure."
+    ],
+    "takeaways": [
+      "Preserve identity across every transformation",
+      "Make epoch ordering a pure decision",
+      "Choose a deliberate policy for the last batch",
+      "Measure what the stopwatch surrounds"
+    ],
+    "references": [
+      {
+        "title": "NumPy Generator permutation",
+        "url": "https://numpy.org/doc/stable/reference/random/generated/numpy.random.Generator.permutation.html"
+      },
+      {
+        "title": "Grain DataLoader guide",
+        "url": "https://google-grain.readthedocs.io/en/latest/tutorials/data_loader_tutorial.html"
+      }
+    ],
+    "diagnosis": "Wrong alignment can preserve shapes and numeric ranges. Keep common record IDs through transformations, and record dataset identity so restoring an old cursor does not silently select new content.",
+    "runtime": {
+      "kind": "cpu"
+    },
+    "buildSteps": [
+      {
+        "title": "Prepare the data and state",
+        "instruction": "Create main.py in your course workspace. Use the tested course environment and add this block first.",
+        "code": "import numpy as np\nimport hashlib\nimport time\nids = np.arange(11,dtype=np.int64)\nfeatures = (ids/10).astype(np.float32)\nlabels = (2*features-1).astype(np.float32)\ndef dataset_digest(x,y):\n    digest = hashlib.sha256()\n    for array in (x,y):\n        digest.update(str(array.dtype).encode())\n        digest.update(str(array.shape).encode())\n        digest.update(array.tobytes())\n    return digest.hexdigest()\nfingerprint = dataset_digest(features,labels)\ndef epoch_order(seed,epoch):\n    return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))",
+        "explanation": "This setup makes the dataset and software assumptions explicit. No external dataset or accelerator is required."
+      },
+      {
+        "title": "Build the pipeline or state transition",
+        "instruction": "Append this block to the same file; follow the named state objects through each function.",
+        "code": "def make_batches(seed,epoch,batch_size=4,drop_last=False):\n    if batch_size <= 0:\n        raise ValueError(\"batch_size must be positive\")\n    order = epoch_order(seed,epoch)\n    for start in range(0,len(order),batch_size):\n        chosen = order[start:start+batch_size]\n        if drop_last and len(chosen) < batch_size:\n            break\n        yield {\"id\":ids[chosen],\"x\":features[chosen],\"y\":labels[chosen]}\nstart_time = time.perf_counter()\nbatches = list(make_batches(seed=17,epoch=0))\nelapsed = time.perf_counter()-start_time\nseen = np.concatenate([b[\"id\"] for b in batches])",
+        "explanation": "The function boundaries expose which inputs determine the next output and which state must be preserved."
+      },
+      {
+        "title": "Run the comparison",
+        "instruction": "Append the checks, save main.py and run python main.py. Predict what should agree before running.",
+        "code": "assert [len(b[\"id\"]) for b in batches] == [4,4,3]\nnp.testing.assert_array_equal(np.sort(seen),ids)\nassert len(np.unique(seen)) == len(ids)\nfor batch in batches:\n    np.testing.assert_allclose(batch[\"y\"],2*batch[\"x\"]-1,atol=1e-7)\nrepeated = np.concatenate([b[\"id\"] for b in make_batches(17,0)])\nnp.testing.assert_array_equal(seen,repeated)\nprint(\"Batch sizes:\",[len(b[\"id\"]) for b in batches])\nprint(\"Example order:\",seen.tolist())\nprint(\"Preparation seconds (local observation only):\",elapsed)\nprint(\"Dataset SHA256:\",fingerprint)",
+        "explanation": "The comparison checks the next behavior, not merely whether a save call succeeded."
+      }
+    ],
+    "visual": {
+      "title": "Shuffling changes order, not dataset membership",
+      "kind": "executed",
+      "prediction": "Where does the short final batch begin?",
+      "reading": "The horizontal axis is position within a shuffled epoch. The vertical axis is the example ID encountered at that position. The line begins with IDs \\(9,10,4,1\\); its zigzags show a changed ordering, not increases and decreases in loss or example quality.\n\nThe dotted separators fall between positions \\(3\\) and \\(4\\), and between \\(7\\) and \\(8\\). They divide the sequence into batches of sizes \\(4\\), \\(4\\), and \\(3\\). The final, shorter batch contains IDs \\(2,5,3\\).",
+      "connection": "All IDs from \\(0\\) through \\(10\\) appear once, so shuffling preserves membership while changing order. The final batch is shorter because \\(11\\) examples do not divide evenly into groups of \\(4\\). Dropping that batch would omit three examples from this epoch.\n\nThe connected segments are a visual aid for following the sequence; an ID halfway between two plotted IDs is not a generated example. For recovery, record the ordering rule and the iterator’s position, so the resumed run consumes the same remaining examples.",
+      "alt": "Shuffling changes order, not dataset membership. The horizontal axis is position within a shuffled epoch. The vertical axis is the example ID encountered at that position. The line begins with IDs \\(9,10,4,1\\); its zigzags show a changed ordering, not increases and decreases in loss or example quality. The dotted separators fall between positions \\(3\\) and \\(4\\), and between \\(7\\) and \\(8\\). They divide the sequence into batches of sizes \\(4\\), \\(4\\), and \\(3\\). The final, shorter batch contains IDs \\(2,5,3\\).",
+      "code": "visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}"
+    }
+  }
+}

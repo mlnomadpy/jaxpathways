@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "id": "transformers-02",
+  "minutes": 90,
+  "content": {
+    "runtime": {
+      "kind": "cpu"
+    },
+    "problem": "An attention head should not always see every token. For example, a next-token model must not peek at the future. We’ll build a causal mask one row at a time, then add padding and boundaries between packed examples. Before training, you’ll be able to explain exactly which positions may read each other.",
+    "idea": "Tokenization maps text to integer IDs; a vocabulary is part of the model contract. Our tiny vocabulary is deliberately local and transparent. Sequence packing concatenates independent examples; attention must still respect their boundaries.\n\nA boolean allowed-mask means True permits a key. For the calculation here scores are zero on allowed entries so outputs are easy-to-check prefix means. Real attention replaces those zero scores with query/key dot products.",
+    "objectives": [
+      "Build a causal mask from positions",
+      "Keep token IDs and targets aligned",
+      "Combine causal and segment boundaries",
+      "Handle padding without an all-masked softmax"
+    ],
+    "sections": [
+      {
+        "title": "Build a causal mask from positions",
+        "body": "For query position i, allow keys j ≤ i. Including the diagonal lets a token use its own representation. The model predicts the next token from that prefix; the target array is shifted one position ahead. Excluding the diagonal is a different convention that requires changing how inputs and labels are aligned.\n\nWith values \\(2\\), \\(4\\), \\(8\\), \\(16\\) and uniform permitted scores, the outputs are prefix means: \\(2\\), \\(3\\), \\(14/3\\) and \\(7.5\\). Changing the last value must not change the first three outputs. This counterfactual tests causal isolation directly.",
+        "formula": "allowed key columns\nquery 0: 1 0 0 0\nquery 1: 1 1 0 0\nquery 2: 1 1 1 0\nquery 3: 1 1 1 1"
+      },
+      {
+        "title": "Keep token IDs and targets aligned",
+        "body": "For vocabulary {a:\\(0\\), b:\\(1\\), c:\\(2\\)}, abcab becomes \\([0,1,2,0,1]\\). Inputs \\([0,1,2,0]\\) pair with next-token targets \\([1,2,0,1]\\). Do not train the last token to predict the first token of an unrelated packed example. A separator or an ignored loss position must express that boundary.\n\nProduction tokenizers introduce normalization, special IDs and subword rules. This lesson teaches alignment using a simple character mapping and does not claim to replace them. Validate unknown characters explicitly rather than silently assigning an existing ID."
+      },
+      {
+        "title": "Combine causal and segment boundaries",
+        "body": "Packing segments \\([0,0,1,1]\\) means positions \\(2\\) and \\(3\\) belong to a new example. Require equal segment IDs as well as causal order. With our values, packed means become \\(2\\), \\(3\\), \\(8\\) and \\(12\\). Position \\(2\\) must not read earlier positions from segment \\(0\\) even though they are causally prior.\n\nSegment IDs must identify separate examples within a packed row. Reusing an ID for two unrelated spans could reconnect them. The mask is only one part of packing: target eligibility must also stop at each segment boundary."
+      },
+      {
+        "title": "Handle padding without an all-masked softmax",
+        "body": "An all-masked row represented by all −infinity scores has no normalized distribution and can produce NaN. Padding queries create precisely that row if you forbid every key. Provide a harmless fallback key for those queries, then replace their outputs with zero and ignore their loss. Every real query still uses its original permitted keys.\n\nThe fallback is a numerical convention, not permission for padding to carry semantic information. Test that perturbing padded values does not change real outputs. Also reject any real query with no valid key when that violates your model contract."
+      },
+      {
+        "title": "Turn the allowed positions into weights",
+        "body": "For causal attention, query position \\(i\\) may use key position \\(j\\) only when \\(j\\le i\\). We leave an allowed score unchanged and replace a blocked score with negative infinity before softmax. This gives blocked positions zero weight when the row has at least one allowed key. If a row is entirely blocked, an ordinary softmax has no valid distribution; handle that case explicitly, as the code does.",
+        "math": "\\widetilde S_{ij}=\\begin{cases}S_{ij}&\\text{if key }j\\text{ is allowed for query }i\\\\-\\infty&\\text{otherwise}\\end{cases}"
+      }
+    ],
+    "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]\n\nvalues = jnp.array([[2.], [4.], [8.], [16.]])\ncausal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]\nout, weights = masked_mean(values, causal)\nassert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))\nassert jnp.allclose(jnp.triu(weights, 1), 0.)\nprint(\"Causal means:\", out[:, 0])",
+    "output": "Causal means \\([2, 3, 4.666667, 7.5]\\); no weight above the diagonal.",
+    "experiments": [
+      {
+        "title": "Perturb the future",
+        "prediction": "If the last value becomes \\(1000\\), which outputs may change?",
+        "code": "changed = values.at[-1, 0].set(1000.)\nchanged_out, _ = masked_mean(changed, causal)\nassert jnp.allclose(changed_out[:3], out[:3])\nassert not jnp.allclose(changed_out[-1], out[-1])",
+        "output": "Only the last output changes.",
+        "explanation": "Perturbation tests whether earlier representations depend on future information."
+      },
+      {
+        "title": "Pack two independent examples",
+        "prediction": "What are the means for segments \\([0,0,1,1]\\)?",
+        "code": "segments = jnp.array([0, 0, 1, 1])\nvalid = jnp.ones(4, dtype=bool)\npacked = make_mask(segments, valid)\npacked_out, _ = masked_mean(values, packed)\nassert jnp.allclose(packed_out[:, 0], jnp.array([2., 3., 8., 12.]))",
+        "output": "Packed means \\([2, 3, 8, 12]\\).",
+        "explanation": "Causal order alone does not isolate independent packed examples."
+      }
+    ],
+    "exercise": "Encode abcab with a three-character vocabulary. Create shifted inputs/targets, and a loss-eligibility vector for packed segments \\([0,0,0,1,1]\\) that excludes a cross-segment next-token target.",
+    "solution": "vocab = {\"a\":0, \"b\":1, \"c\":2}\nids = jnp.array([vocab[c] for c in \"abcab\"])\nassert jnp.array_equal(ids[:-1], jnp.array([0,1,2,0]))\nassert jnp.array_equal(ids[1:], jnp.array([1,2,0,1]))\nseg = jnp.array([0,0,0,1,1])\nloss_valid = seg[:-1] == seg[1:]\nassert jnp.array_equal(loss_valid, jnp.array([True,True,False,True]))",
+    "practice": [
+      {
+        "title": "Repair padding-query NaNs",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Use `valid=[True,True,False,False]`. Reproduce the undefined all-masked rows, then give padded queries a fallback and zero their outputs.",
+        "hint": "Insert a diagonal fallback only for invalid queries.",
+        "solution": "pad_valid = jnp.array([True,True,False,False])\npad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)\nbad_pad, _ = masked_mean(values, pad_mask)\nassert not jnp.all(jnp.isfinite(bad_pad))\nfallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)\npad_out, _ = masked_mean(values, pad_mask | fallback)\npad_out = jnp.where(pad_valid[:, None], pad_out, 0.)\nassert jnp.all(jnp.isfinite(pad_out))\nassert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))",
+        "explanation": "A fallback makes normalization defined; zeroing and loss masking retain the semantic padding contract."
+      },
+      {
+        "title": "Detect packed-example leakage",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "Compare causal-only and segment-aware outputs at query \\(2\\). Explain which prior values caused the difference.",
+        "hint": "Query \\(2\\) should see only value \\(8\\) from its own segment.",
+        "solution": "assert jnp.allclose(out[2,0], 14/3)\nassert jnp.allclose(packed_out[2,0], 8.)\nassert not jnp.allclose(out[2,0], packed_out[2,0])",
+        "explanation": "The earlier values \\(2\\) and \\(4\\) belong to another example; they must be excluded despite being past positions."
+      }
+    ],
+    "question": "What must a packed causal mask enforce?",
+    "options": [
+      "Causal order only",
+      "Same segment and permitted causal keys, plus explicit padding behavior",
+      "Equal token IDs"
+    ],
+    "answer": 1,
+    "explanation": "Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.",
+    "diagnosis": "NaN in a padded output can mean that its mask row permits no keys; count allowed keys before blaming the optimizer. Add a fallback only for invalid queries, zero their outputs, and ignore their loss. If a packed output includes another example’s values, inspect equal-segment and causal conditions separately. Recheck the hand-derived \\([2,3,8,12]\\) result.",
+    "takeaways": [
+      "Perturbation tests whether earlier representations depend on future information.",
+      "Causal order alone does not isolate independent packed examples."
+    ],
+    "references": [
+      {
+        "title": "JAX softmax API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.softmax.html"
+      },
+      {
+        "title": "JAX attention API",
+        "url": "https://docs.jax.dev/en/latest/_autosummary/jax.nn.dot_product_attention.html"
+      },
+      {
+        "title": "Optax cross entropy",
+        "url": "https://optax.readthedocs.io/en/latest/api/losses.html"
+      }
+    ],
+    "buildSteps": [
+      {
+        "title": "1. Prepare the experiment",
+        "instruction": "In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.",
+        "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np",
+        "explanation": "These imports provide JAX array transformations and NumPy reference calculations. Define the numerical functions next; the final build block supplies the concrete fixture and checks."
+      },
+      {
+        "title": "2. Implement the mechanism",
+        "instruction": "Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.",
+        "code": "def masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]",
+        "explanation": "allowed key columns\nquery \\(0\\): \\(1\\) \\(0\\) \\(0\\) \\(0\\)\nquery \\(1\\): \\(1\\) \\(1\\) \\(0\\) \\(0\\)\nquery \\(2\\): \\(1\\) \\(1\\) \\(1\\) \\(0\\)\nquery \\(3\\): \\(1\\) \\(1\\) \\(1\\) \\(1\\)"
+      },
+      {
+        "title": "3. Run and check",
+        "instruction": "Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.",
+        "code": "values = jnp.array([[2.], [4.], [8.], [16.]])\ncausal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]\nout, weights = masked_mean(values, causal)\nassert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))\nassert jnp.allclose(jnp.triu(weights, 1), 0.)\nprint(\"Causal means:\", out[:, 0])",
+        "explanation": "Causal means \\([2, 3, 4.666667, 7.5]\\); no weight above the diagonal."
+      }
+    ],
+    "figure": "attention-mask",
+    "visual": {
+      "title": "A causal mask blocks future information",
+      "kind": "executed",
+      "prediction": "Which cells must remain zero?",
+      "reading": "Rows select query positions and columns select key positions. The diagonal and cells to its left are allowed; the white cells to the right of the diagonal have exactly zero attention weight because they refer to future tokens.\n\nQuery \\(0\\) puts all its weight on key \\(0\\). Query \\(1\\) splits weight equally across keys \\(0\\) and \\(1\\). The last row assigns \\(1/4\\) to every key because, at the last position, all four positions are available.",
+      "connection": "The allowed scores are equal in this constructed example, so each row averages its visible prefix. The causal mask determines which entries must be zero; it does not generally make the remaining entries uniform. Learned scores can distribute weight unevenly within the allowed region.\n\nFor values \\((2,4,8,16)\\), query \\(2\\) returns \\((2+4+8)/3=14/3\\), not the full-sequence average \\(7.5\\). The zero in its last column is what prevents the future value \\(16\\) from influencing that result. Verify normalization across rows, not down columns.",
+      "alt": "A causal mask blocks future information. Rows select query positions and columns select key positions. The diagonal and cells to its left are allowed; the white cells to the right of the diagonal have exactly zero attention weight because they refer to future tokens. Query \\(0\\) puts all its weight on key \\(0\\). Query \\(1\\) splits weight equally across keys \\(0\\) and \\(1\\). The last row assigns \\(1/4\\) to every key because, at the last position, all four positions are available.",
+      "code": "visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' + str(i) for i in range(4)], 'columns': ['key ' + str(i) for i in range(4)], 'unit': 'attention weight'}"
+    }
+  }
+}

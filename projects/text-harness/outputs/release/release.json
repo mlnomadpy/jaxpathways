@@ -1,0 +1,56 @@
+{
+  "tokenizer": {
+    "version": "utf8-byte-v1",
+    "pad_id": 0,
+    "bos_id": 1,
+    "eos_id": 2,
+    "byte_offset": 3,
+    "vocabulary_size": 259,
+    "context_tokens": 12,
+    "normalization": "none",
+    "unknown_policy": "all UTF-8 bytes represented; overlong input rejected"
+  },
+  "architecture": {
+    "blocks": 1,
+    "heads": 2,
+    "width": 24,
+    "head_dim": 12
+  },
+  "training_data_sha256": "609cf1d9cdacf33bf2d97e360f27dc023e164ed5c4ffc6e9b2cdb0812ec32638",
+  "completed_steps": 240,
+  "parameter_sha256": "169ac82001f93ed01066a2662c70ca5df5b6c16a3f5e5da3fada709048e376c2",
+  "jax": "0.9.2",
+  "platform": "CPU",
+  "artifacts": {
+    "fp32:prefill": {
+      "file": "fp32-prefill.jaxexport",
+      "sha256": "926a1259db223553ec79c340a182962677c6e28d7f2b1fd49d5d9fe2cce7ef25"
+    },
+    "fp32:decode": {
+      "file": "fp32-decode.jaxexport",
+      "sha256": "55d536cd787d474479e46d100289e4685be6b14147b0f181f4b090bc89c132dd"
+    },
+    "bf16:prefill": {
+      "file": "bf16-prefill.jaxexport",
+      "sha256": "9bf300c786ca584b8231d1d487f2d02cb730a0b014c1dc860fa2e5188904ebeb"
+    },
+    "bf16:decode": {
+      "file": "bf16-decode.jaxexport",
+      "sha256": "9f03070061bffb6a1871e8323fafa168b09a77d3303c4bfc090d47e0348aa2ce"
+    },
+    "w8a8-int8kv:prefill": {
+      "file": "w8a8-int8kv-prefill.jaxexport",
+      "sha256": "51718c898b8439d1fd77160da339ccb0431085817eac9b05f0ff484403e13d51"
+    },
+    "w8a8-int8kv:decode": {
+      "file": "w8a8-int8kv-decode.jaxexport",
+      "sha256": "a63b14cdf782f2b8776b0b62c4cf9eb26e546c77e52bfaee3f4754f5ee83c0fb"
+    }
+  },
+  "precision": {
+    "fp32": "FP32 weights/activations/dot/attention/KV/output",
+    "bf16": "BF16-rounded dense operands, FP32 dot/attention/norm/softmax/output, BF16 K/V",
+    "w8a8-int8kv": "dynamic per-row INT8 dense activations, per-output INT8 dense weights, INT32 dense accumulation; FP32 embedding/norm/attention/output; INT8 per-token/head K/V with FP32 scales"
+  },
+  "native_low_precision_acceleration_claimed": false
+}

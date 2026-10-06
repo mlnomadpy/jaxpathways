@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "operations-07",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The controlled replay suite passes every case. What is established?",
+      "options": [
+        "The live LLM is safe and accurate for arbitrary requests.",
+        "The evaluator accepts these fixtures; live model and held-out application evaluation remain separate.",
+        "Prompt versions no longer need recording."
+      ],
+      "correct": 1,
+      "explanation": "LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer."
+    }
+  ]
+}

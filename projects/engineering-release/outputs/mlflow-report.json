@@ -1,0 +1,24 @@
+{
+  "mlflow": "3.16.1",
+  "jax": "0.9.2",
+  "experiment_id": "1",
+  "validation_mse": [
+    0.11994461715221405,
+    5.049471951679152e-10
+  ],
+  "rates": [
+    0.02,
+    0.15
+  ],
+  "run_ids": [
+    "7234602ce15649988c86d00bd61b0f72",
+    "ed516311ddad4119a457121f27912918"
+  ],
+  "champion_version": "2",
+  "model_sha256": "31e575d38470fddf821aecd26d0c8bc0a5aa22e9cdaa1f47deae14307b70dfac",
+  "prompt_version": "1",
+  "trace_count": 1,
+  "span_count": 3,
+  "scope": "Real local SQLite tracking, model reload and registry; synthetic training and deterministic answer replay.",
+  "source_sha256": "82a03718154511a94760352bb8746e11f224bbcfe39e9cc8c36a671e4f4ff0d4"
+}

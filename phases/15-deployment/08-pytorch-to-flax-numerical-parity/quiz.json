@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "deployment-08",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The first linear layer agrees, but LayerNorm is the first mismatch. What should you inspect next?",
+      "options": [
+        "Normalization axes, variance calculation, epsilon and affine parameters.",
+        "Relax every tolerance until the final outputs pass.",
+        "Assume successful checkpoint loading proves parity."
+      ],
+      "correct": 0,
+      "explanation": "The earliest mismatch narrows the investigation. Downstream error is often the propagated effect of that first difference."
+    }
+  ]
+}

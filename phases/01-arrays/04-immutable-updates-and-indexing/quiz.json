@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "arrays-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "After `y = x.at[1].set(20.)`, what happens to \\(x\\)?",
+      "options": [
+        "Its second element becomes \\(20\\)",
+        "Its value remains unchanged",
+        "It becomes a Python list"
+      ],
+      "correct": 1,
+      "explanation": "The expression returns the updated value. Assign it to a name to keep it; \\(x\\) retains its original value."
+    }
+  ]
+}

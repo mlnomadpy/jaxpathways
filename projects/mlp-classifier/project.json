@@ -1,0 +1,66 @@
+{
+  "schemaVersion": 1,
+  "id": "mlp-classifier",
+  "title": "Build a reproducible classifier audit",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU",
+  "source": "projects/mlp-classifier/README.md",
+  "requiredLessonIds": [
+    "networks-01",
+    "networks-02",
+    "networks-03",
+    "networks-04",
+    "networks-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Model and shape contract",
+      "command": "python3 projects/mlp-classifier/tests/check.py --stage 1 --implementation projects/mlp-classifier/my_model.py",
+      "evidence": "Shape diagram, independent forward calculation, parameter count",
+      "expected": "PASS stage 1: shape, wiring, parameter count, seeded initialization",
+      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction."
+    },
+    {
+      "id": "2",
+      "title": "Objective and derivative evidence",
+      "command": "python3 projects/mlp-classifier/tests/check.py --stage 2 --implementation projects/mlp-classifier/my_model.py",
+      "evidence": "Independent stable loss, two finite-difference checks, malformed-label diagnosis",
+      "expected": "PASS stage 2: independent loss, two-seed finite differences, label contract",
+      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks."
+    },
+    {
+      "id": "3",
+      "title": "Training audit",
+      "command": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/my_model.py",
+      "evidence": "Held-out metrics, full replay, evaluation isolation, count-weighted aggregation",
+      "expected": "PASS stage 3: held-out metrics, unequal-batch aggregation, evaluation isolation, full replay, changed seed",
+      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state."
+    }
+  ],
+  "rubric": [
+    "Explain the nonlinearity and parameter shapes",
+    "Verify a stable scalar objective independently",
+    "Compare a derivative at two initializations",
+    "Keep training and held-out arrays separate",
+    "Prove evaluation leaves model state unchanged",
+    "Reproduce the complete update sequence",
+    "Diagnose a deliberate failure and report the repair",
+    "State the limitations of synthetic held-out evidence"
+  ],
+  "workspaceFile": "projects/mlp-classifier/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation solution",
+  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/mlp-classifier. Use the extracted top folder as your working directory; a full course checkout is optional for this project.",
+  "assessmentId": "models"
+}

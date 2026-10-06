@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "transformers-01",
+  "contentHash": "d2edd9f0aab5f5df7a89909fa97adb5c19e3ea980a004c1682e4fd7a2763fe5d",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:38:16.461036+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Weights / output: [[0.33333334 0.33333334 0.33333334]\n [0.33333334 0.33333334 0.33333334]] [[2. 2.]\n [2. 2.]]\n",
+  "data": {
+    "kind": "panels",
+    "panels": [
+      {
+        "kind": "heatmap",
+        "title": "Zero queries",
+        "values": [
+          [
+            0.3333333432674408,
+            0.3333333432674408,
+            0.3333333432674408
+          ],
+          [
+            0.3333333432674408,
+            0.3333333432674408,
+            0.3333333432674408
+          ]
+        ],
+        "rows": [
+          "query 0",
+          "query 1"
+        ],
+        "columns": [
+          "key 0",
+          "key 1",
+          "key 2"
+        ],
+        "unit": "attention weight"
+      },
+      {
+        "kind": "heatmap",
+        "title": "Changed queries",
+        "values": [
+          [
+            0.47172629833221436,
+            0.05654735863208771,
+            0.47172629833221436
+          ],
+          [
+            0.05654735863208771,
+            0.47172629833221436,
+            0.47172629833221436
+          ]
+        ],
+        "rows": [
+          "query 0",
+          "query 1"
+        ],
+        "columns": [
+          "key 0",
+          "key 1",
+          "key 2"
+        ],
+        "unit": "attention weight"
+      }
+    ]
+  }
+}

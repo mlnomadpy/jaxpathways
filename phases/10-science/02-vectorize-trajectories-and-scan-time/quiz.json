@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a shape of (3, 41) mean in the batch-major solver?",
+      "options": [
+        "Three independent initial conditions, each with the initial state plus forty updates.",
+        "Three time points, each with forty-one parameters.",
+        "Forty-one independent devices."
+      ],
+      "correct": 0,
+      "explanation": "vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified."
+    }
+  ]
+}

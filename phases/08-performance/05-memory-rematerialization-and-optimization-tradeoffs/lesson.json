@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 1,
+  "id": "performance-05",
+  "minutes": 100,
+  "content": {
+    "problem": "A model runs out of memory during differentiation. Someone suggests checkpointing every layer. Will that change the answer, and will it necessarily reduce this program’s memory? We will compare gradients, inspect saved residuals and measure compiled estimates and timings before making that decision.",
+    "idea": "Reverse-mode differentiation reuses intermediate values from the forward calculation. Rematerialization lets selected values be recomputed during the backward pass instead of retained. That changes a time–memory tradeoff, while the mathematical derivative should remain the same for this pure deterministic function. Saved autodiff residuals, compiler buffer estimates and measured peak device memory are three different kinds of evidence.",
+    "objectives": [
+      "Explain why reverse-mode differentiation needs forward intermediates.",
+      "Compare ordinary and rematerialized gradients with an independent reverse recurrence.",
+      "Inspect saved residual descriptions and compiled memory estimates without equating them.",
+      "Measure warm gradient calls and explain why a memory benefit is workload-dependent."
+    ],
+    "sections": [
+      {
+        "title": "Follow one layer backward",
+        "body": "Our layer multiplies a vector by a fixed matrix and applies tanh. In the backward pass, the derivative of tanh uses the forward output. If that output is retained, the derivative can reuse it. If selected intermediates are discarded, the program must reconstruct the needed value from retained inputs and weights.\n\nFor layer output \\(h\\), the local derivative factor is \\(1-h^2\\). Multiplying the incoming cotangent by that factor, then applying the transposed weight matrix, propagates sensitivity to the preceding vector. The NumPy reference implements this recurrence explicitly instead of calling autodiff.",
+        "math": "\\bar x=W^\\top\\bigl(\\bar h\\odot(1-h^2)\\bigr)"
+      },
+      {
+        "title": "Choose a boundary around pure work",
+        "body": "We apply jax.checkpoint to the layer function. The outer objective uses four layers and a sum of squared final outputs. The reference and rematerialized versions share the same weights and input. If a function relies on untracked mutation, hidden randomness or effects, recomputation can have a different meaning; explicit state and keys remain essential.\n\nCheckpointing the entire loss at an unhelpful boundary may simply recompute nearly all work without eliminating the intermediates you expected. Compare policies at meaningful blocks, and start with a small function whose derivative you can verify."
+      },
+      {
+        "title": "Inspect what autodiff saves",
+        "body": "print_saved_residuals names values retained for differentiation. The output describes a constant weight matrix and selected vector intermediates. Count the entries to compare policies, but read their shapes too: one large matrix may cost more than many scalar entries. The printed list is a diagnostic representation, not a device-memory allocation trace.\n\nIn this fixed example, the ordinary policy reports nine residual descriptions and layer rematerialization reports six. Those counts explain that the differentiation strategy changed; they do not guarantee a proportional reduction in peak bytes."
+      },
+      {
+        "title": "Read compiled memory estimates separately",
+        "body": "Compile the gradient for the same input contract and inspect memory_analysis. Argument, output, temporary and alias bytes answer different questions. Backend support and reporting conventions can vary, so record missing analysis as unavailable instead of substituting zero.\n\nIn the tested small CPU example, both policies report the same temporary-buffer estimate. That is a useful result: fewer saved autodiff values need not reduce this compiled program’s allocated temporary storage. Fusion, buffer reuse and compiler decisions stand between a mathematical strategy and a memory allocation."
+      },
+      {
+        "title": "Measure the tradeoff you actually care about",
+        "body": "Warm both compiled gradients and collect synchronized calls. Keep all samples, not just the fastest. Rematerialization can add arithmetic; on a tiny workload, dispatch and noise can dominate. No strict timing ordering is required.\n\nA training-memory claim requires the complete training step, representative model and batch shapes, and actual peak memory on the target device. Include optimizer state and input buffers. Test whether the policy enables the intended larger batch without changing the objective, then verify quality and runtime again."
+      }
+    ],
+    "output": "Both gradients agree with the independent reverse recurrence. The saved-residual descriptions differ; the small tested CPU program reports equal temporary-memory estimates. Timings vary and no speedup is asserted.",
+    "experiments": [
+      {
+        "title": "Move the boundary to the entire objective",
+        "prediction": "Will checkpointing the whole objective preserve the gradient? Does that alone demonstrate useful memory savings?",
+        "code": "whole=jax.checkpoint(plain)\nnp.testing.assert_allclose(jax.grad(whole)(x),cotangent,rtol=3e-5,atol=1e-7)\nprint('Whole-objective residuals:',residual_report(whole))\nwhole_executable=jax.jit(jax.grad(whole)).lower(x).compile()\nprint('Whole-objective memory estimate:',whole_executable.memory_analysis())",
+        "output": "The derivative remains correct; residual and compiled-memory reports describe this additional boundary.",
+        "explanation": "Correctness is necessary but does not choose the best policy. The boundary determines what is retained and recomputed; inspect actual memory and timing for the intended workload."
+      }
+    ],
+    "exercise": "Use the direction \\(v=(1,\\ldots,1)\\) and central differences to independently check a directional derivative of the original objective at the existing input. Compare it with the gradient dot direction and report the perturbation.",
+    "solution": "direction=jnp.ones_like(x);eps=.001\nfinite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)\nautomatic=float(jnp.vdot(jax.grad(plain)(x),direction))\nnp.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)\nprint('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)",
+    "practice": [
+      {
+        "title": "Check higher-order differentiation",
+        "difficulty": "Transfer",
+        "prompt": "Compare Hessian-vector products of the ordinary and rematerialized objectives along a nonuniform direction. Explain why equal first derivatives alone would be a weaker test.",
+        "hint": "Apply jvp to each gradient function with the same primal point and tangent.",
+        "solution": "direction=jnp.linspace(-1.,1.,len(x))\n_,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))\n_,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))\nnp.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)\nassert np.isfinite(np.asarray(hvp_plain)).all()\nprint('Higher-order directional derivatives agree.')",
+        "explanation": "Recomputation should preserve the differentiable function in this pure example, including its higher-order directional behavior. This still does not establish a device-memory improvement."
+      }
+    ],
+    "question": "Rematerialization reduces the number of saved residual descriptions but the compiled temporary-byte estimates are equal. What is the supported conclusion?",
+    "options": [
+      "The compiler’s report must be wrong.",
+      "The differentiation strategy changed, but this evidence does not show reduced compiled temporary storage.",
+      "The model must train faster because fewer values were listed."
+    ],
+    "answer": 1,
+    "explanation": "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.",
+    "diagnosis": "If gradients differ, first compare inputs, weights, random keys and any hidden effects. If memory does not improve, inspect the checkpoint boundary, residual shapes, compiler buffer estimates and full-step peak measurements before adding more checkpoint wrappers.",
+    "takeaways": [
+      "Recomputation trades retained intermediate values for extra work.",
+      "Verify the derivative independently before evaluating a policy.",
+      "Saved values, estimated buffers and measured peak memory must remain distinct."
+    ],
+    "references": [
+      {
+        "title": "JAX gradient checkpointing",
+        "url": "https://docs.jax.dev/en/latest/gradient-checkpointing.html"
+      },
+      {
+        "title": "JAX benchmarking",
+        "url": "https://docs.jax.dev/en/latest/benchmarking.html"
+      }
+    ],
+    "visual": {
+      "title": "Changed autodiff storage does not guarantee changed compiled buffers",
+      "kind": "executed",
+      "prediction": "Must the two panels tell the same story about memory?",
+      "reading": "The upper panel counts saved-residual descriptions for ordinary differentiation and layer rematerialization. The vertical unit is entries, not bytes. In this fixed network the counts are nine and six, including a shared constant matrix; the decrease shows a changed differentiation strategy.\n\nThe lower panel reports compiler-estimated temporary bytes when that analysis is supported. In the recorded CPU example both bars have height \\(256\\). Equal bars mean the compiler reports no reduction in this category for these shapes, even though the residual-entry count decreased.",
+      "connection": "The independent reverse recurrence checks the numerical derivative for both policies. The figure then compares two distinct storage views: values named by autodiff and temporary buffers estimated after compilation. Compiler reuse and fusion can make their relationship non-proportional.\n\nThese are not measurements of peak accelerator allocation or total training memory. The runtime samples are recorded separately, and a meaningful policy decision needs representative model size, optimizer state and actual target-device measurements. If a backend lacks memory analysis, the plot explicitly substitutes a labeled availability panel rather than treating missing bytes as zero.",
+      "alt": "Residual-entry counts compare ordinary and rematerialized differentiation; a separate panel gives supported compiler temporary-byte estimates.",
+      "code": "panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]\nif all(m is not None for m in memory):\n    panels.append({'kind':'bar','title':'Compiler memory estimate','labels':['ordinary','layer remat'],'ylabel':'estimated temporary bytes','series':[{'label':'compiler temporaries','y':[m['temp_size_in_bytes'] for m in memory]}]})\nelse:\n    panels.append({'kind':'bar','title':'Compiler memory analysis unavailable','labels':['ordinary','layer remat'],'ylabel':'analysis available (1=yes)','series':[{'label':'availability, not byte count','y':[int(m is not None) for m in memory]}]})\nvisual_data={'kind':'panels','panels':panels}"
+    },
+    "runtime": {
+      "kind": "cpu"
+    },
+    "code": "import contextlib\nimport io\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nfrom jax.ad_checkpoint import print_saved_residuals\nrng=np.random.default_rng(18)\nw=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))\nx=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))\ndef layer(v):return jnp.tanh(w@v)\ndef objective(v,rematerialize=False):\n    operation=jax.checkpoint(layer) if rematerialize else layer\n    for _ in range(4):v=operation(v)\n    return jnp.sum(v*v)\nplain=lambda v:objective(v,False)\nremat=lambda v:objective(v,True)\ndef residual_report(fn):\n    stream=io.StringIO()\n    with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)\n    lines=[line for line in stream.getvalue().splitlines() if line.strip()]\n    return lines\nreports=[residual_report(plain),residual_report(remat)]\n\n# Independent reverse recurrence through the same explicitly specified network.\nhost_w=np.asarray(w);values=[np.asarray(x)]\nfor _ in range(4):values.append(np.tanh(host_w@values[-1]))\ncotangent=2*values[-1]\nfor i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))\nfor fn in (plain,remat):\n    np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)\nnp.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)\nexecutables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]\nmemory=[];times=[]\nfor executable in executables:\n    analysis=executable.memory_analysis()\n    memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})\n    executable(x).block_until_ready();samples=[]\n    for _ in range(5):\n        start=time.perf_counter();executable(x).block_until_ready();samples.append(time.perf_counter()-start)\n    times.append(samples)\nprint('Saved residual descriptions:')\nfor name,lines in zip(['plain','remat'],reports):print(name,'\\n'+'\\n'.join(lines))\nprint('Compiler memory estimates:',memory)\nprint('Synchronized gradient samples:',times)\nprint('Independent reverse recurrence agrees with both gradients.')\n",
+    "buildSteps": [
+      {
+        "title": "Define two differentiation policies",
+        "instruction": "Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.",
+        "code": "import contextlib\nimport io\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nfrom jax.ad_checkpoint import print_saved_residuals\nrng=np.random.default_rng(18)\nw=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))\nx=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))\ndef layer(v):return jnp.tanh(w@v)\ndef objective(v,rematerialize=False):\n    operation=jax.checkpoint(layer) if rematerialize else layer\n    for _ in range(4):v=operation(v)\n    return jnp.sum(v*v)\nplain=lambda v:objective(v,False)\nremat=lambda v:objective(v,True)\ndef residual_report(fn):\n    stream=io.StringIO()\n    with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)\n    lines=[line for line in stream.getvalue().splitlines() if line.strip()]\n    return lines\nreports=[residual_report(plain),residual_report(remat)]",
+        "explanation": "Both functions compute the same pure objective; only the recomputation boundary differs. The diagnostic records descriptions rather than claiming physical byte savings."
+      },
+      {
+        "title": "Verify with an independent reverse pass",
+        "instruction": "Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.",
+        "code": "# Independent reverse recurrence through the same explicitly specified network.\nhost_w=np.asarray(w);values=[np.asarray(x)]\nfor _ in range(4):values.append(np.tanh(host_w@values[-1]))\ncotangent=2*values[-1]\nfor i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))\nfor fn in (plain,remat):\n    np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)\nnp.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)\nexecutables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]\nmemory=[];times=[]\nfor executable in executables:\n    analysis=executable.memory_analysis()\n    memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})\n    executable(x).block_until_ready();samples=[]\n    for _ in range(5):\n        start=time.perf_counter();executable(x).block_until_ready();samples.append(time.perf_counter()-start)\n    times.append(samples)\nprint('Saved residual descriptions:')\nfor name,lines in zip(['plain','remat'],reports):print(name,'\\n'+'\\n'.join(lines))\nprint('Compiler memory estimates:',memory)\nprint('Synchronized gradient samples:',times)\nprint('Independent reverse recurrence agrees with both gradients.')\n",
+        "explanation": "The NumPy recurrence propagates cotangents through saved host activations, providing an oracle independent of JAX differentiation."
+      }
+    ]
+  }
+}

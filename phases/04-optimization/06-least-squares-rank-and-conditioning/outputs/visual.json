@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "optimization-06",
+  "contentHash": "61b3e69844733813d1a05e6094d3f4cb4ca7d15ee5b417b394053e889bfb1d73",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:29:28.339622+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "row 0",
+      "row 1",
+      "row 2"
+    ],
+    "ylabel": "target / prediction",
+    "series": [
+      {
+        "label": "target",
+        "y": [
+          1.0,
+          2.0,
+          2.0
+        ]
+      },
+      {
+        "label": "least-squares fit",
+        "y": [
+          0.6666669249534607,
+          1.6666665077209473,
+          2.3333334922790527
+        ]
+      }
+    ]
+  }
+}

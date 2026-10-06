@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "first-gradient",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "For \\(f(x)=x^3\\), JAX reports \\(f\\prime(0)=0\\). What can you conclude?",
+      "options": [
+        "\\(x=0\\) is a global minimum.",
+        "The first-order local slope is zero; optimality requires more evidence.",
+        "JAX has stopped differentiating because the output is zero."
+      ],
+      "correct": 1,
+      "explanation": "The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum."
+    }
+  ]
+}

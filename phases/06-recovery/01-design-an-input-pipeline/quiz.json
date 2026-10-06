@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What information is missing from a model-only checkpoint for mid-epoch recovery?",
+      "options": [
+        "The order/cursor and dataset/configuration identity.",
+        "The number of input columns is always enough.",
+        "Nothing: parameters reveal consumed example IDs."
+      ],
+      "correct": 0,
+      "explanation": "Model state cannot reconstruct which records should be read next."
+    }
+  ]
+}

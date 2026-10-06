@@ -1,0 +1,46 @@
+---
+import '../../styles/home/hero.css';
+import copy from '../../data/home.json';
+import { siteUrl } from '../../lib/urls.js';
+---
+
+<section class="hero" aria-labelledby="home-title">
+  <div class="hero-copy">
+    <h1 id="home-title">
+      {copy.hero.title.map((line, index) => (
+        <>
+          {index > 0 && <br />}
+          {line}
+        </>
+      ))}
+    </h1>
+    <p class="intro">{copy.hero.intro}</p>
+    <div class="actions">
+      {copy.hero.actions.map((action, index) => (
+        <a class:list={['button', { primary: index === 0 }]} href={siteUrl(action.href)}>
+          {action.label}
+        </a>
+      ))}
+    </div>
+    <p class="hero-note">{copy.hero.note}</p>
+  </div>
+  <figure class="hero-art">
+    <picture>
+      <source media="(max-width:760px)" srcset={siteUrl('assets/jax-learning-map-mobile.svg')} />
+      <img
+        src={siteUrl('assets/jax-learning-map.svg')}
+        width="640"
+        height="420"
+        alt="Transform a pure function with grad for derivatives, vmap for batching, and jit for compilation."
+      />
+    </picture>
+    <figcaption>
+      <span>One function. Three ways to transform it.</span>
+      <span class="map-links">
+        <a href={siteUrl('lesson.html?lesson=first-gradient')}>grad</a>
+        <a href={siteUrl('lesson.html?lesson=transforms-03')}>vmap</a>
+        <a href={siteUrl('lesson.html?lesson=transforms-04')}>jit</a>
+      </span>
+    </figcaption>
+  </figure>
+</section>

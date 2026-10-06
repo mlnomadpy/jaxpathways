@@ -1,0 +1,37 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-02",
+  "contentHash": "1bb1324724e08faae15caaa84b0bfc8ebe1082b1748e14687ec7fbe453379ac4",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T21:38:26.765269+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "{\n  \"jax\": \"0.9.2\",\n  \"backend\": \"TFRT_CPU_0\",\n  \"calls\": [\n    {\n      \"label\": \"initial signature\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 140.0\n    },\n    {\n      \"label\": \"same signature changed data\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 204.0\n    },\n    {\n      \"label\": \"same signature changed dynamic gain\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 560.0\n    },\n    {\n      \"label\": \"different input shape\",\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 506.0\n    }\n  ],\n  \"python_trace_events\": [\n    {\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\"\n    },\n    {\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\"\n    }\n  ]\n}\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "initial",
+      "new values",
+      "new gain",
+      "new shape"
+    ],
+    "ylabel": "observed Python trace events",
+    "series": [
+      {
+        "label": "trace delta",
+        "y": [
+          1,
+          0,
+          0,
+          1
+        ]
+      }
+    ]
+  }
+}

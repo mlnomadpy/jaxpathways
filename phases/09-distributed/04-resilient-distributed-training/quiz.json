@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "distributed-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The first resumed batch and update match, but sample IDs differ at the next epoch. Which saved value should you inspect first?",
+      "options": [
+        "Only the learning-rate constant.",
+        "The random key used to construct the next permutation.",
+        "The display formatting of the loss."
+      ],
+      "correct": 1,
+      "explanation": "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary."
+    }
+  ]
+}

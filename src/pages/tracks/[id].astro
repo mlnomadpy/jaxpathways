@@ -1,0 +1,166 @@
+---
+import manifest from '../../../curriculum/modality-tracks.json';
+import { course } from '../../lib/course-data.js';
+import { siteUrl } from '../../lib/urls.js';
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import SiteFooter from '../../components/shared/SiteFooter.astro';
+import '../../styles/tokens.css';
+import '../../styles/base.css';
+import '../../styles/features/tracks.css';
+export function getStaticPaths() {
+  return manifest.tracks.map((track) => ({ params: { id: track.id }, props: { track } }));
+}
+const { track } = Astro.props;
+const lessons = course.phases.flatMap((phase) => phase.lessons);
+---
+
+<SiteLayout title={`${track.title} — JAX Pathways`} description={track.summary} active="projects">
+  <main id="main" class="track-page">
+    <div class="page-intro">
+      <a href={siteUrl('projects.html#modality-tracks')}>All project guides</a>
+      <p class="edition">
+        {track.status === 'authored' ? 'Runnable project' : 'Guided project plan'} · 8 lifecycle
+        stages
+      </p>
+      <h1>{track.title}</h1>
+      <p class="intro">{track.summary}</p>
+      <p class="track-status">{track.available}</p>
+      <div class="actions">
+        {track.harnessProjectId && (
+          <a class="button primary" href={siteUrl(`project.html?id=${track.harnessProjectId}`)}>
+            Open the runnable harness
+          </a>
+        )}
+        <a class="button" href={siteUrl(`lesson.html?lesson=${track.firstLessonId}`)}>
+          Start with the preparation lesson
+        </a>
+        <a class="button" href={siteUrl(`guides/${track.id}.md`)} download>
+          Download guide
+        </a>
+        <a class="button" href={siteUrl('project-guides/engineering-release.html')}>
+          Add tracking, containers and release checks
+        </a>
+      </div>
+    </div>
+    <section class="track-contract" aria-labelledby="target-heading">
+      <div>
+        <h2 id="target-heading">What you’re working toward</h2>
+        <p>{track.task}</p>
+        <h3>Before you start</h3>
+        <p>{track.prerequisites}</p>
+      </div>
+      <div>
+        <h2>How to use this guide</h2>
+        <p>
+          Follow one stage at a time. Read the linked lesson, predict a result, run its companion,
+          then adapt the contract to your project. Keep your observed output and explain a failure
+          before moving on.
+        </p>
+        <p>
+          {track.harnessProjectId
+            ? 'Use the linked project stages to connect these building blocks. Its reference checks establish the declared CPU fixture; real-data quality and target-device measurements need separate evidence.'
+            : 'Preparation links teach a building block. The connected harness for this track remains planned.'}
+        </p>
+      </div>
+    </section>
+    <nav class="track-stage-nav" aria-label="Project stages">
+      <ol>
+        {track.stages.map((stage) => (
+          <li>
+            <a href={`#${stage.id}`}>{stage.title}</a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+    <section class="track-figure" aria-labelledby="figure-heading">
+      <h2 id="figure-heading">Make the figures explain the model</h2>
+      <p>{track.plot}</p>
+      <p>
+        For every figure, name the axes, units, dataset and configuration. Explain one visible
+        pattern with actual values, connect it to the mechanism, and state a conclusion the figure
+        cannot support.
+      </p>
+    </section>
+    {track.stages.map((stage, index) => (
+      <section id={stage.id} class="track-stage" aria-labelledby={`${stage.id}-heading`}>
+        <p class="edition">
+          Stage {index + 1} / {track.stages.length}
+        </p>
+        <h2 id={`${stage.id}-heading`}>{stage.title}</h2>
+        <p>{stage.explanation}</p>
+        <p class="track-application">{stage.application}</p>
+        <div class="track-contract">
+          <div>
+            <h3>Keep as evidence</h3>
+            <p>{stage.artifact}</p>
+          </div>
+          <div>
+            <h3>A check worth passing</h3>
+            <p>{stage.check}</p>
+          </div>
+        </div>
+        {track.harnessProjectId && 'projectStageIds' in stage && stage.projectStageIds && (
+          <p>
+            <a href={siteUrl(`project.html?id=${track.harnessProjectId}`)}>
+              Practice in project {stage.projectStageIds.length === 1 ? 'stage' : 'stages'}{' '}
+              {stage.projectStageIds.join(', ')}
+            </a>
+          </p>
+        )}
+        <h3>Available preparation</h3>
+        <ul class="track-lessons">
+          {stage.lessonIds.map((id) => (
+            <li>
+              <a href={siteUrl(`lesson.html?lesson=${id}`)}>
+                {lessons.find((lesson) => lesson.id === id)?.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+    {manifest.sharedSections.map((section, index) => (
+      <section class="track-stage" aria-labelledby={`shared-${index}`}>
+        <h2 id={`shared-${index}`}>{section.title}</h2>
+        <p>{section.paragraphs[0]}</p>
+        {section.items.length > 0 && (
+          <ul>
+            {section.items.map((item) => (
+              <li>{item}</li>
+            ))}
+          </ul>
+        )}
+        <p>{section.paragraphs[1]}</p>
+      </section>
+    ))}
+    <section class="track-stage" aria-labelledby="reference-heading">
+      <h2 id="reference-heading">References and next steps</h2>
+      <ul>
+        {manifest.references.map((ref) => (
+          <li>
+            <a href={ref.url}>{ref.title}</a>
+          </li>
+        ))}
+      </ul>
+      <div class="actions">
+        {track.pathwayIds.map((id) => (
+          <a class="button" href={siteUrl(`pathways.html?path=${id}`)}>
+            {course.pathways.find((route) => route.id === id)?.title}
+          </a>
+        ))}
+      </div>
+      {track.projectIds.map((id) => (
+        <p>
+          <a href={siteUrl(`project.html?id=${id}`)}>
+            Open the {id === track.harnessProjectId ? 'connected harness' : 'preparation project'}
+          </a>
+        </p>
+      ))}
+    </section>
+    <SiteFooter />
+  </main>
+  <script>
+    import { initExperience } from '../../scripts/experience.js';
+    initExperience();
+  </script>
+</SiteLayout>

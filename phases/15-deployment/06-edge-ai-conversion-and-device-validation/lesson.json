@@ -1,0 +1,123 @@
+{
+  "schemaVersion": 1,
+  "id": "deployment-06",
+  "minutes": 75,
+  "content": {
+    "problem": "A model works on your computer, and now you want it to run near the user—perhaps on a phone or an embedded board. Let’s trace the whole request, from raw input to usable output. We’ll check conversion, measure a batch-one CPU request, and write down what still needs to be measured on the real device.",
+    "idea": "Edge AI runs inference near the data source. A mobile app with CPU/GPU/NPU delegates, a Linux board, and a microcontroller have different runtimes and operator budgets. Choose the device and execution path first, then prove the exported computation fits. This CPU lesson teaches the measurement boundary; it does not emulate an NPU, battery draw or microcontroller memory.",
+    "objectives": [
+      "Trace source model through conversion, runtime and device execution.",
+      "Measure a complete batch-one request separately from first-call overhead.",
+      "Define calibration, held-out quality and device acceptance checks.",
+      "Identify fallback operators and memory costs before claiming edge readiness."
+    ],
+    "sections": [
+      {
+        "title": "Choose a deployment lane",
+        "body": "For a phone or Linux edge device, LiteRT is one runtime option; ONNX Runtime offers execution providers for supported targets. Apple deployments may use Core ML after a supported conversion; PyTorch models may use ExecuTorch. Microcontrollers require a runtime and operator set designed for constrained memory, such as LiteRT for Microcontrollers. These are alternatives, not interchangeable file formats. Write down OS, device model, runtime version, operators, input shapes, precision policy and accelerator path before converting."
+      },
+      {
+        "title": "Follow one concrete TensorFlow-to-LiteRT route",
+        "body": "The optional labs/tensorflow_litert.py companion builds the known dense model in TensorFlow, converts float32 and fully integer variants, inspects input/output scale and zero point, quantizes requests and dequantizes outputs, then checks held-out predictions. Representative calibration inputs are preprocessed floats in the exact source-model input domain. Setting integer-only supported ops and int8 input/output requests a strict integer graph; unsupported conversion should fail rather than silently satisfy the contract with float fallback. The lab uses TensorFlow’s interpreter interface as a desktop compatibility check; it is not a device delegate test. Desktop conversion was verified with Python 3.12.13, TensorFlow 2.21.0 and Keras 3.15.1 on macOS arm64. The optional requirements file pins these tested top-level dependencies; other platforms still need a compatible installation.",
+        "commands": [
+          {
+            "label": "Optional TensorFlow environment — macOS/Linux, from the workspace root",
+            "shell": "sh",
+            "code": "python3.12 -m venv .venv-tensorflow\n.venv-tensorflow/bin/python -m pip install -r phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/requirements-tensorflow.txt\n.venv-tensorflow/bin/python phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/tensorflow_litert.py --output edge-artifacts\n.venv-tensorflow/bin/python -m pip freeze > edge-artifacts/requirements-tested.txt",
+            "expected": "A compatible TensorFlow installation writes two .tflite files and report.json after numerical checks. Desktop float32 and INT8 conversion passed separately from the core CPU receipt; device validation remains unperformed. On Windows use .venv-tensorflow\\Scripts\\python.exe in place of .venv-tensorflow/bin/python. If no compatible TensorFlow wheel exists, choose a supported Python/platform combination from the official installation guide."
+          }
+        ]
+      },
+      {
+        "title": "Keep preprocessing attached to the model",
+        "body": "Our sample uses three sensor features in the range \\(0\\) to \\(255\\) and divides by \\(255\\) before inference. The JSON request exercises that boundary. A camera model also needs color order, resize/crop behavior and normalization; tokenizer-based models need vocabulary, special tokens and sequence rules. Keep preprocessing versioned with weights and output labels. Run the same raw golden inputs through the source pipeline and the device pipeline."
+      },
+      {
+        "title": "Budget more than weights",
+        "body": "Peak memory includes activations, tensors held by the runtime, workspace, preprocessing buffers and, for autoregressive models, KV cache. A compressed file may expand on load. Batch one often minimizes interaction latency but may reduce throughput. Include cold process startup, model load and runtime initialization in a separate device cold-start measurement; our first-request timing starts after imports and model setup, so it does not cover them. Measure power or energy with an actual target-device tool and record thermal state."
+      },
+      {
+        "title": "Measure the request the user experiences",
+        "body": "The timer includes JSON decoding, normalization, host/device placement, inference completion and response encoding. Thirty warm requests produce an instructional p50 and p95, not a production tail-latency estimate. A device report needs more samples, realistic input variation and sustained runs to reveal thermal throttling. Never reuse a kernel-only time as end-to-end latency. Verify the numerical output before interpreting any timings."
+      },
+      {
+        "title": "Device acceptance is an experiment",
+        "body": "Choose quality, memory, startup and latency thresholds before comparing candidates. Record runtime/delegate logs and partitioning so unsupported operators cannot quietly fall back to CPU. Compare float32, FP16 and calibrated INT8 where that device supports them. Retain the original artifact, hashes, versions, input/output metadata, calibration provenance and failed cases. A conversion failure, regression on rare inputs or memory-budget failure is a result to diagnose. Leave device fields unmeasured until tested on the named hardware."
+      }
+    ],
+    "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\nweights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)\nbias = jnp.array([.1, -.2], jnp.float32)\n@jax.jit\ndef infer(features):\n    return features @ weights + bias\npayload = json.dumps({\"features\": [[255., 128., 0.]]})\ndef request(payload):\n    decoded = np.asarray(json.loads(payload)[\"features\"], dtype=np.float32)\n    if decoded.shape != (1, 3) or not np.isfinite(decoded).all():\n        raise ValueError(\"expected finite [1, 3] sensor features\")\n    features = decoded / 255.\n    output = np.asarray(infer(jnp.asarray(features)).block_until_ready())\n    return json.dumps({\"scores\": output.tolist()})\nstart = time.perf_counter()\nfirst_response = request(payload)\nfirst_ms = (time.perf_counter() - start) * 1000\nsamples = []\nfor _ in range(30):\n    start = time.perf_counter()\n    response = request(payload)\n    samples.append((time.perf_counter() - start) * 1000)\nexpected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(json.loads(response)[\"scores\"], expected, atol=1e-6)\nreport = {\"runtime\": \"JAX CPU instructional proxy\", \"jax\": jax.__version__,\n          \"first_request_ms\": first_ms, \"warm_samples_ms\": samples,\n          \"p50_ms\": float(np.percentile(samples, 50)), \"p95_ms\": float(np.percentile(samples, 95)),\n          \"boundary\": \"JSON decode + normalize + transfer + infer + wait + encode\",\n          \"edge_device_validated\": False}\nassert len(samples) == 30 and all(t >= 0 for t in samples)\nprint(json.dumps(report, indent=2))\n",
+    "output": "A JSON report with \\(30\\) measured warm requests, first-request time, p50/p95 and `edge_device_validated=false`. Timings depend on this CPU; no device speedup is asserted.",
+    "experiments": [
+      {
+        "title": "A normalization mismatch survives conversion",
+        "prediction": "Will raw sensor values and normalized values produce the same scores?",
+        "code": "raw = np.array([[255., 128., 0.]], np.float32)\nwrong = np.asarray(infer(raw))\nright = np.asarray(infer(raw / 255.))\nassert not np.allclose(wrong, right)\nprint(\"Preprocessing mismatch max error\", float(np.max(np.abs(wrong-right))))\n",
+        "output": "The mismatch is large despite identical weights.",
+        "explanation": "Conversion checks must start at the raw input boundary when preprocessing is part of the product."
+      }
+    ],
+    "exercise": "Send a second raw input \\([0, 255, 128]\\) through the full request, and verify its independent normalized NumPy result.",
+    "solution": "changed_raw = np.array([[0., 255., 128.]], np.float32)\nchanged_response = json.loads(request(json.dumps({\"features\": changed_raw.tolist()})))\nexpected_changed = (changed_raw / 255.) @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(changed_response[\"scores\"], expected_changed, atol=1e-6)\nprint(\"Changed end-to-end request verified\")",
+    "practice": [
+      {
+        "title": "Make incomplete deployment evidence explicit",
+        "difficulty": "Transfer",
+        "prompt": "Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing.",
+        "hint": "List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.",
+        "solution": "device_report = {\"device\": None, \"runtime_version\": None, \"delegate\": None,\n                 \"quality_metric\": None, \"p95_ms\": None, \"peak_memory_bytes\": None,\n                 \"cold_start_ms\": None, \"fallback_operators\": None}\nmissing = [key for key, value in device_report.items() if value is None]\nassert missing and \"device\" in missing\nprint(\"Not device-validated; missing:\", \", \".join(missing))\n",
+        "explanation": "Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used."
+      }
+    ],
+    "question": "A LiteRT file converts successfully. What must happen before claiming NPU latency?",
+    "options": [
+      "Run it on the named device, verify execution placement and measure the stated request boundary.",
+      "Divide CPU latency by the weight compression ratio.",
+      "Assume every operator uses the NPU."
+    ],
+    "answer": 0,
+    "explanation": "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
+    "diagnosis": "If INT8 quality drops, compare float conversion first, then verify calibration preprocessing, ranges and quantization metadata. If device latency disappoints, inspect fallback partitions, copies, request preprocessing and thermal conditions. If startup dominates, report it separately from warm inference and test the actual loading strategy.",
+    "references": [
+      {
+        "title": "LiteRT integer conversion tutorial",
+        "url": "https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_integer_quant"
+      },
+      {
+        "title": "LiteRT float16 conversion",
+        "url": "https://developers.google.com/edge/litert/conversion/tensorflow/quantization/post_training_float16_quant"
+      },
+      {
+        "title": "ONNX Runtime quantization and providers",
+        "url": "https://onnxruntime.ai/docs/performance/model-optimizations/quantization.html"
+      },
+      {
+        "title": "ExecuTorch edge runtime",
+        "url": "https://docs.pytorch.org/executorch/stable/index.html"
+      },
+      {
+        "title": "Core ML Tools overview",
+        "url": "https://apple.github.io/coremltools/docs-guides/source/overview-coremltools.html"
+      },
+      {
+        "title": "LiteRT for Microcontrollers",
+        "url": "https://developers.google.com/edge/litert/microcontrollers/overview"
+      },
+      {
+        "title": "TensorFlow installation and supported platforms",
+        "url": "https://www.tensorflow.org/install/pip"
+      }
+    ],
+    "runtime": {
+      "kind": "cpu"
+    },
+    "visual": {
+      "title": "An end-to-end boundary includes more than inference",
+      "kind": "executed",
+      "prediction": "Which parts of a request are included in these samples?",
+      "reading": "The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical \\(95\\)th percentile of those same \\(30\\) samples; it is a summary threshold, not a second implementation.\n\nRead a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.",
+      "connection": "Each duration includes JSON decoding, normalization, transfer, inference, waiting for completion, and encoding the response. That boundary explains why the chart should not be read as pure model execution time. An early high warm point or later spike shows variation in the whole request; this plot alone cannot identify its cause.\n\nThe percentile is computed from a small sample, with interpolation between ordered values. It does not guarantee that future requests will meet the threshold. Compare the sample distribution, median, and tail across repeated runs on the target device. These are local CPU proxy measurements, not evidence of mobile or edge-device latency.",
+      "alt": "An end-to-end boundary includes more than inference. The horizontal axis counts warm requests, and the vertical axis measures end-to-end latency in milliseconds. The solid line joins the measured request times. The dashed horizontal line is the empirical \\(95\\)th percentile of those same \\(30\\) samples; it is a summary threshold, not a second implementation. Read a solid point above the dashed line as a request slower than that percentile threshold. The line is not the maximum, so a few points can lie above it. The first cold request is reported separately and is not the first point of this warm-only plot.",
+      "code": "visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}"
+    }
+  }
+}

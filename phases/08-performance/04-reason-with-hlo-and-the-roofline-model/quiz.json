@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "The lowered program contains a dot operation and a roofline model predicts a high ceiling. What is still needed before claiming high accelerator throughput?",
+      "options": [
+        "Nothing; lowered operations establish throughput.",
+        "A matching measured workload on the actual device, with justified traffic and precision assumptions.",
+        "Only the number of Python source lines."
+      ],
+      "correct": 1,
+      "explanation": "A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required."
+    }
+  ]
+}

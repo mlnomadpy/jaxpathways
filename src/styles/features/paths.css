@@ -1,0 +1,1274 @@
+.path-layout {
+  display: grid;
+}
+.routes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 26px;
+}
+.route-symbol {
+  color: var(--mint);
+  font-size: 20px;
+  display: block;
+  margin-bottom: 15px;
+}
+.route-meta {
+  color: var(--blue);
+}
+.route-details p {
+  font-size: 15px;
+  color: var(--muted);
+  margin: 6px 0;
+}
+.route-details a {
+  color: var(--blue);
+  font-size: 13px;
+}
+@media (max-width: 1000px) {
+  .path-layout {
+    grid-template-columns: 220px 1fr;
+    gap: 30px;
+  }
+}
+@media (max-width: 1000px) {
+  .routes {
+    gap: 0 20px;
+  }
+}
+@media (max-width: 760px) {
+  .routes {
+    grid-template-columns: 1fr;
+  }
+}
+.phase-card .route-details {
+  padding: 0 18px 18px;
+}
+.path-summary {
+  margin: 25px 0;
+}
+.path-summary > p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.phase-chip {
+  font-size: 10px;
+  margin: 3px;
+  padding: 8px;
+  text-align: left;
+}
+@media (max-width: 760px) {
+  .phase-card .route-details {
+    padding: 0 12px 18px;
+  }
+}
+@media (max-width: 760px) {
+  .path-summary {
+    padding: 18px;
+  }
+}
+.domain-map {
+  grid-template-columns: 240px 1fr;
+  gap: 36px;
+  align-items: center;
+}
+.domain-center {
+  border: 1px solid var(--blue);
+  padding: 28px;
+  text-align: center;
+  background: var(--panel);
+}
+.domain-center > span {
+  font-size: 36px;
+  color: var(--blue);
+}
+.domain-center h3 {
+  margin-top: 10px;
+  font-size: 22px;
+}
+.domain-center p {
+  font:
+    12px/1.8 ui-monospace,
+    monospace;
+  color: var(--muted);
+}
+.domain-card {
+  border-top: 1px solid var(--line);
+}
+.domain-card .edition {
+  margin-bottom: 12px;
+}
+.domain-card h3 {
+  line-height: 1.4;
+}
+.domain-card p,
+.domain-card li {
+  font-size: 15px;
+  color: var(--muted);
+}
+.domain-card ul {
+  padding-left: 18px;
+}
+.domain-links button {
+  font-size: 10px;
+  padding: 8px 10px;
+}
+.domain-links a {
+  font:
+    10px ui-monospace,
+    monospace;
+  color: var(--blue);
+}
+.role-detail p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.role-detail a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.roles-grid {
+  display: grid;
+}
+.role-card p,
+.role-card li {
+  font-size: 15px;
+  color: var(--muted);
+}
+.role-card ul {
+  padding-left: 18px;
+}
+.role-columns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 35px;
+}
+.role-columns h4 {
+  font:
+    14px ui-monospace,
+    monospace;
+  color: var(--blue);
+}
+.role-columns li {
+  color: var(--muted);
+}
+.roles-start {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-top: 25px;
+}
+.roles-start p {
+  font-size: 15px;
+  color: var(--muted);
+}
+.path-layout .routes article.route:hover h3 {
+  color: var(--ink);
+}
+@media (max-width: 1000px) {
+  .domain-map {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 1000px) {
+  .domain-center {
+    text-align: left;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+}
+@media (max-width: 1000px) {
+  .domain-center h3 {
+    margin: 0;
+  }
+}
+@media (max-width: 1000px) {
+  .domain-center p {
+    margin-left: auto;
+  }
+}
+@media (max-width: 760px) {
+  .domain-center {
+    flex-wrap: wrap;
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .domain-center p {
+    margin: 0;
+    flex-basis: 100%;
+  }
+}
+@media (max-width: 760px) {
+  .roles-start {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+@media (max-width: 760px) {
+  .domain-card h3 {
+    font-size: 19px;
+  }
+}
+.domain-map {
+  display: block;
+}
+.domain-careers {
+  font:
+    11px/1.7 ui-monospace,
+    monospace !important;
+  color: var(--blue) !important;
+}
+.domain-careers a:hover {
+  text-decoration: underline;
+}
+.career-picker {
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 25px;
+}
+.career-picker > h3 {
+  font-size: 20px;
+}
+.career-links {
+  display: flex;
+  flex-wrap: wrap;
+}
+.domain-careers {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.career-link {
+  border: 0;
+  text-align: left;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.career-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 20px;
+}
+.career-heading .edition {
+  margin-top: 0;
+}
+.career-heading > button {
+  padding: 6px 10px;
+}
+.career-subhead {
+  font:
+    15px ui-monospace,
+    monospace;
+  color: var(--blue);
+}
+.career-milestones {
+  padding-left: 22px;
+}
+.career-milestones > li {
+  padding: 10px 0 20px 12px;
+  border-top: 1px solid var(--line);
+  font:
+    12px ui-monospace,
+    monospace;
+  color: var(--blue);
+}
+.career-milestones h4 {
+  font-size: 15px;
+  margin: 12px 0;
+}
+.career-milestones p {
+  margin: 10px 0;
+}
+.career-milestones details {
+  margin-top: 12px;
+}
+.career-milestones summary {
+  font-size: 11px;
+  padding: 12px 0;
+}
+.career-milestones li li {
+  font:
+    14px/1.6 Georgia,
+    serif;
+  color: var(--muted);
+}
+.starting-check summary {
+  font-size: 13px;
+}
+.starting-checks {
+  display: grid;
+  gap: 14px;
+  padding-bottom: 20px;
+}
+.starting-checks label {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  font:
+    14px/1.6 Georgia,
+    serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+.starting-checks input {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  margin: 4px 0;
+  accent-color: var(--blue);
+}
+.career-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.career-start-note {
+  border-left: 2px solid var(--mint);
+  padding-left: 15px;
+}
+.career-controls {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 20px;
+}
+.career-controls label {
+  flex: 1;
+}
+.saved-career {
+  border: 1px solid var(--blue);
+  padding: 24px;
+  margin-bottom: 25px;
+}
+.saved-career h3 {
+  font-size: 18px;
+}
+.saved-career p {
+  font-size: 14px;
+  color: var(--muted);
+}
+.saved-career a {
+  color: var(--blue);
+  font-size: 12px;
+}
+@media (max-width: 760px) {
+  .career-controls {
+    flex-direction: column;
+  }
+}
+@media (max-width: 760px) {
+  .career-milestones {
+    padding-left: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .career-milestones > li {
+    padding-left: 5px;
+  }
+}
+@media (max-width: 760px) {
+  .career-actions button {
+    flex: 1;
+  }
+}
+@media (max-width: 760px) {
+  .career-heading h3 {
+    font-size: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .role-detail .role-columns {
+    gap: 0;
+  }
+}
+.route-meta {
+  font-family: var(--ui);
+}
+.domain-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+.domain-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+}
+.domain-card h3 {
+  font-size: 22px;
+}
+.domain-card p {
+  font-size: 15px !important;
+}
+.domain-card ul {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  list-style: none;
+  padding: 0;
+  margin: 16px 0 !important;
+}
+.domain-card li {
+  background: #eef2fa;
+  border-radius: 5px;
+  font: 12px/1.5 var(--ui);
+  padding: 5px 8px;
+  color: var(--muted);
+}
+.domain-description {
+  margin: 12px 0;
+  color: var(--muted);
+}
+.domain-outcome {
+  color: var(--ink) !important;
+  margin: 4px 0;
+}
+.domain-careers {
+  margin-bottom: 20px !important;
+  font-family: var(--ui) !important;
+}
+.career-link {
+  min-height: 30px;
+  background: none;
+  font: 13px/1.5 var(--ui);
+  padding: 0;
+  color: var(--blue);
+}
+.domain-links {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: auto;
+}
+.domain-links button,
+.domain-links a {
+  font-size: 13px;
+}
+.career-picker {
+  padding-top: 30px;
+  margin-top: 40px;
+}
+.career-picker h3 {
+  font-size: 25px;
+}
+.career-links {
+  gap: 8px;
+}
+.career-links button {
+  font-size: 13px;
+  padding: 10px 14px;
+}
+.career-links button[aria-expanded='true'] {
+  background: var(--blue);
+  color: #fff;
+  border-color: var(--blue);
+}
+.role-detail {
+  background: var(--panel);
+  border: 1px solid #b5c4e7;
+  border-radius: 12px;
+  padding: 30px;
+  margin-top: 26px;
+}
+.role-detail h3 {
+  font-size: 28px;
+}
+.role-columns h4,
+.career-subhead,
+.career-milestones h4 {
+  font-family: var(--ui);
+  font-size: 16px;
+  color: var(--ink);
+}
+.career-milestones > li {
+  font-family: var(--ui);
+  font-size: 14px;
+}
+.career-milestones p,
+.career-milestones li li,
+.starting-checks label {
+  font: 15px/1.65 var(--ui);
+}
+.career-actions button {
+  font-size: 13px;
+}
+.career-heading > button {
+  font-size: 13px;
+  min-height: 36px;
+}
+.role-columns li {
+  font-size: 15px;
+}
+.career-start-note {
+  background: #edf6f1;
+  border-radius: 5px;
+  padding: 14px;
+  border: 0;
+  font-size: 14px;
+}
+.starting-check summary,
+.career-milestones summary {
+  font-size: 14px;
+}
+.phase-chip {
+  font: 12px var(--ui);
+  min-height: 36px;
+  border-radius: 5px;
+}
+.career-controls label {
+  font: 13px/1.5 var(--ui);
+  color: var(--muted);
+}
+.route-details {
+  padding: 0 24px 24px;
+  border-top: 1px solid var(--line);
+}
+.path-summary {
+  background: #edf2ff;
+  border: 1px solid #c6d3f2;
+  border-radius: 10px;
+  padding: 24px;
+}
+.path-summary p {
+  font-size: 15px;
+}
+.roles-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+.role-card {
+  border: 1px solid var(--line);
+  padding: 25px;
+  display: flex;
+  flex-direction: column;
+}
+.role-card .role-headline {
+  font: 15px/1.6 var(--ui);
+  margin: 14px 0;
+}
+.role-card li {
+  font-size: 14px;
+  color: var(--muted);
+}
+.role-card button {
+  align-self: start;
+  margin-top: auto;
+}
+.roles-start {
+  background: #edf2ff;
+  padding: 20px 24px;
+  border-radius: 10px;
+}
+.path-layout {
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 30px;
+}
+.route-meta {
+  font-size: 12px;
+}
+@media (max-width: 1100px) {
+  .roles-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .domain-cards,
+  .roles-grid,
+  .role-columns {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .domain-card {
+    padding: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .career-links button {
+    font-size: 12px;
+  }
+}
+@media (max-width: 760px) {
+  .role-detail {
+    padding: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .role-detail h3 {
+    font-size: 25px;
+  }
+}
+@media (max-width: 760px) {
+  .route-details {
+    padding: 0 16px 16px;
+  }
+}
+@media (max-width: 760px) {
+  .path-layout {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .path-layout aside {
+    max-width: none;
+  }
+}
+@media (max-width: 760px) {
+  .path-layout .foundation-block {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+}
+@media (max-width: 760px) {
+  .career-controls {
+    gap: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .roles-start {
+    padding: 20px;
+  }
+}
+.domain-availability,
+.route-availability {
+  font: 13px/1.6 var(--ui);
+  color: var(--mint);
+  border-left: 2px solid var(--mint);
+  padding-left: 12px;
+}
+.domain-availability {
+  margin-top: 0 !important;
+}
+.route-milestones {
+  margin-bottom: 20px;
+}
+.route-milestones summary {
+  font-size: 14px;
+  min-height: 44px;
+}
+.route-milestones li {
+  margin-bottom: 12px;
+}
+.route-milestones li p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+.route-milestones a {
+  color: var(--blue);
+  text-decoration: underline;
+}
+.career-link,
+.phase-chip {
+  min-height: 44px;
+}
+.atlas-home .domain-cards {
+  gap: 0;
+  grid-template-columns: 1fr 1fr;
+}
+.atlas-home .domain-card {
+  border: 0;
+  border-top: 1px solid #d9d0e8;
+  border-radius: 0;
+  background: none;
+  padding: 30px 0 30px 34px;
+  position: relative;
+}
+.atlas-home .domain-card:nth-child(odd) {
+  padding-right: 36px;
+}
+.atlas-home .domain-card:nth-child(even) {
+  padding-left: 60px;
+}
+.atlas-home .domain-card:before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 35px;
+  width: 20px;
+  height: 34px;
+  border: 2px solid var(--accent);
+  border-right: 0;
+  border-radius: 20px 0 0 20px;
+}
+.atlas-home .domain-card:nth-child(even):before {
+  left: 26px;
+}
+.atlas-home .domain-card h3 {
+  letter-spacing: -0.045em;
+}
+.atlas-home .domain-description {
+  max-width: 48ch;
+}
+.atlas-home .domain-availability {
+  font-size: 13px;
+  color: var(--muted);
+  order: 6;
+  margin-top: 15px;
+}
+.atlas-home .domain-availability summary {
+  font-size: 12px;
+  cursor: pointer;
+  padding: 8px 0;
+  color: var(--blue);
+}
+.atlas-home .domain-availability p {
+  font-size: 12px !important;
+}
+.atlas-home .domain-card ul {
+  gap: 0;
+  margin: 12px 0;
+}
+.atlas-home .domain-card li {
+  background: none;
+  border-radius: 0;
+  padding: 3px 8px 3px 0;
+  color: var(--muted);
+  font-size: 12px;
+}
+.atlas-home .domain-card li:not(:last-child):after {
+  content: '/';
+  margin-left: 8px;
+  color: #b0a3ca;
+}
+.atlas-home .domain-careers {
+  margin-top: 12px;
+}
+.atlas-home .career-link {
+  color: var(--atlas);
+}
+.atlas-home .domain-links {
+  gap: 18px;
+  margin-top: 10px;
+}
+.atlas-home .domain-links button {
+  padding: 5px 0;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 1px solid var(--blue);
+  background: none;
+  font-size: 13px;
+  min-height: 44px;
+}
+.atlas-home .career-picker {
+  margin-top: 0;
+  border-top: 1px solid var(--line);
+}
+.atlas-home .career-picker h3 {
+  font-size: 28px;
+}
+.role-card,
+.path-summary {
+  box-shadow: none;
+  border-color: var(--line);
+}
+.role-card h3 {
+  color: var(--atlas);
+}
+.path-summary,
+.roles-start {
+  background: #e5ddf5;
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-card,
+  .atlas-home .domain-card:nth-child(odd),
+  .atlas-home .domain-card:nth-child(even) {
+    padding: 26px 0 26px 32px;
+  }
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-card:before,
+  .atlas-home .domain-card:nth-child(even):before {
+    left: 0;
+    top: 30px;
+    width: 18px;
+    height: 30px;
+  }
+}
+.atlas-home .domain-availability {
+  border-left-color: var(--line);
+}
+.career-open .page-intro,
+.career-open #roles > .section-head,
+.career-open .career-controls,
+.career-open #role-results,
+.career-open #role-cards,
+.career-open .roles-start,
+.career-open #pathways {
+  display: none;
+}
+.career-open #roles {
+  padding-top: 30px;
+  border: 0;
+}
+.career-open #role-detail {
+  margin: 0 auto;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  max-width: 1040px;
+}
+.career-open .career-heading {
+  align-items: start;
+  margin-bottom: 24px;
+}
+.career-open .career-heading h3[tabindex='-1']:focus {
+  outline: none;
+}
+.career-open .career-heading h3 {
+  font-size: 44px;
+  max-width: 22ch;
+  line-height: 1.1;
+}
+.career-open #role-detail > p {
+  max-width: 75ch;
+}
+.career-open .role-columns {
+  background: #fff;
+  border: 1px solid var(--line);
+  padding: 26px;
+  border-radius: 12px;
+  gap: 36px;
+  margin-block: 28px;
+}
+.career-open .role-columns h4 {
+  margin-top: 0;
+}
+.career-open .career-milestones {
+  border-left: 2px solid #b8a8d9;
+  margin-left: 12px;
+  padding-left: 30px;
+  list-style: none;
+  max-width: 860px;
+}
+.career-open .career-milestones > li {
+  position: relative;
+  padding: 18px 24px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  margin-bottom: 18px;
+}
+.career-open .career-milestones > li:before {
+  content: '';
+  position: absolute;
+  left: -40px;
+  top: 28px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--atlas);
+  border: 4px solid var(--bg);
+}
+.career-open .career-milestones h4 {
+  margin: 0 0 8px;
+  font-size: 20px;
+}
+.career-open .career-actions {
+  padding: 20px 0;
+  border-top: 1px solid var(--line);
+  gap: 12px;
+}
+@media (max-width: 760px) {
+  .career-open #role-detail {
+    padding: 0;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .role-columns {
+    padding: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .career-milestones {
+    padding-left: 22px;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .career-milestones > li {
+    padding: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .career-milestones > li:before {
+    left: -32px;
+  }
+}
+.atlas-home .domain-card h3 {
+  font-size: 27px;
+}
+.atlas-home .domain-card .availability-label {
+  font-size: 14px;
+  color: var(--blue);
+  margin: 18px 0;
+}
+.course-page .route-details {
+  padding: 0 24px 20px;
+}
+.course-page .path-summary {
+  background: #fff;
+  padding: 24px;
+  border-radius: var(--learning-radius);
+}
+.paths-page .page-intro {
+  padding-top: 32px;
+}
+.paths-page .page-intro .intro {
+  font-size: 19px;
+  margin-bottom: 0;
+}
+.path-foundation {
+  background: var(--atlas);
+  color: white;
+  padding: 28px 32px;
+  border-radius: var(--learning-radius);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin: 12px 0 30px;
+}
+.path-foundation h2 {
+  color: white;
+  margin: 0;
+  font-size: 28px;
+}
+.path-foundation p {
+  color: #e1d8f8;
+  font-size: 16px;
+  margin: 10px 0 0;
+}
+.path-foundation .primary {
+  background: white;
+  color: var(--atlas);
+  flex-shrink: 0;
+}
+.paths-page #pathways {
+  border: 0;
+  padding: 0;
+}
+.path-group {
+  border: 0;
+  padding: 22px 0;
+}
+.path-group > h2 {
+  font-size: 28px;
+  margin: 0 0 20px;
+}
+.path-cards {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 20px;
+}
+.path-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: var(--learning-radius);
+}
+.path-card h3 {
+  font-size: 23px;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+  margin: 0 0 16px;
+}
+.path-card p {
+  font-size: 15px;
+  line-height: 1.65;
+  margin: 0 0 16px;
+}
+.path-card .button {
+  align-self: flex-start;
+  margin-top: auto;
+}
+.path-card .soft {
+  font-size: 14px;
+}
+.paths-page #roles {
+  padding: 24px 0;
+  border-top: 1px solid var(--line);
+}
+#career-browser > summary {
+  font: 600 20px/1.5 var(--ui);
+  padding: 16px 0;
+  cursor: pointer;
+}
+.role-card {
+  background: white;
+  border-radius: var(--learning-radius);
+}
+.role-card button {
+  font-size: 14px;
+}
+.role-card h3 {
+  font-size: 22px;
+}
+.path-open .paths-page > .page-intro,
+.path-open .path-foundation,
+.path-open #pathways,
+.path-open #roles {
+  display: none;
+}
+.path-open #path-detail {
+  border: 0;
+  padding: 32px 0;
+}
+.path-detail-heading {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 50px;
+  margin: 28px 0;
+}
+.path-detail-heading h1 {
+  font-size: clamp(38px, 4vw, 58px);
+  line-height: 1.07;
+  margin: 0 0 20px;
+  letter-spacing: -0.045em;
+}
+.path-detail-heading .intro {
+  font-size: 19px;
+  max-width: 52ch;
+}
+.path-outcome {
+  border-left: 2px solid var(--line);
+  padding-left: 30px;
+}
+.path-outcome h2 {
+  font-size: 28px;
+  line-height: 1.2;
+}
+.path-outcome p {
+  font-size: 16px;
+}
+.path-journey {
+  padding-left: 32px;
+  max-width: 850px;
+}
+.path-journey li {
+  padding: 12px 0 12px 16px;
+  border-bottom: 1px solid var(--line);
+  color: var(--atlas);
+}
+.path-journey a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-height: 44px;
+  font-size: 17px;
+}
+.path-journey span {
+  font-size: 14px;
+  color: var(--muted);
+}
+.starting-steps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.starting-steps a {
+  padding: 12px 16px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  font: 15px var(--ui);
+}
+.career-open .path-foundation,
+.career-open #career-browser {
+  display: none;
+}
+.career-open #role-detail {
+  padding: 0;
+}
+.career-open .career-actions button,
+.career-open .career-heading > button {
+  font-size: 14px;
+}
+.career-open .starting-check summary {
+  font-size: 15px;
+}
+@media (max-width: 1100px) {
+  .path-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-card:nth-child(n) {
+    padding: 24px 0 24px 28px;
+  }
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-card:nth-child(n):before {
+    left: 0;
+    top: 29px;
+  }
+}
+@media (max-width: 760px) {
+  .atlas-home .domain-card h3 {
+    font-size: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .course-page .route-details {
+    padding: 0 16px 18px;
+  }
+}
+@media (max-width: 760px) {
+  .path-foundation {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .path-cards {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .path-card {
+    padding: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .path-group {
+    padding-top: 16px;
+  }
+}
+@media (max-width: 760px) {
+  .path-detail-heading {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .path-detail-heading h1 {
+    font-size: 39px;
+  }
+}
+@media (max-width: 760px) {
+  .path-outcome {
+    padding-left: 20px;
+  }
+}
+@media (max-width: 760px) {
+  .path-journey a {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+@media (max-width: 760px) {
+  .paths-page .page-intro {
+    padding-top: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .paths-page #roles .roles-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .career-heading {
+    flex-direction: column;
+  }
+}
+@media (max-width: 760px) {
+  .career-open .career-heading h3 {
+    font-size: 34px;
+  }
+}
+@media (max-width: 760px) {
+  .path-detail-heading .intro {
+    font-size: 18px;
+  }
+}
+.path-detail-heading h1[tabindex='-1']:focus {
+  outline: none;
+}
+.careers-page .page-intro {
+  padding-top: 32px;
+}
+.careers-page .page-intro h1 {
+  font-size: clamp(36px, 4.5vw, 56px);
+}
+.career-availability-note {
+  font-size: 14px;
+  color: var(--muted);
+  margin: 14px 0 0;
+  max-width: 65ch;
+}
+.paths-page #career-browser > h2 {
+  font-size: 28px;
+  margin: 0 0 14px;
+}
+.paths-page #career-browser > p {
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+.careers-page #roles {
+  border: 0;
+  padding: 12px 0 40px;
+}
+.careers-page .role-card h3 {
+  font-size: 24px;
+  line-height: 1.2;
+}
+.careers-page .role-card .role-headline {
+  font-size: 15px;
+  line-height: 1.65;
+}
+.careers-page .role-card li {
+  font-size: 14px;
+  line-height: 1.6;
+}
+.careers-page .role-card button {
+  min-height: 44px;
+  margin-top: auto;
+}
+@media (max-width: 760px) {
+  .careers-page .page-intro {
+    padding-top: 24px;
+  }
+}
+@media (max-width: 760px) {
+  .careers-page #roles {
+    padding-top: 8px;
+  }
+}
+@media (max-width: 760px) {
+  .careers-page .role-card {
+    padding: 24px;
+  }
+}
+.learner-home-grid .path-summary {
+  margin: 0;
+  padding: 2rem;
+  border: 1px solid var(--line, #dbe2e9);
+  border-radius: 8px;
+  background: #f4f7fc;
+}
+.workspace-route .saved-career {
+  padding: 1rem 0 0;
+  border-top: 1px solid #dbe2e9;
+  margin-top: 1.5rem;
+}
+@media (max-width: 680px) {
+  .learner-home-grid .path-summary {
+    padding: 1.25rem;
+  }
+}

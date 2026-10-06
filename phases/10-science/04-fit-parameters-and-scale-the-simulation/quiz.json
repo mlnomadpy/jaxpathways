@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "science-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "You fit only observations at time zero and every rate gives zero loss. What is the problem?",
+      "options": [
+        "The batch is too small for a TPU.",
+        "The step size is too accurate.",
+        "The observations contain no information about the cooling rate."
+      ],
+      "correct": 2,
+      "explanation": "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
+    }
+  ]
+}

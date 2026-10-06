@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "arrays-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which offset shape adds one scalar to each row of a \\((2, 3)\\) batch?",
+      "options": [
+        "\\((2,)\\)",
+        "\\((2, 1)\\)",
+        "\\((3, 2)\\)"
+      ],
+      "correct": 1,
+      "explanation": "\\((2, 1)\\) broadcasts across the three columns. Shape \\((2,)\\) conflicts with the trailing dimension \\(3\\)."
+    }
+  ]
+}

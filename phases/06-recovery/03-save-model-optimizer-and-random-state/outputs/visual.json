@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "recovery-03",
+  "contentHash": "f9cceb87d34622e3e9ed17cd66d2880610affe8ad0a40274c3fbdb8ccc722006",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "conceptual",
+  "generatedAt": "2026-10-05T22:15:40.544658+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Restored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\n",
+  "data": {
+    "kind": "flow",
+    "nodes": [
+      "Parameters at completed step",
+      "Optimizer moments and count",
+      "Random key and step metadata",
+      "Save one completed snapshot",
+      "Restore and compare next update"
+    ],
+    "layout": "merge"
+  }
+}

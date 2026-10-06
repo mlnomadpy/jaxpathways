@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-04",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does evaluating one policy on many episodes fail to measure?",
+      "options": [
+        "Its mean return on those sampled episodes",
+        "Sensitivity to training randomness across independently fitted policies",
+        "Variation in returns between the sampled episodes"
+      ],
+      "correct": 1,
+      "explanation": "More evaluation episodes estimate one policy more precisely. To study training variability, repeat training with different seeds and preserve those runs as separate units."
+    }
+  ]
+}

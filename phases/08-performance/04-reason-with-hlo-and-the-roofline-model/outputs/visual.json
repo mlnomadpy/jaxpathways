@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "performance-04",
+  "contentHash": "1061447f0e22727c613e36eece1574a4c2802397b9209f8234bdc25e9b40dbd5",
+  "rendererHash": "fa4f7c243c5aca959eef281ca4c5b097d5d11d0e59f614363dbb1ae716e5fe5d",
+  "kind": "executed",
+  "generatedAt": "2026-10-05T23:34:11.672143+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0}\nLocal CPU samples seconds: [7.929094135761261e-05, 4.6083005145192146e-05, 4.091719165444374e-05, 6.0042133554816246e-05, 5.8625126257538795e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1.3333333333333333,
+      2.6666666666666665,
+      5.0,
+      5.333333333333333,
+      10.666666666666666,
+      21.333333333333332
+    ],
+    "xlabel": "minimum-traffic operations per byte",
+    "ylabel": "hypothetical ceiling (GFLOP/s)",
+    "series": [
+      {
+        "label": "bandwidth budget",
+        "y": [
+          26.666666666666664,
+          53.33333333333333,
+          100.0,
+          106.66666666666666,
+          213.33333333333331,
+          426.66666666666663
+        ]
+      },
+      {
+        "label": "compute budget",
+        "y": [
+          100.0,
+          100.0,
+          100.0,
+          100.0,
+          100.0,
+          100.0
+        ]
+      },
+      {
+        "label": "combined ceiling",
+        "y": [
+          26.666666666666664,
+          53.33333333333333,
+          100.0,
+          100.0,
+          100.0,
+          100.0
+        ]
+      }
+    ]
+  }
+}

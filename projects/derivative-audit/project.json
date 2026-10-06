@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "id": "derivative-audit",
+  "title": "Audit derivatives and compile a tiny transformation",
+  "pathwayId": "internals",
+  "status": "authored",
+  "hardware": "CPU float64",
+  "source": "projects/derivative-audit/README.md",
+  "requiredLessonIds": [
+    "internals-01",
+    "internals-02",
+    "internals-03",
+    "internals-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Directional products and exact curvature",
+      "command": "python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 1",
+      "evidence": "Three independent Jacobian/Hessian comparisons, adjoint identity and shape contract",
+      "expected": "PASS stage 1: three independent Jacobian/Hessian references, adjoint identity and shape rejection",
+      "diagnosis": "If the HVP disagrees with J-transpose-J times the direction, include the residual-weighted second derivative term."
+    },
+    {
+      "id": "2",
+      "title": "Exact custom derivative contracts",
+      "command": "python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 2",
+      "evidence": "Stable extreme values, analytic slopes/Hessians, cotangent linearity and transformation-boundary evidence",
+      "expected": "PASS stage 2: stable exact custom primals, gradients, curvature, cotangent linearity, common shifts and custom-VJP boundary",
+      "diagnosis": "If first derivatives pass but second derivatives fail, inspect detached derivative coefficients or saved residuals."
+    },
+    {
+      "id": "3",
+      "title": "A compiled primitive-level transformation",
+      "command": "python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 3",
+      "evidence": "Explicit rules, random-shape expression oracles, captured constants, multiple inputs/outputs and unsupported-operation rejection",
+      "expected": "PASS stage 3: random shapes, independent expression oracles, constants, multiple inputs/outputs, compiled changed values and explicit unsupported/signature rejection",
+      "diagnosis": "If the primal is correct but the tangent is not, audit multiplication and constant tangents before changing compiler settings."
+    }
+  ],
+  "rubric": [
+    "Explain input directions and output cotangents using independent Jacobians",
+    "Verify an exact Hessian-vector product rather than substituting Gauss\u2013Newton",
+    "Defend exact custom JVP/VJP rules, stability, seed linearity and higher derivatives",
+    "Implement explicit primitive tangent rules with captured and literal constants",
+    "Reject unsupported primitives and shape/dtype violations",
+    "Verify interpreted and compiled transformed outputs on changed values and shapes",
+    "Explain limits of the supported subset and distinguish IR inspection from performance measurement"
+  ],
+  "workspaceFile": "projects/derivative-audit/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/derivative-audit/starter/model.py projects/derivative-audit/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/derivative-audit/starter/model.py projects/derivative-audit/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/derivative-audit/tests/check.py --implementation solution --stage all",
+  "setupNote": "Extract the ZIP, install requirements-cpu.txt in your course environment, and run commands from the extracted top folder. The scaffold enables CPU float64 examples; no compiler or accelerator installation is required.",
+  "assessmentId": "internals"
+}
