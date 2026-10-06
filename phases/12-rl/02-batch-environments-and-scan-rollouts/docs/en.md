@@ -270,7 +270,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:00:53.582933+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:02:35.511742+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716

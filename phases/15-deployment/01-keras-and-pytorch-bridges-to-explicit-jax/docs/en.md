@@ -203,7 +203,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:02:14.832395+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:03:49.588913+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]

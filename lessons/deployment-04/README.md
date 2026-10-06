@@ -261,19 +261,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:02:41.017169+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:04:10.980476+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 46.820917166769505, 'p50_ms': 0.013270881026983261, 'p95_ms': 0.016752257943153354, 'steady_examples_per_second': 75352.94740166322}
-{'batch': 8, 'first_call_ms': 28.231916949152946, 'p50_ms': 0.012583797797560692, 'p95_ms': 0.036734645254909964, 'steady_examples_per_second': 635738.1236331342}
-{'batch': 32, 'first_call_ms': 26.154874823987484, 'p50_ms': 0.021042069420218468, 'p95_ms': 0.03922067116945981, 'steady_examples_per_second': 1520762.9706445367}
-measured batch-one service proxy (ms): 0.013270881026983261
-simulated last stable/overloaded response (ms): 0.013270881026983261 0.3264636732637882
-{'batch': 1, 'first_call_ms': 30.73883382603526, 'p50_ms': 0.014354009181261063, 'p95_ms': 0.029889517463743676, 'steady_examples_per_second': 69666.94721816707}
-{'batch': 8, 'first_call_ms': 26.39766689389944, 'p50_ms': 0.013395678251981735, 'p95_ms': 0.04393064882606267, 'steady_examples_per_second': 597207.5358570585}
-{'batch': 32, 'first_call_ms': 28.6338753066957, 'p50_ms': 0.020395498722791672, 'p95_ms': 0.027043488807976242, 'steady_examples_per_second': 1568973.6463389576}
-measured batch-one service proxy (ms): 0.014354009181261063
-simulated last stable/overloaded response (ms): 0.014354009181261063 0.35310862585902214
+{'batch': 1, 'first_call_ms': 40.11037480086088, 'p50_ms': 0.01337495632469654, 'p95_ms': 0.023383297957479947, 'steady_examples_per_second': 74766.59928627382}
+{'batch': 8, 'first_call_ms': 25.728917215019464, 'p50_ms': 0.012875068932771683, 'p95_ms': 0.02287509851157664, 'steady_examples_per_second': 621355.8965604543}
+{'batch': 32, 'first_call_ms': 24.821083061397076, 'p50_ms': 0.02112472429871559, 'p95_ms': 0.033172592520713765, 'steady_examples_per_second': 1514812.669150226}
+measured batch-one service proxy (ms): 0.01337495632469654
+simulated last stable/overloaded response (ms): 0.01337495632469654 0.3290239255875349
+{'batch': 1, 'first_call_ms': 26.66070917621255, 'p50_ms': 0.013916287571191788, 'p95_ms': 0.02351505681872367, 'steady_examples_per_second': 71858.24487200937}
+{'batch': 8, 'first_call_ms': 24.00120859965682, 'p50_ms': 0.014020828530192375, 'p95_ms': 0.03425490576773881, 'steady_examples_per_second': 570579.6902638702}
+{'batch': 32, 'first_call_ms': 24.06612504273653, 'p50_ms': 0.020771054551005363, 'p95_ms': 0.03907089121639728, 'steady_examples_per_second': 1540605.4575332638}
+measured batch-one service proxy (ms): 0.013916287571191788
+simulated last stable/overloaded response (ms): 0.013916287571191788 0.342340674251318
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2

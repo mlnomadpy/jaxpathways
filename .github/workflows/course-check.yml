@@ -21,6 +21,7 @@ jobs:
       - run: npm ci
       - run: npm run build
       - run: npm run smoke:cpu
+      - run: npm run test:tpu-precision
       - run: npm run test:math
       - run: npm run test:project
       - run: npm run build

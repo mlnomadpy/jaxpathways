@@ -169,7 +169,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:57:06.782903+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:59:18.512589+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0

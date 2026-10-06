@@ -456,7 +456,7 @@ visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training ste
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:03:45.669549+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:05:17.260762+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]

@@ -182,7 +182,7 @@ The code makes that independence visible through a check: after a recorded call 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:57:46.532292+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:59:47.313573+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2

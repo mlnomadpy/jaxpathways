@@ -114,7 +114,7 @@ The arrows describe dependencies, and the box sizes do not encode runtime. Use t
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:56:22.046346+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:58:40.893336+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0

@@ -1,0 +1,199 @@
+{
+  "schema": 1,
+  "executed_at": "2026-10-06T23:01:09.996867+00:00",
+  "python_version": "3.14.3",
+  "host_system": "Darwin",
+  "scope": "single-process, single-device prequantized inner dot",
+  "platform": "cpu",
+  "device_kind": "cpu",
+  "local_device_count": 1,
+  "global_device_count": 1,
+  "process_count": 1,
+  "jax_version": "0.9.2",
+  "numpy_version": "2.4.4",
+  "dimensions": {
+    "batch": 64,
+    "features": 128,
+    "outputs": 64
+  },
+  "source_sha256": "5697a00fd1fe569e7aa5a6103eee37b45862803ec20e4eabdf2b57cdf1f1a39d",
+  "reference": "NumPy float64 dot of original float32 operands",
+  "timing_scope": "warmed synchronized call; excludes transfer, quantization and compilation",
+  "outlier_rule": "multiply input feature zero by 30 for every row",
+  "results": [
+    {
+      "case": "balanced",
+      "mode": "fp32",
+      "max_absolute_error": 1.7137972085912168e-06,
+      "relative_l2_error": 2.085142441345975e-07,
+      "median_ms": 0.021874671801924706,
+      "samples_ms": [
+        0.038917176425457,
+        0.031457748264074326,
+        0.023750122636556625,
+        0.021582935005426407,
+        0.021749641746282578,
+        0.021458137780427933,
+        0.021999701857566833,
+        0.0216667540371418,
+        0.02512475475668907,
+        0.021624844521284103
+      ],
+      "stored_operand_bytes": 65536,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 65536,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 0,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "2a60a6fffbe58b36068d5b6bd4e205f4cc7a1dbf59b023e8922e2a36c1697032",
+      "integer_accumulation_checked": false
+    },
+    {
+      "case": "balanced",
+      "mode": "bf16",
+      "max_absolute_error": 0.010926193585471922,
+      "relative_l2_error": 0.0023461060310919135,
+      "median_ms": 0.022625084966421127,
+      "samples_ms": [
+        0.03666570410132408,
+        0.028708018362522125,
+        0.022625084966421127,
+        0.021165702491998672,
+        0.02129189670085907,
+        0.02058316022157669,
+        0.0238749198615551,
+        0.02416735514998436,
+        0.022625084966421127,
+        0.021292362362146378
+      ],
+      "stored_operand_bytes": 32768,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 32768,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 0,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "2a60a6fffbe58b36068d5b6bd4e205f4cc7a1dbf59b023e8922e2a36c1697032",
+      "integer_accumulation_checked": false
+    },
+    {
+      "case": "balanced",
+      "mode": "int8",
+      "max_absolute_error": 0.03519680292078681,
+      "relative_l2_error": 0.009144665180392763,
+      "median_ms": 0.01660408452153206,
+      "samples_ms": [
+        0.03483286127448082,
+        0.03216695040464401,
+        0.026458874344825745,
+        0.023208092898130417,
+        0.018207821995019913,
+        0.013833865523338318,
+        0.013208016753196716,
+        0.01295795664191246,
+        0.01270882785320282,
+        0.015000347048044205
+      ],
+      "stored_operand_bytes": 16896,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 16896,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 16384,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "2a60a6fffbe58b36068d5b6bd4e205f4cc7a1dbf59b023e8922e2a36c1697032",
+      "integer_accumulation_checked": true
+    },
+    {
+      "case": "outlier",
+      "mode": "fp32",
+      "max_absolute_error": 7.767985149342849e-06,
+      "relative_l2_error": 2.7970962344286246e-07,
+      "median_ms": 0.024395762011408806,
+      "samples_ms": [
+        0.03737490624189377,
+        0.0260830856859684,
+        0.023416709154844284,
+        0.023082830011844635,
+        0.022541731595993042,
+        0.021832995116710663,
+        0.025374814867973328,
+        0.026792287826538086,
+        0.027250032871961594,
+        0.022166874259710312
+      ],
+      "stored_operand_bytes": 65536,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 65536,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 0,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "5eddbc8a013fe228d81b118f53fd60da4c7af1c0e06c28d49a4a4f04ca6b92c4",
+      "integer_accumulation_checked": false
+    },
+    {
+      "case": "outlier",
+      "mode": "bf16",
+      "max_absolute_error": 0.0498480895282416,
+      "relative_l2_error": 0.0023233659268808307,
+      "median_ms": 0.028437701985239983,
+      "samples_ms": [
+        0.039041973650455475,
+        0.03966689109802246,
+        0.047042034566402435,
+        0.028584152460098267,
+        0.04604225978255272,
+        0.0282912515103817,
+        0.023624859750270844,
+        0.0216667540371418,
+        0.017665792256593704,
+        0.012958887964487076
+      ],
+      "stored_operand_bytes": 32768,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 32768,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 0,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "5eddbc8a013fe228d81b118f53fd60da4c7af1c0e06c28d49a4a4f04ca6b92c4",
+      "integer_accumulation_checked": false
+    },
+    {
+      "case": "outlier",
+      "mode": "int8",
+      "max_absolute_error": 0.4229305310098015,
+      "relative_l2_error": 0.02453219942225819,
+      "median_ms": 0.021916581317782402,
+      "samples_ms": [
+        0.03329059109091759,
+        0.02462463453412056,
+        0.024292152374982834,
+        0.023750122636556625,
+        0.02266606315970421,
+        0.020875129848718643,
+        0.02104230225086212,
+        0.021167099475860596,
+        0.019249971956014633,
+        0.014874618500471115
+      ],
+      "stored_operand_bytes": 16896,
+      "output_dtype": "float32",
+      "compiler_memory_estimate": {
+        "argument_size_in_bytes": 16896,
+        "output_size_in_bytes": 16384,
+        "temp_size_in_bytes": 16384,
+        "alias_size_in_bytes": 0
+      },
+      "input_sha256": "5eddbc8a013fe228d81b118f53fd60da4c7af1c0e06c28d49a4a4f04ca6b92c4",
+      "integer_accumulation_checked": true
+    }
+  ]
+}

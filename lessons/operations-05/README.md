@@ -512,16 +512,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:04:04.976622+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:05:32.897351+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.8879333329387009, 0.733196415938437, 0.7411242499947548]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.1479888888231168, 'load_fraction': 0.0739944444115584, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00036997222205779206, 'within_reserve': True}
+measured local job seconds: [0.7262680418789387, 0.822977916803211, 0.7811467084102333]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.1371629861338685, 'load_fraction': 0.06858149306693424, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00034290746533467123, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.7425233339890838, 0.8764781672507524, 1.3311143750324845]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.2218523958387474, 'load_fraction': 0.1109261979193737, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0005546309895968685, 'within_reserve': True}
+measured local job seconds: [0.7249954170547426, 0.710822416935116, 0.7290814160369337]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.12151356933948894, 'load_fraction': 0.06075678466974447, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00030378392334872237, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.1109261979193737 0.2218523958387474
+nominal load at two demand scenarios: 0.06075678466974447 0.12151356933948894
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 

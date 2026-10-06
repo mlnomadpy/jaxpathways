@@ -298,7 +298,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:01:28.085307+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:03:06.768549+00:00. JAX 0.9.2.
 
 ```text
 Actual backend: cpu simulated layout: TPU v5 lite

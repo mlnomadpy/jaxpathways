@@ -218,7 +218,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:59:28.452400+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:01:16.641250+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -240,7 +240,7 @@ f32[16] output of tanh from <string>:14:20 (layer)
 f32[16] output of tanh from <string>:14:20 (layer)
 f32[16] output of tanh from <string>:14:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[4.11253422498703e-05, 4.462478682398796e-05, 5.191611126065254e-05, 5.337502807378769e-05, 4.520826041698456e-05], [5.3625088185071945e-05, 1.5208963304758072e-05, 1.095794141292572e-05, 1.2458767741918564e-05, 1.2458767741918564e-05]]
+Synchronized gradient samples: [[5.291588604450226e-05, 8.629169315099716e-05, 5.483301356434822e-05, 3.179116174578667e-05, 4.949979484081268e-05], [5.4916832596063614e-05, 6.17089681327343e-05, 4.712492227554321e-05, 3.100000321865082e-05, 2.0875129848718643e-05]]
 Independent reverse recurrence agrees with both gradients.
 Saved residual descriptions:
 plain 
@@ -261,7 +261,7 @@ f32[16] output of tanh from <string>:63:20 (layer)
 f32[16] output of tanh from <string>:63:20 (layer)
 f32[16] output of tanh from <string>:63:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.741728141903877e-05, 1.9459053874015808e-05, 1.600012183189392e-05, 1.4166813343763351e-05, 1.2333039194345474e-05], [1.566670835018158e-05, 1.295795664191246e-05, 1.3417098671197891e-05, 1.3374723494052887e-05, 1.3417098671197891e-05]]
+Synchronized gradient samples: [[3.824988380074501e-05, 3.337487578392029e-05, 2.570776268839836e-05, 1.4209188520908356e-05, 1.3499986380338669e-05], [3.6292243748903275e-05, 3.283331170678139e-05, 1.5624798834323883e-05, 1.354096457362175e-05, 1.2832693755626678e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

@@ -254,7 +254,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:04:55.833597+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:06:17.503001+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701

@@ -216,56 +216,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:59:22.537866+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:01:12.175848+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-x64g1w2g
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-dfxhhvyp
 {
   "input_wait_us": [
-    1266,
-    1277,
-    1271,
-    1263
+    1261,
+    1256,
+    1264,
+    1257
   ],
   "model_and_wait_us": [
-    120,
-    89,
-    66,
-    45
+    63,
+    34,
+    59,
+    42
   ],
   "step_us": [
-    1401,
-    1377,
-    1343,
-    1313
+    1331,
+    1294,
+    1328,
+    1302
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-crqxhn0u
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-xf6o01xs
 {
   "input_wait_us": [
-    1266,
-    1262,
-    1263,
-    1261
+    1260,
+    1257,
+    1258,
+    1257
   ],
   "model_and_wait_us": [
-    66,
-    40,
-    61,
-    54
+    57,
+    47,
+    39,
+    36
   ],
   "step_us": [
-    1340,
-    1308,
-    1330,
-    1319
+    1322,
+    1309,
+    1300,
+    1296
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [8, 6, 6, 4]
-Wrong double-counted totals: [2672, 2610, 2654, 2634]
-{'minimum_ms': 0.04, 'median_ms': 0.057499999999999996, 'maximum_ms': 0.066}
+Unattributed outer time, microseconds: [5, 5, 3, 3]
+Wrong double-counted totals: [2639, 2613, 2597, 2589]
+{'minimum_ms': 0.036, 'median_ms': 0.043, 'maximum_ms': 0.057}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 

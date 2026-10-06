@@ -171,7 +171,7 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:56:38.245739+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:58:55.918075+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]

@@ -236,7 +236,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:02:38.887896+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:04:09.146943+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3

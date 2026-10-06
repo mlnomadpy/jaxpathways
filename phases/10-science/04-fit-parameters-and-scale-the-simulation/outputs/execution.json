@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "science-04",
   "contentHash": "0b8b13de684d6f8ac59a2d7ac51b0d36b1d0ae35695ee18bd199f3f19301a83a",
-  "executedAt": "2026-10-06T22:00:23.109008+00:00",
+  "executedAt": "2026-10-06T23:02:05.040947+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.007875263690948486, 0.007875263690948486), (16, 0.00791577622294426, 0.0004947360139340162), (256, 0.03654230386018753, 0.00014274337445385754)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
+  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.007458031177520752, 0.007458031177520752), (16, 0.00762520357966423, 0.0004765752237290144), (256, 0.04795799031853676, 0.0001873358996817842)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
   "notebookCells": [
     {
       "sourceHash": "8d39340d42b37a91d08a5c7066a5f34f8fc448e2f65e6b61d26d5be876a94e45",
@@ -96,7 +96,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.006875023245811462, 0.006875023245811462), (16, 0.00762520357966423, 0.0004765752237290144), (256, 0.034500379115343094, 0.00013476710591930896)]\n"
+            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.006875023245811462, 0.006875023245811462), (16, 0.00762520357966423, 0.0004765752237290144), (256, 0.03220885992050171, 0.0001258158590644598)]\n"
           ]
         }
       ]

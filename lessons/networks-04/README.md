@@ -235,7 +235,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:58:02.460780+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:00:00.984456+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:

@@ -440,7 +440,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:03:16.875081+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:04:46.202480+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out

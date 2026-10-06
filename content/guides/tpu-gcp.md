@@ -6,6 +6,8 @@ This guide connects those steps. You will produce a **run dossier**: configurati
 
 The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested. The cloud commands are documentation-checked instructions, not a recorded TPU run. This small single-process workload does not shard work across all visible chips or establish production model quality.
 
+After recovery practice, continue with [TPU generations, precision and profiling](tpu-performance.html). That guide compares training and serving workloads, budgets model and cache memory, and measures real numerical error before interpreting a target trace.
+
 ## 1. Separate the resource from the job
 
 Before looking at commands, predict what happens to a VM when Python finishes successfully.

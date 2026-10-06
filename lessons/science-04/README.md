@@ -244,7 +244,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:00:23.109008+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:02:05.040947+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -256,7 +256,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.007875263690948486, 0.007875263690948486), (16, 0.00791577622294426, 0.0004947360139340162), (256, 0.03654230386018753, 0.00014274337445385754)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.007458031177520752, 0.007458031177520752), (16, 0.00762520357966423, 0.0004765752237290144), (256, 0.04795799031853676, 0.0001873358996817842)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05

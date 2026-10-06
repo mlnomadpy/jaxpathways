@@ -181,7 +181,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:02:34.334630+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:04:05.184941+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172

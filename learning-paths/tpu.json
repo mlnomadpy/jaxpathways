@@ -1,9 +1,9 @@
 {
   "id": "tpu",
   "title": "Learn TPUs and Google Cloud",
-  "description": "Build and recover a training experiment on CPU, then learn GCP projects, gcloud provisioning, explicit TPU execution, measurement and cleanup. Connect the cloud workflow to Transformer training and operations.",
+  "description": "Build and recover an experiment on CPU, then learn GCP provisioning, TPU generations, training and inference memory, precision policies and XProf profiling. Connect measured error and real target traces to model engineering.",
   "prerequisites": "Shared foundations and basic machine learning",
-  "outcome": "A reproducible training run with recovery and cloud resource evidence",
+  "outcome": "A reproducible run and a hardware, memory, precision and profiling decision report",
   "libraries": "JAX · Flax NNX · Optax · Orbax · gcloud · XProf",
   "source": "https://docs.jax.dev/en/latest/",
   "phaseIds": [
@@ -33,7 +33,8 @@
       "FP32/BF16/INT8 cache parity, stored bytes and numerical-error comparisons",
       "Six serialized prefill/decode endpoints with fresh-process reload and artifact rejection",
       "A genuine profile and synchronized CPU measurements, plus separate actual-target qualification before any TPU claim",
-      "Cloud resource identity, resolved environment, actual backend events, retrieved checkpoints and verified resource cleanup for any claimed TPU run"
+      "Cloud resource identity, resolved environment, actual backend events, retrieved checkpoints and verified resource cleanup for any claimed TPU run",
+      "Generation and topology choice, explicit weight/activation/accumulator/cache policy, memory budget and one tested profile hypothesis with retained quality evidence"
     ],
     "projectId": "text-harness",
     "assessmentId": "tpu",
@@ -63,15 +64,24 @@
     "text",
     "cross-modal"
   ],
-  "studyAdvice": "Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
+  "studyAdvice": "Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Continue with the TPU performance guide: compare generations, estimate training and cache memory, measure BF16/INT8 error and diagnose a warmed profile. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
   "engineeringLessonIds": [
     "recovery-06",
     "deployment-07",
-    "operations-07"
+    "operations-07",
+    "performance-03",
+    "performance-04"
   ],
   "practicalGuide": {
     "title": "From a laptop experiment to a TPU training run",
     "url": "tpu-gcp.html",
     "scope": "CPU-tested launcher; cloud instructions require target qualification."
-  }
+  },
+  "additionalGuides": [
+    {
+      "title": "TPU generations, precision and profiling",
+      "url": "tpu-performance.html",
+      "scope": "CPU-tested numerical lab and recorded figures; TPU execution and performance require target qualification."
+    }
+  ]
 }

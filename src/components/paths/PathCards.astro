@@ -44,6 +44,11 @@ import { siteUrl } from '../../lib/urls.js';
                 </a>
               </p>
             )}
+            {(route.additionalGuides || []).map((guide) => (
+              <p>
+                <a href={siteUrl(guide.url)}>{guide.title}</a>
+              </p>
+            ))}
           </article>
         );
       })}

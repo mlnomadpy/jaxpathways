@@ -253,7 +253,7 @@ visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:04:06.426042+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T23:05:34.235850+00:00. JAX 0.9.2.
 
 ```text
 Overall MSE: 0.409 high-slice MSE: 4.0 release: False

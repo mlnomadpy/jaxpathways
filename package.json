@@ -1,7 +1,7 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.4.0",
+  "version": "0.5.0",
   "scripts": {
     "dev": "npm run content:build && astro dev",
     "check": "npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm test && python3 scripts/check-distribution.py && npm run check:site",
@@ -25,7 +25,8 @@
     "release:prepare": "node scripts/release.mjs --prepare",
     "release:check": "node scripts/release.mjs",
     "check:types": "tsc -p tsconfig.domain.json",
-    "test:tpu-launcher": "python3 resources/tpu-gcp/check.py"
+    "test:tpu-launcher": "python3 resources/tpu-gcp/check.py",
+    "test:tpu-precision": "python3 resources/tpu-gcp/check_precision.py"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

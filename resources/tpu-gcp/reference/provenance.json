@@ -1,0 +1,9 @@
+{
+  "scope": "Recorded CPU arithmetic and storage experiment; no TPU performance claim",
+  "sha256": {
+    "precision_profile.py": "5697a00fd1fe569e7aa5a6103eee37b45862803ec20e4eabdf2b57cdf1f1a39d",
+    "render_precision.py": "7ad488b9b53d93dc95ff1ee7ea029229c99988a8bcea085642906ca52b51dbc0",
+    "reference/report.json": "7f7e99a9826d4121a0b56933c87c28c28c569a00c1ef8bd11f3804a71236ae17",
+    "reference/precision.png": "ad59edcc5e3f27475c59390550d833b4314d62f412822e92cf258a52c907de98"
+  }
+}

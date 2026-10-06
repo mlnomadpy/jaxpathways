@@ -143,7 +143,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T21:56:33.225951+00:00. JAX 0.9.2.
+CPU run: 2026-10-06T22:58:51.035286+00:00. JAX 0.9.2.
 
 ```text
 3.0
