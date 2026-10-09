@@ -198,8 +198,7 @@ torch.manual_seed(9)
 source=TorchModel().eval()
 # A real local state_dict file, loaded using the tensor-only loading option.
 with tempfile.TemporaryDirectory() as folder:
-    # Read or serialize artifact data on disk (`checkpoint`).
-    # Execute the next step of the computation.
+    # Compute `checkpoint` as `Path(folder)/'weights.pt'`.
     checkpoint=Path(folder)/'weights.pt'
     torch.save(source.state_dict(),checkpoint)
     # Run `torch.load` to compute `state`.
@@ -230,9 +229,9 @@ with tempfile.TemporaryDirectory() as folder:
             # Compute `report` from `error_report(torch_values[name].detach().numpy(),fla...`
             report=error_report(torch_values[name].detach().numpy(),flax_values[name])
             assert report['passed'],(name,report)
-            # Execute the next step of the computation.
+            # Append the computed value via `errors[name].append(report['max_abs'])`.
             errors[name].append(report['max_abs'])
-        # Reduce across the target axis to summarize ``.
+        # Execute `torch_values['output'].sum().backward()`.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
@@ -244,7 +243,7 @@ with tempfile.TemporaryDirectory() as folder:
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
     # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
-    # Assert invariant `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['...` holds
+    # Assert that `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']`.
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     # Loop over `bad` in `[dict(state, unexpected=torch.zeros(1)), {k: v for k, v in state.items() if k != 'norm.bias'}]`:
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -416,8 +415,7 @@ torch.manual_seed(9)
 source=TorchModel().eval()
 # A real local state_dict file, loaded using the tensor-only loading option.
 with tempfile.TemporaryDirectory() as folder:
-    # Read or serialize artifact data on disk (`checkpoint`).
-    # Execute the next step of the computation.
+    # Compute `checkpoint` as `Path(folder)/'weights.pt'`.
     checkpoint=Path(folder)/'weights.pt'
     torch.save(source.state_dict(),checkpoint)
     # Run `torch.load` to compute `state`.
@@ -448,9 +446,9 @@ with tempfile.TemporaryDirectory() as folder:
             # Compute `report` from `error_report(torch_values[name].detach().numpy(),fla...`
             report=error_report(torch_values[name].detach().numpy(),flax_values[name])
             assert report['passed'],(name,report)
-            # Execute the next step of the computation.
+            # Append the computed value via `errors[name].append(report['max_abs'])`.
             errors[name].append(report['max_abs'])
-        # Reduce across the target axis to summarize ``.
+        # Execute `torch_values['output'].sum().backward()`.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
@@ -462,7 +460,7 @@ with tempfile.TemporaryDirectory() as folder:
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
     # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
-    # Assert invariant `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['...` holds
+    # Assert that `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']`.
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     # Loop over `bad` in `[dict(state, unexpected=torch.zeros(1)), {k: v for k, v in state.items() if k != 'norm.bias'}]`:
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -495,7 +493,7 @@ near_zero = error_report([0.], [1e-6])
 near_zero_fail = error_report([0.], [3e-6])
 # Run `error_report` to compute `large_value`.
 large_value = error_report([100.], [100.001])
-# Assert invariant `near_zero['passed'] and not near_zero_fail['passed'] and large_va...` holds
+# Assert that `near_zero['passed'] and not near_zero_fail['passed'] and large_value['passed']`.
 assert near_zero['passed'] and not near_zero_fail['passed'] and large_value['passed']
 # Print the observed values to compare against the expected result.
 print('Near-zero, excessive near-zero, large-value:', near_zero['passed'], near_zero_fail['passed'], large_value['passed'])

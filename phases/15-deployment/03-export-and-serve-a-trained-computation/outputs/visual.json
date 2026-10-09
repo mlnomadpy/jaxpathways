@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "1c1986f1c041e4b5b08b91eeae451fe375fe5dc66a12e977345465f08209501f",
+  "contentHash": "91267b06b6a6e6a23fbaaf815f1fe67f6592120682f6537b201055867c00a950",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T21:55:31.496608+00:00",
@@ -42,7 +42,7 @@
     "prediction": "Which row is tested by the exported object alone?",
     "reading": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
     "alt": "Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,
     "panel": {
       "kind": "table",

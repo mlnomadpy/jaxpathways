@@ -94,7 +94,7 @@ def transition(state):
 def publish(path, step):
     # Compute `pending` from `root/'LATEST.pending'`
     pending=root/'LATEST.pending'
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     pending.write_text(json.dumps({'path':str(path),'step':step}))
     # Run `pending.replace` to perform the next check or state transition.
     pending.replace(root/'LATEST.json')
@@ -212,7 +212,7 @@ def transition(state):
 def publish(path, step):
     # Compute `pending` from `root/'LATEST.pending'`
     pending=root/'LATEST.pending'
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     pending.write_text(json.dumps({'path':str(path),'step':step}))
     # Run `pending.replace` to perform the next check or state transition.
     pending.replace(root/'LATEST.json')

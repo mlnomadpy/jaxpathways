@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-12",
-  "contentHash": "0997313ccf24fa1fd669286d0dde88d28ef83db78f6229e9d6dbec0a49bb709d",
+  "contentHash": "7865f177493adecf3ff510c6fb88ea024776cd1f71a2a776cce04682295aa9ac",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:25.079415+00:00",
@@ -247,7 +247,7 @@
     "prediction": "Does coordinate clipping at \\(2.5\\) guarantee that the whole gradient norm is at most \\(2.5\\)?",
     "reading": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
     "alt": "The blue arrow is \\((3,4)\\). Green scales it to norm \\(2.5\\) along the same ray. Orange clips each coordinate to \\(2.5\\), landing at the box corner with norm \\(2.5\\sqrt{2}\\). The circle and box are analytic constraints, not training measurements.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
       "kind": "clipping"

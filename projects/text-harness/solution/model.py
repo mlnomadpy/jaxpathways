@@ -9,21 +9,21 @@ import jax
 import jax.numpy as jnp
 from jax import export
 
-# Evaluate `VOCAB` from the current inputs and state.
+# Compute `VOCAB` as `259`.
 VOCAB=259
-# Evaluate `CONTEXT` from the current inputs and state.
+# Compute `CONTEXT` as `12`.
 CONTEXT=12
-# Evaluate `WIDTH` from the current inputs and state.
+# Compute `WIDTH` as `24`.
 WIDTH=24
-# Evaluate `HEADS` from the current inputs and state.
+# Compute `HEADS` as `2`.
 HEADS=2
-# Evaluate `HEAD_DIM` from the current inputs and state.
+# Compute `HEAD_DIM` as `12`.
 HEAD_DIM=12
 # Combine or mask array elements to form `TOKENIZER`.
 TOKENIZER={"version":"utf8-byte-v1","pad_id":0,"bos_id":1,"eos_id":2,"byte_offset":3,
            "vocabulary_size":259,"context_tokens":12,"normalization":"none",
            "unknown_policy":"all UTF-8 bytes represented; overlong input rejected"}
-# Evaluate `PARAM_SHAPES` from the current inputs and state.
+# Construct dictionary `PARAM_SHAPES` with the structured fields for this stage.
 PARAM_SHAPES={"embed":(VOCAB,WIDTH),"position":(CONTEXT,WIDTH),"q":(WIDTH,WIDTH),
               "k":(WIDTH,WIDTH),"v":(WIDTH,WIDTH),"o":(WIDTH,WIDTH),
               "ff1":(WIDTH,48),"ff2":(48,WIDTH),"head":(WIDTH,VOCAB)}
@@ -33,7 +33,7 @@ PARAM_SHAPES={"embed":(VOCAB,WIDTH),"position":(CONTEXT,WIDTH),"q":(WIDTH,WIDTH)
 def encode(text,eos=False):
     # Guard input contract (`not isinstance(text, str)`) and fail fast if violated.
     if not isinstance(text,str):raise ValueError("text must be a string")
-    # Evaluate `ids` from the current inputs and state.
+    # Initialize list `ids` for the stage values.
     ids=[1]+[int(b)+3 for b in text.encode("utf8")]
     # Branch on condition `eos`:
     if eos:ids.append(2)
@@ -45,7 +45,7 @@ def encode(text,eos=False):
 
 # Function `decode(ids)` implementing this stage's computation:
 def decode(ids):
-    # Evaluate `output` from the current inputs and state.
+    # Initialize list `output` for the stage values.
     output=[]
     # Iterate over `token` to step through the computation:
     for token in ids:
@@ -65,7 +65,7 @@ def decode(ids):
 
 # Function `corpus_hash(data)` implementing this stage's computation:
 def corpus_hash(data):
-    # Evaluate `payload` from the current inputs and state.
+    # Construct dictionary `payload` with the structured fields for this stage.
     payload={"ids":data["ids"],"groups":data["groups"],"texts":data["texts"],"tokenizer":TOKENIZER}
     # Run `np.ascontiguousarray` to compute `a`.
     a=np.ascontiguousarray(data["tokens"])
@@ -77,7 +77,7 @@ def corpus_hash(data):
 def make_corpus(seed=31,count=96,split="train",exclude=()):
     # Draw pseudorandom samples for `rng` using the explicit RNG state.
     # Run `set` to compute `seen`.
-    # Evaluate `texts` from the current inputs and state.
+    # Compute `rng` as `np.random.default_rng(seed)`.
     rng=np.random.default_rng(seed)
     seen=set(exclude)
     texts=[]
@@ -93,7 +93,7 @@ def make_corpus(seed=31,count=96,split="train",exclude=()):
     # Iterate over `(i, text)` to step through the computation:
     for i,text in enumerate(texts):
         # Run `encode` to compute `ids`.
-        # Evaluate `tokens[i, :len(ids)]` from the current inputs and state.
+        # Compute `ids` as `encode(text,eos=True)`.
         ids=encode(text,eos=True)
         tokens[i,:len(ids)]=ids
     # Return `{'tokens': tokens, 'texts': texts, 'ids': [f'{split}-document-{seed}-{i:04d}' for i in range(count)], 'groups': [f'{split}-source-{seed}-{i:04d}' for i in range(count)], 'provenance': 'generated symbolic reversal strings; not a natural-language benchmark'}` to the caller.
@@ -104,19 +104,14 @@ def make_corpus(seed=31,count=96,split="train",exclude=()):
 
 # Function `load_text_manifest(path, split)` implementing this stage's computation:
 def load_text_manifest(path,split):
-    # Read or serialize artifact data on disk (`path`).
-    # Read or serialize artifact data on disk (`rows`).
     # Run `set` to compute `seen_ids`.
-    # Evaluate `seen_text` from the current inputs and state.
-    # Evaluate `groups` from the current inputs and state.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     rows=json.loads(path.read_text())
     seen_ids=set()
     seen_text={}
     groups={}
-    # Evaluate `texts` from the current inputs and state.
-    # Evaluate `ids` from the current inputs and state.
-    # Evaluate `selected_groups` from the current inputs and state.
+    # Initialize list `texts` for the stage values.
     texts=[]
     ids=[]
     selected_groups=[]
@@ -132,17 +127,17 @@ def load_text_manifest(path,split):
         # Run `seen_ids.add` to perform the next check or state transition.
         seen_ids.add(row["id"])
         groups.setdefault(row["group"],set()).add(row["split"])
-        # Evaluate `raw` from the current inputs and state.
+        # Evaluate the compound expression for `raw`.
         raw=(path.parent/row["file"]).read_bytes()
         # Guard input contract (`hashlib.sha256(raw).hexdigest() != row['sha256']`) and fail fast if violated.
         if hashlib.sha256(raw).hexdigest()!=row["sha256"]:raise ValueError("text checksum mismatch")
         # Run `raw.decode` to compute `text`.
-        # Execute the next step of the computation.
+        # Compute `text` as `raw.decode("utf8")`.
         text=raw.decode("utf8")
         encode(text,eos=True)
         # Guard input contract (`text in seen_text and seen_text[text] != row['split']`) and fail fast if violated.
         if text in seen_text and seen_text[text]!=row["split"]:raise ValueError("duplicate content crosses splits")
-        # Evaluate `seen_text[text]` from the current inputs and state.
+        # Compute `seen_text[text]` as `row["split"]`.
         seen_text[text]=row["split"]
         # Branch on condition `row['split'] == split`:
         if row["split"]==split:
@@ -158,7 +153,7 @@ def load_text_manifest(path,split):
     # Loop over `(i, text)` in `enumerate(texts)`:
     for i,text in enumerate(texts):
         # Run `encode` to compute `encoded`.
-        # Evaluate `tokens[i, :len(encoded)]` from the current inputs and state.
+        # Compute `encoded` as `encode(text,eos=True)`.
         encoded=encode(text,eos=True)
         tokens[i,:len(encoded)]=encoded
     # Return `{'tokens': tokens, 'texts': texts, 'ids': ids, 'groups': selected_groups, 'provenance': 'user-permitted UTF-8 documents from ' + str(path)}` to the caller.
@@ -241,7 +236,7 @@ def dropout(x,key):
 def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     # Create evenly spaced index values in `positions`.
     positions=jnp.arange(tokens.shape[1])
-    # Evaluate `x` from the current inputs and state.
+    # Compute `x` as `params["embed"][tokens]+params["position"][positions][None,:,:]`.
     x=params["embed"][tokens]+params["position"][positions][None,:,:]
     # Run `layer_norm` to compute `normalized`.
     normalized=layer_norm(x)
@@ -261,7 +256,7 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     v=unpack_cache(stored_v,vs)
     # Perform matrix contraction / projection to compute `score`.
     score=jnp.einsum("bhtd,bhsd->bhts",q,k)/jnp.sqrt(float(HEAD_DIM))
-    # Evaluate `allowed` from the current inputs and state.
+    # Evaluate the compound expression for `allowed`.
     allowed=(positions[:,None]>=positions[None,:])[None,None,:,:] & (tokens!=0)[:,None,None,:]
     # Apply nonlinear activation or probability normalization to compute `attention`.
     attention=jax.nn.softmax(jnp.where(allowed,score,-1e9),axis=-1)
@@ -271,7 +266,7 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     if key is not None:
         first,second=jax.random.split(key)
         attended=dropout(attended,first)
-    # Evaluate `x` from the current inputs and state.
+    # Compute `x` as `x+attended`.
     x=x+attended
     # Apply nonlinear activation or probability normalization to compute `hidden`.
     hidden=jax.nn.gelu(linear(layer_norm(x),params["ff1"],compute_policy))
@@ -279,7 +274,7 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     residual=linear(hidden,params["ff2"],compute_policy)
     # Branch on condition `key is not None`:
     if key is not None:residual=dropout(residual,second)
-    # Evaluate `x` from the current inputs and state.
+    # Compute `x` as `x+residual`.
     x=x+residual
     # Run `linear` to compute `logits`.
     logits=linear(layer_norm(x),params["head"],compute_policy)
@@ -289,17 +284,16 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
 
 # Function `token_loss(params, documents, key)` implementing this stage's computation:
 def token_loss(params,documents,key=None):
-    # Evaluate `inputs` from the current inputs and state.
-    # Evaluate `targets` from the current inputs and state.
+    # Compute `inputs` as `documents[:,:-1]`.
     inputs=documents[:,:-1]
     targets=documents[:,1:]
     # Run `forward` to compute `logits`.
     logits=forward(params,inputs,key)[0]
     # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp=jax.nn.log_softmax(logits,axis=-1)
-    # Evaluate `values` from the current inputs and state.
+    # Compute `values` as `-jnp.take_along_axis(logp,targets[...,None],axis=-1)[...,0]`.
     values=-jnp.take_along_axis(logp,targets[...,None],axis=-1)[...,0]
-    # Evaluate `mask` from the current inputs and state.
+    # Compute `mask` as `targets!=0`.
     mask=targets!=0
     # Return `jnp.sum(jnp.where(mask, values, 0.0)) / jnp.maximum(mask.sum(), 1)` to the caller.
     return jnp.sum(jnp.where(mask,values,0.))/jnp.maximum(mask.sum(),1)
@@ -323,14 +317,14 @@ def initialize(data,seed=3,batch_size=16,rate=.006):
         if row[0]!=1 or len(ends)!=1 or np.any(row[1:ends[0]]<3) or np.any(row[ends[0]+1:]!=0):
             raise ValueError("documents require BOS, byte content, one EOS and right padding")
     # Initialize explicit deterministic PRNG key `key`.
-    # Evaluate `params` from the current inputs and state.
+    # Compute `key` as `jax.random.PRNGKey(seed)`.
     key=jax.random.PRNGKey(seed)
     params={}
     # Loop over `(name, shape)` in `PARAM_SHAPES.items()`:
     for name,shape in PARAM_SHAPES.items():
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
         key,subkey=jax.random.split(key)
-        # Evaluate `scale` from the current inputs and state.
+        # Compute `scale` as `.06 if name in ("embed","position") else 1/np.sqrt(shape[0])`.
         scale=.06 if name in ("embed","position") else 1/np.sqrt(shape[0])
         # Draw pseudorandom samples for `params[name]` using the explicit RNG state.
         params[name]=jax.random.normal(subkey,shape)*scale
@@ -391,8 +385,7 @@ def step(state,data):
 
 # Function `save_checkpoint(path, state)` implementing this stage's computation:
 def save_checkpoint(path,state):
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     path.mkdir(parents=True,exist_ok=True)
     # Convert `arrays` to a host NumPy array for inspection or verification.
@@ -406,13 +399,12 @@ def save_checkpoint(path,state):
     # Compute deterministic cryptographic digest `` for provenance verification.
     manifest.update(tokenizer=TOKENIZER,jax=jax.__version__,architecture={"width":WIDTH,"heads":HEADS,"blocks":1},
                     state_sha256=hashlib.sha256((path/"state.npz").read_bytes()).hexdigest())
-    # Read or serialize artifact data on disk (``).
+    # Compute `(path/"checkpoint.json").write_text(json.dumps(manifest,indent` as `2))`.
     (path/"checkpoint.json").write_text(json.dumps(manifest,indent=2))
 
 
 # Function `load_checkpoint(path, data, config)` implementing this stage's computation:
 def load_checkpoint(path,data,config):
-    # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     path=Path(path)
     manifest=json.loads((path/"checkpoint.json").read_text())
@@ -438,15 +430,13 @@ def load_checkpoint(path,data,config):
 
 # Function `evaluate(params, data, batch_size, compute_policy, ...)` implementing this stage's computation:
 def evaluate(params,data,batch_size=11,compute_policy="fp32",cache_policy="fp32"):
-    # Evaluate `total` from the current inputs and state.
-    # Evaluate `count` from the current inputs and state.
-    # Evaluate `correct` from the current inputs and state.
+    # Compute `total` as `0.`.
     total=0.
     count=0
     correct=0
     # Loop over `start` in `range(0, len(data['ids']), batch_size)`:
     for start in range(0,len(data["ids"]),batch_size):
-        # Evaluate `docs` from the current inputs and state.
+        # Compute `docs` as `data["tokens"][start:start+batch_size]`.
         docs=data["tokens"][start:start+batch_size]
         # Create device-backed JAX array `logits`.
         logits=np.asarray(forward(params,jnp.asarray(docs[:,:-1]),compute_policy=compute_policy,cache_policy=cache_policy)[0])
@@ -454,8 +444,7 @@ def evaluate(params,data,batch_size=11,compute_policy="fp32",cache_policy="fp32"
         shifted=logits-logits.max(-1,keepdims=True)
         # Reduce across the target axis to summarize `logp`.
         logp=shifted-np.log(np.exp(shifted).sum(-1,keepdims=True))
-        # Evaluate `targets` from the current inputs and state.
-        # Evaluate `mask` from the current inputs and state.
+        # Compute `targets` as `docs[:,1:]`.
         targets=docs[:,1:]
         mask=targets!=0
         # Accumulate the next contribution into `total`.
@@ -493,7 +482,7 @@ def prefill_core(params,padded,length,compute_policy="fp32",cache_policy="fp32")
 
 # Function `decode_core(params, token, K, V, ...)` implementing this stage's computation:
 def decode_core(params,token,K,V,Ks,Vs,length,compute_policy="fp32",cache_policy="fp32"):
-    # Evaluate `x` from the current inputs and state.
+    # Compute `x` as `params["embed"][token][:,None,:]+params["position"][length][None,None,:]`.
     x=params["embed"][token][:,None,:]+params["position"][length][None,None,:]
     # Run `layer_norm` to compute `norm`.
     norm=layer_norm(x)
@@ -531,7 +520,7 @@ def decode_core(params,token,K,V,Ks,Vs,length,compute_policy="fp32",cache_policy
 def prefill(params,prompt,compute_policy="fp32",cache_policy="fp32"):
     # Run `validate_prompt` to compute `prompt`.
     # Allocate initialized array `padded` with the specified shape and dtype.
-    # Evaluate `padded[0, :len(prompt)]` from the current inputs and state.
+    # Compute `prompt` as `validate_prompt(prompt)`.
     prompt=validate_prompt(prompt)
     padded=np.zeros((1,CONTEXT),np.int32)
     padded[0,:len(prompt)]=prompt
@@ -549,15 +538,13 @@ def decode_step(params,token,state,compute_policy="fp32",cache_policy="fp32"):
     return decode_core(params,jnp.asarray([token],jnp.int32),*state[1:],compute_policy,cache_policy)
 
 
-# Evaluate `RELEASE_POLICIES` from the current inputs and state.
+# Construct dictionary `RELEASE_POLICIES` with the structured fields for this stage.
 RELEASE_POLICIES={"fp32":("fp32","fp32"),"bf16":("bf16","bf16"),"w8a8-int8kv":("w8a8","int8")}
 
 
 # Function `export_release(path, state)` implementing this stage's computation:
 def export_release(path,state):
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
-    # Evaluate `artifacts` from the current inputs and state.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     path.mkdir(parents=True,exist_ok=True)
     artifacts={}
@@ -565,7 +552,7 @@ def export_release(path,state):
     for name,(compute,cache) in RELEASE_POLICIES.items():
         # Compile and trace the function with XLA (`pre`).
         pre=jax.jit(lambda tokens,length:prefill_core(state["params"],tokens,length,compute,cache))
-        # Evaluate `signature` from the current inputs and state.
+        # Evaluate the compound expression for `signature`.
         signature=(jax.ShapeDtypeStruct((1,CONTEXT),jnp.int32),jax.ShapeDtypeStruct((),jnp.int32))
         # Run `export.export` to compute `pre_artifact`.
         pre_artifact=export.export(pre)(*signature)
@@ -584,8 +571,7 @@ def export_release(path,state):
         # Loop over `(endpoint, artifact)` in `(('prefill', pre_artifact), ('decode', dec_artifact))`:
         for endpoint,artifact in (("prefill",pre_artifact),("decode",dec_artifact)):
             # Run `artifact.serialize` to compute `data`.
-            # Evaluate `filename` from the current inputs and state.
-            # Execute the next step of the computation.
+            # Compute `data` as `artifact.serialize()`.
             data=artifact.serialize()
             filename=f"{name}-{endpoint}.jaxexport"
             (path/filename).write_bytes(data)
@@ -601,7 +587,7 @@ def export_release(path,state):
               "bf16":"BF16-rounded dense operands, FP32 dot/attention/norm/softmax/output, BF16 K/V",
               "w8a8-int8kv":"dynamic per-row INT8 dense activations, per-output INT8 dense weights, INT32 dense accumulation; FP32 embedding/norm/attention/output; INT8 per-token/head K/V with FP32 scales"},
               "native_low_precision_acceleration_claimed":False}
-    # Read or serialize artifact data on disk (``).
+    # Compute `(path/"release.json").write_text(json.dumps(manifest,indent` as `2))`.
     (path/"release.json").write_text(json.dumps(manifest,indent=2))
     # Return `manifest` to the caller.
     return manifest
@@ -609,17 +595,16 @@ def export_release(path,state):
 
 # Function `load_release(path)` implementing this stage's computation:
 def load_release(path):
-    # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     path=Path(path)
     manifest=json.loads((path/"release.json").read_text())
     # Guard input contract (`manifest['tokenizer'] != TOKENIZER or manifest['jax'] != jax.__version__`) and fail fast if violated.
     if manifest["tokenizer"]!=TOKENIZER or manifest["jax"]!=jax.__version__:raise ValueError("tokenizer/runtime mismatch")
-    # Evaluate `artifacts` from the current inputs and state.
+    # Construct dictionary `artifacts` with the structured fields for this stage.
     artifacts={}
     # Loop over `(key, item)` in `manifest['artifacts'].items()`:
     for key,item in manifest["artifacts"].items():
-        # Evaluate `data` from the current inputs and state.
+        # Evaluate the compound expression for `data`.
         data=(path/item["file"]).read_bytes()
         # Guard input contract (`hashlib.sha256(data).hexdigest() != item['sha256']`) and fail fast if violated.
         if hashlib.sha256(data).hexdigest()!=item["sha256"]:raise ValueError("artifact checksum mismatch")
@@ -635,7 +620,7 @@ def exported_prefill(manifest,artifacts,prompt,policy="fp32"):
     if policy not in manifest["precision"]:raise ValueError("unsupported precision policy")
     # Run `validate_prompt` to compute `prompt`.
     # Allocate initialized array `tokens` with the specified shape and dtype.
-    # Evaluate `tokens[0, :len(prompt)]` from the current inputs and state.
+    # Compute `prompt` as `validate_prompt(prompt)`.
     prompt=validate_prompt(prompt)
     tokens=np.zeros((1,CONTEXT),np.int32)
     tokens[0,:len(prompt)]=prompt
@@ -664,17 +649,17 @@ def generate(manifest,artifacts,text,max_new_tokens=4,policy="fp32"):
     # Guard input contract (`max_new_tokens < 0 or len(prompt) + max_new_tokens > CONTEXT`) and fail fast if violated.
     if max_new_tokens<0 or len(prompt)+max_new_tokens>CONTEXT:raise ValueError("generation exceeds context budget")
     # Run `exported_prefill` to compute `state`.
-    # Evaluate `generated` from the current inputs and state.
+    # Compute `state` as `exported_prefill(manifest,artifacts,prompt,policy)`.
     state=exported_prefill(manifest,artifacts,prompt,policy)
     generated=[]
     # Repeat the update loop over `range(max_new_tokens)` steps:
     for _ in range(max_new_tokens):
         # Convert `logits` to a host NumPy array for inspection or verification.
-        # Evaluate `logits[:2]` from the current inputs and state.
+        # Compute `logits` as `np.asarray(state[0])[0].copy()`.
         logits=np.asarray(state[0])[0].copy()
         logits[:2]=-np.inf
         # Evaluate `logits.argmax()` and convert the result into Python scalar/collection `token`.
-        # Execute the next step of the computation.
+        # Compute `token` as `int(logits.argmax())`.
         token=int(logits.argmax())
         generated.append(token)
         # Branch on condition `token == 2`:
@@ -701,25 +686,24 @@ def benchmark(manifest,artifacts,prompt,policy="fp32",repeats=30):
     # Run `ord` to compute `token`.
     token=ord("a")+3
     # Record execution timing or profiler trace in `started`.
-    # Execute the next step of the computation.
+    # Compute `started` as `time.perf_counter()`.
     started=time.perf_counter()
     exported_decode(manifest,artifacts,token,cache,policy)
     # Record execution timing or profiler trace in `first_decode`.
     first_decode=(time.perf_counter()-started)*1000
-    # Evaluate `pre` from the current inputs and state.
-    # Evaluate `dec` from the current inputs and state.
+    # Initialize list `pre` for the stage values.
     pre=[]
     dec=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `started`.
-        # Execute the next step of the computation.
+        # Compute `started` as `time.perf_counter()`.
         started=time.perf_counter()
         exported_prefill(manifest,artifacts,tokens,policy)
         # Record execution timing or profiler trace in ``.
         pre.append((time.perf_counter()-started)*1000)
         # Record execution timing or profiler trace in `started`.
-        # Execute the next step of the computation.
+        # Compute `started` as `time.perf_counter()`.
         started=time.perf_counter()
         exported_decode(manifest,artifacts,token,cache,policy)
         # Record execution timing or profiler trace in ``.

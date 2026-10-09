@@ -30,7 +30,7 @@ The active-count curve decreases while the tensor shape stays fixed. It measures
 
 ![A terminal transition still counts](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.
 
@@ -410,7 +410,7 @@ The random stream is part of the experiment state. Replay in this environment is
 r = jnp.array([[-.01],[-.01],[1.],[0.]])
 # Run `returns_to_go` to compute `g`.
 g = returns_to_go(r)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))`.
 assert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))
 # Print the observed values to compare against the expected result.
 print('reward-to-go:', g[:,0])
@@ -515,9 +515,9 @@ for a in [1,1]:
     correct += float(reward*active)
     # Accumulate the next contribution into `broken`.
     broken += float(reward*(~s.done))
-# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`
+# Assert that `abs(correct-.99) < 1e-6`.
 assert abs(correct-.99)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`
+# Assert that `abs(broken+.01) < 1e-6`.
 assert abs(broken+.01)  # TODO: complete assertion check
 ```
 
@@ -538,9 +538,9 @@ for a in [1,1]:
     correct += float(reward*active)
     # Accumulate the next contribution into `broken`.
     broken += float(reward*(~s.done))
-# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`
+# Assert that `abs(correct-.99) < 1e-6`.
 assert abs(correct-.99) < 1e-6
-# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`
+# Assert that `abs(broken+.01) < 1e-6`.
 assert abs(broken+.01) < 1e-6
 ```
 
@@ -571,7 +571,7 @@ The two start states need different numbers of actions. Compare each return agai
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 2. Combine or mask array elements to form `expected`.
-3. Verify that the numerical values match the expected reference within tolerance.
+3. Assert that `jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)`.
 4. Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 
 **Starter code scaffold (fill in the TODOs):**
@@ -582,7 +582,7 @@ The two start states need different numbers of actions. Compare each return agai
 _, easy = rollout(...)  # TODO: compute _, easy
 # Combine or mask array elements to form `expected`.
 expected = jnp.where(...)  # TODO: compute expected
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)`.
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)  # TODO: complete assertion check
 # Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: complete assertion check
@@ -596,7 +596,7 @@ assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: 
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
 # Combine or mask array elements to form `expected`.
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)`.
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)
 # Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])

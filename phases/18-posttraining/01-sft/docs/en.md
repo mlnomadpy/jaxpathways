@@ -154,7 +154,7 @@ for _ in range(100):
     # Compute `p` from `p - 0.5 * g`
     p = p - 0.5 * g
 
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(5), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
 # Assert invariant `history[-1] < 0.15` holds
 assert history[-1] < 0.15
@@ -229,7 +229,7 @@ for _ in range(100):
     # Compute `p` from `p - 0.5 * g`
     p = p - 0.5 * g
 
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(5), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
 # Assert invariant `history[-1] < 0.15` holds
 assert history[-1] < 0.15
@@ -309,7 +309,7 @@ PASS: posttraining-01
 # Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
 # Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
-# Assert invariant `np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarra...` holds
+# Assert that `np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0`.
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(g)[4], 0.0)
@@ -352,7 +352,7 @@ for row in range(2):
             total += values[int(ragged_tokens[row, position + 1])] - log_normalizer
     # Append the current step result to `expected`.
     expected.append(total)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(observed, expected, atol=1e-6)`
+# Compute `np.testing.assert_allclose(observed, expected, atol` as `1e-6)`.
 np.testing.assert_allclose(observed, expected, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Supervised targets per sequence:', np.asarray(ragged_roles[:, 1:].sum(1)))

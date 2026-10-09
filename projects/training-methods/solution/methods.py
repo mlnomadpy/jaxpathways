@@ -8,7 +8,7 @@ import numpy as np
 def masked_ce(logits, targets, selected):
     # Caller validates a nonempty mask before a transformed training step.
     logp = jax.nn.log_softmax(logits, axis=-1)
-    # Evaluate `nll` from the current inputs and state.
+    # Compute `nll` as `-jnp.take_along_axis(logp, targets[..., None], axis=-1)[..., 0]`.
     nll = -jnp.take_along_axis(logp, targets[..., None], axis=-1)[..., 0]
     # Return `jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)` to the caller.
     return jnp.sum(jnp.where(selected, nll, 0.)) / jnp.sum(selected)
@@ -30,7 +30,7 @@ def corrupt_tokens(tokens, selected, mask_id):
 
 # Function `mlm_logits(p, corrupted)` implementing this stage's computation:
 def mlm_logits(p, corrupted):
-    # Evaluate `h` from the current inputs and state.
+    # Compute `h` as `p['embedding'][corrupted]`.
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
@@ -41,7 +41,7 @@ def mlm_logits(p, corrupted):
 
 # Function `patchify(images, patch)` implementing this stage's computation:
 def patchify(images, patch=2):
-    # Evaluate `(b, h, w, c)` from the current inputs and state.
+    # Compute `b,h,w,c` as `images.shape`.
     b,h,w,c = images.shape
     # Guard input contract (`h % patch or w % patch`) and fail fast if violated.
     if h % patch or w % patch:
@@ -78,7 +78,7 @@ def response_logps(logits, tokens, response_mask):
 
 # Function `lora_forward(x, base, a, b, ...)` implementing this stage's computation:
 def lora_forward(x, base, a, b, alpha=1.):
-    # Evaluate `rank` from the current inputs and state.
+    # Compute `rank` as `a.shape[1]`.
     rank = a.shape[1]
     # Return `x @ base + alpha / rank * (x @ a @ b)` to the caller.
     return x @ base + (alpha/rank) * (x @ a @ b)
@@ -109,7 +109,7 @@ def ppo_loss(logits, old_logps, actions, advantages, reference_logps, beta=.1, c
 
 # Function `dpo_loss(policy_logps, reference_logps, chosen, rejected, ...)` implementing this stage's computation:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=.2):
-    # Evaluate `margin` from the current inputs and state.
+    # Evaluate the compound expression for `margin`.
     margin = (policy_logps[chosen]-policy_logps[rejected]) - jax.lax.stop_gradient(reference_logps[chosen]-reference_logps[rejected])
     # Return `jnp.mean(jax.nn.softplus(-beta * margin))` to the caller.
     return jnp.mean(jax.nn.softplus(-beta*margin))

@@ -9,7 +9,7 @@ import jax
 import jax.numpy as jnp
 from jax import export
 
-# Evaluate `TRAINING` from the current inputs and state.
+# Construct dictionary `TRAINING` with the structured fields for this stage.
 TRAINING = {'optimizer': 'momentum', 'learning_rate': 0.015, 'momentum': 0.85, 'temperature': 0.2, 'normalization_floor': 1e-6}
 
 # Function `implementation_hash()` implementing this stage's computation:
@@ -17,7 +17,7 @@ def implementation_hash():
     # Return `hashlib.sha256(Path(__file__).read_bytes()).hexdigest()` to the caller.
     return hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
 
-# Evaluate `CONTRACT` from the current inputs and state.
+# Construct dictionary `CONTRACT` with the structured fields for this stage.
 CONTRACT = {'schema': 1, 'image_shape': [8, 8], 'image_range': [0., 1.],
             'vocabulary': ['vertical', 'horizontal', 'thin', 'thick'],
             'embedding_width': 4, 'preprocessing': 'grayscale-f32/bag-v1'}
@@ -30,7 +30,7 @@ def digest(value):
 # Function `text_features(captions)` implementing this stage's computation:
 def text_features(captions):
     """Exactly one orientation and one thickness; reject missing/ambiguous concepts."""
-    # Evaluate `result` from the current inputs and state.
+    # Initialize list `result` for the stage values.
     result = []
     # Iterate over `caption` to step through the computation:
     for caption in captions:
@@ -77,25 +77,26 @@ def fixture(seed=0, per_class=12, shift=0):
         raise ValueError('invalid fixture configuration')
     # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng = np.random.default_rng(seed)
-    # Evaluate `(images, captions, labels)` from the current inputs and state.
+    # Initialize list `images, captions, labels` for the stage values.
     images, captions, labels = [], [], []
     # Iterate over `label` to step through the computation:
     for label in range(4):
-        # Evaluate `(vertical, thick)` from the current inputs and state.
+        # Compute `vertical, thick` as `label < 2, label % 2 == 1`.
         vertical, thick = label < 2, label % 2 == 1
-        # Evaluate `caption` from the current inputs and state.
+        # Evaluate the compound expression for `caption`.
         caption = ('vertical' if vertical else 'horizontal') + ' ' + ('thick' if thick else 'thin')
         # Repeat the update loop over `range(per_class)` steps:
         for _ in range(per_class):
             # Allocate initialized array `x` with the specified shape and dtype.
             x = np.zeros((8, 8), np.float32)
-            # Evaluate `(start, stop)` from the current inputs and state.
+            # Evaluate the compound expression for `start, stop`.
             start, stop = (2, 6) if thick else (3, 4)
-            # Evaluate `(start, stop)` from the current inputs and state.
+            # Compute `start, stop` as `start + shift, stop + shift`.
             start, stop = start + shift, stop + shift
             # Branch on condition `vertical`:
             if vertical: x[:, start:stop] = 1
-            else: x[start:stop, :] = 1
+            else:
+                x[start:stop, :] = 1
             # Cast or evaluate `x` in explicit floating-point precision.
             x = np.clip(x + rng.normal(0, 0.045, x.shape), 0, 1).astype(np.float32)
             # Append the current step result to `images`.
@@ -160,7 +161,7 @@ def objective(params, x, t, labels):
     zi, zt = embeddings(params, x, t)
     # Perform matrix contraction / projection to compute `scores`.
     scores = zi @ zt.T / TRAINING['temperature']
-    # Evaluate `positive` from the current inputs and state.
+    # Compute `positive` as `labels[:, None] == labels[None, :]`.
     positive = labels[:, None] == labels[None, :]
     # All captions/images of the same semantic class are positives, not false negatives.
     row = jax.scipy.special.logsumexp(scores, axis=1) - jax.scipy.special.logsumexp(jnp.where(positive, scores, -jnp.inf), axis=1)
@@ -200,14 +201,14 @@ def transition(state, data):
     # Guard input contract (`state['data_hash'] != dataset_hash(data)`) and fail fast if violated.
     if state['data_hash'] != dataset_hash(data):
         raise ValueError('data identity changed')
-    # Evaluate `(cursor, order, key)` from the current inputs and state.
+    # Compute `cursor, order, key` as `state['cursor'], state['order'], state['key']`.
     cursor, order, key = state['cursor'], state['order'], state['key']
     # Branch on condition `cursor == len(order)`:
     if cursor == len(order):
         key, shuffle = jax.random.split(key)
         order = np.asarray(jax.random.permutation(shuffle, len(order)))
         cursor = 0
-    # Evaluate `chosen` from the current inputs and state.
+    # Compute `chosen` as `order[cursor:cursor + state['batch_size']]`.
     chosen = order[cursor:cursor + state['batch_size']]
     # Run `image_features` to compute `x`.
     # Run `text_features` to compute `t`.
@@ -217,7 +218,7 @@ def transition(state, data):
     params, momentum, loss = _update(state['params'], state['momentum'], jnp.asarray(x), jnp.asarray(t), jnp.asarray(data['labels'][chosen]))
     # Synchronize host execution until asynchronous device computation completes.
     loss.block_until_ready()
-    # Evaluate `new` from the current inputs and state.
+    # Construct dictionary `new` with the structured fields for this stage.
     new = {**state, 'params': params, 'momentum': momentum, 'key': key, 'order': order,
            'cursor': cursor + len(chosen), 'step': state['step'] + 1}
     # Return `(new, {'loss': float(loss), 'ids': [data['ids'][i] for i in chosen], 'count': len(chosen)})` to the caller.
@@ -227,7 +228,7 @@ def transition(state, data):
 def train(data, seed=0, steps=80):
     # Run `initial_state` to compute `state`.
     state = initial_state(data, seed)
-    # Evaluate `history` from the current inputs and state.
+    # Initialize list `history` for the stage values.
     history = []
     # Repeat the update loop over `range(steps)` steps:
     for _ in range(steps):
@@ -240,15 +241,15 @@ def train(data, seed=0, steps=80):
 
 # Function `evaluate(params, data)` implementing this stage's computation:
 def evaluate(params, data):
-    # Evaluate `(x, t)` from the current inputs and state.
+    # Compute `x, t` as `image_features(data['images']), text_features(data['captions'])`.
     x, t = image_features(data['images']), text_features(data['captions'])
     # Create device-backed JAX array `(zi, zt)`.
     zi, zt = embeddings(params, jnp.asarray(x), jnp.asarray(t))
     # Convert `scores` to a host NumPy array for inspection or verification.
     scores = np.asarray(zi @ zt.T)
-    # Evaluate `labels` from the current inputs and state.
+    # Compute `labels` as `data['labels']`.
     labels = data['labels']
-    # Evaluate `(pi, pt)` from the current inputs and state.
+    # Compute `pi, pt` as `labels[scores.argmax(axis=1)], labels[scores.argmax(axis=0)]`.
     pi, pt = labels[scores.argmax(axis=1)], labels[scores.argmax(axis=0)]
     # Return `{'count': len(labels), 'image_to_text_correct': int(np.sum(pi == labels)), 'text_to_image_correct': int(np.sum(pt == labels)), 'scores': scores, 'image_predictions': pi, 'text_predictions': pt}` to the caller.
     return {'count': len(labels), 'image_to_text_correct': int(np.sum(pi == labels)),
@@ -265,21 +266,19 @@ def _host_state(state):
 
 # Function `save_checkpoint(folder, state)` implementing this stage's computation:
 def save_checkpoint(folder, state):
-    # Read or serialize artifact data on disk (`folder`).
-    # Execute the next step of the computation.
+    # Compute `folder` as `Path(folder)`.
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=False)
-    # Evaluate `payload` from the current inputs and state.
+    # Construct dictionary `payload` with the structured fields for this stage.
     payload = {'contract': CONTRACT, 'training': TRAINING, 'implementation_hash': implementation_hash(), 'state': _host_state(state)}
-    # Read or serialize artifact data on disk (``).
+    # Compute `(folder/'checkpoint.json').write_text(json.dumps({'payload': payload, 'sha256': digest(payload)}, allow_nan` as `False))`.
     (folder/'checkpoint.json').write_text(json.dumps({'payload': payload, 'sha256': digest(payload)}, allow_nan=False))
 
 # Function `load_checkpoint(folder, data, batch_size)` implementing this stage's computation:
 def load_checkpoint(folder, data, batch_size=16):
     # Read or serialize artifact data on disk (`record`).
     record = json.loads((Path(folder)/'checkpoint.json').read_text())
-    # Evaluate `p` from the current inputs and state.
-    # Evaluate `s` from the current inputs and state.
+    # Compute `p` as `record['payload']`.
     p = record['payload']
     s = p['state']
     # Guard input contract (`digest(p) != record['sha256'] or p['contract'] != CONTRACT or p.get('training') != TRAINING or (p.get('implementation_hash') != implementation_hash()) or (s['data_hash'] != dataset_hash(data)) or (s['batch_size'] != batch_size)`) and fail fast if violated.
@@ -289,7 +288,8 @@ def load_checkpoint(folder, data, batch_size=16):
     if sorted(s['order']) != list(range(len(data['ids']))) or not 0 <= s['cursor'] <= len(s['order']) or s['step'] < 0:
         raise ValueError('invalid iterator state')
     # Guard input contract (`len(s['key']) != 2`) and fail fast if violated.
-    if len(s['key']) != 2: raise ValueError('invalid random state')
+    if len(s['key']) != 2:
+        raise ValueError('invalid random state')
     # Loop over `group` in `['params', 'momentum']`:
     for group in ['params', 'momentum']:
         # Loop over `(k, shape)` in `[('image', (64, 4)), ('text', (4, 4))]`:
@@ -297,7 +297,8 @@ def load_checkpoint(folder, data, batch_size=16):
             # Convert `v` to a host NumPy array for inspection or verification.
             v = np.asarray(s[group][k], np.float32)
             # Guard input contract (`v.shape != shape or not np.isfinite(v).all()`) and fail fast if violated.
-            if v.shape != shape or not np.isfinite(v).all(): raise ValueError('invalid parameter state')
+            if v.shape != shape or not np.isfinite(v).all():
+                raise ValueError('invalid parameter state')
             # Create device-backed JAX array `s[group][k]`.
             s[group][k] = jnp.asarray(v)
     # Create device-backed JAX array `s['key']`.
@@ -336,10 +337,11 @@ def encoder(params, branch, policy, calibration):
     if policy == 'fp32': return lambda x: normalize(x @ w)
     # Branch on condition `policy == 'w8a32'`:
     if policy == 'w8a32': return lambda x: normalize(x @ (jnp.asarray(qw, jnp.float32) * jnp.asarray(scale)))
-    # Evaluate `activation_scale` from the current inputs and state.
+    # Compute `activation_scale` as `calibration['input_scales'][branch]`.
     activation_scale = calibration['input_scales'][branch]
     # Guard input contract (`not np.isfinite(activation_scale) or activation_scale <= 0`) and fail fast if violated.
-    if not np.isfinite(activation_scale) or activation_scale <= 0: raise ValueError('invalid calibration')
+    if not np.isfinite(activation_scale) or activation_scale <= 0:
+        raise ValueError('invalid calibration')
     # Function `run(x)` implementing this stage's computation:
     def run(x):
         # Combine or mask array elements to form `qx`.
@@ -353,11 +355,10 @@ def encoder(params, branch, policy, calibration):
 
 # Function `export_artifact(folder, params, calibration, policy)` implementing this stage's computation:
 def export_artifact(folder, params, calibration, policy='fp32'):
-    # Read or serialize artifact data on disk (`folder`).
-    # Execute the next step of the computation.
+    # Compute `folder` as `Path(folder)`.
     folder = Path(folder)
     folder.mkdir(parents=True, exist_ok=False)
-    # Evaluate `files` from the current inputs and state.
+    # Construct dictionary `files` with the structured fields for this stage.
     files = {}
     # Loop over `(branch, width)` in `[('image', 64), ('text', 4)]`:
     for branch, width in [('image',64),('text',4)]:
@@ -369,9 +370,9 @@ def export_artifact(folder, params, calibration, policy='fp32'):
             spec = jax.ShapeDtypeStruct((batch, width), jnp.float32)
             # Compile and trace the function with XLA (`payload`).
             payload = export.export(jax.jit(fn))(spec).serialize()
-            # Evaluate `name` from the current inputs and state.
+            # Compute `name` as `f'{branch}-{batch}.jax'`.
             name = f'{branch}-{batch}.jax'
-            # Execute the next step of the computation.
+            # Write the serialized artifact payload to disk.
             (folder/name).write_bytes(payload)
             # Compute deterministic cryptographic digest `files[name]` for provenance verification.
             files[name] = hashlib.sha256(payload).hexdigest()
@@ -379,30 +380,29 @@ def export_artifact(folder, params, calibration, policy='fp32'):
     metadata = {'contract':CONTRACT,'policy':policy,'calibration':calibration,'files':files,
                 'parameter_hash':digest({k:np.asarray(v).tolist() for k,v in params.items()}),
                 'runtime':'JAX CPU export; int32 accumulation for w8a8; no native-int8 speed claim'}
-    # Read or serialize artifact data on disk (``).
+    # Compute `(folder/'manifest.json').write_text(json.dumps({'payload':metadata,'sha256':digest(metadata)},allow_nan` as `False))`.
     (folder/'manifest.json').write_text(json.dumps({'payload':metadata,'sha256':digest(metadata)},allow_nan=False))
 
 # Function `load_artifact(folder)` implementing this stage's computation:
 def load_artifact(folder):
-    # Read or serialize artifact data on disk (`folder`).
-    # Read or serialize artifact data on disk (`record`).
-    # Evaluate `meta` from the current inputs and state.
+    # Compute `folder` as `Path(folder)`.
     folder = Path(folder)
     record = json.loads((folder/'manifest.json').read_text())
     meta = record['payload']
-    # Evaluate `names` from the current inputs and state.
+    # Construct dictionary `names` with the structured fields for this stage.
     names = {f'{branch}-{batch}.jax' for branch in ['image','text'] for batch in [1,8]}
     # Guard input contract (`record['sha256'] != digest(meta) or meta['contract'] != CONTRACT or set(meta['files']) != names`) and fail fast if violated.
     if record['sha256'] != digest(meta) or meta['contract'] != CONTRACT or set(meta['files']) != names:
         raise ValueError('artifact metadata mismatch')
-    # Evaluate `loaded` from the current inputs and state.
+    # Construct dictionary `loaded` with the structured fields for this stage.
     loaded = {}
     # Loop over `(name, checksum)` in `meta['files'].items()`:
     for name, checksum in meta['files'].items():
-        # Evaluate `payload` from the current inputs and state.
+        # Evaluate the compound expression for `payload`.
         payload = (folder/name).read_bytes()
         # Guard input contract (`hashlib.sha256(payload).hexdigest() != checksum`) and fail fast if violated.
-        if hashlib.sha256(payload).hexdigest() != checksum: raise ValueError('artifact checksum mismatch')
+        if hashlib.sha256(payload).hexdigest() != checksum:
+            raise ValueError('artifact checksum mismatch')
         # Run `export.deserialize` to compute `loaded[name]`.
         loaded[name] = export.deserialize(payload)
     # Return `{'meta': meta, 'models': loaded}` to the caller.
@@ -413,14 +413,15 @@ def infer(artifact, *, images=None, captions=None):
     # Guard input contract (`(images is None) == (captions is None)`) and fail fast if violated.
     if (images is None) == (captions is None):
         raise ValueError('supply exactly one modality per embedding request')
-    # Evaluate `branch` from the current inputs and state.
+    # Compute `branch` as `'image' if images is not None else 'text'`.
     branch = 'image' if images is not None else 'text'
     # Run `image_features` to compute `x`.
     x = image_features(images) if images is not None else text_features(captions)
-    # Evaluate `name` from the current inputs and state.
+    # Compute `name` as `f'{branch}-{len(x)}.jax'`.
     name = f'{branch}-{len(x)}.jax'
     # Guard input contract (`name not in artifact['models']`) and fail fast if violated.
-    if name not in artifact['models']: raise ValueError('supported batch sizes are 1 and 8')
+    if name not in artifact['models']:
+        raise ValueError('supported batch sizes are 1 and 8')
     # Create device-backed JAX array `result`.
     result = artifact['models'][name].call(jnp.asarray(x))
     # Synchronize host execution until asynchronous device computation completes.
@@ -431,15 +432,15 @@ def infer(artifact, *, images=None, captions=None):
 # Function `measure(artifact, images, repeats)` implementing this stage's computation:
 def measure(artifact, images, repeats=30):
     # Guard input contract (`repeats < 2`) and fail fast if violated.
-    if repeats < 2: raise ValueError('need repeated observations')
+    if repeats < 2:
+        raise ValueError('need repeated observations')
     # Run `infer` to perform the next check or state transition.
     infer(artifact, images=images)
-    # Evaluate `samples` from the current inputs and state.
+    # Initialize list `samples` for the stage values.
     samples=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `start`.
-        # Execute the next step of the computation.
         # Record execution timing or profiler trace in ``.
         start=time.perf_counter()
         infer(artifact,images=images)
@@ -452,13 +453,14 @@ def measure(artifact, images, repeats=30):
 def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_accuracy=0.75):
     """Measured fixture quality gate before an atomic local pointer change."""
     # Guard input contract (`not 0 <= minimum_accuracy <= 1`) and fail fast if violated.
-    if not 0 <= minimum_accuracy <= 1: raise ValueError('invalid quality threshold')
+    if not 0 <= minimum_accuracy <= 1:
+        raise ValueError('invalid quality threshold')
     # Run `load_artifact` to compute `artifact`.
     artifact = load_artifact(candidate)
     # Guard input contract (`len(evaluation_images) != 8 or np.asarray(evaluation_labels).shape != (8,)`) and fail fast if violated.
     if len(evaluation_images) != 8 or np.asarray(evaluation_labels).shape != (8,):
         raise ValueError('quality gate needs eight declared labeled examples')
-    # Evaluate `bank` from the current inputs and state.
+    # Initialize list `bank` for the stage values.
     bank = ['vertical thin','vertical thick','horizontal thin','horizontal thick'] * 2
     # Run `infer` to compute `zi`.
     # Run `infer` to compute `zt`.
@@ -469,16 +471,14 @@ def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_
     # Reduce across the target axis to summarize `score`.
     score = float(np.mean(predicted == evaluation_labels))
     # Guard input contract (`score < minimum_accuracy`) and fail fast if violated.
-    if score < minimum_accuracy: raise ValueError('candidate failed measured retrieval gate')
-    # Read or serialize artifact data on disk (`registry`).
-    # Execute the next step of the computation.
+    if score < minimum_accuracy:
+        raise ValueError('candidate failed measured retrieval gate')
+    # Compute `registry` as `Path(registry)`.
     registry=Path(registry)
     registry.mkdir(parents=True,exist_ok=True)
     # Read or serialize artifact data on disk (`record`).
     record={'folder':str(Path(candidate).resolve()),'manifest_sha256':hashlib.sha256((Path(candidate)/'manifest.json').read_bytes()).hexdigest(),'gate_accuracy':score}
-    # Evaluate `temporary` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
-    # Execute the next step of the computation.
+    # Compute `temporary` as `registry/'ACTIVE.tmp'`.
     temporary=registry/'ACTIVE.tmp'
     temporary.write_text(json.dumps(record))
     temporary.replace(registry/'ACTIVE.json')
@@ -488,7 +488,6 @@ def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_
 # Function `load_pairs(manifest_path, split)` implementing this stage's computation:
 def load_pairs(manifest_path, split):
     """Read explicitly licensed local .npy image/caption pairs; no downloads."""
-    # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     path=Path(manifest_path).resolve()
     manifest=json.loads(path.read_text())
@@ -499,25 +498,23 @@ def load_pairs(manifest_path, split):
     records=manifest.get('records',[])
     # Guard input contract (`not records or len({r['id'] for r in records}) != len(records)`) and fail fast if violated.
     if not records or len({r['id'] for r in records})!=len(records):raise ValueError('duplicate or missing pair IDs')
-    # Evaluate `train_groups` from the current inputs and state.
+    # Construct dictionary `train_groups` with the structured fields for this stage.
     train_groups={r['group'] for r in records if r['split']=='train'}
-    # Evaluate `held_groups` from the current inputs and state.
+    # Construct dictionary `held_groups` with the structured fields for this stage.
     held_groups={r['group'] for r in records if r['split']=='held'}
     # Guard input contract (`train_groups & held_groups`) and fail fast if violated.
     if train_groups & held_groups:raise ValueError('source groups leak across splits')
-    # Evaluate `rows` from the current inputs and state.
+    # Initialize list `rows` for the stage values.
     rows=[r for r in records if r['split']==split]
     # Guard input contract (`not rows`) and fail fast if violated.
     if not rows:raise ValueError('empty split')
-    # Evaluate `images` from the current inputs and state.
-    # Evaluate `captions` from the current inputs and state.
-    # Evaluate `labels` from the current inputs and state.
+    # Initialize list `images` for the stage values.
     images=[]
     captions=[]
     labels=[]
     # Loop over `r` in `rows`:
     for r in rows:
-        # Evaluate `image_path` from the current inputs and state.
+        # Evaluate the compound expression for `image_path`.
         image_path=(path.parent/r['image']).resolve()
         # Guard input contract (`not image_path.is_relative_to(path.parent)`) and fail fast if violated.
         if not image_path.is_relative_to(path.parent):raise ValueError('image must be inside the dataset folder')
@@ -527,7 +524,7 @@ def load_pairs(manifest_path, split):
         # Run `text_features` to compute `feat`.
         image_features(pixels[None,...])
         feat=text_features([r['caption']])[0]
-        # Evaluate `label` from the current inputs and state.
+        # Evaluate the compound expression for `label`.
         label=(0 if feat[0] else 2)+(1 if feat[3] else 0)
         # Append the current step result to `images`.
         # Append the current step result to `images`.

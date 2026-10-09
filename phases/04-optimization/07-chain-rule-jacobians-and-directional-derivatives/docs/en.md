@@ -84,7 +84,7 @@ x = jnp.array([2.0, 3.0])
 v = jnp.array([1.0, -1.0])
 # Construct `J` via `jnp.array([[4.0, 1.0], [3.0, 2.0]])`
 J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(f(x), jnp.array([7.0, 6.0]))`.
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 ```
 
@@ -104,9 +104,9 @@ _, pullback = jax.vjp(f, x)
 c = out
 # Run `pullback` to compute `jt_c`.
 jt_c = pullback(c)[0]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jv, jnp.array([3.0, 1.0]))`.
 assert jnp.allclose(jv, jnp.array([3.0, 1.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`
+# Assert that `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`.
 assert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))
 ```
 
@@ -121,11 +121,11 @@ Append the scalar objective and independent matrix checks, then run python main.
 def loss(x):
     # Return `0.5 * jnp.sum(f(x) ** 2)` to the caller.
     return 0.5 * jnp.sum(f(x) ** 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.jacfwd(f)(x), J)`.
 assert jnp.allclose(jax.jacfwd(f)(x), J)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(loss)(x), J.T @ c)`
+# Assert that `jnp.allclose(jax.grad(loss)(x), J.T @ c)`.
 assert jnp.allclose(jax.grad(loss)(x), J.T @ c)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`
+# Assert that `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`.
 assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 # Print the observed values to compare against the expected result.
 print('Jv / loss gradient:', jv, jt_c)
@@ -151,7 +151,7 @@ x = jnp.array([2.0, 3.0])
 v = jnp.array([1.0, -1.0])
 # Construct `J` via `jnp.array([[4.0, 1.0], [3.0, 2.0]])`
 J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(f(x), jnp.array([7.0, 6.0]))`.
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
 # Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
@@ -163,20 +163,20 @@ _, pullback = jax.vjp(f, x)
 c = out
 # Run `pullback` to compute `jt_c`.
 jt_c = pullback(c)[0]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jv, jnp.array([3.0, 1.0]))`.
 assert jnp.allclose(jv, jnp.array([3.0, 1.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`
+# Assert that `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`.
 assert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))
 
 # Step 3 — Connect to a scalar loss: Both routes give directional loss derivative 27.
 def loss(x):
     # Return `0.5 * jnp.sum(f(x) ** 2)` to the caller.
     return 0.5 * jnp.sum(f(x) ** 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.jacfwd(f)(x), J)`.
 assert jnp.allclose(jax.jacfwd(f)(x), J)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(loss)(x), J.T @ c)`
+# Assert that `jnp.allclose(jax.grad(loss)(x), J.T @ c)`.
 assert jnp.allclose(jax.grad(loss)(x), J.T @ c)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`
+# Assert that `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`.
 assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 # Print the observed values to compare against the expected result.
 print('Jv / loss gradient:', jv, jt_c)
@@ -230,7 +230,7 @@ PASS: optimization-07
 h = 0.01
 # Compute `fd` from `(f(x + h * v) - f(x - h * v)) / (2 * h)`
 fd = (f(x + h * v) - f(x - h * v)) / (2 * h)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd, J @ v, atol=0.0001, rtol=0.0001)`.
 assert jnp.allclose(fd, J @ v, atol=0.0001, rtol=0.0001)
 ```
 
@@ -248,9 +248,9 @@ A numerical perturbation provides a check independent of autodiff.
 x2 = jnp.array([0.0, 1.0])
 # Construct `J2` via `jnp.array([[0.0, 1.0], [1.0, 0.0]])`
 J2 = jnp.array([[0.0, 1.0], [1.0, 0.0]])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.jacrev(f)(x2), J2)`.
 assert jnp.allclose(jax.jacrev(f)(x2), J2)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)`
+# Assert that `jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)`.
 assert jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)
 ```
 
@@ -271,7 +271,7 @@ Replace the scalar loss by $L(x)=f_0(x)+2f_1(x)$. Predict its gradient at $(2,3)
 
 **Step-by-step implementation plan:**
 1. Return `f(x)[0] + 2 * f(x)[1]` to the caller.
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -280,7 +280,7 @@ Replace the scalar loss by $L(x)=f_0(x)+2f_1(x)$. Predict its gradient at $(2,3)
 def weighted_loss(x):
     # Return `f(x)[0] + 2 * f(x)[1]` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))`.
 assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))  # TODO: complete assertion check
 ```
 
@@ -291,7 +291,7 @@ assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))  # TODO:
 def weighted_loss(x):
     # Return `f(x)[0] + 2 * f(x)[1]` to the caller.
     return f(x)[0] + 2 * f(x)[1]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))`.
 assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))
 ```
 
@@ -321,8 +321,8 @@ Compare the derivative of the sum of outputs with $J^\mathsf{T}(1,1)$.
 1. Define `detached(x)` to evaluate the objective and its automatic derivatives:
 2. Run `jax.lax.stop_gradient` to compute `a`.
 3. Return `jnp.array([a * a + x[1], a * x[1]])` to the caller.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.arr...`
+4. Assert that `jnp.allclose(detached(x), f(x))`.
+5. Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -334,11 +334,11 @@ def detached(x):
     a = jax.lax.stop_gradient(...)  # TODO: compute a
     # Return `jnp.array([a * a + x[1], a * x[1]])` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(detached(x), f(x))`.
 assert jnp.allclose(detached(x), f(x))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.arr...`
+# Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))`.
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0...`
+# Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))`.
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))  # TODO: complete assertion check
 ```
 
@@ -352,11 +352,11 @@ def detached(x):
     a = jax.lax.stop_gradient(x[0])
     # Return `jnp.array([a * a + x[1], a * x[1]])` to the caller.
     return jnp.array([a * a + x[1], a * x[1]])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(detached(x), f(x))`.
 assert jnp.allclose(detached(x), f(x))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.arr...`
+# Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))`.
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0...`
+# Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))`.
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))
 ```
 
@@ -388,7 +388,7 @@ The reference is $A^\mathsf{T}c$, not $Ac$.
 2. Construct `c3` via `jnp.array([1.0, -1.0, 2.0])`
 3. Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
 4. Check tensor shape invariant: `back(c3)[0].shape == (2,)`
-5. Check numerical equivalence within tolerance: `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`
+5. Assert that `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -402,7 +402,7 @@ c3 = jnp.array(...)  # TODO: compute c3
 _, back = jax.vjp(...)  # TODO: compute _, back
 # Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`
+# Assert that `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`.
 assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))  # TODO: complete assertion check
 ```
 
@@ -418,7 +418,7 @@ c3 = jnp.array([1.0, -1.0, 2.0])
 _, back = jax.vjp(lambda z: A @ z, x)
 # Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape == (2,)
-# Check numerical equivalence within tolerance: `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`
+# Assert that `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`.
 assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))
 ```
 

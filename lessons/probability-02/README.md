@@ -104,9 +104,9 @@ def posterior(X,y,sigma,prior_scale):
     return mean,covariance
 # Run `posterior` to compute `(mean, cov)`.
 mean,cov = posterior(X,y,sigma,prior_scale)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)`.
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`
+# Assert that `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`.
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 ```
 
@@ -129,9 +129,9 @@ def predictive(design,mean,cov,sigma):
 query = jnp.array([[1.,0.],[1.,2.]])
 # Run `predictive` to compute `(center, latent_var, observation_var)`.
 center,latent_var,observation_var = predictive(query,mean,cov,sigma)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)`.
 assert jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(observation_var-latent_var,1.)`
+# Assert that `jnp.allclose(observation_var-latent_var,1.)`.
 assert jnp.allclose(observation_var-latent_var,1.)
 # Print the observed values to compare against the expected result.
 print('posterior mean:',mean,'covariance:',cov)
@@ -168,9 +168,9 @@ def posterior(X,y,sigma,prior_scale):
     return mean,covariance
 # Run `posterior` to compute `(mean, cov)`.
 mean,cov = posterior(X,y,sigma,prior_scale)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)`.
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`
+# Assert that `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`.
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 
 # Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
@@ -185,9 +185,9 @@ def predictive(design,mean,cov,sigma):
 query = jnp.array([[1.,0.],[1.,2.]])
 # Run `predictive` to compute `(center, latent_var, observation_var)`.
 center,latent_var,observation_var = predictive(query,mean,cov,sigma)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)`.
 assert jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(observation_var-latent_var,1.)`
+# Assert that `jnp.allclose(observation_var-latent_var,1.)`.
 assert jnp.allclose(observation_var-latent_var,1.)
 # Print the observed values to compare against the expected result.
 print('posterior mean:',mean,'covariance:',cov)
@@ -263,9 +263,9 @@ The calculation treats rows as independent new evidence. Duplicating a stored fi
 ```python
 # Experiment — Check the prior-only boundary: The posterior recovers the prior when no likelihood information...
 empty_mean,empty_cov = posterior(jnp.empty((0,2)),jnp.empty((0,)),sigma,prior_scale)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(empty_mean,0.)`.
 assert jnp.allclose(empty_mean,0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(empty_cov,4*jnp.eye(2))`
+# Assert that `jnp.allclose(empty_cov,4*jnp.eye(2))`.
 assert jnp.allclose(empty_cov,4*jnp.eye(2))
 ```
 
@@ -398,7 +398,7 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 1. Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 2. Sample deterministic random values into `weights` using an explicit PRNG key.
 3. Sample deterministic random values into `replicated` using an explicit PRNG key.
-4. Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
+4. Assert that `abs(float(replicated.var())-float(observation_var[0]))<.07`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -410,7 +410,7 @@ kw,kn = jax.random.split(...)  # TODO: compute kw,kn
 weights = ...  # TODO: compute weights
 # Sample deterministic random values into `replicated` using an explicit PRNG key.
 replicated = ...  # TODO: compute replicated
-# Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
+# Assert that `abs(float(replicated.var())-float(observation_var[0]))<.07`.
 assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete assertion check
 ```
 
@@ -424,7 +424,7 @@ kw,kn=jax.random.split(jax.random.key(37))
 weights=mean+jax.random.normal(kw,(30000,2))@jnp.linalg.cholesky(cov).T
 # Sample deterministic random values into `replicated` using an explicit PRNG key.
 replicated=weights[:,0]+sigma*jax.random.normal(kn,(30000,))
-# Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
+# Assert that `abs(float(replicated.var())-float(observation_var[0]))<.07`.
 assert abs(float(replicated.var())-float(observation_var[0]))<.07
 ```
 

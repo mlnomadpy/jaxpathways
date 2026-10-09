@@ -16,9 +16,9 @@ def loss(weight):
 # Step 3: Verify shapes and numerical invariants
 value, gradient = jax.value_and_grad(loss)(1.0)
 # Print the observed values to compare against the expected result.
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(value, 14./3.)`.
 assert jnp.allclose(value, 14./3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(gradient, -28./3.)`
+# Assert that `jnp.allclose(gradient, -28./3.)`.
 assert jnp.allclose(gradient, -28./3.)
 
 # Losses and value_and_grad: A loss value tells us how the current prediction is scored.
@@ -37,9 +37,9 @@ def loss(weight):
 value, gradient = jax.value_and_grad(loss)(1.0)
 # Print the observed values to compare against the expected result.
 print("Loss:", float(value), "gradient:", float(gradient))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(value, 14./3.)`.
 assert jnp.allclose(value, 14./3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(gradient, -28./3.)`
+# Assert that `jnp.allclose(gradient, -28./3.)`.
 assert jnp.allclose(gradient, -28./3.)
 
 # Figure data experiment
@@ -60,7 +60,7 @@ for weight in (0., 1., 2.):
     value_here, grad_here = jax.value_and_grad(loss)(weight)
     # Print the observed values to compare against the expected result.
     print("weight / loss / gradient:", weight, float(value_here), float(grad_here))
-    # Verify that the numerical values match the expected reference within tolerance.
+    # Assert that `jnp.allclose(grad_here, analytic_loss_gradient(weight))`.
     assert jnp.allclose(grad_here, analytic_loss_gradient(weight))
 
 # Experiment: Return residuals without changing the objective
@@ -74,11 +74,11 @@ def loss_with_residuals(weight):
 (aux_value, residuals), aux_gradient = jax.value_and_grad(loss_with_residuals, has_aux=True)(1.)
 # Check tensor shape invariant: `residuals.shape == (3,)`
 assert residuals.shape == (3,)
-# Check numerical equivalence within tolerance: `jnp.allclose(residuals, jnp.array([-1., -2., -3.]))`
+# Assert that `jnp.allclose(residuals, jnp.array([-1., -2., -3.]))`.
 assert jnp.allclose(residuals, jnp.array([-1., -2., -3.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(aux_value, value)`
+# Assert that `jnp.allclose(aux_value, value)`.
 assert jnp.allclose(aux_value, value)
-# Check numerical equivalence within tolerance: `jnp.allclose(aux_gradient, gradient)`
+# Assert that `jnp.allclose(aux_gradient, gradient)`.
 assert jnp.allclose(aux_gradient, gradient)
 
 # Reference solution. Try the exercise before reading this.
@@ -86,13 +86,13 @@ assert jnp.allclose(aux_gradient, gradient)
 small_step = 1. - 0.1 * gradient
 # Compute `large_step` from `1. - 0.3 * gradient`
 large_step = 1. - 0.3 * gradient
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(small_step, 29. / 15.)`.
 assert jnp.allclose(small_step, 29. / 15.)
 # Assert invariant `loss(small_step) < value` holds
 assert loss(small_step) < value
 # Assert invariant `loss(large_step) > value` holds
 assert loss(large_step) > value
-# Check numerical equivalence within tolerance: `jnp.allclose(loss(2.), 0.)`
+# Assert that `jnp.allclose(loss(2.), 0.)`.
 assert jnp.allclose(loss(2.), 0.)
 
 # Reference practice: Make the data boundary explicit
@@ -102,9 +102,9 @@ def explicit_loss(weight, inputs, targets):
     return jnp.mean((weight * inputs - targets) ** 2)
 # Differentiate the objective to obtain `(v_explicit, g_explicit)` via automatic differentiation.
 v_explicit, g_explicit = jax.value_and_grad(explicit_loss)(1., x, y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(v_explicit, 14. / 3.)`.
 assert jnp.allclose(v_explicit, 14. / 3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(g_explicit, -28. / 3.)`
+# Assert that `jnp.allclose(g_explicit, -28. / 3.)`.
 assert jnp.allclose(g_explicit, -28. / 3.)
 
 # Reference practice: Audit reduction and batch replication
@@ -118,12 +118,12 @@ g_mean = jax.grad(explicit_loss)(1., x, y)
 g_sum = jax.grad(summed_loss)(1., x, y)
 # Compute `x_twice, y_twice` from `jnp.tile(x, 2), jnp.tile(y, 2)`
 x_twice, y_twice = jnp.tile(x, 2), jnp.tile(y, 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(g_sum, len(x) * g_mean)`.
 assert jnp.allclose(g_sum, len(x) * g_mean)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)`
+# Assert that `jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)`.
 assert jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_...`
+# Assert that `jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_sum)`.
 assert jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_sum)
-# Check numerical equivalence within tolerance: `jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)`
+# Assert that `jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)`.
 assert jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)
 print("PASS: transforms-02")

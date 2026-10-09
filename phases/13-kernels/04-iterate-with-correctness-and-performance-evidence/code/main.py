@@ -25,7 +25,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -154,7 +153,6 @@ def target_benchmark(candidate,baseline,args,repeats=20):
 # Audit a matrix of shapes and precisions
 # Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
 rng=np.random.default_rng(42)
-# Evaluate `correctness` from the current inputs and state.
 # Compute `correctness` from `[]`
 correctness=[]
 precision_gaps=[]
@@ -166,7 +164,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     original_y=rng.normal(size=shape).astype(np.float32)
     # Compute `ideal` from `2*original_x+original_y`
     ideal=2*original_x+original_y
-    # Evaluate `row` from the current inputs and state.
     # Compute `row` from `[]`
     row=[]
     gaps=[]
@@ -236,7 +233,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -364,7 +360,6 @@ def target_benchmark(candidate,baseline,args,repeats=20):
 
 # Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
 rng=np.random.default_rng(42)
-# Evaluate `correctness` from the current inputs and state.
 # Compute `correctness` from `[]`
 correctness=[]
 precision_gaps=[]
@@ -376,7 +371,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     original_y=rng.normal(size=shape).astype(np.float32)
     # Compute `ideal` from `2*original_x+original_y`
     ideal=2*original_x+original_y
-    # Evaluate `row` from the current inputs and state.
     # Compute `row` from `[]`
     row=[]
     gaps=[]
@@ -474,9 +468,8 @@ for block in [(8,128),(16,256)]:
     for buffers in (2,3):
         # Run `pipelined_axpy` to compute `result`.
         result=pipelined_axpy(a,b,block,buffers=buffers)
-        # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)`
+        # Compute `np.testing.assert_allclose(result,expected,rtol` as `1e-6,atol=1e-6)`.
         np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)
-        # Evaluate `gm` from the current inputs and state.
         # Compute `gm` from `(15+block[0]-1)//block[0]`
         gm=(15+block[0]-1)//block[0]
         gn=(255+block[1]-1)//block[1]
@@ -487,7 +480,7 @@ for block in [(8,128),(16,256)]:
 # Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.
 # Iterate over `(first, second)` to step through the computation:
 for first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:
-    # Compute `rejected` from `False`
+    # Compute `rejected` as `False`.
     rejected=False
     # Run the boundary check and catch the expected exception:
     try:pipelined_axpy(first,second)

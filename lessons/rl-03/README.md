@@ -292,7 +292,7 @@ theta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)
 theta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)
 # Assert invariant `history_pg[-1] > .9 and history_ppo[-1] > .9` holds
 assert history_pg[-1] > .9 and history_ppo[-1] > .9
-# Check numerical equivalence within tolerance: `jnp.allclose(history_pg[0], .466875, atol=1e-6)`
+# Assert that `jnp.allclose(history_pg[0], .466875, atol=1e-6)`.
 assert jnp.allclose(history_pg[0], .466875, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('REINFORCE initial/final exact return:', history_pg[0], history_pg[-1])
@@ -305,7 +305,7 @@ eps = 1e-3
 d = jnp.array([0., 1., 0.])
 # Compute `fd` from `(exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)`
 fd = (exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)`.
 assert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)
 ```
 
@@ -515,7 +515,7 @@ theta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)
 theta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)
 # Assert invariant `history_pg[-1] > .9 and history_ppo[-1] > .9` holds
 assert history_pg[-1] > .9 and history_ppo[-1] > .9
-# Check numerical equivalence within tolerance: `jnp.allclose(history_pg[0], .466875, atol=1e-6)`
+# Assert that `jnp.allclose(history_pg[0], .466875, atol=1e-6)`.
 assert jnp.allclose(history_pg[0], .466875, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('REINFORCE initial/final exact return:', history_pg[0], history_pg[-1])
@@ -528,7 +528,7 @@ eps = 1e-3
 d = jnp.array([0., 1., 0.])
 # Compute `fd` from `(exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)`
 fd = (exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)`.
 assert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)
 ```
 
@@ -584,9 +584,9 @@ ratio = jnp.array([.6,1.,1.4])
 positive = jnp.minimum(ratio,jnp.clip(ratio,.8,1.2))
 # Reduce across the target axis to summarize `negative`.
 negative = jnp.minimum(-ratio,-jnp.clip(ratio,.8,1.2))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(positive,jnp.array([.6,1.,1.2]))`.
 assert jnp.allclose(positive,jnp.array([.6,1.,1.2]))
-# Check numerical equivalence within tolerance: `jnp.allclose(negative,jnp.array([-.8,-1.,-1.4]))`
+# Assert that `jnp.allclose(negative,jnp.array([-.8,-1.,-1.4]))`.
 assert jnp.allclose(negative,jnp.array([-.8,-1.,-1.4]))
 # Print the observed values to compare against the expected result.
 print('positive / negative targets:', positive, negative)
@@ -608,7 +608,7 @@ _, batch = rollout(z,jax.random.key(902),32768,8)
 sampled = -jax.grad(policy_loss)(z,batch,'reinforce')
 # Differentiate the objective to obtain `exact` via automatic differentiation.
 exact = jax.grad(exact_return)(z)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(sampled,exact,atol=.012,rtol=.04)`.
 assert jnp.allclose(sampled,exact,atol=.012,rtol=.04)
 # Print the observed values to compare against the expected result.
 print('sampled / exact gradient:', sampled, exact)
@@ -761,7 +761,7 @@ From position $0$, two moves earn $-0.02$. From position $1$, they earn $0.99$.
 
 **Step-by-step implementation plan:**
 1. Compute `short` from `exact_return(jnp.full(3,100.),horizon=2)`
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `jnp.allclose(short,(-.02+.99)/2,atol=1e-6)`.
 3. Assert invariant `short < exact_return(jnp.full(3,100.),horizon=8)` holds
 
 **Starter code scaffold (fill in the TODOs):**
@@ -770,7 +770,7 @@ From position $0$, two moves earn $-0.02$. From position $1$, they earn $0.99$.
 # Change the time budget (Transfer / diagnosis): Changing the horizon changes the task itself.
 # Compute `short` from `exact_return(jnp.full(3,100.),horizon=2)`
 short = exact_return(...)  # TODO: compute short
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(short,(-.02+.99)/2,atol=1e-6)`.
 assert jnp.allclose(short,(-.02+.99)/2,atol=1e-6)  # TODO: complete assertion check
 # Assert invariant `short < exact_return(jnp.full(3,100.),horizon=8)` holds
 assert short  # TODO: complete assertion check
@@ -782,7 +782,7 @@ assert short  # TODO: complete assertion check
 # Change the time budget (Transfer / diagnosis): Changing the horizon changes the task itself.
 # Compute `short` from `exact_return(jnp.full(3,100.),horizon=2)`
 short = exact_return(jnp.full(3,100.),horizon=2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(short,(-.02+.99)/2,atol=1e-6)`.
 assert jnp.allclose(short,(-.02+.99)/2,atol=1e-6)
 # Assert invariant `short < exact_return(jnp.full(3,100.),horizon=8)` holds
 assert short < exact_return(jnp.full(3,100.),horizon=8)

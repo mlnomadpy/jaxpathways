@@ -132,9 +132,9 @@ Append the remaining block, then run python main.py in the terminal. Compare the
 print("Predictions:", predict(w, 1., X))
 # Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X), targets)`.
 assert jnp.allclose(predict(w, 1., X), targets)
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 1.), 0.)`
+# Assert that `jnp.allclose(mse(w, 1.), 0.)`.
 assert jnp.allclose(mse(w, 1.), 0.)
 ```
 
@@ -171,9 +171,9 @@ def mse(w, bias):
 print("Predictions:", predict(w, 1., X))
 # Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X), targets)`.
 assert jnp.allclose(predict(w, 1., X), targets)
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 1.), 0.)`
+# Assert that `jnp.allclose(mse(w, 1.), 0.)`.
 assert jnp.allclose(mse(w, 1.), 0.)
 ```
 
@@ -228,9 +228,9 @@ PASS: optimization-01
 # Experiment — Verify the gradient by hand: The matrix formula and autodiff agree for the same row-matched...
 # Differentiate the objective to obtain `(gw, gb)` via automatic differentiation.
 gw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(gw, jnp.array([-4/3, -4/3]))`.
 assert jnp.allclose(gw, jnp.array([-4/3, -4/3]))
-# Check numerical equivalence within tolerance: `jnp.allclose(gb, -2.)`
+# Assert that `jnp.allclose(gb, -2.)`.
 assert jnp.allclose(gb, -2.)
 # Print the observed values to compare against the expected result.
 print("Analytic gradients:", gw, gb)
@@ -251,7 +251,7 @@ column_targets = targets[:, None]
 pairwise = predict(w, 1., X) - column_targets
 # Check tensor shape invariant: `pairwise.shape == (3, 3)`
 assert pairwise.shape == (3, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairwise**2), 28/9)`
+# Assert that `jnp.allclose(jnp.mean(pairwise**2), 28/9)`.
 assert jnp.allclose(jnp.mean(pairwise**2), 28/9)
 # Print the observed values to compare against the expected result.
 print("Wrong residual shape:", pairwise.shape)
@@ -280,7 +280,7 @@ point = jnp.array([0.2, -0.4])
 residual = X @ point - targets
 # Perform matrix contraction / projection to compute `analytic_mean`.
 analytic_mean = 2 * X.T @ residual / X.shape[0]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)`.
 assert jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)
 # Check tensor shape invariant: `jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_...`
 assert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, atol=1e-6)
@@ -301,17 +301,17 @@ Set the bias to zero. Predict each residual and calculate the loss by hand, then
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Verify that the numerical values match the expected reference within tolerance.
-2. Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 0.), 1.)`
+1. Assert that `jnp.allclose(residual, -jnp.ones(3))`.
+2. Assert that `jnp.allclose(mse(w, 0.), 1.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Set the bias to zero.
 residual = predict(...)  # TODO: compute residual
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(residual, -jnp.ones(3))`.
 assert jnp.allclose(residual, -jnp.ones(3))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 0.), 1.)`
+# Assert that `jnp.allclose(mse(w, 0.), 1.)`.
 assert jnp.allclose(mse(w, 0.), 1.)  # TODO: complete assertion check
 ```
 
@@ -320,9 +320,9 @@ assert jnp.allclose(mse(w, 0.), 1.)  # TODO: complete assertion check
 ```python
 # Exercise solution: Set the bias to zero.
 residual = predict(w, 0., X) - targets
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(residual, -jnp.ones(3))`.
 assert jnp.allclose(residual, -jnp.ones(3))
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 0.), 1.)`
+# Assert that `jnp.allclose(mse(w, 0.), 1.)`.
 assert jnp.allclose(mse(w, 0.), 1.)
 ```
 
@@ -349,7 +349,7 @@ The new target is the dot product plus bias.
 **Step-by-step implementation plan:**
 1. Construct `X_new` via `jnp.concatenate([X, jnp.array([[2., -1.]])])`
 2. Construct `y_new` via `jnp.concatenate([targets, jnp.array([6.])])`
-3. Verify that the numerical values match the expected reference within tolerance.
+3. Assert that `jnp.allclose(predict(w, 1., X_new), y_new)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -359,7 +359,7 @@ The new target is the dot product plus bias.
 X_new = jnp.concatenate(...)  # TODO: compute X_new
 # Construct `y_new` via `jnp.concatenate([targets, jnp.array([6.])])`
 y_new = jnp.concatenate(...)  # TODO: compute y_new
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X_new), y_new)`.
 assert jnp.allclose(predict(w, 1., X_new), y_new)  # TODO: complete assertion check
 ```
 
@@ -371,7 +371,7 @@ assert jnp.allclose(predict(w, 1., X_new), y_new)  # TODO: complete assertion ch
 X_new = jnp.concatenate([X, jnp.array([[2., -1.]])])
 # Construct `y_new` via `jnp.concatenate([targets, jnp.array([6.])])`
 y_new = jnp.concatenate([targets, jnp.array([6.])])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X_new), y_new)`.
 assert jnp.allclose(predict(w, 1., X_new), y_new)
 ```
 

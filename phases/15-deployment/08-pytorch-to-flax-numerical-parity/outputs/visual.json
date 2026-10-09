@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-08",
-  "contentHash": "a930eef6c821e1921e29dc2e3d767fbbfd3e2f6fcf269f305bcf7d8866731e58",
+  "contentHash": "38210ecd214a46023dd350f47f905595ea0e0f9de27e8bdbc0673817bb96bbf8",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T21:55:46.265243+00:00",
@@ -49,7 +49,7 @@
     "prediction": "Why can a larger absolute difference pass at a larger reference value?",
     "reading": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
     "alt": "Read each row as one elementwise decision using absolute tolerance \\(2\\times10^{-6}\\) and relative tolerance \\(2\\times10^{-5}\\). Near zero the absolute term determines the allowance. At reference \\(100\\), the relative term increases it. These are hand-worked tolerance examples, not measured conversion errors; the executed bar plot below reports the model comparison.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,
     "panel": {
       "kind": "table",

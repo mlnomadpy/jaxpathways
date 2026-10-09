@@ -173,7 +173,7 @@ assert len(steps)==len(input_events)==len(model_events)==4
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
+        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
     # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
@@ -277,7 +277,7 @@ assert len(steps)==len(input_events)==len(model_events)==4
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
+        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
     # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
@@ -472,19 +472,18 @@ Sort endpoints and merge intervals that intersect.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `total` from the current inputs and state.
-2. Compute `total` from `0`
-3. Iterate over `(start, end)` to step through the computation:
-4. Guard input contract (`end < start`) and fail fast if violated.
-5. Branch on condition `right is None`:
+1. Compute `total` as `0`.
+2. Iterate over `(start, end)` to step through the computation:
+3. Guard input contract (`end < start`) and fail fast if violated.
+4. Branch on condition `right is None`:
+5. Return `total + (0 if right is None else right - left)` to the caller.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
-    # Evaluate `total` from the current inputs and state.
-    # Compute `total` from `0`
+    # Compute `total` as `0`.
     total = ...  # TODO: compute total
     left = ...  # TODO: compute left
     # Iterate over `(start, end)` to step through the computation:
@@ -512,8 +511,7 @@ print('Hypothetical union: 12 microseconds; summed duration: 19.')
 ```python
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
-    # Evaluate `total` from the current inputs and state.
-    # Compute `total` from `0`
+    # Compute `total` as `0`.
     total=0
     left=right=None
     # Iterate over `(start, end)` to step through the computation:

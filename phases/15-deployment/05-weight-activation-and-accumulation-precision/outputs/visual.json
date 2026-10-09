@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-05",
-  "contentHash": "83b9ec47023bf593818be36a3ca2af1f43b3892fda9a9462e653353dd6dcef71",
+  "contentHash": "d4eed41e9730891aa6ff5c8ea8663bf72376a8cad435d2591fb9e850db2e7c03",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T21:55:34.192263+00:00",
@@ -76,7 +76,7 @@
     "prediction": "What happens if you ignore a nonzero zero-point when interpreting quantized values?",
     "reading": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
     "alt": "Follow affine integer codes into centered products, wide accumulation and compatible bias units, then output rescaling. Exact accumulator dtype and per-channel scale axes belong to the declared runtime policy. These arrows describe arithmetic dependencies, not a specific hardware kernel.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.4,
     "panel": {
       "kind": "graph",

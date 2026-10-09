@@ -55,7 +55,7 @@
       {
         "title": "Reward-to-go by hand",
         "prediction": "Predict the four targets for rewards \\((-0.01,-0.01,1,0)\\).",
-        "code": "# Experiment — Reward-to-go by hand: Zero padded rewards preserve the finite-episode sum, while the...\n# Construct `r` via `jnp.array([[-.01],[-.01],[1.],[0.]])`\nr = jnp.array([[-.01],[-.01],[1.],[0.]])\n# Run `returns_to_go` to compute `g`.\ng = returns_to_go(r)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))\n# Print the observed values to compare against the expected result.\nprint('reward-to-go:', g[:,0])",
+        "code": "# Experiment — Reward-to-go by hand: Zero padded rewards preserve the finite-episode sum, while the...\n# Construct `r` via `jnp.array([[-.01],[-.01],[1.],[0.]])`\nr = jnp.array([[-.01],[-.01],[1.],[0.]])\n# Run `returns_to_go` to compute `g`.\ng = returns_to_go(r)\n# Assert that `jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))`.\nassert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))\n# Print the observed values to compare against the expected result.\nprint('reward-to-go:', g[:,0])",
         "output": "The targets are \\((0.98,0.99,1,0)\\).",
         "explanation": "Zero padded rewards preserve the finite-episode sum, while the active mask removes meaningless log probabilities."
       }
@@ -68,7 +68,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Construct a two-action success from position \\(1\\). Compare masking by the pre-transition done flag with masking by the post-transition done flag.",
         "hint": "Record the mask before calling step; the successful transition still belongs to the episode.",
-        "solution": "# Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...\ns = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))\n# Compute `correct, broken` from `0., 0.`\ncorrect, broken = 0., 0.\n# Iterate over `a` to step through the computation:\nfor a in [1,1]:\n    # Compute `active` from `~s.done`\n    active = ~s.done\n    # Run `step` to compute `(s, reward, _, _)`.\n    s, reward, _, _ = step(s,jnp.int32(a))\n    # Accumulate the next contribution into `correct`.\n    correct += float(reward*active)\n    # Accumulate the next contribution into `broken`.\n    broken += float(reward*(~s.done))\n# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`\nassert abs(correct-.99) < 1e-6\n# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`\nassert abs(broken+.01) < 1e-6",
+        "solution": "# Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...\ns = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))\n# Compute `correct, broken` from `0., 0.`\ncorrect, broken = 0., 0.\n# Iterate over `a` to step through the computation:\nfor a in [1,1]:\n    # Compute `active` from `~s.done`\n    active = ~s.done\n    # Run `step` to compute `(s, reward, _, _)`.\n    s, reward, _, _ = step(s,jnp.int32(a))\n    # Accumulate the next contribution into `correct`.\n    correct += float(reward*active)\n    # Accumulate the next contribution into `broken`.\n    broken += float(reward*(~s.done))\n# Assert that `abs(correct-.99) < 1e-6`.\nassert abs(correct-.99) < 1e-6\n# Assert that `abs(broken+.01) < 1e-6`.\nassert abs(broken+.01) < 1e-6",
         "explanation": "The broken mask removes the action responsible for success, leaving only a cost."
       },
       {
@@ -76,7 +76,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Use very large positive logits and verify that every episode follows a shortest route.",
         "hint": "The two start states need different numbers of actions. Compare each return against its own initial position.",
-        "solution": "# Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...\n# Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.\n_, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)\n# Combine or mask array elements to form `expected`.\nexpected = jnp.where(easy['observation'][0] == 0,.98,.99)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)\n# Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds\nassert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])",
+        "solution": "# Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...\n# Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.\n_, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)\n# Combine or mask array elements to form `expected`.\nexpected = jnp.where(easy['observation'][0] == 0,.98,.99)\n# Assert that `jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)`.\nassert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)\n# Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds\nassert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])",
         "explanation": "The expected return is calculated from the initial position rather than copied from the collector."
       }
     ],
@@ -149,7 +149,7 @@
       "prediction": "Should every cell after the first done flag be treated identically to the transition that caused done?",
       "reading": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
       "alt": "Each row is one environment. A terminating transition can still earn reward; later cells are padding under this absorbing-state contract. Tensor length stays fixed while activity changes. This is a conceptual rollout example, not an auto-reset implementation.",
-      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "scope": "Architecture and dataflow mechanism diagram.",
       "height": 4.1,
       "panel": {
         "kind": "table",

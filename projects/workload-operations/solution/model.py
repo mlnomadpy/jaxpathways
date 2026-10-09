@@ -1,4 +1,4 @@
-"""Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
 # Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
@@ -20,8 +20,7 @@ def digest(value):
 # Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
@@ -35,7 +34,8 @@ def atomic_json(path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
-        if os.path.exists(temporary): os.unlink(temporary)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 
 # This file is materialized only inside the caller-owned temporary run folder.
@@ -140,7 +140,8 @@ def default_config(**changes):
     # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
+            raise ValueError(name+' must be a positive integer')
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
@@ -150,18 +151,17 @@ def default_config(**changes):
 
 # Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Read or serialize artifact data on disk (`root`).
-    # Execute the next step of the computation.
+    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
-    if timeout <= 0: raise ValueError('timeout must be positive')
+    if timeout <= 0:
+        raise ValueError('timeout must be positive')
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Evaluate `worker` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
+    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
@@ -170,33 +170,36 @@ def launch(root, config=None, timeout=10.):
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         timed_out=True
         process.terminate()
-        try: stdout,stderr=process.communicate(timeout=1.)
+        try:
+            stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
+    # Initialize list `events` for the stage values.
     events=[]
     malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         try:
             event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
+            if not isinstance(event,dict) or 'event' not in event:
+                raise ValueError('not an event')
             events.append(event)
-        except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+        except (ValueError,TypeError):
+            malformed.append(line)
+    # Compute `status` as `'timed_out' if timed_out else 'completed' if process.returncode == 0 and not malfo`.
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -209,9 +212,9 @@ def launch(root, config=None, timeout=10.):
 
 # Function `summarize(result)` implementing this stage's computation:
 def summarize(result):
-    # Evaluate `updates` from the current inputs and state.
+    # Initialize list `updates` for the stage values.
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Evaluate `checkpoints` from the current inputs and state.
+    # Initialize list `checkpoints` for the stage values.
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
     # Run `sum` to compute `count`.
     # Run `sum` to compute `update_s`.
@@ -232,7 +235,6 @@ def summarize(result):
 # Function `publish(store, artifact)` implementing this stage's computation:
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
-    # Read or serialize artifact data on disk (`store`).
     # Run `digest` to compute `identifier`.
     store=Path(store)
     identifier=digest(artifact)
@@ -250,7 +252,8 @@ def read_artifact(store, identifier):
     # Read or serialize artifact data on disk (`artifact`).
     artifact=json.loads((Path(store)/'artifacts'/(identifier+'.json')).read_text())
     # Guard input contract (`digest(artifact) != identifier`) and fail fast if violated.
-    if digest(artifact) != identifier: raise ValueError('artifact digest mismatch')
+    if digest(artifact) != identifier:
+        raise ValueError('artifact digest mismatch')
     # Return `artifact` to the caller.
     return artifact
 
@@ -263,7 +266,7 @@ def artifact_metrics(artifact):
     # Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
     if len(params)!=2 or any(not math.isfinite(float(v)) for v in params):
         raise ValueError('invalid model parameters')
-    # Evaluate `inputs` from the current inputs and state.
+    # Evaluate the compound expression for `inputs`.
     inputs=(-1.5,-.37,.22,1.5)
     # Run `sum` to compute `mse`.
     mse=sum((params[0]*x+params[1]-(2*x+1))**2 for x in inputs)/len(inputs)
@@ -278,13 +281,14 @@ def activate(store, identifier):
     # Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
     if artifact.get('validation',{}).get('passed') is not True:
         raise ValueError('artifact has no passing validation evidence')
-    # Evaluate `required` from the current inputs and state.
+    # Initialize list `required` for the stage values.
     required=['worker_hash','config_hash','data_hash','state']
     # Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
-    if any(name not in artifact for name in required): raise ValueError('artifact provenance incomplete')
+    if any(name not in artifact for name in required):
+        raise ValueError('artifact provenance incomplete')
     # Guard input contract (`not artifact_metrics(artifact)['passed']`) and fail fast if violated.
-    if not artifact_metrics(artifact)['passed']: raise ValueError('held-out model validation failed')
-    # Evaluate `previous` from the current inputs and state.
+    if not artifact_metrics(artifact)['passed']:
+        raise ValueError('held-out model validation failed')
     # Read or serialize artifact data on disk (`pointer`).
     previous=None
     pointer=Path(store)/'active.json'
@@ -309,7 +313,7 @@ def rollback(store):
 # Function `capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, ...)` implementing this stage's computation:
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
-    # Evaluate `values` from the current inputs and state.
+    # Initialize list `values` for the stage values.
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
     # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
@@ -317,9 +321,9 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
-    # Evaluate `offered` from the current inputs and state.
+    # Compute `offered` as `arrivals_per_hour*measured_job_s/3600`.
     offered=arrivals_per_hour*measured_job_s/3600
-    # Evaluate `load` from the current inputs and state.
+    # Compute `load` as `offered/workers`.
     load=offered/workers
     # Run `max` to compute `required`.
     required=max(1,math.ceil(offered/(1-reserve_fraction)))

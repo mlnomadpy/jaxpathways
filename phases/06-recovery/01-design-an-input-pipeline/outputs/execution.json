@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-01",
-  "contentHash": "6ce618802d7f9e9b046cf07676f9f8ad7c72c20fd0cc531c27631d02c6cbcb64",
+  "contentHash": "e278a98aa94fbb0aef9cce38997084653b1a6e55a59eabb2fdeeb9383de0aa49",
   "executedAt": "2026-10-08T14:02:52.562299+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,11 +18,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "27c8c61e6dc5a8a94dd37ca199725fd6b50ef4ad2297ee19779eeb24951e3fcb",
+      "sourceHash": "031afb8b9d3a4e202f87cbf67601d4d5f006390f51791a0e62e0c1587cad117a",
       "outputs": []
     },
     {
-      "sourceHash": "a943877e19cdf3c2915a5d1cd81c155864e4d705eb3987dee388cd82d157c11b",
+      "sourceHash": "b5f8e24590688eb8dc2faa055881369da26eb9746d57caac0b18658f0f9ce775",
       "outputs": [
         {
           "output_type": "stream",
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "sourceHash": "8c281c229fca36d4cd435652fda14c12dbbface6d340010d3b315a96a05ed7a2",
+      "sourceHash": "4f95568841f5aa14416bce04389c605ec1c547e47ef516674436fa3eefef80ab",
       "outputs": [
         {
           "output_type": "stream",
@@ -95,11 +95,11 @@
       ]
     },
     {
-      "sourceHash": "094864f49051c5c0e509f39cc954ee9b5e29c4b97d8440e6e13c1cd4c3bb8360",
+      "sourceHash": "ca078e9fa58d5ac3623530558cde0634d81aea2eaf9c84bce2a28eab75f554cf",
       "outputs": []
     },
     {
-      "sourceHash": "02b399e06a7bc75c03937e5d6b02278870d280f16b8403db4cec72ca1b0332dd",
+      "sourceHash": "9031cf4fa058ba1277800a39f72e4068caf97fb9d43aa7f6ee8c220569ed5a18",
       "outputs": []
     },
     {
@@ -119,11 +119,11 @@
       ]
     },
     {
-      "sourceHash": "088e05fb3d0551cd88759ccc69c11eee40fe403a663346e19e8954c8af53bba0",
+      "sourceHash": "a440599e22203068e95a1cb876bbb43ec3abb64677a8cc7be0213142828abdc8",
       "outputs": []
     },
     {
-      "sourceHash": "f6d5047b333a52991eb5a95ebfa5d91c38bffd18a2ef28c8eca55deb2bb6d863",
+      "sourceHash": "448b70c8a9269751ad121592f52f7fe4860d95751563f2cf181f23bc80d5b705",
       "outputs": []
     }
   ],

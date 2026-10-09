@@ -12,7 +12,7 @@ centered = x - mean
 
 # Step 3: Verify shapes and numerical invariants
 assert jnp.allclose(mean, jnp.array([3., 14.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(centered.mean(axis=0), jnp.zeros(2))`
+# Assert that `jnp.allclose(centered.mean(axis=0), jnp.zeros(2))`.
 assert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))
 
 # From NumPy to jax.numpy: Feature preprocessing answers a specific question: how does each...
@@ -28,9 +28,9 @@ centered = x - mean
 print("Mean:", mean)
 # Print diagnostic summary of the computed outputs.
 print("Centered:\n", centered)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(mean, jnp.array([3., 14.]))`.
 assert jnp.allclose(mean, jnp.array([3., 14.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(centered.mean(axis=0), jnp.zeros(2))`
+# Assert that `jnp.allclose(centered.mean(axis=0), jnp.zeros(2))`.
 assert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))
 
 # Figure data experiment
@@ -48,11 +48,11 @@ reference_data = np.array([[1., 10.], [3., 14.], [5., 18.]], dtype=np.float32)
 reference_mean = reference_data.mean(axis=0)
 # Reduce along axis=0 to compute `reference_scale`.
 reference_scale = reference_data.std(axis=0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(mean, reference_mean)`.
 assert jnp.allclose(mean, reference_mean)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.std(axis=0), reference_scale)`
+# Assert that `jnp.allclose(x.std(axis=0), reference_scale)`.
 assert jnp.allclose(x.std(axis=0), reference_scale)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.std(axis=0), jnp.sqrt(jnp.array([8. / 3., 32. / 3....`
+# Assert that `jnp.allclose(x.std(axis=0), jnp.sqrt(jnp.array([8. / 3., 32. / 3.])))`.
 assert jnp.allclose(x.std(axis=0), jnp.sqrt(jnp.array([8. / 3., 32. / 3.])))
 
 # Experiment: Observe a new batch in training coordinates
@@ -80,16 +80,16 @@ new_batch = jnp.array([[7., 22.]])
 new_values = apply_standardizer(new_batch, statistics)
 # Print the observed values to compare against the expected result.
 print("new batch transformed:", new_values)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(new_values, jnp.full((1, 2), jnp.sqrt(6.)), atol=1e-6)`.
 assert jnp.allclose(new_values, jnp.full((1, 2), jnp.sqrt(6.)), atol=1e-6)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Foundation · Standardize the original data using its standard...
 # Reduce along axis=0 to compute `standardized`.
 standardized = centered / (x.std(axis=0) + 1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)`.
 assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)`
+# Assert that `jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)`.
 assert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)
 
 # Reference practice: Test the constant-feature policy
@@ -102,9 +102,9 @@ constant_statistics = fit_standardizer(constant_data)
 constant_transformed = apply_standardizer(constant_data, constant_statistics)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(constant_transformed))
-# Check numerical equivalence within tolerance: `jnp.allclose(constant_transformed[:, 1], 0.)`
+# Assert that `jnp.allclose(constant_transformed[:, 1], 0.)`.
 assert jnp.allclose(constant_transformed[:, 1], 0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_s...`
+# Assert that `jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)`.
 assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)
 
 # Reference practice: Detect accidental batch-dependent preprocessing
@@ -115,10 +115,10 @@ new_rows = jnp.array([[7., 22.], [9., 26.]])
 together = apply_standardizer(new_rows, statistics)
 # Combine or mask array elements to form `separately`.
 separately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(together, separately)`.
 assert jnp.allclose(together, separately)
 # Run `apply_standardizer` to compute `refitted`.
 refitted = apply_standardizer(new_rows, fit_standardizer(new_rows))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not jnp.allclose(together, refitted)`.
 assert not jnp.allclose(together, refitted)
 print("PASS: arrays-01")

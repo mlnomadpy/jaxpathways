@@ -90,13 +90,11 @@ def tiny_jvp(closed,primals,tangents):
     # Guard input contract (`len(primals) != len(program.invars) or len(tangents) != len(primals)`) and fail fast if violated.
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
-    # Evaluate `values` from the current inputs and state.
     # Compute `values` from `{}`
     values={}
     directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
-        # Evaluate `values[var]` from the current inputs and state.
         # Compute `values[var]` from `value`
         values[var]=value
         directions[var]=tangent
@@ -185,11 +183,11 @@ primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
 # Convert `reference_tangent` to a host NumPy array for inspection or verification.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol...`
+# Compute `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,r...`
+# Compute `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol` as `1e-12)`.
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
-# Compute forward-mode Jacobian-vector product (``).
+# Compute `np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol` as `1e-12)`.
 np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol=1e-12)
 # Print diagnostic summary of the computed outputs.
 print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
@@ -216,11 +214,11 @@ assert len(stablehlo)>0
 compiled=lowered.compile()
 # Run `compiled` to compute `(compiled_primal, compiled_tangent)`.
 compiled_primal,compiled_tangent=compiled(x,direction)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_primal[0],reference_value,rto...`
+# Compute `np.testing.assert_allclose(compiled_primal[0],reference_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,...`
+# Compute `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol` as `1e-12)`.
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
-# Compute `shape_rejected` from `False`
+# Compute `shape_rejected` as `False`.
 shape_rejected=False
 # Run the boundary check and catch the expected exception:
 try:
@@ -262,13 +260,11 @@ def tiny_jvp(closed,primals,tangents):
     # Guard input contract (`len(primals) != len(program.invars) or len(tangents) != len(primals)`) and fail fast if violated.
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
-    # Evaluate `values` from the current inputs and state.
     # Compute `values` from `{}`
     values={}
     directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
-        # Evaluate `values[var]` from the current inputs and state.
         # Compute `values[var]` from `value`
         values[var]=value
         directions[var]=tangent
@@ -349,11 +345,11 @@ primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
 # Convert `reference_tangent` to a host NumPy array for inspection or verification.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol...`
+# Compute `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,r...`
+# Compute `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol` as `1e-12)`.
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
-# Compute forward-mode Jacobian-vector product (``).
+# Compute `np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol` as `1e-12)`.
 np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol=1e-12)
 # Print diagnostic summary of the computed outputs.
 print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
@@ -372,11 +368,11 @@ assert len(stablehlo)>0
 compiled=lowered.compile()
 # Run `compiled` to compute `(compiled_primal, compiled_tangent)`.
 compiled_primal,compiled_tangent=compiled(x,direction)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_primal[0],reference_value,rto...`
+# Compute `np.testing.assert_allclose(compiled_primal[0],reference_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,...`
+# Compute `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol` as `1e-12)`.
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
-# Compute `shape_rejected` from `False`
+# Compute `shape_rejected` as `False`.
 shape_rejected=False
 # Run the boundary check and catch the expected exception:
 try:
@@ -417,7 +413,6 @@ Agreement applies to this primitive subset and tested inputs. It does not valida
 # Compute figure data for: A composed interpreter tracks the analytic directional derivative
 # Generate a uniform grid of points in `alphas`.
 alphas=np.linspace(-1,1,9)
-# Evaluate `interpreted` from the current inputs and state.
 # Compute `interpreted` from `[]`
 interpreted=[]
 analytic=[]
@@ -465,7 +460,7 @@ PASS: internals-04
 # Experiment — Exercise an unsupported primitive: A numerical result without a supported tangent rule would...
 # Trace or lower the function to inspect its compiler representation (`unsupported`).
 unsupported=jax.make_jaxpr(lambda z:jnp.sum(jnp.exp(z)))(x)
-# Compute `rejected` from `False`
+# Compute `rejected` as `False`.
 rejected=False
 # Run the boundary check and catch the expected exception:
 try:
@@ -496,9 +491,9 @@ cp,ct=compiled(changed,direction)
 expected=np.sum(np.sin(np.asarray(changed))*np.asarray(changed)+np.asarray(offset))
 # Convert `expected_d` to a host NumPy array for inspection or verification.
 expected_d=np.dot(np.sin(np.asarray(changed))+np.asarray(changed)*np.cos(np.asarray(changed)),np.asarray(direction))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(cp[0],expected,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(cp[0],expected,rtol` as `1e-12)`.
 np.testing.assert_allclose(cp[0],expected,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(ct[0],expected_d,rtol` as `1e-12)`.
 np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Changed-value compiled tangent:",float(ct[0]))
@@ -686,7 +681,7 @@ np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
-# Compute `rejected` from `False`
+# Compute `rejected` as `False`.
 rejected = ...  # TODO: compute rejected
 # Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))
@@ -715,7 +710,7 @@ np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
-# Compute `rejected` from `False`
+# Compute `rejected` as `False`.
 rejected=False
 # Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))

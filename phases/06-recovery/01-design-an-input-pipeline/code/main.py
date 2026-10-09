@@ -48,7 +48,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute the next step of the computation.
+        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 # Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
@@ -69,7 +69,7 @@ np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
@@ -130,7 +130,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute the next step of the computation.
+        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 # Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
@@ -150,7 +150,7 @@ np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
@@ -203,9 +203,9 @@ padded_labels = np.pad(last,(0,4-len(last)))
 mask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)
 # Aggregate array values to compute `masked`.
 masked = (padded_labels*mask).sum()/mask.sum()
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
 np.testing.assert_allclose(masked,last.mean(),atol=1e-7)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 assert not np.isclose(padded_labels.mean(),last.mean())
 
 # Reference practice: Fingerprint meaning, not just a row count
@@ -231,11 +231,11 @@ print('Copy preserves fingerprint; reordered source and edited labels invalidate
 batch = batches[0]
 # Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = batch["y"][::-1]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)
 # Compute `fixed` from `labels[batch["id"]]`
 fixed = labels[batch["id"]]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)`
+# Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
 # Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.

@@ -152,7 +152,6 @@ def data_contract(seed=42):
             "versions":dict(package_versions(),grain=__import__("importlib.metadata",fromlist=["version"]).version("grain"))}
 # Function `consume(state, iterator, count)` implementing this stage's computation:
 def consume(state,iterator,count):
-    # Evaluate `losses` from the current inputs and state.
     # Compute `losses` from `[]`
     losses=[]
     orders=[]
@@ -200,7 +199,7 @@ reference_final,reference_losses,reference_ids = consume(reference_state,referen
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1...`
+# Compute `np.testing.assert_allclose(reference_losses,resumed_losses,rtol` as `1e-6,atol=1e-7)`.
 np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(reference_final,resumed_final)
@@ -363,7 +362,6 @@ def data_contract(seed=42):
             "versions":dict(package_versions(),grain=__import__("importlib.metadata",fromlist=["version"]).version("grain"))}
 # Function `consume(state, iterator, count)` implementing this stage's computation:
 def consume(state,iterator,count):
-    # Evaluate `losses` from the current inputs and state.
     # Compute `losses` from `[]`
     losses=[]
     orders=[]
@@ -410,7 +408,7 @@ reference_final,reference_losses,reference_ids = consume(reference_state,referen
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1...`
+# Compute `np.testing.assert_allclose(reference_losses,resumed_losses,rtol` as `1e-6,atol=1e-7)`.
 np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(reference_final,resumed_final)
@@ -434,7 +432,7 @@ fresh = iter(make_loader())
 wrong_state,wrong_losses,wrong_ids = consume(restored_payload["training"],fresh,1)
 # Assert invariant `not np.array_equal(wrong_ids[0],reference_ids[0])` holds
 assert not np.array_equal(wrong_ids[0],reference_ids[0])
-# Check numerical equivalence within tolerance: `not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol...`
+# Assert that `not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)`.
 assert not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Missing iterator restore repeats earlier IDs and changes the next loss")
@@ -447,7 +445,7 @@ reader_only.set_state(unpack_bytes(restored_payload["pipeline"]))
 wrong_model,wrong_model_losses,correct_ids = consume(initial_state(),reader_only,1)
 # Execute `np.testing.assert_array_equal(correct_ids[0],reference_ids[0`
 np.testing.assert_array_equal(correct_ids[0],reference_ids[0])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(wrong_model_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)`.
 assert not np.isclose(wrong_model_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
 # Assert invariant `int(wrong_model["step"])==1` holds
 assert int(wrong_model["step"])==1
@@ -472,7 +470,7 @@ with ocp.StandardCheckpointer() as cp:
     # Run `cp.restore` to compute `other_saved`.
     other_saved = cp.restore(other_path,target={"training":initial_state(),"pipeline":pack_bytes(b""),"contract":encode_contract(contract)})
 # Run `iter` to compute `other_resumed`.
-# Execute the next step of the computation.
+# Compute `other_resumed` as `iter(make_loader())`.
 other_resumed = iter(make_loader())
 other_resumed.set_state(unpack_bytes(other_saved["pipeline"]))
 # Run `consume` to compute `(a, loss_a, ids_a)`.
@@ -481,7 +479,7 @@ a,loss_a,ids_a = consume(other_state,other_iterator,5)
 b,loss_b,ids_b = consume(other_saved["training"],other_resumed,5)
 # Iterate over `(l, r)` to step through the computation:
 for l,r in zip(ids_a,ids_b):np.testing.assert_array_equal(l,r)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)`
+# Compute `np.testing.assert_allclose(loss_a,loss_b,rtol` as `1e-6,atol=1e-7)`.
 np.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(a,b)
@@ -516,7 +514,7 @@ else:
 # Run `validate_contract` to perform the next check or state transition.
 validate_contract(restored_payload["contract"],contract)
 # Run `iter` to compute `fixed_reader`.
-# Execute the next step of the computation.
+# Compute `fixed_reader` as `iter(make_loader())`.
 fixed_reader = iter(make_loader())
 fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
 # Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`

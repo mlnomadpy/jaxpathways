@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-04",
-  "contentHash": "343a8193a31c58a9edc93ddab7f5d20990e3ad1bca4645c322b838088f302820",
+  "contentHash": "a0d2c403e7bb78eb2bbf79656ebb01b8cd95641f3a90055bf8e0bb59d1fe058c",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:25.924139+00:00",
@@ -133,7 +133,7 @@
     "prediction": "What stays shared when the kernel moves?",
     "reading": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
     "alt": "The purple square selects one three-by-three patch within a five-by-five input. Each selected cell contributes to one output under the declared convolution. Moving the patch reuses weights. This separate shape example has three valid positions per axis at stride one without padding; it does not display learned weights.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.5,
     "panel": {
       "kind": "receptive-field"

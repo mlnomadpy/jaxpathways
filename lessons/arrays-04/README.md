@@ -99,9 +99,9 @@ Check that the resulting arrays satisfy the expected shape, dtype, and numerical
 
 ```python
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`
+# Assert that `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`.
 assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`
+# Assert that `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`.
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 ```
 
@@ -125,11 +125,11 @@ print("Original:", x)
 print("Set:", y)
 # Print diagnostic summary of the computed outputs.
 print("Add:", z)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`.
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`
+# Assert that `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`.
 assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`
+# Assert that `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`.
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 ```
 
@@ -184,13 +184,13 @@ original = x
 rebound = x
 # Compute `rebound` from `rebound.at[1].set(20.)`
 rebound = rebound.at[1].set(20.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(original, jnp.array([1., 2., 3., 4.]))`.
 assert jnp.allclose(original, jnp.array([1., 2., 3., 4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))`
+# Assert that `jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))`.
 assert jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))
 # Compute `ignored` from `x.at[0].set(99.)`
 ignored = x.at[0].set(99.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(x, original)`.
 assert jnp.allclose(x, original)
 # Assert invariant `float(ignored[0]) == 99.` holds
 assert float(ignored[0]) == 99.
@@ -245,17 +245,17 @@ Replace the last two elements with zero in a new array. Keep $x$ unchanged.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Verify that the numerical values match the expected reference within tolerance.
-2. Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
+1. Assert that `jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))`.
+2. Assert that `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Replace the last two elements with zero in a new array.
 masked = ...  # TODO: compute masked
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))`.
 assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
+# Assert that `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`.
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion check
 ```
 
@@ -264,9 +264,9 @@ assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion che
 ```python
 # Exercise solution: Replace the last two elements with zero in a new array.
 masked = x.at[2:].set(0.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))`.
 assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
+# Assert that `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`.
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
 ```
 
@@ -295,8 +295,8 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 **Step-by-step implementation plan:**
 1. Construct and reshape `matrix` into the target tensor dimensions.
 2. Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
-3. Verify that the numerical values match the expected reference within tolerance.
-4. Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
+3. Assert that `jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))`.
+4. Assert that `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -306,9 +306,9 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 matrix = jnp.arange(...)  # TODO: compute matrix
 # Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
 updated_matrix = ...  # TODO: compute updated_matrix
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))`.
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
+# Assert that `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`.
 assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete assertion check
 ```
 
@@ -320,9 +320,9 @@ assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete asser
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
 # Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
 updated_matrix = matrix.at[:, -1].set(-1.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))`.
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))
-# Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
+# Assert that `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`.
 assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))
 ```
 
@@ -352,8 +352,8 @@ Use where for the fixed-shape result. Boolean indexing produces selected values,
 1. Compute `selected` from `x[x > 2.]`
 2. Check tensor shape invariant: `fixed_shape.shape == (4,)`
 3. Check tensor shape invariant: `selected.shape == (2,)`
-4. Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
-5. Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
+4. Assert that `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`.
+5. Assert that `jnp.allclose(selected, jnp.array([3., 4.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -366,9 +366,9 @@ selected = ...  # TODO: compute selected
 assert fixed_shape.shape  # TODO: complete assertion check
 # Check tensor shape invariant: `selected.shape == (2,)`
 assert selected.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
+# Assert that `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`.
 assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
+# Assert that `jnp.allclose(selected, jnp.array([3., 4.]))`.
 assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion check
 ```
 
@@ -383,9 +383,9 @@ selected = x[x > 2.]
 assert fixed_shape.shape == (4,)
 # Check tensor shape invariant: `selected.shape == (2,)`
 assert selected.shape == (2,)
-# Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
+# Assert that `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`.
 assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
+# Assert that `jnp.allclose(selected, jnp.array([3., 4.]))`.
 assert jnp.allclose(selected, jnp.array([3., 4.]))
 ```
 

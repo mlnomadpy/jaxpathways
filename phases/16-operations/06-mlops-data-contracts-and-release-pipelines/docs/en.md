@@ -168,27 +168,28 @@ def gate_metrics(errors, slices, limit):
 rows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]
 # Run `validate_rows` to compute `fingerprint`.
 fingerprint = validate_rows(rows)
-# Evaluate `changed` from the current inputs and state.
 # Accumulate the next contribution into `changed[-1]['x']`.
 changed = [dict(r) for r in rows]
 changed[-1]['x'] += 1
 # Assert invariant `validate_rows(changed) != fingerprint` holds
 assert validate_rows(changed) != fingerprint
-# Evaluate `leaked` from the current inputs and state.
 # Compute `leaked` from `[dict(r) for r in rows]`
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
 # Run the boundary check and catch the expected exception:
-try: validate_rows(leaked)
-except ValueError: pass
-else: raise AssertionError('cross-split source leakage accepted')
+try:
+    validate_rows(leaked)
+except ValueError:
+    pass
+else:
+    raise AssertionError('cross-split source leakage accepted')
 # Compute `errors` from `[.01] * 9 + [4.]`
 errors = [.01] * 9 + [4.]
 # Compute `slices` from `['low'] * 9 + ['high']`
 slices = ['low'] * 9 + ['high']
 # Run `gate_metrics` to compute `metrics`.
 metrics = gate_metrics(errors, slices, .5)
-# Check numerical equivalence within tolerance: `math.isclose(metrics['overall']['mse']`
+# Assert that `math.isclose(metrics['overall']['mse'], .409)`.
 assert math.isclose(metrics['overall']['mse'], .409)
 # Assert invariant `metrics['overall']['mse'] < .5 and not metrics['passed']` holds
 assert metrics['overall']['mse'] < .5 and not metrics['passed']
@@ -201,7 +202,7 @@ reference_mix = [.9, .1]
 current_mix = [.5, .5]
 # Compute `shift` from `.5 * sum(abs(a-b) for a,b in zip(reference_mix,curre...`
 shift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))
-# Check numerical equivalence within tolerance: `math.isclose(shift, .4)`
+# Assert that `math.isclose(shift, .4)`.
 assert math.isclose(shift, .4)
 # Print diagnostic summary of the computed outputs.
 print('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])
@@ -304,27 +305,28 @@ def gate_metrics(errors, slices, limit):
 rows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]
 # Run `validate_rows` to compute `fingerprint`.
 fingerprint = validate_rows(rows)
-# Evaluate `changed` from the current inputs and state.
 # Accumulate the next contribution into `changed[-1]['x']`.
 changed = [dict(r) for r in rows]
 changed[-1]['x'] += 1
 # Assert invariant `validate_rows(changed) != fingerprint` holds
 assert validate_rows(changed) != fingerprint
-# Evaluate `leaked` from the current inputs and state.
 # Compute `leaked` from `[dict(r) for r in rows]`
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
 # Run the boundary check and catch the expected exception:
-try: validate_rows(leaked)
-except ValueError: pass
-else: raise AssertionError('cross-split source leakage accepted')
+try:
+    validate_rows(leaked)
+except ValueError:
+    pass
+else:
+    raise AssertionError('cross-split source leakage accepted')
 # Compute `errors` from `[.01] * 9 + [4.]`
 errors = [.01] * 9 + [4.]
 # Compute `slices` from `['low'] * 9 + ['high']`
 slices = ['low'] * 9 + ['high']
 # Run `gate_metrics` to compute `metrics`.
 metrics = gate_metrics(errors, slices, .5)
-# Check numerical equivalence within tolerance: `math.isclose(metrics['overall']['mse']`
+# Assert that `math.isclose(metrics['overall']['mse'], .409)`.
 assert math.isclose(metrics['overall']['mse'], .409)
 # Assert invariant `metrics['overall']['mse'] < .5 and not metrics['passed']` holds
 assert metrics['overall']['mse'] < .5 and not metrics['passed']
@@ -337,7 +339,7 @@ reference_mix = [.9, .1]
 current_mix = [.5, .5]
 # Compute `shift` from `.5 * sum(abs(a-b) for a,b in zip(reference_mix,curre...`
 shift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))
-# Check numerical equivalence within tolerance: `math.isclose(shift, .4)`
+# Assert that `math.isclose(shift, .4)`.
 assert math.isclose(shift, .4)
 # Print diagnostic summary of the computed outputs.
 print('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])
@@ -415,7 +417,7 @@ Show that averaging slice means without counts changes the overall error.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify that the numerical values match the expected reference within tolerance.
+1. Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
 2. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -423,7 +425,7 @@ Show that averaging slice means without counts changes the overall error.
 ```python
 # Exercise solution: Show that averaging slice means without counts changes the overall error.
 wrong = ...  # TODO: compute wrong
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
 assert math.isclose(wrong,2.005)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Unweighted slice average:',wrong)
@@ -434,7 +436,7 @@ print('Unweighted slice average:',wrong)
 ```python
 # Exercise solution: Show that averaging slice means without counts changes the overall error.
 wrong=(metrics['low']['mse']+metrics['high']['mse'])/2
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
 assert math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])
 # Print the observed values to compare against the expected result.
 print('Unweighted slice average:',wrong)
@@ -463,7 +465,7 @@ Change counts rather than the model errors.
 
 **Step-by-step implementation plan:**
 1. Change the population mix (transfer): Aggregate performance changes with population mix even when...
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
 3. Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
 4. Print the observed values to compare against the expected result.
 
@@ -472,7 +474,7 @@ Change counts rather than the model errors.
 ```python
 # Change the population mix (transfer): Aggregate performance changes with population mix even when...
 shifted = gate_metrics(...)  # TODO: compute shifted
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
 assert math.isclose(shifted['overall']['mse'],3.601)  # TODO: complete assertion check
 # Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
 assert shifted['high']['mse']  # TODO: complete assertion check
@@ -485,7 +487,7 @@ print('New population MSE:',shifted['overall']['mse'])
 ```python
 # Change the population mix (transfer): Aggregate performance changes with population mix even when...
 shifted=gate_metrics([.01]+[4.]*9,['low']+['high']*9,.5)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
 assert math.isclose(shifted['overall']['mse'],3.601)
 # Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
 assert shifted['high']['mse']==metrics['high']['mse']

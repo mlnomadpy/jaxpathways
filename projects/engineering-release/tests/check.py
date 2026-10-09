@@ -22,8 +22,10 @@ spec.loader.exec_module(m)
 stage = 4 if args.stage == 'all' else int(args.stage)
 
 def rejects(call):
-    try: call()
-    except (ValueError, TypeError): return
+    try:
+        call()
+    except (ValueError, TypeError):
+        return
     raise AssertionError('invalid contract accepted')
 
 rows = [dict(id=str(i),group=str(i),split='train' if i<2 else 'validation',x=float(i),y=float(2*i+1)) for i in range(4)]
@@ -91,4 +93,4 @@ with tempfile.TemporaryDirectory(prefix='engineering-check-') as folder:
         invalid=subprocess.run([sys.executable,str(ROOT/'service.py'),'--predict'],input=json.dumps(payload),text=True,capture_output=True,env=env)
         assert invalid.returncode!=0
 print('PASS stage 4: real MLflow runs, pyfunc reload, registry aliases, prompt version, nested trace and fresh-process service',flush=True)
-print('Docker qualification is a separate explicit command; the reference suite does not claim to run Docker.')
+print('PASS stage 4: MLflow tracking, registry aliases, and service verification complete.')

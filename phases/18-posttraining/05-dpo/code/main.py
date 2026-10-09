@@ -34,7 +34,7 @@ loss = lambda theta: dpo_loss(
 )
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(theta), np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 
 # 3. Fit the policy and test cancellation
@@ -56,13 +56,13 @@ margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
 # Assert invariant `np.all(margin > 0)` holds
 assert np.all(margin > 0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(theta + 50), loss(theta), atol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(theta + 50), loss(theta), atol` as `1e-6)`.
 np.testing.assert_allclose(loss(theta + 50), loss(theta), atol=1e-6)
 # Print the observed values to compare against the expected result.
 print(
@@ -105,7 +105,7 @@ loss = lambda theta: dpo_loss(
 )
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(theta), np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 
 # Step 3 — 3. Fit the policy and test cancellation: The host stable-softplus calculation checks final margins.
@@ -126,13 +126,13 @@ margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
 # Assert invariant `np.all(margin > 0)` holds
 assert np.all(margin > 0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(theta + 50), loss(theta), atol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(theta + 50), loss(theta), atol` as `1e-6)`.
 np.testing.assert_allclose(loss(theta + 50), loss(theta), atol=1e-6)
 # Print the observed values to compare against the expected result.
 print(
@@ -160,13 +160,13 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 # Experiment: Verify the reference cancellation
 # Experiment — Verify the reference cancellation: The initial policy is not uniform.
 initial = dpo_loss(reference, reference, chosen, rejected, 0.3)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(initial, np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(initial, np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(initial, np.log(2), atol=1e-6)
 # Aggregate array values to compute `uncorrected`.
 uncorrected = jnp.mean(
     jax.nn.softplus(-0.3 * (reference[chosen] - reference[rejected]))
 )
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(float(initial), float(uncorrected))`.
 assert not np.isclose(float(initial), float(uncorrected))
 # Print the observed values to compare against the expected result.
 print('Corrected/unadjusted initial loss:', float(initial), float(uncorrected))
@@ -189,7 +189,7 @@ after = float(dpo_loss(example_policy, example_ref, choice, reject, 0.3))
 assert after < before and float(jnp.exp(example_policy[0])) < float(
     jnp.exp(example_ref[0])
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(after, np.logaddexp(0.0, -0.3 * np.log...`
+# Compute `np.testing.assert_allclose(after, np.logaddexp(0.0, -0.3 * np.log(3)), atol` as `1e-6)`.
 np.testing.assert_allclose(after, np.logaddexp(0.0, -0.3 * np.log(3)), atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Loss before/after:', before, after, '; chosen probability: 0.4 -> 0.3')

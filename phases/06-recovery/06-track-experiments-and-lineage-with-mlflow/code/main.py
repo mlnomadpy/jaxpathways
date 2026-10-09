@@ -58,7 +58,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
                 # Run `update` to compute `p`.
                 p = update(p, rate)
                 # Evaluate `objective(p)` and convert the result into Python scalar/collection `metric`.
-                # Execute the next step of the computation.
+                # Compute `metric` as `float(objective(p))`.
                 metric = float(objective(p))
                 history.append(metric)
                 # Run `mlflow.log_metric` to perform the next check or state transition.
@@ -67,7 +67,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             held = float(jnp.mean((p[0] * vx + p[1] - vy) ** 2))
             # Independent host arithmetic checks what the reported validation metric means.
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
-            # Check numerical equivalence within tolerance: `abs(held - oracle) < 1e-6`
+            # Assert that `abs(held - oracle) < 1e-6`.
             assert abs(held - oracle) < 1e-6
             # Run `mlflow.log_metric` to perform the next check or state transition.
             mlflow.log_metric('validation_mse', held, step=30)
@@ -95,7 +95,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     artifact = client.download_artifacts(selected.info.run_id, 'model.json')
     # Read or serialize artifact data on disk (`restored`).
     restored = json.loads(Path(artifact).read_text())
-    # Check numerical equivalence within tolerance: `abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) ...`
+    # Assert that `abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001`.
     assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001
 
 # Track experiments and lineage with MLflow: A tracker is useful when a plotted point leads back to the data,...
@@ -154,7 +154,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
                 # Run `update` to compute `p`.
                 p = update(p, rate)
                 # Evaluate `objective(p)` and convert the result into Python scalar/collection `metric`.
-                # Execute the next step of the computation.
+                # Compute `metric` as `float(objective(p))`.
                 metric = float(objective(p))
                 history.append(metric)
                 # Run `mlflow.log_metric` to perform the next check or state transition.
@@ -163,7 +163,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
             held = float(jnp.mean((p[0] * vx + p[1] - vy) ** 2))
             # Independent host arithmetic checks what the reported validation metric means.
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
-            # Check numerical equivalence within tolerance: `abs(held - oracle) < 1e-6`
+            # Assert that `abs(held - oracle) < 1e-6`.
             assert abs(held - oracle) < 1e-6
             # Run `mlflow.log_metric` to perform the next check or state transition.
             mlflow.log_metric('validation_mse', held, step=30)
@@ -191,7 +191,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     artifact = client.download_artifacts(selected.info.run_id, 'model.json')
     # Read or serialize artifact data on disk (`restored`).
     restored = json.loads(Path(artifact).read_text())
-    # Check numerical equivalence within tolerance: `abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) ...`
+    # Assert that `abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001`.
     assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001
 # Print the observed values to compare against the expected result.
 print('Validation MSE by learning rate:', dict(zip([.02, .15], validation)))

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-03",
-  "contentHash": "58e8a7e3074fbe4a719860c9831b42457362b4b5e98d3942a0c44e93e7a5a675",
+  "contentHash": "82a03acd6fc3bee3da8b815272acc85b360e65c21cc072052cc3b1b62dc6e36e",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-07T15:28:11.312218+00:00",
@@ -60,7 +60,7 @@
     "prediction": "Does every participant hold the complete reduced array after reduce-scatter?",
     "reading": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
     "alt": "Contributions \\([1,2]\\) and \\([3,4]\\) are summed into portions \\([4]\\) and \\([6]\\). After reduce-scatter neither participant holds the full result. All-gather then gives each \\([4,6]\\). This analytic example shows ownership, not a physical schedule or measured traffic.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 3.8,
     "panel": {
       "kind": "table",

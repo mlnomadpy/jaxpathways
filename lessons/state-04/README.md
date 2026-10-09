@@ -107,9 +107,9 @@ Append the checks, save main.py, and run python main.py from this folder using y
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
 # Print the observed values to compare against the expected result.
 print(float(magnitude(-3.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(magnitude(-3.), 3.)`.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(magnitude(2.), 2.)`
+# Assert that `jnp.allclose(magnitude(2.), 2.)`.
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -132,9 +132,9 @@ def magnitude(x):
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
 # Print the observed values to compare against the expected result.
 print(float(magnitude(-3.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(magnitude(-3.), 3.)`.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(magnitude(2.), 2.)`
+# Assert that `jnp.allclose(magnitude(2.), 2.)`.
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -204,7 +204,7 @@ else:
     raise AssertionError("Expected branch error")
 # Iterate over `v` to step through the computation:
 for v in [-3.,0.,2.]:
-    # Check numerical equivalence within tolerance: `jnp.allclose(magnitude(v),abs(v))`
+    # Assert that `jnp.allclose(magnitude(v),abs(v))`.
     assert jnp.allclose(magnitude(v),abs(v))
 ```
 
@@ -220,9 +220,9 @@ The repair changes where the decision is represented. It does not make $x$ stati
 # Experiment — Check a batched numerical selection: Correct values under batching do not imply a conditional branch...
 # Construct `values` via `jnp.array([-3.,-1.,2.,4.])`
 values=jnp.array([-3.,-1.,2.,4.])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))`.
 assert jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1....`
+# Assert that `jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))`.
 assert jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))
 ```
 
@@ -244,8 +244,8 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 1. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 2. Function `choose_update(x)` implementing this stage's computation:
 3. Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
+4. Assert that `jnp.allclose(choose_update(3.), 6.)`.
+5. Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -257,11 +257,11 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 def choose_update(x):
     # Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(choose_update(3.), 6.)`.
 assert jnp.allclose(choose_update(3.), 6.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
+# Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 assert jnp.allclose(choose_update(-3.), -5.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(0.), -2.)`
+# Assert that `jnp.allclose(choose_update(0.), -2.)`.
 assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 ```
 
@@ -275,11 +275,11 @@ assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 def choose_update(x):
     # Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
     return jax.lax.cond(x > 0., lambda v: v * 2., lambda v: v - 2., x)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(choose_update(3.), 6.)`.
 assert jnp.allclose(choose_update(3.), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
+# Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 assert jnp.allclose(choose_update(-3.), -5.)
-# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(0.), -2.)`
+# Assert that `jnp.allclose(choose_update(0.), -2.)`.
 assert jnp.allclose(choose_update(0.), -2.)
 ```
 
@@ -307,9 +307,9 @@ At $x=1$ the false branch is selected.
 
 **Step-by-step implementation plan:**
 1. Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
-2. Verify that the numerical values match the expected reference within tolerance.
-3. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
-4. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
+2. Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
+3. Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
+4. Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -318,11 +318,11 @@ At $x=1$ the false branch is selected.
 def piecewise(v):
     # Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
+# Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
+# Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion check
 ```
 
@@ -333,11 +333,11 @@ assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion chec
 def piecewise(v):
     # Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
     return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
+# Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
+# Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)
 ```
 
@@ -367,7 +367,7 @@ Decide what each output component means before padding.
 1. Run the boundary check and catch the expected exception:
 2. Function `pair(v)` implementing this stage's computation:
 3. Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
-4. Verify that the numerical values match the expected reference within tolerance.
+4. Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -384,7 +384,7 @@ else:
 def pair(v):
     # Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))  # TODO: complete assertion check
 ```
 
@@ -403,7 +403,7 @@ else:
 def pair(v):
     # Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
     return jax.lax.cond(v>=0.,lambda x:jnp.stack([x,x*x]),lambda x:jnp.stack([-x,x*x]),v)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))
 ```
 

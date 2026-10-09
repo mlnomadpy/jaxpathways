@@ -72,7 +72,7 @@ Create main.py with this block. Run python3 main.py in the CPU course environmen
 
 ```python
 # Step 1: Create the local artifact helpers
-"""Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
 # Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
@@ -94,8 +94,7 @@ def digest(value):
 # Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
@@ -109,7 +108,8 @@ def atomic_json(path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
-        if os.path.exists(temporary): os.unlink(temporary)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 ```
 
 The only filesystem writes are to the caller-selected run directory. Stable JSON encoding makes hashes reproducible.
@@ -228,7 +228,8 @@ def default_config(**changes):
     # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
+            raise ValueError(name+' must be a positive integer')
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
@@ -238,18 +239,17 @@ def default_config(**changes):
 
 # Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Read or serialize artifact data on disk (`root`).
-    # Execute the next step of the computation.
+    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
-    if timeout <= 0: raise ValueError('timeout must be positive')
+    if timeout <= 0:
+        raise ValueError('timeout must be positive')
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Evaluate `worker` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
+    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
@@ -258,32 +258,35 @@ def launch(root, config=None, timeout=10.):
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` from `False`
+    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         timed_out=True
         process.terminate()
-        try: stdout,stderr=process.communicate(timeout=1.)
+        try:
+            stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Evaluate `events` from the current inputs and state.
     # Compute `events` from `[]`
     events=[]
     malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         try:
             event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
+            if not isinstance(event,dict) or 'event' not in event:
+                raise ValueError('not an event')
             events.append(event)
-        except (ValueError,TypeError): malformed.append(line)
+        except (ValueError,TypeError):
+            malformed.append(line)
     # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
@@ -364,7 +367,7 @@ Both summaries are derived from real child output; failures are not invented sta
 
 ```python
 # Complete runnable example (operations-02)
-"""Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
 # Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
@@ -386,8 +389,7 @@ def digest(value):
 # Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
@@ -401,7 +403,8 @@ def atomic_json(path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
-        if os.path.exists(temporary): os.unlink(temporary)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 # This file is materialized only inside the caller-owned temporary run folder.
 WORKER = r'''
@@ -504,7 +507,8 @@ def default_config(**changes):
     # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
+            raise ValueError(name+' must be a positive integer')
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
@@ -514,18 +518,17 @@ def default_config(**changes):
 
 # Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Read or serialize artifact data on disk (`root`).
-    # Execute the next step of the computation.
+    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
-    if timeout <= 0: raise ValueError('timeout must be positive')
+    if timeout <= 0:
+        raise ValueError('timeout must be positive')
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Evaluate `worker` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
+    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
@@ -534,32 +537,35 @@ def launch(root, config=None, timeout=10.):
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` from `False`
+    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         timed_out=True
         process.terminate()
-        try: stdout,stderr=process.communicate(timeout=1.)
+        try:
+            stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Evaluate `events` from the current inputs and state.
     # Compute `events` from `[]`
     events=[]
     malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         try:
             event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
+            if not isinstance(event,dict) or 'event' not in event:
+                raise ValueError('not an event')
             events.append(event)
-        except (ValueError,TypeError): malformed.append(line)
+        except (ValueError,TypeError):
+            malformed.append(line)
     # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
@@ -638,9 +644,7 @@ The staircase records when state becomes available for recovery. A gap is expect
 
 ```python
 # Compute figure data for: Observed progress and committed progress diverge before failure
-# Evaluate `committed` from the current inputs and state.
-# Evaluate `points` from the current inputs and state.
-# Compute `committed` from `0`
+# Compute `committed` as `0`.
 committed=0
 points=[]
 saved=[]
@@ -684,7 +688,7 @@ PASS: operations-02
 total_examples=sum(e['examples'] for e in progress)
 # Run `sum` to compute `total_time`.
 total_time=sum(e['update_s'] for e in progress)
-# Check numerical equivalence within tolerance: `abs(total_examples/total_time-healthy['update_examples_per_s']) <...`
+# Assert that `abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6`.
 assert abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6
 # Assert invariant `all(e['update_s']>0 for e in progress)` holds
 assert all(e['update_s']>0 for e in progress)
@@ -705,9 +709,9 @@ Summing work and time weights slow steps appropriately; an unweighted mean of ra
 names=[e['event'] for e in interrupted['events']]
 # Assert invariant `names[-1]=='failed'` holds
 assert names[-1]=='failed'
-# Assert invariant `[e['step'] for e in interrupted['events'] if e['event']=='checkpo...` holds
+# Assert that `[e['step'] for e in interrupted['events'] if e['event']=='checkpoint']==[2,4]`.
 assert [e['step'] for e in interrupted['events'] if e['event']=='checkpoint']==[2,4]
-# Assert invariant `[e['step'] for e in interrupted['events'] if e['event']=='progres...` holds
+# Assert that `[e['step'] for e in interrupted['events'] if e['event']=='progress'][-1]==5`.
 assert [e['step'] for e in interrupted['events'] if e['event']=='progress'][-1]==5
 ```
 
@@ -728,7 +732,7 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 
 **Step-by-step implementation plan:**
 1. Assert invariant `0 < duty < 1` holds
-2. Check numerical equivalence within tolerance: `abs(duty-healthy['update_duty_fraction']) < 1e-9`
+2. Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
 3. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -738,7 +742,7 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 duty = sum(...)  # TODO: compute duty
 # Assert invariant `0 < duty < 1` holds
 assert 0  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(duty-healthy['update_duty_fraction']) < 1e-9`
+# Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
 assert abs(duty-healthy['update_duty_fraction'])  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('measured update duty fraction, not hardware utilization:',duty)
@@ -751,7 +755,7 @@ print('measured update duty fraction, not hardware utilization:',duty)
 duty=sum(e['update_s'] for e in progress)/observed['wall_s']
 # Assert invariant `0 < duty < 1` holds
 assert 0 < duty < 1
-# Check numerical equivalence within tolerance: `abs(duty-healthy['update_duty_fraction']) < 1e-9`
+# Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
 assert abs(duty-healthy['update_duty_fraction']) < 1e-9
 # Print the observed values to compare against the expected result.
 print('measured update duty fraction, not hardware utilization:',duty)
@@ -781,7 +785,7 @@ Sum examples and seconds first.
 **Step-by-step implementation plan:**
 1. Run `sum` to compute `wrong`.
 2. Run `sum` to compute `right`.
-3. Check numerical equivalence within tolerance: `abs(wrong-16/3)<1e-12 and right==4.`
+3. Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -793,7 +797,7 @@ counts = ...  # TODO: compute counts
 wrong = sum(...)  # TODO: compute wrong
 # Run `sum` to compute `right`.
 right = sum(...)  # TODO: compute right
-# Check numerical equivalence within tolerance: `abs(wrong-16/3)<1e-12 and right==4.`
+# Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
 assert abs(wrong-16/3)  # TODO: complete assertion check
 ```
 
@@ -807,7 +811,7 @@ counts=[8,8]
 wrong=sum(n/t for n,t in zip(counts,durations))/2
 # Run `sum` to compute `right`.
 right=sum(counts)/sum(durations)
-# Check numerical equivalence within tolerance: `abs(wrong-16/3)<1e-12 and right==4.`
+# Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
 assert abs(wrong-16/3)<1e-12 and right==4.
 ```
 

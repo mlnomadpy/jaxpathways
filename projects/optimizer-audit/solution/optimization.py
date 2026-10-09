@@ -132,7 +132,7 @@ def noise_audit(w, x, y, batch_size=2, penalty=0.):
     gradients = np.asarray(per)[draws].mean(axis=1)
     # Reduce across the target axis to summarize `mean`.
     mean = gradients.astype(np.float64).mean(axis=0)
-    # Evaluate `centered` from the current inputs and state.
+    # Compute `centered` as `gradients-mean`.
     centered = gradients-mean
     # Return `{'draws': draws, 'gradients': gradients, 'mean': mean, 'covariance': centered.T @ centered / len(draws), 'per_example': np.asarray(per)}` to the caller.
     return {'draws':draws,'gradients':gradients,'mean':mean,
@@ -161,7 +161,8 @@ def rates(initial, steps, decay_at=None, factor=0.1):
     # Branch on condition `decay_at is not None`:
     if decay_at is not None: values[decay_at:] *= np.float32(factor)
     # Guard input contract (`not np.isfinite(values).all() or np.any(values <= 0)`) and fail fast if violated.
-    if not np.isfinite(values).all() or np.any(values<=0): raise ValueError('schedule outside float32 range')
+    if not np.isfinite(values).all() or np.any(values<=0):
+        raise ValueError('schedule outside float32 range')
     # Return `values` to the caller.
     return values
 
@@ -173,7 +174,7 @@ def optimizer_step(state, gradient, rate, method='gd', clip_norm=jnp.inf):
     norm = jnp.linalg.norm(gradient)
     # Reduce across the target axis to summarize `clipped`.
     clipped = gradient*jnp.minimum(1.,clip_norm/jnp.maximum(norm,1e-12))
-    # Evaluate `count` from the current inputs and state.
+    # Compute `count` as `state['step']+1`.
     count = state['step']+1
     # Branch on condition `method == 'gd'`:
     if method == 'gd':
@@ -187,7 +188,7 @@ def optimizer_step(state, gradient, rate, method='gd', clip_norm=jnp.inf):
         direction = (first/(1-.9**count))/(jnp.sqrt(second/(1-.99**count))+1e-8)
     else:
         raise ValueError('unknown optimizer')
-    # Evaluate `new` from the current inputs and state.
+    # Construct dictionary `new` with the structured fields for this stage.
     new = {'weights':state['weights']-rate*direction,'first':first,'second':second,'step':count}
     # Return `(new, {'raw_norm': norm, 'clipped_norm': jnp.linalg.norm(clipped), 'update_norm': jnp.linalg.norm(rate * direction)})` to the caller.
     return new, {'raw_norm':norm,'clipped_norm':jnp.linalg.norm(clipped),'update_norm':jnp.linalg.norm(rate*direction)}
@@ -200,13 +201,13 @@ def _run(w, x, y, held_x, held_y, indices, learning_rates, penalty, clip_norm, m
     state = {'weights':w,'first':jnp.zeros_like(w),'second':jnp.zeros_like(w),'step':jnp.int32(0)}
     # Function `advance(state, inputs)` implementing this stage's computation:
     def advance(state, inputs):
-        # Evaluate `(ids, rate)` from the current inputs and state.
+        # Compute `ids, rate` as `inputs`.
         ids, rate = inputs
         # Evaluate both scalar loss and parameter gradients in one pass (`(value, gradient)`).
         value, gradient = jax.value_and_grad(objective)(state['weights'],x[ids],y[ids],penalty)
         # Combine or mask array elements to form `(updated, diagnostics)`.
         updated, diagnostics = optimizer_step(state,gradient,rate,method,clip_norm)
-        # Evaluate `weights` from the current inputs and state.
+        # Compute `weights` as `updated['weights']`.
         weights = updated['weights']
         # Perform matrix contraction / projection to compute `observed`.
         observed = {'weights':weights,'batch_objective_before':value,
@@ -240,7 +241,8 @@ def run(w, x, y, held_x, held_y, indices, learning_rates, method='gd', penalty=0
     if method not in ['gd','momentum','adam'] or not np.isfinite(penalty) or penalty<0:
         raise ValueError('invalid optimizer or penalty')
     # Guard input contract (`clip_norm is not None and (not np.isfinite(clip_norm) or clip_norm <= 0)`) and fail fast if violated.
-    if clip_norm is not None and (not np.isfinite(clip_norm) or clip_norm<=0): raise ValueError('positive finite clipping threshold required')
+    if clip_norm is not None and (not np.isfinite(clip_norm) or clip_norm<=0):
+        raise ValueError('positive finite clipping threshold required')
     # Cast or evaluate `(final, trace)` in explicit floating-point precision.
     final, trace=_run(w,x,y,held_x,held_y,ids,lr,np.float32(penalty),jnp.float32(jnp.inf if clip_norm is None else clip_norm),method)
     # Synchronize host execution until asynchronous device computation completes.

@@ -9,11 +9,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`.
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`.
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`.
     done: jax.Array
 
 
@@ -31,17 +31,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` as `~state.done`.
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` as `state.elapsed + active.astype(jnp.int32)`.
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` as `active & (position == 3)`.
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` as `active & ~terminated & (elapsed >= horizon)`.
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -69,7 +69,7 @@ def rollout(theta, key, batch_size=256, horizon=8):
     time_keys = jax.random.split(action_key, horizon)
     # Function `body(states, time_key)` implementing this stage's computation:
     def body(states, time_key):
-        # Evaluate `observations` from the current inputs and state.
+        # Compute `observations` as `states.position`.
         observations = states.position
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
@@ -131,11 +131,11 @@ def exact_return(theta, horizon=8):
     states = jnp.arange(3)
     # Reduce across the target axis to summarize `left`.
     left = jnp.maximum(states-1, 0)
-    # Evaluate `right` from the current inputs and state.
+    # Compute `right` as `states+1`.
     right = states+1
     # Function `backup(_, values)` implementing this stage's computation:
     def backup(_, values):
-        # Evaluate `q_left` from the current inputs and state.
+        # Compute `q_left` as `-.01 + values[left]`.
         q_left = -.01 + values[left]
         # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
@@ -157,7 +157,7 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     theta = jnp.zeros(3)
     # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
-        # Evaluate `(theta, key)` from the current inputs and state.
+        # Compute `theta, key` as `carry`.
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)

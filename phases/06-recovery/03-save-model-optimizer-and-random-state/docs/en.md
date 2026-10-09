@@ -460,7 +460,7 @@ model_only = dict(restored["training"])
 model_only["optimizer"] = tx.init(model_only["params"])
 # Run `step` to compute `(wrong_next, _)`.
 wrong_next,_ = step(model_only,x,y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `any(not np.allclose(np.asarray(a),np.asarray(b),rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree`.
 assert any(not np.allclose(np.asarray(a),np.asarray(b),rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(wrong_next["params"]),jax.tree.leaves(expected_next["params"])))
 # Assert invariant `int(wrong_next["optimizer"][0].count)==1` holds
 assert int(wrong_next["optimizer"][0].count)==1
@@ -483,7 +483,7 @@ reset_random = dict(restored["training"])
 reset_random["key_data"] = initial_state()["key_data"]
 # Run `step` to compute `(reset_next, reset_loss)`.
 reset_next,reset_loss = step(reset_random,x,y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(float(reset_loss),float(expected_loss),rtol=1e-6,atol=1e-7)`.
 assert not np.isclose(float(reset_loss),float(expected_loss),rtol=1e-6,atol=1e-7)
 # Assert invariant `not np.array_equal(np.asarray(reset_next["key_data"])` holds
 assert not np.array_equal(np.asarray(reset_next["key_data"]),np.asarray(expected_next["key_data"]))
@@ -614,7 +614,7 @@ reset_next,_ = step(...)  # TODO: compute reset_next,_
 assert int(full_next['optimizer'][0].count)  # TODO: complete assertion check
 # Assert invariant `int(reset_next['optimizer'][0].count)==1` holds
 assert int(reset_next['optimizer'][0].count)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `any(not np.allclose(a`
+# Assert that `any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(full_next['param`.
 assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')
@@ -635,7 +635,7 @@ reset_next,_=step(weights_only,x,y)
 assert int(full_next['optimizer'][0].count)==4
 # Assert invariant `int(reset_next['optimizer'][0].count)==1` holds
 assert int(reset_next['optimizer'][0].count)==1
-# Check numerical equivalence within tolerance: `any(not np.allclose(a`
+# Assert that `any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(full_next['param`.
 assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(full_next['params']),jax.tree.leaves(reset_next['params'])))
 # Print the observed values to compare against the expected result.
 print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')

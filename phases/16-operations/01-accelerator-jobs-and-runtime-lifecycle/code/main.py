@@ -2,7 +2,7 @@
 
 # Create the local artifact helpers
 # Step 1: Create the local artifact helpers
-"""Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
 # Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
@@ -24,8 +24,7 @@ def digest(value):
 # Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
@@ -39,7 +38,8 @@ def atomic_json(path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
-        if os.path.exists(temporary): os.unlink(temporary)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 # Define the supervised worker
 # This file is materialized only inside the caller-owned temporary run folder.
@@ -144,7 +144,8 @@ def default_config(**changes):
     # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
+            raise ValueError(name+' must be a positive integer')
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
@@ -154,18 +155,17 @@ def default_config(**changes):
 
 # Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Read or serialize artifact data on disk (`root`).
-    # Execute the next step of the computation.
+    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
-    if timeout <= 0: raise ValueError('timeout must be positive')
+    if timeout <= 0:
+        raise ValueError('timeout must be positive')
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Evaluate `worker` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
+    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
@@ -174,32 +174,35 @@ def launch(root, config=None, timeout=10.):
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` from `False`
+    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         timed_out=True
         process.terminate()
-        try: stdout,stderr=process.communicate(timeout=1.)
+        try:
+            stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Evaluate `events` from the current inputs and state.
     # Compute `events` from `[]`
     events=[]
     malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         try:
             event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
+            if not isinstance(event,dict) or 'event' not in event:
+                raise ValueError('not an event')
             events.append(event)
-        except (ValueError,TypeError): malformed.append(line)
+        except (ValueError,TypeError):
+            malformed.append(line)
     # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
@@ -236,7 +239,7 @@ print('statuses:',successful['status'],rejected['status'],stalled['status'])
 print('actual exit codes:',successful['returncode'],rejected['returncode'],stalled['returncode'])
 
 # Complete runnable example (operations-01)
-"""Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+"""Bounded local JAX subprocess supervisor and lifecycle verifier."""
 # Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
@@ -258,8 +261,7 @@ def digest(value):
 # Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
@@ -273,7 +275,8 @@ def atomic_json(path, value):
             os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
-        if os.path.exists(temporary): os.unlink(temporary)
+        if os.path.exists(temporary):
+            os.unlink(temporary)
 
 # This file is materialized only inside the caller-owned temporary run folder.
 WORKER = r'''
@@ -376,7 +379,8 @@ def default_config(**changes):
     # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
-        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+        if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
+            raise ValueError(name+' must be a positive integer')
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
@@ -386,18 +390,17 @@ def default_config(**changes):
 
 # Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Read or serialize artifact data on disk (`root`).
-    # Execute the next step of the computation.
+    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
-    if timeout <= 0: raise ValueError('timeout must be positive')
+    if timeout <= 0:
+        raise ValueError('timeout must be positive')
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Evaluate `worker` from the current inputs and state.
-    # Read or serialize artifact data on disk (``).
+    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
@@ -406,32 +409,35 @@ def launch(root, config=None, timeout=10.):
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` from `False`
+    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
         timed_out=True
         process.terminate()
-        try: stdout,stderr=process.communicate(timeout=1.)
+        try:
+            stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Evaluate `events` from the current inputs and state.
     # Compute `events` from `[]`
     events=[]
     malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
-        if not line.strip(): continue
+        if not line.strip():
+            continue
         try:
             event=json.loads(line)
-            if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
+            if not isinstance(event,dict) or 'event' not in event:
+                raise ValueError('not an event')
             events.append(event)
-        except (ValueError,TypeError): malformed.append(line)
+        except (ValueError,TypeError):
+            malformed.append(line)
     # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
@@ -473,7 +479,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 # Experiment: A child that fails before training
 # Experiment — A child that fails before training: This check links the failure classification to a concrete...
-# Assert invariant `any(e['event']=='failed' and 'runtime' in e['message'] for e in r...` holds
+# Assert that `any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])`.
 assert any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])
 # Assert invariant `not any(e['event']=='progress' for e in rejected['events'])` holds
 assert not any(e['event']=='progress' for e in rejected['events'])
@@ -481,7 +487,7 @@ assert not any(e['event']=='progress' for e in rejected['events'])
 # Experiment: A started process need not be ready
 # Experiment — A started process need not be ready: The sequence rules out startup failure in this controlled drill.
 names=[e['event'] for e in stalled['events']]
-# Assert invariant `names.index('started') < names.index('ready') < names.index('stal...` holds
+# Assert that `names.index('started') < names.index('ready') < names.index('stall_injected')`.
 assert names.index('started') < names.index('ready') < names.index('stall_injected')
 # Assert invariant `'completed' not in names` holds
 assert 'completed' not in names
@@ -505,9 +511,12 @@ assert short['events'][-1]['step']==3
 # Reject invalid work before spawning (Transfer / diagnosis): Validation makes an impossible workload fail at the caller...
 # Iterate over `values` to step through the computation:
 for values in [dict(steps=0),dict(batch_size=65)]:
-    try: default_config(**values)
-    except ValueError: pass
-    else: raise AssertionError('invalid work accepted')
+    try:
+        default_config(**values)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid work accepted')
 
 # Reference practice: Preserve a successful checkpoint
 # Preserve a successful checkpoint (Transfer / diagnosis): A status and a durable artifact should agree about what was...

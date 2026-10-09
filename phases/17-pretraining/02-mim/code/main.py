@@ -86,7 +86,7 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(w), expected, rtol=1e-5)`
+# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
 # Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)
@@ -199,7 +199,7 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(w), expected, rtol=1e-5)`
+# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
 # Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)

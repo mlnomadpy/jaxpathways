@@ -98,9 +98,9 @@ lam = 0.5
 w = ridge(X, y, lam)
 # Compute `objective` from `lambda w: mse(w, X, y) + lam * jnp.dot(w, w)`
 objective = lambda w: mse(w, X, y) + lam * jnp.dot(w, w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(w, jnp.array([2.0]), atol=1e-06)`.
 assert jnp.allclose(w, jnp.array([2.0]), atol=1e-06)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`
+# Assert that `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`.
 assert jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)
 ```
 
@@ -117,7 +117,7 @@ train = mse(w, X, y)
 validation = mse(w, Xv, yv)
 # Run `objective` to compute `penalized`.
 penalized = objective(w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jnp.array([train, validation, penalized]), jnp.array([1.0, 0.0, 3.0]))`.
 assert jnp.allclose(jnp.array([train, validation, penalized]), jnp.array([1.0, 0.0, 3.0]))
 # Print the observed values to compare against the expected result.
 print('train / validation / objective:', train, validation, penalized)
@@ -157,9 +157,9 @@ lam = 0.5
 w = ridge(X, y, lam)
 # Compute `objective` from `lambda w: mse(w, X, y) + lam * jnp.dot(w, w)`
 objective = lambda w: mse(w, X, y) + lam * jnp.dot(w, w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(w, jnp.array([2.0]), atol=1e-06)`.
 assert jnp.allclose(w, jnp.array([2.0]), atol=1e-06)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`
+# Assert that `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`.
 assert jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)
 
 # Step 3 — Separate the quantities you report: Training prediction loss is 1, validation loss is 0, and the...
@@ -168,7 +168,7 @@ train = mse(w, X, y)
 validation = mse(w, Xv, yv)
 # Run `objective` to compute `penalized`.
 penalized = objective(w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jnp.array([train, validation, penalized]), jnp.array([1.0, 0.0, 3.0]))`.
 assert jnp.allclose(jnp.array([train, validation, penalized]), jnp.array([1.0, 0.0, 3.0]))
 # Print the observed values to compare against the expected result.
 print('train / validation / objective:', train, validation, penalized)
@@ -230,11 +230,11 @@ fits = jnp.stack([ridge(X, y, float(a)) for a in candidates])
 training = jnp.array([mse(a, X, y) for a in fits])
 # Construct `validation` via `jnp.array([mse(a, Xv, yv) for a in fits])`
 validation = jnp.array([mse(a, Xv, yv) for a in fits])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fits[:, 0], jnp.array([3.0, 2.0, 1.0]))`.
 assert jnp.allclose(fits[:, 0], jnp.array([3.0, 2.0, 1.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(training, jnp.array([0.0, 1.0, 4.0]))`
+# Assert that `jnp.allclose(training, jnp.array([0.0, 1.0, 4.0]))`.
 assert jnp.allclose(training, jnp.array([0.0, 1.0, 4.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(validation, jnp.array([4.0, 0.0, 4.0]))`
+# Assert that `jnp.allclose(validation, jnp.array([4.0, 0.0, 4.0]))`.
 assert jnp.allclose(validation, jnp.array([4.0, 0.0, 4.0]))
 # Assert invariant `int(jnp.argmin(training)) != int(jnp.argmin(validation))` holds
 assert int(jnp.argmin(training)) != int(jnp.argmin(validation))
@@ -253,7 +253,7 @@ Regularization deliberately trades training fit against a preference for smaller
 ```python
 # Experiment — Duplicate the training set: Using a mean data loss keeps the penalty tradeoff unchanged...
 repeat = ridge(jnp.tile(X, (2, 1)), jnp.tile(y, 2), lam)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(repeat, w, atol=1e-06)`.
 assert jnp.allclose(repeat, w, atol=1e-06)
 ```
 
@@ -276,8 +276,8 @@ For a target slope of $4$ and penalty $\lambda=1$, derive the fitted slope and v
 **Step-by-step implementation plan:**
 1. Construct `y4` via `jnp.array([-4.0, 4.0])`
 2. Run `ridge` to compute `w4`.
-3. Verify that the numerical values match the expected reference within tolerance.
-4. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4...`
+3. Assert that `jnp.allclose(w4, jnp.array([2.0]))`.
+4. Assert that `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -287,9 +287,9 @@ For a target slope of $4$ and penalty $\lambda=1$, derive the fitted slope and v
 y4 = jnp.array(...)  # TODO: compute y4
 # Run `ridge` to compute `w4`.
 w4 = ridge(...)  # TODO: compute w4
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(w4, jnp.array([2.0]))`.
 assert jnp.allclose(w4, jnp.array([2.0]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4...`
+# Assert that `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)`.
 assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)  # TODO: complete assertion check
 ```
 
@@ -301,9 +301,9 @@ assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.z
 y4 = jnp.array([-4.0, 4.0])
 # Run `ridge` to compute `w4`.
 w4 = ridge(X, y4, 1.0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(w4, jnp.array([2.0]))`.
 assert jnp.allclose(w4, jnp.array([2.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4...`
+# Assert that `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)`.
 assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)
 ```
 
@@ -351,9 +351,9 @@ mask = jnp.diag(...)  # TODO: compute mask
 correct = jnp.linalg.solve(...)  # TODO: compute correct
 # Run `ridge` to compute `all_penalized`.
 all_penalized = ridge(...)  # TODO: compute all_penalized
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(correct, jnp.array([0.0, 5.0]))`.
 assert jnp.allclose(correct, jnp.array([0.0, 5.0]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))`
+# Assert that `jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))`.
 assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))  # TODO: complete assertion check
 ```
 
@@ -373,9 +373,9 @@ mask = jnp.diag(jnp.array([1.0, 0.0]))
 correct = jnp.linalg.solve(A.T @ A + 3 * mask, A.T @ target)
 # Run `ridge` to compute `all_penalized`.
 all_penalized = ridge(A, target, 1.0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(correct, jnp.array([0.0, 5.0]))`.
 assert jnp.allclose(correct, jnp.array([0.0, 5.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))`
+# Assert that `jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))`.
 assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))
 ```
 
@@ -407,7 +407,7 @@ Fit the mean on training data; do not refit it on validation data.
 2. Construct `val_x` via `jnp.array([100.0])`
 3. Aggregate array values to compute `train_mean`.
 4. Aggregate array values to compute `leaked_mean`.
-5. Verify that the numerical values match the expected reference within tolerance.
+5. Assert that `jnp.allclose(val_x - train_mean, jnp.array([99.0]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -421,11 +421,11 @@ val_x = jnp.array(...)  # TODO: compute val_x
 train_mean = jnp.mean(...)  # TODO: compute train_mean
 # Aggregate array values to compute `leaked_mean`.
 leaked_mean = jnp.mean(...)  # TODO: compute leaked_mean
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(val_x - train_mean, jnp.array([99.0]))`.
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `not jnp.allclose(train_mean, leaked_mean)`
+# Assert that `not jnp.allclose(train_mean, leaked_mean)`.
 assert not jnp.allclose(train_mean, leaked_mean)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(train_x - train_mean), 0.0)`
+# Assert that `jnp.allclose(jnp.mean(train_x - train_mean), 0.0)`.
 assert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)  # TODO: complete assertion check
 ```
 
@@ -441,11 +441,11 @@ val_x = jnp.array([100.0])
 train_mean = jnp.mean(train_x)
 # Aggregate array values to compute `leaked_mean`.
 leaked_mean = jnp.mean(jnp.concatenate([train_x, val_x]))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(val_x - train_mean, jnp.array([99.0]))`.
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))
-# Check numerical equivalence within tolerance: `not jnp.allclose(train_mean, leaked_mean)`
+# Assert that `not jnp.allclose(train_mean, leaked_mean)`.
 assert not jnp.allclose(train_mean, leaked_mean)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(train_x - train_mean), 0.0)`
+# Assert that `jnp.allclose(jnp.mean(train_x - train_mean), 0.0)`.
 assert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)
 ```
 

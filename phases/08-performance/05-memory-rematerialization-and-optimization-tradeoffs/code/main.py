@@ -64,7 +64,6 @@ for fn in (plain,remat):
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
 # Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
-# Evaluate `memory` from the current inputs and state.
 # Compute `memory` from `[]`
 memory=[]
 times=[]
@@ -165,7 +164,6 @@ for fn in (plain,remat):
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
 # Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
-# Evaluate `memory` from the current inputs and state.
 # Compute `memory` from `[]`
 memory=[]
 times=[]
@@ -233,7 +231,7 @@ eps=.001
 finite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)
 # Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic=float(jnp.vdot(jax.grad(plain)(x),direction))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)`
+# Compute `np.testing.assert_allclose(finite,automatic,rtol` as `3e-3,atol=1e-6)`.
 np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
@@ -246,7 +244,7 @@ direction=jnp.linspace(-1.,1.,len(x))
 _,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))
 # Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)`
+# Compute `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol` as `3e-5,atol=1e-7)`.
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()

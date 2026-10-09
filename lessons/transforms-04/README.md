@@ -130,9 +130,9 @@ second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 # Print diagnostic summary of the computed outputs.
 # Print diagnostic summary of the computed outputs.
-# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
+# Assert that `jnp.allclose(first, loss(w, x, y))`.
 assert jnp.allclose(first, loss(w, x, y))
-# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
+# Assert that `jnp.allclose(second, first)`.
 assert jnp.allclose(second, first)
 ```
 
@@ -174,9 +174,9 @@ repeat_seconds = time.perf_counter() - t0
 print("Loss:", float(second))
 # Print diagnostic summary of the computed outputs.
 print("First/repeat seconds:", first_seconds, repeat_seconds)
-# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
+# Assert that `jnp.allclose(first, loss(w, x, y))`.
 assert jnp.allclose(first, loss(w, x, y))
-# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
+# Assert that `jnp.allclose(second, first)`.
 assert jnp.allclose(second, first)
 ```
 
@@ -231,9 +231,9 @@ PASS: transforms-04
 # Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
 # Construct `expected_predictions` via `jnp.array([0., 0.6, 1.2, 1.8])`
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(x @ w, expected_predictions, atol=1e-6)`.
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)`
+# Assert that `jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)`.
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
 # Perform matrix / vector contraction (`@`) to compute `manual_gradient`.
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
@@ -241,7 +241,7 @@ manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
 # Run `compiled_value_gradient` to compute `(checked_value, checked_gradient)`.
 checked_value, checked_gradient = compiled_value_gradient(w, x, y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)`.
 assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
 ```
 
@@ -302,8 +302,8 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 1. Differentiate the objective to obtain `compiled_step` via automatic differentiation.
 2. Run `compiled_step` to compute `(v, g)`.
 3. Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
+4. Assert that `jnp.allclose(v, expected_v)`.
+5. Assert that `jnp.allclose(g, expected_g)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -315,9 +315,9 @@ compiled_step = jax.jit(...)  # TODO: compute compiled_step
 v, g = compiled_step(...)  # TODO: compute v, g
 # Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(...)  # TODO: compute expected_v, expected_g
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(v, expected_v)`.
 assert jnp.allclose(v, expected_v)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
+# Assert that `jnp.allclose(g, expected_g)`.
 assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
 ```
 
@@ -331,9 +331,9 @@ compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
 # Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(v, expected_v)`.
 assert jnp.allclose(v, expected_v)
-# Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
+# Assert that `jnp.allclose(g, expected_g)`.
 assert jnp.allclose(g, expected_g)
 ```
 
@@ -361,7 +361,7 @@ Compilation specializes to relevant properties, not each ordinary array element 
 1. Iterate over `new_w` to step through the computation:
 2. Aggregate array values to compute `expected`.
 3. Run `compiled` to compute `observed`.
-4. Verify that the numerical values match the expected reference within tolerance.
+4. Assert that `jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -373,7 +373,7 @@ for new_w in (w, w + 0.25):
     expected = jnp.mean(...)  # TODO: compute expected
     # Run `compiled` to compute `observed`.
     observed = compiled(...)  # TODO: compute observed
-    # Verify that the numerical values match the expected reference within tolerance.
+    # Assert that `jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)`.
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)  # TODO: complete assertion check
 ```
 
@@ -387,7 +387,7 @@ for new_w in (w, w + 0.25):
     expected = jnp.mean((x @ new_w - y) ** 2)
     # Run `compiled` to compute `observed`.
     observed = compiled(new_w, x, y)
-    # Verify that the numerical values match the expected reference within tolerance.
+    # Assert that `jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)`.
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)
 ```
 

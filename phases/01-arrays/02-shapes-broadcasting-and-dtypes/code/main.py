@@ -12,7 +12,7 @@ y = batch + bias
 
 # Step 3: Verify shapes and numerical invariants
 assert y.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`
+# Assert that `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`.
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 
 # Shapes, broadcasting, and dtypes: Before adding or subtracting arrays, name what each axis represents.
@@ -30,7 +30,7 @@ print(y)
 print("Shape:", y.shape, "dtype:", y.dtype)
 # Check tensor shape invariant: `y.shape == (2, 3)`
 assert y.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`
+# Assert that `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`.
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 
 # Figure data experiment
@@ -56,9 +56,9 @@ print("pairwise residuals:", pairwise_residuals)
 assert correct_residuals.shape == (3,)
 # Check tensor shape invariant: `pairwise_residuals.shape == (3, 3)`
 assert pairwise_residuals.shape == (3, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)`
+# Assert that `jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)`.
 assert jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)`
+# Assert that `jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)`.
 assert jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)
 
 # Experiment: Observe a precision limit separately
@@ -80,7 +80,7 @@ offsets = jnp.array([100., 200.])[:, None]
 z = batch + offsets
 # Check tensor shape invariant: `offsets.shape == (2, 1)`
 assert offsets.shape == (2, 1)
-# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`
+# Assert that `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`.
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 
 # Reference practice: Use both kinds of offsets together
@@ -89,7 +89,7 @@ assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 combined = batch + bias + jnp.array([100., 200.])[:, None]
 # Check tensor shape invariant: `combined.shape == (2, 3)`
 assert combined.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225....`
+# Assert that `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))`.
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))
 
 # Reference practice: Reject an aligned-loss contract violation
@@ -100,7 +100,7 @@ def aligned_mse(prediction, target):
         raise ValueError("aligned prediction and target shapes must match")
     # Return `jnp.mean((prediction - target) ** 2)` to the caller.
     return jnp.mean((prediction - target) ** 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(aligned_mse(predictions, targets), 0.)`.
 assert jnp.allclose(aligned_mse(predictions, targets), 0.)
 # Run the boundary check and catch the expected exception:
 try:

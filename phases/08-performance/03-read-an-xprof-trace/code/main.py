@@ -70,7 +70,7 @@ assert len(steps)==len(input_events)==len(model_events)==4
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
+        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
     # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
@@ -161,7 +161,7 @@ assert len(steps)==len(input_events)==len(model_events)==4
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
+        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
     # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
@@ -214,8 +214,7 @@ print(summary)
 # Reference practice: Compute a union instead of summing overlap
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
-    # Evaluate `total` from the current inputs and state.
-    # Compute `total` from `0`
+    # Compute `total` as `0`.
     total=0
     left=right=None
     # Iterate over `(start, end)` to step through the computation:

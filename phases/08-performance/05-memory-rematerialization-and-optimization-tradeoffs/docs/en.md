@@ -144,7 +144,6 @@ for fn in (plain,remat):
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
 # Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
-# Evaluate `memory` from the current inputs and state.
 # Compute `memory` from `[]`
 memory=[]
 times=[]
@@ -258,7 +257,6 @@ for fn in (plain,remat):
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
 # Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
-# Evaluate `memory` from the current inputs and state.
 # Compute `memory` from `[]`
 memory=[]
 times=[]
@@ -419,7 +417,7 @@ Use the direction $v=(1,\ldots,1)$ and central differences to independently chec
 1. Construct `direction` via `jnp.ones_like(x)`
 2. Compute `finite` from `(float(plain(x+eps*direction))-float(plain(x-eps*dir...`
 3. Differentiate the objective to obtain `automatic` via automatic differentiation.
-4. Check numerical equivalence within tolerance: `np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)`
+4. Compute `np.testing.assert_allclose(finite,automatic,rtol` as `3e-3,atol=1e-6)`.
 5. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -433,7 +431,7 @@ eps = ...  # TODO: compute eps
 finite = ...  # TODO: compute finite
 # Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = float(...)  # TODO: compute automatic
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)`
+# Compute `np.testing.assert_allclose(finite,automatic,rtol` as `3e-3,atol=1e-6)`.
 np.testing.assert_allclose(finite,automatic,rtol = ...  # TODO: compute np.testing.assert_allclose(finite,automatic,rtol
 # Print the observed values to compare against the expected result.
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
@@ -450,7 +448,7 @@ eps=.001
 finite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)
 # Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic=float(jnp.vdot(jax.grad(plain)(x),direction))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)`
+# Compute `np.testing.assert_allclose(finite,automatic,rtol` as `3e-3,atol=1e-6)`.
 np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
@@ -482,7 +480,7 @@ Apply jvp to each gradient function with the same primal point and tangent.
 1. Construct `direction` via `jnp.linspace(-1.,1.,len(x))`
 2. Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
 3. Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
-4. Check numerical equivalence within tolerance: `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)`
+4. Compute `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol` as `3e-5,atol=1e-7)`.
 5. Confirm that all computed values remain finite (no NaN or Inf).
 
 **Starter code scaffold (fill in the TODOs):**
@@ -495,7 +493,7 @@ direction = jnp.linspace(...)  # TODO: compute direction
 _,hvp_plain = jax.jvp(...)  # TODO: compute _,hvp_plain
 # Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat = jax.jvp(...)  # TODO: compute _,hvp_remat
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)`
+# Compute `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol` as `3e-5,atol=1e-7)`.
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol = ...  # TODO: compute np.testing.assert_allclose(hvp_plain,hvp_remat,rtol
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()  # TODO: complete assertion check
@@ -513,7 +511,7 @@ direction=jnp.linspace(-1.,1.,len(x))
 _,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))
 # Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)`
+# Compute `np.testing.assert_allclose(hvp_plain,hvp_remat,rtol` as `3e-5,atol=1e-7)`.
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()

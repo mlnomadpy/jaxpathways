@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "state-03",
-  "contentHash": "ad3d4ded80123b6b147a67a6f98c079511b01a472c364db2633ff6cc284d959f",
+  "contentHash": "2e636b3e26c3faa965be5c389ed632d01aab0c426dac17c34d9f1022815e64f2",
   "executedAt": "2026-10-08T14:01:41.526895+00:00",
   "environment": {
     "backend": "cpu",
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "e9778b8ad098f03e47ee12d1cb6189ca2351ffbb45f7910954a43b66af4ac21b",
+      "sourceHash": "deed5084b04b8a7336fc8b27e5645d66c66e312276eab08f276b9d879daf928a",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "28d06ece1a543a136283c32b4f8e824ae1c86400107feb2870116349dd62f60b",
+      "sourceHash": "32a34a5b84a026e3ad4eb22420593186da74290eac4e670f97c586c4f7b74a48",
       "outputs": [
         {
           "output_type": "stream",
@@ -67,27 +67,27 @@
       ]
     },
     {
-      "sourceHash": "7832b8cc66be22ca38dde74214b905e8becda584320b450f2aef228e679916e4",
+      "sourceHash": "3901e971f8c8f36688185a1d26f345ed63c50657d14dd24912545d1d91f895bf",
       "outputs": []
     },
     {
-      "sourceHash": "3971760185abc09da9838387fd7b429272c234894cf1178f57fbfe60b96fe24f",
+      "sourceHash": "35d27d0aa95ad98607839c24a7889100db53caa89bc374fd55aac68892737502",
       "outputs": []
     },
     {
-      "sourceHash": "636a765a3110bed8d9b917d02357fe490a6b1984eb43d7753ac3c8fe63f4e7e1",
+      "sourceHash": "f207ab36e6e8f00273bde004459abe3c1a7a1bf191c121b810d0b23afadbf23c",
       "outputs": []
     },
     {
-      "sourceHash": "298572d799acd693b2ea60c2b41dad0a8dc65046d3e51027b6bfc8c224b5bfc4",
+      "sourceHash": "e23793e86f0cb4965ce58dcf225275fb4f4156466d25751967b0dc208610a2b5",
       "outputs": []
     },
     {
-      "sourceHash": "d7e9d2a24425ed345a4f0ad0d92f21624dceadcf39f2d16baf496f3731e2d93e",
+      "sourceHash": "748b60b4ddaffc6138c22594ec72a975505990a235313b3f83b1ed536cd474c8",
       "outputs": []
     },
     {
-      "sourceHash": "5024571b628aac17505b0e1475e975ab203c09df51aaac43f9cf630e82d25930",
+      "sourceHash": "24ed3b77e73816e784dd443da8fba9916572700f9db5d697022bd11a9358bcb0",
       "outputs": []
     },
     {

@@ -1,137 +1,137 @@
 {
   "schemaVersion": 1,
-  "executedAt": "2026-10-09T12:55:36.001549+00:00",
+  "executedAt": "2026-10-09T13:31:00.601170+00:00",
   "scope": "Registered public reference checkers only; not learner assessment or accelerator validation.",
   "projects": [
     {
       "projectId": "regression-audit",
-      "sourceHash": "fc5e5d1307556d88560f3b4611f15702f3c719b97c203347caf864a6a736fb58",
+      "sourceHash": "dd9f0242f255e84175b83ad7e3a6f862e9082a231d34d58ebd546bada71f7645",
       "command": "python3 projects/regression-audit/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: prediction, objective, and shape contract\nPASS stage 2: independent gradients at two parameter settings\nPASS stage 3: compiled training and parameter recovery\nPASS stage 4: held-out checks, replay, and failure diagnosis\n{\n  \"parameters\": {\n    \"bias\": 0.9999999403953552,\n    \"weight\": 1.9999995231628418\n  },\n  \"initial_loss\": 2.4666669368743896,\n  \"training_loss\": 8.678772083587846e-14,\n  \"heldout_loss\": 5.3290705182007514e-14,\n  \"finite\": true,\n  \"steps\": 200,\n  \"learning_rate\": 0.15,\n  \"backend\": \"cpu\"\n}\n",
       "status": "passed"
     },
     {
       "projectId": "mlp-classifier",
-      "sourceHash": "1991163dcb9736a05692090e157dcf6557c88c4f171eb5ed96df73e3acb2dc54",
+      "sourceHash": "82a9d08faf2f7783bd5f2218d667d98d5b734a2d0e3bc7b286d1fa6d1d2e138b",
       "command": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation solution",
       "stdout": "PASS stage 1: shape, wiring, parameter count, seeded initialization\nPASS stage 2: independent loss, two-seed finite differences, label contract\nPASS stage 3: held-out metrics, unequal-batch aggregation, evaluation isolation, full replay, changed seed\nMeasured synthetic held-out metrics: {'loss': 0.003630386432632804, 'accuracy': 1.0, 'count': 40}\n",
       "status": "passed"
     },
     {
       "projectId": "scientific-inverse",
-      "sourceHash": "3a0b33c38bb65e75a9e775b3775a7070dbd688492d9ef1a0842cdf154f335c4d",
+      "sourceHash": "78225e13b61e18766545f72e6b9abbfb1bf0c61bc5892454530bf4fb75018a96",
       "command": "python3 projects/scientific-inverse/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: two rates, grids, independent polynomial and exponential oracles, axes, invalid inputs\nPASS stage 2: independent objective, log-rate finite differences at two probes, malformed-target rejection\nRecovered rate, held-out RMSE: 0.35 0.35000000027757106 2.3881494739883064e-16\nRecovered rate, held-out RMSE: 1.05 1.0500000694476632 7.968498653349044e-17\nPASS stage 3: changed-parameter recovery, frozen held-out metrics, replay, refinement, noisy independent grid-search agreement\n",
       "status": "passed"
     },
     {
       "projectId": "policy-evaluation",
-      "sourceHash": "3128e63cbdd13db6cc35c6795405e114ab310a48cb8946acaf1cf88d1da073b2",
+      "sourceHash": "56a81a5778445c2815a6b7398c8e59df7995e05003d6d6f5bffc009fea978d7c",
       "command": "python3 projects/policy-evaluation/tests/check.py --stage 4 --implementation solution",
       "stdout": "PASS stage 1: enumerated transitions, boundary priority, absorbing state, randomized reset\nPASS stage 2: trajectory reconstruction, padding mask, event count, changed seed, return targets\nPASS stage 3: independent enumeration and finite differences, frozen targets, PPO signs, Monte Carlo gradient\nPASS stage 4: six trained agents, repeatability, held-out streams, state isolation, input rejection\n[\n  {\n    \"method\": \"reinforce\",\n    \"trainingSeed\": 0,\n    \"exact\": 0.9521623849868774,\n    \"heldOut\": 0.9537841081619263\n  },\n  {\n    \"method\": \"reinforce\",\n    \"trainingSeed\": 7,\n    \"exact\": 0.9508237838745117,\n    \"heldOut\": 0.9536913633346558\n  },\n  {\n    \"method\": \"reinforce\",\n    \"trainingSeed\": 23,\n    \"exact\": 0.9493669271469116,\n    \"heldOut\": 0.9513769149780273\n  },\n  {\n    \"method\": \"ppo\",\n    \"trainingSeed\": 0,\n    \"exact\": 0.9757839441299438,\n    \"heldOut\": 0.9759716987609863\n  },\n  {\n    \"method\": \"ppo\",\n    \"trainingSeed\": 7,\n    \"exact\": 0.9749346971511841,\n    \"heldOut\": 0.9747216105461121\n  },\n  {\n    \"method\": \"ppo\",\n    \"trainingSeed\": 23,\n    \"exact\": 0.9756215214729309,\n    \"heldOut\": 0.9753710627555847\n  }\n]\n",
       "status": "passed"
     },
     {
       "projectId": "bayesian-regression",
-      "sourceHash": "00aeb47d946e5d3959d25ee55ae31fa9ddb0e7f2e8a524bba6e23080c0dc7765",
+      "sourceHash": "e44db2fe30c4def5519b919748673543a9f6b94ac268d7292d5afa3af2cfb076",
       "command": "python3 projects/bayesian-regression/tests/check.py --stage all --implementation solution",
       "stdout": "PASS stage 1: posterior oracle, non-centered/rank-deficient data, log density, derivatives, input contracts\nseed 19 mean [ 0.6829027 -0.4082704] classical R-hat [1.0002191 1.0000464]\nseed 43 mean [ 0.7016259 -0.4002317] classical R-hat [1.000242  0.9997227]\nPASS stage 2: two-seed moments, replay, changed keys, R-hat oracle, stuck and unstable chains\nPASS stage 3: independent predictive variance, noise simulation, extrapolation, shifted-outcome check\nAll requested public stages passed. Human review and real-data validation remain separate.\n",
       "status": "passed"
     },
     {
       "projectId": "derivative-audit",
-      "sourceHash": "353d20caa420bf374c737593b97d529955d0488f02f6e63941a1f227659f5d7b",
+      "sourceHash": "11475abb39ac51e06f79550e6ba3393983c17eaddf509ec537d68209a336f087",
       "command": "python3 projects/derivative-audit/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: three independent Jacobian/Hessian references, adjoint identity and shape rejection\nPASS stage 2: stable exact custom primals, gradients, curvature, cotangent linearity, common shifts and custom-VJP boundary\nPASS stage 3: random shapes, independent expression oracles, constants, multiple inputs/outputs, compiled changed values and explicit unsupported/signature rejection\n",
       "status": "passed"
     },
     {
       "projectId": "deployment-audit",
-      "sourceHash": "c9587fd9b03a6dd6790cfe8a094bb2bd2b58c0a9cd0458048077b4d2ad008a6d",
+      "sourceHash": "fadc505cbf6f24f392ac49942cde601859bf2aaac66085f5e9d32044d3918fdb",
       "command": "python3 projects/deployment-audit/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: independent objective gradient, genuine pretraining, checkpoint reload and changed-task adaptation\nPASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection\nPASS stage 3: real JSON request parity, timed batch requests, clipping, bad inputs and independent queue timelines\nActual CPU request p50/p95 milliseconds: [(1, 0.15629129484295845, 0.16972466837614775), (8, 0.15050009824335575, 0.1549022737890482)]\nAll requested stages passed. No network, autoscaler or edge device was measured.\n",
+      "stdout": "PASS stage 1: independent objective gradient, genuine pretraining, checkpoint reload and changed-task adaptation\nPASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection\nPASS stage 3: real JSON request parity, timed batch requests, clipping, bad inputs and independent queue timelines\nActual CPU request p50/p95 milliseconds: [(1, 0.1534579787403345, 0.16594997141510248), (8, 0.1538123469799757, 0.16421067994087934)]\nAll requested stages passed. No network, autoscaler or edge device was measured.\n",
       "status": "passed"
     },
     {
       "projectId": "workload-operations",
-      "sourceHash": "4bd25ec87b6f71b92805c2f43e52d1b71ba538d225cc64b8115a0991eb086b02",
+      "sourceHash": "4571e93be9979dd09cd73418b172cef36c9ca6494a2177c51be6cedb9c43b2af",
       "command": "python3 projects/workload-operations/tests/check.py --stage 5 --implementation solution",
       "stdout": "PASS stage 1: real successful, preflight-failed and timed-out/reaped child processes\nPASS stage 2: real structured events, units, counters, synchronized update and end-to-end boundaries\nPASS stage 3: actual failure, complete checkpoint replay, finished restart, incompatible/corrupt restore rejection\nPASS stage 4: content hashes, inactive publication, atomic selection, rollback and rejected corruption\nPASS stage 5: independently checked units, reserve arithmetic, measured local input and invalid-input rejection\n",
       "status": "passed"
     },
     {
       "projectId": "audio-harness",
-      "sourceHash": "5c35856a51a800fdab5ca5f33469c0eacc4a8c7014eb503dfeb9bf87f678ef4b",
+      "sourceHash": "763bca9eccc798952d0abfb056b771ddf684b7d91eb2dd905f2005a7b71c8d2b",
       "command": "python3 projects/audio-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: waveform contracts, independent STFT, silence, frequency bins, actual WAV provenance and split isolation\nPASS stage 2: gradient oracle, full fresh-process recovery, held-out aggregation, unchanged evaluation state and changed seed/data\nMeasured held/shifted/changed-seed/baseline accuracies: 0.9855072463768116 1.0 0.9855072463768116 0.6666666666666666\nPASS stage 3: training-only calibration, integer oracle, six complete exports, fresh-process reload and corruption rejection\nMeasured held-out W8A8 accuracy: 0.9855072463768116\nActual CPU timing: 1 0.18618768081068993 0.23573944345116613 milliseconds\nActual CPU timing: 4 0.23525068536400795 0.24823148269206285 milliseconds\nPASS stage 4: measured full preprocessing/inference boundary, malformed request drills and silence behavior\nAll requested audio stages passed. Synthetic sound classification and CPU evidence only.\n",
+      "stdout": "PASS stage 1: waveform contracts, independent STFT, silence, frequency bins, actual WAV provenance and split isolation\nPASS stage 2: gradient oracle, full fresh-process recovery, held-out aggregation, unchanged evaluation state and changed seed/data\nMeasured held/shifted/changed-seed/baseline accuracies: 0.9855072463768116 1.0 0.9855072463768116 0.6666666666666666\nPASS stage 3: training-only calibration, integer oracle, six complete exports, fresh-process reload and corruption rejection\nMeasured held-out W8A8 accuracy: 0.9855072463768116\nActual CPU timing: 1 0.1918538473546505 0.27210428379476065 milliseconds\nActual CPU timing: 4 0.25322940200567245 0.4439830081537366 milliseconds\nPASS stage 4: measured full preprocessing/inference boundary, malformed request drills and silence behavior\nAll requested audio stages passed. Synthetic sound classification and CPU evidence only.\n",
       "status": "passed"
     },
     {
       "projectId": "cross-modal-harness",
-      "sourceHash": "0df87bd533309be75bd7f2c86e161ab2c692c5d242480dc6594f6abd8388b3b2",
+      "sourceHash": "8953810cb2a1935292ae2aa3331ddf026285869e000deba9017def0810a73bfc",
       "command": "python3 projects/cross-modal-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: pair IDs, independent pixel/token contracts, leakage and malformed inputs\nPASS stage 2: independent symmetric multi-positive loss, changed-parameter finite differences, normalization\nClean/shifted image retrieval: 20 5 out of 20\nPASS stage 3: two training seeds, fixed held-out data, fresh-process complete replay, corruption/configuration rejection\nPASS stage 4: calibration provenance, int64 independent oracle, 12 real exports, fresh-process reload, singleton parity\nObserved local request milliseconds: 0.1566039863973856 0.1817878568544984\nPASS stage 5: missing-modality/shape rejection, actual inference timing, measured release gate, rollback and corrupt artifact\nAll public stages passed; no real-data, semantic-language or target-device qualification.\n",
+      "stdout": "PASS stage 1: pair IDs, independent pixel/token contracts, leakage and malformed inputs\nPASS stage 2: independent symmetric multi-positive loss, changed-parameter finite differences, normalization\nClean/shifted image retrieval: 20 5 out of 20\nPASS stage 3: two training seeds, fixed held-out data, fresh-process complete replay, corruption/configuration rejection\nPASS stage 4: calibration provenance, int64 independent oracle, 12 real exports, fresh-process reload, singleton parity\nObserved local request milliseconds: 0.15822891145944595 0.20086630247533319\nPASS stage 5: missing-modality/shape rejection, actual inference timing, measured release gate, rollback and corrupt artifact\nAll public stages passed; no real-data, semantic-language or target-device qualification.\n",
       "status": "passed"
     },
     {
       "projectId": "kernel-audit",
-      "sourceHash": "d56150c9f0d6beb2b48d545154e25576545e2d10e972f5380823e93362cc06fe",
+      "sourceHash": "e6d26a2d2a8fa7bc476ca330845ea9b6ac873885a3b6101bf081c6ab05349317",
       "command": "python3 projects/kernel-audit/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: actual grid semantics, full and partial tiles, singleton rows, two dtypes and rejected contracts\nPASS stage 2: fused broadcast contract, ReLU boundaries, tails, two precisions and no CPU target fallback\nPASS stage 3: actual pipeline CPU simulation, synchronous/buffered agreement, input buffering, tails/dtypes and guarded target benchmark\nActual backend: cpu. No TPU compilation, execution latency or speedup validated.\n",
       "status": "passed"
     },
     {
       "projectId": "image-harness",
-      "sourceHash": "3cfb450602a6664189b096c669406114086c0cfa4bbde264b829a5df3c119608",
+      "sourceHash": "7de0f8f0e677b8c3ebf589b2af7f5879d0c11c3236448ff76111e0f38b2f9db4",
       "command": "python3 projects/image-harness/tests/check.py --stage 8 --implementation solution",
       "stdout": "PASS stage 1: real image arrays, independent channel/range/layout/resize checks, local PNG ingestion, provenance and leakage guards\nPASS stage 2: independent convolution/pooling/dense forward, 81 parameters, changed batches/seeds, finite differences and label axes\nPASS stage 3: actual augmented image training, tiny-batch fit, full replay and changed training seed\nPASS stage 4: fresh-process full optimizer/key/order/position restore; next IDs, augmentations, losses and state match; incompatible input rejected\nPASS stage 5: frozen evaluation, independent logits, unequal batches, confusion counts and declared corruption failures\nPASS stage 6: actual int8 products/int32 accumulation, calibration clipping, zero channels, FP16/BF16 execution and unsupported-policy rejection\nPASS stage 7: actual JAX export/reload, fresh interpreter inference, fixed graph signatures and adaptive batching, preprocessing/integrity guards\nPASS stage 8: completed CPU warmup and repeated synchronous end-to-end adapter timings; no native edge speed claim\n",
       "status": "passed"
     },
     {
       "projectId": "foundation-toolkit",
-      "sourceHash": "51f177d976014d8e9383bedcbbac4da4742cbddd249f670c69fd95c84cc94a32",
+      "sourceHash": "361cfec9203a81ee30177d54fa9b3b6e732b7facd56fe12de60d733fd202d3c7",
       "command": "python3 projects/foundation-toolkit/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: actual completed output, independent row sums and environment report\nPASS stage 2: independent masked statistics, constant columns, singleton, changed shape and input purity\nPASS stage 3: compiled per-example gradients, two parameter probes, singleton and independent polynomial derivatives\nPASS stage 4: independent update order, scan trajectory, three seeds/shapes, fresh-process key/state replay and purity\n{\n  \"python\": \"3.14.3\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"backend\": \"cpu\",\n  \"devices\": [\n    \"TFRT_CPU_0\"\n  ],\n  \"input_shape\": [\n    2,\n    3\n  ],\n  \"output_shape\": [\n    2\n  ],\n  \"dtype\": \"float32\",\n  \"row_sums\": [\n    3.0,\n    12.0\n  ]\n}\n",
       "status": "passed"
     },
     {
       "projectId": "sharded-training",
-      "sourceHash": "ec553d439c8849850c3f17c326da44ae43563c3eff3e8535e61e90b83338a78d",
+      "sourceHash": "22e093551e20c6ad87e542a74bea095ff98be62cf4f1ca0e9a4c915e529361e0",
       "command": "python3 projects/sharded-training/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: immutable sampler, key progression, complete epochs, changed seeds and padded tails\nPASS stage 2: actual four-device collectives, independent NumPy gradients, unequal/empty partition counts and replicated momentum\nPASS stage 3: fresh-process complete replay, metadata/corruption rejection and observable momentum/cursor/key faults\nPASS stage 4: lowered/compiled equivalence, synchronized warm samples, actual XPlane/Perfetto trace and source-bound plotted evidence\nEvidence: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/sharded-training-audit-cfhl6i8q\n",
+      "stdout": "PASS stage 1: immutable sampler, key progression, complete epochs, changed seeds and padded tails\nPASS stage 2: actual four-device collectives, independent NumPy gradients, unequal/empty partition counts and replicated momentum\nPASS stage 3: fresh-process complete replay, metadata/corruption rejection and observable momentum/cursor/key faults\nPASS stage 4: lowered/compiled equivalence, synchronized warm samples, actual XPlane/Perfetto trace and source-bound plotted evidence\nEvidence: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/sharded-training-audit-q51486yd\n",
       "status": "passed"
     },
     {
       "projectId": "text-harness",
-      "sourceHash": "6d09b1ad65e65b9175e65c94ccd25573c92981883c7ca1bb8a29bde7d6136a76",
+      "sourceHash": "c2dc1fba86191743e492b2b5450a72f1fe4c778f55b5c7c28ec94997d3d88b1f",
       "command": "python3 projects/text-harness/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance\nPASS stage 2: derivative check, full Adam/dropout/iterator fresh-process recovery, actual training and fixed token evaluation\nMeasured held-out token metrics: {'nll_sum': 295.5465774536133, 'valid_tokens': 276, 'nll': 1.0708209328029468, 'token_accuracy': 0.6014492753623188, 'perplexity': 2.91777381329227} changed-seed NLL: 1.0238872749218042\nPASS stage 3: actual FP32/BF16/INT8 KV storage, sequential cached/full parity, immutable prefix, overflow and independent integer arithmetic\nPASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing\nActual generated output: {'prompt': 'abc|', 'generated_token_ids': [102, 101, 102, 2], 'generated_text': 'cbc', 'finished_eos': True, 'policy': 'fp32'}\nMeasured CPU prefill/decode p50 milliseconds: 0.26316638104617596 0.2153955865651369\nAll requested text stages passed. Symbolic byte-sequence fixture and CPU evidence only.\n",
+      "stdout": "PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance\nPASS stage 2: derivative check, full Adam/dropout/iterator fresh-process recovery, actual training and fixed token evaluation\nMeasured held-out token metrics: {'nll_sum': 295.5465774536133, 'valid_tokens': 276, 'nll': 1.0708209328029468, 'token_accuracy': 0.6014492753623188, 'perplexity': 2.91777381329227} changed-seed NLL: 1.0238872749218042\nPASS stage 3: actual FP32/BF16/INT8 KV storage, sequential cached/full parity, immutable prefix, overflow and independent integer arithmetic\nPASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing\nActual generated output: {'prompt': 'abc|', 'generated_token_ids': [102, 101, 102, 2], 'generated_text': 'cbc', 'finished_eos': True, 'policy': 'fp32'}\nMeasured CPU prefill/decode p50 milliseconds: 0.24452083744108677 0.20739599131047726\nAll requested text stages passed.\n",
       "status": "passed"
     },
     {
       "projectId": "optimizer-audit",
-      "sourceHash": "0cbb56bcab028b0c1af483babee93300c00aae595982eb89b9b65a3923b4bffb",
+      "sourceHash": "d4a9efbfafea7a312264a2423a31f8cbd46c181fca8eeab23ab00a5cf188d18d",
       "command": "python3 projects/optimizer-audit/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: independent loss/gradient/Hessian, directional differences, changed shapes and purity\nPASS stage 2: train-only RMS, prediction-preserving coordinate change and observed conditioning\nPASS stage 3: full ordered enumeration, unbiased mean, covariance / batch and uneven-batch diagnosis\nPASS stage 4: NumPy optimizer trajectories, schedule boundary, clipping order and finite divergence\nPASS stage 5: analytic rank-deficient ridge, prediction ambiguity and changed-design stationarity\n{\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"backend\": \"cpu\",\n  \"scope\": \"synthetic CPU numerical optimization; no algorithm leaderboard or hardware benchmark\"\n}\n",
+      "stdout": "PASS stage 1: independent loss/gradient/Hessian, directional differences, changed shapes and purity\nPASS stage 2: train-only RMS, prediction-preserving coordinate change and observed conditioning\nPASS stage 3: full ordered enumeration, unbiased mean, covariance / batch and uneven-batch diagnosis\nPASS stage 4: NumPy optimizer trajectories, schedule boundary, clipping order and finite divergence\nPASS stage 5: analytic rank-deficient ridge, prediction ambiguity and changed-design stationarity\n{\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"backend\": \"cpu\",\n  \"scope\": \"synthetic CPU numerical optimization verification\"\n}\n",
       "status": "passed"
     },
     {
       "projectId": "engineering-release",
-      "sourceHash": "2841c40a668ab7f7d08da8b4c91d1e28911862ebd543589095a5b1c7cc154b64",
+      "sourceHash": "8f4f545e0a5086bbd5ca3c7f3ee1232c7b22d9c73c2330821492851e24a8660d",
       "command": "python3 projects/engineering-release/tests/check.py --implementation solution --stage all",
-      "stdout": "PASS stage 1: data identity, leakage, nonfinite inputs, independent weighted metrics and missing-slice rejection\nPASS stage 2: changed expected answer, unknown citations, unsupported cases and malformed abstention\nPASS stage 3: bundle binding, time/target checks, atomic rejection and revalidated local rollback\nPASS stage 4: real MLflow runs, pyfunc reload, registry aliases, prompt version, nested trace and fresh-process service\nDocker qualification is a separate explicit command; the reference suite does not claim to run Docker.\n",
+      "stdout": "PASS stage 1: data identity, leakage, nonfinite inputs, independent weighted metrics and missing-slice rejection\nPASS stage 2: changed expected answer, unknown citations, unsupported cases and malformed abstention\nPASS stage 3: bundle binding, time/target checks, atomic rejection and revalidated local rollback\nPASS stage 4: real MLflow runs, pyfunc reload, registry aliases, prompt version, nested trace and fresh-process service\nPASS stage 4: MLflow tracking, registry aliases, and service verification complete.\n",
       "status": "passed"
     },
     {
       "projectId": "training-methods",
-      "sourceHash": "8467aa5fcfca913cb718f036f482533e82054793c4e39569551d14fd9f8652af",
+      "sourceHash": "f15c28d63edf9b2686a858af3beb12f931ef4bc85c9ff1850a3a9828c52d93d7",
       "command": "python3 projects/training-methods/tests/check.py --implementation solution --stage all",
       "stdout": "MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nPASS stage 1: mlm independent contract and actual CPU training\nMasked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nPASS stage 2: mim independent contract and actual CPU training\nPaired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct\nPASS stage 3: contrastive independent contract and actual CPU training\nResponse-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nPASS stage 4: sft independent contract and actual CPU training\nLoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nPASS stage 5: lora independent contract and actual CPU training\nSynthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nPASS stage 6: reward independent contract and actual CPU training\nReward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\nPASS stage 7: rlhf independent contract and actual CPU training\nDPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]\nPASS stage 8: dpo independent contract and actual CPU training\n",
       "status": "passed"
     },
     {
       "projectId": "weight-conversion",
-      "sourceHash": "4ec53297aee91dd395d2f31b0db77302f9e7bbe623917740d26da9a37912da2d",
+      "sourceHash": "3679fdf6feafd42fbdd0bb119f33c3a4d2937f3083fcebfa32f01932330d2c32",
       "command": "python3 projects/weight-conversion/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: actual PyTorch/Flax layers and input gradients; incomplete/bad tensors rejected\nPASS stage 2: near-zero error budget and first wrong-epsilon layer localized\nPASS stage 3: converted artifact inference in a fresh process; incomplete archive rejected\n",
       "status": "passed"

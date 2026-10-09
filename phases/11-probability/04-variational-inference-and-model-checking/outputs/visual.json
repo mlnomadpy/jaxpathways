@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-04",
-  "contentHash": "29f1273777c13fad343332c6c2b7ad15cffe14ecd80a8c163a4060e45563ec2f",
+  "contentHash": "5c5695a74f75168bc005c23b8ee2bd998edd3ccc8892f9ec2d9d31e96c190995",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:31.054628+00:00",
@@ -51,7 +51,7 @@
     "prediction": "Can matching each coordinate's mean prove a correct distribution for their sum?",
     "reading": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
     "alt": "Both analytic matrices have unit marginal variances. Purple adds covariance \\(0.8\\), stretching along the shared diagonal; green has zero covariance. These are unit Mahalanobis-distance contours, not 95% regions or fitted samples. Sum variances are \\(3.6\\) and \\(2\\), respectively.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.8,
     "panel": {
       "kind": "covariance"

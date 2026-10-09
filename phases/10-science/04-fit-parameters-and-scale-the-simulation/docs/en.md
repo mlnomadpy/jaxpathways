@@ -161,7 +161,7 @@ for _ in range(160):
     rate_history.append(float(jnp.exp(log_rate)))
 # Evaluate `jnp.exp(log_rate)` and convert the result into Python scalar/collection `fitted_rate`.
 fitted_rate = float(jnp.exp(log_rate))
-# Check numerical equivalence within tolerance: `abs(fitted_rate-true_rate) < 2e-7`
+# Assert that `abs(fitted_rate-true_rate) < 2e-7`.
 assert abs(fitted_rate-true_rate) < 2e-7
 # Assert invariant `loss_history[-1] < 1e-20` holds
 assert loss_history[-1] < 1e-20
@@ -287,7 +287,7 @@ for _ in range(160):
     rate_history.append(float(jnp.exp(log_rate)))
 # Evaluate `jnp.exp(log_rate)` and convert the result into Python scalar/collection `fitted_rate`.
 fitted_rate = float(jnp.exp(log_rate))
-# Check numerical equivalence within tolerance: `abs(fitted_rate-true_rate) < 2e-7`
+# Assert that `abs(fitted_rate-true_rate) < 2e-7`.
 assert abs(fitted_rate-true_rate) < 2e-7
 # Assert invariant `loss_history[-1] < 1e-20` holds
 assert loss_history[-1] < 1e-20
@@ -388,9 +388,9 @@ biased_rate=(1-np.exp(-true_rate*h))/h
 coarse_times=np.arange(5)*h
 # Compute `matched` from `2*(1-biased_rate*h)**np.arange(5)`
 matched=2*(1-biased_rate*h)**np.arange(5)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(matched,2*np.exp(-true_rate*coarse_tim...`
+# Compute `np.testing.assert_allclose(matched,2*np.exp(-true_rate*coarse_times),rtol` as `1e-12)`.
 np.testing.assert_allclose(matched,2*np.exp(-true_rate*coarse_times),rtol=1e-12)
-# Check numerical equivalence within tolerance: `abs(biased_rate-true_rate)>0.1`
+# Assert that `abs(biased_rate-true_rate)>0.1`.
 assert abs(biased_rate-true_rate)>0.1
 # Print the observed values to compare against the expected result.
 print("True rate:",true_rate,"perfect coarse Euler rate:",biased_rate)
@@ -482,11 +482,11 @@ for _ in range(200):
     changed_theta = changed_update(...)  # TODO: compute changed_theta
 # Evaluate `jnp.exp(changed_theta)` and convert the result into Python scalar/collection `changed_rate`.
 changed_rate = float(...)  # TODO: compute changed_rate
-# Check numerical equivalence within tolerance: `abs(changed_rate-changed_truth)<1e-6`
+# Assert that `abs(changed_rate-changed_truth)<1e-6`.
 assert abs(changed_rate-changed_truth)  # TODO: complete assertion check
 # Convert `changed_held` to a host NumPy array for inspection or verification.
 changed_held = np.asarray(...)  # TODO: compute changed_held
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(changed_rate,held_initials),ch...`
+# Compute `np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol` as `2e-6,atol=1e-7)`.
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol = ...  # TODO: compute np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol
 # Print the observed values to compare against the expected result.
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -513,11 +513,11 @@ for _ in range(200):
     changed_theta=changed_update(changed_theta)
 # Evaluate `jnp.exp(changed_theta)` and convert the result into Python scalar/collection `changed_rate`.
 changed_rate=float(jnp.exp(changed_theta))
-# Check numerical equivalence within tolerance: `abs(changed_rate-changed_truth)<1e-6`
+# Assert that `abs(changed_rate-changed_truth)<1e-6`.
 assert abs(changed_rate-changed_truth)<1e-6
 # Convert `changed_held` to a host NumPy array for inspection or verification.
 changed_held=np.asarray(held_initials)[:,None]*np.exp(-changed_truth*np.asarray(times))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(changed_rate,held_initials),ch...`
+# Compute `np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol` as `2e-6,atol=1e-7)`.
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol=2e-6,atol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -547,7 +547,7 @@ At fixed rate, predictions are amplitude multiplied by a known decay vector.
 1. Compute `unknown_initial` from `2.8`
 2. Compute `measured` from `unknown_initial*basis`
 3. Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
-4. Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
+4. Assert that `abs(estimate-unknown_initial)<1e-12`.
 5. Function `amplitude_loss(amplitude)` implementing this stage's computation:
 
 **Starter code scaffold (fill in the TODOs):**
@@ -561,13 +561,13 @@ unknown_initial = ...  # TODO: compute unknown_initial
 measured = ...  # TODO: compute measured
 # Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
 estimate = float(...)  # TODO: compute estimate
-# Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
+# Assert that `abs(estimate-unknown_initial)<1e-12`.
 assert abs(estimate-unknown_initial)  # TODO: complete assertion check
 # Function `amplitude_loss(amplitude)` implementing this stage's computation:
 def amplitude_loss(amplitude):
     # Return `jnp.mean((amplitude * jnp.asarray(basis) - jnp.asarray(measured)) ** 2)` to the caller.
     return ...  # TODO: return computed result
-# Check numerical equivalence within tolerance: `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`
+# Assert that `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`.
 assert abs(float(jax.grad(amplitude_loss)(estimate)))  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Recovered initial amplitude:",estimate)
@@ -584,13 +584,13 @@ unknown_initial=2.8
 measured=unknown_initial*basis
 # Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
 estimate=float(np.dot(basis,measured)/np.dot(basis,basis))
-# Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
+# Assert that `abs(estimate-unknown_initial)<1e-12`.
 assert abs(estimate-unknown_initial)<1e-12
 # Function `amplitude_loss(amplitude)` implementing this stage's computation:
 def amplitude_loss(amplitude):
     # Return `jnp.mean((amplitude * jnp.asarray(basis) - jnp.asarray(measured)) ** 2)` to the caller.
     return jnp.mean((amplitude*jnp.asarray(basis)-jnp.asarray(measured))**2)
-# Check numerical equivalence within tolerance: `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`
+# Assert that `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`.
 assert abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12
 # Print the observed values to compare against the expected result.
 print("Recovered initial amplitude:",estimate)
@@ -622,7 +622,7 @@ Search a dense one-dimensional grid using the analytic forward model and report 
 2. Convert `reference_predictions` to a host NumPy array for inspection or verification.
 3. Reduce along axis=(1 to compute `reference_losses`.
 4. Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
-5. Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
+5. Assert that `abs(best-0.7)<0.01`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -637,7 +637,7 @@ reference_predictions = np.asarray(...)  # TODO: compute reference_predictions
 reference_losses = np.mean(...)  # TODO: compute reference_losses
 # Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
 best = float(...)  # TODO: compute best
-# Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
+# Assert that `abs(best-0.7)<0.01`.
 assert abs(best-0.7)  # TODO: complete assertion check
 # Assert invariant `float(np.min(reference_losses))>0` holds
 assert float(np.min(reference_losses))  # TODO: complete assertion check
@@ -658,7 +658,7 @@ reference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates
 reference_losses=np.mean((reference_predictions-noisy[None,:,:])**2,axis=(1,2))
 # Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
 best=float(candidates[np.argmin(reference_losses)])
-# Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
+# Assert that `abs(best-0.7)<0.01`.
 assert abs(best-0.7)<0.01
 # Assert invariant `float(np.min(reference_losses))>0` holds
 assert float(np.min(reference_losses))>0

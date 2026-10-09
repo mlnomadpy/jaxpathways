@@ -30,7 +30,7 @@ The byte bars are modeled payloads under the lesson's assumptions. They do not c
 
 ![Reduce-scatter followed by all-gather](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Contributions $[1,2]$ and $[3,4]$ are summed into portions $[4]$ and $[6]$. After reduce-scatter neither participant holds the full result. All-gather then gives each $[4,6]$. This analytic example shows ownership, not a physical schedule or measured traffic.
 
@@ -518,7 +518,7 @@ for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
 # Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = ...  # TODO: compute wrong_labels
-# Check numerical equivalence within tolerance: `np.max(np.abs(wrong_labels-r2)) > 0.01`
+# Assert that `np.max(np.abs(wrong_labels-r2)) > 0.01`.
 assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')
@@ -547,7 +547,7 @@ for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol=2e-6, rtol=2e-6)
 # Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = 2 * xh.T @ (xh @ w2h - yh[::-1]) / 16
-# Check numerical equivalence within tolerance: `np.max(np.abs(wrong_labels-r2)) > 0.01`
+# Assert that `np.max(np.abs(wrong_labels-r2)) > 0.01`.
 assert np.max(np.abs(wrong_labels-r2)) > 0.01
 # Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')

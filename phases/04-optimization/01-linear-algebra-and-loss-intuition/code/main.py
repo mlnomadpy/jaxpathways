@@ -33,9 +33,9 @@ def mse(w, bias):
 print("Predictions:", predict(w, 1., X))
 # Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X), targets)`.
 assert jnp.allclose(predict(w, 1., X), targets)
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 1.), 0.)`
+# Assert that `jnp.allclose(mse(w, 1.), 0.)`.
 assert jnp.allclose(mse(w, 1.), 0.)
 
 # Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
@@ -66,9 +66,9 @@ def mse(w, bias):
 print("Predictions:", predict(w, 1., X))
 # Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X), targets)`.
 assert jnp.allclose(predict(w, 1., X), targets)
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 1.), 0.)`
+# Assert that `jnp.allclose(mse(w, 1.), 0.)`.
 assert jnp.allclose(mse(w, 1.), 0.)
 
 # Figure data experiment
@@ -80,9 +80,9 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 # Experiment — Verify the gradient by hand: The matrix formula and autodiff agree for the same row-matched...
 # Differentiate the objective to obtain `(gw, gb)` via automatic differentiation.
 gw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(gw, jnp.array([-4/3, -4/3]))`.
 assert jnp.allclose(gw, jnp.array([-4/3, -4/3]))
-# Check numerical equivalence within tolerance: `jnp.allclose(gb, -2.)`
+# Assert that `jnp.allclose(gb, -2.)`.
 assert jnp.allclose(gb, -2.)
 # Print the observed values to compare against the expected result.
 print("Analytic gradients:", gw, gb)
@@ -94,7 +94,7 @@ column_targets = targets[:, None]
 pairwise = predict(w, 1., X) - column_targets
 # Check tensor shape invariant: `pairwise.shape == (3, 3)`
 assert pairwise.shape == (3, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairwise**2), 28/9)`
+# Assert that `jnp.allclose(jnp.mean(pairwise**2), 28/9)`.
 assert jnp.allclose(jnp.mean(pairwise**2), 28/9)
 # Print the observed values to compare against the expected result.
 print("Wrong residual shape:", pairwise.shape)
@@ -114,7 +114,7 @@ point = jnp.array([0.2, -0.4])
 residual = X @ point - targets
 # Perform matrix contraction / projection to compute `analytic_mean`.
 analytic_mean = 2 * X.T @ residual / X.shape[0]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)`.
 assert jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)
 # Check tensor shape invariant: `jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_...`
 assert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, atol=1e-6)
@@ -122,9 +122,9 @@ assert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, at
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Set the bias to zero.
 residual = predict(w, 0., X) - targets
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(residual, -jnp.ones(3))`.
 assert jnp.allclose(residual, -jnp.ones(3))
-# Check numerical equivalence within tolerance: `jnp.allclose(mse(w, 0.), 1.)`
+# Assert that `jnp.allclose(mse(w, 0.), 1.)`.
 assert jnp.allclose(mse(w, 0.), 1.)
 
 # Reference practice: Add an unseen observation
@@ -133,7 +133,7 @@ assert jnp.allclose(mse(w, 0.), 1.)
 X_new = jnp.concatenate([X, jnp.array([[2., -1.]])])
 # Construct `y_new` via `jnp.concatenate([targets, jnp.array([6.])])`
 y_new = jnp.concatenate([targets, jnp.array([6.])])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(w, 1., X_new), y_new)`.
 assert jnp.allclose(predict(w, 1., X_new), y_new)
 
 # Reference practice: Reject and repair a column target

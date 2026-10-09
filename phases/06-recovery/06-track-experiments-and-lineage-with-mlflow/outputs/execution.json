@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "0c23d7ef80bf7a5c8fc50816b2953c9191442220932196729a9bcd58748431de",
+  "contentHash": "0a441bdc68539ca3439d6d80abe888f42fec18d2102b06e76d3c2b65373d9a7e",
   "executedAt": "2026-10-08T14:03:25.127410+00:00",
   "environment": {
     "backend": "cpu",
@@ -22,11 +22,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "ecf8e8836608cda3779715505a04598d20d98b0aea8ae2ac2c5bd5c85ee6a796",
+      "sourceHash": "84146a6d8e864b49f6f780bff6cbe4c6787034c860f40c014a2ffecf82cc96f3",
       "outputs": []
     },
     {
-      "sourceHash": "8a6d2c5bc8087feee20f487e69b4656940420cff48b5b8aa2cf5af5ddff3c299",
+      "sourceHash": "c46075e0ecfcd140950746885b3553aeee401a119eff92dd6662e1c2931e9d93",
       "outputs": [
         {
           "output_type": "stream",

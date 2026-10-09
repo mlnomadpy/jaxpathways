@@ -58,9 +58,9 @@ assert output.shape == x.shape
 assert jnp.all(jnp.isfinite(output))
 # Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(block_forward(zero, x), x)`.
 assert jnp.allclose(block_forward(zero, x), x)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`
+# Assert that `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`.
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
 # Print the observed values to compare against the expected result.
 print("Block shape:", output.shape)
@@ -120,9 +120,9 @@ assert output.shape == x.shape
 assert jnp.all(jnp.isfinite(output))
 # Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(block_forward(zero, x), x)`.
 assert jnp.allclose(block_forward(zero, x), x)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`
+# Assert that `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`.
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
 # Print the observed values to compare against the expected result.
 print("Block shape:", output.shape)
@@ -137,9 +137,9 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 changed_x = x.at[-1].add(100.)
 # Run `block_forward` to compute `changed_output`.
 changed_output = block_forward(p, changed_x)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(changed_output[:3], output[:3], atol=1e-5)`.
 assert jnp.allclose(changed_output[:3], output[:3], atol=1e-5)
-# Check numerical equivalence within tolerance: `not jnp.allclose(changed_output[-1], output[-1])`
+# Assert that `not jnp.allclose(changed_output[-1], output[-1])`.
 assert not jnp.allclose(changed_output[-1], output[-1])
 
 # Experiment: Compare two precision policies
@@ -208,7 +208,7 @@ def shifted_objective(delta):
     return objective(altered)
 # Compute `fd` from `(shifted_objective(1e-2)-shifted_objective(-1e-2))/(...`
 fd = (shifted_objective(1e-2)-shifted_objective(-1e-2))/(2e-2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)`.
 assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)
 
 # Reference practice: Check normalization without autodiff
@@ -216,9 +216,9 @@ assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)
 row = np.asarray(x[0])
 # Aggregate array values to compute `reference`.
 reference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)`
+# Compute `np.testing.assert_allclose(layer_norm(x)[0],reference,atol` as `1e-6)`.
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(layer_norm(jnp.ones((2,8))),0.)`.
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)
 
 # Reference practice: Repair a residual width mismatch

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "state-03",
-  "contentHash": "ad3d4ded80123b6b147a67a6f98c079511b01a472c364db2633ff6cc284d959f",
+  "contentHash": "2e636b3e26c3faa965be5c389ed632d01aab0c426dac17c34d9f1022815e64f2",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:23.201990+00:00",
@@ -49,7 +49,7 @@
     "prediction": "What changes if the step emits the old carry instead of the new carry?",
     "reading": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
     "alt": "An additive scan starts with carry \\(0\\) and inputs \\(1,2,3\\). Horizontal arrows pass updated carry; downward arrows collect emitted values. Final carry \\(6\\) and outputs \\([1,3,6]\\) are different return values. Arrow lengths do not represent runtime.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.8,
     "panel": {
       "kind": "graph",

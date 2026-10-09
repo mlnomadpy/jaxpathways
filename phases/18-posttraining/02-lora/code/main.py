@@ -211,7 +211,7 @@ a_probe = jnp.asarray(rng.normal(size=(6, 2)) * 0.1, jnp.float32)
 b_probe = jnp.asarray(rng.normal(size=(2, 4)) * 0.1, jnp.float32)
 # Compute `scale` from `3.0 / 2`
 scale = 3.0 / 2
-# Compute `output_gradient` from `(`
+# Evaluate the compound expression for `output_gradient`.
 output_gradient = (
     2 * (lora_forward(x, base, a_probe, b_probe, 3.0) - target) / target.size
 )
@@ -226,9 +226,9 @@ actual_a, actual_b = jax.grad(
     ),
     argnums=(0, 1),
 )(a_probe, b_probe)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual_a, expected_a, atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual_a, expected_a, atol` as `1e-6)`.
 np.testing.assert_allclose(actual_a, expected_a, atol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual_b, expected_b, atol` as `1e-6)`.
 np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')
@@ -272,7 +272,7 @@ new_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
 )
-# Assert invariant `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ me...` holds
+# Assert that `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3`.
 assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3
 # Print the observed values to compare against the expected result.
 print('New-input merge passes; accidental double merge changes outputs.')
@@ -297,7 +297,7 @@ target_update = np.diag([3.0, 1.0])
 u_s, s_s, v_s = np.linalg.svd(target_update)
 # Perform matrix / vector contraction (`@`) to compute `rank_one`.
 rank_one = (u_s[:, :1] * s_s[:1]) @ v_s[:1]
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)`.
 np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)
 # Construct an identity matrix ``.
 np.testing.assert_allclose(

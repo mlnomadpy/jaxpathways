@@ -221,15 +221,15 @@ for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
 # Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 # Print diagnostic summary of the computed outputs.
 print("Summed local means are four times too large; weighted aggregation repaired")
@@ -264,15 +264,15 @@ for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
 # Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Summed local means are four times too large; weighted aggregation repaired")

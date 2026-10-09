@@ -13,7 +13,7 @@ params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
 # Step 3: Verify shapes and numerical invariants
 x = jnp.array([0., 1., 2.])
 # Print the observed values to compare against the expected result.
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`.
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 
 # Pure functions and explicit inputs: A pure function makes its changing inputs visible and returns...
@@ -29,7 +29,7 @@ params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
 x = jnp.array([0., 1., 2.])
 # Print the observed values to compare against the expected result.
 print(predict(params, x))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`.
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 
 # Figure data experiment
@@ -64,20 +64,20 @@ second_params = {"weight": jnp.array(-1.), "bias": jnp.array(4.)}
 first_output = predict(first_params, x)
 # Run `predict` to compute `second_output`.
 second_output = predict(second_params, x)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(first_output, jnp.array([1., 3., 5.]))`.
 assert jnp.allclose(first_output, jnp.array([1., 3., 5.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(second_output, jnp.array([4., 3., 2.]))`
+# Assert that `jnp.allclose(second_output, jnp.array([4., 3., 2.]))`.
 assert jnp.allclose(second_output, jnp.array([4., 3., 2.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(predict(first_params, x), first_output)`
+# Assert that `jnp.allclose(predict(first_params, x), first_output)`.
 assert jnp.allclose(predict(first_params, x), first_output)
-# Check numerical equivalence within tolerance: `jnp.allclose(predict(second_params, x), second_output)`
+# Assert that `jnp.allclose(predict(second_params, x), second_output)`.
 assert jnp.allclose(predict(second_params, x), second_output)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Create new parameters with weight 3 while retaining the original bias.
 # Construct `updated` via `{**params, "weight": jnp.array(3.)}`
 updated = {**params, "weight": jnp.array(3.)}
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))`.
 assert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))
 # Assert invariant `float(params["weight"]) == 2.0` holds
 assert float(params["weight"]) == 2.0
@@ -91,9 +91,9 @@ def with_bias(parameters, new_bias):
 changed_bias = with_bias(params, -2.)
 # Assert invariant `changed_bias is not params` holds
 assert changed_bias is not params
-# Check numerical equivalence within tolerance: `jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))`
+# Assert that `jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))`.
 assert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`
+# Assert that `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`.
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 
 # Reference practice: Return predictions and metrics together
@@ -111,11 +111,11 @@ outputs, error = evaluate(first_params, x, labels)
 other_outputs, other_error = evaluate(second_params, x, labels)
 # Check tensor shape invariant: `error.shape == ()`
 assert error.shape == ()
-# Check numerical equivalence within tolerance: `jnp.allclose(error, 0.)`
+# Assert that `jnp.allclose(error, 0.)`.
 assert jnp.allclose(error, 0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(other_error, 6.)`
+# Assert that `jnp.allclose(other_error, 6.)`.
 assert jnp.allclose(other_error, 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(outputs, first_output)`
+# Assert that `jnp.allclose(outputs, first_output)`.
 assert jnp.allclose(outputs, first_output)
 # Print the observed values to compare against the expected result.
 print("evaluation losses:", float(error), float(other_error))

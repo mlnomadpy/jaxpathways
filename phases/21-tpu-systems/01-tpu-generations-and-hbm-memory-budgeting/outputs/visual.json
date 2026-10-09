@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "91d5116b89754a7ef7d7e24f724ed10a991268069fdabc0788896f214a0db24a",
+  "contentHash": "06acd342a6bc8c755a79c8b595b7089a5e348484b9c1e3a716820c0fb9515346",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-08T10:31:59.255787+00:00",
@@ -46,7 +46,7 @@
     "prediction": "Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?",
     "reading": "Read top to bottom: HBM stores master `fp32` parameters and Adam moments (`m`, `v`) alongside `bf16` activations and KV cache; operands are cast to `bf16` (or `int8`) to stream across the HBM bandwidth bottleneck into the MXU, which accumulates dot products in `fp32` before writing updated state back.",
     "alt": "Read top to bottom: HBM holds fp32 master weights and Adam moments plus bf16/int8 caches, streams bf16 operands into the MXU, accumulates dot products in fp32, and updates sharded HBM state.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
       "kind": "graph",

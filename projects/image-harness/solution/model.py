@@ -15,7 +15,7 @@ from jax import export
 PREPROCESS=dict(version='image-v1',height=8,width=8,channels=1,source_channels=[1,3],
                 resize='nearest floor-index',rgb_weights=[.2126,.7152,.0722],
                 normalization='2 * gray_in_0_1 - 1',layout='NHWC',exif='transpose on file decode')
-# Evaluate `CLASSES` from the current inputs and state.
+# Initialize list `CLASSES` for the stage values.
 CLASSES=['vertical','horizontal','cross']
 
 
@@ -32,9 +32,7 @@ def digest_arrays(*arrays):
     # Iterate over `value` to step through the computation:
     for value in arrays:
         # Run `np.ascontiguousarray` to compute `a`.
-        # Execute the next step of the computation.
-        # Execute the next step of the computation.
-        # Execute the next step of the computation.
+        # Compute `a` as `np.ascontiguousarray(value)`.
         a=np.ascontiguousarray(value)
         h.update(str(a.dtype).encode())
         h.update(str(a.shape).encode())
@@ -98,7 +96,7 @@ def validate_splits(training,heldout):
         if not np.issubdtype(np.asarray(data['labels']).dtype,np.integer) or np.any((data['labels']<0)|(data['labels']>=3)):raise ValueError('class labels required')
     # Guard input contract (`set(training['ids']) & set(heldout['ids']) or set(training['groups']) & set(heldout['groups'])`) and fail fast if violated.
     if set(training['ids'])&set(heldout['ids']) or set(training['groups'])&set(heldout['groups']):raise ValueError('split leakage')
-    # Evaluate `train_pixels` from the current inputs and state.
+    # Construct dictionary `train_pixels` with the structured fields for this stage.
     train_pixels={digest_arrays(image) for image in training['images']}
     # Guard input contract (`train_pixels & {digest_arrays(image) for image in heldout['images']}`) and fail fast if violated.
     if train_pixels & {digest_arrays(image) for image in heldout['images']}:raise ValueError('duplicate image content across splits')
@@ -126,7 +124,7 @@ def preprocess(images,layout='NHWC',input_range='uint8'):
     # Initialize array `rows` with explicit values and shape.
     rows=(np.arange(8)*a.shape[1]//8)
     cols=(np.arange(8)*a.shape[2]//8)
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` as `a[:,rows][:,:,cols]`.
     a=a[:,rows][:,:,cols]
     # Branch on condition `a.shape[-1] == 3`:
     if a.shape[-1]==3:a=np.sum(a*np.array(PREPROCESS['rgb_weights'],np.float32),axis=-1,keepdims=True)
@@ -156,19 +154,13 @@ def load_external_manifest(path):
     JSON: split, source, license, items [{path,id,group,label}]. This loads supplied
     files only and never downloads data. Split related subjects/sources before use.
     """
-    # Read or serialize artifact data on disk (`path`).
-    # Read or serialize artifact data on disk (`manifest`).
     # Run `path.parent.resolve` to compute `root`.
     path=Path(path)
     manifest=json.loads(path.read_text())
     root=path.parent.resolve()
     # Guard input contract (`not all((manifest.get(k) for k in ('split', 'source', 'license', 'items')))`) and fail fast if violated.
     if not all(manifest.get(k) for k in ('split','source','license','items')):raise ValueError('data provenance and items required')
-    # Evaluate `images` from the current inputs and state.
-    # Evaluate `labels` from the current inputs and state.
-    # Evaluate `ids` from the current inputs and state.
-    # Evaluate `groups` from the current inputs and state.
-    # Evaluate `file_hashes` from the current inputs and state.
+    # Initialize list `images` for the stage values.
     images=[]
     labels=[]
     ids=[]
@@ -176,7 +168,7 @@ def load_external_manifest(path):
     file_hashes=[]
     # Loop over `item` in `manifest['items']`:
     for item in manifest['items']:
-        # Evaluate `image_path` from the current inputs and state.
+        # Evaluate the compound expression for `image_path`.
         image_path=(root/item['path']).resolve()
         # Guard input contract (`not image_path.is_relative_to(root)`) and fail fast if violated.
         if not image_path.is_relative_to(root):raise ValueError('image outside manifest directory')
@@ -295,9 +287,8 @@ def advance(state,data,updates=1):
     # Guard input contract (`not isinstance(updates, int) or updates < 1`) and fail fast if violated.
     if not isinstance(updates,int) or updates<1:raise ValueError('positive update count required')
     # Evaluate `state` and convert the result into Python scalar/collection `s`.
-    # Evaluate `records` from the current inputs and state.
     # Run `len` to compute `n`.
-    # Evaluate `batch` from the current inputs and state.
+    # Compute `s` as `dict(state)`.
     s=dict(state)
     records=[]
     n=len(data['images'])
@@ -314,7 +305,7 @@ def advance(state,data,updates=1):
             s['order']=np.asarray(jax.random.permutation(k,n))
             s['position']=0
             s['epoch']+=1
-        # Evaluate `indices` from the current inputs and state.
+        # Compute `indices` as `s['order'][s['position']:s['position']+batch]`.
         indices=s['order'][s['position']:s['position']+batch]
         # Create device-backed JAX array `(p, v, k, loss, aug)`.
         p,v,k,loss,aug=_update(s['params'],s['velocity'],s['key'],jnp.asarray(all_x[indices]),jnp.asarray(data['labels'][indices]),s['settings']['learning_rate'],s['settings']['momentum'])
@@ -369,14 +360,12 @@ def metrics(logits,labels,ids):
 
 # Function `save_checkpoint(path, state)` implementing this stage's computation:
 def save_checkpoint(path,state):
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     path.parent.mkdir(parents=True,exist_ok=True)
     # Convert `arrays` to a host NumPy array for inspection or verification.
     arrays={**{'p_'+k:np.asarray(v) for k,v in state['params'].items()},**{'v_'+k:np.asarray(v) for k,v in state['velocity'].items()},'key':np.asarray(state['key']),'order':np.asarray(state['order'])}
-    # Evaluate `meta` from the current inputs and state.
-    # Execute the next step of the computation.
+    # Construct dictionary `meta` with the structured fields for this stage.
     meta={k:state[k] for k in ('step','position','epoch','seed','data_hash','settings')}
     meta.update(version=1,jax_version=jax.__version__,numpy_version=np.__version__,preprocess=PREPROCESS,arrays_hash=digest_arrays(*[arrays[k] for k in sorted(arrays)]))
     # Run `digest_json` to compute `meta['metadata_hash']`.
@@ -397,7 +386,6 @@ def save_checkpoint(path,state):
 def restore_checkpoint(path,data,settings=None):
     # Enter managed runtime/context scope for this block:
     with np.load(path,allow_pickle=False) as bundle:
-        # Evaluate `arrays` from the current inputs and state.
         # Read or serialize artifact data on disk (`meta`).
         arrays={k:bundle[k].copy() for k in bundle.files if k!='metadata'}
         meta=json.loads(str(bundle['metadata']))
@@ -467,7 +455,6 @@ def calibrate(params,data,percentile=99.):
 def integer_forward(quantized,x,accumulator='int32'):
     # Guard input contract (`accumulator != 'int32'`) and fail fast if violated.
     if accumulator!='int32':raise ValueError('only int32 accumulation is supported')
-    # Evaluate `q` from the current inputs and state.
     # Convert `raw` to a host NumPy array for inspection or verification.
     # Run `quantize` to compute `ix`.
     q=quantized
@@ -497,17 +484,17 @@ def export_model(folder,state,quantized):
     for batch in (1,4):
         # Cast or evaluate `artifact` in explicit floating-point precision.
         artifact=export.export(jax.jit(lambda x:forward(state['params'],x)))(jax.ShapeDtypeStruct((batch,8,8,1),jnp.float32))
-        # Execute the next step of the computation.
+        # Write the serialized artifact payload to disk.
         (folder/f'model-{batch}.jax').write_bytes(artifact.serialize())
     # Run `np.savez` to perform the next check or state transition.
     np.savez(folder/'integer.npz',**quantized)
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(folder/'float-params.npz',**{k:np.asarray(v) for k,v in state['params'].items()})
-    # Evaluate `names` from the current inputs and state.
+    # Initialize list `names` for the stage values.
     names=['model-1.jax','model-4.jax','integer.npz','float-params.npz']
     # Compute deterministic cryptographic digest `manifest` for provenance verification.
     manifest=dict(version=1,preprocess=PREPROCESS,classes=CLASSES,batches=[1,4],training_data_hash=state['data_hash'],training_settings=state['settings'],calibration_data_hash=str(quantized['calibration_hash']),calibration_percentile=float(quantized['percentile']),completed_steps=state['step'],jax_version=jax.__version__,validated_platform='cpu',integer_accumulator='int32',files={n:hashlib.sha256((folder/n).read_bytes()).hexdigest() for n in names})
-    # Read or serialize artifact data on disk (``).
+    # Compute `(folder/'manifest.json').write_text(json.dumps(manifest,indent` as `2,sort_keys=True)+'\n')`.
     (folder/'manifest.json').write_text(json.dumps(manifest,indent=2,sort_keys=True)+'\n')
     # Return `manifest` to the caller.
     return manifest
@@ -515,13 +502,12 @@ def export_model(folder,state,quantized):
 
 # Function `load_model(folder, expected_preprocess)` implementing this stage's computation:
 def load_model(folder,expected_preprocess=PREPROCESS):
-    # Read or serialize artifact data on disk (`folder`).
     # Read or serialize artifact data on disk (`meta`).
     folder=Path(folder)
     meta=json.loads((folder/'manifest.json').read_text())
     # Guard input contract (`meta['version'] != 1 or meta['preprocess'] != expected_preprocess or meta['classes'] != CLASSES or (meta['batches'] != [1, 4]) or (meta['integer_accumulator'] != 'int32')`) and fail fast if violated.
     if meta['version']!=1 or meta['preprocess']!=expected_preprocess or meta['classes']!=CLASSES or meta['batches']!=[1,4] or meta['integer_accumulator']!='int32':raise ValueError('incompatible artifact contract')
-    # Evaluate `names` from the current inputs and state.
+    # Initialize list `names` for the stage values.
     names=['model-1.jax','model-4.jax','integer.npz','float-params.npz']
     # Guard input contract (`set(meta['files']) != set(names)`) and fail fast if violated.
     if set(meta['files'])!=set(names):raise ValueError('unexpected artifact files')
@@ -529,10 +515,10 @@ def load_model(folder,expected_preprocess=PREPROCESS):
     for name in names:
         # Guard input contract (`hashlib.sha256((folder / name).read_bytes()).hexdigest() != meta['files'][name]`) and fail fast if violated.
         if hashlib.sha256((folder/name).read_bytes()).hexdigest()!=meta['files'][name]:raise ValueError('artifact integrity mismatch')
-    # Evaluate `models` from the current inputs and state.
+    # Construct dictionary `models` with the structured fields for this stage.
     models={b:export.deserialize((folder/f'model-{b}.jax').read_bytes()) for b in (1,4)}
     # Enter managed runtime/context scope for this block:
-    # Evaluate `q` from the current inputs and state.
+    # Execute `with np.load(folder/'integer.npz',allow_pickle=False) as f:q={k:f[k].copy() for `.
     with np.load(folder/'integer.npz',allow_pickle=False) as f:q={k:f[k].copy() for k in f.files}
     # Return `dict(models=models, quantized=q, manifest=meta)` to the caller.
     return dict(models=models,quantized=q,manifest=meta)
@@ -546,8 +532,7 @@ def infer(runtime,images,layout='NHWC',input_range='uint8',precision='float32'):
     if precision=='int8':return integer_forward(runtime['quantized'],x)[0]
     # Guard input contract (`precision != 'float32'`) and fail fast if violated.
     if precision!='float32':raise ValueError('runtime supports float32 exported graph or int8 reference')
-    # Evaluate `outputs` from the current inputs and state.
-    # Evaluate `position` from the current inputs and state.
+    # Initialize list `outputs` for the stage values.
     outputs=[]
     position=0
     while position<len(x):
@@ -565,17 +550,15 @@ def benchmark(runtime,images,repeats=12,precision='float32'):
     # Guard input contract (`repeats < 3`) and fail fast if violated.
     if repeats<3:raise ValueError('at least three timing repetitions required')
     # Record execution timing or profiler trace in `start`.
-    # Execute the next step of the computation.
     # Record execution timing or profiler trace in `warmup`.
     start=time.perf_counter()
     infer(runtime,images,precision=precision)
     warmup=time.perf_counter()-start
-    # Evaluate `samples` from the current inputs and state.
+    # Initialize list `samples` for the stage values.
     samples=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `start`.
-        # Execute the next step of the computation.
         # Record execution timing or profiler trace in ``.
         start=time.perf_counter()
         infer(runtime,images,precision=precision)

@@ -193,7 +193,7 @@ mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))
 
 # Reference practice: Change both dimensions
@@ -232,6 +232,6 @@ mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))
 print("PASS: distributed-01")

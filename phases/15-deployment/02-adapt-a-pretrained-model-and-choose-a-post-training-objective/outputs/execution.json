@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-02",
-  "contentHash": "4ec125dddb701b05e277399e8bd668a87b55fc6555f219cc87512460c56d2958",
+  "contentHash": "e4ed09290fbedefdeea3fd40dc5f110265fd2c1a4c4d67e2b2947bb5c9c727f3",
   "executedAt": "2026-10-08T14:05:57.173513+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,11 +18,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "b6b6edf395025894f771d021495f425dcabe367148d1ae48445d8f3da9a212f3",
+      "sourceHash": "84d60ad59817a4eb3a0c73053a0d0bf409687bc3361a194cd8ec4b07f946e5a9",
       "outputs": []
     },
     {
-      "sourceHash": "f0a13d4e5ddebbdf776a16dead40a140cba5df1dffc8de1d533931a8dbb47a33",
+      "sourceHash": "cd41661054890d748d21ce5f63b41392dac585dcc3685e3a1b844aeaea50a37f",
       "outputs": [
         {
           "output_type": "stream",
@@ -51,7 +51,7 @@
       ]
     },
     {
-      "sourceHash": "9bfa60882e039b8bf57fae319608869c194d594b74d70bbb73a6b59513c58f0d",
+      "sourceHash": "6b70674142b9f0d6d157873fce6b420a9f8d9252ad7aa221aa1cf2587f9df3ea",
       "outputs": [
         {
           "output_type": "stream",
@@ -99,11 +99,11 @@
       ]
     },
     {
-      "sourceHash": "aa5db3f70e8217c82c8811caa6badd478d39b7110c9768f99d492bd60265ee36",
+      "sourceHash": "6b99941e230e8633fb7d7868b5c560e6afd6baecb8f61f9cf8a1d3b7d2325974",
       "outputs": []
     },
     {
-      "sourceHash": "ba1b41ee35410cd2a5b4093ac446a71ce2158b57f41acabba7a984ebd82ec165",
+      "sourceHash": "446b186269b4a092138f21d1bf35d3a7cf5ae9bef802b7b603d9f67855323161",
       "outputs": [
         {
           "output_type": "stream",
@@ -147,11 +147,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "18123a809844492245fa213428275c370dc09a856d60493a5b9191420985fc5b",
+      "sourceHash": "a100c923de5e37c4e6685a4140c696be136281c087b66838f0c4a660a8cff438",
       "outputs": []
     },
     {
-      "sourceHash": "d5e29ac44a80b908dc717d9f043fc1f47bba37b8f11942da65b1b9d6cceea60c",
+      "sourceHash": "a032b2f68a9641f54439d6f3dc9b02e251f6c98c2163696c2c70813052d288d6",
       "outputs": [
         {
           "output_type": "stream",

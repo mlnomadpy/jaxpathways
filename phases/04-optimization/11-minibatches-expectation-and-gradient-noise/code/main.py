@@ -18,9 +18,9 @@ def example_loss(w, y):
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 # Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))`.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(full, -2.5)`
+# Assert that `jnp.allclose(full, -2.5)`.
 assert jnp.allclose(full, -2.5)
 
 # Enumerate every pair
@@ -28,11 +28,11 @@ assert jnp.allclose(full, -2.5)
 pairs = (per[:, None] + per[None, :]) / 2
 # Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairs), full)`
+# Assert that `jnp.allclose(jnp.mean(pairs), full)`.
 assert jnp.allclose(jnp.mean(pairs), full)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(per), 1.25)`
+# Assert that `jnp.allclose(jnp.var(per), 1.25)`.
 assert jnp.allclose(jnp.var(per), 1.25)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(pairs), 0.625)`
+# Assert that `jnp.allclose(jnp.var(pairs), 0.625)`.
 assert jnp.allclose(jnp.var(pairs), 0.625)
 
 # Sample and replay one batch
@@ -67,20 +67,20 @@ def example_loss(w, y):
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 # Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))`.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(full, -2.5)`
+# Assert that `jnp.allclose(full, -2.5)`.
 assert jnp.allclose(full, -2.5)
 
 # Step 2 — Enumerate every pair: All ordered pairs are equally likely under independent uniform draws.
 pairs = (per[:, None] + per[None, :]) / 2
 # Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairs), full)`
+# Assert that `jnp.allclose(jnp.mean(pairs), full)`.
 assert jnp.allclose(jnp.mean(pairs), full)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(per), 1.25)`
+# Assert that `jnp.allclose(jnp.var(per), 1.25)`.
 assert jnp.allclose(jnp.var(per), 1.25)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(pairs), 0.625)`
+# Assert that `jnp.allclose(jnp.var(pairs), 0.625)`.
 assert jnp.allclose(jnp.var(pairs), 0.625)
 
 # Step 3 — Sample and replay one batch: Replay checks reproducibility.
@@ -114,9 +114,9 @@ last = jnp.mean(per[3:])
 wrong = (first + last) / 2
 # Compute `correct` from `(3 * first + last) / 4`
 correct = (3 * first + last) / 4
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(wrong, -3.0)`.
 assert jnp.allclose(wrong, -3.0)
-# Check numerical equivalence within tolerance: `jnp.allclose(correct, full)`
+# Assert that `jnp.allclose(correct, full)`.
 assert jnp.allclose(correct, full)
 
 # Experiment: Take a noisy step at the full optimum
@@ -127,7 +127,7 @@ full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
 optimum = jnp.array(2.5)
 # Differentiate the objective to obtain `noisy` via automatic differentiation.
 noisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(full_loss)(optimum), 0.0)`.
 assert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)
 # Assert invariant `full_loss(noisy) > full_loss(optimum)` holds
 assert full_loss(noisy) > full_loss(optimum)
@@ -137,9 +137,9 @@ assert full_loss(noisy) > full_loss(optimum)
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 # Assert invariant `triples.size == 64` holds
 assert triples.size == 64
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`
+# Assert that `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`.
 assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`
+# Assert that `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`.
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)
 
 # Reference practice: Accumulate before updating
@@ -150,14 +150,14 @@ g1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)
 g2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)
 # Compute `accumulated` from `(3 * g1 + g2) / 4`
 accumulated = (3 * g1 + g2) / 4
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)`.
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)
 
 # Reference practice: Detect a biased sampler
 # Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
 biased = 0.9 * per[0] + 0.1 * per[3]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(biased, -1.3)`.
 assert jnp.allclose(biased, -1.3)
-# Check numerical equivalence within tolerance: `not jnp.allclose(biased, full)`
+# Assert that `not jnp.allclose(biased, full)`.
 assert not jnp.allclose(biased, full)
 print("PASS: optimization-11")

@@ -34,7 +34,7 @@ $$
 
 ![Four different deployment boundaries](../../phases/15-deployment/03-export-and-serve-a-trained-computation/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Read top to bottom from the raw request to the response. Each row has a distinct contract and a distinct failure. The exported computation handles the numeric call; request fields, artifact identity and response meaning require surrounding checks. The fresh-process experiment exercises loading and calling under the installed CPU runtime.
 
@@ -138,7 +138,7 @@ with tempfile.TemporaryDirectory() as folder:
     sample = np.array([[1., 2., -1.]], np.float32)
     # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)`
+    # Compute `np.testing.assert_allclose(actual, [[3.1, -.45]], atol` as `1e-6)`.
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
     # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
@@ -183,7 +183,7 @@ with tempfile.TemporaryDirectory() as folder:
     sample = np.array([[1., 2., -1.]], np.float32)
     # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)`
+    # Compute `np.testing.assert_allclose(actual, [[3.1, -.45]], atol` as `1e-6)`.
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
     # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
@@ -283,7 +283,7 @@ with tempfile.TemporaryDirectory() as directory:
     completed = subprocess.run([sys.executable, '-c', worker, str(exported_path)], input=json.dumps({'features': [[1.,2.,-1.]]}), text=True, capture_output=True, check=True, env=dict(os.environ, JAX_PLATFORMS='cpu'), timeout=60)
     # Read or serialize artifact data on disk (`worker_scores`).
     worker_scores = json.loads(completed.stdout)['scores']
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)`
+# Compute `np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol` as `1e-6)`.
 np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Fresh interpreter loaded bytes and matched the known scores.')
@@ -305,7 +305,7 @@ Verify a new input $[-2, 0, 3]$ against an independent NumPy expression.
 **Step-by-step implementation plan:**
 1. Compute `changed` from `np.array([[-2., 0., 3.]], np.float32)`
 2. Convert `expected` to a host NumPy array for inspection or verification.
-3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
+3. Compute `np.testing.assert_allclose(restored.call(changed), expected, atol` as `1e-6)`.
 4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -316,7 +316,7 @@ Verify a new input $[-2, 0, 3]$ against an independent NumPy expression.
 changed = np.array(...)  # TODO: compute changed
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected = ...  # TODO: compute expected
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
+# Compute `np.testing.assert_allclose(restored.call(changed), expected, atol` as `1e-6)`.
 np.testing.assert_allclose(restored.call(changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(restored.call(changed), expected, atol
 # Print the observed values to compare against the expected result.
 print("Changed exported request verified")
@@ -330,7 +330,7 @@ print("Changed exported request verified")
 changed = np.array([[-2., 0., 3.]], np.float32)
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected = changed @ np.asarray(weights) + np.asarray(bias)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
+# Compute `np.testing.assert_allclose(restored.call(changed), expected, atol` as `1e-6)`.
 np.testing.assert_allclose(restored.call(changed), expected, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed exported request verified")
@@ -361,7 +361,7 @@ Validate shape and finiteness on the host before calling inference. Include a si
 2. Guard input contract (`array.shape != (1, 3) or not np.isfinite(array).all()`) and fail fast if violated.
 3. Return `array` to the caller.
 4. Iterate over `invalid` to step through the computation:
-5. Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
+5. Compute `np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol` as `1e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -383,7 +383,7 @@ for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
         pass
     else:
         raise AssertionError("invalid input accepted")
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
+# Compute `np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol` as `1e-6)`.
 np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
 ```
 
@@ -407,7 +407,7 @@ for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
         pass
     else:
         raise AssertionError("invalid input accepted")
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
+# Compute `np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol` as `1e-6)`.
 np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
 ```
 
@@ -454,12 +454,15 @@ def checked_prediction(values):
     return ...  # TODO: return computed result
 # Iterate over `invalid` to step through the computation:
 for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
-    try: checked_prediction(invalid)
-    except ValueError: pass
-    else: raise AssertionError('invalid request reached inference')
+    try:
+        checked_prediction(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid request reached inference')
 # Assert invariant `inference_calls[0] == 0` holds
 assert inference_calls[0]  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3...`
+# Compute `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol` as `1e-6)`.
 np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
 # Assert invariant `inference_calls[0] == 1` holds
 assert inference_calls[0]  # TODO: complete assertion check
@@ -482,12 +485,15 @@ def checked_prediction(values):
     return np.asarray(restored.call(array))
 # Iterate over `invalid` to step through the computation:
 for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
-    try: checked_prediction(invalid)
-    except ValueError: pass
-    else: raise AssertionError('invalid request reached inference')
+    try:
+        checked_prediction(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid request reached inference')
 # Assert invariant `inference_calls[0] == 0` holds
 assert inference_calls[0] == 0
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3...`
+# Compute `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol` as `1e-6)`.
 np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
 # Assert invariant `inference_calls[0] == 1` holds
 assert inference_calls[0] == 1

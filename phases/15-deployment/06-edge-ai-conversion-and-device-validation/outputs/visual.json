@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-06",
-  "contentHash": "05f35882e0fae27a347d13b7d4e215d996c8d41b61a91cd08c73f28a1d7ff152",
+  "contentHash": "32a0131f0329ae143e7d518596114a10ea9c7bd2df68344f72063d77af3b282c",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T21:55:35.456895+00:00",
@@ -127,7 +127,7 @@
     "prediction": "If inference becomes twice as fast, does the whole request become twice as fast?",
     "reading": "Read the two columns as a hypothetical serial request before and after halving only inference. Preprocessing and transfer/response work remain unchanged. Add down each column: the total moves from \\(24\\) to \\(20\\) milliseconds, a \\(1.2\\)-fold improvement. These times are analytic teaching values; the separate plot contains actual local CPU request measurements.",
     "alt": "Read the two columns as a hypothetical serial request before and after halving only inference. Preprocessing and transfer/response work remain unchanged. Add down each column: the total moves from \\(24\\) to \\(20\\) milliseconds, a \\(1.2\\)-fold improvement. These times are analytic teaching values; the separate plot contains actual local CPU request measurements.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,
     "panel": {
       "kind": "table",

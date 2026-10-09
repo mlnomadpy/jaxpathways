@@ -23,7 +23,7 @@ print("Devices:", x.devices())
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
+# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
@@ -44,7 +44,7 @@ print("Devices:", x.devices())
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
+# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 
 # Figure data experiment
@@ -64,7 +64,7 @@ print("Means:",means)
 print("Centered:",centered)
 # Check tensor shape invariant: `means.shape==(1,3)`
 assert means.shape==(1,3)
-# Check numerical equivalence within tolerance: `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`
+# Assert that `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`.
 assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 
 # Experiment: Keep a host reference
@@ -86,16 +86,16 @@ print("Host dtype:",host.dtype)
 column_sums = x.sum(axis=0)
 # Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape == (3,)
-# Check numerical equivalence within tolerance: `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`
+# Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 
 # Reference practice: Add a new observation
 # Add a new observation (Practice): Changing the observation count changes axis 0, while the...
 # Construct and reshape `table` into the target tensor dimensions.
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`
+# Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
 
 # Reference practice: Diagnose an impossible reshape

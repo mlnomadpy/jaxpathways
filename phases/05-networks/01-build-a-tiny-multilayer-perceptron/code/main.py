@@ -32,11 +32,11 @@ def loss(p, batch, labels):
 scores = np.asarray(logits(params,x))
 # Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(params,x,y), expected, rtol` as `1e-6)`.
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
 # Transform every leaf of the parameter PyTree (`zeros`).
 zeros = jax.tree.map(jnp.zeros_like, params)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol` as `1e-6)`.
 np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)
 # Check tensor shape invariant: `logits(params,jnp.ones((1,2))).shape == (1,)`
 assert logits(params,jnp.ones((1,2))).shape == (1,)
@@ -109,11 +109,11 @@ def loss(p, batch, labels):
 scores = np.asarray(logits(params,x))
 # Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(params,x,y), expected, rtol` as `1e-6)`.
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
 # Transform every leaf of the parameter PyTree (`zeros`).
 zeros = jax.tree.map(jnp.zeros_like, params)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)`
+# Compute `np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol` as `1e-6)`.
 np.testing.assert_allclose(loss(zeros,x,y),np.log(2.),rtol=1e-6)
 # Check tensor shape invariant: `logits(params,jnp.ones((1,2))).shape == (1,)`
 assert logits(params,jnp.ones((1,2))).shape == (1,)
@@ -172,14 +172,14 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 # Experiment — Duplication preserves a mean objective: Averaging normalizes repeated identical data.
 repeated_x=jnp.repeat(x,3,axis=0)
 repeated_y=jnp.repeat(y,3)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(params,repeated_x,repeated_y),los...`
+# Compute `np.testing.assert_allclose(loss(params,repeated_x,repeated_y),loss(params,x,y),rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(params,repeated_x,repeated_y),loss(params,x,y),rtol=1e-5)
 # Differentiate the objective to obtain `original_g` via automatic differentiation.
 original_g=jax.grad(loss)(params,x,y)
 repeated_g=jax.grad(loss)(params,repeated_x,repeated_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(jax.tree.leaves(original_g),jax.tree.leaves(repeated_g)):
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(a,b,rtol=1e-4,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(a,b,rtol` as `1e-4,atol=1e-7)`.
     np.testing.assert_allclose(a,b,rtol=1e-4,atol=1e-7)
 
 # Experiment: An affine stack stays affine
@@ -196,11 +196,11 @@ np.testing.assert_allclose(affine_stack(midpoint),.5*(affine_stack(midpoint+delt
 complemented=dict(params,w2=-params['w2'],b2=-params['b2'])
 # Construct `changed_x` via `jnp.array([[-.8,.7],[.7,.9],[-1.1,-.8]])`
 changed_x=jnp.array([[-.8,.7],[.7,.9],[-1.1,-.8]])
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(logits(complemented,changed_x),-logits...`
+# Compute `np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol` as `1e-6)`.
 np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
 # Convert `expected_labels` to a host NumPy array for inspection or verification.
 expected_labels=(np.asarray(changed_x)[:,0]*np.asarray(changed_x)[:,1]>0)
-# Assert invariant `np.array_equal(np.asarray(logits(complemented,changed_x)>0),expec...` holds
+# Assert that `np.array_equal(np.asarray(logits(complemented,changed_x)>0),expected_labels)`.
 assert np.array_equal(np.asarray(logits(complemented,changed_x)>0),expected_labels)
 
 # Reference practice: Reorder hidden units without changing predictions
@@ -211,11 +211,11 @@ order=jnp.array([7,0,6,1,5,2,4,3])
 probe=jnp.array([[.2,-.9],[-.4,.6],[.8,.1]])
 # Evaluate `params, w1=params['w1'][:, order], b1=params['b1'][order], w2=params['w2'][order, :]` and convert the result into Python scalar/collection `permuted`.
 permuted=dict(params,w1=params['w1'][:,order],b1=params['b1'][order],w2=params['w2'][order,:])
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(logits(permuted,probe),logits(params,p...`
+# Compute `np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol` as `1e-5,atol=1e-5)`.
 np.testing.assert_allclose(logits(permuted,probe),logits(params,probe),rtol=1e-5,atol=1e-5)
 # Evaluate `params, w1=params['w1'][:, order], b1=params['b1'][order]` and convert the result into Python scalar/collection `broken`.
 broken=dict(params,w1=params['w1'][:,order],b1=params['b1'][order])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)`.
 assert not np.allclose(logits(broken,probe),logits(params,probe),atol=1e-5)
 # Print the observed values to compare against the expected result.
 print('Consistent hidden permutation preserves logits; one-sided permutation changes them.')
@@ -230,6 +230,6 @@ assert bad.shape==(4,4)
 good=optax.sigmoid_binary_cross_entropy(logits(params,x),y)
 # Check tensor shape invariant: `good.shape==(4,)`
 assert good.shape==(4,)
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol` as `1e-6)`.
 np.testing.assert_allclose(jnp.mean(good),loss(params,x,y),rtol=1e-6)
 print("PASS: networks-01")

@@ -133,7 +133,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute the next step of the computation.
+        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 # Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
@@ -161,7 +161,7 @@ np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
@@ -228,7 +228,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute the next step of the computation.
+        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 # Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
@@ -248,7 +248,7 @@ np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
@@ -368,8 +368,8 @@ Pad the final three-label batch to four elements with zero. Show that an unmaske
 1. Combine or mask array elements to form `padded_labels`.
 2. Compute `mask` from `np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.fl...`
 3. Aggregate array values to compute `masked`.
-4. Reduce across the target axis to summarize ``.
-5. Verify that the numerical values match the expected reference within tolerance.
+4. Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
+5. Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -382,9 +382,9 @@ padded_labels = np.pad(...)  # TODO: compute padded_labels
 mask = np.array(...)  # TODO: compute mask
 # Aggregate array values to compute `masked`.
 masked = ...  # TODO: compute masked
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
 np.testing.assert_allclose(masked,last.mean(),atol = ...  # TODO: compute np.testing.assert_allclose(masked,last.mean(),atol
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 assert not np.isclose(padded_labels.mean(),last.mean())  # TODO: complete assertion check
 ```
 
@@ -399,9 +399,9 @@ padded_labels = np.pad(last,(0,4-len(last)))
 mask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)
 # Aggregate array values to compute `masked`.
 masked = (padded_labels*mask).sum()/mask.sum()
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
 np.testing.assert_allclose(masked,last.mean(),atol=1e-7)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 assert not np.isclose(padded_labels.mean(),last.mean())
 ```
 
@@ -498,9 +498,9 @@ The known relation $y=2x-1$ provides a stronger oracle than a falling training l
 
 **Step-by-step implementation plan:**
 1. Compute `wrong_labels` from `batch["y"][::-1]`
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 3. Compute `fixed` from `labels[batch["id"]]`
-4. Check numerical equivalence within tolerance: `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)`
+4. Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 5. Run `labels.copy` to compute `changed_labels`.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -510,11 +510,11 @@ The known relation $y=2x-1$ provides a stronger oracle than a falling training l
 batch = ...  # TODO: compute batch
 # Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = ...  # TODO: compute wrong_labels
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)  # TODO: complete assertion check
 # Compute `fixed` from `labels[batch["id"]]`
 fixed = ...  # TODO: compute fixed
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)`
+# Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
 # Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
@@ -531,11 +531,11 @@ assert dataset_digest(features,changed_labels)  # TODO: complete assertion check
 batch = batches[0]
 # Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = batch["y"][::-1]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)
 # Compute `fixed` from `labels[batch["id"]]`
 fixed = labels[batch["id"]]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)`
+# Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
 # Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-02",
-  "contentHash": "4507eeb6d3c444e5b9c08b5c811169617f75f5600681cddfee7493b17057b2bd",
+  "contentHash": "5e5ca64afe37564c6b9c7e89e5adbee0f42e0c1314b29a988558a2e9ddb4a1e9",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:29.899953+00:00",
@@ -206,7 +206,7 @@
     "prediction": "What should happen if you permute independent initial conditions?",
     "reading": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
     "alt": "Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5,
     "panel": {
       "kind": "graph",

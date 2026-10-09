@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-05",
-  "contentHash": "c80a252d895af4b9b883ea6f9c3bd1838d5ec1495a6fb0a1ab6223723849ad1e",
+  "contentHash": "bbfaa90adea8cbb8d46bb3337e06ee73f23f31fe86d9c4dffaee49fbf74b1631",
   "executedAt": "2026-10-08T14:03:18.426772+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,7 @@
   "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-uem4o66m\n{\n  \"save_call_seconds\": 0.004411875270307064,\n  \"remaining_work_and_wait_seconds\": 0.014456083066761494,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-351xanch\n{\n  \"save_call_seconds\": 0.0018216250464320183,\n  \"remaining_work_and_wait_seconds\": 0.009038458112627268,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
   "notebookCells": [
     {
-      "sourceHash": "314251befd2dd17588096b6cc555bdfad171bf0a94178401ebb90a10eb4405fd",
+      "sourceHash": "ca451e684a37b5e4171bc3670b1e5fe5657837277778ecd8457bf5b5397ff879",
       "outputs": []
     },
     {
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "sourceHash": "e69d479614cadcf6627be9ca161cf87d04bd1df1629a9f386e9bd653cd651af0",
+      "sourceHash": "e47624f605ae3558ce6ef2117abbe85fb07fdbb386acb367ab51ffbf0612bfb4",
       "outputs": [
         {
           "output_type": "stream",

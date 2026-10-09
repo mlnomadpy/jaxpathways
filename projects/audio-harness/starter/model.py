@@ -90,7 +90,7 @@ def save_checkpoint(path,state):
     # Step 3: Convert `` to a host NumPy array for inspection or verification.
     # Step 4: Compute deterministic cryptographic digest `manifest` for provenance verification.
     # Step 5: Compute deterministic cryptographic digest `` for provenance verification.
-    # Step 6: Read or serialize artifact data on disk (``).
+    # Execute `raise NotImplementedError("Save the complete committed training boundary")`.
     raise NotImplementedError("Save the complete committed training boundary")
 
 

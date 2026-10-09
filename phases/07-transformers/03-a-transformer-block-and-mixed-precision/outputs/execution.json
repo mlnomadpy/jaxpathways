@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-03",
-  "contentHash": "f4dd81ad5eea7b1da922458f83d8ac20678ddb8ee2f717a46d858d8ef47c96f9",
+  "contentHash": "f3b68a23b33f636acdfed6ccb7cde2ce48763d4ec43574019e4968b13e126454",
   "executedAt": "2026-10-08T14:03:39.056987+00:00",
   "environment": {
     "backend": "cpu",
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "f1ca5fd2cd351fbe1674da86207cc534188d4cc41d84ca57ba881ae117193134",
+      "sourceHash": "87e4b6475e2930f5773008e9c36eca804a50b1e0a7a2f85fc5bd6a231c89c471",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "7a7d2ef211b878d7886e644c7039faae460382a16316921e8dfa78eea4212fe6",
+      "sourceHash": "00b01482784ef292f7804cc3af0b6e0ceb6907c4f73276cf47f6479b5ef2e50c",
       "outputs": [
         {
           "output_type": "stream",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "560c1f9d6faccf62922b3fa96174ab077919329eaa20d8ef5523af685889bc36",
+      "sourceHash": "468b39e72db2a4d97e010e521c1cfbdcbc2fdaaf00e91dd9b3b33bd98146f17d",
       "outputs": []
     },
     {
@@ -82,19 +82,19 @@
       ]
     },
     {
-      "sourceHash": "d50539c13f6e68b104c17e827ec3e2332e40b4573570ceaeda1a5d72013492ce",
+      "sourceHash": "020760ebe3b99d87cf261a9677d5eeb3f9ef9244d509185e4a803930c899a8b0",
       "outputs": []
     },
     {
-      "sourceHash": "8fe3a9d78a0039ab6740d446e0bbc0aa83a504e5806d8e9cc6d7cc6b08fa41e1",
+      "sourceHash": "49481d3d0b3beb77385d5e09b253c55ad7ba7ac651a3f73258b1c444a6de9808",
       "outputs": []
     },
     {
-      "sourceHash": "4a3556a7968c6775a5a69373a9599287ab072fcce2e53778fe2d22cd449cd110",
+      "sourceHash": "b35eadb6f0d0cb1d1745a344cc11309915117a49193b2ee3135b1118dd499e2b",
       "outputs": []
     },
     {
-      "sourceHash": "4f688a1a6957deb81e724a60480714aa6cc0f99eec0e82565369e4e499457549",
+      "sourceHash": "bf15cc6b7082b9265c68ff5b43d8d2ae7cb9fb2485b928b728fca29f97121a25",
       "outputs": []
     },
     {

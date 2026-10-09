@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-06",
-  "contentHash": "ab390355eafb9e5585a455103dae3f99acee9c4395172530ca075e00553ab163",
+  "contentHash": "feab841a0aad04860d808e0172c302fd0b37d92230a83268f25b9ed0f2430b8a",
   "executedAt": "2026-10-08T14:08:25.927372+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,7 @@
   "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0972\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0731\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 20.57 Traced steady step ms: 0.0731\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 257376\nPASS: tpu-06\n",
   "notebookCells": [
     {
-      "sourceHash": "6a567352869a5eba213bae61d91d1862bbe3040bd22b7e5c8dc575b327478316",
+      "sourceHash": "5e397e5f25ebe5b19b1279c368bf550397d915b410c93d4fdafa0e9e7876c23b",
       "outputs": []
     },
     {
@@ -26,7 +26,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "e9707e3ad3d2e8229d32b526e10f8c200783b004286fe5a44a4b0117e3a902ac",
+      "sourceHash": "96fe69f3520c1508a07dbce7eea54fe48081ca6c3af245c2f1023e3b6816b8bb",
       "outputs": [
         {
           "output_type": "stream",
@@ -66,11 +66,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "3ad9b51eaf089b5d7c37aa789f3ac57a613ef90eaa03b498d122ffdb9403bb5c",
+      "sourceHash": "5aadfe35beef72e9894ccd95d0e45f61a3590d789fba9c1a13086cdc8ad8e3e0",
       "outputs": []
     },
     {
-      "sourceHash": "4038b126362a8e2ba2b9f3dc17c87c4b6023f0f24eaaa28002b1ba6403f9f8df",
+      "sourceHash": "9b5ef9107823cca095f0b68ea59f4cec8bb1441a0b87a7ed251f1b61dda21dd3",
       "outputs": []
     },
     {

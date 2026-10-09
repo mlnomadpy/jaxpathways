@@ -154,9 +154,9 @@ value = shifted_square_sum(x)
 gradient = jax.grad(shifted_square_sum)(x)
 # Print the observed values to compare against the expected result.
 print("Value / gradient:", value, gradient)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(value, 29.)`.
 assert jnp.allclose(value, 29.)
-# Check numerical equivalence within tolerance: `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`
+# Assert that `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`.
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -199,9 +199,9 @@ value = shifted_square_sum(x)
 gradient = jax.grad(shifted_square_sum)(x)
 # Print the observed values to compare against the expected result.
 print("Value / gradient:", value, gradient)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(value, 29.)`.
 assert jnp.allclose(value, 29.)
-# Check numerical equivalence within tolerance: `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`
+# Assert that `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`.
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -339,11 +339,11 @@ derivative_program = jax.make_jaxpr(jax.grad(shifted_square_sum))(x)
 print("Derivative program:", derivative_program)
 # Construct `other` via `jnp.array([-1., 0., 2.])`
 other = jnp.array([-1., 0., 2.])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(shifted_square_sum(other), 10.)`.
 assert jnp.allclose(shifted_square_sum(other), 10.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., ...`
+# Assert that `jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., 2., 6.]))`.
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., 2., 6.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))`
+# Assert that `jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))`.
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))
 ```
 
@@ -379,7 +379,7 @@ print("Explicit:", explicit_program)
 assert len(captured_program.jaxpr.invars) == 1
 # Assert invariant `len(explicit_program.jaxpr.invars) == 2` holds
 assert len(explicit_program.jaxpr.invars) == 2
-# Check numerical equivalence within tolerance: `jnp.allclose(captured(x), explicit(x, offset))`
+# Assert that `jnp.allclose(captured(x), explicit(x, offset))`.
 assert jnp.allclose(captured(x), explicit(x, offset))
 ```
 
@@ -403,8 +403,8 @@ Change the scalar offset from $1$ to $2$. Draw the new value flow for $[1, 2, 3]
 1. Compute `shifted` from `z + 2.`
 2. Return `jnp.sum(shifted * shifted)` to the caller.
 3. Print the observed values to compare against the expected result.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
+4. Assert that `jnp.allclose(shifted_two(x), 50.)`.
+5. Assert that `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -417,9 +417,9 @@ def shifted_two(z):
     return ...  # TODO: return computed result
 # Print the observed values to compare against the expected result.
 print(jax.make_jaxpr(shifted_two)(x))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(shifted_two(x), 50.)`.
 assert jnp.allclose(shifted_two(x), 50.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
+# Assert that `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`.
 assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))  # TODO: complete assertion check
 ```
 
@@ -434,9 +434,9 @@ def shifted_two(z):
     return jnp.sum(shifted * shifted)
 # Print the observed values to compare against the expected result.
 print(jax.make_jaxpr(shifted_two)(x))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(shifted_two(x), 50.)`.
 assert jnp.allclose(shifted_two(x), 50.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
+# Assert that `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`.
 assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))
 ```
 
@@ -493,9 +493,9 @@ def scanned(z):
 print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
 # Print diagnostic summary of the computed outputs.
 print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(unrolled(jnp.array(0.)), 1.875)`.
 assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(scanned(jnp.array(0.)), 1.875)`
+# Assert that `jnp.allclose(scanned(jnp.array(0.)), 1.875)`.
 assert jnp.allclose(scanned(jnp.array(0.)), 1.875)  # TODO: complete assertion check
 ```
 
@@ -524,9 +524,9 @@ def scanned(z):
 print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
 # Print diagnostic summary of the computed outputs.
 print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(unrolled(jnp.array(0.)), 1.875)`.
 assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)
-# Check numerical equivalence within tolerance: `jnp.allclose(scanned(jnp.array(0.)), 1.875)`
+# Assert that `jnp.allclose(scanned(jnp.array(0.)), 1.875)`.
 assert jnp.allclose(scanned(jnp.array(0.)), 1.875)
 ```
 
@@ -583,9 +583,9 @@ def repaired(z):
     return ...  # TODO: return computed result
 # Print the observed values to compare against the expected result.
 print("Repaired:", jax.make_jaxpr(repaired)(x))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.jit(repaired)(x), 6.)`.
 assert jnp.allclose(jax.jit(repaired)(x), 6.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(repaired)(-x), 6.)`
+# Assert that `jnp.allclose(jax.jit(repaired)(-x), 6.)`.
 assert jnp.allclose(jax.jit(repaired)(-x), 6.)  # TODO: complete assertion check
 ```
 
@@ -612,9 +612,9 @@ def repaired(z):
     return jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)
 # Print the observed values to compare against the expected result.
 print("Repaired:", jax.make_jaxpr(repaired)(x))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.jit(repaired)(x), 6.)`.
 assert jnp.allclose(jax.jit(repaired)(x), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(repaired)(-x), 6.)`
+# Assert that `jnp.allclose(jax.jit(repaired)(-x), 6.)`.
 assert jnp.allclose(jax.jit(repaired)(-x), 6.)
 ```
 

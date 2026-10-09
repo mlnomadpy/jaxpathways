@@ -35,7 +35,7 @@ $$
 
 ![Time the completed result](../../phases/08-performance/01-benchmark-asynchronous-work-correctly/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-02",
-  "contentHash": "50d5c4bdd3ebe4abbac5bf931faf522c4ae00247055c616986f0c884eb8f8d7c",
+  "contentHash": "ec874985d4f66850822c3ef7af374a5e24e927f54ef9b3f10bc97dbd75813306",
   "executedAt": "2026-10-08T14:01:08.742597+00:00",
   "environment": {
     "backend": "cpu",
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "f364bd05eeb033e441fb5014e87e462eccda76bd0f58b2936a1a7b4f27bbe390",
+      "sourceHash": "6a67b1489da5fe0de467d512d1e5fb8be0c791b71039bd04d347feffc54b4c6d",
       "outputs": [
         {
           "output_type": "stream",
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "sourceHash": "d9fcdb6230947a40f882ec6f3e88111988fbfabd6002566fbccc21a5eb7d68ed",
+      "sourceHash": "6760ffe620e99f473326b08a9cdf208a9bfca9d5950c201c57a2f9ed0bd2bb51",
       "outputs": [
         {
           "output_type": "stream",
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "sourceHash": "f31e760f9b66133f1949a334347bfc08f9db182d780af36b3826ab80b30b92f6",
+      "sourceHash": "e7adaf0fadaf405bd5b491963eb2ee8259f7a8499a75d7495c1961d96e641bdf",
       "outputs": [
         {
           "output_type": "stream",
@@ -97,19 +97,19 @@
       ]
     },
     {
-      "sourceHash": "cc2e4965959203f55f8c6bebdfa5a9b93e38469e9b90a0a76e62b552feaf7916",
+      "sourceHash": "31b63828d23400510b102e47376d25c3f950eff386224b3734697f4d4b65524f",
       "outputs": []
     },
     {
-      "sourceHash": "b2e950c27c45f10843061f309e08a66acbba13756203a6c82abd4c6b013d3495",
+      "sourceHash": "991d0e5c8269ff10f620062db013fec8e54bf0625ab8304adf31ee32850876d6",
       "outputs": []
     },
     {
-      "sourceHash": "27e2e98f540b5ff29d2af0b03cd2610f6f2bb6ff33ad6d6d52b5fe24cd314515",
+      "sourceHash": "8ddf3b9576761ed26267ad8c6f3999444caa59dc1f37fb44ddd85e5109c6417e",
       "outputs": []
     },
     {
-      "sourceHash": "b77bce3d66d58f80ba2993f47985c90885b4b0c8a8e3a6b4a78851b4fc4d25a4",
+      "sourceHash": "64466ea6e7e8e1882d706c1f695b3cd2b01275433aebc2205e13b70f85a009d1",
       "outputs": []
     },
     {

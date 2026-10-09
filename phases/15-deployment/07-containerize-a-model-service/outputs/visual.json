@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "e9c015dfe8900920d5f94adcfd995724eed6b63e0f47bef9a70014e3dce55ad5",
+  "contentHash": "effb6eddc80ddbc7e710833b3ade12380da3dbc3e094fe30bb56a570b620f2e9",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T21:55:37.183466+00:00",
@@ -36,7 +36,7 @@
     "prediction": "Which evidence would still be missing after the Python subprocess tests pass?",
     "reading": "Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.",
     "alt": "Each row identifies an object and the evidence needed to make a claim about it. The current companion supplies artifact checks and fresh-process predictions. An actual container run must add image, user and runtime evidence; device qualification adds hardware and workload measurements. Do not fill later rows with results from an earlier boundary.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.2,
     "panel": {
       "kind": "table",

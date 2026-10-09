@@ -121,7 +121,7 @@ def measure(batch_size,repeats=40):
     first_ms=(time.perf_counter()-began)*1000
     # Convert `expected` to a host NumPy array for inspection or verification.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)`
+    # Compute `np.testing.assert_allclose(first,expected,rtol` as `2e-5,atol=2e-6)`.
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     # Compute `samples` from `[]`
     samples=[]
@@ -181,7 +181,6 @@ def simulate_queue(arrival_ms,service_ms):
         raise ValueError('service duration must be positive milliseconds')
     # Compute `ready` from `0.`
     ready=0.
-    # Evaluate `starts` from the current inputs and state.
     # Compute `starts` from `[]`
     starts=[]
     finishes=[]
@@ -215,9 +214,9 @@ overloaded_arrivals=request_index*.6*service_ms
 _,_,stable_latency=simulate_queue(stable_arrivals,service_ms)
 # Run `simulate_queue` to compute `(_, _, overloaded_latency)`.
 _,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)
-# Check numerical equivalence within tolerance: `np.allclose(stable_latency,service_ms)`
+# Assert that `np.allclose(stable_latency,service_ms)`.
 assert np.allclose(stable_latency,service_ms)
-# Check numerical equivalence within tolerance: `np.isclose(overloaded_latency[-1],24.6*service_ms)`
+# Assert that `np.isclose(overloaded_latency[-1],24.6*service_ms)`.
 assert np.isclose(overloaded_latency[-1],24.6*service_ms)
 # Print diagnostic summary of the computed outputs.
 print('measured batch-one service proxy (ms):',service_ms)
@@ -263,7 +262,7 @@ def measure(batch_size,repeats=40):
     first_ms=(time.perf_counter()-began)*1000
     # Convert `expected` to a host NumPy array for inspection or verification.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)`
+    # Compute `np.testing.assert_allclose(first,expected,rtol` as `2e-5,atol=2e-6)`.
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     # Compute `samples` from `[]`
     samples=[]
@@ -307,7 +306,6 @@ def simulate_queue(arrival_ms,service_ms):
         raise ValueError('service duration must be positive milliseconds')
     # Compute `ready` from `0.`
     ready=0.
-    # Evaluate `starts` from the current inputs and state.
     # Compute `starts` from `[]`
     starts=[]
     finishes=[]
@@ -341,9 +339,9 @@ overloaded_arrivals=request_index*.6*service_ms
 _,_,stable_latency=simulate_queue(stable_arrivals,service_ms)
 # Run `simulate_queue` to compute `(_, _, overloaded_latency)`.
 _,_,overloaded_latency=simulate_queue(overloaded_arrivals,service_ms)
-# Check numerical equivalence within tolerance: `np.allclose(stable_latency,service_ms)`
+# Assert that `np.allclose(stable_latency,service_ms)`.
 assert np.allclose(stable_latency,service_ms)
-# Check numerical equivalence within tolerance: `np.isclose(overloaded_latency[-1],24.6*service_ms)`
+# Assert that `np.isclose(overloaded_latency[-1],24.6*service_ms)`.
 assert np.isclose(overloaded_latency[-1],24.6*service_ms)
 # Print diagnostic summary of the computed outputs.
 print('measured batch-one service proxy (ms):',service_ms)
@@ -448,9 +446,9 @@ A throughput improvement can be overwhelmed by waiting for a batch at low arriva
 illustrative_ms=np.array([1.]*19+[100.])
 # Evaluate `np.percentile(illustrative_ms, 95, method='linear')` and convert the result into Python scalar/collection `interpolated_p95`.
 interpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)`
+# Compute `np.testing.assert_allclose(interpolated_p95,5.95,atol` as `1e-10)`.
 np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)
-# Assert invariant `interpolated_p95 not in illustrative_ms and illustrative_ms.max()...` holds
+# Assert that `interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.`.
 assert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.
 # Print the observed values to compare against the expected result.
 print('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())

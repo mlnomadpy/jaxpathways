@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-01",
-  "contentHash": "bb70ad29fc2cc7c0736d55821d265746940df892dee725c9243185fc412454a6",
+  "contentHash": "3c3345bbf0f87842d9408f811361742ec2fdaa618ee2bc604b4d1b474bd7ccd9",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-07T11:16:19.731090+00:00",
@@ -372,7 +372,7 @@
     "prediction": "If all visible tokens reveal the same class, what limit does that place on the experiment?",
     "reading": "Clean tokens fork into labels and a corrupted-input path. Only corrupted inputs enter the encoder. Selected logits meet clean targets at the loss. This makes supervision available without leaking the hidden answer directly into the input.",
     "alt": "Clean tokens fork into labels and a corrupted-input path. Only corrupted inputs enter the encoder. Selected logits meet clean targets at the loss. This makes supervision available without leaking the hidden answer directly into the input.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
       "kind": "graph",

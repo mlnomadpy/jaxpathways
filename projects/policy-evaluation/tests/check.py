@@ -133,13 +133,19 @@ if a.stage >= 4:
             assert abs(evaluation['mean']-enumerate_return(theta,8)) < .03
             results.append(dict(method=method,trainingSeed=seed,exact=float(history[-1]),heldOut=evaluation['mean']))
     for bad in [jnp.zeros(2),jnp.array([0.,jnp.nan,0.])]:
-        try: m.evaluate(bad,[1,2])
-        except ValueError: pass
-        else: raise AssertionError('invalid policy accepted')
+        try:
+            m.evaluate(bad,[1,2])
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('invalid policy accepted')
     for seeds in [[1],[1,1]]:
-        try: m.evaluate(jnp.zeros(3),seeds)
-        except ValueError: pass
-        else: raise AssertionError('evaluation seed contract ignored')
+        try:
+            m.evaluate(jnp.zeros(3),seeds)
+        except ValueError:
+            pass
+        else:
+            raise AssertionError('evaluation seed contract ignored')
     print('PASS stage 4: six trained agents, repeatability, held-out streams, state isolation, input rejection')
     print(json.dumps(results,indent=2))
 if a.report:

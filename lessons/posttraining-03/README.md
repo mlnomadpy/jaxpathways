@@ -149,13 +149,13 @@ for _ in range(100):
 rewards = features @ w
 # Assert invariant `rewards[0] > rewards[1] > rewards[2]` holds
 assert rewards[0] > rewards[1] > rewards[2]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
 # Assert invariant `history[-1] < 0.1` holds
 assert history[-1] < 0.1
 # Convert `margins` to a host NumPy array for inspection or verification.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     preference_loss(w, chosen, rejected),
     np.mean(np.logaddexp(0, -margins)),
@@ -224,13 +224,13 @@ for _ in range(100):
 rewards = features @ w
 # Assert invariant `rewards[0] > rewards[1] > rewards[2]` holds
 assert rewards[0] > rewards[1] > rewards[2]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
 # Assert invariant `history[-1] < 0.1` holds
 assert history[-1] < 0.1
 # Convert `margins` to a host NumPy array for inspection or verification.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     preference_loss(w, chosen, rejected),
     np.mean(np.logaddexp(0, -margins)),
@@ -331,7 +331,7 @@ This checks label direction. A decreasing incorrectly signed loss can train a co
 conflict = lambda margin: 0.5 * (
     jax.nn.softplus(-margin) + jax.nn.softplus(margin)
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)`
+# Compute `np.testing.assert_allclose(conflict(0.0), np.log(2), atol` as `1e-6)`.
 np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)

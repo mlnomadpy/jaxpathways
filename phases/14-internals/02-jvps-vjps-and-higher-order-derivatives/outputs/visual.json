@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "b2b1ffaa0cbb29538743502b5b0c3ca014d302b79bf281fccb38f842fddaaf25",
+  "contentHash": "d30fcea2db889ee2fc705e5605c905ee37fcc96c3d90ce8f672641ff9daff029",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:32.370943+00:00",
@@ -70,7 +70,7 @@
     "prediction": "Does a VJP simply return the same vector as a JVP?",
     "reading": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
     "alt": "The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 3.5,
     "panel": {
       "kind": "table",

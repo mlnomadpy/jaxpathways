@@ -52,15 +52,15 @@ class FlaxModel(nnx.Module):
 
 # Function `convert(state, eps)` implementing this stage's computation:
 def convert(state,eps=1e-5):
-    # Evaluate `shapes` from the current inputs and state.
+    # Construct dictionary `shapes` with the structured fields for this stage.
     shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
     # Guard input contract (`set(state) != set(shapes)`) and fail fast if violated.
     if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
-    # Evaluate `arrays` from the current inputs and state.
+    # Construct dictionary `arrays` with the structured fields for this stage.
     arrays={}
     # Iterate over `(name, shape)` to step through the computation:
     for name,shape in shapes.items():
-        # Evaluate `value` from the current inputs and state.
+        # Compute `value` as `state[name].detach().cpu().numpy()`.
         value=state[name].detach().cpu().numpy()
         # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
         if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
@@ -97,7 +97,7 @@ def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
     # Run `np.abs` to compute `absolute`.
     absolute=np.abs(actual-reference)
-    # Evaluate `budget` from the current inputs and state.
+    # Compute `budget` as `atol+rtol*np.abs(reference)`.
     budget=atol+rtol*np.abs(reference)
     # Return `{'max_abs': float(absolute.max()), 'relative_l2': float(np.linalg.norm(actual - reference) / max(np.linalg.norm(reference), 1e-12)), 'passed': bool(np.all(absolute <= budget))}` to the caller.
     return {'max_abs':float(absolute.max()),'relative_l2':float(np.linalg.norm(actual-reference)/max(np.linalg.norm(reference),1e-12)),
@@ -113,7 +113,7 @@ def save_flax(model,path):
 
 # Function `load_flax(path)` implementing this stage's computation:
 def load_flax(path):
-    # Evaluate `shapes` from the current inputs and state.
+    # Construct dictionary `shapes` with the structured fields for this stage.
     shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
     # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path,allow_pickle=False) as archive:
@@ -127,11 +127,11 @@ def load_flax(path):
         eps=float(archive['epsilon'])
         # Guard input contract (`not np.isfinite(eps) or eps <= 0`) and fail fast if violated.
         if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
-        # Evaluate `arrays` from the current inputs and state.
+        # Construct dictionary `arrays` with the structured fields for this stage.
         arrays={}
         # Iterate over `(key, shape)` to step through the computation:
         for key,shape in shapes.items():
-            # Evaluate `value` from the current inputs and state.
+            # Compute `value` as `archive[key]`.
             value=archive[key]
             # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
             if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)

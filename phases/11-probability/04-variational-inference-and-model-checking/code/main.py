@@ -39,11 +39,11 @@ params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
 location,log_scale=params
 # Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(location,mu,atol=1e-4)`.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Check numerical equivalence within tolerance: `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`
+# Assert that `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`.
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Check numerical equivalence within tolerance: `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`
+# Assert that `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`.
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
 # Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
@@ -110,11 +110,11 @@ params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
 location,log_scale=params
 # Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(location,mu,atol=1e-4)`.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Check numerical equivalence within tolerance: `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`
+# Assert that `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`.
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Check numerical equivalence within tolerance: `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`
+# Assert that `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`.
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
 # Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
@@ -162,7 +162,7 @@ logp=-.5*(jnp.einsum('ni,ij,nj->n',delta,P,delta)+2*jnp.log(2*jnp.pi)+jnp.linalg
 logq=-.5*jnp.sum(eps**2,axis=1)-jnp.sum(log_scale)-jnp.log(2*jnp.pi)
 # Aggregate array values to compute `estimate`.
 estimate=jnp.mean(logq-logp)
-# Check numerical equivalence within tolerance: `abs(float(estimate-kl(params)))<.03`
+# Assert that `abs(float(estimate-kl(params)))<.03`.
 assert abs(float(estimate-kl(params)))<.03
 # Print the observed values to compare against the expected result.
 print('Monte Carlo KL:',float(estimate))
@@ -183,7 +183,7 @@ print("model self-coverage:",float(model_coverage))
 def independent_kl(location,log_scale):
     # Return `0.5 * (jnp.sum(jnp.exp(2 * log_scale)) + jnp.sum((location - mu) ** 2) - 2 - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.exp(2*log_scale))+jnp.sum((location-mu)**2)-2-jnp.sum(2*log_scale))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)`.
 assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)
 
 # Reference practice: A correct diagonal is not a correct covariance
@@ -194,9 +194,9 @@ direction=jnp.ones(2)
 true_sum_var=direction@Sigma@direction
 # Aggregate array values to compute `approx_sum_var`.
 approx_sum_var=jnp.sum(variance)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(true_sum_var,3.6)`.
 assert jnp.allclose(true_sum_var,3.6)
-# Check numerical equivalence within tolerance: `jnp.allclose(approx_sum_var,.72,atol=1e-5)`
+# Assert that `jnp.allclose(approx_sum_var,.72,atol=1e-5)`.
 assert jnp.allclose(approx_sum_var,.72,atol=1e-5)
 
 # Reference practice: Repair the changed mean without hiding noise
@@ -207,8 +207,8 @@ truth=jnp.linspace(-2,2,20000)**2-1
 fresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))
 # Compute `residual` from `fresh-truth`
 residual=fresh-truth
-# Check numerical equivalence within tolerance: `abs(float(residual.std())-.25)<.01`
+# Assert that `abs(float(residual.std())-.25)<.01`.
 assert abs(float(residual.std())-.25)<.01
-# Check numerical equivalence within tolerance: `abs(float(residual.mean()))<.01`
+# Assert that `abs(float(residual.mean()))<.01`.
 assert abs(float(residual.mean()))<.01
 print("PASS: probability-04")

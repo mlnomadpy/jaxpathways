@@ -39,7 +39,7 @@ $$
 
 ![Where the first result comes from](../../phases/00-welcome/01-set-up-your-learning-workspace/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.
 

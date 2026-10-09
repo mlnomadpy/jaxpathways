@@ -94,9 +94,9 @@ a = 2. + 3.*jax.random.normal(key_a, (20000,))
 b = 2. + 3.*jax.random.normal(key_b, (20000,))
 # Compute `expected_mean, expected_variance` from `2., 9.`
 expected_mean, expected_variance = 2., 9.
-# Check numerical equivalence within tolerance: `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`
+# Assert that `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`.
 assert abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)
-# Check numerical equivalence within tolerance: `abs(float(a.var())-expected_variance) < .4`
+# Assert that `abs(float(a.var())-expected_variance) < .4`.
 assert abs(float(a.var())-expected_variance) < .4
 # Assert invariant `not jnp.array_equal(a,b)` holds
 assert not jnp.array_equal(a,b)
@@ -116,7 +116,7 @@ Append the independent scalar reference and stable mixture calculation, then run
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 # Compute `reference` from `[-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*m...`
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 # Construct `components` via `jnp.array([-1000.,-1001.])`
 components = jnp.array([-1000.,-1001.])
@@ -159,9 +159,9 @@ a = 2. + 3.*jax.random.normal(key_a, (20000,))
 b = 2. + 3.*jax.random.normal(key_b, (20000,))
 # Compute `expected_mean, expected_variance` from `2., 9.`
 expected_mean, expected_variance = 2., 9.
-# Check numerical equivalence within tolerance: `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`
+# Assert that `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`.
 assert abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)
-# Check numerical equivalence within tolerance: `abs(float(a.var())-expected_variance) < .4`
+# Assert that `abs(float(a.var())-expected_variance) < .4`.
 assert abs(float(a.var())-expected_variance) < .4
 # Assert invariant `not jnp.array_equal(a,b)` holds
 assert not jnp.array_equal(a,b)
@@ -173,7 +173,7 @@ assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 # Compute `reference` from `[-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*m...`
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 # Construct `components` via `jnp.array([-1000.,-1001.])`
 components = jnp.array([-1000.,-1001.])
@@ -259,7 +259,7 @@ values = jnp.array([-2.,-3.])
 independent_log = values.sum()
 # Evaluate numerically stable log-space cross-entropy/likelihood (`mixture_log`).
 mixture_log = logsumexp(values)-jnp.log(2.)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(independent_log,-5.)`.
 assert jnp.allclose(independent_log,-5.)
 # Assert invariant `mixture_log > -3.` holds
 assert mixture_log > -3.
@@ -283,8 +283,8 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
-2. Check numerical equivalence within tolerance: `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`
-3. Check numerical equivalence within tolerance: `abs(float(changed.var())-.25) < .015`
+2. Assert that `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`.
+3. Assert that `abs(float(changed.var())-.25) < .015`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -292,9 +292,9 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 # Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = ...  # TODO: compute changed
-# Check numerical equivalence within tolerance: `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`
+# Assert that `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`.
 assert abs(float(changed.mean())+1.)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(float(changed.var())-.25) < .015`
+# Assert that `abs(float(changed.var())-.25) < .015`.
 assert abs(float(changed.var())-.25)  # TODO: complete assertion check
 ```
 
@@ -304,9 +304,9 @@ assert abs(float(changed.var())-.25)  # TODO: complete assertion check
 # Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = -1.+.5*jax.random.normal(jax.random.key(51),(30000,))
-# Check numerical equivalence within tolerance: `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`
+# Assert that `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`.
 assert abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)
-# Check numerical equivalence within tolerance: `abs(float(changed.var())-.25) < .015`
+# Assert that `abs(float(changed.var())-.25) < .015`.
 assert abs(float(changed.var())-.25) < .015
 ```
 
@@ -332,7 +332,7 @@ The residual is zero for both; retain $-\log\sigma$.
 
 **Step-by-step implementation plan:**
 1. Construct `scores` via `normal_logpdf(0.,0.,jnp.array([1.,2.]))`
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `jnp.allclose(scores[0]-scores[1],jnp.log(2.))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -340,7 +340,7 @@ The residual is zero for both; retain $-\log\sigma$.
 # Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.
 # Construct `scores` via `normal_logpdf(0.,0.,jnp.array([1.,2.]))`
 scores = normal_logpdf(...)  # TODO: compute scores
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(scores[0]-scores[1],jnp.log(2.))`.
 assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))  # TODO: complete assertion check
 ```
 
@@ -350,7 +350,7 @@ assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))  # TODO: complete assertion
 # Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.
 # Construct `scores` via `normal_logpdf(0.,0.,jnp.array([1.,2.]))`
 scores = normal_logpdf(0.,0.,jnp.array([1.,2.]))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(scores[0]-scores[1],jnp.log(2.))`.
 assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))
 ```
 

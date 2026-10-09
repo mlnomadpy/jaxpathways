@@ -7,7 +7,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Compute `TPU_SPECS` from `[`
+# Initialize list `TPU_SPECS` for the stage values.
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
@@ -41,7 +41,7 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 # Run `estimate_memory_gib` to compute `budget_1p5b`.
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-# Assert invariant `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mix...` holds
+# Assert that `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] <`.
 assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
 # Assert invariant `budget_1p5b["mixed_bf16_train_state_gib"] < 64.0` holds
 assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
@@ -62,7 +62,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Compute `TPU_SPECS` from `[`
+# Initialize list `TPU_SPECS` for the stage values.
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
@@ -96,7 +96,7 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 # Run `estimate_memory_gib` to compute `budget_1p5b`.
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-# Assert invariant `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mix...` holds
+# Assert that `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] <`.
 assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
 # Assert invariant `budget_1p5b["mixed_bf16_train_state_gib"] < 64.0` holds
 assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
@@ -109,7 +109,7 @@ print("1.5B memory budget (GiB):", budget_1p5b)
 
 # Figure data experiment
 # Compute figure data for: Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations
-# Compute `visual_data` from `{`
+# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': [s['gen'] for s in TPU_SPECS],
@@ -123,9 +123,9 @@ visual_data = {
 
 # Experiment: Compare KV-cache memory across FP32, BF16, and INT8
 # Experiment — Compare KV-cache memory across FP32, BF16, and INT8: Halving bytes per element halves both the HBM capacity consumed...
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `np.isclose(budget_7b["kv_fp32_gib"], 2.0 * budget_7b["kv_bf16_gib"])`.
 assert np.isclose(budget_7b["kv_fp32_gib"], 2.0 * budget_7b["kv_bf16_gib"])
-# Check numerical equivalence within tolerance: `np.isclose(budget_7b["kv_bf16_gib"]`
+# Assert that `np.isclose(budget_7b["kv_bf16_gib"], 2.0 * budget_7b["kv_int8_gib"])`.
 assert np.isclose(budget_7b["kv_bf16_gib"], 2.0 * budget_7b["kv_int8_gib"])
 # Print the observed values to compare against the expected result.
 print("KV cache GiB (FP32 / BF16 / INT8):", budget_7b["kv_fp32_gib"], budget_7b["kv_bf16_gib"], budget_7b["kv_int8_gib"])
@@ -145,7 +145,7 @@ assert min_v5e_chips > 4 and min_v5e_chips <= 8
 budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
 # Print the observed values to compare against the expected result.
 print("1.5B budget (GiB):", budget_check)
-# Assert invariant `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_che...` holds
+# Assert that `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_`.
 assert budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]) < 64.0
 
 # Reference practice: Compare arithmetic intensity against the TPU v5e and v6e ridge points

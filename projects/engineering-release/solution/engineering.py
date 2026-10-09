@@ -20,7 +20,7 @@ def validate_rows(rows):
         raise ValueError('empty dataset')
     # Run `set` to compute `ids`.
     ids = set()
-    # Evaluate `groups` from the current inputs and state.
+    # Construct dictionary `groups` with the structured fields for this stage.
     groups = {}
     # Iterate over `row` to step through the computation:
     for row in rows:
@@ -45,7 +45,7 @@ def validate_rows(rows):
         if row['group'] in groups and groups[row['group']] != row['split']:
             raise ValueError('source group leaks between splits')
         # Run `ids.add` to perform the next check or state transition.
-        # Evaluate `groups[row['group']]` from the current inputs and state.
+        # Execute `ids.add(row['id'])`.
         ids.add(row['id'])
         groups[row['group']] = row['split']
     # Return `digest(rows)` to the caller.
@@ -64,15 +64,15 @@ def gate_metrics(errors, slices, limit):
     # Guard input contract (`not set(slices) <= {'low', 'high'}`) and fail fast if violated.
     if not set(slices) <= {'low', 'high'}:
         raise ValueError('unknown slice')
-    # Evaluate `result` from the current inputs and state.
+    # Construct dictionary `result` with the structured fields for this stage.
     result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}
     # Iterate over `(name, item)` to step through the computation:
     for name, item in result.items():
-        # Evaluate `selected` from the current inputs and state.
+        # Initialize list `selected` for the stage values.
         selected = [e for e, s in zip(errors, slices) if s == name]
         # Branch on condition `selected`:
         if selected: item['mse'] = math.fsum(selected) / len(selected)
-    # Evaluate `result['overall']` from the current inputs and state.
+    # Construct dictionary `result['overall']` with the structured fields for this stage.
     result['overall'] = {'count': len(errors), 'mse': math.fsum(errors) / len(errors)}
     # Run `all` to compute `result['passed']`.
     result['passed'] = all(v['count'] > 0 and v['mse'] <= limit for v in result.values())
@@ -110,19 +110,19 @@ def approval_for(bundle, actor, now, expires):
 
 # Function `verify_release(bundle, approval, now, target)` implementing this stage's computation:
 def verify_release(bundle, approval, now, target):
-    # Evaluate `required` from the current inputs and state.
+    # Construct dictionary `required` with the structured fields for this stage.
     required = {'model_hash', 'data_hash', 'evaluation_hash', 'image_digest', 'owner', 'target', 'passed'}
     # Guard input contract (`set(bundle) != required or bundle['passed'] is not True or (not bundle['owner']) or (bundle['target'] != target)`) and fail fast if violated.
     if set(bundle) != required or bundle['passed'] is not True or not bundle['owner'] or bundle['target'] != target:
         raise ValueError('release contract rejected')
     # Iterate over `key` to step through the computation:
     for key in ['model_hash', 'data_hash', 'evaluation_hash']:
-        # Evaluate `value` from the current inputs and state.
+        # Compute `value` as `bundle[key]`.
         value = bundle[key]
         # Guard input contract (`not isinstance(value, str) or len(value) != 64 or any((c not in '0123456789abcdef' for c in value))`) and fail fast if violated.
         if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
             raise ValueError('invalid content digest')
-    # Evaluate `image` from the current inputs and state.
+    # Compute `image` as `bundle['image_digest']`.
     image = bundle['image_digest']
     # Guard input contract (`not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any((c not in '0123456789abcdef' for c in image[7:]))`) and fail fast if violated.
     if not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any(c not in '0123456789abcdef' for c in image[7:]):
@@ -142,19 +142,17 @@ def activate(store, version, bundle, approval, now, target):
     """A single-writer local fixture; a deployed service needs concurrency control and auth."""
     # Run `verify_release` to perform the next check or state transition.
     verify_release(bundle, approval, now, target)
-    # Read or serialize artifact data on disk (`store`).
-    # Execute the next step of the computation.
+    # Compute `store` as `Path(store)`.
     store = Path(store)
     store.mkdir(parents=True, exist_ok=True)
-    # Evaluate `pointer` from the current inputs and state.
+    # Compute `pointer` as `store / 'active.json'`.
     pointer = store / 'active.json'
     # Read or serialize artifact data on disk (`previous`).
     previous = json.loads(pointer.read_text())['current'] if pointer.exists() else None
-    # Evaluate `selected` from the current inputs and state.
+    # Construct dictionary `selected` with the structured fields for this stage.
     selected = {'current': version, 'previous': previous, 'bundle_hash': digest(bundle)}
-    # Evaluate `temporary` from the current inputs and state.
+    # Compute `temporary` as `store / 'active.tmp'`.
     temporary = store / 'active.tmp'
-    # Read or serialize artifact data on disk (``).
     # Run `temporary.write_text` to perform the next check or state transition.
     temporary.write_text(json.dumps(selected))
     temporary.replace(pointer)

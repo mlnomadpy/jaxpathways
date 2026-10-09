@@ -139,7 +139,7 @@
       "prediction": "Where should synchronization occur in completed-result latency measurement?",
       "reading": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
       "alt": "The host dispatches and waits while device work proceeds. The measurement lane includes readiness. Lengths illustrate ordering only and are not measured durations. Compilation and data preparation need separately chosen boundaries when included in a benchmark.",
-      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "scope": "Architecture and dataflow mechanism diagram.",
       "height": 3.8,
       "panel": {
         "kind": "timeline"

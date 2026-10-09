@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "transformers-03",
-  "contentHash": "f4dd81ad5eea7b1da922458f83d8ac20678ddb8ee2f717a46d858d8ef47c96f9",
+  "contentHash": "f3b68a23b33f636acdfed6ccb7cde2ce48763d4ec43574019e4968b13e126454",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:28.396628+00:00",
@@ -81,7 +81,7 @@
     "prediction": "What should happen when every learned projection is zero?",
     "reading": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
     "alt": "The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 8.7,
     "panel": {
       "kind": "graph",

@@ -167,11 +167,11 @@ with tempfile.TemporaryDirectory() as directory:
               'jax':jax.__version__,'dtype':'float32','optimizer_state_included':False}
     # Read or serialize artifact data on disk (`manifest_path`).
     manifest_path=Path(directory)/'manifest.json'
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     manifest_path.write_text(json.dumps(manifest))
     # Read or serialize artifact data on disk (`recorded`).
     recorded=json.loads(manifest_path.read_text())
-    # Assert invariant `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['we...` holds
+    # Assert that `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']`.
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     # Enter managed runtime/context scope for this block:
     with np.load(checkpoint,allow_pickle=False) as saved:
@@ -219,9 +219,9 @@ for name,weights in [('pretrained',restored),('supervised',sft),('teacher',disti
     metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),
                    'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),
                    'source_cross_entropy':float(objective(weights,source_X,source_targets))}
-# Assert invariant `metrics['supervised']['held_cross_entropy']<metrics['pretrained']...` holds
+# Assert that `metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']`.
 assert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
-# Assert invariant `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['h...` holds
+# Assert that `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']`.
 assert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
 # Print the observed values to compare against the expected result.
 print(json.dumps(metrics,indent=2))
@@ -305,11 +305,11 @@ with tempfile.TemporaryDirectory() as directory:
               'jax':jax.__version__,'dtype':'float32','optimizer_state_included':False}
     # Read or serialize artifact data on disk (`manifest_path`).
     manifest_path=Path(directory)/'manifest.json'
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     manifest_path.write_text(json.dumps(manifest))
     # Read or serialize artifact data on disk (`recorded`).
     recorded=json.loads(manifest_path.read_text())
-    # Assert invariant `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['we...` holds
+    # Assert that `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']`.
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     # Enter managed runtime/context scope for this block:
     with np.load(checkpoint,allow_pickle=False) as saved:
@@ -349,9 +349,9 @@ for name,weights in [('pretrained',restored),('supervised',sft),('teacher',disti
     metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),
                    'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),
                    'source_cross_entropy':float(objective(weights,source_X,source_targets))}
-# Assert invariant `metrics['supervised']['held_cross_entropy']<metrics['pretrained']...` holds
+# Assert that `metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']`.
 assert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
-# Assert invariant `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['h...` holds
+# Assert that `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']`.
 assert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
 # Print the observed values to compare against the expected result.
 print(json.dumps(metrics,indent=2))
@@ -443,7 +443,7 @@ PASS: deployment-02
 # Experiment — Check a stable extreme logit: logaddexp evaluates softplus stably; a naive log(1+exp(z)) can...
 # Construct `extreme` via `objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zer...`
 extreme=objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zeros(1))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.isfinite(extreme) and jnp.allclose(extreme,1000.)`.
 assert jnp.isfinite(extreme) and jnp.allclose(extreme,1000.)
 ```
 
@@ -458,7 +458,7 @@ logaddexp evaluates softplus stably; a naive log(1+exp(z)) can overflow.
 ```python
 # Experiment — Reveal teacher error: Distillation optimizes fidelity to its teacher, which is not...
 wrong,_=train(restored,adapt_X,1-soft_targets,steps=200)
-# Assert invariant `objective(wrong,held_X,held_prob)>objective(distilled,held_X,held...` holds
+# Assert that `objective(wrong,held_X,held_prob)>objective(distilled,held_X,held_prob)`.
 assert objective(wrong,held_X,held_prob)>objective(distilled,held_X,held_prob)
 # Print the observed values to compare against the expected result.
 print("wrong-teacher held loss:",float(objective(wrong,held_X,held_prob)))
@@ -671,7 +671,7 @@ for name in ('supervised', 'teacher'):
 selected = min(...)  # TODO: compute selected
 # Assert invariant `selected == 'pretrained' or selected in eligible` holds
 assert selected  # TODO: complete assertion check
-# Assert invariant `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['sou...` holds
+# Assert that `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= rete`.
 assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy']  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Candidate selected under the declared fixture budget:', selected)
@@ -700,7 +700,7 @@ for name in ('supervised', 'teacher'):
 selected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'
 # Assert invariant `selected == 'pretrained' or selected in eligible` holds
 assert selected == 'pretrained' or selected in eligible
-# Assert invariant `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['sou...` holds
+# Assert that `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= rete`.
 assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)
 # Print the observed values to compare against the expected result.
 print('Candidate selected under the declared fixture budget:', selected)

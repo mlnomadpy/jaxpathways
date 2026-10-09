@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "6861c583ae9344e6257e9d3c4f24897ce29c3ef7010ffa80e325a06e8bdfa383",
+  "contentHash": "156ade8d485fd822a76d02ee156798e4934f7ca3c1c632b6f00f3de5a058af16",
   "executedAt": "2026-10-08T14:07:33.031647+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,7 @@
   "stdout": "measured local job seconds: [0.6653099581599236, 0.6619620830751956, 0.6629581670276821]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.11088499302665393, 'load_fraction': 0.055442496513326965, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002772124825666348, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\nmeasured local job seconds: [0.6668672077357769, 0.6649332502856851, 0.7188250827603042]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.1198041804600507, 'load_fraction': 0.05990209023002535, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00029951045115012676, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\nnominal load at two demand scenarios: 0.05990209023002535 0.1198041804600507\nrequired workers under changed hypothetical reserve: 1\nPASS: operations-05\n",
   "notebookCells": [
     {
-      "sourceHash": "14079ee4a62b6b463c268eb1b3b3dea0d1350c42a84187facba332c03ef5d4f7",
+      "sourceHash": "173b3b89774defa7383e32a35a271dd3c10d22a5888dca79393294672c9ff5be",
       "outputs": []
     },
     {
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "59f3027b53e4e2d8e0999a203df3afc5161c94aed9851e63684cc4867aef7765",
+      "sourceHash": "47e6f4d7c10dede25f52eb4f926609175d11c767385a865324e6e8b525e31e5f",
       "outputs": []
     },
     {
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "a6686fef7eab08607a5eefb0cce5864be240444c8cd7e4398cf7b8d0c99686bf",
+      "sourceHash": "c13df52841af6530b35d8493ece6406131ec5be5c5d18967a5dbebc2de6575d0",
       "outputs": [
         {
           "output_type": "stream",
@@ -81,7 +81,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "19820ca35100862abcca5de2d51094c6890ec7b0f33548ff1efdd32a1cfe7856",
+      "sourceHash": "bd48628e798d897469fdf67b616ddef9ecce40a3565f73e1d7dc323d1afefedf",
       "outputs": [
         {
           "output_type": "stream",
@@ -109,19 +109,19 @@
       ]
     },
     {
-      "sourceHash": "e444ab5a16d4558ef037f6ee83d222d8da2ae746dd87d55baad99df96cefadb2",
+      "sourceHash": "b72796b2ef31b9e2290150eacc4f9a3cd6cff144d499f7ee2f73c8aff711ffe8",
       "outputs": []
     },
     {
-      "sourceHash": "24aeb90148129a168ec20cf1f568a737812c0e4c526fca5f02a94657c4cbefbd",
+      "sourceHash": "00b4761c0285dada87d527bbf4a3096070a8d3de9268767dc32964a661c413cb",
       "outputs": []
     },
     {
-      "sourceHash": "c297941f3f187742b8fd63d4ad2829ffb31526ac691eeecabe846c3b387a833a",
+      "sourceHash": "61bd0ab363739971920bf145d5fe4b49a0514b17678e99f90689f86b112479d5",
       "outputs": []
     },
     {
-      "sourceHash": "ff83c243ade91c6bb71891fe67bf4ef23ac4e5d36a8bcc6616ff8e155568c826",
+      "sourceHash": "b56eb9a51ae6c8f42fa5f9f31194d05f18132bee639f716a5aa7350aa745cd11",
       "outputs": []
     }
   ],

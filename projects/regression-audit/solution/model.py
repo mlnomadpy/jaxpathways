@@ -20,15 +20,15 @@ def loss(params, x, y):
 def gradient_check(params, x, y, h=1e-2):
     # Differentiate the objective to obtain `automatic` via automatic differentiation.
     automatic = jax.grad(loss)(params, x, y)
-    # Evaluate `finite` from the current inputs and state.
+    # Construct dictionary `finite` with the structured fields for this stage.
     finite = {}
     # Iterate over `key` to step through the computation:
     for key in params:
-        # Evaluate `plus` from the current inputs and state.
+        # Construct dictionary `plus` with the structured fields for this stage.
         plus = {**params, key: params[key] + h}
-        # Evaluate `minus` from the current inputs and state.
+        # Construct dictionary `minus` with the structured fields for this stage.
         minus = {**params, key: params[key] - h}
-        # Evaluate `finite[key]` from the current inputs and state.
+        # Evaluate the compound expression for `finite[key]`.
         finite[key] = (loss(plus, x, y) - loss(minus, x, y)) / (2*h)
     # Return `(automatic, finite)` to the caller.
     return automatic, finite
@@ -55,7 +55,7 @@ def report(params, x, y, rate=0.15, steps=200):
     fitted, history = train(params, x, y, rate, steps)
     # Initialize array `heldout_x` with explicit values and shape.
     heldout_x = jnp.array([-0.8, 0.2, 0.8])
-    # Evaluate `heldout_y` from the current inputs and state.
+    # Compute `heldout_y` as `2 * heldout_x + 1`.
     heldout_y = 2 * heldout_x + 1
     # Return `{'parameters': {k: float(v) for k, v in fitted.items()}, 'initial_loss': float(history[0]), 'training_loss': float(loss(fitted, x, y)), 'heldout_loss': float(loss(fitted, heldout_x, heldout_y)), 'finite': bool(jnp.all(jnp.isfinite(history))), 'steps': steps, 'learning_rate': rate, 'backend': jax.default_backend()}` to the caller.
     return {'parameters': {k: float(v) for k,v in fitted.items()},

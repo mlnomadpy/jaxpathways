@@ -30,7 +30,7 @@ Read reward, KL and action-probability panels together. Higher reward accompanie
 
 ![Different objects have different update lifetimes](../../phases/18-posttraining/04-rlhf/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.
 
@@ -214,9 +214,9 @@ for iteration in range(40):
         theta = theta - 0.15 * g
     # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(theta)
-    # Reduce across the target axis to summarize ``.
+    # Append the computed value via `history.append(float(jnp.sum(jnp.exp(logp) * rewards)))`.
     history.append(float(jnp.sum(jnp.exp(logp) * rewards)))
-    # Reduce across the target axis to summarize ``.
+    # Append the computed value via `kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))`.
     kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))
 
 # Execute `np.testing.assert_array_equal(reference, reference_copy)`
@@ -342,9 +342,9 @@ for iteration in range(40):
         theta = theta - 0.15 * g
     # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
     logp = jax.nn.log_softmax(theta)
-    # Reduce across the target axis to summarize ``.
+    # Append the computed value via `history.append(float(jnp.sum(jnp.exp(logp) * rewards)))`.
     history.append(float(jnp.sum(jnp.exp(logp) * rewards)))
-    # Reduce across the target axis to summarize ``.
+    # Append the computed value via `kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))`.
     kl_history.append(float(jnp.sum(jnp.exp(logp) * (logp - reference))))
 
 # Execute `np.testing.assert_array_equal(reference, reference_copy)`
@@ -472,7 +472,7 @@ enumerated = jnp.sum(
 exact = jax.grad(lambda logits: jnp.sum(jax.nn.softmax(logits) * rewards))(
     probe
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(enumerated, exact, atol=1e-6)`
+# Compute `np.testing.assert_allclose(enumerated, exact, atol` as `1e-6)`.
 np.testing.assert_allclose(enumerated, exact, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Enumerated baseline score gradient matches exact expected-reward gradient.')

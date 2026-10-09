@@ -49,11 +49,11 @@ def next_batch(state, x, y, batch_size, mesh):
         key, order_key = jax.random.split(jnp.asarray(result['key']))
         result.update(key=np.asarray(key), order=np.asarray(jax.random.permutation(order_key, len(x))), cursor=np.asarray(0,np.int32))
     # Evaluate `result['cursor']` and convert the result into Python scalar/collection `start`.
-    # Evaluate `ids` from the current inputs and state.
+    # Compute `start` as `int(result['cursor'])`.
     start = int(result['cursor'])
     ids = result['order'][start:start+batch_size]
     # Run `len` to compute `size`.
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `size` as `len(ids)`.
     size = len(ids)
     padded = ((size+3)//4)*4
     # Allocate initialized array `xb` with the specified shape and dtype.
@@ -62,7 +62,7 @@ def next_batch(state, x, y, batch_size, mesh):
     yb = np.zeros(padded,np.float32)
     # Allocate initialized array `mask` with the specified shape and dtype.
     mask = np.zeros(padded,np.float32)
-    # Evaluate `(xb[:size], yb[:size], mask[:size])` from the current inputs and state.
+    # Compute `xb[:size],yb[:size],mask[:size]` as `x[ids],y[ids],1`.
     xb[:size],yb[:size],mask[:size] = x[ids],y[ids],1
     # Convert `result['cursor']` to a host NumPy array for inspection or verification.
     result['cursor'] = np.asarray(start+size,np.int32)
@@ -89,7 +89,7 @@ def make_step(mesh, *, compiled=True):
         grad = jax.lax.psum(2*x.T@(residual*valid), 'data')/count
         # Aggregate array values to compute `loss`.
         loss = jax.lax.psum(jnp.sum(valid*residual**2), 'data')/count
-        # Evaluate `velocity` from the current inputs and state.
+        # Compute `velocity` as `.8*v+grad`.
         velocity = .8*v+grad
         # Return `(w - 0.03 * velocity, velocity, loss, grad)` to the caller.
         return w-.03*velocity, velocity, loss, grad
@@ -158,9 +158,9 @@ def restore(path,expected,mesh):
         # Guard input contract (`json.loads(str(archive['metadata'])) != expected`) and fail fast if violated.
         if json.loads(str(archive['metadata'])) != expected:
             raise ValueError('checkpoint configuration/dataset mismatch')
-        # Evaluate `state` from the current inputs and state.
+        # Construct dictionary `state` with the structured fields for this stage.
         state = {k:archive[k].copy() for k in archive.files if k!='metadata'}
-    # Evaluate `(size, width)` from the current inputs and state.
+    # Compute `size,width` as `expected['dataset_size'],expected['feature_width']`.
     size,width = expected['dataset_size'],expected['feature_width']
     # Guard input contract (`state['weights'].shape != (width,) or state['momentum'].shape != (width,) or state['weights'].dtype != np.float32 or (state['momentum'].dtype != np.float32) or (not np.isfinite(state['weights']).all()) or (not np.isfinite(state['momentum']).all()) or (state['key'].shape != (2,)) or (state['key'].dtype != np.uint32) or (state['order'].dtype != np.int32) or (not np.array_equal(np.sort(state['order']), np.arange(size))) or (state['cursor'].shape != ()) or (state['cursor'].dtype != np.int32) or (state['step'].shape != ()) or (state['step'].dtype != np.int32) or (not 0 <= int(state['cursor']) <= size) or (int(state['step']) < 0)`) and fail fast if violated.
     if (state['weights'].shape!=(width,) or state['momentum'].shape!=(width,) or

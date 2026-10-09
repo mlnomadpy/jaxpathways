@@ -31,7 +31,7 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
-    # Check numerical equivalence within tolerance: `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`
+    # Assert that `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
     # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
@@ -46,13 +46,13 @@ g = jnp.array([3.0, 4.0])
 clip = optax.clip_by_global_norm(1.0)
 # Construct `clipped, _` via `clip.update(g, clip.init(jnp.zeros(2)))`
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)`.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
 # Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
 # Construct `update, _` via `chain.update(g, chain.init(jnp.zeros(2)))`
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)`.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 
 # Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
@@ -84,7 +84,7 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
-    # Check numerical equivalence within tolerance: `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`
+    # Assert that `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
     # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
@@ -98,13 +98,13 @@ g = jnp.array([3.0, 4.0])
 clip = optax.clip_by_global_norm(1.0)
 # Construct `clipped, _` via `clip.update(g, clip.init(jnp.zeros(2)))`
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)`.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
 # Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
 # Construct `update, _` via `chain.update(g, chain.init(jnp.zeros(2)))`
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)`.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 
 # Figure data experiment
@@ -142,7 +142,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 schedule = optax.linear_schedule(init_value=0.1, end_value=0.01, transition_steps=4)
 # Construct `rates` via `jnp.array([schedule(i) for i in range(6)])`
 rates = jnp.array([schedule(i) for i in range(6)])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)`.
 assert jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)
 # Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
@@ -156,7 +156,7 @@ for _ in range(5):
     delta, s = tx.update(jnp.array(1.0), s, p)
     # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(p, -0.275, atol=1e-06)`.
 assert jnp.allclose(p, -0.275, atol=1e-06)
 # Print the observed values to compare against the expected result.
 print('schedule rates:', rates)
@@ -195,17 +195,17 @@ for name, tx in optimizers.items():
     traces[name] = history
     # Print diagnostic summary of the computed outputs.
     print(name, 'initial / final loss:', bowl(start), history[-1])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not jnp.allclose(traces['sgd'], traces['adam'])`.
 assert not jnp.allclose(traces['sgd'], traces['adam'])
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
 coordinate = jnp.clip(g, -1.0, 1.0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(coordinate, jnp.array([1.0, 1.0]))`.
 assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))
-# Check numerical equivalence within tolerance: `jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])`
+# Assert that `jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])`.
 assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])
-# Check numerical equivalence within tolerance: `not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])`
+# Assert that `not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])`.
 assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])
 
 # Reference practice: Catch schedule restart
@@ -226,9 +226,9 @@ for _ in range(5):
 continued, _ = tx.update(jnp.array(1.0), s, p)
 # Construct `restarted, _` via `tx.update(jnp.array(1.0), tx.init(p), p)`
 restarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(continued, -0.01, atol=1e-06)`.
 assert jnp.allclose(continued, -0.01, atol=1e-06)
-# Check numerical equivalence within tolerance: `jnp.allclose(restarted, -0.1, atol=1e-06)`
+# Assert that `jnp.allclose(restarted, -0.1, atol=1e-06)`.
 assert jnp.allclose(restarted, -0.1, atol=1e-06)
 
 # Reference practice: Check transformation order
@@ -241,8 +241,8 @@ after = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))
 u_before, _ = before.update(g, before.init(jnp.zeros(2)))
 # Construct `u_after, _` via `after.update(g, after.init(jnp.zeros(2)))`
 u_after, _ = after.update(g, after.init(jnp.zeros(2)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)`
+# Assert that `jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)
 print("PASS: optimization-12")

@@ -115,7 +115,7 @@ final, history = train(0., 0.1, 60)
 print("Final weight:", float(final))
 # Print diagnostic summary of the computed outputs.
 print("Final loss:", float(history[-1]))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(final, 2., atol=1e-4)`.
 assert jnp.allclose(final, 2., atol=1e-4)
 # Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
@@ -152,7 +152,7 @@ final, history = train(0., 0.1, 60)
 print("Final weight:", float(final))
 # Print diagnostic summary of the computed outputs.
 print("Final loss:", float(history[-1]))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(final, 2., atol=1e-4)`.
 assert jnp.allclose(final, 2., atol=1e-4)
 # Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
@@ -227,9 +227,9 @@ PASS: optimization-03
 ```python
 # Experiment — Check the first two steps: A hand-derived trajectory checks update sign and the recording...
 two_w, two_losses = train(0., 0.1, 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(two_w, 0.72)`.
 assert jnp.allclose(two_w, 0.72)
-# Check numerical equivalence within tolerance: `jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))`
+# Assert that `jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))`.
 assert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))
 # Print the observed values to compare against the expected result.
 print("First two post-update losses:", two_losses)
@@ -246,9 +246,9 @@ A hand-derived trajectory checks update sign and the recording convention.
 ```python
 # Experiment — Test the edge of stability: Magnitude-one error multipliers do not contract even though the...
 edge_w, edge_losses = train(0., 1., 5)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(edge_w, 4.)`.
 assert jnp.allclose(edge_w, 4.)
-# Check numerical equivalence within tolerance: `jnp.allclose(edge_losses, jnp.full(5, 4.))`
+# Assert that `jnp.allclose(edge_losses, jnp.full(5, 4.))`.
 assert jnp.allclose(edge_losses, jnp.full(5, 4.))
 ```
 
@@ -270,9 +270,9 @@ quadratic = lambda value: (value-2.)**2
 grad_far = jax.grad(quadratic)(far)
 # Compute `next_far` from `far - 1e-8*grad_far`
 next_far = far - 1e-8*grad_far
-# Check numerical equivalence within tolerance: `jnp.abs(next_far-far)<1e-6`
+# Assert that `jnp.abs(next_far-far)<1e-6`.
 assert jnp.abs(next_far-far)<1e-6
-# Check numerical equivalence within tolerance: `jnp.abs(grad_far)>3.`
+# Assert that `jnp.abs(grad_far)>3.`.
 assert jnp.abs(grad_far)>3.
 # Assert invariant `quadratic(next_far)>3.9` holds
 assert quadratic(next_far)>3.9
@@ -295,7 +295,7 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 
 **Step-by-step implementation plan:**
 1. Assert invariant `unstable_history[-1] > loss(0.)` holds
-2. Check numerical equivalence within tolerance: `abs(1 - 2 * 1.1) > 1`
+2. Assert that `abs(1 - 2 * 1.1) > 1`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -304,7 +304,7 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 unstable, unstable_history = train(...)  # TODO: compute unstable, unstable_history
 # Assert invariant `unstable_history[-1] > loss(0.)` holds
 assert unstable_history[-1]  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(1 - 2 * 1.1) > 1`
+# Assert that `abs(1 - 2 * 1.1) > 1`.
 assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
 ```
 
@@ -315,7 +315,7 @@ assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
 unstable, unstable_history = train(0., 1.1, 10)
 # Assert invariant `unstable_history[-1] > loss(0.)` holds
 assert unstable_history[-1] > loss(0.)
-# Check numerical equivalence within tolerance: `abs(1 - 2 * 1.1) > 1`
+# Assert that `abs(1 - 2 * 1.1) > 1`.
 assert abs(1 - 2 * 1.1) > 1
 ```
 
@@ -363,7 +363,7 @@ def scaled_step(w, _):
     return ...  # TODO: return computed result
 # Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(scaled_w, 3., atol=1e-5)`.
 assert jnp.allclose(scaled_w, 3., atol=1e-5)  # TODO: complete assertion check
 # Assert invariant `jnp.all(jnp.diff(scaled_history) <= 1e-6)` holds
 assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
@@ -384,7 +384,7 @@ def scaled_step(w, _):
     return new, scaled_loss(new)
 # Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(scaled_w, 3., atol=1e-5)`.
 assert jnp.allclose(scaled_w, 3., atol=1e-5)
 # Assert invariant `jnp.all(jnp.diff(scaled_history) <= 1e-6)` holds
 assert jnp.all(jnp.diff(scaled_history) <= 1e-6)
@@ -417,7 +417,7 @@ The derivative at zero is $-4$.
 2. Differentiate the objective to obtain `downhill` via automatic differentiation.
 3. Assert invariant `loss(uphill) > loss(0.)` holds
 4. Assert invariant `loss(downhill) < loss(0.)` holds
-5. Check numerical equivalence within tolerance: `jnp.allclose(downhill, 0.4)`
+5. Assert that `jnp.allclose(downhill, 0.4)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -431,7 +431,7 @@ downhill = ...  # TODO: compute downhill
 assert loss(uphill)  # TODO: complete assertion check
 # Assert invariant `loss(downhill) < loss(0.)` holds
 assert loss(downhill)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(downhill, 0.4)`
+# Assert that `jnp.allclose(downhill, 0.4)`.
 assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
 ```
 
@@ -447,7 +447,7 @@ downhill = 0. - 0.1*jax.grad(loss)(0.)
 assert loss(uphill) > loss(0.)
 # Assert invariant `loss(downhill) < loss(0.)` holds
 assert loss(downhill) < loss(0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(downhill, 0.4)`
+# Assert that `jnp.allclose(downhill, 0.4)`.
 assert jnp.allclose(downhill, 0.4)
 ```
 

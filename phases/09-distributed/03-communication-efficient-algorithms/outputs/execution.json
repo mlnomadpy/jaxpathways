@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-03",
-  "contentHash": "58e8a7e3074fbe4a719860c9831b42457362b4b5e98d3942a0c44e93e7a5a675",
+  "contentHash": "82a03acd6fc3bee3da8b815272acc85b360e65c21cc072052cc3b1b62dc6e36e",
   "executedAt": "2026-10-08T14:04:03.035337+00:00",
   "environment": {
     "backend": "cpu",
@@ -99,11 +99,11 @@
       ]
     },
     {
-      "sourceHash": "9f8d83292ffe83a3a6efc5e2d8d2c5dfca26a7219a8a5dd69dbde6ca3a909caf",
+      "sourceHash": "cbacea100d938c5b15da3ff87a425e970f8b83dd9a37cd307ed7c0afbb3fd0c7",
       "outputs": []
     },
     {
-      "sourceHash": "8f025ff0d9a63aac4e11b5774f0ef9291990567c93bf7e6a2e4e070095b72378",
+      "sourceHash": "93790aa63cac455440d9929303cda3c573a8171c539698bedf71cd903bc34483",
       "outputs": [
         {
           "output_type": "stream",

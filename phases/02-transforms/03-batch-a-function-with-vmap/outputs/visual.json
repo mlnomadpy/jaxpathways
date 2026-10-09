@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-03",
-  "contentHash": "975d8a2f417ad2206a71bcd1bf227b2ccc039a57965c52558663294c023b167a",
+  "contentHash": "3b4b4fe234885ffd9952a5b1e0c6dcaecf8c77f259507dd8ffb7263a8bae9221",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:23.025461+00:00",
@@ -37,7 +37,7 @@
     "prediction": "What should happen if you duplicate an input row while keeping the same shared weights?",
     "reading": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
     "alt": "Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4,
     "panel": {
       "kind": "table",

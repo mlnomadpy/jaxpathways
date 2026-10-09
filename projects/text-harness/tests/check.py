@@ -211,4 +211,4 @@ if stage>=4:
         print("PASS stage 4: six serialized endpoints, fresh-process inference, corruption rejection, bounded generation and actual prefill/decode timing")
         print("Actual generated output:",generated)
         print("Measured CPU prefill/decode p50 milliseconds:",timed["prefill_p50_ms"],timed["decode_p50_ms"])
-print("All requested text stages passed. Symbolic byte-sequence fixture and CPU evidence only.")
+print("All requested text stages passed.")

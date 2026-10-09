@@ -34,7 +34,7 @@ def log_joint(weights, X, y, noise_scale=1., prior_scale=2.):
     """Normalized prior and independent Gaussian likelihood; weights is one vector."""
     # Perform matrix contraction / projection to compute `residual`.
     residual = y-X@weights
-    # Evaluate `(n, d)` from the current inputs and state.
+    # Compute `n, d` as `X.shape`.
     n, d = X.shape
     # Return `-0.5 * jnp.sum(residual ** 2) / noise_scale ** 2 - n * jnp.log(noise_scale) - 0.5 * jnp.sum(weights ** 2) / prior_scale ** 2 - d * jnp.log(prior_scale) - 0.5 * (n + d) * jnp.log(2 * jnp.pi)` to the caller.
     return (-.5*jnp.sum(residual**2)/noise_scale**2-n*jnp.log(noise_scale)
@@ -51,7 +51,7 @@ def sample(key, mean, covariance, starts, step_size=.15, leapfrog_steps=9,
     """
     # Create device-backed JAX array `(mean, covariance, starts)`.
     mean, covariance, starts = map(jnp.asarray, (mean, covariance, starts))
-    # Evaluate `d` from the current inputs and state.
+    # Compute `d` as `mean.size`.
     d = mean.size
     # Guard input contract (`mean.ndim != 1 or covariance.shape != (d, d) or starts.ndim != 2 or (starts.shape[1] != d)`) and fail fast if violated.
     if mean.ndim != 1 or covariance.shape != (d,d) or starts.ndim != 2 or starts.shape[1] != d:
@@ -73,7 +73,7 @@ def sample(key, mean, covariance, starts, step_size=.15, leapfrog_steps=9,
     precision = jnp.linalg.solve(covariance, jnp.eye(d))
     # Function `energy(q)` implementing this stage's computation:
     def energy(q):
-        # Evaluate `delta` from the current inputs and state.
+        # Compute `delta` as `q-mean`.
         delta = q-mean
         # Return `0.5 * delta @ precision @ delta` to the caller.
         return .5*delta@precision@delta
@@ -84,19 +84,19 @@ def sample(key, mean, covariance, starts, step_size=.15, leapfrog_steps=9,
     def one_chain(chain_key, start):
         # Function `transition(state, _)` implementing this stage's computation:
         def transition(state, _):
-            # Evaluate `(q, chain_key)` from the current inputs and state.
+            # Compute `q, chain_key` as `state`.
             q, chain_key = state
             # Split the PRNG key deterministically into independent subkeys (`(chain_key, momentum_key, accept_key)`).
             chain_key, momentum_key, accept_key = jax.random.split(chain_key,3)
             # Draw pseudorandom samples for `initial_p` using the explicit RNG state.
             initial_p = jax.random.normal(momentum_key,q.shape)
-            # Evaluate `p` from the current inputs and state.
+            # Compute `p` as `initial_p-.5*step_size*force(q)`.
             p = initial_p-.5*step_size*force(q)
             # Function `leap(i, state)` implementing this stage's computation:
             def leap(i,state):
-                # Evaluate `(position, momentum)` from the current inputs and state.
+                # Compute `position,momentum` as `state`.
                 position,momentum = state
-                # Evaluate `position` from the current inputs and state.
+                # Compute `position` as `position+step_size*momentum`.
                 position = position+step_size*momentum
                 # Combine or mask array elements to form `momentum`.
                 momentum = momentum-jnp.where(i<leapfrog_steps-1,step_size,.5*step_size)*force(position)
@@ -130,7 +130,7 @@ def diagnose(chains):
     # Guard input contract (`values.ndim != 3 or values.shape[0] < 2 or values.shape[1] < 4 or (not np.isfinite(values).all())`) and fail fast if violated.
     if values.ndim!=3 or values.shape[0]<2 or values.shape[1]<4 or not np.isfinite(values).all():
         raise ValueError("diagnostics require finite (chains, draws, parameters) with multiple chains")
-    # Evaluate `half` from the current inputs and state.
+    # Compute `half` as `values.shape[1]//2`.
     half=values.shape[1]//2
     # Combine or mask array elements to form `split`.
     split=np.concatenate([values[:,:half],values[:,-half:]],axis=0)

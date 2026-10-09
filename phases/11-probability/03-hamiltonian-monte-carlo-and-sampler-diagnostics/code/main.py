@@ -20,7 +20,7 @@ def potential(q):
     return .5*delta@precision@delta
 # Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))`.
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
 # 2. Integrate then accept or reject
@@ -90,9 +90,9 @@ def split_rhat(values):
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
 # Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
-# Check numerical equivalence within tolerance: `jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15`
+# Assert that `jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15`.
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
-# Check numerical equivalence within tolerance: `jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2`
+# Assert that `jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2`.
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
 # Assert invariant `jnp.all(rhats<1.05)` holds
 assert jnp.all(rhats<1.05)
@@ -120,7 +120,7 @@ def potential(q):
     return .5*delta@precision@delta
 # Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))`.
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
 # Step 2 — 2. Integrate then accept or reject: Leapfrog approximates energy conservation.
@@ -188,9 +188,9 @@ def split_rhat(values):
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
 # Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
-# Check numerical equivalence within tolerance: `jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15`
+# Assert that `jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15`.
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
-# Check numerical equivalence within tolerance: `jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2`
+# Assert that `jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2`.
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
 # Assert invariant `jnp.all(rhats<1.05)` holds
 assert jnp.all(rhats<1.05)
@@ -215,9 +215,9 @@ p0=jnp.array([.3,.7])
 q1,p1=leapfrog(q0,p0,.15,9)
 # Run `leapfrog` to compute `(q2, p2)`.
 q2,p2=leapfrog(q1,-p1,.15,9)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(q2,q0,atol=2e-6)`
+# Compute `np.testing.assert_allclose(q2,q0,atol` as `2e-6)`.
 np.testing.assert_allclose(q2,q0,atol=2e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(p2,-p0,atol=2e-6)`
+# Compute `np.testing.assert_allclose(p2,-p0,atol` as `2e-6)`.
 np.testing.assert_allclose(p2,-p0,atol=2e-6)
 
 # Experiment: Separate replay from a changed chain
@@ -263,8 +263,8 @@ analytic=(precision@(q-target_mean))@v
 auto=force(q)@v
 # Compute `finite` from `(potential(q+eps*v)-potential(q-eps*v))/(2*eps)`
 finite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(auto,analytic,rtol=1e-6)`
+# Compute `np.testing.assert_allclose(auto,analytic,rtol` as `1e-6)`.
 np.testing.assert_allclose(auto,analytic,rtol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finite,analytic,rtol=.005,atol=.002)`
+# Compute `np.testing.assert_allclose(finite,analytic,rtol` as `.005,atol=.002)`.
 np.testing.assert_allclose(finite,analytic,rtol=.005,atol=.002)
 print("PASS: probability-03")

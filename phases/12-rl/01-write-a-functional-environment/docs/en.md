@@ -140,7 +140,7 @@ for action in [1, 1, 0, 0]:
     rewards.append(float(reward))
 # Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`
+# Assert that `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
 # Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
@@ -229,7 +229,7 @@ for action in [1, 1, 0, 0]:
     rewards.append(float(reward))
 # Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`
+# Assert that `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
 # Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
@@ -350,7 +350,7 @@ for i in range(3):
     total += float(r)
     # Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
     assert not bool(term)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(total + .03) < 1e-6`
+# Assert that `abs(total + .03) < 1e-6`.
 assert abs(total + .03)  # TODO: complete assertion check
 # Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(...)  # TODO: compute s2, r, term, trunc
@@ -373,7 +373,7 @@ for i in range(3):
     total += float(r)
     # Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
     assert not bool(term) and bool(trunc) == (i == 2)
-# Check numerical equivalence within tolerance: `abs(total + .03) < 1e-6`
+# Assert that `abs(total + .03) < 1e-6`.
 assert abs(total + .03) < 1e-6
 # Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(s, jnp.int32(1), 3)
@@ -406,7 +406,7 @@ Use the termination flag for the continuing task. The finite-horizon task assign
 1. Compute `continuing_timeout` from `r + gamma * value`
 2. Compute `terminal` from `r`
 3. Compute `finite_horizon_timeout` from `r`
-4. Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
+4. Assert that `abs(continuing_timeout - 1.79) < 1e-7`.
 5. Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 
 **Starter code scaffold (fill in the TODOs):**
@@ -420,7 +420,7 @@ continuing_timeout = ...  # TODO: compute continuing_timeout
 terminal = ...  # TODO: compute terminal
 # Compute `finite_horizon_timeout` from `r`
 finite_horizon_timeout = ...  # TODO: compute finite_horizon_timeout
-# Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
+# Assert that `abs(continuing_timeout - 1.79) < 1e-7`.
 assert abs(continuing_timeout - 1.79)  # TODO: complete assertion check
 # Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 assert terminal  # TODO: complete assertion check
@@ -437,7 +437,7 @@ continuing_timeout = r + gamma * value
 terminal = r
 # Compute `finite_horizon_timeout` from `r`
 finite_horizon_timeout = r
-# Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
+# Assert that `abs(continuing_timeout - 1.79) < 1e-7`.
 assert abs(continuing_timeout - 1.79) < 1e-7
 # Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 assert terminal == finite_horizon_timeout == -.01
@@ -491,7 +491,7 @@ for position in range(3):
         assert int(nxt.position)  # TODO: complete assertion check
         # Assert invariant `bool(term) == (expected == 3)` holds
         assert bool(term)  # TODO: complete assertion check
-        # Check numerical equivalence within tolerance: `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`
+        # Assert that `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`.
         assert abs(float(reward) - (1. if expected  # TODO: complete assertion check
 ```
 
@@ -515,7 +515,7 @@ for position in range(3):
         assert int(nxt.position) == expected
         # Assert invariant `bool(term) == (expected == 3)` holds
         assert bool(term) == (expected == 3)
-        # Check numerical equivalence within tolerance: `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`
+        # Assert that `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`.
         assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6
 ```
 

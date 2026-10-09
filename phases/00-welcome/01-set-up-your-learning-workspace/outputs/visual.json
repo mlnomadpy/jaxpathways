@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-01",
-  "contentHash": "0cdd92d8c8b335b67a3ace087e106f0870905617ce969f8e770a77eb23e2b48e",
+  "contentHash": "9f5daafe82f4003b811cca85b50bb2cb5832c4bee49fcaef5a42bc0b4bccd721",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-09T12:23:05.840675+00:00",
@@ -55,7 +55,7 @@
     "prediction": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
     "reading": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
     "alt": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
       "kind": "graph",

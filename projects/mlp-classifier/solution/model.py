@@ -62,7 +62,7 @@ def train(seed, x, labels, rate=.03, steps=200, width=8):
     model = make_model(seed, width)
     # Configure or step the Optax optimizer state (`optimizer`).
     optimizer = nnx.Optimizer(model, optax.adam(rate), wrt=nnx.Param)
-    # Evaluate `losses` from the current inputs and state.
+    # Initialize list `losses` for the stage values.
     losses = []
     # Repeat the update loop over `range(steps)` steps:
     for _ in range(steps):

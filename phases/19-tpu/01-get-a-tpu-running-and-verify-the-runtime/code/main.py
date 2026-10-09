@@ -30,13 +30,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     total = float(jax.block_until_ready(jnp.sum(per_device)))
     # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Compute `contract_ok` from `(`
+    # Evaluate the compound expression for `contract_ok`.
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Compute `receipt` from `{`
+    # Construct dictionary `receipt` with the structured fields for this stage.
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -113,13 +113,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     total = float(jax.block_until_ready(jnp.sum(per_device)))
     # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Compute `contract_ok` from `(`
+    # Evaluate the compound expression for `contract_ok`.
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Compute `receipt` from `{`
+    # Construct dictionary `receipt` with the structured fields for this stage.
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -165,7 +165,7 @@ print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"]
 
 # Figure data experiment
 # Compute figure data for: Single-host Cloud TPU slice chip counts and total HBM capacity
-# Compute `visual_data` from `{`
+# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': [t['slice'] for t in topologies],
@@ -182,7 +182,7 @@ visual_data = {
 mismatch = verify_runtime_contract(expected_backend="tpu", min_devices=4)
 # Print the observed values to compare against the expected result.
 print("Mismatch contract_ok:", mismatch["contract_ok"], "observed:", mismatch["observed_backend"], "devices:", mismatch["device_count"])
-# Assert invariant `mismatch["contract_ok"] == (jax.default_backend() == "tpu" and ja...` holds
+# Assert that `mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)`.
 assert mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)
 
 # Experiment: Verify single-host vs multi-host process counts
@@ -192,7 +192,7 @@ slice_hosts = {"v5litepod-1": 1, "v5litepod-4": 1, "v5litepod-8": 1, "v5litepod-
 needs_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}
 # Print the observed values to compare against the expected result.
 print("Requires --worker=all and jax.distributed.initialize():", needs_multi_host)
-# Assert invariant `needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5...` holds
+# Assert that `needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True`.
 assert needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True
 
 # Reference solution. Try the exercise before reading this.
@@ -202,7 +202,7 @@ checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_de
 v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
 # Print the observed values to compare against the expected result.
 print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-# Assert invariant `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v...` holds
+# Assert that `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64`.
 assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
 
 # Reference practice: Check whether a model state fits on a single-host TPU slice

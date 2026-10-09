@@ -36,9 +36,9 @@ values = jnp.array([[2.], [4.], [8.], [16.]])
 causal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]
 # Run `masked_mean` to compute `(out, weights)`.
 out, weights = masked_mean(values, causal)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))`.
 assert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.triu(weights, 1), 0.)`
+# Assert that `jnp.allclose(jnp.triu(weights, 1), 0.)`.
 assert jnp.allclose(jnp.triu(weights, 1), 0.)
 # Print the observed values to compare against the expected result.
 print("Causal means:", out[:, 0])
@@ -76,9 +76,9 @@ values = jnp.array([[2.], [4.], [8.], [16.]])
 causal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]
 # Run `masked_mean` to compute `(out, weights)`.
 out, weights = masked_mean(values, causal)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))`.
 assert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.triu(weights, 1), 0.)`
+# Assert that `jnp.allclose(jnp.triu(weights, 1), 0.)`.
 assert jnp.allclose(jnp.triu(weights, 1), 0.)
 # Print the observed values to compare against the expected result.
 print("Causal means:", out[:, 0])
@@ -93,9 +93,9 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 changed = values.at[-1, 0].set(1000.)
 # Run `masked_mean` to compute `(changed_out, _)`.
 changed_out, _ = masked_mean(changed, causal)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(changed_out[:3], out[:3])`.
 assert jnp.allclose(changed_out[:3], out[:3])
-# Check numerical equivalence within tolerance: `not jnp.allclose(changed_out[-1], out[-1])`
+# Assert that `not jnp.allclose(changed_out[-1], out[-1])`.
 assert not jnp.allclose(changed_out[-1], out[-1])
 
 # Experiment: Pack two independent examples
@@ -108,7 +108,7 @@ valid = jnp.ones(4, dtype=bool)
 packed = make_mask(segments, valid)
 # Run `masked_mean` to compute `(packed_out, _)`.
 packed_out, _ = masked_mean(values, packed)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(packed_out[:, 0], jnp.array([2., 3., 8., 12.]))`.
 assert jnp.allclose(packed_out[:, 0], jnp.array([2., 3., 8., 12.]))
 
 # Reference solution. Try the exercise before reading this.
@@ -145,15 +145,15 @@ pad_out, _ = masked_mean(values, pad_mask | fallback)
 pad_out = jnp.where(pad_valid[:, None], pad_out, 0.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(pad_out))
-# Check numerical equivalence within tolerance: `jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))`
+# Assert that `jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))`.
 assert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))
 
 # Reference practice: Detect packed-example leakage
 # Detect packed-example leakage (Transfer / diagnosis): The earlier values 2 and 4 belong to another example; they...
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(out[2,0], 14/3)`.
 assert jnp.allclose(out[2,0], 14/3)
-# Check numerical equivalence within tolerance: `jnp.allclose(packed_out[2,0], 8.)`
+# Assert that `jnp.allclose(packed_out[2,0], 8.)`.
 assert jnp.allclose(packed_out[2,0], 8.)
-# Check numerical equivalence within tolerance: `not jnp.allclose(out[2,0], packed_out[2,0])`
+# Assert that `not jnp.allclose(out[2,0], packed_out[2,0])`.
 assert not jnp.allclose(out[2,0], packed_out[2,0])
 print("PASS: transformers-02")

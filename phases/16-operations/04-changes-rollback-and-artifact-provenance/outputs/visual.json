@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "c127de5259c516d92b5786e73e16008eb13ef4b2cfb3c2971f03c72529b1785a",
+  "contentHash": "d9d832ea713d6bf104d52f995d2989e02246422d37c4959fbfe31825606c6ede",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:33.892665+00:00",
@@ -42,7 +42,7 @@
     "prediction": "Should a rejected candidate change the active artifact pointer?",
     "reading": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
     "alt": "Candidate B can exist while A remains active. Only the passing branch permits activation under the policy; failure keeps A selected. Letters identify artifacts, not scores. Preserve compatible processor and configuration identities with the selected model.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6.3,
     "panel": {
       "kind": "graph",

@@ -98,8 +98,6 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
             raise RuntimeError("Real TPU inputs/backend required; CPU fallback is disabled")
         if bm%8 or bn%128:
             raise ValueError("this TPU wrapper requires block multiples of (8,128)")
-    # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `pm` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     pm=(m+bm-1)//bm*bm
@@ -144,7 +142,7 @@ bias=jnp.linspace(-.3,.4,129,dtype=jnp.float32)
 actual=fused_bias_relu(x,bias)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=np.maximum(np.asarray(x)+np.asarray(bias)[None,:],0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Check tensor shape invariant: `actual.shape==(9,129)`
 assert actual.shape==(9,129)
@@ -208,8 +206,6 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
             raise RuntimeError("Real TPU inputs/backend required; CPU fallback is disabled")
         if bm%8 or bn%128:
             raise ValueError("this TPU wrapper requires block multiples of (8,128)")
-    # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `pm` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     pm=(m+bm-1)//bm*bm
@@ -246,7 +242,7 @@ bias=jnp.linspace(-.3,.4,129,dtype=jnp.float32)
 actual=fused_bias_relu(x,bias)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=np.maximum(np.asarray(x)+np.asarray(bias)[None,:],0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Check tensor shape invariant: `actual.shape==(9,129)`
 assert actual.shape==(9,129)
@@ -393,7 +389,7 @@ expected = np.maximum(...)  # TODO: compute expected
 for block in [(8,128),(16,256)]:
     # Run `fused_bias_relu` to compute `result`.
     result = fused_bias_relu(...)  # TODO: compute result
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)`
+    # Compute `np.testing.assert_allclose(result,expected,rtol` as `1e-6,atol=1e-6)`.
     np.testing.assert_allclose(result,expected,rtol = ...  # TODO: compute np.testing.assert_allclose(result,expected,rtol
 # Print the observed values to compare against the expected result.
 print("Changed tails and two TPU-compatible blocks verified in interpretation")
@@ -414,7 +410,7 @@ expected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)
 for block in [(8,128),(16,256)]:
     # Run `fused_bias_relu` to compute `result`.
     result=fused_bias_relu(changed_x,changed_bias,block)
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)`
+    # Compute `np.testing.assert_allclose(result,expected,rtol` as `1e-6,atol=1e-6)`.
     np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed tails and two TPU-compatible blocks verified in interpretation")
@@ -441,7 +437,7 @@ A column bias is a vector with exactly one entry per matrix column.
 
 **Step-by-step implementation plan:**
 1. Iterate over `malformed` to step through the computation:
-2. Compute `rejected` from `False`
+2. Compute `rejected` as `False`.
 3. Run the boundary check and catch the expected exception:
 4. Assert invariant `rejected` holds
 5. Print the observed values to compare against the expected result.
@@ -452,7 +448,7 @@ A column bias is a vector with exactly one entry per matrix column.
 # Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
 # Iterate over `malformed` to step through the computation:
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
-    # Compute `rejected` from `False`
+    # Compute `rejected` as `False`.
     rejected = ...  # TODO: compute rejected
     # Run the boundary check and catch the expected exception:
     try:fused_bias_relu(x,malformed)
@@ -469,7 +465,7 @@ print("Malformed bias axes rejected")
 # Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
 # Iterate over `malformed` to step through the computation:
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
-    # Compute `rejected` from `False`
+    # Compute `rejected` as `False`.
     rejected=False
     # Run the boundary check and catch the expected exception:
     try:fused_bias_relu(x,malformed)
@@ -505,7 +501,7 @@ Use a deterministic reversed column order; do not permute the bias independently
 **Step-by-step implementation plan:**
 1. Construct `order` via `jnp.arange(128,-1,-1)`
 2. Run `fused_bias_relu` to compute `permuted`.
-3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,ato...`
+3. Compute `np.testing.assert_allclose(permuted[:,order],actual,rtol` as `1e-6,atol=1e-6)`.
 4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -516,7 +512,7 @@ Use a deterministic reversed column order; do not permute the bias independently
 order = jnp.arange(...)  # TODO: compute order
 # Run `fused_bias_relu` to compute `permuted`.
 permuted = fused_bias_relu(...)  # TODO: compute permuted
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,ato...`
+# Compute `np.testing.assert_allclose(permuted[:,order],actual,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Column/bias pairing survives a joint permutation")
@@ -530,7 +526,7 @@ print("Column/bias pairing survives a joint permutation")
 order=jnp.arange(128,-1,-1)
 # Run `fused_bias_relu` to compute `permuted`.
 permuted=fused_bias_relu(x[:,order],bias[order])
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,ato...`
+# Compute `np.testing.assert_allclose(permuted[:,order],actual,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Column/bias pairing survives a joint permutation")

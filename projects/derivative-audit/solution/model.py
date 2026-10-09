@@ -17,9 +17,9 @@ def stable_softplus(x):
 @stable_softplus.defjvp
 # Function `softplus_jvp(primals, tangents)` implementing this stage's computation:
 def softplus_jvp(primals,tangents):
-    # Evaluate `(x,)` from the current inputs and state.
+    # Compute `x,` as `primals`.
     x,=primals
-    # Evaluate `(dx,)` from the current inputs and state.
+    # Compute `dx,` as `tangents`.
     dx,=tangents
     # Return `(stable_softplus(x), jax.nn.sigmoid(x) * dx)` to the caller.
     return stable_softplus(x),jax.nn.sigmoid(x)*dx
@@ -45,7 +45,7 @@ def logsumexp_bwd(weights,cotangent):
     # Return `(cotangent * weights,)` to the caller.
     return (cotangent*weights,)
 
-# Evaluate numerically stable log-space cross-entropy/likelihood (``).
+# Execute `stable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)`.
 stable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)
 
 # Define `analyze(x, direction, weighting)` to evaluate the objective and its automatic derivatives:
@@ -55,7 +55,7 @@ def analyze(x,direction,weighting):
         raise ValueError("point, direction and weighting must each have shape (2,)")
     # Function `mapping(z)` implementing this stage's computation:
     def mapping(z):
-        # Evaluate `(a, b)` from the current inputs and state.
+        # Compute `a,b` as `z`.
         a,b=z
         # Return `jnp.array([a * b, jnp.sin(a) + b * b])` to the caller.
         return jnp.array([a*b,jnp.sin(a)+b*b])
@@ -63,7 +63,7 @@ def analyze(x,direction,weighting):
     value,jvp=jax.jvp(mapping,(x,),(direction,))
     # Compute exact directional derivative / Jacobian / Hessian (`vjp`).
     vjp=jax.vjp(mapping,x)[1](weighting)[0]
-    # Evaluate `objective` from the current inputs and state.
+    # Compute `objective` as `lambda z:0.5*jnp.vdot(mapping(z),mapping(z))`.
     objective=lambda z:0.5*jnp.vdot(mapping(z),mapping(z))
     # Differentiate the objective to obtain gradients `hvp`.
     hvp=jax.jvp(jax.grad(objective),(x,),(direction,))[1]
@@ -77,7 +77,7 @@ from jax.extend import core
 # Function `tiny_jvp(closed, primals, tangents)` implementing this stage's computation:
 def tiny_jvp(closed,primals,tangents):
     """Interpret a pure flat jaxpr with floating inputs and explicit tangent rules."""
-    # Evaluate `program` from the current inputs and state.
+    # Compute `program` as `closed.jaxpr`.
     program=closed.jaxpr
     # Guard input contract (`program.effects`) and fail fast if violated.
     if program.effects:
@@ -85,14 +85,12 @@ def tiny_jvp(closed,primals,tangents):
     # Guard input contract (`len(primals) != len(program.invars) or len(tangents) != len(primals)`) and fail fast if violated.
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
-    # Evaluate `values` from the current inputs and state.
-    # Evaluate `directions` from the current inputs and state.
+    # Construct dictionary `values` with the structured fields for this stage.
     values={}
     directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
-        # Evaluate `values[var]` from the current inputs and state.
-        # Evaluate `directions[var]` from the current inputs and state.
+        # Compute `values[var]` as `value`.
         values[var]=value
         directions[var]=tangent
     # Loop over `(var, constant)` in `zip(program.constvars, closed.consts)`:
@@ -121,7 +119,7 @@ def tiny_jvp(closed,primals,tangents):
         return values[atom],directions[atom]
     # Loop over `equation` in `program.eqns`:
     for equation in program.eqns:
-        # Evaluate `name` from the current inputs and state.
+        # Compute `name` as `equation.primitive.name`.
         name=equation.primitive.name
         # Guard input contract (`name not in {'add', 'mul', 'neg', 'sin', 'reduce_sum'}`) and fail fast if violated.
         if name not in {"add","mul","neg","sin","reduce_sum"}:
@@ -129,9 +127,9 @@ def tiny_jvp(closed,primals,tangents):
         # Guard input contract (`len(equation.outvars) != 1`) and fail fast if violated.
         if len(equation.outvars)!=1:
             raise NotImplementedError("multiple-result primitives are outside this interpreter")
-        # Evaluate `operands` from the current inputs and state.
+        # Initialize list `operands` for the stage values.
         operands=[read(atom) for atom in equation.invars]
-        # Evaluate `(a, da)` from the current inputs and state.
+        # Compute `a,da` as `operands[0]`.
         a,da=operands[0]
         # Branch on condition `name == 'add'`:
         if name=="add":
@@ -149,7 +147,7 @@ def tiny_jvp(closed,primals,tangents):
             result,tangent=jnp.sum(a,axis=axes),jnp.sum(da,axis=axes)
         # Run `put` to perform the next check or state transition.
         put(equation.outvars[0],result,tangent)
-    # Evaluate `output` from the current inputs and state.
+    # Initialize list `output` for the stage values.
     output=[read(var) for var in program.outvars]
     # Return `(tuple((v for v, _ in output)), tuple((t for _, t in output)))` to the caller.
     return tuple(v for v,_ in output),tuple(t for _,t in output)

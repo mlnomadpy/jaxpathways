@@ -32,9 +32,9 @@ second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 # Print diagnostic summary of the computed outputs.
 # Print diagnostic summary of the computed outputs.
-# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
+# Assert that `jnp.allclose(first, loss(w, x, y))`.
 assert jnp.allclose(first, loss(w, x, y))
-# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
+# Assert that `jnp.allclose(second, first)`.
 assert jnp.allclose(second, first)
 
 # Compile a function with jit: Compilation prepares a program that can be reused for compatible...
@@ -70,9 +70,9 @@ repeat_seconds = time.perf_counter() - t0
 print("Loss:", float(second))
 # Print diagnostic summary of the computed outputs.
 print("First/repeat seconds:", first_seconds, repeat_seconds)
-# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
+# Assert that `jnp.allclose(first, loss(w, x, y))`.
 assert jnp.allclose(first, loss(w, x, y))
-# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
+# Assert that `jnp.allclose(second, first)`.
 assert jnp.allclose(second, first)
 
 # Figure data experiment
@@ -84,9 +84,9 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 # Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
 # Construct `expected_predictions` via `jnp.array([0., 0.6, 1.2, 1.8])`
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(x @ w, expected_predictions, atol=1e-6)`.
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
-# Check numerical equivalence within tolerance: `jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)`
+# Assert that `jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)`.
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
 # Perform matrix / vector contraction (`@`) to compute `manual_gradient`.
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
@@ -94,7 +94,7 @@ manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
 # Run `compiled_value_gradient` to compute `(checked_value, checked_gradient)`.
 checked_value, checked_gradient = compiled_value_gradient(w, x, y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)`.
 assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
 
 # Experiment: Collect a synchronized latency sample
@@ -134,9 +134,9 @@ compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
 # Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(v, expected_v)`.
 assert jnp.allclose(v, expected_v)
-# Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
+# Assert that `jnp.allclose(g, expected_g)`.
 assert jnp.allclose(g, expected_g)
 
 # Reference practice: Check that a new value remains runtime data
@@ -147,7 +147,7 @@ for new_w in (w, w + 0.25):
     expected = jnp.mean((x @ new_w - y) ** 2)
     # Run `compiled` to compute `observed`.
     observed = compiled(new_w, x, y)
-    # Verify that the numerical values match the expected reference within tolerance.
+    # Assert that `jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)`.
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)
 
 # Reference practice: Build a report whose timing claim can be checked

@@ -35,7 +35,7 @@ $$
 
 ![The actual single-head pre-LN block](../../phases/07-transformers/03-a-transformer-block-and-mixed-precision/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 The center path carries four positions with eight features. Attention mixes eligible positions through four-by-four weights. The feed-forward branch changes each token from eight to sixteen features and back. Curved bypasses carry residual values to additions. No multihead or cache component is implied.
 
@@ -159,9 +159,9 @@ assert output.shape == x.shape
 assert jnp.all(jnp.isfinite(output))
 # Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(block_forward(zero, x), x)`.
 assert jnp.allclose(block_forward(zero, x), x)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`
+# Assert that `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`.
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
 # Print the observed values to compare against the expected result.
 print("Block shape:", output.shape)
@@ -227,9 +227,9 @@ assert output.shape == x.shape
 assert jnp.all(jnp.isfinite(output))
 # Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(block_forward(zero, x), x)`.
 assert jnp.allclose(block_forward(zero, x), x)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`
+# Assert that `jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)`.
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
 # Print the observed values to compare against the expected result.
 print("Block shape:", output.shape)
@@ -285,9 +285,9 @@ PASS: transformers-03
 changed_x = x.at[-1].add(100.)
 # Run `block_forward` to compute `changed_output`.
 changed_output = block_forward(p, changed_x)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(changed_output[:3], output[:3], atol=1e-5)`.
 assert jnp.allclose(changed_output[:3], output[:3], atol=1e-5)
-# Check numerical equivalence within tolerance: `not jnp.allclose(changed_output[-1], output[-1])`
+# Assert that `not jnp.allclose(changed_output[-1], output[-1])`.
 assert not jnp.allclose(changed_output[-1], output[-1])
 ```
 
@@ -391,7 +391,7 @@ def shifted_objective(delta):
     return ...  # TODO: return computed result
 # Compute `fd` from `(shifted_objective(1e-2)-shifted_objective(-1e-2))/(...`
 fd = ...  # TODO: compute fd
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)`.
 assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)  # TODO: complete assertion check
 ```
 
@@ -414,7 +414,7 @@ def shifted_objective(delta):
     return objective(altered)
 # Compute `fd` from `(shifted_objective(1e-2)-shifted_objective(-1e-2))/(...`
 fd = (shifted_objective(1e-2)-shifted_objective(-1e-2))/(2e-2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)`.
 assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)
 ```
 
@@ -441,8 +441,8 @@ Use population variance over features and epsilon $10^{-5}$.
 
 **Step-by-step implementation plan:**
 1. Aggregate array values to compute `reference`.
-2. Check numerical equivalence within tolerance: `np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)`
-3. Verify that the numerical values match the expected reference within tolerance.
+2. Compute `np.testing.assert_allclose(layer_norm(x)[0],reference,atol` as `1e-6)`.
+3. Assert that `jnp.allclose(layer_norm(jnp.ones((2,8))),0.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -451,9 +451,9 @@ Use population variance over features and epsilon $10^{-5}$.
 row = np.asarray(...)  # TODO: compute row
 # Aggregate array values to compute `reference`.
 reference = ...  # TODO: compute reference
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)`
+# Compute `np.testing.assert_allclose(layer_norm(x)[0],reference,atol` as `1e-6)`.
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol = ...  # TODO: compute np.testing.assert_allclose(layer_norm(x)[0],reference,atol
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(layer_norm(jnp.ones((2,8))),0.)`.
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion check
 ```
 
@@ -464,9 +464,9 @@ assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion 
 row = np.asarray(x[0])
 # Aggregate array values to compute `reference`.
 reference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)`
+# Compute `np.testing.assert_allclose(layer_norm(x)[0],reference,atol` as `1e-6)`.
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(layer_norm(jnp.ones((2,8))),0.)`.
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)
 ```
 

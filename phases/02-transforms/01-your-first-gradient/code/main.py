@@ -13,7 +13,7 @@ derivative = jax.grad(f)
 
 # Step 3: Verify shapes and numerical invariants
 assert jnp.allclose(derivative(3.0), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(derivative(0.0), 0.)`
+# Assert that `jnp.allclose(derivative(0.0), 0.)`.
 assert jnp.allclose(derivative(0.0), 0.)
 
 # Numerical estimate: Approximately 6.0.
@@ -30,7 +30,7 @@ def square(x):
 estimate = central_difference(square, 3.0)
 # Print the observed values to compare against the expected result.
 print("Finite-difference estimate:", estimate)
-# Check numerical equivalence within tolerance: `abs(estimate - 6.0) < 1e-8`
+# Assert that `abs(estimate - 6.0) < 1e-8`.
 assert abs(estimate - 6.0) < 1e-8
 
 # Your first gradient: A derivative tells us how an output changes near a particular input.
@@ -45,9 +45,9 @@ def f(x):
 derivative = jax.grad(f)
 # Print the observed values to compare against the expected result.
 print(float(derivative(3.0)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(derivative(3.0), 6.)`.
 assert jnp.allclose(derivative(3.0), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(derivative(0.0), 0.)`
+# Assert that `jnp.allclose(derivative(0.0), 0.)`.
 assert jnp.allclose(derivative(0.0), 0.)
 
 # Figure data experiment
@@ -76,7 +76,7 @@ for point in (-1., 0., 2.):
     expected = 6. * (3. * point + 1.)
     # Print the observed values to compare against the expected result.
     print("chain rule:", point, float(observed))
-    # Check numerical equivalence within tolerance: `jnp.allclose(observed, expected)`
+    # Assert that `jnp.allclose(observed, expected)`.
     assert jnp.allclose(observed, expected)
 
 # Experiment: Choose a finite-difference scale
@@ -92,7 +92,7 @@ for step in (1e-1, 1e-2, 1e-3, 1e-5, 1e-7):
     estimate = (cubic32(point + step) - cubic32(point - step)) / (2. * step)
     # Print the observed values to compare against the expected result.
     print("h / estimate / error:", step, float(estimate), float(jnp.abs(estimate - 27.)))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(cubic32)(point), 27.)`.
 assert jnp.allclose(jax.grad(cubic32)(point), 27.)
 
 # Reference solution. Try the exercise before reading this.
@@ -102,7 +102,7 @@ def cubic(x):
     return x ** 3
 # Iterate over `point` to step through the computation:
 for point in (-2., 0., 3.):
-    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)`
+    # Assert that `jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)`.
     assert jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)
 # Assert invariant `cubic(-0.1) < cubic(0.) < cubic(0.1)` holds
 assert cubic(-0.1) < cubic(0.) < cubic(0.1)
@@ -112,9 +112,9 @@ assert cubic(-0.1) < cubic(0.) < cubic(0.1)
 def scalar_prediction(weight, x):
     # Return `weight * x` to the caller.
     return weight * x
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)`.
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)`
+# Assert that `jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)`.
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)
 
 # Reference practice: Repair an objective without hiding its meaning
@@ -128,8 +128,8 @@ def mean_cost(x):
     return jnp.mean(two_costs(x))
 # Iterate over `point` to step through the computation:
 for point in (0., 1., 2.):
-    # Verify that the numerical values match the expected reference within tolerance.
+    # Assert that `jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)`.
     assert jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)
-    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2....`
+    # Assert that `jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))`.
     assert jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))
 print("PASS: first-gradient")

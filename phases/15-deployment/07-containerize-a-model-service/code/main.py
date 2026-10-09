@@ -15,14 +15,20 @@ assert MODEL['weight']*2+MODEL['bias']==5
 # The deployment contract uses exported coefficients, not a training environment.
 SERVICE = '''import hashlib,json,math,os,sys
 raw=open(os.environ['MODEL_PATH'],'rb').read()
-if hashlib.sha256(raw).hexdigest()!=os.environ['MODEL_SHA256']: raise ValueError('artifact mismatch')
+if hashlib.sha256(raw).hexdigest()!=os.environ['MODEL_SHA256']:
+    raise ValueError('artifact mismatch')
 m=json.loads(raw)
-if not isinstance(m,dict) or set(m)!={'schema','weight','bias'}: raise ValueError('model schema')
-if type(m['schema']) is not int or m['schema']!=1: raise ValueError('model schema version')
-if any(type(m[k]) not in (int,float) or not math.isfinite(m[k]) for k in ('weight','bias')): raise ValueError('invalid coefficient')
+if not isinstance(m,dict) or set(m)!={'schema','weight','bias'}:
+    raise ValueError('model schema')
+if type(m['schema']) is not int or m['schema']!=1:
+    raise ValueError('model schema version')
+if any(type(m[k]) not in (int,float) or not math.isfinite(m[k]) for k in ('weight','bias')):
+    raise ValueError('invalid coefficient')
 x=json.load(sys.stdin)['inputs']
-if not isinstance(x,list) or not 1<=len(x)<=32: raise ValueError('batch limit')
-if any(type(v) not in (int,float) or not math.isfinite(v) for v in x): raise ValueError('invalid input')
+if not isinstance(x,list) or not 1<=len(x)<=32:
+    raise ValueError('batch limit')
+if any(type(v) not in (int,float) or not math.isfinite(v) for v in x):
+    raise ValueError('invalid input')
 print(json.dumps({'predictions':[m['weight']*v+m['bias'] for v in x]},allow_nan=False))
 '''
 
@@ -31,14 +37,11 @@ print(json.dumps({'predictions':[m['weight']*v+m['bias'] for v in x]},allow_nan=
 accepted, rejected = 0, 0
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
-    # Read or serialize artifact data on disk (`root`).
-    # Evaluate `artifact` from the current inputs and state.
     # Compute `root` from `Path(folder)`
     root = Path(folder)
     artifact = root / 'model.json'
     service = root / 'service.py'
-    # Read or serialize artifact data on disk (``).
-    # Read or serialize artifact data on disk (``).
+    # Compute `artifact.write_text(json.dumps(MODEL, sort_keys` as `True))`.
     artifact.write_text(json.dumps(MODEL, sort_keys=True))
     service.write_text(SERVICE)
     # Compute deterministic cryptographic digest `sha` for provenance verification.
@@ -77,28 +80,31 @@ MODEL = {'schema': 1, 'weight': 2., 'bias': 1.}
 # The deployment contract uses exported coefficients, not a training environment.
 SERVICE = '''import hashlib,json,math,os,sys
 raw=open(os.environ['MODEL_PATH'],'rb').read()
-if hashlib.sha256(raw).hexdigest()!=os.environ['MODEL_SHA256']: raise ValueError('artifact mismatch')
+if hashlib.sha256(raw).hexdigest()!=os.environ['MODEL_SHA256']:
+    raise ValueError('artifact mismatch')
 m=json.loads(raw)
-if not isinstance(m,dict) or set(m)!={'schema','weight','bias'}: raise ValueError('model schema')
-if type(m['schema']) is not int or m['schema']!=1: raise ValueError('model schema version')
-if any(type(m[k]) not in (int,float) or not math.isfinite(m[k]) for k in ('weight','bias')): raise ValueError('invalid coefficient')
+if not isinstance(m,dict) or set(m)!={'schema','weight','bias'}:
+    raise ValueError('model schema')
+if type(m['schema']) is not int or m['schema']!=1:
+    raise ValueError('model schema version')
+if any(type(m[k]) not in (int,float) or not math.isfinite(m[k]) for k in ('weight','bias')):
+    raise ValueError('invalid coefficient')
 x=json.load(sys.stdin)['inputs']
-if not isinstance(x,list) or not 1<=len(x)<=32: raise ValueError('batch limit')
-if any(type(v) not in (int,float) or not math.isfinite(v) for v in x): raise ValueError('invalid input')
+if not isinstance(x,list) or not 1<=len(x)<=32:
+    raise ValueError('batch limit')
+if any(type(v) not in (int,float) or not math.isfinite(v) for v in x):
+    raise ValueError('invalid input')
 print(json.dumps({'predictions':[m['weight']*v+m['bias'] for v in x]},allow_nan=False))
 '''
 # Compute `accepted, rejected` from `0, 0`
 accepted, rejected = 0, 0
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
-    # Read or serialize artifact data on disk (`root`).
-    # Evaluate `artifact` from the current inputs and state.
     # Compute `root` from `Path(folder)`
     root = Path(folder)
     artifact = root / 'model.json'
     service = root / 'service.py'
-    # Read or serialize artifact data on disk (``).
-    # Read or serialize artifact data on disk (``).
+    # Compute `artifact.write_text(json.dumps(MODEL, sort_keys` as `True))`.
     artifact.write_text(json.dumps(MODEL, sort_keys=True))
     service.write_text(SERVICE)
     # Compute deterministic cryptographic digest `sha` for provenance verification.
@@ -150,15 +156,14 @@ with tempfile.TemporaryDirectory() as directory:
     invalid_path = Path(directory)/'model.json'
     # Read or serialize artifact data on disk (`runner_path`).
     runner_path = Path(directory)/'service.py'
-    # Read or serialize artifact data on disk (``).
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     invalid_path.write_text(json.dumps(invalid_model))
     runner_path.write_text(SERVICE)
     # Compute deterministic cryptographic digest `matching_digest` for provenance verification.
     matching_digest = hashlib.sha256(invalid_path.read_bytes()).hexdigest()
     # Configure environment variable before initializing the runtime.
     invalid_result = subprocess.run([sys.executable,str(runner_path)], input=json.dumps({'inputs':[0.]}), text=True,capture_output=True,env=dict(os.environ,MODEL_PATH=str(invalid_path),MODEL_SHA256=matching_digest),timeout=30)
-    # Assert invariant `invalid_result.returncode != 0 and 'invalid coefficient' in inval...` holds
+    # Assert that `invalid_result.returncode != 0 and 'invalid coefficient' in invalid_result.stderr`.
     assert invalid_result.returncode != 0 and 'invalid coefficient' in invalid_result.stderr
 # Print the observed values to compare against the expected result.
 print('Matching digest did not bypass model validation.')
@@ -168,7 +173,7 @@ print('Matching digest did not bypass model validation.')
 original=json.dumps(MODEL,sort_keys=True).encode()
 # Read or serialize artifact data on disk (`mutated`).
 mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
-# Assert invariant `hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hex...` holds
+# Assert that `hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()`.
 assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
 # Print the observed values to compare against the expected result.
 print('Changed artifact requires a new recorded digest.')
@@ -177,9 +182,7 @@ print('Changed artifact requires a new recorded digest.')
 # Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as tmp:
-    # Read or serialize artifact data on disk (`p`).
-    # Read or serialize artifact data on disk (``).
-    # Read or serialize artifact data on disk (``).
+    # Compute `p` as `Path(tmp)`.
     p=Path(tmp)
     (p/'model').write_text(json.dumps(MODEL))
     (p/'service.py').write_text(SERVICE)
@@ -196,12 +199,10 @@ print('Nonfinite input rejected before output.')
 # Check changed behavior after a legitimate artifact replacement (Transfer / diagnosis): The old model produced 5; the new one produces 7.
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as directory:
-    # Read or serialize artifact data on disk (`model_path`).
     # Read or serialize artifact data on disk (`runner_path`).
     model_path=Path(directory)/'model.json'
     runner_path=Path(directory)/'service.py'
-    # Read or serialize artifact data on disk (``).
-    # Read or serialize artifact data on disk (``).
+    # Compute `model_path.write_text(json.dumps(dict(MODEL,weight` as `3.)))`.
     model_path.write_text(json.dumps(dict(MODEL,weight=3.)))
     runner_path.write_text(SERVICE)
     # Compute deterministic cryptographic digest `digest` for provenance verification.

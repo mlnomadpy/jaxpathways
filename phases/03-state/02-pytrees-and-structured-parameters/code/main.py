@@ -66,15 +66,15 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 # Experiment: Verify every gradient leaf
 # Experiment — Verify every gradient leaf: This check verifies parameter identity and the actual gradient...
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))`.
 assert jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(grads["bias"]`
+# Assert that `jnp.allclose(grads["bias"],-4.)`.
 assert jnp.allclose(grads["bias"],-4.)
-# Check numerical equivalence within tolerance: `jnp.allclose(updated["weight"]`
+# Assert that `jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))`.
 assert jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))
-# Check numerical equivalence within tolerance: `jnp.allclose(updated["bias"]`
+# Assert that `jnp.allclose(updated["bias"],0.2)`.
 assert jnp.allclose(updated["bias"],0.2)
-# Check numerical equivalence within tolerance: `jnp.allclose(loss(updated),0.64,atol=1e-6)`
+# Assert that `jnp.allclose(loss(updated),0.64,atol=1e-6)`.
 assert jnp.allclose(loss(updated),0.64,atol=1e-6)
 
 # Experiment: Flatten and reconstruct without losing identity
@@ -95,9 +95,9 @@ assert jnp.array_equal(rebuilt["bias"],params["bias"])
 norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
 # Aggregate array values to compute `manual`.
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(norm_squared, manual)`.
 assert jnp.allclose(norm_squared, manual)
-# Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
+# Assert that `jnp.allclose(norm_squared, 96.)`.
 assert jnp.allclose(norm_squared, 96.)
 
 # Reference practice: Extend to a nested model
@@ -114,7 +114,7 @@ def nested_loss(p):
 g=jax.grad(nested_loss)(nested)
 # Assert invariant `jax.tree.structure(g)==jax.tree.structure(nested)` holds
 assert jax.tree.structure(g)==jax.tree.structure(nested)
-# Check numerical equivalence within tolerance: `jnp.allclose(g["scale"]`
+# Assert that `jnp.allclose(g["scale"],-4.)`.
 assert jnp.allclose(g["scale"],-4.)
 
 # Reference practice: Repair a mismatched update tree
@@ -128,6 +128,6 @@ else:
     raise AssertionError("Expected a missing-key failure")
 # Transform every leaf of the parameter PyTree (`fixed`).
 fixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(loss(fixed),0.64,atol=1e-6)`.
 assert jnp.allclose(loss(fixed),0.64,atol=1e-6)
 print("PASS: state-02")

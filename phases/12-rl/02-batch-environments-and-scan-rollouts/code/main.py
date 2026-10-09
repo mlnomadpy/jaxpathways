@@ -267,7 +267,7 @@ assert not jnp.array_equal(records['action'], changed['action'])
 r = jnp.array([[-.01],[-.01],[1.],[0.]])
 # Run `returns_to_go` to compute `g`.
 g = returns_to_go(r)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))`.
 assert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))
 # Print the observed values to compare against the expected result.
 print('reward-to-go:', g[:,0])
@@ -300,9 +300,9 @@ for a in [1,1]:
     correct += float(reward*active)
     # Accumulate the next contribution into `broken`.
     broken += float(reward*(~s.done))
-# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`
+# Assert that `abs(correct-.99) < 1e-6`.
 assert abs(correct-.99) < 1e-6
-# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`
+# Assert that `abs(broken+.01) < 1e-6`.
 assert abs(broken+.01) < 1e-6
 
 # Reference practice: Check a deterministic policy limit
@@ -311,7 +311,7 @@ assert abs(broken+.01) < 1e-6
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
 # Combine or mask array elements to form `expected`.
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)`.
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)
 # Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])

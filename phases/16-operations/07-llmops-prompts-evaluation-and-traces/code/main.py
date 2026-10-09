@@ -49,7 +49,7 @@ guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], ab
 results = []
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Read or serialize artifact data on disk (``).
+    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     # Run `MlflowClient` to compute `client`.
     # Read or serialize artifact data on disk (`experiment`).
@@ -137,7 +137,7 @@ guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], ab
 results = []
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Read or serialize artifact data on disk (``).
+    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     # Run `MlflowClient` to compute `client`.
     # Read or serialize artifact data on disk (`experiment`).
@@ -216,9 +216,12 @@ assert replay_summary == {'count': 10, 'passed': 9, 'fraction': .9}
 # Iterate over `broken` to step through the computation:
 for broken in (complete_replies[:-1], complete_replies + [complete_replies[0]],
                complete_replies[:-1] + [dict(id='unknown', response=answer)]):
-    try: score_replay(cases, broken, ['course-v1'])
-    except ValueError: pass
-    else: raise AssertionError('incomplete or ambiguous evaluation accepted')
+    try:
+        score_replay(cases, broken, ['course-v1'])
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('incomplete or ambiguous evaluation accepted')
 # Print the observed values to compare against the expected result.
 print('Complete inventory:', replay_summary, '; missing, duplicate and unknown responses rejected.')
 

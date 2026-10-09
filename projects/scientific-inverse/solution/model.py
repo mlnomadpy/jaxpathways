@@ -22,15 +22,15 @@ def simulate(rate, initials, steps=40, dt=0.05):
         raise ValueError('rate must be scalar')
     # Function `advance(values, unused)` implementing this stage's computation:
     def advance(values, unused):
-        # Evaluate `a` from the current inputs and state.
+        # Compute `a` as `-rate*values`.
         a = -rate*values
-        # Evaluate `b` from the current inputs and state.
+        # Compute `b` as `-rate*(values+dt*a/2)`.
         b = -rate*(values+dt*a/2)
-        # Evaluate `c` from the current inputs and state.
+        # Compute `c` as `-rate*(values+dt*b/2)`.
         c = -rate*(values+dt*b/2)
-        # Evaluate `d` from the current inputs and state.
+        # Compute `d` as `-rate*(values+dt*c)`.
         d = -rate*(values+dt*c)
-        # Evaluate `next_values` from the current inputs and state.
+        # Compute `next_values` as `values+dt*(a+2*b+2*c+d)/6`.
         next_values = values+dt*(a+2*b+2*c+d)/6
         # Return `(next_values, next_values)` to the caller.
         return next_values, next_values
@@ -58,7 +58,7 @@ def fit(initials, observations, dt=0.05, initial_rate=1.4, updates=250, learning
         raise ValueError('initial rate, update count and learning rate must be positive')
     # Create device-backed JAX array `theta`.
     theta = jnp.log(jnp.asarray(initial_rate,dtype=jnp.float64))
-    # Evaluate `objective` from the current inputs and state.
+    # Compute `objective` as `lambda p: loss(p,initials,observations,dt)`.
     objective = lambda p: loss(p,initials,observations,dt)
     # Validate before entering the compiled update and retain a pre-update point.
     history = [float(objective(theta))]
@@ -83,7 +83,7 @@ def evaluate(rate, initials, observations, dt=0.05):
     value=loss(jnp.log(rate),initials,observations,dt)
     # Run `simulate` to compute `predictions`.
     predictions=simulate(rate,initials,int(observations.shape[1]-1),dt)
-    # Evaluate `error` from the current inputs and state.
+    # Compute `error` as `predictions-observations`.
     error=predictions-observations
     # Return `{'mse': float(value), 'rmse': float(jnp.sqrt(value)), 'max_abs_error': float(jnp.max(jnp.abs(error))), 'trajectory_count': int(len(initials)), 'observation_count': int(observations.size)}` to the caller.
     return {'mse':float(value),'rmse':float(jnp.sqrt(value)),

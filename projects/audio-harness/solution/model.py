@@ -16,9 +16,9 @@ PREPROCESS = {"version":"audio-stft-v1","sample_rate":8000,"channels":1,"samples
               "spectrum":"rfft magnitude squared / sum(window squared)",
               "feature":"mean over frames of log1p(power); 65 frequency bins",
               "normalization":"training mean and std; std floor 0.05"}
-# Evaluate `CLASSES` from the current inputs and state.
+# Initialize list `CLASSES` for the stage values.
 CLASSES = ["background","low-tone","high-tone"]
-# Evaluate `BATCHES` from the current inputs and state.
+# Evaluate the compound expression for `BATCHES`.
 BATCHES = (1,4)
 
 
@@ -56,7 +56,7 @@ def make_dataset(seed=41,count=96,split="train",shift=False):
     labels=np.arange(count,dtype=np.int32)%3
     # Initialize array `time_axis` with explicit values and shape.
     time_axis=np.arange(PREPROCESS["clip_samples"])/PREPROCESS["sample_rate"]
-    # Evaluate `waves` from the current inputs and state.
+    # Initialize list `waves` for the stage values.
     waves=[]
     # Loop over `label` in `labels`:
     for label in labels:
@@ -101,7 +101,7 @@ def validate_waveforms(waveforms,sample_rate=8000,channels=1,version="audio-stft
 def spectrum_core(waveforms):
     # Initialize array `offsets` with explicit values and shape.
     offsets=jnp.arange(15)[:,None]*64+jnp.arange(128)[None,:]
-    # Evaluate `frames` from the current inputs and state.
+    # Compute `frames` as `waveforms[:,offsets]`.
     frames=waveforms[:,offsets]
     # Cast or evaluate `window` in explicit floating-point precision.
     window=jnp.hanning(128).astype(jnp.float32)
@@ -181,8 +181,7 @@ def create_state(data,seed=0,batch_size=12,rate=.04,momentum=.85):
 def update_arrays(W,b,vW,vb,normalized,labels,rate,momentum):
     # Evaluate both scalar loss and parameter gradients in one pass (`(loss, (gW, gb))`).
     loss,(gW,gb)=jax.value_and_grad(objective,argnums=(0,1))(W,b,normalized,labels)
-    # Evaluate `vW` from the current inputs and state.
-    # Evaluate `vb` from the current inputs and state.
+    # Compute `vW` as `momentum*vW+gW`.
     vW=momentum*vW+gW
     vb=momentum*vb+gb
     # Return `(W - rate * vW, b - rate * vb, vW, vb, loss)` to the caller.
@@ -202,7 +201,7 @@ def step(state,data):
         state["order"]=jax.random.permutation(order_key,len(data["labels"]))
         state["cursor"]=0
         state["epoch"]+=1
-    # Evaluate `cursor` from the current inputs and state.
+    # Compute `cursor` as `state["cursor"]`.
     cursor=state["cursor"]
     # Convert `indices` to a host NumPy array for inspection or verification.
     indices=np.asarray(state["order"][cursor:cursor+state["config"]["batch_size"]])
@@ -220,7 +219,7 @@ def step(state,data):
     augmented=windows*gains+.003*jax.random.normal(noise_key,windows.shape)
     # Run `features_core` to compute `feat`.
     feat=features_core(augmented)
-    # Evaluate `normalized` from the current inputs and state.
+    # Evaluate the compound expression for `normalized`.
     normalized=(feat-state["mean"])/state["std"]
     # Create device-backed JAX array `(state['W'], state['b'], state['vW'], state['vb'], loss)`.
     state["W"],state["b"],state["vW"],state["vb"],loss=update_arrays(
@@ -238,14 +237,13 @@ def step(state,data):
     return state,trace
 
 
-# Evaluate `ARRAY_FIELDS` from the current inputs and state.
+# Evaluate the compound expression for `ARRAY_FIELDS`.
 ARRAY_FIELDS=("W","b","vW","vb","mean","std","key","order")
 
 
 # Function `save_checkpoint(path, state)` implementing this stage's computation:
 def save_checkpoint(path,state):
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     path.mkdir(parents=True,exist_ok=True)
     # Convert `` to a host NumPy array for inspection or verification.
@@ -255,13 +253,12 @@ def save_checkpoint(path,state):
     # Compute deterministic cryptographic digest `` for provenance verification.
     manifest.update(preprocessing=PREPROCESS,jax=jax.__version__,
                     state_sha256=hashlib.sha256((path/"state.npz").read_bytes()).hexdigest())
-    # Read or serialize artifact data on disk (``).
+    # Compute `(path/"checkpoint.json").write_text(json.dumps(manifest,indent` as `2))`.
     (path/"checkpoint.json").write_text(json.dumps(manifest,indent=2))
 
 
 # Function `load_checkpoint(path, data, config)` implementing this stage's computation:
 def load_checkpoint(path,data,config):
-    # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     path=Path(path)
     manifest=json.loads((path/"checkpoint.json").read_text())
@@ -294,9 +291,6 @@ def scores(state,waveforms):
 
 # Function `evaluate(state, data, batch_size)` implementing this stage's computation:
 def evaluate(state,data,batch_size=13):
-    # Evaluate `count` from the current inputs and state.
-    # Evaluate `loss_sum` from the current inputs and state.
-    # Evaluate `correct` from the current inputs and state.
     # Allocate initialized array `confusion` with the specified shape and dtype.
     count=0
     loss_sum=0.
@@ -306,7 +300,7 @@ def evaluate(state,data,batch_size=13):
     windows=fixed_windows(data)
     # Loop over `start` in `range(0, len(windows), batch_size)`:
     for start in range(0,len(windows),batch_size):
-        # Evaluate `y` from the current inputs and state.
+        # Compute `y` as `data["labels"][start:start+batch_size]`.
         y=data["labels"][start:start+batch_size]
         # Convert `logits` to a host NumPy array for inspection or verification.
         logits=np.asarray(scores(state,windows[start:start+batch_size]))
@@ -355,7 +349,7 @@ def calibrate(state,training_data):
 
 # Function `policy_scores(state, waveforms, calibration, policy)` implementing this stage's computation:
 def policy_scores(state,waveforms,calibration,policy="fp32"):
-    # Evaluate `x` from the current inputs and state.
+    # Evaluate the compound expression for `x`.
     x=(features_core(waveforms)-state["mean"])/state["std"]
     # Branch on condition `policy == 'fp32'`:
     if policy=="fp32":return x@state["W"]+state["b"]
@@ -367,7 +361,7 @@ def policy_scores(state,waveforms,calibration,policy="fp32"):
     if policy=="w8a32":return x@(q.astype(jnp.float32)*s)+state["b"]
     # Guard input contract (`policy != 'w8a8'`) and fail fast if violated.
     if policy!="w8a8":raise ValueError("unknown precision policy")
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` as `calibration["activation_scale"]`.
     a=calibration["activation_scale"]
     # Combine or mask array elements to form `qa`.
     qa=jnp.clip(jnp.rint(x/a),-127,127).astype(jnp.int8)
@@ -379,14 +373,13 @@ def policy_scores(state,waveforms,calibration,policy="fp32"):
 
 # Function `export_release(path, state, calibration)` implementing this stage's computation:
 def export_release(path,state,calibration):
-    # Read or serialize artifact data on disk (`path`).
-    # Execute the next step of the computation.
+    # Compute `path` as `Path(path)`.
     path=Path(path)
     path.mkdir(parents=True,exist_ok=True)
     # Guard input contract (`calibration['calibration_sha256'] != state['dataset_sha256']`) and fail fast if violated.
     if calibration["calibration_sha256"]!=state["dataset_sha256"]:
         raise ValueError("calibration provenance mismatch")
-    # Evaluate `artifacts` from the current inputs and state.
+    # Construct dictionary `artifacts` with the structured fields for this stage.
     artifacts={}
     # Loop over `policy` in `('fp32', 'w8a32', 'w8a8')`:
     for policy in ("fp32","w8a32","w8a8"):
@@ -396,8 +389,7 @@ def export_release(path,state,calibration):
             function=jax.jit(lambda x,policy=policy:policy_scores(state,x,calibration,policy))
             # Cast or evaluate `data` in explicit floating-point precision.
             data=export.export(function)(jax.ShapeDtypeStruct((batch,1024),jnp.float32)).serialize()
-            # Evaluate `name` from the current inputs and state.
-            # Execute the next step of the computation.
+            # Compute `name` as `f"{policy}-b{batch}.jaxexport"`.
             name=f"{policy}-b{batch}.jaxexport"
             (path/name).write_bytes(data)
             # Compute deterministic cryptographic digest `artifacts[f'{policy}:{batch}']` for provenance verification.
@@ -414,7 +406,7 @@ def export_release(path,state,calibration):
                           "w8a32":"FP32 STFT/features; INT8 weight storage dequantized to FP32; FP32 accumulation/bias/output",
                           "w8a8":"FP32 STFT/features; INT8 normalized features and weights; INT32 dot accumulation; FP32 bias/output"},
               "native_integer_acceleration_claimed":False,"device":"CPU","artifacts":artifacts}
-    # Read or serialize artifact data on disk (``).
+    # Compute `(path/"release.json").write_text(json.dumps(manifest,indent` as `2))`.
     (path/"release.json").write_text(json.dumps(manifest,indent=2))
     # Return `manifest` to the caller.
     return manifest
@@ -422,18 +414,17 @@ def export_release(path,state,calibration):
 
 # Function `load_release(path)` implementing this stage's computation:
 def load_release(path):
-    # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     path=Path(path)
     manifest=json.loads((path/"release.json").read_text())
     # Guard input contract (`manifest['preprocessing'] != PREPROCESS or manifest['jax'] != jax.__version__`) and fail fast if violated.
     if manifest["preprocessing"]!=PREPROCESS or manifest["jax"]!=jax.__version__:
         raise ValueError("release preprocessing/runtime mismatch")
-    # Evaluate `artifacts` from the current inputs and state.
+    # Construct dictionary `artifacts` with the structured fields for this stage.
     artifacts={}
     # Loop over `(key, item)` in `manifest['artifacts'].items()`:
     for key,item in manifest["artifacts"].items():
-        # Evaluate `data` from the current inputs and state.
+        # Evaluate the compound expression for `data`.
         data=(path/item["file"]).read_bytes()
         # Guard input contract (`hashlib.sha256(data).hexdigest() != item['sha256']`) and fail fast if violated.
         if hashlib.sha256(data).hexdigest()!=item["sha256"]:raise ValueError("artifact checksum mismatch")
@@ -460,17 +451,17 @@ def infer_release(manifest,artifacts,waveforms,sample_rate=8000,channels=1,
 # Function `benchmark(manifest, artifacts, waveforms, policy, ...)` implementing this stage's computation:
 def benchmark(manifest,artifacts,waveforms,policy="fp32",repeats=30):
     # Record execution timing or profiler trace in `began`.
-    # Execute the next step of the computation.
+    # Compute `began` as `time.perf_counter()`.
     began=time.perf_counter()
     infer_release(manifest,artifacts,waveforms,policy=policy)
     # Record execution timing or profiler trace in `first_ms`.
     first_ms=(time.perf_counter()-began)*1000
-    # Evaluate `samples` from the current inputs and state.
+    # Initialize list `samples` for the stage values.
     samples=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `began`.
-        # Execute the next step of the computation.
+        # Compute `began` as `time.perf_counter()`.
         began=time.perf_counter()
         infer_release(manifest,artifacts,waveforms,policy=policy)
         # Record execution timing or profiler trace in ``.
@@ -486,11 +477,9 @@ def benchmark(manifest,artifacts,waveforms,policy="fp32",repeats=30):
 # Function `load_wav_manifest(manifest_path, split)` implementing this stage's computation:
 def load_wav_manifest(manifest_path,split):
     """Ingest user-provided licensed PCM16/mono/8kHz files; no implicit resampling."""
-    # Read or serialize artifact data on disk (`manifest_path`).
     # Read or serialize artifact data on disk (`rows`).
     manifest_path=Path(manifest_path)
     rows=json.loads(manifest_path.read_text())
-    # Evaluate `groups` from the current inputs and state.
     # Run `set` to compute `ids`.
     groups={}
     ids=set()
@@ -508,9 +497,7 @@ def load_wav_manifest(manifest_path,split):
         groups.setdefault(row["group"],set()).add(row["split"])
     # Guard input contract (`any((len(splits) > 1 for splits in groups.values()))`) and fail fast if violated.
     if any(len(splits)>1 for splits in groups.values()):raise ValueError("recording group leaks across splits")
-    # Evaluate `output` from the current inputs and state.
-    # Evaluate `labels` from the current inputs and state.
-    # Evaluate `selected` from the current inputs and state.
+    # Initialize list `output` for the stage values.
     output=[]
     labels=[]
     selected=[]
@@ -518,7 +505,7 @@ def load_wav_manifest(manifest_path,split):
     for row in rows:
         # Branch on condition `row['split'] != split`:
         if row["split"]!=split:continue
-        # Evaluate `path` from the current inputs and state.
+        # Compute `path` as `manifest_path.parent/row["file"]`.
         path=manifest_path.parent/row["file"]
         # Guard input contract (`hashlib.sha256(path.read_bytes()).hexdigest() != row['sha256']`) and fail fast if violated.
         if hashlib.sha256(path.read_bytes()).hexdigest()!=row["sha256"]:raise ValueError("WAV checksum mismatch")

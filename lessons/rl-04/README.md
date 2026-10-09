@@ -320,7 +320,7 @@ exact_means = np.array([r['exact'] for r in reports])
 baseline = evaluate(jnp.zeros(3),evaluation_seeds)
 # Assert invariant `np.all(trained_means > baseline['mean'] + .4)` holds
 assert np.all(trained_means > baseline['mean'] + .4)
-# Check numerical equivalence within tolerance: `np.all(np.abs(trained_means-exact_means) < .03)`
+# Assert that `np.all(np.abs(trained_means-exact_means) < .03)`.
 assert np.all(np.abs(trained_means-exact_means) < .03)
 # Print the observed values to compare against the expected result.
 print('training seeds:', training_seeds)
@@ -576,7 +576,7 @@ exact_means = np.array([r['exact'] for r in reports])
 baseline = evaluate(jnp.zeros(3),evaluation_seeds)
 # Assert invariant `np.all(trained_means > baseline['mean'] + .4)` holds
 assert np.all(trained_means > baseline['mean'] + .4)
-# Check numerical equivalence within tolerance: `np.all(np.abs(trained_means-exact_means) < .03)`
+# Assert that `np.all(np.abs(trained_means-exact_means) < .03)`.
 assert np.all(np.abs(trained_means-exact_means) < .03)
 # Print the observed values to compare against the expected result.
 print('training seeds:', training_seeds)
@@ -647,13 +647,13 @@ PASS: rl-04
 left = evaluate(jnp.full(3,-100.),evaluation_seeds)
 # Compute `right` from `evaluate(jnp.full(3,100.),evaluation_seeds)`
 right = evaluate(jnp.full(3,100.),evaluation_seeds)
-# Check numerical equivalence within tolerance: `abs(left['mean']+.08) < 1e-6`
+# Assert that `abs(left['mean']+.08) < 1e-6`.
 assert abs(left['mean']+.08) < 1e-6
-# Check numerical equivalence within tolerance: `abs(right['mean']-.985) < .002`
+# Assert that `abs(right['mean']-.985) < .002`.
 assert abs(right['mean']-.985) < .002
 # Assert invariant `left['mean'] < baseline['mean'] < right['mean']` holds
 assert left['mean'] < baseline['mean'] < right['mean']
-# Check numerical equivalence within tolerance: `abs(baseline['mean']-.466875) < .04`
+# Assert that `abs(baseline['mean']-.466875) < .04`.
 assert abs(baseline['mean']-.466875) < .04
 # Print the observed values to compare against the expected result.
 print('left / random / right:', left['mean'], baseline['mean'], right['mean'])
@@ -813,8 +813,8 @@ Use sample standard deviation with ddof=1; a standard error divides by the squar
 1. Compute `values` from `np.array([.8,.9,1.])`
 2. Aggregate array values to compute `sd`.
 3. Compute `naive_se` from `sd/np.sqrt(3)`
-4. Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
-5. Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
+4. Assert that `abs(sd-.1) < 1e-12`.
+5. Assert that `abs(naive_se-.0577350269) < 1e-9`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -826,9 +826,9 @@ values = np.array(...)  # TODO: compute values
 sd = values.std(...)  # TODO: compute sd
 # Compute `naive_se` from `sd/np.sqrt(3)`
 naive_se = ...  # TODO: compute naive_se
-# Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
+# Assert that `abs(sd-.1) < 1e-12`.
 assert abs(sd-.1)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
+# Assert that `abs(naive_se-.0577350269) < 1e-9`.
 assert abs(naive_se-.0577350269)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('sample sd / independence-assuming SE:',sd,naive_se)
@@ -844,9 +844,9 @@ values = np.array([.8,.9,1.])
 sd = values.std(ddof=1)
 # Compute `naive_se` from `sd/np.sqrt(3)`
 naive_se = sd/np.sqrt(3)
-# Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
+# Assert that `abs(sd-.1) < 1e-12`.
 assert abs(sd-.1) < 1e-12
-# Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
+# Assert that `abs(naive_se-.0577350269) < 1e-9`.
 assert abs(naive_se-.0577350269) < 1e-9
 # Print the observed values to compare against the expected result.
 print('sample sd / independence-assuming SE:',sd,naive_se)

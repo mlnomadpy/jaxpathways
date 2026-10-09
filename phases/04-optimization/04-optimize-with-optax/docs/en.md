@@ -133,9 +133,9 @@ print("Parameters:", params)
 print("Loss:", float(loss(params)))
 # Assert invariant `loss(params) < 1e-8` holds
 assert loss(params) < 1e-8
-# Check numerical equivalence within tolerance: `jnp.allclose(params["weight"]`
+# Assert that `jnp.allclose(params["weight"], 2., atol=1e-4)`.
 assert jnp.allclose(params["weight"], 2., atol=1e-4)
-# Check numerical equivalence within tolerance: `jnp.allclose(params["bias"]`
+# Assert that `jnp.allclose(params["bias"], 1., atol=1e-4)`.
 assert jnp.allclose(params["bias"], 1., atol=1e-4)
 ```
 
@@ -180,9 +180,9 @@ print("Parameters:", params)
 print("Loss:", float(loss(params)))
 # Assert invariant `loss(params) < 1e-8` holds
 assert loss(params) < 1e-8
-# Check numerical equivalence within tolerance: `jnp.allclose(params["weight"]`
+# Assert that `jnp.allclose(params["weight"], 2., atol=1e-4)`.
 assert jnp.allclose(params["weight"], 2., atol=1e-4)
-# Check numerical equivalence within tolerance: `jnp.allclose(params["bias"]`
+# Assert that `jnp.allclose(params["bias"], 1., atol=1e-4)`.
 assert jnp.allclose(params["bias"], 1., atol=1e-4)
 ```
 
@@ -242,9 +242,9 @@ g0 = jax.grad(loss)(p0)
 u0, s0 = optimizer.update(g0, optimizer.init(p0), p0)
 # Configure or step the Optax optimizer state (`p1`).
 p1 = optax.apply_updates(p0, u0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(p1["weight"], 22/75)`.
 assert jnp.allclose(p1["weight"], 22/75)
-# Check numerical equivalence within tolerance: `jnp.allclose(p1["bias"]`
+# Assert that `jnp.allclose(p1["bias"], 0.4)`.
 assert jnp.allclose(p1["bias"], 0.4)
 # Print the observed values to compare against the expected result.
 print("First parameters:", p1)
@@ -270,11 +270,11 @@ u1, m1 = momentum.update(jnp.array(2.), m0)
 u2, m2 = momentum.update(jnp.array(1.), m1)
 # Construct `reset_u2, _` via `momentum.update(jnp.array(1.), m0)`
 reset_u2, _ = momentum.update(jnp.array(1.), m0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(u1, -0.2)`.
 assert jnp.allclose(u1, -0.2)
-# Check numerical equivalence within tolerance: `jnp.allclose(u2, -0.28)`
+# Assert that `jnp.allclose(u2, -0.28)`.
 assert jnp.allclose(u2, -0.28)
-# Check numerical equivalence within tolerance: `jnp.allclose(reset_u2, -0.1)`
+# Assert that `jnp.allclose(reset_u2, -0.1)`.
 assert jnp.allclose(reset_u2, -0.1)
 ```
 
@@ -300,9 +300,9 @@ coast_first, momentum_state = momentum_tx.update(jnp.array(2.),momentum_state,po
 position = optax.apply_updates(position,coast_first)
 # Construct `coast_second, momentum_state` via `momentum_tx.update(jnp.array(0.),momentum_state,posi...`
 coast_second, momentum_state = momentum_tx.update(jnp.array(0.),momentum_state,position)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(coast_first,-0.2)`.
 assert jnp.allclose(coast_first,-0.2)
-# Check numerical equivalence within tolerance: `jnp.allclose(coast_second,-0.18)`
+# Assert that `jnp.allclose(coast_second,-0.18)`.
 assert jnp.allclose(coast_second,-0.18)
 ```
 
@@ -343,7 +343,7 @@ updates, _ = optimizer.update(...)  # TODO: compute updates, _
 actual = optax.apply_updates(...)  # TODO: compute actual
 # Transform every leaf of the parameter PyTree (`expected`).
 expected = jax.tree.map(...)  # TODO: compute expected
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `all(jnp.allclose(a, b) for a, b in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)))`.
 assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
 ```
 
@@ -361,7 +361,7 @@ updates, _ = optimizer.update(grads, optimizer.init(start), start)
 actual = optax.apply_updates(start, updates)
 # Transform every leaf of the parameter PyTree (`expected`).
 expected = jax.tree.map(lambda p, g: p - 0.2 * g, start, grads)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `all(jnp.allclose(a, b) for a, b in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)))`.
 assert all(jnp.allclose(a, b) for a, b in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)))
 ```
 
@@ -387,8 +387,8 @@ Optimizer transformations return new state; reuse the saved value for the replay
 
 **Step-by-step implementation plan:**
 1. Construct `replay_u, replay_state` via `momentum.update(jnp.array(1.), m1)`
-2. Verify that the numerical values match the expected reference within tolerance.
-3. Check numerical equivalence within tolerance: `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state...`
+2. Assert that `jnp.allclose(replay_u, u2)`.
+3. Assert that `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -396,9 +396,9 @@ Optimizer transformations return new state; reuse the saved value for the replay
 # Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.
 # Construct `replay_u, replay_state` via `momentum.update(jnp.array(1.), m1)`
 replay_u, replay_state = momentum.update(...)  # TODO: compute replay_u, replay_state
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(replay_u, u2)`.
 assert jnp.allclose(replay_u, u2)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state...`
+# Assert that `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))`.
 assert all(jnp.allclose(a,b) for a,b  # TODO: complete assertion check
 ```
 
@@ -408,9 +408,9 @@ assert all(jnp.allclose(a,b) for a,b  # TODO: complete assertion check
 # Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.
 # Construct `replay_u, replay_state` via `momentum.update(jnp.array(1.), m1)`
 replay_u, replay_state = momentum.update(jnp.array(1.), m1)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(replay_u, u2)`.
 assert jnp.allclose(replay_u, u2)
-# Check numerical equivalence within tolerance: `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state...`
+# Assert that `all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))`.
 assert all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))
 ```
 

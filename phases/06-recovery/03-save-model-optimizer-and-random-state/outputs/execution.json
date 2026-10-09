@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "20312ee7f5b2a93fba25b7e80d0e7af0eab3fc6247055aedb930acd0deb28752",
+  "contentHash": "fcb2a6b9f664776312c5aa6d30b3cc18fc12df6d5b561453c9f856864caf468f",
   "executedAt": "2026-10-08T14:03:07.300457+00:00",
   "environment": {
     "backend": "cpu",
@@ -59,11 +59,11 @@
       ]
     },
     {
-      "sourceHash": "14a9c3a115f874d7ab76b133dc70ef9d7bdbbf2f5802684620ae4dc52ae10084",
+      "sourceHash": "894004e34b29aefbcaacddcee353786d27b9945a3ab852135824beab3eddd247",
       "outputs": []
     },
     {
-      "sourceHash": "dd7d281f0cee241ef63e6aa80b8c25eb126005a0cd5a9bfcbbedb5b977d29d98",
+      "sourceHash": "002848f265581ac916dfde422202169dcc670d19edd5f3876fb036f12d91763e",
       "outputs": []
     },
     {
@@ -75,11 +75,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "f1e2b2cc21fd19ef45f86d55f14c01f463b2af1327a0d3a040ee43a3b622fe59",
+      "sourceHash": "1b9de5ce04fd139931bf3d46019500d488a2210bcdf55bf3b7fdf1a17e216fb6",
       "outputs": []
     },
     {
-      "sourceHash": "e4122cdd7cb596b7eb42f32599f7fbace1c73d9f3325f748bcbb795efea5587a",
+      "sourceHash": "257162ebb4e4a1021935d40e0c8144cb7ac8ce9691f72e5f335f96e157359094",
       "outputs": []
     },
     {

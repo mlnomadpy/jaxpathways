@@ -76,11 +76,11 @@ for _ in range(100):
 
 # Assert invariant `history[-1] < history[0] * 0.15` holds
 assert history[-1] < history[0] * 0.15
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(3), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(3), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(3), atol=1e-6)
 # Changing the clean target after constructing corrupted input cannot change the forward pass.
 changed_targets = tokens.at[:, 1].set((tokens[:, 1] + 1) % 3)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(`.
 assert not np.isclose(
     float(masked_ce(mlm_logits(p, corrupted), changed_targets, selected)),
     history[-1],
@@ -169,11 +169,11 @@ for _ in range(100):
 
 # Assert invariant `history[-1] < history[0] * 0.15` holds
 assert history[-1] < history[0] * 0.15
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(3), atol=1e-6)`
+# Compute `np.testing.assert_allclose(history[0], np.log(3), atol` as `1e-6)`.
 np.testing.assert_allclose(history[0], np.log(3), atol=1e-6)
 # Changing the clean target after constructing corrupted input cannot change the forward pass.
 changed_targets = tokens.at[:, 1].set((tokens[:, 1] + 1) % 3)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(`.
 assert not np.isclose(
     float(masked_ce(mlm_logits(p, corrupted), changed_targets, selected)),
     history[-1],
@@ -248,13 +248,13 @@ host_losses = -np.log(
 expected = host_losses[np.asarray(audit_mask)].mean()
 # Evaluate `masked_ce(audit_logits, audit_targets, audit_mask)` and convert the result into Python scalar/collection `observed`.
 observed = float(masked_ce(audit_logits, audit_targets, audit_mask))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(observed, expected, atol=1e-6)`
+# Compute `np.testing.assert_allclose(observed, expected, atol` as `1e-6)`.
 np.testing.assert_allclose(observed, expected, atol=1e-6)
 # Aggregate array values to compute `sequence_mean`.
 sequence_mean = np.mean(
     [host_losses[i][np.asarray(audit_mask[i])].mean() for i in range(2)]
 )
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(observed, sequence_mean)`.
 assert not np.isclose(observed, sequence_mean)
 # Print diagnostic summary of the computed outputs.
 print('Token-weighted / sequence-weighted:', observed, sequence_mean)

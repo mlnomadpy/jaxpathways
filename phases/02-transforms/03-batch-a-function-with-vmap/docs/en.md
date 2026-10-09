@@ -35,7 +35,7 @@ $$
 
 ![Mapped rows and shared weights](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Each row enters the same single-example rule with one shared weight vector. The scalar results are stacked in row order. This is a mathematical mapping, not a hardware-thread allocation. Reordering observations should reorder outputs identically.
 
@@ -124,7 +124,7 @@ batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
 # Vectorize across the batch dimension with `jax.vmap` (`batched`).
 batched = jax.vmap(predict, in_axes=(None, 0))
 # Print the observed values to compare against the expected result.
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))`.
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 ```
 
@@ -149,7 +149,7 @@ batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
 batched = jax.vmap(predict, in_axes=(None, 0))
 # Print the observed values to compare against the expected result.
 print(batched(weight, batch))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))`.
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 ```
 
@@ -205,9 +205,9 @@ vector_predictions = batched(weight, batch)
 matrix_predictions = batch @ weight
 # Check tensor shape invariant: `vector_predictions.shape == (3,)`
 assert vector_predictions.shape == (3,)
-# Check numerical equivalence within tolerance: `jnp.allclose(vector_predictions, loop_predictions)`
+# Assert that `jnp.allclose(vector_predictions, loop_predictions)`.
 assert jnp.allclose(vector_predictions, loop_predictions)
-# Check numerical equivalence within tolerance: `jnp.allclose(vector_predictions, matrix_predictions)`
+# Assert that `jnp.allclose(vector_predictions, matrix_predictions)`.
 assert jnp.allclose(vector_predictions, matrix_predictions)
 # Print the observed values to compare against the expected result.
 print("loop / vmap / matmul:", loop_predictions, vector_predictions, matrix_predictions)
@@ -226,7 +226,7 @@ The loop makes example selection explicit; the matrix product checks an independ
 column_batch = batch.T
 # Vectorize across the batch dimension with `jax.vmap` (`column_predict`).
 column_predict = jax.vmap(predict, in_axes=(None, 1))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(column_predict(weight, column_batch), vector_predictions)`.
 assert jnp.allclose(column_predict(weight, column_batch), vector_predictions)
 # Function `feature_pair(row)` implementing this stage's computation:
 def feature_pair(row):
@@ -240,7 +240,7 @@ features_columns = jax.vmap(feature_pair, out_axes=1)(batch)
 assert features_rows.shape == (3, 2)
 # Check tensor shape invariant: `features_columns.shape == (2, 3)`
 assert features_columns.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(features_rows.T, features_columns)`
+# Assert that `jnp.allclose(features_rows.T, features_columns)`.
 assert jnp.allclose(features_rows.T, features_columns)
 ```
 
@@ -262,7 +262,7 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.
 2. Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
-3. Check numerical equivalence within tolerance: `jnp.allclose(per_example_gradient, batch)`
+3. Assert that `jnp.allclose(per_example_gradient, batch)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -272,7 +272,7 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 per_example_gradient = jax.vmap(...)  # TODO: compute per_example_gradient
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(per_example_gradient, batch)`
+# Assert that `jnp.allclose(per_example_gradient, batch)`.
 assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion check
 ```
 
@@ -284,7 +284,7 @@ assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion che
 per_example_gradient = jax.vmap(jax.grad(predict), in_axes=(None, 0))(weight, batch)
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape == (3, 2)
-# Check numerical equivalence within tolerance: `jnp.allclose(per_example_gradient, batch)`
+# Assert that `jnp.allclose(per_example_gradient, batch)`.
 assert jnp.allclose(per_example_gradient, batch)
 ```
 
@@ -333,9 +333,9 @@ individual_grads = jax.vmap(...)  # TODO: compute individual_grads
 manual_grads = ...  # TODO: compute manual_grads
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 assert individual_grads.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(individual_grads, manual_grads)`
+# Assert that `jnp.allclose(individual_grads, manual_grads)`.
 assert jnp.allclose(individual_grads, manual_grads)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`
+# Assert that `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`.
 assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))  # TODO: complete assertion check
 ```
 
@@ -355,9 +355,9 @@ individual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight,
 manual_grads = 2. * (batch @ weight - targets)[:, None] * batch
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 assert individual_grads.shape == (3, 2)
-# Check numerical equivalence within tolerance: `jnp.allclose(individual_grads, manual_grads)`
+# Assert that `jnp.allclose(individual_grads, manual_grads)`.
 assert jnp.allclose(individual_grads, manual_grads)
-# Check numerical equivalence within tolerance: `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`
+# Assert that `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`.
 assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))
 ```
 
@@ -407,7 +407,7 @@ for labels in (targets, targets + 0.5):
     aggregate = jax.grad(...)  # TODO: compute aggregate
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape  # TODO: complete assertion check
-    # Check numerical equivalence within tolerance: `jnp.allclose(aggregate, jnp.mean(each, axis=0))`
+    # Assert that `jnp.allclose(aggregate, jnp.mean(each, axis=0))`.
     assert jnp.allclose(aggregate, jnp.mean(each, axis=0))  # TODO: complete assertion check
 ```
 
@@ -426,7 +426,7 @@ for labels in (targets, targets + 0.5):
     aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape == weight.shape
-    # Check numerical equivalence within tolerance: `jnp.allclose(aggregate, jnp.mean(each, axis=0))`
+    # Assert that `jnp.allclose(aggregate, jnp.mean(each, axis=0))`.
     assert jnp.allclose(aggregate, jnp.mean(each, axis=0))
 ```
 

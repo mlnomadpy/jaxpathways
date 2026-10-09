@@ -110,7 +110,7 @@ scores=model(batch,record=True)
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)`
+# Compute `np.testing.assert_allclose(scores,expected,rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)
 # Run `nnx.state` to compute `param_state`.
 param_state=nnx.state(model,nnx.Param)
@@ -120,7 +120,7 @@ other_state=nnx.state(model,nnx.Not(nnx.Param))
 assert sum(a.size for a in jax.tree.leaves(param_state))==13
 # Assert invariant `sum(a.size for a in jax.tree.leaves(other_state))==1` holds
 assert sum(a.size for a in jax.tree.leaves(other_state))==1
-# Assert invariant `int(model.calls[...])==1` holds
+# Assert that `int(model.calls[...])==1`.
 assert int(model.calls[...])==1
 ```
 
@@ -135,11 +135,11 @@ Append the clone test. Predict which counter changes when the clone executes.
 graphdef,state=nnx.split(model)
 # Transform every leaf of the parameter PyTree (`clone`).
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)`
+# Compute `np.testing.assert_allclose(clone(batch),model(batch),rtol` as `1e-6)`.
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
 # Run `clone` to perform the next check or state transition.
 clone(batch,record=True)
-# Assert invariant `int(clone.calls[...])==2 and int(model.calls[...])==1` holds
+# Assert that `int(clone.calls[...])==2 and int(model.calls[...])==1`.
 assert int(clone.calls[...])==2 and int(model.calls[...])==1
 # Differentiate the objective to obtain `grads` via automatic differentiation.
 grads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)
@@ -191,7 +191,7 @@ scores=model(batch,record=True)
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)`
+# Compute `np.testing.assert_allclose(scores,expected,rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)
 # Run `nnx.state` to compute `param_state`.
 param_state=nnx.state(model,nnx.Param)
@@ -201,18 +201,18 @@ other_state=nnx.state(model,nnx.Not(nnx.Param))
 assert sum(a.size for a in jax.tree.leaves(param_state))==13
 # Assert invariant `sum(a.size for a in jax.tree.leaves(other_state))==1` holds
 assert sum(a.size for a in jax.tree.leaves(other_state))==1
-# Assert invariant `int(model.calls[...])==1` holds
+# Assert that `int(model.calls[...])==1`.
 assert int(model.calls[...])==1
 
 # Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
 # Transform every leaf of the parameter PyTree (`clone`).
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)`
+# Compute `np.testing.assert_allclose(clone(batch),model(batch),rtol` as `1e-6)`.
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
 # Run `clone` to perform the next check or state transition.
 clone(batch,record=True)
-# Assert invariant `int(clone.calls[...])==2 and int(model.calls[...])==1` holds
+# Assert that `int(clone.calls[...])==2 and int(model.calls[...])==1`.
 assert int(clone.calls[...])==2 and int(model.calls[...])==1
 # Differentiate the objective to obtain `grads` via automatic differentiation.
 grads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)
@@ -271,7 +271,7 @@ before=np.asarray(model(batch))
 saved=model.out.bias[...]
 # Compute `model.out.bias[...]` from `saved+.25`
 model.out.bias[...] = saved+.25
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(model(batch),before+.25,atol=1e-6)`
+# Compute `np.testing.assert_allclose(model(batch),before+.25,atol` as `1e-6)`.
 np.testing.assert_allclose(model(batch),before+.25,atol=1e-6)
 # Compute `model.out.bias[...]` from `saved`
 model.out.bias[...] = saved
@@ -294,7 +294,7 @@ for a,b in zip(jax.tree.leaves(nnx.state(replay,nnx.Param)),jax.tree.leaves(para
     np.testing.assert_array_equal(a,b)
 # Run `TinyMLP` to compute `different`.
 different=TinyMLP(1)
-# Assert invariant `not np.array_equal(np.asarray(different.hidden.kernel[...]),np.as...` holds
+# Assert that `not np.array_equal(np.asarray(different.hidden.kernel[...]),np.asarray(model.hidden.kernel[.`.
 assert not np.array_equal(np.asarray(different.hidden.kernel[...]),np.asarray(model.hidden.kernel[...]))
 ```
 
@@ -370,7 +370,7 @@ Snapshot the original parameters before editing clone.out.bias.
 1. Transform every leaf of the parameter PyTree (`original_leaves`).
 2. Convert `old_clone` to a host NumPy array for inspection or verification.
 3. Compute `clone.out.bias[...]` from `clone.out.bias[...] + 1.`
-4. Check numerical equivalence within tolerance: `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,at...`
+4. Compute `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol` as `1e-5,atol=1e-6)`.
 5. Iterate over `(before, after)` to step through the computation:
 
 **Starter code scaffold (fill in the TODOs):**
@@ -383,7 +383,7 @@ original_leaves = ...  # TODO: compute original_leaves
 old_clone = np.asarray(...)  # TODO: compute old_clone
 # Compute `clone.out.bias[...]` from `clone.out.bias[...] + 1.`
 clone.out.bias[...] = ...  # TODO: compute clone.out.bias[...]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,at...`
+# Compute `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
 # Iterate over `(before, after)` to step through the computation:
 for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
@@ -403,7 +403,7 @@ original_leaves=[np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(model,
 old_clone=np.asarray(clone(batch)).copy()
 # Compute `clone.out.bias[...]` from `clone.out.bias[...] + 1.`
 clone.out.bias[...] = clone.out.bias[...] + 1.
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,at...`
+# Compute `np.testing.assert_allclose(clone(batch),old_clone+1.,rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
 # Iterate over `(before, after)` to step through the computation:
 for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
@@ -439,7 +439,7 @@ Assignment changes which name refers to the same object.
 1. Diagnose a shared module reference (Intermediate): Sharing a graph is useful for tied layers but wrong for an...
 2. Compute `shared` from `model`
 3. Run `shared` to perform the next check or state transition.
-4. Assert invariant `int(model.calls[...])==saved_count+1` holds
+4. Assert that `int(model.calls[...])==saved_count+1`.
 5. Run `nnx.split` to compute `(graph, state)`.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -451,7 +451,7 @@ saved_count = int(...)  # TODO: compute saved_count
 shared = ...  # TODO: compute shared
 # Run `shared` to perform the next check or state transition.
 shared(batch,record = ...  # TODO: compute shared(batch,record
-# Assert invariant `int(model.calls[...])==saved_count+1` holds
+# Assert that `int(model.calls[...])==saved_count+1`.
 assert int(model.calls[...])  # TODO: complete assertion check
 # Run `nnx.split` to compute `(graph, state)`.
 graph,state = nnx.split(...)  # TODO: compute graph,state
@@ -459,9 +459,9 @@ graph,state = nnx.split(...)  # TODO: compute graph,state
 independent = nnx.merge(...)  # TODO: compute independent
 # Run `independent` to perform the next check or state transition.
 independent(batch,record = ...  # TODO: compute independent(batch,record
-# Assert invariant `int(model.calls[...])==saved_count+1` holds
+# Assert that `int(model.calls[...])==saved_count+1`.
 assert int(model.calls[...])  # TODO: complete assertion check
-# Assert invariant `int(independent.calls[...])==saved_count+2` holds
+# Assert that `int(independent.calls[...])==saved_count+2`.
 assert int(independent.calls[...])  # TODO: complete assertion check
 ```
 
@@ -474,7 +474,7 @@ saved_count=int(model.calls[...])
 shared=model
 # Run `shared` to perform the next check or state transition.
 shared(batch,record=True)
-# Assert invariant `int(model.calls[...])==saved_count+1` holds
+# Assert that `int(model.calls[...])==saved_count+1`.
 assert int(model.calls[...])==saved_count+1
 # Run `nnx.split` to compute `(graph, state)`.
 graph,state=nnx.split(model)
@@ -482,9 +482,9 @@ graph,state=nnx.split(model)
 independent=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 # Run `independent` to perform the next check or state transition.
 independent(batch,record=True)
-# Assert invariant `int(model.calls[...])==saved_count+1` holds
+# Assert that `int(model.calls[...])==saved_count+1`.
 assert int(model.calls[...])==saved_count+1
-# Assert invariant `int(independent.calls[...])==saved_count+2` holds
+# Assert that `int(independent.calls[...])==saved_count+2`.
 assert int(independent.calls[...])==saved_count+2
 ```
 

@@ -53,7 +53,7 @@ def normalize_columns(x,valid):
 
 # Function `per_example_loss(w, x, y)` implementing this stage's computation:
 def per_example_loss(w,x,y):
-    # Evaluate `residual` from the current inputs and state.
+    # Compute `residual` as `w[0]*x+w[1]-y`.
     residual=w[0]*x+w[1]-y
     # Return `0.5 * residual ** 2 + 0.1 * jnp.sum(w ** 2)` to the caller.
     return .5*residual**2+.1*jnp.sum(w**2)
@@ -92,11 +92,11 @@ def transition(state,dt=.05):
     key,noise_key=jax.random.split(state['key'])
     # Sample deterministic random values into `noise` using an explicit PRNG key.
     noise=jax.random.normal(noise_key,state['position'].shape)
-    # Evaluate `velocity` from the current inputs and state.
+    # Compute `velocity` as `.9*state['velocity']+.1*noise`.
     velocity=.9*state['velocity']+.1*noise
-    # Evaluate `position` from the current inputs and state.
+    # Compute `position` as `state['position']+dt*velocity`.
     position=state['position']+dt*velocity
-    # Evaluate `new` from the current inputs and state.
+    # Construct dictionary `new` with the structured fields for this stage.
     new={'position':position,'velocity':velocity,'key':key,'step':state['step']+1}
     # Return `(new, position)` to the caller.
     return new,position
@@ -147,7 +147,7 @@ def save_state(path,state):
 # Function `load_state(path)` implementing this stage's computation:
 def load_state(path):
     # Enter managed runtime/context scope for this block:
-    # Evaluate `state` from the current inputs and state.
+    # Execute `with np.load(path,allow_pickle=False) as arrays:state={k:arrays[k] for k in arra`.
     with np.load(path,allow_pickle=False) as arrays:state={k:arrays[k] for k in arrays.files}
     # Validate stored dtypes before JAX can downcast or wrap a malformed counter.
     validate_state(state)

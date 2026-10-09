@@ -35,7 +35,7 @@ $$
 
 ![Checkpointed TPU job launcher lifecycle from warmup to zero-drift resume](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Read top to bottom: the launcher loads either the initial state or `checkpoint-latest.json`, runs one synchronized `@jax.jit` warmup call to compile XLA HLO without mutating state, executes timed steady-state steps while appending to `events.jsonl`, and writes `checkpoint-latest.json` atomically via `.tmp` + `fsync` + `os.replace`.
 
@@ -141,7 +141,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         record = {"event": event, "backend": jax.default_backend(), "devices": jax.device_count(), **fields}
         # Enter managed runtime/context scope for this block:
         with events_path.open("a", encoding="utf-8") as f:
-            # Read or serialize artifact data on disk (``).
+            # Compute `f.write(json.dumps(record, sort_keys` as `True) + "\n")`.
             f.write(json.dumps(record, sort_keys=True) + "\n")
         # Return `record` to the caller.
         return record
@@ -274,7 +274,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
 
 # Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Check numerical equivalence within tolerance: `np.allclose(resumed_losses`
+# Assert that `np.allclose(resumed_losses, control["step_losses"])`.
 assert np.allclose(resumed_losses, control["step_losses"])
 # Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
@@ -346,7 +346,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         record = {"event": event, "backend": jax.default_backend(), "devices": jax.device_count(), **fields}
         # Enter managed runtime/context scope for this block:
         with events_path.open("a", encoding="utf-8") as f:
-            # Read or serialize artifact data on disk (``).
+            # Compute `f.write(json.dumps(record, sort_keys` as `True) + "\n")`.
             f.write(json.dumps(record, sort_keys=True) + "\n")
         # Return `record` to the caller.
         return record
@@ -472,7 +472,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
 
 # Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Check numerical equivalence within tolerance: `np.allclose(resumed_losses`
+# Assert that `np.allclose(resumed_losses, control["step_losses"])`.
 assert np.allclose(resumed_losses, control["step_losses"])
 # Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
@@ -500,7 +500,7 @@ Because the checkpoint at step 3 saved `(w, b, m_w, m_b, key)` atomically and th
 
 ```python
 # Compute figure data for: Interrupted-and-resumed trajectory vs uninterrupted 6-step control run
-# Compute `visual_data` from `{`
+# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'line',
     'x': [1, 2, 3, 4, 5, 6],
@@ -567,7 +567,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-bad-resume-") as tmp:
     ckpt["m_w"] = [[0.0]]
     # Compute `ckpt["m_b"]` from `[0.0]`
     ckpt["m_b"] = [0.0]
-    # Read or serialize artifact data on disk (``).
+    # Compute `(bad_dir / "checkpoint-latest.json").write_text(json.dumps(ckpt), encoding` as `"utf-8")`.
     (bad_dir / "checkpoint-latest.json").write_text(json.dumps(ckpt), encoding="utf-8")
     # Run `run_tpu_ready_job` to compute `bad_part2`.
     bad_part2 = run_tpu_ready_job(bad_dir, steps=6, save_every=3, resume=True)
@@ -615,7 +615,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
     ctrl8 = run_tpu_ready_job(...)  # TODO: compute ctrl8
 # Print the observed values to compare against the expected result.
 print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-# Assert invariant `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"]...` holds
+# Assert that `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8`.
 assert r2["state_hash"]  # TODO: complete assertion check
 ```
 
@@ -635,7 +635,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
     ctrl8 = run_tpu_ready_job(ex_root / "control", steps=8, save_every=2, resume=False)
 # Print the observed values to compare against the expected result.
 print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-# Assert invariant `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"]...` holds
+# Assert that `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8`.
 assert r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8
 ```
 
@@ -683,7 +683,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
     event_names = ...  # TODO: compute event_names
 # Print the observed values to compare against the expected result.
 print("Recorded event sequence:", event_names)
-# Assert invariant `"started" in event_names and "restored" in event_names and event_...` holds
+# Assert that `"started" in event_names and "restored" in event_names and event_names[-1] == "completed"`.
 assert "started"  # TODO: complete assertion check
 ```
 
@@ -703,7 +703,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
     event_names = [json.loads(line)["event"] for line in (ev_dir / "events.jsonl").read_text().splitlines()]
 # Print the observed values to compare against the expected result.
 print("Recorded event sequence:", event_names)
-# Assert invariant `"started" in event_names and "restored" in event_names and event_...` holds
+# Assert that `"started" in event_names and "restored" in event_names and event_names[-1] == "completed"`.
 assert "started" in event_names and "restored" in event_names and event_names[-1] == "completed"
 ```
 

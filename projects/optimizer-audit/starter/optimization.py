@@ -101,7 +101,8 @@ def rates(initial, steps, decay_at=None, factor=0.1):
         raise ValueError('decay_at is a zero-based update index')
     values = np.full(steps,initial,np.float32)
     if decay_at is not None: values[decay_at:] *= np.float32(factor)
-    if not np.isfinite(values).all() or np.any(values<=0): raise ValueError('schedule outside float32 range')
+    if not np.isfinite(values).all() or np.any(values<=0):
+        raise ValueError('schedule outside float32 range')
     return values
 
 
@@ -144,7 +145,8 @@ def run(w, x, y, held_x, held_y, indices, learning_rates, method='gd', penalty=0
         raise ValueError('one positive finite float32 rate per update required')
     if method not in ['gd','momentum','adam'] or not np.isfinite(penalty) or penalty<0:
         raise ValueError('invalid optimizer or penalty')
-    if clip_norm is not None and (not np.isfinite(clip_norm) or clip_norm<=0): raise ValueError('positive finite clipping threshold required')
+    if clip_norm is not None and (not np.isfinite(clip_norm) or clip_norm<=0):
+        raise ValueError('positive finite clipping threshold required')
     final, trace=_run(w,x,y,held_x,held_y,ids,lr,np.float32(penalty),jnp.float32(jnp.inf if clip_norm is None else clip_norm),method)
     jax.block_until_ready(final)
     return jax.tree.map(np.asarray, final),jax.tree.map(np.asarray,trace)

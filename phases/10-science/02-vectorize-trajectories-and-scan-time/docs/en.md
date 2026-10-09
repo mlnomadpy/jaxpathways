@@ -31,7 +31,7 @@ The trajectory plot shows outputs of that grid. Preserve the returned time/batch
 
 ![Vectorize across systems; scan through time](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Each row is an independent initial condition. Horizontal arrows advance only that system; there are no cross-row state dependencies. Vectorization groups rows and scan represents recurrence. Boxes show state positions in the computation, not physical coordinates or measured durations.
 
@@ -132,7 +132,7 @@ times = np.arange(steps+1)*dt
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
 # Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=...`
+# Compute `np.testing.assert_allclose(trajectories, oracle, rtol` as `3e-8, atol=1e-10)`.
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
@@ -164,7 +164,7 @@ def scan_batch(rate, values, steps=40, dt=0.05):
 time_major = scan_batch(rate, initials)
 # Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12...`
+# Compute `np.testing.assert_allclose(time_major.T, trajectories, rtol` as `1e-12, atol=1e-12)`.
 np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("scan(vectors) transposed equals vmap(scan)")
@@ -225,7 +225,7 @@ times = np.arange(steps+1)*dt
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
 # Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=...`
+# Compute `np.testing.assert_allclose(trajectories, oracle, rtol` as `3e-8, atol=1e-10)`.
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
@@ -249,7 +249,7 @@ def scan_batch(rate, values, steps=40, dt=0.05):
 time_major = scan_batch(rate, initials)
 # Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12...`
+# Compute `np.testing.assert_allclose(time_major.T, trajectories, rtol` as `1e-12, atol=1e-12)`.
 np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("scan(vectors) transposed equals vmap(scan)")
@@ -312,7 +312,7 @@ z = -rate*dt
 multiplier = 1 + z + z*z/2 + z**3/6 + z**4/24
 # Compute `polynomial` from `np.asarray(initials)[:,None]*multiplier**np.arange(s...`
 polynomial = np.asarray(initials)[:,None]*multiplier**np.arange(steps+1)[None,:]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, polynomial, rtol=1e-12, ...`
+# Compute `np.testing.assert_allclose(trajectories, polynomial, rtol` as `1e-12, atol=1e-12)`.
 np.testing.assert_allclose(trajectories, polynomial, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("RK4 polynomial maximum difference:", np.max(np.abs(np.asarray(trajectories)-polynomial)))
@@ -334,7 +334,7 @@ rates = jnp.array([0.2, 0.7, 1.1])
 paired = jax.vmap(lambda k, u: solve(k,u), in_axes=(0,0))(rates,initials)
 # Convert `paired_reference` to a host NumPy array for inspection or verification.
 paired_reference = np.asarray(initials)[:,None]*np.exp(-np.asarray(rates)[:,None]*times)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol...`
+# Compute `np.testing.assert_allclose(paired,paired_reference,rtol` as `2e-7,atol=1e-10)`.
 np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol=1e-10)
 # Print the observed values to compare against the expected result.
 print("Paired-rate endpoints:", np.asarray(paired)[:,-1])
@@ -378,7 +378,7 @@ np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-
 order = jnp.array(...)  # TODO: compute order
 # Vectorize across the batch dimension with `jax.vmap` (`reordered`).
 reordered = jax.vmap(...)  # TODO: compute reordered
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reordered,changed[order],rtol=1e-12)`
+# Compute `np.testing.assert_allclose(reordered,changed[order],rtol` as `1e-12)`.
 np.testing.assert_allclose(reordered,changed[order],rtol = ...  # TODO: compute np.testing.assert_allclose(reordered,changed[order],rtol
 # Print the observed values to compare against the expected result.
 print("Permutation preserves trajectory identity")
@@ -400,7 +400,7 @@ np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-
 order = jnp.array([3,0,2,1])
 # Vectorize across the batch dimension with `jax.vmap` (`reordered`).
 reordered = jax.vmap(lambda u: solve(0.7,u))(changed_initials[order])
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reordered,changed[order],rtol=1e-12)`
+# Compute `np.testing.assert_allclose(reordered,changed[order],rtol` as `1e-12)`.
 np.testing.assert_allclose(reordered,changed[order],rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Permutation preserves trajectory identity")
@@ -448,7 +448,7 @@ def final_only(rate, initial, steps=40, dt=0.05):
     return jax.lax.scan(advance,initial,None,length = ...  # TODO: compute return jax.lax.scan(advance,initial,None,length
 # Vectorize across the batch dimension with `jax.vmap` (`finals`).
 finals = jax.vmap(...)  # TODO: compute finals
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)`
+# Compute `np.testing.assert_allclose(finals,trajectories[:,-1],rtol` as `1e-12)`.
 np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Only final states returned:", np.asarray(finals))
@@ -468,7 +468,7 @@ def final_only(rate, initial, steps=40, dt=0.05):
     return jax.lax.scan(advance,initial,None,length=steps)[0]
 # Vectorize across the batch dimension with `jax.vmap` (`finals`).
 finals = jax.vmap(lambda u: final_only(0.7,u))(initials)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)`
+# Compute `np.testing.assert_allclose(finals,trajectories[:,-1],rtol` as `1e-12)`.
 np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Only final states returned:", np.asarray(finals))

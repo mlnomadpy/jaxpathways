@@ -460,7 +460,7 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 2. Synchronize host execution until asynchronous device computation completes.
 3. Convert `` to a host NumPy array for inspection or verification.
 4. Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
-5. Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
+5. Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -475,9 +475,9 @@ reversed_y.block_until_ready()
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
 # Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
+# Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
 assert np.isclose(float(reversed_y[0]), 3.625)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[-1]), 0.34375)`
+# Assert that `np.isclose(float(reversed_y[-1]), 0.34375)`.
 assert np.isclose(float(reversed_y[-1]), 0.34375)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')
@@ -496,9 +496,9 @@ reversed_y.block_until_ready()
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
 # Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d in reversed_y.devices()} == {expected}
-# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
+# Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
 assert np.isclose(float(reversed_y[0]), 3.625)
-# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[-1]), 0.34375)`
+# Assert that `np.isclose(float(reversed_y[-1]), 0.34375)`.
 assert np.isclose(float(reversed_y[-1]), 0.34375)
 # Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')

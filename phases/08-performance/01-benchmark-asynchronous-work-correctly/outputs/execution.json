@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-01",
-  "contentHash": "df4c0644dff652e725e6ed61bfbfd229abf7e5ab23c0b65046462c91ba8d0647",
+  "contentHash": "4886ba46a0cd96f88d037b54611aac8312a60f52ed679dedb70aaa1b73da2b53",
   "executedAt": "2026-10-08T14:03:50.509935+00:00",
   "environment": {
     "backend": "cpu",

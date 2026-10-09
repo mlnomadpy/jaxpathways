@@ -35,7 +35,7 @@ def evaluate_precision_policies(seed=0):
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    # Compute `policies` from `[`
+    # Initialize list `policies` for the stage values.
     policies = [
         ("bf16 (fp32 accum)", out_bf16_fp32acc),
         ("bf16 (bf16 accum)", out_bf16_bf16acc),
@@ -47,7 +47,7 @@ def evaluate_precision_policies(seed=0):
     for label, tensor in policies:
         # Run `jnp.abs` to compute `diff`.
         diff = jnp.abs(tensor - ref_fp32)
-        # Reduce across the target axis to summarize ``.
+        # Append the computed value via `results.append({`.
         results.append({
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
@@ -140,7 +140,7 @@ def evaluate_precision_policies(seed=0):
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    # Compute `policies` from `[`
+    # Initialize list `policies` for the stage values.
     policies = [
         ("bf16 (fp32 accum)", out_bf16_fp32acc),
         ("bf16 (bf16 accum)", out_bf16_bf16acc),
@@ -152,7 +152,7 @@ def evaluate_precision_policies(seed=0):
     for label, tensor in policies:
         # Run `jnp.abs` to compute `diff`.
         diff = jnp.abs(tensor - ref_fp32)
-        # Reduce across the target axis to summarize ``.
+        # Append the computed value via `results.append({`.
         results.append({
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
@@ -247,7 +247,7 @@ p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
 # Print the observed values to compare against the expected result.
 print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
-# Assert invariant `p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_co...` holds
+# Assert that `p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1`.
 assert p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1
 
 # Reference practice: Compare per-channel vs per-tensor INT8 quantization error

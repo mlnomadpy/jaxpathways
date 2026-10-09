@@ -51,7 +51,7 @@ def quantize(weights,bits=8):
     # Guard input contract (`weights.ndim != 2 or not np.isfinite(weights).all() or bits not in (4, 8)`) and fail fast if violated.
     if weights.ndim!=2 or not np.isfinite(weights).all() or bits not in (4,8):
         raise ValueError("finite matrix and signed 4/8-bit policy required")
-    # Evaluate `limit` from the current inputs and state.
+    # Compute `limit` as `2**(bits-1)-1`.
     limit=2**(bits-1)-1
     # Reduce along axis=0 to compute `maximum`.
     maximum=np.max(np.abs(weights),axis=0,keepdims=True)
@@ -66,8 +66,7 @@ def quantize(weights,bits=8):
 # Function `prepare(directory, weights, calibration, provenance)` implementing this stage's computation:
 def prepare(directory,weights,calibration,provenance):
     """Write trained weights and six actual serialized inference computations."""
-    # Read or serialize artifact data on disk (`directory`).
-    # Execute the next step of the computation.
+    # Compute `directory` as `Path(directory)`.
     directory=Path(directory)
     directory.mkdir(parents=True,exist_ok=True)
     # Convert `weights` to a host NumPy array for inspection or verification.
@@ -90,7 +89,7 @@ def prepare(directory,weights,calibration,provenance):
     activation_scale=np.float32(max(float(np.max(np.abs(calibration)))/127,1e-8))
     # Run `np.save` to perform the next check or state transition.
     np.save(directory/"weights.npy",weights,allow_pickle=False)
-    # Evaluate `policies` from the current inputs and state.
+    # Construct dictionary `policies` with the structured fields for this stage.
     policies={
         "fp32":dict(weight="float32",activation="float32",accumulator="float32",output="float32"),
         "w8a32":dict(weight="int8",activation="float32",accumulator="float32",output="float32"),
@@ -114,7 +113,7 @@ def prepare(directory,weights,calibration,provenance):
             return (accum.astype(jnp.float32)*(activation_scale*jnp.asarray(s))).reshape(-1)
         # Return `jax.jit(integer)` to the caller.
         return jax.jit(integer)
-    # Evaluate `artifacts` from the current inputs and state.
+    # Construct dictionary `artifacts` with the structured fields for this stage.
     artifacts={}
     # Loop over `policy` in `policies`:
     for policy in policies:
@@ -122,10 +121,10 @@ def prepare(directory,weights,calibration,provenance):
         for batch in (1,8):
             # Cast or evaluate `artifact` in explicit floating-point precision.
             artifact=export.export(make_infer(policy))(jax.ShapeDtypeStruct((batch,len(weights)),jnp.float32))
-            # Evaluate `name` from the current inputs and state.
+            # Compute `name` as `f"{policy}-b{batch}.jaxexport"`.
             name=f"{policy}-b{batch}.jaxexport"
             # Run `artifact.serialize` to compute `data`.
-            # Execute the next step of the computation.
+            # Compute `data` as `artifact.serialize()`.
             data=artifact.serialize()
             (directory/name).write_bytes(data)
             # Compute deterministic cryptographic digest `artifacts[f'{policy}:{batch}']` for provenance verification.
@@ -138,7 +137,7 @@ def prepare(directory,weights,calibration,provenance):
               "activation_scale":float(activation_scale),"weight_scales":s.tolist(),
               "policies":policies,"artifacts":artifacts,"provenance":provenance,
               "boundary":"serialized JAX CPU inference; integer kernel acceleration unclaimed"}
-    # Read or serialize artifact data on disk (``).
+    # Compute `(directory/"manifest.json").write_text(json.dumps(manifest,indent` as `2))`.
     (directory/"manifest.json").write_text(json.dumps(manifest,indent=2))
     # Return `manifest` to the caller.
     return manifest
@@ -153,11 +152,11 @@ def load(directory):
     # Guard input contract (`hashlib.sha256((directory / 'weights.npy').read_bytes()).hexdigest() != manifest['weights_sha256']`) and fail fast if violated.
     if hashlib.sha256((directory/"weights.npy").read_bytes()).hexdigest()!=manifest["weights_sha256"]:
         raise ValueError("checkpoint hash mismatch")
-    # Evaluate `restored` from the current inputs and state.
+    # Construct dictionary `restored` with the structured fields for this stage.
     restored={}
     # Iterate over `(key, item)` to step through the computation:
     for key,item in manifest["artifacts"].items():
-        # Evaluate `data` from the current inputs and state.
+        # Evaluate the compound expression for `data`.
         data=(directory/item["file"]).read_bytes()
         # Guard input contract (`hashlib.sha256(data).hexdigest() != item['sha256']`) and fail fast if violated.
         if hashlib.sha256(data).hexdigest()!=item["sha256"]:raise ValueError("artifact hash mismatch")
@@ -200,17 +199,17 @@ def benchmark(payload,manifest,restored,policy="fp32",repeats=30):
     # Guard input contract (`repeats < 2`) and fail fast if violated.
     if repeats<2:raise ValueError("need multiple observations")
     # Record execution timing or profiler trace in `began`.
-    # Execute the next step of the computation.
+    # Compute `began` as `time.perf_counter()`.
     began=time.perf_counter()
     request(payload,manifest,restored,policy)
     # Record execution timing or profiler trace in `first_ms`.
     first_ms=(time.perf_counter()-began)*1000
-    # Evaluate `values` from the current inputs and state.
+    # Initialize list `values` for the stage values.
     values=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `began`.
-        # Execute the next step of the computation.
+        # Compute `began` as `time.perf_counter()`.
         began=time.perf_counter()
         request(payload,manifest,restored,policy)
         # Record execution timing or profiler trace in ``.
@@ -234,14 +233,13 @@ def simulate(arrival_ms,service_ms):
         raise ValueError("ordered nonnegative finite arrival times required")
     # Guard input contract (`not np.isfinite(service_ms) or service_ms <= 0`) and fail fast if violated.
     if not np.isfinite(service_ms) or service_ms<=0:raise ValueError("positive service milliseconds required")
-    # Evaluate `ready` from the current inputs and state.
-    # Evaluate `finish` from the current inputs and state.
+    # Compute `ready` as `0.`.
     ready=0.
     finish=[]
     # Iterate over `arrival` to step through the computation:
     for arrival in arrivals:
         # Run `max` to compute `ready`.
-        # Execute the next step of the computation.
+        # Compute `ready` as `max(ready,float(arrival))+service_ms`.
         ready=max(ready,float(arrival))+service_ms
         finish.append(ready)
     # Return `np.asarray(finish) - arrivals` to the caller.

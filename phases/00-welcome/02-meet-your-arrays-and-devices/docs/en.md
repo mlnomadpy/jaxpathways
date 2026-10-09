@@ -115,7 +115,7 @@ print("Devices:", x.devices())
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
+# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -142,7 +142,7 @@ print("Devices:", x.devices())
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
+# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -212,7 +212,7 @@ print("Means:",means)
 print("Centered:",centered)
 # Check tensor shape invariant: `means.shape==(1,3)`
 assert means.shape==(1,3)
-# Check numerical equivalence within tolerance: `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`
+# Assert that `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`.
 assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 ```
 
@@ -256,7 +256,7 @@ Compute column sums instead. State the resulting shape before running the code.
 **Step-by-step implementation plan:**
 1. Reduce along axis=0 to compute `column_sums`.
 2. Check tensor shape invariant: `column_sums.shape == (3,)`
-3. Check numerical equivalence within tolerance: `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`
+3. Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -266,7 +266,7 @@ Compute column sums instead. State the resulting shape before running the code.
 column_sums = x.sum(...)  # TODO: compute column_sums
 # Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`
+# Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete assertion check
 ```
 
@@ -278,7 +278,7 @@ assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete asse
 column_sums = x.sum(axis=0)
 # Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape == (3,)
-# Check numerical equivalence within tolerance: `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`
+# Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 ```
 
@@ -306,8 +306,8 @@ Keep observation rows and measurement columns.
 
 **Step-by-step implementation plan:**
 1. Construct and reshape `table` into the target tensor dimensions.
-2. Verify that the numerical values match the expected reference within tolerance.
-3. Check numerical equivalence within tolerance: `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`
+2. Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
+3. Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -315,9 +315,9 @@ Keep observation rows and measurement columns.
 # Add a new observation (Practice): Changing the observation count changes axis 0, while the...
 # Construct and reshape `table` into the target tensor dimensions.
 table = jnp.arange(...)  # TODO: compute table
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`
+# Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
 ```
 
@@ -327,9 +327,9 @@ assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete 
 # Add a new observation (Practice): Changing the observation count changes axis 0, while the...
 # Construct and reshape `table` into the target tensor dimensions.
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`
+# Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
 ```
 

@@ -30,7 +30,7 @@ Compare target and predicted hidden patches at the same spatial coordinates and 
 
 ![Visible patches and hidden targets](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 The sixteen cells preserve the four-by-four image layout. Green patches 0 and 3 provide visible values. Hatched patches 1 and 2 are hidden targets for reconstruction loss. Hatching means missing input, not observed black pixels. This maps the actual mask without inventing a reconstructed image or error measurement.
 
@@ -196,7 +196,7 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(w), expected, rtol=1e-5)`
+# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
 # Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)
@@ -315,7 +315,7 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss(w), expected, rtol=1e-5)`
+# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
 # Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)

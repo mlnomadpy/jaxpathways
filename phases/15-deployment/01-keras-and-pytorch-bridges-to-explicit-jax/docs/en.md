@@ -254,7 +254,7 @@ square = np.array([[1., 2.], [3., 4.]], np.float32)
 z = np.array([[2., -1.]], np.float32)
 # Check tensor shape invariant: `(z @ square).shape == (z @ square.T).shape`
 assert (z @ square).shape == (z @ square.T).shape
-# Check numerical equivalence within tolerance: `not np.allclose(z @ square, z @ square.T)`
+# Assert that `not np.allclose(z @ square, z @ square.T)`.
 assert not np.allclose(z @ square, z @ square.T)
 # Print the observed values to compare against the expected result.
 print("Equal shapes, unequal outputs")
@@ -275,13 +275,13 @@ permutation = [2, 1, 0]
 reordered = x[:, permutation]
 # Convert `wrong_order` to a host NumPy array for inspection or verification.
 wrong_order = np.asarray(predict(params, reordered))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)`
+# Compute `np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol` as `1e-6)`.
 np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(wrong_order, actual)`.
 assert not np.allclose(wrong_order, actual)
 # Compute `repaired_params` from `{'kernel': params['kernel'][permutation, :], 'bias':...`
 repaired_params = {'kernel': params['kernel'][permutation, :], 'bias': params['bias']}
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(repaired_params, reordered), a...`
+# Compute `np.testing.assert_allclose(predict(repaired_params, reordered), actual, atol` as `1e-6)`.
 np.testing.assert_allclose(predict(repaired_params, reordered), actual, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Feature order failed, then matched after aligning kernel rows.')
@@ -304,7 +304,7 @@ Add a batch with four rows and preserve the same parameters. Verify each row ind
 **Step-by-step implementation plan:**
 1. Construct and reshape `changed` into the target tensor dimensions.
 2. Combine or mask array elements to form `expected`.
-3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(params, changed), expected, at...`
+3. Compute `np.testing.assert_allclose(predict(params, changed), expected, atol` as `2e-6)`.
 4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -315,7 +315,7 @@ Add a batch with four rows and preserve the same parameters. Verify each row ind
 changed = np.arange(...)  # TODO: compute changed
 # Combine or mask array elements to form `expected`.
 expected = np.stack(...)  # TODO: compute expected
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(params, changed), expected, at...`
+# Compute `np.testing.assert_allclose(predict(params, changed), expected, atol` as `2e-6)`.
 np.testing.assert_allclose(predict(params, changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(predict(params, changed), expected, atol
 # Print the observed values to compare against the expected result.
 print("Changed batch verified")
@@ -329,7 +329,7 @@ print("Changed batch verified")
 changed = np.arange(12, dtype=np.float32).reshape(4, 3) / 4
 # Combine or mask array elements to form `expected`.
 expected = np.stack([sum(row[i] * keras_kernel[i] for i in range(3)) + bias for row in changed])
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(params, changed), expected, at...`
+# Compute `np.testing.assert_allclose(predict(params, changed), expected, atol` as `2e-6)`.
 np.testing.assert_allclose(predict(params, changed), expected, atol=2e-6)
 # Print the observed values to compare against the expected result.
 print("Changed batch verified")
@@ -358,8 +358,8 @@ Compute both predictions from the same raw input: once with the source normaliza
 1. Compute `pixels` from `np.array([[255., 128., 0.]], np.float32)`
 2. Run `predict` to compute `source`.
 3. Run `predict` to compute `wrong`.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `np.testing.assert_allclose(source, predict(params, pixels / 255.)...`
+4. Assert that `not np.allclose(source, wrong)`.
+5. Compute `np.testing.assert_allclose(source, predict(params, pixels / 255.), atol` as `1e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -371,9 +371,9 @@ pixels = np.array(...)  # TODO: compute pixels
 source = predict(...)  # TODO: compute source
 # Run `predict` to compute `wrong`.
 wrong = predict(...)  # TODO: compute wrong
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(source, wrong)`.
 assert not np.allclose(source, wrong)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(source, predict(params, pixels / 255.)...`
+# Compute `np.testing.assert_allclose(source, predict(params, pixels / 255.), atol` as `1e-6)`.
 np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
 ```
 
@@ -387,9 +387,9 @@ pixels = np.array([[255., 128., 0.]], np.float32)
 source = predict(params, pixels / 255.)
 # Run `predict` to compute `wrong`.
 wrong = predict(params, pixels)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(source, wrong)`.
 assert not np.allclose(source, wrong)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(source, predict(params, pixels / 255.)...`
+# Compute `np.testing.assert_allclose(source, predict(params, pixels / 255.), atol` as `1e-6)`.
 np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
 ```
 
@@ -419,7 +419,7 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 2. Compute `second_bias` from `np.array([.3], np.float32)`
 3. Convert `hidden` to a host NumPy array for inspection or verification.
 4. Perform matrix contraction / projection to compute `bridged_scores`.
-5. Check numerical equivalence within tolerance: `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], at...`
+5. Compute `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol` as `2e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -433,15 +433,15 @@ second_bias = np.array(...)  # TODO: compute second_bias
 hidden = np.maximum(...)  # TODO: compute hidden
 # Perform matrix contraction / projection to compute `bridged_scores`.
 bridged_scores = ...  # TODO: compute bridged_scores
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], at...`
+# Compute `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol` as `2e-6)`.
 np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
 # Convert `omitted_relu` to a host NumPy array for inspection or verification.
 omitted_relu = np.asarray(...)  # TODO: compute omitted_relu
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(omitted_relu, bridged_scores)`.
 assert not np.allclose(omitted_relu, bridged_scores)  # TODO: complete assertion check
 # Compute `positive_probe` from `np.array([[1., 2.]], np.float32)`
 positive_probe = np.array(...)  # TODO: compute positive_probe
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)`.
 np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
 # Print the observed values to compare against the expected result.
 print('Two-layer reference scores:', bridged_scores[:, 0])
@@ -459,15 +459,15 @@ second_bias = np.array([.3], np.float32)
 hidden = np.maximum(np.asarray(predict(params, x)), 0.)
 # Perform matrix contraction / projection to compute `bridged_scores`.
 bridged_scores = hidden @ second_kernel + second_bias
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], at...`
+# Compute `np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol` as `2e-6)`.
 np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
 # Convert `omitted_relu` to a host NumPy array for inspection or verification.
 omitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(omitted_relu, bridged_scores)`.
 assert not np.allclose(omitted_relu, bridged_scores)
 # Compute `positive_probe` from `np.array([[1., 2.]], np.float32)`
 positive_probe = np.array([[1., 2.]], np.float32)
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)`.
 np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
 # Print the observed values to compare against the expected result.
 print('Two-layer reference scores:', bridged_scores[:, 0])

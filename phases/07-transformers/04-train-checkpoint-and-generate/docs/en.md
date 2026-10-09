@@ -93,7 +93,7 @@ from tempfile import TemporaryDirectory
 
 # Compute `VOCAB` from `{"a":0, "b":1, "c":2}`
 VOCAB = {"a":0, "b":1, "c":2}
-# Compute `CONTEXT` from `4`
+# Compute `CONTEXT` as `4`.
 CONTEXT = 4
 ```
 
@@ -244,7 +244,7 @@ def save_snapshot(folder, p, state, step):
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     (folder/"manifest.json").write_text(json.dumps(manifest))
 
 # Function `load_snapshot(folder)` implementing this stage's computation:
@@ -308,7 +308,7 @@ with TemporaryDirectory() as directory:
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
     # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
-    # Check numerical equivalence within tolerance: `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`
+    # Assert that `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`.
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
 # Repeat the update loop over `range(80)` steps:
@@ -389,7 +389,7 @@ from tempfile import TemporaryDirectory
 
 # Compute `VOCAB` from `{"a":0, "b":1, "c":2}`
 VOCAB = {"a":0, "b":1, "c":2}
-# Compute `CONTEXT` from `4`
+# Compute `CONTEXT` as `4`.
 CONTEXT = 4
 # Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
 def layer_norm(x):
@@ -498,7 +498,7 @@ def save_snapshot(folder, p, state, step):
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     (folder/"manifest.json").write_text(json.dumps(manifest))
 
 # Function `load_snapshot(folder)` implementing this stage's computation:
@@ -554,7 +554,7 @@ with TemporaryDirectory() as directory:
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
     # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
-    # Check numerical equivalence within tolerance: `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`
+    # Assert that `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`.
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
 # Repeat the update loop over `range(80)` steps:
@@ -653,7 +653,7 @@ PASS: transformers-04
 # Experiment — Verify uniform-logit cross entropy: A known probability distribution independently checks target...
 # Construct `zero_head` via `{**params,"head":jnp.zeros_like(params["head"])}`
 zero_head = {**params,"head":jnp.zeros_like(params["head"])}
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)`.
 assert jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)
 ```
 
@@ -673,7 +673,7 @@ example = jnp.array([0,1,2,0])
 original = logits(params,example)
 # Run `logits` to compute `modified`.
 modified = logits(params,example.at[-1].set(1))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(original[:3],modified[:3],atol=1e-5)`.
 assert jnp.allclose(original[:3],modified[:3],atol=1e-5)
 ```
 
@@ -755,7 +755,7 @@ with TemporaryDirectory() as directory:
     metadata = json.loads(...)  # TODO: compute metadata
     # Compute `metadata["vocabulary"]` from `{"a":1,"b":0,"c":2}`
     metadata["vocabulary"] = ...  # TODO: compute metadata["vocabulary"]
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(json.dumps(metadata))
     try:
         load_snapshot(folder)
@@ -765,9 +765,9 @@ with TemporaryDirectory() as directory:
         raise AssertionError("wrong vocabulary accepted")
     # Read or serialize artifact data on disk (`forged_step`).
     forged_step = json.loads(...)  # TODO: compute forged_step
-    # Compute `forged_step["step"]` from `101`
+    # Compute `forged_step["step"]` as `101`.
     forged_step["step"] = ...  # TODO: compute forged_step["step"]
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(json.dumps(forged_step))
     try:
         load_snapshot(folder)
@@ -775,13 +775,13 @@ with TemporaryDirectory() as directory:
         pass
     else:
         raise AssertionError("wrong step accepted")
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(correct)
     # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
     recovered, _, recovered_step = load_snapshot(...)  # TODO: compute recovered, _, recovered_step
     # Assert invariant `recovered_step == 100` holds
     assert recovered_step  # TODO: complete assertion check
-    # Check numerical equivalence within tolerance: `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params...`
+    # Assert that `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))`.
     assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))  # TODO: complete assertion check
 ```
 
@@ -803,7 +803,7 @@ with TemporaryDirectory() as directory:
     metadata = json.loads(correct)
     # Compute `metadata["vocabulary"]` from `{"a":1,"b":0,"c":2}`
     metadata["vocabulary"] = {"a":1,"b":0,"c":2}
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(json.dumps(metadata))
     try:
         load_snapshot(folder)
@@ -813,9 +813,9 @@ with TemporaryDirectory() as directory:
         raise AssertionError("wrong vocabulary accepted")
     # Read or serialize artifact data on disk (`forged_step`).
     forged_step = json.loads(correct)
-    # Compute `forged_step["step"]` from `101`
+    # Compute `forged_step["step"]` as `101`.
     forged_step["step"] = 101
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(json.dumps(forged_step))
     try:
         load_snapshot(folder)
@@ -823,13 +823,13 @@ with TemporaryDirectory() as directory:
         pass
     else:
         raise AssertionError("wrong step accepted")
-    # Read or serialize artifact data on disk (``).
+    # Write the serialized artifact payload to disk.
     metadata_path.write_text(correct)
     # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
     recovered, _, recovered_step = load_snapshot(folder)
     # Assert invariant `recovered_step == 100` holds
     assert recovered_step == 100
-    # Check numerical equivalence within tolerance: `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params...`
+    # Assert that `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))`.
     assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))
 ```
 

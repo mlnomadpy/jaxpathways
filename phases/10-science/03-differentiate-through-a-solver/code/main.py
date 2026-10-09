@@ -54,9 +54,9 @@ dr_dk = -dt*(1+z+z*z/2+z**3/6)
 discrete_gradient = 2.0*steps*r**(steps-1)*dr_dk
 # Compute `continuous_gradient` from `-2.0*(steps*dt)*np.exp(-rate*steps*dt)`
 continuous_gradient = -2.0*(steps*dt)*np.exp(-rate*steps*dt)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,...`
+# Compute `np.testing.assert_allclose(autodiff,discrete_gradient,rtol` as `1e-11,atol=1e-12)`.
 np.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,atol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)`
+# Compute `np.testing.assert_allclose(autodiff,continuous_gradient,rtol` as `1e-7)`.
 np.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Autodiff:",autodiff,"discrete oracle:",discrete_gradient,"continuous oracle:",continuous_gradient)
@@ -79,7 +79,7 @@ value, derivative = jax.value_and_grad(objective)(probe)
 epsilon = 1e-4
 # Compute `finite_difference` from `(float(objective(probe+epsilon))-float(objective(pro...`
 finite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(derivative,finite_difference,rtol=2e-7...`
+# Compute `np.testing.assert_allclose(derivative,finite_difference,rtol` as `2e-7,atol=1e-10)`.
 np.testing.assert_allclose(derivative,finite_difference,rtol=2e-7,atol=1e-10)
 # Assert invariant `float(derivative) > 0` holds
 assert float(derivative) > 0
@@ -140,9 +140,9 @@ dr_dk = -dt*(1+z+z*z/2+z**3/6)
 discrete_gradient = 2.0*steps*r**(steps-1)*dr_dk
 # Compute `continuous_gradient` from `-2.0*(steps*dt)*np.exp(-rate*steps*dt)`
 continuous_gradient = -2.0*(steps*dt)*np.exp(-rate*steps*dt)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,...`
+# Compute `np.testing.assert_allclose(autodiff,discrete_gradient,rtol` as `1e-11,atol=1e-12)`.
 np.testing.assert_allclose(autodiff,discrete_gradient,rtol=1e-11,atol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)`
+# Compute `np.testing.assert_allclose(autodiff,continuous_gradient,rtol` as `1e-7)`.
 np.testing.assert_allclose(autodiff,continuous_gradient,rtol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Autodiff:",autodiff,"discrete oracle:",discrete_gradient,"continuous oracle:",continuous_gradient)
@@ -164,7 +164,7 @@ value, derivative = jax.value_and_grad(objective)(probe)
 epsilon = 1e-4
 # Compute `finite_difference` from `(float(objective(probe+epsilon))-float(objective(pro...`
 finite_difference = (float(objective(probe+epsilon))-float(objective(probe-epsilon)))/(2*epsilon)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(derivative,finite_difference,rtol=2e-7...`
+# Compute `np.testing.assert_allclose(derivative,finite_difference,rtol` as `2e-7,atol=1e-10)`.
 np.testing.assert_allclose(derivative,finite_difference,rtol=2e-7,atol=1e-10)
 # Assert invariant `float(derivative) > 0` holds
 assert float(derivative) > 0
@@ -224,9 +224,9 @@ changed_rate, changed_initial = 0.4, 3.0
 g_rate = jax.grad(lambda k: solve(k,jnp.array(changed_initial))[-1])(changed_rate)
 # Differentiate the objective to obtain `g_initial` via automatic differentiation.
 g_initial = jax.grad(lambda u: solve(changed_rate,u)[-1])(changed_initial)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8)...`
+# Compute `np.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8),rtol` as `1e-7)`.
 np.testing.assert_allclose(g_rate,-2*changed_initial*np.exp(-0.8),rtol=1e-7)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(g_initial,np.exp(-0.8),rtol=1e-8)`
+# Compute `np.testing.assert_allclose(g_initial,np.exp(-0.8),rtol` as `1e-8)`.
 np.testing.assert_allclose(g_initial,np.exp(-0.8),rtol=1e-8)
 # Print the observed values to compare against the expected result.
 print("Rate and initial-state sensitivities:",float(g_rate),float(g_initial))
@@ -273,7 +273,7 @@ def detached_objective(k):
 assert float(jax.grad(detached_objective)(1.0)) == 0.0
 # Compute `fd` from `(float(detached_objective(1.0001))-float(detached_ob...`
 fd=(float(detached_objective(1.0001))-float(detached_objective(0.9999)))/0.0002
-# Check numerical equivalence within tolerance: `abs(fd)>1e-3`
+# Assert that `abs(fd)>1e-3`.
 assert abs(fd)>1e-3
 # Print the observed values to compare against the expected result.
 print("Detached autodiff is zero; actual value sensitivity:",fd)

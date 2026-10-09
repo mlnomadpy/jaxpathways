@@ -61,7 +61,7 @@ for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 # Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
@@ -134,7 +134,7 @@ for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 # Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
+    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
@@ -190,7 +190,7 @@ later_state = later.get_state()
 # Run `next` to compute `expected_third`.
 expected_third = next(later)
 # Run `iter` to compute `new_iterator`.
-# Execute the next step of the computation.
+# Compute `new_iterator` as `iter(make_loader())`.
 new_iterator = iter(make_loader())
 new_iterator.set_state(later_state)
 # Execute `np.testing.assert_array_equal(next(new_iterator)["id"],expec`
@@ -200,14 +200,14 @@ np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
 # Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
 boundary=iter(make_loader())
 # Repeat the update loop over `range(3)` steps:
-# Execute the next step of the computation.
+# Execute `for _ in range(3):next(boundary)`.
 for _ in range(3):next(boundary)
 # Run `boundary.get_state` to compute `boundary_state`.
 boundary_state=boundary.get_state()
 # Compute `expected` from `[next(boundary) for _ in range(2)]`
 expected=[next(boundary) for _ in range(2)]
 # Run `iter` to compute `replay`.
-# Execute the next step of the computation.
+# Compute `replay` as `iter(make_loader())`.
 replay=iter(make_loader())
 replay.set_state(boundary_state)
 # Iterate over `reference` to step through the computation:
@@ -230,7 +230,7 @@ except ValueError:
 else:
     raise AssertionError("Expected changed sampler rejection")
 # Run `iter` to compute `compatible`.
-# Execute the next step of the computation.
+# Compute `compatible` as `iter(make_loader(seed=42))`.
 compatible = iter(make_loader(seed=42))
 compatible.set_state(snapshot)
 # Execute `np.testing.assert_array_equal(next(compatible)["id"],second_`

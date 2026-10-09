@@ -320,8 +320,8 @@ Reuse the random construction for a controlled comparison, not accidentally acro
 1. Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
 2. Return `2 * x + 1 + eps` to the caller.
 3. Construct `inputs` via `jnp.array([0.,1.,2.])`
-4. Assert invariant `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inp...` holds
-5. Check numerical equivalence within tolerance: `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inpu...`
+4. Assert that `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))`.
+5. Assert that `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -334,9 +334,9 @@ def noisy_prediction(seed,x):
     return ...  # TODO: return computed result
 # Construct `inputs` via `jnp.array([0.,1.,2.])`
 inputs = jnp.array(...)  # TODO: compute inputs
-# Assert invariant `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inp...` holds
+# Assert that `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))`.
 assert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inpu...`
+# Assert that `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)`.
 assert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)  # TODO: complete assertion check
 ```
 
@@ -351,9 +351,9 @@ def noisy_prediction(seed,x):
     return 2*x+1+eps
 # Construct `inputs` via `jnp.array([0.,1.,2.])`
 inputs=jnp.array([0.,1.,2.])
-# Assert invariant `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inp...` holds
+# Assert that `jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))`.
 assert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))
-# Check numerical equivalence within tolerance: `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inpu...`
+# Assert that `jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)`.
 assert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)
 ```
 

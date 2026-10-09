@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "ce994b72c39a4925cb907e6838deaf69a48461cd7475789baf9f2d02b53ad6c9",
+  "contentHash": "9a67dd2f7a35de8692effc588fa5e99f8fe38b09d771790a7189b91e11e66bd6",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-07T11:16:21.620625+00:00",
@@ -383,7 +383,7 @@
     "prediction": "Why should original and reconstructed images share a color scale?",
     "reading": "The sixteen cells preserve the four-by-four image layout. Green patches 0 and 3 provide visible values. Hatched patches 1 and 2 are hidden targets for reconstruction loss. Hatching means missing input, not observed black pixels. This maps the actual mask without inventing a reconstructed image or error measurement.",
     "alt": "The sixteen cells preserve the four-by-four image layout. Green patches 0 and 3 provide visible values. Hatched patches 1 and 2 are hidden targets for reconstruction loss. Hatching means missing input, not observed black pixels. This maps the actual mask without inventing a reconstructed image or error measurement.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.3,
     "panel": {
       "kind": "patches"

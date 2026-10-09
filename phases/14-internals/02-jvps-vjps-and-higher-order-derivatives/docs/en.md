@@ -30,7 +30,7 @@ When reading product bars, name the vector's space before interpreting its coord
 
 ![JVP and VJP use different vector spaces](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 The top row pushes a three-component direction into two output components. The bottom pulls a two-component sensitivity back to three inputs. Shapes disambiguate the two products even when a square worked example would not. The adjoint identity checks their relationship.
 
@@ -124,7 +124,7 @@ value,jvp=jax.jvp(mapping,(x,),(v,))
 value_again,pullback=jax.vjp(mapping,x)
 # Run `pullback` to compute `(vjp,)`.
 vjp,=pullback(u)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(value,expected_value,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(value,expected_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(value,expected_value,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)
@@ -134,7 +134,7 @@ np.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)
 # Evaluate `jnp.vdot(vjp, v)` and convert the result into Python scalar/collection `right`.
 left=float(jnp.vdot(u,jvp))
 right=float(jnp.vdot(vjp,v))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(left,right,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(left,right,rtol` as `1e-12)`.
 np.testing.assert_allclose(left,right,rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Jacobian:",jacobian)
@@ -169,7 +169,7 @@ hessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1
 np.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)`
+# Compute `np.testing.assert_allclose(hessian,hessian.T,atol` as `1e-12)`.
 np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)
 # Print diagnostic summary of the computed outputs.
 print("Hessian-vector product:",np.asarray(hvp))
@@ -215,7 +215,7 @@ value,jvp=jax.jvp(mapping,(x,),(v,))
 value_again,pullback=jax.vjp(mapping,x)
 # Run `pullback` to compute `(vjp,)`.
 vjp,=pullback(u)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(value,expected_value,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(value,expected_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(value,expected_value,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)
@@ -225,7 +225,7 @@ np.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)
 # Evaluate `jnp.vdot(vjp, v)` and convert the result into Python scalar/collection `right`.
 left=float(jnp.vdot(u,jvp))
 right=float(jnp.vdot(vjp,v))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(left,right,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(left,right,rtol` as `1e-12)`.
 np.testing.assert_allclose(left,right,rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Jacobian:",jacobian)
@@ -252,7 +252,7 @@ hessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1
 np.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)`
+# Compute `np.testing.assert_allclose(hessian,hessian.T,atol` as `1e-12)`.
 np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)
 # Print diagnostic summary of the computed outputs.
 print("Hessian-vector product:",np.asarray(hvp))
@@ -320,9 +320,9 @@ basis=jnp.eye(2)
 columns=jax.vmap(lambda direction:jax.jvp(mapping,(x,),(direction,))[1])(basis).T
 # Vectorize across the batch dimension with `jax.vmap` (`rows`).
 rows=jax.vmap(lambda weighting:pullback(weighting)[0])(basis)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(columns,jacobian,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(columns,jacobian,rtol` as `1e-12)`.
 np.testing.assert_allclose(columns,jacobian,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(rows,jacobian,rtol=1e-12)`
+# Compute `np.testing.assert_allclose(rows,jacobian,rtol` as `1e-12)`.
 np.testing.assert_allclose(rows,jacobian,rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Forward columns and reverse rows agree")
@@ -348,7 +348,7 @@ assert np.linalg.norm(np.asarray(hvp)-approximation)>0.1
 eps=1e-4
 # Differentiate the objective to obtain `fd` via automatic differentiation.
 fd=(np.asarray(jax.grad(objective)(x+eps*v))-np.asarray(jax.grad(objective)(x-eps*v)))/(2*eps)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hvp,fd,rtol=1e-7,atol=1e-8)`
+# Compute `np.testing.assert_allclose(hvp,fd,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hvp,fd,rtol=1e-7,atol=1e-8)
 # Print the observed values to compare against the expected result.
 print("Exact HVP:",np.asarray(hvp),"Gauss-Newton product:",approximation)
@@ -396,7 +396,7 @@ rj = jax.vjp(...)  # TODO: compute rj
 np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
 # Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,cha...`
+# Compute `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol
 # Print the observed values to compare against the expected result.
 print("Changed-point adjoint verified")
@@ -422,7 +422,7 @@ rj=jax.vjp(mapping,changed_x)[1](changed_u)[0]
 np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
 # Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,cha...`
+# Compute `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Changed-point adjoint verified")
@@ -452,7 +452,7 @@ A derivative is linear in its direction at a fixed base point.
 **Step-by-step implementation plan:**
 1. Construct `w` via `jnp.array([-0.6,0.9])`
 2. Compute exact directional derivative / Jacobian / Hessian (`product`).
-3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w)...`
+3. Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
 4. Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 5. Assert invariant `np.linalg.norm(np.asarray(shifted-product(v)))>0.1` holds
 
@@ -464,7 +464,7 @@ A derivative is linear in its direction at a fixed base point.
 w = jnp.array(...)  # TODO: compute w
 # Compute exact directional derivative / Jacobian / Hessian (`product`).
 product = ...  # TODO: compute product
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w)...`
+# Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
 np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
 # Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 shifted = jax.jvp(...)  # TODO: compute shifted
@@ -482,7 +482,7 @@ print("Direction linearity holds; the Jacobian changes with the base point")
 w=jnp.array([-0.6,0.9])
 # Compute exact directional derivative / Jacobian / Hessian (`product`).
 product=lambda direction:jax.jvp(mapping,(x,),(direction,))[1]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w)...`
+# Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
 np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
 # Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 shifted=jax.jvp(mapping,(x+w,),(v,))[1]
@@ -519,7 +519,7 @@ Compose jvp with grad and compare scalar products.
 **Step-by-step implementation plan:**
 1. Construct `w` via `jnp.array([0.2,0.9])`
 2. Differentiate the objective to obtain `hw` via automatic differentiation.
-3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e...`
+3. Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
 4. Compute `eps` from `1e-4`
 5. Differentiate the objective to obtain `fdw` via automatic differentiation.
 
@@ -531,13 +531,13 @@ Compose jvp with grad and compare scalar products.
 w = jnp.array(...)  # TODO: compute w
 # Differentiate the objective to obtain `hw` via automatic differentiation.
 hw = jax.jvp(...)  # TODO: compute hw
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e...`
+# Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol
 # Compute `eps` from `1e-4`
 eps = ...  # TODO: compute eps
 # Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw = ...  # TODO: compute fdw
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)`
+# Compute `np.testing.assert_allclose(hw,fdw,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hw,fdw,rtol = ...  # TODO: compute np.testing.assert_allclose(hw,fdw,rtol
 # Print the observed values to compare against the expected result.
 print("Bilinear Hessian symmetry and finite-difference product verified")
@@ -551,13 +551,13 @@ print("Bilinear Hessian symmetry and finite-difference product verified")
 w=jnp.array([0.2,0.9])
 # Differentiate the objective to obtain `hw` via automatic differentiation.
 hw=jax.jvp(jax.grad(objective),(x,),(w,))[1]
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e...`
+# Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)
 # Compute `eps` from `1e-4`
 eps=1e-4
 # Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)`
+# Compute `np.testing.assert_allclose(hw,fdw,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)
 # Print the observed values to compare against the expected result.
 print("Bilinear Hessian symmetry and finite-difference product verified")

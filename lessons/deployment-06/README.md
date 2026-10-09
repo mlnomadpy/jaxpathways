@@ -31,7 +31,7 @@ The CPU request trace is a useful reference for the interface. It is distinct fr
 
 ![Model speed is one part of request speed](../../phases/15-deployment/06-edge-ai-conversion-and-device-validation/outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Read the two columns as a hypothetical serial request before and after halving only inference. Preprocessing and transfer/response work remain unchanged. Add down each column: the total moves from $24$ to $20$ milliseconds, a $1.2$-fold improvement. These times are analytic teaching values; the separate plot contains actual local CPU request measurements.
 
@@ -200,7 +200,7 @@ Append this block to the same main.py and rerun the whole file. Compare the resp
 # Step 4 — Validate outputs and describe measurement scope: The report records local CPU timings and explicitly leaves...
 # Compute `expected` from `(np.array([[255., 128., 0.]], np.float32) / 255.) @ ...`
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
-# Read or serialize artifact data on disk (``).
+# Compute `np.testing.assert_allclose(json.loads(response)["scores"], expected, atol` as `1e-6)`.
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
 # Compute `report` from `{"runtime": "JAX CPU instructional proxy", "jax": ja...`
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
@@ -286,7 +286,7 @@ for _ in range(30):
     samples.append((time.perf_counter() - start) * 1000)
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
-# Read or serialize artifact data on disk (``).
+# Compute `np.testing.assert_allclose(json.loads(response)["scores"], expected, atol` as `1e-6)`.
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
 # Compute `report` from `{"runtime": "JAX CPU instructional proxy", "jax": ja...`
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
@@ -436,7 +436,7 @@ raw = np.array([[255., 128., 0.]], np.float32)
 wrong = np.asarray(infer(raw))
 # Convert `right` to a host NumPy array for inspection or verification.
 right = np.asarray(infer(raw / 255.))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(wrong, right)`.
 assert not np.allclose(wrong, right)
 # Print the observed values to compare against the expected result.
 print("Preprocessing mismatch max error", float(np.max(np.abs(wrong-right))))
@@ -455,9 +455,12 @@ Conversion checks must start at the raw input boundary when preprocessing is par
 invalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]
 # Iterate over `invalid` to step through the computation:
 for invalid in invalid_payloads:
-    try: request(json.dumps(invalid))
-    except ValueError: pass
-    else: raise AssertionError('invalid sensor payload accepted')
+    try:
+        request(json.dumps(invalid))
+    except ValueError:
+        pass
+    else:
+        raise AssertionError('invalid sensor payload accepted')
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)
 # Print the observed values to compare against the expected result.
@@ -481,7 +484,7 @@ Send a second raw input $[0, 255, 128]$ through the full request, and verify its
 1. Compute `changed_raw` from `np.array([[0., 255., 128.]], np.float32)`
 2. Read or serialize artifact data on disk (`changed_response`).
 3. Convert `expected_changed` to a host NumPy array for inspection or verification.
-4. Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed_response["scores"], expected_c...`
+4. Compute `np.testing.assert_allclose(changed_response["scores"], expected_changed, atol` as `1e-6)`.
 5. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -494,7 +497,7 @@ changed_raw = np.array(...)  # TODO: compute changed_raw
 changed_response = json.loads(...)  # TODO: compute changed_response
 # Convert `expected_changed` to a host NumPy array for inspection or verification.
 expected_changed = ...  # TODO: compute expected_changed
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed_response["scores"], expected_c...`
+# Compute `np.testing.assert_allclose(changed_response["scores"], expected_changed, atol` as `1e-6)`.
 np.testing.assert_allclose(changed_response["scores"], expected_changed, atol = ...  # TODO: compute np.testing.assert_allclose(changed_response["scores"], expected_changed, atol
 # Print the observed values to compare against the expected result.
 print("Changed end-to-end request verified")
@@ -510,7 +513,7 @@ changed_raw = np.array([[0., 255., 128.]], np.float32)
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
 # Convert `expected_changed` to a host NumPy array for inspection or verification.
 expected_changed = (changed_raw / 255.) @ np.asarray(weights) + np.asarray(bias)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed_response["scores"], expected_c...`
+# Compute `np.testing.assert_allclose(changed_response["scores"], expected_changed, atol` as `1e-6)`.
 np.testing.assert_allclose(changed_response["scores"], expected_changed, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed end-to-end request verified")

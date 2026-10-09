@@ -60,10 +60,12 @@ def main():
                     return
                 try:
                     size = int(self.headers.get('Content-Length', '0'))
-                    if not 0 < size <= 4096: raise ValueError('request size')
+                    if not 0 < size <= 4096:
+                        raise ValueError('request size')
                     request = json.loads(self.rfile.read(size))
                     self.reply(200, predict(model, request))
-                except (ValueError, TypeError, KeyError): self.reply(400, {'error': 'invalid input contract'})
+                except (ValueError, TypeError, KeyError):
+                    self.reply(400, {'error': 'invalid input contract'})
             def log_message(self, *args): pass  # Do not emit raw request content.
         HTTPServer(('0.0.0.0', int(os.environ.get('PORT', '8080'))), Handler).serve_forever()
 

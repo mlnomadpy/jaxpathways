@@ -388,7 +388,7 @@ mask = jax.device_put(...)  # TODO: compute mask
 masked_mean = jax.jit(...)  # TODO: compute masked_mean
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
 ```
 
@@ -428,7 +428,7 @@ mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))
 ```
 
@@ -549,7 +549,7 @@ mask = jax.device_put(...)  # TODO: compute mask
 masked_mean = jax.jit(...)  # TODO: compute masked_mean
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
 ```
 
@@ -576,7 +576,7 @@ mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))`.
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))
 ```
 

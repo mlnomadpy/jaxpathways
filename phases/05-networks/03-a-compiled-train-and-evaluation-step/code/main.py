@@ -71,9 +71,9 @@ def snapshot(m):return [np.array(a,copy=True) for a in jax.tree.leaves(nnx.state
 # Evaluate `objective(model, train_x, train_y)` and convert the result into Python scalar/collection `before_loss`.
 before_loss=float(objective(model,train_x,train_y))
 # Repeat the update loop over `range(80)` steps:
-# Execute the next step of the computation.
+# Execute `for _ in range(80):train_step(model,optimizer,train_x,train_y)`.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
-# Assert invariant `int(optimizer.step[...])==80` holds
+# Assert that `int(optimizer.step[...])==80`.
 assert int(optimizer.step[...])==80
 
 # 3. Verify held-out metrics and state isolation
@@ -84,17 +84,17 @@ step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
-# Assert invariant `int(optimizer.step[...])==step_count` holds
+# Assert that `int(optimizer.step[...])==step_count`.
 assert int(optimizer.step[...])==step_count
 # Convert `scores` to a host NumPy array for inspection or verification.
 # Convert `labels` to a host NumPy array for inspection or verification.
 scores=np.asarray(model(test_x))
 labels=np.asarray(test_y)
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(test_accuracy,np.mean((scores>0)` as `=labels),atol=1e-6)`.
 np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
-# Assert invariant `float(test_accuracy)>.85 and float(objective(model,train_x,train_...` holds
+# Assert that `float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3`.
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 # Print the observed values to compare against the expected result.
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
@@ -168,9 +168,9 @@ def snapshot(m):return [np.array(a,copy=True) for a in jax.tree.leaves(nnx.state
 # Evaluate `objective(model, train_x, train_y)` and convert the result into Python scalar/collection `before_loss`.
 before_loss=float(objective(model,train_x,train_y))
 # Repeat the update loop over `range(80)` steps:
-# Execute the next step of the computation.
+# Execute `for _ in range(80):train_step(model,optimizer,train_x,train_y)`.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
-# Assert invariant `int(optimizer.step[...])==80` holds
+# Assert that `int(optimizer.step[...])==80`.
 assert int(optimizer.step[...])==80
 
 # Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
@@ -180,17 +180,17 @@ step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
-# Assert invariant `int(optimizer.step[...])==step_count` holds
+# Assert that `int(optimizer.step[...])==step_count`.
 assert int(optimizer.step[...])==step_count
 # Convert `scores` to a host NumPy array for inspection or verification.
 # Convert `labels` to a host NumPy array for inspection or verification.
 scores=np.asarray(model(test_x))
 labels=np.asarray(test_y)
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
-# Reduce across the target axis to summarize ``.
+# Compute `np.testing.assert_allclose(test_accuracy,np.mean((scores>0)` as `=labels),atol=1e-6)`.
 np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
-# Assert invariant `float(test_accuracy)>.85 and float(objective(model,train_x,train_...` holds
+# Assert that `float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3`.
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 # Print the observed values to compare against the expected result.
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
@@ -212,17 +212,17 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 # Experiment — Replay the complete update sequence: Replay reconstructs optimizer state from the start.
 replay,replay_optimizer=initialize()
 # Repeat the update loop over `range(80)` steps:
-# Execute the next step of the computation.
+# Execute `for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)`.
 for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(snapshot(model),snapshot(replay)):np.testing.assert_allclose(a,b,rtol=1e-6,atol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluat...`
+# Compute `np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluate(model,test_x,test_y),rtol` as `1e-6)`.
 np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluate(model,test_x,test_y),rtol=1e-6)
 
 # Experiment: Duplicating evaluation data
 # Experiment — Duplicating evaluation data: Means normalize the observation count.
 doubled=evaluate(model,jnp.concatenate([test_x,test_x]),jnp.concatenate([test_y,test_y]))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),...`
+# Compute `np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol` as `1e-5,atol=1e-6)`.
 np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=1e-6)
 
 # Reference solution. Try the exercise before reading this.
@@ -252,9 +252,9 @@ correct=np.array([6,20])
 counts=np.array([7,41])
 # Compute `expected` from `26/48`
 expected=26/48
-# Reduce across the target axis to summarize ``.
+# Execute `np.testing.assert_allclose(correct.sum()/counts.sum(),expected)`.
 np.testing.assert_allclose(correct.sum()/counts.sum(),expected)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not np.isclose(np.mean(correct/counts),expected)`.
 assert not np.isclose(np.mean(correct/counts),expected)
 # Print the observed values to compare against the expected result.
 print('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expected)
@@ -270,10 +270,10 @@ bad_optimizer=nnx.Optimizer(bad_model,optax.adam(.03),wrt=nnx.Param)
 prior=snapshot(bad_model)
 # Run `train_step` to perform the next check or state transition.
 train_step(bad_model,bad_optimizer,test_x,test_y)
-# Assert invariant `int(bad_optimizer.step[...])==1` holds
+# Assert that `int(bad_optimizer.step[...])==1`.
 assert int(bad_optimizer.step[...])==1
-# Assert invariant `any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_mod...` holds
+# Assert that `any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_model)))`.
 assert any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_model)))
-# Assert invariant `int(optimizer.step[...])==80` holds
+# Assert that `int(optimizer.step[...])==80`.
 assert int(optimizer.step[...])==80
 print("PASS: networks-03")

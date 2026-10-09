@@ -189,7 +189,7 @@
       "prediction": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
       "reading": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
       "alt": "Read downward: a command runs from a working folder, selects an interpreter, opens the file and imports its packages before computing. Arrows are dependencies, not measured time. A file-path failure happens before JAX arithmetic; an import failure points to the selected environment.",
-      "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+      "scope": "Architecture and dataflow mechanism diagram.",
       "height": 6,
       "panel": {
         "kind": "graph",

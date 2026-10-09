@@ -31,7 +31,7 @@ Enumerate coordinates independently and verify coverage of every valid element. 
 
 ![Program coordinates and partial boundary tiles](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.
 
@@ -98,7 +98,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -151,7 +150,7 @@ actual=blocked_axpy(x,y)
 reference=2*np.asarray(x)+np.asarray(y)
 # Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Assert invariant `float(actual[-1,-1])==float(reference[-1,-1])` holds
 assert float(actual[-1,-1])==float(reference[-1,-1])
@@ -172,7 +171,6 @@ rows,cols=np.indices((5,11))
 owner=(rows//2)*3+(cols//4)
 # Assert invariant `owner[0,0]==0 and owner[4,10]==8` holds
 assert owner[0,0]==0 and owner[4,10]==8
-# Evaluate `logical` from the current inputs and state.
 # Compute `logical` from `5*11`
 logical=5*11
 padded=6*12
@@ -211,7 +209,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -256,7 +253,7 @@ actual=blocked_axpy(x,y)
 reference=2*np.asarray(x)+np.asarray(y)
 # Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(actual,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Assert invariant `float(actual[-1,-1])==float(reference[-1,-1])` holds
 assert float(actual[-1,-1])==float(reference[-1,-1])
@@ -269,7 +266,6 @@ rows,cols=np.indices((5,11))
 owner=(rows//2)*3+(cols//4)
 # Assert invariant `owner[0,0]==0 and owner[4,10]==8` holds
 assert owner[0,0]==0 and owner[4,10]==8
-# Evaluate `logical` from the current inputs and state.
 # Compute `logical` from `5*11`
 logical=5*11
 padded=6*12
@@ -335,7 +331,7 @@ PASS: kernels-01
 ```python
 # Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...
 changed=blocked_axpy(x,y,(3,5))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(changed,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed grid:",(2,3),"same numerical result")
@@ -356,7 +352,7 @@ covered=np.zeros((5,11),dtype=bool)
 for i in range(5//2):
     # Loop over `j` in `range(11 // 4)`:
     for j in range(11//4):
-        # Compute `covered[i*2:(i+1)*2,j*4:(j+1)*4]` from `True`
+        # Compute `covered[i*2:(i+1)*2,j*4:(j+1)*4]` as `True`.
         covered[i*2:(i+1)*2,j*4:(j+1)*4]=True
 # Assert invariant `int(covered.sum())==32` holds
 assert int(covered.sum())==32
@@ -509,8 +505,8 @@ Use integer ceiling division; do not time interpretation as accelerator performa
 1. Iterate over `shape` to step through the computation:
 2. Compute `counts` from `[]`
 3. Iterate over `(bm, bn)` to step through the computation:
-4. Evaluate `gm` from the current inputs and state.
-5. Compute `gm` from `(shape[0]+bm-1)//bm`
+4. Compute `gm` from `(shape[0]+bm-1)//bm`
+5. Append the current step result to `counts`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -522,7 +518,6 @@ for shape in [(5,11),(33,129)]:
     counts = ...  # TODO: compute counts
     # Iterate over `(bm, bn)` to step through the computation:
     for bm,bn in [(2,4),(8,128),(16,256)]:
-        # Evaluate `gm` from the current inputs and state.
         # Compute `gm` from `(shape[0]+bm-1)//bm`
         gm = ...  # TODO: compute gm
         gn = ...  # TODO: compute gn
@@ -544,7 +539,6 @@ for shape in [(5,11),(33,129)]:
     counts=[]
     # Iterate over `(bm, bn)` to step through the computation:
     for bm,bn in [(2,4),(8,128),(16,256)]:
-        # Evaluate `gm` from the current inputs and state.
         # Compute `gm` from `(shape[0]+bm-1)//bm`
         gm=(shape[0]+bm-1)//bm
         gn=(shape[1]+bn-1)//bn

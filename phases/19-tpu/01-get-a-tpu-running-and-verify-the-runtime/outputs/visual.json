@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "065fbee0e9557cb1dd5d24d2a4b20f626a66cd642a554605aec72f0c5ded336e",
+  "contentHash": "a67833264e71f5170b34b3db66b014a849e8aa6e5840de5def2a404bee7aae74",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-08T10:31:55.358421+00:00",
@@ -49,7 +49,7 @@
     "prediction": "Where does Python execute when you SSH into a Cloud TPU VM, and when does billing stop?",
     "reading": "Read top to bottom: your workstation runs `gcloud` to allocate the Cloud TPU VM, SSH starts Python inside `~/jax-tpu-lab/.venv` on the TPU VM host, `libtpu` dispatches XLA programs to the attached TPU chips, `scp` retrieves the runtime receipt, and `tpu-vm delete` releases the resource.",
     "alt": "Read top to bottom: workstation gcloud create allocates the TPU VM, SSH launches Python inside .venv on the TPU VM host, libtpu runs XLA on attached TPU chips, scp copies the receipt back, and tpu-vm delete stops billing.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
       "kind": "graph",

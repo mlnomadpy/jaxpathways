@@ -200,15 +200,15 @@ PASS: state-02
 
 ```python
 # Experiment — Verify every gradient leaf: This check verifies parameter identity and the actual gradient...
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))`.
 assert jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))
-# Check numerical equivalence within tolerance: `jnp.allclose(grads["bias"]`
+# Assert that `jnp.allclose(grads["bias"],-4.)`.
 assert jnp.allclose(grads["bias"],-4.)
-# Check numerical equivalence within tolerance: `jnp.allclose(updated["weight"]`
+# Assert that `jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))`.
 assert jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))
-# Check numerical equivalence within tolerance: `jnp.allclose(updated["bias"]`
+# Assert that `jnp.allclose(updated["bias"],0.2)`.
 assert jnp.allclose(updated["bias"],0.2)
-# Check numerical equivalence within tolerance: `jnp.allclose(loss(updated),0.64,atol=1e-6)`
+# Assert that `jnp.allclose(loss(updated),0.64,atol=1e-6)`.
 assert jnp.allclose(loss(updated),0.64,atol=1e-6)
 ```
 
@@ -250,8 +250,8 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 **Step-by-step implementation plan:**
 1. Transform every leaf of the parameter PyTree (`norm_squared`).
 2. Aggregate array values to compute `manual`.
-3. Verify that the numerical values match the expected reference within tolerance.
-4. Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
+3. Assert that `jnp.allclose(norm_squared, manual)`.
+4. Assert that `jnp.allclose(norm_squared, 96.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -261,9 +261,9 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 norm_squared = sum(...)  # TODO: compute norm_squared
 # Aggregate array values to compute `manual`.
 manual = jnp.sum(...)  # TODO: compute manual
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(norm_squared, manual)`.
 assert jnp.allclose(norm_squared, manual)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
+# Assert that `jnp.allclose(norm_squared, 96.)`.
 assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
 ```
 
@@ -275,9 +275,9 @@ assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
 norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
 # Aggregate array values to compute `manual`.
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(norm_squared, manual)`.
 assert jnp.allclose(norm_squared, manual)
-# Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
+# Assert that `jnp.allclose(norm_squared, 96.)`.
 assert jnp.allclose(norm_squared, 96.)
 ```
 
@@ -325,7 +325,7 @@ def nested_loss(p):
 g = jax.grad(...)  # TODO: compute g
 # Assert invariant `jax.tree.structure(g)==jax.tree.structure(nested)` holds
 assert jax.tree.structure(g)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(g["scale"]`
+# Assert that `jnp.allclose(g["scale"],-4.)`.
 assert jnp.allclose(g["scale"],-4.)  # TODO: complete assertion check
 ```
 
@@ -345,7 +345,7 @@ def nested_loss(p):
 g=jax.grad(nested_loss)(nested)
 # Assert invariant `jax.tree.structure(g)==jax.tree.structure(nested)` holds
 assert jax.tree.structure(g)==jax.tree.structure(nested)
-# Check numerical equivalence within tolerance: `jnp.allclose(g["scale"]`
+# Assert that `jnp.allclose(g["scale"],-4.)`.
 assert jnp.allclose(g["scale"],-4.)
 ```
 
@@ -374,7 +374,7 @@ Matching leaf counts is not enough; key paths matter.
 **Step-by-step implementation plan:**
 1. Run the boundary check and catch the expected exception:
 2. Transform every leaf of the parameter PyTree (`fixed`).
-3. Verify that the numerical values match the expected reference within tolerance.
+3. Assert that `jnp.allclose(loss(fixed),0.64,atol=1e-6)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -389,7 +389,7 @@ else:
     raise AssertionError("Expected a missing-key failure")
 # Transform every leaf of the parameter PyTree (`fixed`).
 fixed = jax.tree.map(...)  # TODO: compute fixed
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(loss(fixed),0.64,atol=1e-6)`.
 assert jnp.allclose(loss(fixed),0.64,atol=1e-6)  # TODO: complete assertion check
 ```
 
@@ -406,7 +406,7 @@ else:
     raise AssertionError("Expected a missing-key failure")
 # Transform every leaf of the parameter PyTree (`fixed`).
 fixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(loss(fixed),0.64,atol=1e-6)`.
 assert jnp.allclose(loss(fixed),0.64,atol=1e-6)
 ```
 

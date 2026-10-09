@@ -364,7 +364,7 @@ PASS: pretraining-03
 collapsed = jnp.ones((4, 2))
 # Evaluate `paired_contrastive(collapsed, collapsed)` and convert the result into Python scalar/collection `collapse_loss`.
 collapse_loss = float(paired_contrastive(collapsed, collapsed))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(collapse_loss, np.log(4), atol=1e-6)`
+# Compute `np.testing.assert_allclose(collapse_loss, np.log(4), atol` as `1e-6)`.
 np.testing.assert_allclose(collapse_loss, np.log(4), atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Collapsed baseline:', collapse_loss)
@@ -386,7 +386,7 @@ orthogonal = jnp.eye(2)
 for tau in [0.2, 1.0, 2.0]:
     # Evaluate `paired_contrastive(orthogonal, orthogonal, tau)` and convert the result into Python scalar/collection `observed`.
     observed = float(paired_contrastive(orthogonal, orthogonal, tau))
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau...`
+    # Compute `np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau), atol` as `1e-6)`.
     np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau), atol=1e-6)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(
@@ -457,7 +457,7 @@ Each original candidate appears twice, but only one copy is labeled positive.
 
 **Step-by-step implementation plan:**
 1. Perform matrix contraction / projection to compute `original`.
-2. Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
+2. Compute `np.testing.assert_allclose(duplicated - original, np.log(2), atol` as `1e-5)`.
 3. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -469,7 +469,7 @@ duplicated = float(...)  # TODO: compute duplicated
 )
 # Perform matrix contraction / projection to compute `original`.
 original = float(...)  # TODO: compute original
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
+# Compute `np.testing.assert_allclose(duplicated - original, np.log(2), atol` as `1e-5)`.
 np.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)
 # Print the observed values to compare against the expected result.
 print('Duplicated diagonal-only penalty:', duplicated - original)
@@ -484,7 +484,7 @@ duplicated = float(
 )
 # Perform matrix contraction / projection to compute `original`.
 original = float(paired_contrastive(left @ w, right @ w))
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
+# Compute `np.testing.assert_allclose(duplicated - original, np.log(2), atol` as `1e-5)`.
 np.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)
 # Print the observed values to compare against the expected result.
 print('Duplicated diagonal-only penalty:', duplicated - original)
@@ -538,7 +538,7 @@ for epsilon in [1e-3, 5e-4]:
     estimate = float(...)  # TODO: compute estimate
         (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)
     )
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)`
+    # Compute `np.testing.assert_allclose(estimate, auto, rtol` as `3e-3, atol=1e-3)`.
     np.testing.assert_allclose(estimate, auto, rtol = ...  # TODO: compute np.testing.assert_allclose(estimate, auto, rtol
     # Print diagnostic summary of the computed outputs.
     print('Step / finite difference / autodiff:', epsilon, estimate, auto)
@@ -562,7 +562,7 @@ for epsilon in [1e-3, 5e-4]:
     estimate = float(
         (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)
     )
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)`
+    # Compute `np.testing.assert_allclose(estimate, auto, rtol` as `3e-3, atol=1e-3)`.
     np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)
     # Print diagnostic summary of the computed outputs.
     print('Step / finite difference / autodiff:', epsilon, estimate, auto)

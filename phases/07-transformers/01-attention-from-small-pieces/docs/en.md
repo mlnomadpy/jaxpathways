@@ -120,11 +120,11 @@ v = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
 output, weights = attend(q, k, v)
 # Print the observed values to compare against the expected result.
 print("Weights / output:", weights, output)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(weights, jnp.full((2, 3), 1/3))`.
 assert jnp.allclose(weights, jnp.full((2, 3), 1/3))
-# Check numerical equivalence within tolerance: `jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))`
+# Assert that `jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))`.
 assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.sum(weights, axis=-1), 1.)`
+# Assert that `jnp.allclose(jnp.sum(weights, axis=-1), 1.)`.
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 ```
 
@@ -159,11 +159,11 @@ v = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
 output, weights = attend(q, k, v)
 # Print the observed values to compare against the expected result.
 print("Weights / output:", weights, output)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(weights, jnp.full((2, 3), 1/3))`.
 assert jnp.allclose(weights, jnp.full((2, 3), 1/3))
-# Check numerical equivalence within tolerance: `jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))`
+# Assert that `jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))`.
 assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.sum(weights, axis=-1), 1.)`
+# Assert that `jnp.allclose(jnp.sum(weights, axis=-1), 1.)`.
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 ```
 
@@ -230,7 +230,7 @@ scores_np = np.asarray(q_new) @ np.asarray(k).T / np.sqrt(2)
 raw = np.exp(scores_np - scores_np.max(axis=-1, keepdims=True))
 # Reduce along axis=-1 to compute `reference_w`.
 reference_w = raw / raw.sum(axis=-1, keepdims=True)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)`
+# Compute `np.testing.assert_allclose(w_new, reference_w, rtol` as `1e-6, atol=1e-6)`.
 np.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(actual, reference_w @ np.asarray(v), rtol=1e-6, atol=1e-6)
@@ -250,7 +250,7 @@ A separate NumPy calculation checks nonuniform weighting and the output axis.
 shift = jnp.array([5., -2.])
 # Run `attend` to compute `(shifted, _)`.
 shifted, _ = attend(q_new, k, v + shift)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(shifted, actual + shift)`.
 assert jnp.allclose(shifted, actual + shift)
 ```
 
@@ -272,8 +272,8 @@ Permute the three key/value pairs together, then permute only values. Verify inv
 1. Construct `order` via `jnp.array([2, 0, 1])`
 2. Run `attend` to compute `(paired, _)`.
 3. Run `attend` to compute `(mismatched, _)`.
-4. Verify that the numerical values match the expected reference within tolerance.
-5. Check numerical equivalence within tolerance: `not jnp.allclose(mismatched, actual)`
+4. Assert that `jnp.allclose(paired, actual)`.
+5. Assert that `not jnp.allclose(mismatched, actual)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -285,9 +285,9 @@ order = jnp.array(...)  # TODO: compute order
 paired, _ = attend(...)  # TODO: compute paired, _
 # Run `attend` to compute `(mismatched, _)`.
 mismatched, _ = attend(...)  # TODO: compute mismatched, _
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(paired, actual)`.
 assert jnp.allclose(paired, actual)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `not jnp.allclose(mismatched, actual)`
+# Assert that `not jnp.allclose(mismatched, actual)`.
 assert not jnp.allclose(mismatched, actual)  # TODO: complete assertion check
 ```
 
@@ -301,9 +301,9 @@ order = jnp.array([2, 0, 1])
 paired, _ = attend(q_new, k[order], v[order])
 # Run `attend` to compute `(mismatched, _)`.
 mismatched, _ = attend(q_new, k, v[order])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(paired, actual)`.
 assert jnp.allclose(paired, actual)
-# Check numerical equivalence within tolerance: `not jnp.allclose(mismatched, actual)`
+# Assert that `not jnp.allclose(mismatched, actual)`.
 assert not jnp.allclose(mismatched, actual)
 ```
 
@@ -331,7 +331,7 @@ The score matrix does not depend on Dv.
 1. Construct `scalar_v` via `jnp.array([[3.], [6.], [9.]])`
 2. Run `attend` to compute `(scalar_out, _)`.
 3. Check tensor shape invariant: `scalar_out.shape == (2, 1)`
-4. Check numerical equivalence within tolerance: `jnp.allclose(scalar_out, 6.)`
+4. Assert that `jnp.allclose(scalar_out, 6.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -343,7 +343,7 @@ scalar_v = jnp.array(...)  # TODO: compute scalar_v
 scalar_out, _ = attend(...)  # TODO: compute scalar_out, _
 # Check tensor shape invariant: `scalar_out.shape == (2, 1)`
 assert scalar_out.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(scalar_out, 6.)`
+# Assert that `jnp.allclose(scalar_out, 6.)`.
 assert jnp.allclose(scalar_out, 6.)  # TODO: complete assertion check
 ```
 
@@ -357,7 +357,7 @@ scalar_v = jnp.array([[3.], [6.], [9.]])
 scalar_out, _ = attend(q, k, scalar_v)
 # Check tensor shape invariant: `scalar_out.shape == (2, 1)`
 assert scalar_out.shape == (2, 1)
-# Check numerical equivalence within tolerance: `jnp.allclose(scalar_out, 6.)`
+# Assert that `jnp.allclose(scalar_out, 6.)`.
 assert jnp.allclose(scalar_out, 6.)
 ```
 
@@ -386,9 +386,9 @@ Two queries and three keys make the incorrect result visible.
 
 **Step-by-step implementation plan:**
 1. Construct `wrong_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=0)`
-2. Verify that the numerical values match the expected reference within tolerance.
+2. Assert that `jnp.allclose(wrong_w.sum(axis=-1), 1.5)`.
 3. Construct `right_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)`
-4. Verify that the numerical values match the expected reference within tolerance.
+4. Assert that `jnp.allclose(right_w.sum(axis=-1), 1.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -396,11 +396,11 @@ Two queries and three keys make the incorrect result visible.
 # Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.
 # Construct `wrong_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=0)`
 wrong_w = jax.nn.softmax(...)  # TODO: compute wrong_w
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(wrong_w.sum(axis=-1), 1.5)`.
 assert jnp.allclose(wrong_w.sum(axis=-1), 1.5)  # TODO: complete assertion check
 # Construct `right_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)`
 right_w = jax.nn.softmax(...)  # TODO: compute right_w
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(right_w.sum(axis=-1), 1.)`.
 assert jnp.allclose(right_w.sum(axis=-1), 1.)  # TODO: complete assertion check
 ```
 
@@ -410,11 +410,11 @@ assert jnp.allclose(right_w.sum(axis=-1), 1.)  # TODO: complete assertion check
 # Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.
 # Construct `wrong_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=0)`
 wrong_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=0)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(wrong_w.sum(axis=-1), 1.5)`.
 assert jnp.allclose(wrong_w.sum(axis=-1), 1.5)
 # Construct `right_w` via `jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)`
 right_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(right_w.sum(axis=-1), 1.)`.
 assert jnp.allclose(right_w.sum(axis=-1), 1.)
 ```
 

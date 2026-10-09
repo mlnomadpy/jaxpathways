@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
-  "contentHash": "f309980a95122e81564ad76ef8e2f8fd39e9a26ec66324c04361d04360563540",
+  "contentHash": "8409909ae439cbb5c29796399494918f9ab94ba1e7ed0f0d50c7ced84406a2c5",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-07T11:16:29.195414+00:00",
@@ -328,7 +328,7 @@
     "prediction": "Which frozen object refreshes between rollout batches: old policy probabilities or the reference policy?",
     "reading": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
     "alt": "Current parameters change within PPO updates. Old probabilities stay fixed for that rollout batch and refresh next rollout. The reference and reward remain fixed during policy training. This categorical fixture has an exact baseline, so no learned critic is shown.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 5.2,
     "panel": {
       "kind": "table",

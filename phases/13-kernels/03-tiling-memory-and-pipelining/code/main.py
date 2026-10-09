@@ -25,7 +25,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -118,9 +117,9 @@ reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 # Run `pipelined_axpy` to compute `buffered`.
 buffered=pipelined_axpy(x,y,no_pipelining=False)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1...`
+# Compute `np.testing.assert_allclose(synchronous,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(buffered,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
 # Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
@@ -136,11 +135,9 @@ configurations=[(8,128),(16,128),(16,256)]
 metadata=[]
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
-    # Evaluate `gm` from the current inputs and state.
     # Compute `gm` from `(17+bm-1)//bm`
     gm=(17+bm-1)//bm
     gn=(257+bn-1)//bn
-    # Evaluate `programs` from the current inputs and state.
     # Compute `programs` from `gm*gn`
     programs=gm*gn
     padded_elements=programs*bm*bn
@@ -150,7 +147,7 @@ for bm,bn in configurations:
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     # Run `pipelined_axpy` to compute `result`.
     result=pipelined_axpy(x,y,(bm,bn))
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)`
+    # Compute `np.testing.assert_allclose(result,reference,rtol` as `1e-6,atol=1e-6)`.
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
@@ -179,7 +176,6 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
     # Compute `m,n` from `x.shape`
     m,n=x.shape
     bm,bn=block
@@ -271,9 +267,9 @@ reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 # Run `pipelined_axpy` to compute `buffered`.
 buffered=pipelined_axpy(x,y,no_pipelining=False)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1...`
+# Compute `np.testing.assert_allclose(synchronous,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(buffered,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
 # Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
@@ -288,11 +284,9 @@ configurations=[(8,128),(16,128),(16,256)]
 metadata=[]
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
-    # Evaluate `gm` from the current inputs and state.
     # Compute `gm` from `(17+bm-1)//bm`
     gm=(17+bm-1)//bm
     gn=(257+bn-1)//bn
-    # Evaluate `programs` from the current inputs and state.
     # Compute `programs` from `gm*gn`
     programs=gm*gn
     padded_elements=programs*bm*bn
@@ -302,7 +296,7 @@ for bm,bn in configurations:
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     # Run `pipelined_axpy` to compute `result`.
     result=pipelined_axpy(x,y,(bm,bn))
-    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)`
+    # Compute `np.testing.assert_allclose(result,reference,rtol` as `1e-6,atol=1e-6)`.
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
@@ -317,7 +311,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 # Experiment: Change input buffer count without changing the result
 # Experiment — Change input buffer count without changing the result: More input buffering changes potential overlap and storage, not...
 three=pipelined_axpy(x,y,buffers=3)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)`
+# Compute `np.testing.assert_allclose(three,reference,rtol` as `1e-6,atol=1e-6)`.
 np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)
 # Execute `np.testing.assert_array_equal(three,buffered)`
 np.testing.assert_array_equal(three,buffered)
@@ -372,7 +366,6 @@ print("Unsupported pipeline tile rejected")
 # Estimate the price of a third input buffer (Challenge): A third slot for each input increases this limited...
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
-    # Evaluate `two` from the current inputs and state.
     # Compute `two` from `(2*2+2)*bm*bn*4`
     two=(2*2+2)*bm*bn*4
     three=(2*3+2)*bm*bn*4

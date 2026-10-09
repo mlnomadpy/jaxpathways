@@ -116,9 +116,9 @@ Append the remaining block, then run python main.py in the terminal. Compare the
 print("Finite difference:", finite)
 # Print diagnostic summary of the computed outputs.
 print("Autodiff:", automatic)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(automatic, analytic)`.
 assert jnp.allclose(automatic, analytic)
-# Check numerical equivalence within tolerance: `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`
+# Assert that `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`.
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 ```
 
@@ -152,9 +152,9 @@ analytic = 2 * (w - jnp.array([2., -1.]))
 print("Finite difference:", finite)
 # Print diagnostic summary of the computed outputs.
 print("Autodiff:", automatic)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(automatic, analytic)`.
 assert jnp.allclose(automatic, analytic)
-# Check numerical equivalence within tolerance: `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`
+# Assert that `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`.
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 ```
 
@@ -190,7 +190,7 @@ errors = []
 for h_plot in steps:
     # Vectorize across the batch dimension without a Python loop (`estimate`).
     estimate = jax.vmap(lambda e: (objective(w + h_plot * e) - objective(w - h_plot * e)) / (2 * h_plot))(basis)
-    # Reduce across the target axis to summarize ``.
+    # Append the computed value via `errors.append(float(jnp.max(jnp.abs(estimate - analytic))))`.
     errors.append(float(jnp.max(jnp.abs(estimate - analytic))))
 # Compute `visual_data` from `{'kind': 'line', 'x': steps.tolist(), 'xscale': 'log...`
 visual_data = {'kind': 'line', 'x': steps.tolist(), 'xscale': 'log', 'xlabel': 'finite-difference step', 'ylabel': 'maximum absolute gradient error', 'series': [{'label': 'float32 central difference', 'y': errors}]}
@@ -229,7 +229,7 @@ for step_size in [1e-1, 1e-2, 1e-4, 1e-8]:
     print("h / max error:", step_size, float(jnp.max(jnp.abs(estimate-analytic))))
 # Vectorize across the batch dimension with `jax.vmap` (`tiny`).
 tiny = jax.vmap(lambda e: (objective(w+1e-8*e)-objective(w-1e-8*e))/(2e-8))(basis)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `not jnp.allclose(tiny, analytic, atol=1e-3)`.
 assert not jnp.allclose(tiny, analytic, atol=1e-3)
 ```
 
@@ -247,9 +247,9 @@ Nearby float32 inputs can coincide, so reducing the step does not monotonically 
 direction = jnp.array([1., -2.])
 # Compute `directional` from `(objective(w+h*direction)-objective(w-h*direction))/...`
 directional = (objective(w+h*direction)-objective(w-h*direction))/(2*h)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(directional, -8., atol=2e-4)`.
 assert jnp.allclose(directional, -8., atol=2e-4)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(automatic, direction), -8.)`
+# Assert that `jnp.allclose(jnp.dot(automatic, direction), -8.)`.
 assert jnp.allclose(jnp.dot(automatic, direction), -8.)
 ```
 
@@ -270,13 +270,13 @@ symmetric = (jnp.abs(h_kink)-jnp.abs(-h_kink))/(2*h_kink)
 left = (jnp.abs(0.)-jnp.abs(-h_kink))/h_kink
 # Compute `right` from `(jnp.abs(h_kink)-jnp.abs(0.))/h_kink`
 right = (jnp.abs(h_kink)-jnp.abs(0.))/h_kink
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(symmetric,0.)`.
 assert jnp.allclose(symmetric,0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(left,-1.) and jnp.allclose(right,1.)`
+# Assert that `jnp.allclose(left,-1.) and jnp.allclose(right,1.)`.
 assert jnp.allclose(left,-1.) and jnp.allclose(right,1.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)`
+# Assert that `jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)`.
 assert jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)`
+# Assert that `jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)`.
 assert jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)
 ```
 
@@ -298,8 +298,8 @@ Check the gradient again at $w=[2., -1.]$. Explain why this checks a minimum but
 
 **Step-by-step implementation plan:**
 1. Construct `minimum` via `jnp.array([2., -1.])`
-2. Verify that the numerical values match the expected reference within tolerance.
-3. Check numerical equivalence within tolerance: `jnp.allclose(objective(minimum), 0.)`
+2. Assert that `jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))`.
+3. Assert that `jnp.allclose(objective(minimum), 0.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -307,9 +307,9 @@ Check the gradient again at $w=[2., -1.]$. Explain why this checks a minimum but
 # Exercise solution: Check the gradient again at w=[2., -1.].
 # Construct `minimum` via `jnp.array([2., -1.])`
 minimum = jnp.array(...)  # TODO: compute minimum
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))`.
 assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(objective(minimum), 0.)`
+# Assert that `jnp.allclose(objective(minimum), 0.)`.
 assert jnp.allclose(objective(minimum), 0.)  # TODO: complete assertion check
 ```
 
@@ -319,9 +319,9 @@ assert jnp.allclose(objective(minimum), 0.)  # TODO: complete assertion check
 # Exercise solution: Check the gradient again at w=[2., -1.].
 # Construct `minimum` via `jnp.array([2., -1.])`
 minimum = jnp.array([2., -1.])
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))`.
 assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))
-# Check numerical equivalence within tolerance: `jnp.allclose(objective(minimum), 0.)`
+# Assert that `jnp.allclose(objective(minimum), 0.)`.
 assert jnp.allclose(objective(minimum), 0.)
 ```
 
@@ -352,7 +352,7 @@ Use cosine as the analytic reference; here truncation error also matters.
 2. Function `trig_loss(z)` implementing this stage's computation:
 3. Return `jnp.sum(jnp.sin(z))` to the caller.
 4. Vectorize across the batch dimension with `jax.vmap` (`fd`).
-5. Verify that the numerical values match the expected reference within tolerance.
+5. Assert that `jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -366,9 +366,9 @@ def trig_loss(z):
     return ...  # TODO: return computed result
 # Vectorize across the batch dimension with `jax.vmap` (`fd`).
 fd = jax.vmap(...)  # TODO: compute fd
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))`.
 assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)`
+# Assert that `jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)`.
 assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)  # TODO: complete assertion check
 ```
 
@@ -384,9 +384,9 @@ def trig_loss(z):
     return jnp.sum(jnp.sin(z))
 # Vectorize across the batch dimension with `jax.vmap` (`fd`).
 fd = jax.vmap(lambda e: (trig_loss(z+1e-2*e)-trig_loss(z-1e-2*e))/(2e-2))(jnp.eye(2))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))`.
 assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))
-# Check numerical equivalence within tolerance: `jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)`
+# Assert that `jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)`.
 assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)
 ```
 
@@ -416,9 +416,9 @@ Differentiate $(z_0-2)^2$ and compare both coordinates.
 **Step-by-step implementation plan:**
 1. Return `(z[0] - 2.0) ** 2` to the caller.
 2. Differentiate the objective to obtain `bad` via automatic differentiation.
-3. Verify that the numerical values match the expected reference within tolerance.
-4. Check numerical equivalence within tolerance: `not jnp.allclose(bad, analytic)`
-5. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), analytic)`
+3. Assert that `jnp.allclose(bad, jnp.array([-3., 0.]))`.
+4. Assert that `not jnp.allclose(bad, analytic)`.
+5. Assert that `jnp.allclose(jax.grad(objective)(w), analytic)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -429,11 +429,11 @@ def incomplete(z):
     return ...  # TODO: return computed result
 # Differentiate the objective to obtain `bad` via automatic differentiation.
 bad = jax.grad(...)  # TODO: compute bad
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(bad, jnp.array([-3., 0.]))`.
 assert jnp.allclose(bad, jnp.array([-3., 0.]))  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `not jnp.allclose(bad, analytic)`
+# Assert that `not jnp.allclose(bad, analytic)`.
 assert not jnp.allclose(bad, analytic)  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), analytic)`
+# Assert that `jnp.allclose(jax.grad(objective)(w), analytic)`.
 assert jnp.allclose(jax.grad(objective)(w), analytic)  # TODO: complete assertion check
 ```
 
@@ -446,11 +446,11 @@ def incomplete(z):
     return (z[0]-2.)**2
 # Differentiate the objective to obtain `bad` via automatic differentiation.
 bad = jax.grad(incomplete)(w)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(bad, jnp.array([-3., 0.]))`.
 assert jnp.allclose(bad, jnp.array([-3., 0.]))
-# Check numerical equivalence within tolerance: `not jnp.allclose(bad, analytic)`
+# Assert that `not jnp.allclose(bad, analytic)`.
 assert not jnp.allclose(bad, analytic)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), analytic)`
+# Assert that `jnp.allclose(jax.grad(objective)(w), analytic)`.
 assert jnp.allclose(jax.grad(objective)(w), analytic)
 ```
 

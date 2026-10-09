@@ -24,9 +24,9 @@ final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 # Print diagnostic summary of the computed outputs.
 print("Final:", float(final))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))`.
 assert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))
-# Check numerical equivalence within tolerance: `jnp.allclose(final, history[-1])`
+# Assert that `jnp.allclose(final, history[-1])`.
 assert jnp.allclose(final, history[-1])
 
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
@@ -48,9 +48,9 @@ final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 # Print diagnostic summary of the computed outputs.
 print("Final:", float(final))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))`.
 assert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))
-# Check numerical equivalence within tolerance: `jnp.allclose(final, history[-1])`
+# Assert that `jnp.allclose(final, history[-1])`.
 assert jnp.allclose(final, history[-1])
 
 # Figure data experiment
@@ -74,11 +74,11 @@ for inc in [1.,-1.,2.,0.]:
     reference.append(state)
 # Run compiled structured control flow via `jax.lax` (`(last, observed)`).
 last,observed=jax.lax.scan(step,jnp.array(0.),inputs)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(observed,jnp.array([1.,-0.5,1.75,0.875]))`.
 assert jnp.allclose(observed,jnp.array([1.,-0.5,1.75,0.875]))
-# Check numerical equivalence within tolerance: `jnp.allclose(observed,jnp.array(reference))`
+# Assert that `jnp.allclose(observed,jnp.array(reference))`.
 assert jnp.allclose(observed,jnp.array(reference))
-# Check numerical equivalence within tolerance: `jnp.allclose(last,state)`
+# Assert that `jnp.allclose(last,state)`.
 assert jnp.allclose(last,state)
 
 # Experiment: Verify state and sensitivity together
@@ -89,11 +89,11 @@ def terminal(d):
     return jax.lax.scan(lambda c,u:(d*c+u,d*c+u),jnp.array(0.),increments)[0]
 # Differentiate the objective to obtain `(value, sensitivity)` via automatic differentiation.
 value,sensitivity=jax.value_and_grad(terminal)(0.5)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(value,1.875)`.
 assert jnp.allclose(value,1.875)
-# Check numerical equivalence within tolerance: `jnp.allclose(sensitivity,2.75)`
+# Assert that `jnp.allclose(sensitivity,2.75)`.
 assert jnp.allclose(sensitivity,2.75)
-# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(terminal)(0.5),value)`
+# Assert that `jnp.allclose(jax.jit(terminal)(0.5),value)`.
 assert jnp.allclose(jax.jit(terminal)(0.5),value)
 
 # Reference solution. Try the exercise before reading this.
@@ -108,16 +108,16 @@ def simulate(decay):
         return value, value
     # Return `jax.lax.scan(transition, jnp.array(0.0), increments)[0]` to the caller.
     return jax.lax.scan(transition, jnp.array(0.), increments)[0]
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(jax.grad(simulate)(0.5), 2.75)`.
 assert jnp.allclose(jax.grad(simulate)(0.5), 2.75)
 
 # Reference practice: Record a different output
 # Record a different output (Practice): Carry and history need not have the same interpretation.
 # Run compiled structured control flow via `jax.lax` (`(last, energy)`).
 last,energy=jax.lax.scan(lambda c,u:(0.5*c+u,(0.5*c+u)**2),jnp.array(0.),increments)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(last,1.875)`.
 assert jnp.allclose(last,1.875)
-# Check numerical equivalence within tolerance: `jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))`
+# Assert that `jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))`.
 assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))
 
 # Reference practice: Diagnose a growing carry

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "5d7e3405e4ace391e233a1ccfc995ffd425d36e07d2b364bf8c26f105ac82ecd",
+  "contentHash": "75b75338788495f40b4bf4d93999f39ac88eebc0d94c79f572162082c67ebd3d",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
   "generatedAt": "2026-10-06T15:41:32.307798+00:00",
@@ -111,7 +111,7 @@
     "prediction": "Why test an awkward shape in addition to a tile-aligned shape?",
     "reading": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
     "alt": "Two-by-four tiles cover a five-by-eleven logical matrix. Each cell lists a program ID and valid row/column range. Bottom and right tiles are partial; accesses outside the logical range need boundary treatment. Program IDs are categories, matching the corrected discrete ownership heatmap. Here explicit padding makes whole-block accesses valid; cropping removes artificial output positions.",
-    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "scope": "Architecture and dataflow mechanism diagram.",
     "height": 4.6,
     "panel": {
       "kind": "table",

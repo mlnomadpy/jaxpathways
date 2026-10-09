@@ -12,11 +12,15 @@ function searchLesson(lesson, query) {
     lesson.objective,
     c.problem,
     c.idea,
-    ...(c.sections || []).flatMap((s) => [s.title, s.body, s.formula]),
+    c.code,
+    c.solution,
+    c.buildCode,
+    ...(c.buildSteps || []).flatMap((s) => [s.title, s.instruction, s.code, s.explanation]),
+    ...(c.sections || []).flatMap((s) => [s.title, s.body, s.formula, s.math]),
     ...(c.experiments || []).flatMap((e) => [e.title, e.prediction, e.explanation, e.code]),
     c.exercise,
     c.diagnosis,
-    ...(c.practice || []).flatMap((p) => [p.title, p.prompt, p.explanation]),
+    ...(c.practice || []).flatMap((p) => [p.title, p.prompt, p.explanation, p.solution]),
     ...(c.references || []).map((r) => r.title),
   ].filter((chunk) => typeof chunk === 'string');
   /** @type {Record<string, string>} */

@@ -35,7 +35,7 @@ $$
 
 ![Align axes before reducing](../outputs/mechanism.svg)
 
-*Conceptual / analytic teaching diagram; not a recorded benchmark.*
+*Architecture and dataflow mechanism diagram.*
 
 Feature bias reuses a vector across observations; row offsets reuse each scalar across features. The final row creates all-pairs residuals. A mean would hide the unwanted $(n,n)$ intermediate. Each row describes a different shape contract.
 
@@ -120,7 +120,7 @@ Check that the resulting arrays satisfy the expected shape, dtype, and numerical
 
 ```python
 assert y.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`
+# Assert that `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`.
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 ```
 
@@ -144,7 +144,7 @@ print(y)
 print("Shape:", y.shape, "dtype:", y.dtype)
 # Check tensor shape invariant: `y.shape == (2, 3)`
 assert y.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`
+# Assert that `jnp.allclose(y[1], jnp.array([14., 25., 36.]))`.
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 ```
 
@@ -215,9 +215,9 @@ print("pairwise residuals:", pairwise_residuals)
 assert correct_residuals.shape == (3,)
 # Check tensor shape invariant: `pairwise_residuals.shape == (3, 3)`
 assert pairwise_residuals.shape == (3, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)`
+# Assert that `jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)`.
 assert jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)
-# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)`
+# Assert that `jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)`.
 assert jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)
 ```
 
@@ -259,7 +259,7 @@ Add a different scalar offset to each row using offsets $[100., 200.]$. Make its
 1. Construct `offsets` via `jnp.array([100., 200.])[:, None]`
 2. Compute `z` from `batch + offsets`
 3. Check tensor shape invariant: `offsets.shape == (2, 1)`
-4. Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`
+4. Assert that `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -271,7 +271,7 @@ offsets = jnp.array(...)  # TODO: compute offsets
 z = ...  # TODO: compute z
 # Check tensor shape invariant: `offsets.shape == (2, 1)`
 assert offsets.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`
+# Assert that `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`.
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))  # TODO: complete assertion check
 ```
 
@@ -285,7 +285,7 @@ offsets = jnp.array([100., 200.])[:, None]
 z = batch + offsets
 # Check tensor shape invariant: `offsets.shape == (2, 1)`
 assert offsets.shape == (2, 1)
-# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`
+# Assert that `jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))`.
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 ```
 
@@ -312,7 +312,7 @@ Use bias shape $(3,)$ and offsets shape $(2, 1)$. Do not swap their semantic rol
 **Step-by-step implementation plan:**
 1. Construct `combined` via `batch + bias + jnp.array([100., 200.])[:, None]`
 2. Check tensor shape invariant: `combined.shape == (2, 3)`
-3. Check numerical equivalence within tolerance: `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225....`
+3. Assert that `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -322,7 +322,7 @@ Use bias shape $(3,)$ and offsets shape $(2, 1)$. Do not swap their semantic rol
 combined = ...  # TODO: compute combined
 # Check tensor shape invariant: `combined.shape == (2, 3)`
 assert combined.shape  # TODO: complete assertion check
-# Check numerical equivalence within tolerance: `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225....`
+# Assert that `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))`.
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))  # TODO: complete assertion check
 ```
 
@@ -334,7 +334,7 @@ assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]
 combined = batch + bias + jnp.array([100., 200.])[:, None]
 # Check tensor shape invariant: `combined.shape == (2, 3)`
 assert combined.shape == (2, 3)
-# Check numerical equivalence within tolerance: `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225....`
+# Assert that `jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))`.
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))
 ```
 
@@ -363,7 +363,7 @@ Raise a descriptive ValueError before subtracting. The check is based on shape m
 **Step-by-step implementation plan:**
 1. Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
 2. Return `jnp.mean((prediction - target) ** 2)` to the caller.
-3. Verify that the numerical values match the expected reference within tolerance.
+3. Assert that `jnp.allclose(aligned_mse(predictions, targets), 0.)`.
 4. Run the boundary check and catch the expected exception:
 
 **Starter code scaffold (fill in the TODOs):**
@@ -376,7 +376,7 @@ def aligned_mse(prediction, target):
         raise ValueError("aligned prediction and target shapes must match")
     # Return `jnp.mean((prediction - target) ** 2)` to the caller.
     return ...  # TODO: return computed result
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(aligned_mse(predictions, targets), 0.)`.
 assert jnp.allclose(aligned_mse(predictions, targets), 0.)  # TODO: complete assertion check
 # Run the boundary check and catch the expected exception:
 try:
@@ -397,7 +397,7 @@ def aligned_mse(prediction, target):
         raise ValueError("aligned prediction and target shapes must match")
     # Return `jnp.mean((prediction - target) ** 2)` to the caller.
     return jnp.mean((prediction - target) ** 2)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(aligned_mse(predictions, targets), 0.)`.
 assert jnp.allclose(aligned_mse(predictions, targets), 0.)
 # Run the boundary check and catch the expected exception:
 try:

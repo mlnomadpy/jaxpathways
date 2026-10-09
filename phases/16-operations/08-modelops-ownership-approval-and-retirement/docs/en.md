@@ -136,8 +136,7 @@ def activate(store, version, bundle, approval, now, target):
     """A single-writer local fixture; a deployed service needs concurrency control and auth."""
     # Run `verify_release` to perform the next check or state transition.
     verify_release(bundle, approval, now, target)
-    # Read or serialize artifact data on disk (`store`).
-    # Execute the next step of the computation.
+    # Compute `store` as `Path(store)`.
     store = Path(store)
     store.mkdir(parents=True, exist_ok=True)
     # Compute `pointer` from `store / 'active.json'`
@@ -148,7 +147,6 @@ def activate(store, version, bundle, approval, now, target):
     selected = {'current': version, 'previous': previous, 'bundle_hash': digest(bundle)}
     # Compute `temporary` from `store / 'active.tmp'`
     temporary = store / 'active.tmp'
-    # Read or serialize artifact data on disk (``).
     # Run `temporary.write_text` to perform the next check or state transition.
     temporary.write_text(json.dumps(selected))
     temporary.replace(pointer)
@@ -165,16 +163,18 @@ checks = [True]
 with tempfile.TemporaryDirectory(prefix='modelops-') as folder:
     # Run `activate` to compute `active`.
     active = activate(folder,'model-v1',bundle,approval,150,'cpu-demo')
-    # Read or serialize artifact data on disk (`pointer`).
     # Run `pointer.read_bytes` to compute `before`.
     pointer = Path(folder)/'active.json'
     before = pointer.read_bytes()
     # Iterate over `(candidate, at, target)` to step through the computation:
     for candidate,at,target in [(dict(bundle,model_hash=digest({'weight':3})),150,'cpu-demo'), (bundle,200,'cpu-demo'), (bundle,150,'edge-device')]:
         # Run the boundary check and catch the expected exception:
-        try: activate(folder,'rejected-v2',candidate,approval,at,target)
-        except ValueError: checks.append(False)
-        else: raise AssertionError('invalid release activated')
+        try:
+            activate(folder,'rejected-v2',candidate,approval,at,target)
+        except ValueError:
+            checks.append(False)
+        else:
+            raise AssertionError('invalid release activated')
         # Assert invariant `pointer.read_bytes() == before` holds
         assert pointer.read_bytes() == before
 # Assert invariant `checks == [True,False,False,False]` holds
@@ -252,8 +252,7 @@ def activate(store, version, bundle, approval, now, target):
     """A single-writer local fixture; a deployed service needs concurrency control and auth."""
     # Run `verify_release` to perform the next check or state transition.
     verify_release(bundle, approval, now, target)
-    # Read or serialize artifact data on disk (`store`).
-    # Execute the next step of the computation.
+    # Compute `store` as `Path(store)`.
     store = Path(store)
     store.mkdir(parents=True, exist_ok=True)
     # Compute `pointer` from `store / 'active.json'`
@@ -264,7 +263,6 @@ def activate(store, version, bundle, approval, now, target):
     selected = {'current': version, 'previous': previous, 'bundle_hash': digest(bundle)}
     # Compute `temporary` from `store / 'active.tmp'`
     temporary = store / 'active.tmp'
-    # Read or serialize artifact data on disk (``).
     # Run `temporary.write_text` to perform the next check or state transition.
     temporary.write_text(json.dumps(selected))
     temporary.replace(pointer)
@@ -281,16 +279,18 @@ checks = [True]
 with tempfile.TemporaryDirectory(prefix='modelops-') as folder:
     # Run `activate` to compute `active`.
     active = activate(folder,'model-v1',bundle,approval,150,'cpu-demo')
-    # Read or serialize artifact data on disk (`pointer`).
     # Run `pointer.read_bytes` to compute `before`.
     pointer = Path(folder)/'active.json'
     before = pointer.read_bytes()
     # Iterate over `(candidate, at, target)` to step through the computation:
     for candidate,at,target in [(dict(bundle,model_hash=digest({'weight':3})),150,'cpu-demo'), (bundle,200,'cpu-demo'), (bundle,150,'edge-device')]:
         # Run the boundary check and catch the expected exception:
-        try: activate(folder,'rejected-v2',candidate,approval,at,target)
-        except ValueError: checks.append(False)
-        else: raise AssertionError('invalid release activated')
+        try:
+            activate(folder,'rejected-v2',candidate,approval,at,target)
+        except ValueError:
+            checks.append(False)
+        else:
+            raise AssertionError('invalid release activated')
         # Assert invariant `pointer.read_bytes() == before` holds
         assert pointer.read_bytes() == before
 # Assert invariant `checks == [True,False,False,False]` holds
@@ -351,9 +351,12 @@ PASS: operations-08
 # Assert invariant `verify_release(bundle` holds
 assert verify_release(bundle,approval,199,'cpu-demo')
 # Run the boundary check and catch the expected exception:
-try: verify_release(bundle,approval,200,'cpu-demo')
-except ValueError: print('Expiry is exclusive: 199 accepted, 200 rejected.')
-else: raise AssertionError('expired approval accepted')
+try:
+    verify_release(bundle,approval,200,'cpu-demo')
+except ValueError:
+    print('Expiry is exclusive: 199 accepted, 200 rejected.')
+else:
+    raise AssertionError('expired approval accepted')
 ```
 
 **Expected:** Time 199 is accepted; 200 is rejected.
@@ -379,9 +382,12 @@ Change the evaluation hash while keeping the model unchanged, and prove the old 
 # Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
 rechecked = dict(...)  # TODO: compute rechecked
 # Run the boundary check and catch the expected exception:
-try: verify_release(rechecked,approval,150,'cpu-demo')
-except ValueError: print('Changed evaluation invalidates the old approval.')
-else: raise AssertionError('stale approval accepted')
+try:
+    verify_release(rechecked,approval,150,'cpu-demo')
+except ValueError:
+    print('Changed evaluation invalidates the old approval.')
+else:
+    raise AssertionError('stale approval accepted')
 ```
 
 <details><summary>Reference solution</summary>
@@ -390,9 +396,12 @@ else: raise AssertionError('stale approval accepted')
 # Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
 rechecked=dict(bundle,evaluation_hash=digest({'high_slice_mse':9.}))
 # Run the boundary check and catch the expected exception:
-try: verify_release(rechecked,approval,150,'cpu-demo')
-except ValueError: print('Changed evaluation invalidates the old approval.')
-else: raise AssertionError('stale approval accepted')
+try:
+    verify_release(rechecked,approval,150,'cpu-demo')
+except ValueError:
+    print('Changed evaluation invalidates the old approval.')
+else:
+    raise AssertionError('stale approval accepted')
 ```
 
 </details>
@@ -429,9 +438,12 @@ changed_owner = dict(...)  # TODO: compute changed_owner
 # Assert invariant `digest(changed_owner)!=approval['bundle_hash']` holds
 assert digest(changed_owner)  # TODO: complete assertion check
 # Run the boundary check and catch the expected exception:
-try: verify_release(changed_owner,approval,150,'cpu-demo')
-except ValueError: print('Ownership change requires renewed review.')
-else: raise AssertionError('changed owner accepted')
+try:
+    verify_release(changed_owner,approval,150,'cpu-demo')
+except ValueError:
+    print('Ownership change requires renewed review.')
+else:
+    raise AssertionError('changed owner accepted')
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -442,9 +454,12 @@ changed_owner=dict(bundle,owner='different-team')
 # Assert invariant `digest(changed_owner)!=approval['bundle_hash']` holds
 assert digest(changed_owner)!=approval['bundle_hash']
 # Run the boundary check and catch the expected exception:
-try: verify_release(changed_owner,approval,150,'cpu-demo')
-except ValueError: print('Ownership change requires renewed review.')
-else: raise AssertionError('changed owner accepted')
+try:
+    verify_release(changed_owner,approval,150,'cpu-demo')
+except ValueError:
+    print('Ownership change requires renewed review.')
+else:
+    raise AssertionError('changed owner accepted')
 ```
 
 Ownership is an operational responsibility, so this policy requires review after it changes. Organizations may choose different policies, but the rule must be explicit.

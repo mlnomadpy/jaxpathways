@@ -20,9 +20,9 @@ compiled = jax.jit(reduce_values, static_argnames=("mode",))
 x = jnp.array([1., 2., 3.])
 # Print the observed values to compare against the expected result.
 # Print diagnostic summary of the computed outputs.
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(compiled(x, mode="sum"), 6.)`.
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(compiled(x`
+# Assert that `jnp.allclose(compiled(x, mode="mean"), 2.)`.
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 # Tracing, static arguments, and recompilation: Tracing observes how Python builds an array computation from...
@@ -46,9 +46,9 @@ x = jnp.array([1., 2., 3.])
 print("Sum:", float(compiled(x, mode="sum")))
 # Print diagnostic summary of the computed outputs.
 print("Mean:", float(compiled(x, mode="mean")))
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(compiled(x, mode="sum"), 6.)`.
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
-# Check numerical equivalence within tolerance: `jnp.allclose(compiled(x`
+# Assert that `jnp.allclose(compiled(x, mode="mean"), 2.)`.
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 # Figure data experiment
@@ -68,9 +68,9 @@ def sum_squares(values):
 print(jax.make_jaxpr(sum_squares)(x))
 # Wrap with `jax.jit` (`staged_squares`) so XLA traces and compiles the function.
 staged_squares = jax.jit(sum_squares)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(staged_squares(x), 14.)`.
 assert jnp.allclose(staged_squares(x), 14.)
-# Check numerical equivalence within tolerance: `jnp.allclose(staged_squares(x + 1.), 29.)`
+# Assert that `jnp.allclose(staged_squares(x + 1.), 29.)`.
 assert jnp.allclose(staged_squares(x + 1.), 29.)
 
 # Experiment: Reproduce and repair a dynamic branch
@@ -96,9 +96,9 @@ def runtime_branch(value):
     return jax.lax.cond(value > 0., lambda z: z ** 2, lambda z: -z, value)
 # Wrap with `jax.jit` (`compiled_branch`) so XLA traces and compiles the function.
 compiled_branch = jax.jit(runtime_branch)
-# Verify that the numerical values match the expected reference within tolerance.
+# Assert that `jnp.allclose(compiled_branch(jnp.array(-2.)), 2.)`.
 assert jnp.allclose(compiled_branch(jnp.array(-2.)), 2.)
-# Check numerical equivalence within tolerance: `jnp.allclose(compiled_branch(jnp.array(3.)), 9.)`
+# Assert that `jnp.allclose(compiled_branch(jnp.array(3.)), 9.)`.
 assert jnp.allclose(compiled_branch(jnp.array(3.)), 9.)
 
 # Reference solution. Try the exercise before reading this.
@@ -120,7 +120,7 @@ choose = jax.jit(choose_reduction, static_argnames=("mode",))
 for values in (x, jnp.array([-4., -1., -2.])):
     # Loop over `(mode, reference)` in `(('sum', jnp.sum), ('mean', jnp.mean), ('max', jnp.max))`:
     for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
-        # Check numerical equivalence within tolerance: `jnp.allclose(choose(values, mode=mode), reference(values))`
+        # Assert that `jnp.allclose(choose(values, mode=mode), reference(values))`.
         assert jnp.allclose(choose(values, mode=mode), reference(values))
 # Run the boundary check and catch the expected exception:
 try:
@@ -139,7 +139,7 @@ def elementwise_absolute(values):
 compiled_absolute = jax.jit(elementwise_absolute)
 # Iterate over `values` to step through the computation:
 for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
-    # Check numerical equivalence within tolerance: `jnp.allclose(compiled_absolute(values), jnp.abs(values))`
+    # Assert that `jnp.allclose(compiled_absolute(values), jnp.abs(values))`.
     assert jnp.allclose(compiled_absolute(values), jnp.abs(values))
 
 # Reference practice: Audit a shape-dependent specialization
@@ -157,6 +157,6 @@ for length in (3, 5):
         values = jnp.arange(length, dtype=jnp.float32) + shift
         # Run `sum` to compute `expected`.
         expected = sum(float(v) ** 2 for v in values)
-        # Check numerical equivalence within tolerance: `jnp.allclose(compiled_squares(values), expected)`
+        # Assert that `jnp.allclose(compiled_squares(values), expected)`.
         assert jnp.allclose(compiled_squares(values), expected)
 print("PASS: transforms-05")

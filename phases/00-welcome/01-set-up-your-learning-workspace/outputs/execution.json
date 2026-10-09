@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-01",
-  "contentHash": "0cdd92d8c8b335b67a3ace087e106f0870905617ce969f8e770a77eb23e2b48e",
+  "contentHash": "9f5daafe82f4003b811cca85b50bb2cb5832c4bee49fcaef5a42bc0b4bccd721",
   "executedAt": "2026-10-08T14:01:07.065447+00:00",
   "environment": {
     "backend": "cpu",

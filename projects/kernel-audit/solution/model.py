@@ -22,11 +22,10 @@ def validate_pair(x,y,block):
 def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
-    # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `m,n` as `x.shape`.
     m,n=x.shape
     bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Evaluate the compound expression for `padded`.
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -44,7 +43,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` as `block`.
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -60,7 +59,7 @@ def blocked_axpy(x,y,block=(2,4)):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` as `block`.
     bm,bn=block
     # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
@@ -113,7 +112,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         raise ValueError("at least five repeated target measurements required")
     # Import time for this computation.
     import time
-    # Evaluate `records` from the current inputs and state.
+    # Construct dictionary `records` with the structured fields for this stage.
     records={}
     # Iterate over `(label, function)` to step through the computation:
     for label,function in (("candidate",candidate),("baseline",baseline)):
@@ -126,7 +125,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         # Repeat the update loop over `range(5)` steps:
         # Synchronize host execution until asynchronous device computation completes.
         for _ in range(5):compiled(*args).block_until_ready()
-        # Evaluate `samples` from the current inputs and state.
+        # Initialize list `samples` for the stage values.
         samples=[]
         # Repeat the update loop over `range(repeats)` steps:
         for _ in range(repeats):
@@ -136,7 +135,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
             compiled(*args).block_until_ready()
             # Record execution timing or profiler trace in ``.
             samples.append((time.perf_counter()-started)*1000)
-        # Evaluate `records[label]` from the current inputs and state.
+        # Construct dictionary `records[label]` with the structured fields for this stage.
         records[label]={"compile_seconds":compile_seconds,"samples_ms":samples,
             "median_ms":float(np.median(samples)),"p90_ms":float(np.percentile(samples,90))}
     # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `records['actual_backend']`.
@@ -156,7 +155,7 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
     # Guard input contract (`x.dtype != bias.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=bias.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 required")
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` as `block`.
     bm,bn=block
     # Guard input contract (`not isinstance(bm, int) or not isinstance(bn, int) or bm < 1 or (bn < 1)`) and fail fast if violated.
     if not isinstance(bm,int) or not isinstance(bn,int) or bm<1 or bn<1:
@@ -170,9 +169,7 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
             raise RuntimeError("Real TPU inputs/backend required; CPU fallback is disabled")
         if bm%8 or bn%128:
             raise ValueError("this TPU wrapper requires block multiples of (8,128)")
-    # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `pm` from the current inputs and state.
-    # Evaluate `pn` from the current inputs and state.
+    # Compute `m,n` as `x.shape`.
     m,n=x.shape
     pm=(m+bm-1)//bm*bm
     pn=(n+bn-1)//bn*bn

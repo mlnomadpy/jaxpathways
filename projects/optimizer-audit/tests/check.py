@@ -167,4 +167,4 @@ for penalty in [.03,.5]:
     np.testing.assert_allclose(h@fitted,right,atol=2e-10)
 rejects(lambda:m.ridge_solution(x,y,-.1))
 print('PASS stage 5: analytic rank-deficient ridge, prediction ambiguity and changed-design stationarity',flush=True)
-print(json.dumps({'jax':jax.__version__,'numpy':np.__version__,'backend':jax.default_backend(),'scope':'synthetic CPU numerical optimization; no algorithm leaderboard or hardware benchmark'},indent=2))
+print(json.dumps({'jax':jax.__version__,'numpy':np.__version__,'backend':jax.default_backend(),'scope':'synthetic CPU numerical optimization verification'},indent=2))

@@ -312,7 +312,7 @@ for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol=2e-6, rtol=2e-6)
 # Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = 2 * xh.T @ (xh @ w2h - yh[::-1]) / 16
-# Check numerical equivalence within tolerance: `np.max(np.abs(wrong_labels-r2)) > 0.01`
+# Assert that `np.max(np.abs(wrong_labels-r2)) > 0.01`.
 assert np.max(np.abs(wrong_labels-r2)) > 0.01
 # Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')

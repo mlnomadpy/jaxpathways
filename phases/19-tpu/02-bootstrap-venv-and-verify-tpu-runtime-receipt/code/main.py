@@ -143,7 +143,7 @@ print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in sl
 per_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]
 # Compute `cumulative` from `[float(sum(per_chip[: i + 1])) for i in range(4)]`
 cumulative = [float(sum(per_chip[: i + 1])) for i in range(4)]
-# Compute `visual_data` from `{`
+# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': ['chip 0 (0..7)', 'chip 1 (8..15)', 'chip 2 (16..23)', 'chip 3 (24..31)'],
@@ -163,7 +163,7 @@ x4 = jnp.arange(4 * 8, dtype=jnp.float32).reshape(4, 8)
 row_sums_4 = [float(v) for v in jnp.sum(x4 * x4, axis=1)]
 # Print the observed values to compare against the expected result.
 print("Per-chip sums on a 4-chip slice:", row_sums_4, "Total:", sum(row_sums_4))
-# Assert invariant `row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4)...` holds
+# Assert that `row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) == 10416.0`.
 assert row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) == 10416.0
 
 # Experiment: Verify teardown confirmation logic

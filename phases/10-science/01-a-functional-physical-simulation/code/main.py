@@ -40,11 +40,11 @@ times = np.arange(steps+1)*dt
 continuous = 2.0*np.exp(-rate*times)
 # Compute `discrete` from `2.0*(1-rate*dt)**np.arange(steps+1)`
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol...`
+# Compute `np.testing.assert_allclose(trajectory, discrete, rtol` as `1e-12, atol=1e-12)`.
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
 # Assert invariant `np.all(np.diff(np.asarray(trajectory)) < 0)` holds
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
-# Check numerical equivalence within tolerance: `abs(float(trajectory[-1])-continuous[-1]) > 0.1`
+# Assert that `abs(float(trajectory[-1])-continuous[-1]) > 0.1`.
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
 # Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
@@ -102,11 +102,11 @@ times = np.arange(steps+1)*dt
 continuous = 2.0*np.exp(-rate*times)
 # Compute `discrete` from `2.0*(1-rate*dt)**np.arange(steps+1)`
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol...`
+# Compute `np.testing.assert_allclose(trajectory, discrete, rtol` as `1e-12, atol=1e-12)`.
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
 # Assert invariant `np.all(np.diff(np.asarray(trajectory)) < 0)` holds
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
-# Check numerical equivalence within tolerance: `abs(float(trajectory[-1])-continuous[-1]) > 0.1`
+# Assert that `abs(float(trajectory[-1])-continuous[-1]) > 0.1`.
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
 # Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
@@ -136,7 +136,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 # Experiment — Stable does not mean physically positive: The magnitude decays because |1-kh|=0.4, but crossing below...
 # Construct `oscillatory` via `euler_solve(0.7, jnp.array(2.0), 4, 2.0)`
 oscillatory = euler_solve(0.7, jnp.array(2.0), 4, 2.0)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128,...`
+# Compute `np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128, 0.0512], atol` as `1e-12)`.
 np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128, 0.0512], atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Stable but sign-alternating:", np.asarray(oscillatory))
@@ -145,7 +145,7 @@ print("Stable but sign-alternating:", np.asarray(oscillatory))
 # Experiment — Reproduce numerical instability: The multiplier is -1.1.
 # Construct `unstable` via `euler_solve(0.7, jnp.array(2.0), 6, 3.0)`
 unstable = euler_solve(0.7, jnp.array(2.0), 6, 3.0)
-# Check numerical equivalence within tolerance: `abs(float(unstable[-1])) > 2.0`
+# Assert that `abs(float(unstable[-1])) > 2.0`.
 assert abs(float(unstable[-1])) > 2.0
 # Assert invariant `2*np.exp(-0.7*18) < 1e-4` holds
 assert 2*np.exp(-0.7*18) < 1e-4
@@ -158,11 +158,11 @@ print("Unstable numerical endpoint:", float(unstable[-1]))
 changed = euler_solve(0.3, jnp.array(5.0), 20, 0.1)
 # Compute `reference` from `5.0*(1-0.3*0.1)**np.arange(21)`
 reference = 5.0*(1-0.3*0.1)**np.arange(21)
-# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed, reference, rtol=1e-12)`
+# Compute `np.testing.assert_allclose(changed, reference, rtol` as `1e-12)`.
 np.testing.assert_allclose(changed, reference, rtol=1e-12)
 # Assert invariant `float(changed[0]) == 5.0` holds
 assert float(changed[0]) == 5.0
-# Check numerical equivalence within tolerance: `abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03`
+# Assert that `abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03`.
 assert abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03
 # Print the observed values to compare against the expected result.
 print("Changed rate, initial state and grid verified")

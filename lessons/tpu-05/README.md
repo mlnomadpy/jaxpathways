@@ -93,7 +93,7 @@ import json
 import jax
 import numpy as np
 
-# Compute `SLICE_CATALOG` from `[`
+# Initialize list `SLICE_CATALOG` for the stage values.
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
@@ -137,7 +137,7 @@ single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "dis
 pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
 # Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
 assert "--worker=all" not in single_cmds["ssh_run"]
-# Assert invariant `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod...` holds
+# Assert that `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]`.
 assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
 # Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
@@ -167,7 +167,7 @@ import json
 import jax
 import numpy as np
 
-# Compute `SLICE_CATALOG` from `[`
+# Initialize list `SLICE_CATALOG` for the stage values.
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
@@ -211,7 +211,7 @@ single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "dis
 pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
 # Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
 assert "--worker=all" not in single_cmds["ssh_run"]
-# Assert invariant `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod...` holds
+# Assert that `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]`.
 assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
 # Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
@@ -239,7 +239,7 @@ The horizontal axis compares four Cloud TPU slices (`v5litepod-4`, `v5litepod-8`
 
 ```python
 # Compute figure data for: Host count, per-host local chips, and global TPU chips across single-host and Pod slices
-# Compute `visual_data` from `{`
+# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': [s['slice'] for s in SLICE_CATALOG],
@@ -300,7 +300,7 @@ Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` ch
 hbm_by_slice = {s["slice"]: s["total_hbm_gib"] for s in SLICE_CATALOG}
 # Print the observed values to compare against the expected result.
 print("Total HBM GiB by slice:", hbm_by_slice)
-# Assert invariant `hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] ==...` holds
+# Assert that `hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256`.
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
 ```
 
@@ -321,7 +321,7 @@ Call `build_tpu_experiment_commands('jax-tpu-pod', 'us-east5-a', 'transformers-0
 **Step-by-step implementation plan:**
 1. Print the observed values to compare against the expected result.
 2. Print diagnostic summary of the computed outputs.
-3. Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
+3. Assert that `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transfo`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -332,7 +332,7 @@ tx_cmds = build_tpu_experiment_commands(...)  # TODO: compute tx_cmds
 print("Stage:", tx_cmds["scp_stage"])
 # Print diagnostic summary of the computed outputs.
 print("Run:", tx_cmds["ssh_run"])
-# Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
+# Assert that `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transfo`.
 assert "--worker=all"  # TODO: complete assertion check
 ```
 
@@ -345,7 +345,7 @@ tx_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-east5-a", "transforme
 print("Stage:", tx_cmds["scp_stage"])
 # Print diagnostic summary of the computed outputs.
 print("Run:", tx_cmds["ssh_run"])
-# Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
+# Assert that `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transfo`.
 assert "--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transformers-04.py" in tx_cmds["ssh_run"]
 ```
 
