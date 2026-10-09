@@ -77,11 +77,11 @@ Create a fresh main.py. The first feature is an intercept. Targets contain three
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `X` with explicit values and shape.
+# Construct `X` via `jnp.array([[1.,-1.],[1.,0.],[1.,1.]])`
 X = jnp.array([[1.,-1.],[1.,0.],[1.,1.]])
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([-1.,1.,3.])`
 y = jnp.array([-1.,1.,3.])
-# Evaluate `(sigma, prior_scale)` from the current inputs and state.
+# Compute `sigma, prior_scale` from `1., 2.`
 sigma, prior_scale = 1., 2.
 ```
 
@@ -94,11 +94,11 @@ Append the conjugate update. Use a linear solve rather than writing an explicit 
 ```python
 # Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
 def posterior(X,y,sigma,prior_scale):
-    # Initialize array `precision` with explicit values and shape.
+    # Compute `precision` from `jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2`
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     # Perform matrix contraction / projection to compute `mean`.
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
-    # Initialize array `covariance` with explicit values and shape.
+    # Compute `covariance` from `jnp.linalg.solve(precision,jnp.eye(X.shape[1]))`
     covariance = jnp.linalg.solve(precision,jnp.eye(X.shape[1]))
     # Return `(mean, covariance)` to the caller.
     return mean,covariance
@@ -106,7 +106,7 @@ def posterior(X,y,sigma,prior_scale):
 mean,cov = posterior(X,y,sigma,prior_scale)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 ```
 
@@ -125,13 +125,13 @@ def predictive(design,mean,cov,sigma):
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     # Return `(center, latent_variance, latent_variance + sigma ** 2)` to the caller.
     return center,latent_variance,latent_variance+sigma**2
-# Initialize array `query` with explicit values and shape.
+# Construct `query` via `jnp.array([[1.,0.],[1.,2.]])`
 query = jnp.array([[1.,0.],[1.,2.]])
 # Run `predictive` to compute `(center, latent_var, observation_var)`.
 center,latent_var,observation_var = predictive(query,mean,cov,sigma)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(observation_var-latent_var,1.)`
 assert jnp.allclose(observation_var-latent_var,1.)
 # Print the observed values to compare against the expected result.
 print('posterior mean:',mean,'covariance:',cov)
@@ -149,20 +149,20 @@ The variance at the extrapolation input is larger because slope uncertainty cont
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `X` with explicit values and shape.
+# Construct `X` via `jnp.array([[1.,-1.],[1.,0.],[1.,1.]])`
 X = jnp.array([[1.,-1.],[1.,0.],[1.,1.]])
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([-1.,1.,3.])`
 y = jnp.array([-1.,1.,3.])
-# Evaluate `(sigma, prior_scale)` from the current inputs and state.
+# Compute `sigma, prior_scale` from `1., 2.`
 sigma, prior_scale = 1., 2.
 
 # Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
 def posterior(X,y,sigma,prior_scale):
-    # Initialize array `precision` with explicit values and shape.
+    # Compute `precision` from `jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2`
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     # Perform matrix contraction / projection to compute `mean`.
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
-    # Initialize array `covariance` with explicit values and shape.
+    # Compute `covariance` from `jnp.linalg.solve(precision,jnp.eye(X.shape[1]))`
     covariance = jnp.linalg.solve(precision,jnp.eye(X.shape[1]))
     # Return `(mean, covariance)` to the caller.
     return mean,covariance
@@ -170,7 +170,7 @@ def posterior(X,y,sigma,prior_scale):
 mean,cov = posterior(X,y,sigma,prior_scale)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)`
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 
 # Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
@@ -181,13 +181,13 @@ def predictive(design,mean,cov,sigma):
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     # Return `(center, latent_variance, latent_variance + sigma ** 2)` to the caller.
     return center,latent_variance,latent_variance+sigma**2
-# Initialize array `query` with explicit values and shape.
+# Construct `query` via `jnp.array([[1.,0.],[1.,2.]])`
 query = jnp.array([[1.,0.],[1.,2.]])
 # Run `predictive` to compute `(center, latent_var, observation_var)`.
 center,latent_var,observation_var = predictive(query,mean,cov,sigma)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(latent_var,jnp.array([4/13,4/13+16/9]),atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(observation_var-latent_var,1.)`
 assert jnp.allclose(observation_var-latent_var,1.)
 # Print the observed values to compare against the expected result.
 print('posterior mean:',mean,'covariance:',cov)
@@ -219,7 +219,7 @@ The gap is not a fixed standard deviation of one: variances add, then we take th
 grid=jnp.linspace(-3,3,61)
 # Allocate initialized array `(_, lv, ov)` with the specified shape and dtype.
 _,lv,ov=predictive(jnp.stack([jnp.ones_like(grid),grid],axis=1),mean,cov,sigma)
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"kind":"line","x":grid.tolist(),"xlabel":"input val...`
 visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"predictive standard deviation (target units)","series":[{"label":"latent line","y":jnp.sqrt(lv).tolist()},{"label":"new observation","y":jnp.sqrt(ov).tolist()}]}
 ```
 
@@ -246,7 +246,7 @@ PASS: probability-02
 ```python
 # Experiment — Repeat independent observations: The calculation treats rows as independent new evidence.
 repeat_mean,repeat_cov = posterior(jnp.tile(X,(2,1)),jnp.tile(y,2),sigma,prior_scale)
-# Verify contract: `jnp.all(jnp.diag(repeat_cov) < jnp.diag(cov))`.
+# Assert invariant `jnp.all(jnp.diag(repeat_cov)<jnp.diag(cov))` holds
 assert jnp.all(jnp.diag(repeat_cov)<jnp.diag(cov))
 # Print the observed values to compare against the expected result.
 print(jnp.diag(repeat_cov))
@@ -265,7 +265,7 @@ The calculation treats rows as independent new evidence. Duplicating a stored fi
 empty_mean,empty_cov = posterior(jnp.empty((0,2)),jnp.empty((0,)),sigma,prior_scale)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(empty_mean,0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(empty_cov,4*jnp.eye(2))`
 assert jnp.allclose(empty_cov,4*jnp.eye(2))
 ```
 
@@ -285,17 +285,17 @@ Strengthen the prior by changing its scale from two to one half. Predict the dir
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `jnp.linalg.norm(strong_mean) < jnp.linalg.norm(mean)`.
-2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Assert invariant `jnp.linalg.norm(strong_mean)<jnp.linalg.norm(mean)` holds
+2. Assert invariant `jnp.all(jnp.diag(strong_cov)<jnp.diag(cov))` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Strengthen the prior by changing its scale from two to one half.
 strong_mean,strong_cov = posterior(...)  # TODO: compute strong_mean,strong_cov
-# Verify contract: `jnp.linalg.norm(strong_mean) < jnp.linalg.norm(mean)`.
+# Assert invariant `jnp.linalg.norm(strong_mean)<jnp.linalg.norm(mean)` holds
 assert jnp.linalg.norm(strong_mean)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.all(jnp.diag(strong_cov)<jnp.diag(cov))` holds
 assert jnp.all(jnp.diag(strong_cov)  # TODO: complete assertion check
 ```
 
@@ -304,9 +304,9 @@ assert jnp.all(jnp.diag(strong_cov)  # TODO: complete assertion check
 ```python
 # Exercise solution: Strengthen the prior by changing its scale from two to one half.
 strong_mean,strong_cov = posterior(X,y,sigma,.5)
-# Verify contract: `jnp.linalg.norm(strong_mean) < jnp.linalg.norm(mean)`.
+# Assert invariant `jnp.linalg.norm(strong_mean)<jnp.linalg.norm(mean)` holds
 assert jnp.linalg.norm(strong_mean)<jnp.linalg.norm(mean)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.all(jnp.diag(strong_cov)<jnp.diag(cov))` holds
 assert jnp.all(jnp.diag(strong_cov)<jnp.diag(cov))
 ```
 
@@ -331,7 +331,7 @@ The intercept and slope can compensate for each other when features are not cent
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `shift_X` with explicit values and shape.
+1. Construct `shift_X` via `jnp.array([[1.,0.],[1.,1.],[1.,2.]])`
 2. Run `posterior` to compute `(shift_m, shift_c)`.
 3. Convert `host_X` to a host NumPy array for inspection or verification.
 4. Construct an identity matrix `host_P`.
@@ -341,7 +341,7 @@ The intercept and slope can compensate for each other when features are not cent
 
 ```python
 # Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
-# Initialize array `shift_X` with explicit values and shape.
+# Construct `shift_X` via `jnp.array([[1.,0.],[1.,1.],[1.,2.]])`
 shift_X = jnp.array(...)  # TODO: compute shift_X
 # Run `posterior` to compute `(shift_m, shift_c)`.
 shift_m,shift_c = posterior(...)  # TODO: compute shift_m,shift_c
@@ -351,7 +351,7 @@ host_X = np.asarray(...)  # TODO: compute host_X
 host_P = np.eye(...)  # TODO: compute host_P
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
-# Verify contract: `shift_c[0, 1] < 0`.
+# Assert invariant `shift_c[0,1]<0` holds
 assert shift_c[0,1]  # TODO: complete assertion check
 ```
 
@@ -359,7 +359,7 @@ assert shift_c[0,1]  # TODO: complete assertion check
 
 ```python
 # Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
-# Initialize array `shift_X` with explicit values and shape.
+# Construct `shift_X` via `jnp.array([[1.,0.],[1.,1.],[1.,2.]])`
 shift_X = jnp.array([[1.,0.],[1.,1.],[1.,2.]])
 # Run `posterior` to compute `(shift_m, shift_c)`.
 shift_m,shift_c = posterior(shift_X,y,sigma,prior_scale)
@@ -369,7 +369,7 @@ host_X=np.asarray(shift_X,dtype=np.float64)
 host_P=np.eye(2)/4+host_X.T@host_X
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
-# Verify contract: `shift_c[0, 1] < 0`.
+# Assert invariant `shift_c[0,1]<0` holds
 assert shift_c[0,1]<0
 ```
 
@@ -398,7 +398,7 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 1. Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 2. Sample deterministic random values into `weights` using an explicit PRNG key.
 3. Sample deterministic random values into `replicated` using an explicit PRNG key.
-4. Verify contract: `abs(float(replicated.var()) - float(observation_var[0])) < 0.07`.
+4. Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -410,7 +410,7 @@ kw,kn = jax.random.split(...)  # TODO: compute kw,kn
 weights = ...  # TODO: compute weights
 # Sample deterministic random values into `replicated` using an explicit PRNG key.
 replicated = ...  # TODO: compute replicated
-# Verify contract: `abs(float(replicated.var()) - float(observation_var[0])) < 0.07`.
+# Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
 assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete assertion check
 ```
 
@@ -424,7 +424,7 @@ kw,kn=jax.random.split(jax.random.key(37))
 weights=mean+jax.random.normal(kw,(30000,2))@jnp.linalg.cholesky(cov).T
 # Sample deterministic random values into `replicated` using an explicit PRNG key.
 replicated=weights[:,0]+sigma*jax.random.normal(kn,(30000,))
-# Verify contract: `abs(float(replicated.var()) - float(observation_var[0])) < 0.07`.
+# Check numerical equivalence within tolerance: `abs(float(replicated.var())-float(observation_var[0]))<.07`
 assert abs(float(replicated.var())-float(observation_var[0]))<.07
 ```
 

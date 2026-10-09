@@ -37,7 +37,7 @@
       "id": "ops",
       "projectId": "workload-operations",
       "title": "Workload operations synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/ops.md",
       "url": "assessments/ops.html"

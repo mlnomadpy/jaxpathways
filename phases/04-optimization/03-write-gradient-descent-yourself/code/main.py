@@ -31,9 +31,9 @@ print("Final weight:", float(final))
 print("Final loss:", float(history[-1]))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(final, 2., atol=1e-4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.all(jnp.diff(history) <= 1e-7)` holds
 assert jnp.all(jnp.diff(history) <= 1e-7)
 
 # Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
@@ -62,32 +62,32 @@ print("Final weight:", float(final))
 print("Final loss:", float(history[-1]))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(final, 2., atol=1e-4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.all(jnp.diff(history) <= 1e-7)` holds
 assert jnp.all(jnp.diff(history) <= 1e-7)
 
 # Figure data experiment
 # Compute figure data for: Gradient descent trades step size for stability
-# Evaluate `rates` from the current inputs and state.
+# Compute `rates` from `[0.1, 0.5, 1.1]`
 rates = [0.1, 0.5, 1.1]
-# Evaluate `series` from the current inputs and state.
+# Compute `series` from `[]`
 series = []
 # Loop over `rate_plot` in `rates`:
 for rate_plot in rates:
     # Create device-backed JAX array `position_plot`.
     position_plot = jnp.array(0.0)
-    # Evaluate `losses` from the current inputs and state.
+    # Compute `losses` from `[]`
     losses = []
     # Repeat the update loop over `range(12)` steps:
     for _ in range(12):
         # Append the current step result to `losses`.
         losses.append(float((position_plot - 2) ** 2))
-        # Evaluate `position_plot` from the current inputs and state.
+        # Compute `position_plot` from `position_plot - rate_plot * 2 * (position_plot - 2)`
         position_plot = position_plot - rate_plot * 2 * (position_plot - 2)
     # Append the current step result to `series`.
     series.append({'label': 'rate ' + str(rate_plot), 'y': losses})
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': list(range(12)), 'xlabel': 'co...`
 visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}
 
 # Experiment: Check the first two steps
@@ -95,7 +95,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 two_w, two_losses = train(0., 0.1, 2)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(two_w, 0.72)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))`
 assert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))
 # Print the observed values to compare against the expected result.
 print("First two post-update losses:", two_losses)
@@ -105,32 +105,32 @@ print("First two post-update losses:", two_losses)
 edge_w, edge_losses = train(0., 1., 5)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(edge_w, 4.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(edge_losses, jnp.full(5, 4.))`
 assert jnp.allclose(edge_losses, jnp.full(5, 4.))
 
 # Experiment: A tiny update far from the solution
 # Experiment — A tiny update far from the solution: A stopping rule must distinguish lack of progress from reaching...
-# Initialize array `far` with explicit values and shape.
+# Construct `far` via `jnp.array(0.)`
 far = jnp.array(0.)
-# Evaluate `quadratic` from the current inputs and state.
+# Compute `quadratic` from `lambda value: (value-2.)**2`
 quadratic = lambda value: (value-2.)**2
 # Differentiate the objective to obtain `grad_far` via automatic differentiation.
 grad_far = jax.grad(quadratic)(far)
-# Evaluate `next_far` from the current inputs and state.
+# Compute `next_far` from `far - 1e-8*grad_far`
 next_far = far - 1e-8*grad_far
-# Verify contract: `jnp.abs(next_far - far) < 1e-06`.
+# Check numerical equivalence within tolerance: `jnp.abs(next_far-far)<1e-6`
 assert jnp.abs(next_far-far)<1e-6
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.abs(grad_far)>3.`
 assert jnp.abs(grad_far)>3.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `quadratic(next_far)>3.9` holds
 assert quadratic(next_far)>3.9
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Run ten steps with learning rate 1.1.
 unstable, unstable_history = train(0., 1.1, 10)
-# Verify contract: `unstable_history[-1] > loss(0.0)`.
+# Assert invariant `unstable_history[-1] > loss(0.)` holds
 assert unstable_history[-1] > loss(0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(1 - 2 * 1.1) > 1`
 assert abs(1 - 2 * 1.1) > 1
 
 # Reference practice: Transfer the stability analysis
@@ -148,7 +148,7 @@ def scaled_step(w, _):
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(scaled_w, 3., atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.all(jnp.diff(scaled_history) <= 1e-6)` holds
 assert jnp.all(jnp.diff(scaled_history) <= 1e-6)
 
 # Reference practice: Reproduce an uphill update and repair it
@@ -157,10 +157,10 @@ assert jnp.all(jnp.diff(scaled_history) <= 1e-6)
 uphill = 0. + 0.1*jax.grad(loss)(0.)
 # Differentiate the objective to obtain `downhill` via automatic differentiation.
 downhill = 0. - 0.1*jax.grad(loss)(0.)
-# Verify contract: `loss(uphill) > loss(0.0)`.
+# Assert invariant `loss(uphill) > loss(0.)` holds
 assert loss(uphill) > loss(0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `loss(downhill) < loss(0.)` holds
 assert loss(downhill) < loss(0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(downhill, 0.4)`
 assert jnp.allclose(downhill, 0.4)
 print("PASS: optimization-03")

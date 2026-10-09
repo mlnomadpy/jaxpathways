@@ -29,7 +29,7 @@
       "id": "probability",
       "projectId": "bayesian-regression",
       "title": "Bayesian regression synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/probability.md",
       "url": "assessments/probability.html"

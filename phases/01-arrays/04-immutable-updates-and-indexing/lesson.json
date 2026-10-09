@@ -4,10 +4,10 @@
   "minutes": 45,
   "content": {
     "idea": "An indexed update in JAX returns an array value. This makes the relationship between old and new state explicit: the caller chooses which result to keep. The programming model describes values; compiler decisions about physical memory reuse are a separate issue.",
-    "code": "# Immutable updates and indexing: An indexed update in JAX returns an array value.\n# Import jax.numpy for this computation.\nimport jax.numpy as jnp\n# Initialize array `x` with explicit values and shape.\nx = jnp.array([1., 2., 3., 4.])\n# Evaluate `y` from the current inputs and state.\ny = x.at[1].set(20.)\n# Initialize array `z` with explicit values and shape.\nz = x.at[jnp.array([0, 2])].add(5.)\n# Print the observed values to compare against the expected result.\nprint(\"Original:\", x)\n# Print diagnostic summary of the computed outputs.\nprint(\"Set:\", y)\n# Print diagnostic summary of the computed outputs.\nprint(\"Add:\", z)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
+    "code": "# Immutable updates and indexing: An indexed update in JAX returns an array value.\n# Import jax.numpy for this computation.\nimport jax.numpy as jnp\n# Construct `x` via `jnp.array([1., 2., 3., 4.])`\nx = jnp.array([1., 2., 3., 4.])\n# Compute `y` from `x.at[1].set(20.)`\ny = x.at[1].set(20.)\n# Construct `z` via `x.at[jnp.array([0, 2])].add(5.)`\nz = x.at[jnp.array([0, 2])].add(5.)\n# Print the observed values to compare against the expected result.\nprint(\"Original:\", x)\n# Print diagnostic summary of the computed outputs.\nprint(\"Set:\", y)\n# Print diagnostic summary of the computed outputs.\nprint(\"Add:\", z)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
     "output": "Original: \\([1., 2., 3., 4.]\\); Set: \\([1., 20., 3., 4.]\\); Add: \\([6., 2., 8., 4.]\\).",
     "exercise": "Replace the last two elements with zero in a new array. Keep \\(x\\) unchanged.",
-    "solution": "# Exercise solution: Replace the last two elements with zero in a new array.\nmasked = x.at[2:].set(0.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))",
+    "solution": "# Exercise solution: Replace the last two elements with zero in a new array.\nmasked = x.at[2:].set(0.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`\nassert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))",
     "question": "After `y = x.at[1].set(20.)`, what happens to \\(x\\)?",
     "options": [
       "Its second element becomes \\(20\\)",
@@ -31,7 +31,8 @@
         "check": {
           "prompt": "You call an indexed update but keep using the original variable. Why might later predictions be unchanged?",
           "answer": "The returned updated value was discarded. Assign or pass that result into the next computation; do not expect the original array value to mutate."
-        }
+        },
+        "math": "C_{i,k} = \\sum_{j=1}^{N} A_{i,j} B_{j,k} = \\text{einsum}(\\texttt{'ij,jk->ik'}, A, B)"
       },
       {
         "title": "A Python name and an array value are different",
@@ -51,21 +52,21 @@
       },
       {
         "title": "Carry functional updates into training state",
-        "body": "A model update is a larger version of the same idea: parameters and gradients produce new parameters. The caller retains or checkpoints state. Functional indexed operations let you describe a selective change without mutating an old array value.\n\nThis lesson prepares you to reason about optimizer and simulation state. It does not establish memory efficiency or a training algorithm; those require broader computations and measurements."
+        "body": "A model update is a larger version of the same idea: parameters and gradients produce new parameters. The caller retains or checkpoints state. Functional indexed operations let you describe a selective change without mutating an old array value.\n\nThis lesson prepares you to reason about optimizer and simulation state. It is separate from memory efficiency or a training algorithm; those require broader computations and measurements."
       }
     ],
     "experiments": [
       {
         "title": "See name rebinding without old-value mutation",
         "prediction": "If two names point at the original array and one name is rebound, which values remain available?",
-        "code": "# Experiment — See name rebinding without old-value mutation: Assigning a result changes the binding, while ignoring a result...\noriginal = x\n# Evaluate `rebound` from the current inputs and state.\nrebound = x\n# Evaluate `rebound` from the current inputs and state.\nrebound = rebound.at[1].set(20.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(original, jnp.array([1., 2., 3., 4.]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))\n# Evaluate `ignored` from the current inputs and state.\nignored = x.at[0].set(99.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(x, original)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert float(ignored[0]) == 99.",
+        "code": "# Experiment — See name rebinding without old-value mutation: Assigning a result changes the binding, while ignoring a result...\noriginal = x\n# Compute `rebound` from `x`\nrebound = x\n# Compute `rebound` from `rebound.at[1].set(20.)`\nrebound = rebound.at[1].set(20.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(original, jnp.array([1., 2., 3., 4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))`\nassert jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))\n# Compute `ignored` from `x.at[0].set(99.)`\nignored = x.at[0].set(99.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(x, original)\n# Assert invariant `float(ignored[0]) == 99.` holds\nassert float(ignored[0]) == 99.",
         "output": "The original remains \\([1, 2, 3, 4]\\); rebound and ignored hold separate returned values.",
         "explanation": "Assigning a result changes the binding, while ignoring a result leaves the caller using the old value."
       },
       {
         "title": "Accumulate repeated integer contributions",
         "prediction": "Predict the total at index \\(1\\) after adding contributions \\(2\\) and \\(3\\) there. What differs from replacement?",
-        "code": "# Experiment — Accumulate repeated integer contributions: The integer loop reference makes accumulation explicit.\n# Import numpy for this computation.\nimport numpy as np\n# Initialize array `indices` with explicit values and shape.\nindices = jnp.array([1, 1, 3])\n# Initialize array `contributions` with explicit values and shape.\ncontributions = jnp.array([2, 3, 7], dtype=jnp.int32)\n# Initialize array `base_counts` with explicit values and shape.\nbase_counts = jnp.zeros(4, dtype=jnp.int32)\n# Evaluate `counts` from the current inputs and state.\ncounts = base_counts.at[indices].add(contributions)\n# Allocate initialized array `reference_counts` with the specified shape and dtype.\nreference_counts = np.zeros(4, dtype=np.int32)\n# Iterate over `(index, contribution)` to step through the computation:\nfor index, contribution in zip([1, 1, 3], [2, 3, 7]):\n    # Accumulate the next contribution into `reference_counts[index]`.\n    reference_counts[index] += contribution\n# Verify contract: `jnp.array_equal(counts, reference_counts)`.\nassert jnp.array_equal(counts, reference_counts)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))",
+        "code": "# Experiment — Accumulate repeated integer contributions: The integer loop reference makes accumulation explicit.\n# Import numpy for this computation.\nimport numpy as np\n# Construct `indices` via `jnp.array([1, 1, 3])`\nindices = jnp.array([1, 1, 3])\n# Construct `contributions` via `jnp.array([2, 3, 7], dtype=jnp.int32)`\ncontributions = jnp.array([2, 3, 7], dtype=jnp.int32)\n# Construct `base_counts` via `jnp.zeros(4, dtype=jnp.int32)`\nbase_counts = jnp.zeros(4, dtype=jnp.int32)\n# Compute `counts` from `base_counts.at[indices].add(contributions)`\ncounts = base_counts.at[indices].add(contributions)\n# Allocate initialized array `reference_counts` with the specified shape and dtype.\nreference_counts = np.zeros(4, dtype=np.int32)\n# Iterate over `(index, contribution)` to step through the computation:\nfor index, contribution in zip([1, 1, 3], [2, 3, 7]):\n    # Accumulate the next contribution into `reference_counts[index]`.\n    reference_counts[index] += contribution\n# Assert invariant `jnp.array_equal(counts, reference_counts)` holds\nassert jnp.array_equal(counts, reference_counts)\n# Assert invariant `jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))` holds\nassert jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))\n# Assert invariant `jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))` holds\nassert jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))",
         "output": "The counts are \\([0, 5, 0, 7]\\); repeated index \\(1\\) receives both contributions.",
         "explanation": "The integer loop reference makes accumulation explicit. It avoids asserting a floating-point reduction order or conflicting-set behavior."
       }
@@ -76,7 +77,7 @@
         "difficulty": "Practice",
         "prompt": "Create a \\((3, 3)\\) matrix containing \\(0\\) through \\(8\\). Set its final column to \\(-1\\) in a returned value. Verify the whole result and original matrix.",
         "hint": "The slice [:, \\(-1\\)] selects every row and the last column. A scalar replacement broadcasts across that slice.",
-        "solution": "# Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...\n# Construct and reshape `matrix` into the target tensor dimensions.\nmatrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)\n# Evaluate `updated_matrix` from the current inputs and state.\nupdated_matrix = matrix.at[:, -1].set(-1.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))",
+        "solution": "# Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...\n# Construct and reshape `matrix` into the target tensor dimensions.\nmatrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)\n# Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`\nupdated_matrix = matrix.at[:, -1].set(-1.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))\n# Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`\nassert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))",
         "explanation": "Checking the entire matrix verifies both changed and unchanged positions; preserving the original checks the update contract."
       },
       {
@@ -84,7 +85,7 @@
         "difficulty": "Challenge",
         "prompt": "Keep only values greater than \\(2\\) from \\(x\\), replacing other positions with zero. Compare with compact selection and explain the shape difference.",
         "hint": "Use where for the fixed-shape result. Boolean indexing produces selected values, not a shape-preserving mask.",
-        "solution": "# Keep shape while masking values (Challenge): Both are useful representations, but they are not...\nfixed_shape = jnp.where(x > 2., x, 0.)\n# Evaluate `selected` from the current inputs and state.\nselected = x[x > 2.]\n# Verify that the output tensor shape matches our prediction.\nassert fixed_shape.shape == (4,)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert selected.shape == (2,)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(selected, jnp.array([3., 4.]))",
+        "solution": "# Keep shape while masking values (Challenge): Both are useful representations, but they are not...\nfixed_shape = jnp.where(x > 2., x, 0.)\n# Compute `selected` from `x[x > 2.]`\nselected = x[x > 2.]\n# Check tensor shape invariant: `fixed_shape.shape == (4,)`\nassert fixed_shape.shape == (4,)\n# Check tensor shape invariant: `selected.shape == (2,)`\nassert selected.shape == (2,)\n# Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`\nassert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`\nassert jnp.allclose(selected, jnp.array([3., 4.]))",
         "explanation": "Both are useful representations, but they are not interchangeable. The expected downstream shape determines which is appropriate."
       }
     ],
@@ -113,6 +114,26 @@
       "connection": "The bottom row still contains \\(2\\) at index \\(1\\). This is the visual clue that the two updates branch from the original; the second operation did not continue from the middle row. In both cases, the top row remains unchanged.\n\nAn immutable update returns a new value. To make changes accumulate, pass the returned array into the next update. If these operations were chained, the final array would be \\((6,20,8,4)\\), which is deliberately not the bottom row shown here.",
       "alt": "An update returns a new array. Columns are array indices. The top row is the original array, and each lower row is a separate result created from that original. The cell colors encode stored values; the dark cell containing \\(20\\) makes the replacement easy to locate. The middle row replaces only index \\(1\\): \\((1,2,3,4)\\) becomes \\((1,20,3,4)\\). The bottom row instead adds \\(5\\) at indices \\(0\\) and \\(2\\), giving \\((6,2,8,4)\\).",
       "code": "# Compute figure data for: An update returns a new array\n# Combine or mask array elements to form `visual_data`.\nvisual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows': ['original', 'set index 1', 'add at 0 and 2'], 'columns': ['0', '1', '2', '3'], 'unit': 'stored value'}"
-    }
+    },
+    "buildSteps": [
+      {
+        "title": "Step 1: Set up imports and input tensors",
+        "instruction": "Import the required JAX modules and define the initial inputs for immutable updates and indexing.",
+        "code": "import jax.numpy as jnp\n# Construct `x` via `jnp.array([1., 2., 3., 4.])`\nx = jnp.array([1., 2., 3., 4.])",
+        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+      },
+      {
+        "title": "Step 2: Apply the core JAX transformation",
+        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "code": "y = x.at[1].set(20.)\n# Construct `z` via `x.at[jnp.array([0, 2])].add(5.)`\nz = x.at[jnp.array([0, 2])].add(5.)",
+        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+      },
+      {
+        "title": "Step 3: Verify shapes and numerical invariants",
+        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "code": "assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`\nassert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))\n# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`\nassert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))",
+        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+      }
+    ]
   }
 }

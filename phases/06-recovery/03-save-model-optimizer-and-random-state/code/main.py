@@ -19,7 +19,7 @@ from pathlib import Path
 tx = optax.adam(0.05)
 # Function `initial_state()` implementing this stage's computation:
 def initial_state():
-    # Initialize array `params` with explicit values and shape.
+    # Construct `params` via `{"weight":jnp.array(0.,jnp.float32),"bias":jnp.array...`
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
     # Return `{'params': params, 'optimizer': tx.init(params), 'key_data': jax.random.key_data(jax.random.key(7, impl='threefry2x32')), 'step': jnp.array(0, jnp.int32)}` to the caller.
     return {"params":params,"optimizer":tx.init(params),
@@ -47,13 +47,13 @@ def unpack_bytes(packed):
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 # Function `same_tree(left, right)` implementing this stage's computation:
 def same_tree(left,right):
-    # Verify contract: `jax.tree.structure(left) == jax.tree.structure(right)`.
+    # Assert invariant `jax.tree.structure(left)==jax.tree.structure(right)` holds
     assert jax.tree.structure(left)==jax.tree.structure(right)
     # Iterate over `(a, b)` to step through the computation:
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
         # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
         host_a,host_b = np.asarray(a),np.asarray(b)
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
         # Branch on condition `np.issubdtype(host_a.dtype, np.integer)`:
         if np.issubdtype(host_a.dtype,np.integer):
@@ -70,7 +70,7 @@ def step(state,x,y):
     target_noise = 0.01*jax.random.normal(sample_key,y.shape)
     # Function `objective(params)` implementing this stage's computation:
     def objective(params):
-        # Evaluate `residual` from the current inputs and state.
+        # Compute `residual` from `params["weight"]*x+params["bias"]-(y+target_noise)`
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         # Return `jnp.mean(residual ** 2)` to the caller.
         return jnp.mean(residual**2)
@@ -108,9 +108,9 @@ root = Path(workspace.name)
 
 # Build the pipeline or state transition
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([0.,0.5,1.],dtype=jnp.float32)`
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
-# Evaluate `y` from the current inputs and state.
+# Compute `y` from `2*x-1`
 y = 2*x-1
 # Convert `contract` to a host NumPy array for inspection or verification.
 contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
@@ -122,9 +122,9 @@ state = initial_state()
 for _ in range(3):
     # Run `step` to compute `(state, _)`.
     state,_ = step(state,x,y)
-# Evaluate `checkpoint_path` from the current inputs and state.
+# Compute `checkpoint_path` from `root/"step_3"`
 checkpoint_path = root/"step_3"
-# Evaluate `payload` from the current inputs and state.
+# Compute `payload` from `{"training":state,"contract":encode_contract(contract)}`
 payload = {"training":state,"contract":encode_contract(contract)}
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as checkpointer:
@@ -148,7 +148,7 @@ restored_next,restored_loss = step(restored["training"],x,y)
 same_tree(expected_next,restored_next)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
-# Verify contract: `int(restored_next['step']) == 4`.
+# Assert invariant `int(restored_next["step"])==4` holds
 assert int(restored_next["step"])==4
 # Print the observed values to compare against the expected result.
 print("Restored step:",int(restored["training"]["step"]))
@@ -175,7 +175,7 @@ from pathlib import Path
 tx = optax.adam(0.05)
 # Function `initial_state()` implementing this stage's computation:
 def initial_state():
-    # Initialize array `params` with explicit values and shape.
+    # Construct `params` via `{"weight":jnp.array(0.,jnp.float32),"bias":jnp.array...`
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
     # Return `{'params': params, 'optimizer': tx.init(params), 'key_data': jax.random.key_data(jax.random.key(7, impl='threefry2x32')), 'step': jnp.array(0, jnp.int32)}` to the caller.
     return {"params":params,"optimizer":tx.init(params),
@@ -203,13 +203,13 @@ def unpack_bytes(packed):
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 # Function `same_tree(left, right)` implementing this stage's computation:
 def same_tree(left,right):
-    # Verify contract: `jax.tree.structure(left) == jax.tree.structure(right)`.
+    # Assert invariant `jax.tree.structure(left)==jax.tree.structure(right)` holds
     assert jax.tree.structure(left)==jax.tree.structure(right)
     # Iterate over `(a, b)` to step through the computation:
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
         # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
         host_a,host_b = np.asarray(a),np.asarray(b)
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
         # Branch on condition `np.issubdtype(host_a.dtype, np.integer)`:
         if np.issubdtype(host_a.dtype,np.integer):
@@ -226,7 +226,7 @@ def step(state,x,y):
     target_noise = 0.01*jax.random.normal(sample_key,y.shape)
     # Function `objective(params)` implementing this stage's computation:
     def objective(params):
-        # Evaluate `residual` from the current inputs and state.
+        # Compute `residual` from `params["weight"]*x+params["bias"]-(y+target_noise)`
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         # Return `jnp.mean(residual ** 2)` to the caller.
         return jnp.mean(residual**2)
@@ -263,9 +263,9 @@ workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([0.,0.5,1.],dtype=jnp.float32)`
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
-# Evaluate `y` from the current inputs and state.
+# Compute `y` from `2*x-1`
 y = 2*x-1
 # Convert `contract` to a host NumPy array for inspection or verification.
 contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
@@ -277,9 +277,9 @@ state = initial_state()
 for _ in range(3):
     # Run `step` to compute `(state, _)`.
     state,_ = step(state,x,y)
-# Evaluate `checkpoint_path` from the current inputs and state.
+# Compute `checkpoint_path` from `root/"step_3"`
 checkpoint_path = root/"step_3"
-# Evaluate `payload` from the current inputs and state.
+# Compute `payload` from `{"training":state,"contract":encode_contract(contract)}`
 payload = {"training":state,"contract":encode_contract(contract)}
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as checkpointer:
@@ -302,7 +302,7 @@ restored_next,restored_loss = step(restored["training"],x,y)
 same_tree(expected_next,restored_next)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
-# Verify contract: `int(restored_next['step']) == 4`.
+# Assert invariant `int(restored_next["step"])==4` holds
 assert int(restored_next["step"])==4
 # Print the observed values to compare against the expected result.
 print("Restored step:",int(restored["training"]["step"]))
@@ -310,6 +310,12 @@ print("Restored step:",int(restored["training"]["step"]))
 print("Optimizer count:",int(restored["training"]["optimizer"][0].count))
 # Print diagnostic summary of the computed outputs.
 print("Next update and loss agree; checkpoint exists:",checkpoint_path.exists())
+
+# Figure data experiment
+# Compare parameter leaf norms between `expected_next` and `restored_next`:
+saved_norms = [float(jnp.linalg.norm(a)) for a in jax.tree.leaves(expected_next['params'])]
+restored_norms = [float(jnp.linalg.norm(a)) for a in jax.tree.leaves(restored_next['params'])]
+visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'leaf {i}' for i in range(len(saved_norms))], 'xlabel': 'checkpoint parameter leaf index', 'ylabel': 'L2 norm', 'series': [{'label': 'uninterrupted step', 'y': saved_norms}, {'label': 'restored from Orbax', 'y': restored_norms}]}
 
 # Experiment: Model-only restoration loses Adam history
 # Experiment — Model-only restoration loses Adam history: Saved weights give the same pre-update predictions but not...
@@ -320,7 +326,7 @@ model_only["optimizer"] = tx.init(model_only["params"])
 wrong_next,_ = step(model_only,x,y)
 # Verify that the numerical values match the expected reference within tolerance.
 assert any(not np.allclose(np.asarray(a),np.asarray(b),rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(wrong_next["params"]),jax.tree.leaves(expected_next["params"])))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(wrong_next["optimizer"][0].count)==1` holds
 assert int(wrong_next["optimizer"][0].count)==1
 # Print the observed values to compare against the expected result.
 print("Model-only checkpoint produces a different Adam update")
@@ -334,7 +340,7 @@ reset_random["key_data"] = initial_state()["key_data"]
 reset_next,reset_loss = step(reset_random,x,y)
 # Verify that the numerical values match the expected reference within tolerance.
 assert not np.isclose(float(reset_loss),float(expected_loss),rtol=1e-6,atol=1e-7)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not np.array_equal(np.asarray(reset_next["key_data"])` holds
 assert not np.array_equal(np.asarray(reset_next["key_data"]),np.asarray(expected_next["key_data"]))
 # Print the observed values to compare against the expected result.
 print("Reset key changes the noisy objective and continuation stream")
@@ -359,10 +365,11 @@ with ocp.StandardCheckpointer() as cp:
 validate_contract(recovered["contract"],contract)
 # Run `step` to compute `(left, _)`.
 # Run `step` to compute `(right, _)`.
-left,_=step(later,x,y);right,_=step(recovered["training"],x,y)
+left,_=step(later,x,y)
+right,_=step(recovered["training"],x,y)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(left,right)
-# Verify contract: `int(right['step']) == 6`.
+# Assert invariant `int(right["step"])==6` holds
 assert int(right["step"])==6
 
 # Reference practice: Show what weights-only recovery loses
@@ -374,11 +381,11 @@ weights_only=dict(full,optimizer=tx.init(full['params']))
 full_next,_=step(full,x,y)
 # Run `step` to compute `(reset_next, _)`.
 reset_next,_=step(weights_only,x,y)
-# Verify contract: `int(full_next['optimizer'][0].count) == 4`.
+# Assert invariant `int(full_next['optimizer'][0].count)==4` holds
 assert int(full_next['optimizer'][0].count)==4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(reset_next['optimizer'][0].count)==1` holds
 assert int(reset_next['optimizer'][0].count)==1
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `any(not np.allclose(a`
 assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(full_next['params']),jax.tree.leaves(reset_next['params'])))
 # Print the observed values to compare against the expected result.
 print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')
@@ -397,11 +404,11 @@ else:
 validate_contract(restored["contract"],contract)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(jax.tree.leaves(state["params"]),jax.tree.leaves(restored["training"]["params"])):
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`
     assert a.shape==b.shape and a.dtype==b.dtype
 # Integer PRNG words must be checked exactly, not with relative float tolerance.
 changed_key = dict(state)
-# Evaluate `changed_key['key_data']` from the current inputs and state.
+# Compute `changed_key["key_data"]` from `state["key_data"].at[0].add(np.uint32(1))`
 changed_key["key_data"] = state["key_data"].at[0].add(np.uint32(1))
 # Run the boundary check and catch the expected exception:
 try:

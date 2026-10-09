@@ -44,6 +44,6 @@ Monitor both directional losses, valid-pair counts, candidate pools, tower gradi
 
 ## Shared promotion rule
 
-Every branch must pass the same stage-artifact, recovery, numerical parity, precision-quality, service and publication gates, with its own task metrics and baselines. Reuse MLflow schema and release tooling; retain modality-specific data and preprocessing code. A text benchmark cannot certify an image/audio encoder, and a generic “multimodal average” cannot replace per-direction/per-domain evidence.
+Every branch must pass the same stage-artifact, recovery, numerical parity, precision-quality, service and publication gates, with its own task metrics and baselines. Reuse MLflow schema and release tooling; retain modality-specific data and preprocessing code. A text benchmark cannot certify an image/audio encoder, and a generic “multimodal average” complements per-direction/per-domain evidence.
 
 Implement text end to end first, then image and audio independently, then cross-modal alignment using their saved encoders. This order makes the final multimodal project visibly combine earlier learner work rather than importing unexplained pretrained components.

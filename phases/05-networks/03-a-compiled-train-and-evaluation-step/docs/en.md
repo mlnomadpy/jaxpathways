@@ -25,6 +25,10 @@ Capture parameter and relevant state values before evaluation and compare afterw
 
 Aggregate evaluation contributions with their counts. Unequal batch sizes make an average of batch means different from an example mean. Finally, inspect actual errors in the held-out prediction field: a visually attractive boundary cannot rule out leakage or a denominator mistake.
 
+$$
+\mathcal{L}(\Theta) = -\frac{1}{B}\sum_{i=1}^{B} \sum_{c=1}^{C} y_{i,c} \log \hat{p}_{i,c}(\Theta)
+$$
+
 ### Pause and reason
 
 Why compare state before and after evaluation instead of checking only the score?
@@ -140,7 +144,7 @@ before_loss=float(objective(model,train_x,train_y))
 # Repeat the update loop over `range(80)` steps:
 # Execute the next step of the computation.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
-# Verify contract: `int(optimizer.step[...]) == 80`.
+# Assert invariant `int(optimizer.step[...])==80` holds
 assert int(optimizer.step[...])==80
 ```
 
@@ -152,21 +156,23 @@ Append snapshot and reference comparisons. Print both training and held-out resu
 
 ```python
 # Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
-frozen=snapshot(model);step_count=int(optimizer.step[...])
+frozen=snapshot(model)
+step_count=int(optimizer.step[...])
 # Run `evaluate` to compute `(test_loss, test_accuracy)`.
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
-# Verify contract: `int(optimizer.step[...]) == step_count`.
+# Assert invariant `int(optimizer.step[...])==step_count` holds
 assert int(optimizer.step[...])==step_count
 # Convert `scores` to a host NumPy array for inspection or verification.
 # Convert `labels` to a host NumPy array for inspection or verification.
-scores=np.asarray(model(test_x));labels=np.asarray(test_y)
+scores=np.asarray(model(test_x))
+labels=np.asarray(test_y)
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
-# Verify contract: `float(test_accuracy) > 0.85 and float(objective(model, train_x, trai...`.
+# Assert invariant `float(test_accuracy)>.85 and float(objective(model,train_x,train_...` holds
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 # Print the observed values to compare against the expected result.
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
@@ -248,25 +254,27 @@ before_loss=float(objective(model,train_x,train_y))
 # Repeat the update loop over `range(80)` steps:
 # Execute the next step of the computation.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
-# Verify contract: `int(optimizer.step[...]) == 80`.
+# Assert invariant `int(optimizer.step[...])==80` holds
 assert int(optimizer.step[...])==80
 
 # Step 3 — 3. Verify held-out metrics and state isolation: The synthetic fixture normally exceeds 0.85 held-out accuracy.
-frozen=snapshot(model);step_count=int(optimizer.step[...])
+frozen=snapshot(model)
+step_count=int(optimizer.step[...])
 # Run `evaluate` to compute `(test_loss, test_accuracy)`.
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
-# Verify contract: `int(optimizer.step[...]) == step_count`.
+# Assert invariant `int(optimizer.step[...])==step_count` holds
 assert int(optimizer.step[...])==step_count
 # Convert `scores` to a host NumPy array for inspection or verification.
 # Convert `labels` to a host NumPy array for inspection or verification.
-scores=np.asarray(model(test_x));labels=np.asarray(test_y)
+scores=np.asarray(model(test_x))
+labels=np.asarray(test_y)
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
-# Verify contract: `float(test_accuracy) > 0.85 and float(objective(model, train_x, trai...`.
+# Assert invariant `float(test_accuracy)>.85 and float(objective(model,train_x,train_...` holds
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 # Print the observed values to compare against the expected result.
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
@@ -292,7 +300,7 @@ A slanted transition separates a mostly pale left side from a dark right side. T
 
 The data rule assigns label $1$ when $x_0+0.5x_1>0$, whose boundary is $x_1=-2x_0$. That explains the overall downward slant. The network approximates this separation; its transition need not be perfectly straight everywhere.
 
-To inspect a mistake in a changed run, look for a triangle where the probability is below $0.5$, or a circle where it is above $0.5$, and check the model at that exact point. Grid colors are sampled approximations. Perfect accuracy on this small synthetic set does not establish accuracy outside it, and extreme probabilities do not by themselves establish calibration.
+To inspect a mistake in a changed run, look for a triangle where the probability is below $0.5$, or a circle where it is above $0.5$, and check the model at that exact point. Grid colors are sampled approximations. Perfect accuracy on this small synthetic set is separate from accuracy outside it, and extreme probabilities do not by themselves establish calibration.
 
 ```python
 # Compute figure data for: Inspect predictions on held-out inputs
@@ -304,7 +312,7 @@ gx, gy = jnp.meshgrid(axis, axis)
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
 # Rearrange tensor axes to match the required layout for `prob`.
 prob = jax.nn.sigmoid(model(grid)).reshape(gx.shape)
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'field', 'values': prob.tolist(), 'extent':...`
 visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -3.0, 3.0], 'xlabel': 'feature 0', 'ylabel': 'feature 1', 'unit': 'P(label 1)', 'points': test_x.tolist(), 'labels': test_y.tolist()}
 ```
 
@@ -332,7 +340,7 @@ replay,replay_optimizer=initialize()
 for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(snapshot(model),snapshot(replay)):np.testing.assert_allclose(a,b,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluat...`
 np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluate(model,test_x,test_y),rtol=1e-6)
 ```
 
@@ -347,7 +355,7 @@ Replay reconstructs optimizer state from the start. It is not a checkpoint-resum
 ```python
 # Experiment — Duplicating evaluation data: Means normalize the observation count.
 doubled=evaluate(model,jnp.concatenate([test_x,test_x]),jnp.concatenate([test_y,test_y]))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),...`
 np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=1e-6)
 ```
 
@@ -366,7 +374,7 @@ Compute held-out metrics in three equal chunks and reconstruct the overall means
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Evaluate `pieces` from the current inputs and state.
+1. Compute `pieces` from `[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i...`
 2. Reduce along axis=0 to compute `aggregate`.
 3. Convert `` to a host NumPy array for inspection or verification.
 4. Iterate over `(a, b)` to step through the computation:
@@ -376,7 +384,7 @@ Compute held-out metrics in three equal chunks and reconstruct the overall means
 ```python
 # Exercise solution: Compute held-out metrics in three equal chunks and reconstruct the...
 old = snapshot(...)  # TODO: compute old
-# Evaluate `pieces` from the current inputs and state.
+# Compute `pieces` from `[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i...`
 pieces = ...  # TODO: compute pieces
 # Reduce along axis=0 to compute `aggregate`.
 aggregate = np.mean(...)  # TODO: compute aggregate
@@ -391,7 +399,7 @@ for a,b in zip(old,snapshot(model)):np.testing.assert_array_equal(a,b)
 ```python
 # Exercise solution: Compute held-out metrics in three equal chunks and reconstruct the...
 old=snapshot(model)
-# Evaluate `pieces` from the current inputs and state.
+# Compute `pieces` from `[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i...`
 pieces=[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i in range(0,48,16)]
 # Reduce along axis=0 to compute `aggregate`.
 aggregate=np.mean(np.asarray(pieces),axis=0)
@@ -422,17 +430,17 @@ Weight each batch mean by its number of observations.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `sizes` with explicit values and shape.
+1. Compute `sizes` from `np.array([7,41])`
 2. Convert `metrics` to a host NumPy array for inspection or verification.
 3. Reduce along axis=0 to compute `weighted`.
 4. Convert `` to a host NumPy array for inspection or verification.
-5. Initialize array `correct` with explicit values and shape.
+5. Compute `correct` from `np.array([6,20])`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Aggregate unequal batches (Transfer): A batch is a packaging choice, not a unit of evidence.
-# Initialize array `sizes` with explicit values and shape.
+# Compute `sizes` from `np.array([7,41])`
 sizes = np.array(...)  # TODO: compute sizes
 # Convert `metrics` to a host NumPy array for inspection or verification.
 metrics = np.asarray(...)  # TODO: compute metrics
@@ -440,9 +448,10 @@ metrics = np.asarray(...)  # TODO: compute metrics
 weighted = ...  # TODO: compute weighted
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol
-# Initialize array `correct` with explicit values and shape.
+# Compute `correct` from `np.array([6,20])`
 correct = np.array(...)  # TODO: compute correct
-# Evaluate `expected` from the current inputs and state.
+counts = np.array(...)  # TODO: compute counts
+# Compute `expected` from `26/48`
 expected = ...  # TODO: compute expected
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(correct.sum()/counts.sum(),expected)
@@ -456,7 +465,7 @@ print('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expect
 
 ```python
 # Aggregate unequal batches (Transfer): A batch is a packaging choice, not a unit of evidence.
-# Initialize array `sizes` with explicit values and shape.
+# Compute `sizes` from `np.array([7,41])`
 sizes=np.array([7,41])
 # Convert `metrics` to a host NumPy array for inspection or verification.
 metrics=np.asarray([evaluate(model,test_x[:7],test_y[:7]),evaluate(model,test_x[7:],test_y[7:])])
@@ -464,9 +473,10 @@ metrics=np.asarray([evaluate(model,test_x[:7],test_y[:7]),evaluate(model,test_x[
 weighted=(metrics*sizes[:,None]).sum(axis=0)/sizes.sum()
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol=1e-5,atol=1e-6)
-# Initialize array `correct` with explicit values and shape.
-correct=np.array([6,20]);counts=np.array([7,41])
-# Evaluate `expected` from the current inputs and state.
+# Compute `correct` from `np.array([6,20])`
+correct=np.array([6,20])
+counts=np.array([7,41])
+# Compute `expected` from `26/48`
 expected=26/48
 # Reduce across the target axis to summarize ``.
 np.testing.assert_allclose(correct.sum()/counts.sum(),expected)
@@ -501,7 +511,7 @@ Compare both optimizer.step and model parameters around the bad call.
 - `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
 
 **Step-by-step implementation plan:**
-1. Catch an evaluation function that trains (Intermediate): A plausible returned loss does not establish evaluation.
+1. Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 2. Transform every leaf of the parameter PyTree (`bad_model`).
 3. Configure or step the Optax optimizer state (`bad_optimizer`).
 4. Run `snapshot` to compute `prior`.
@@ -510,7 +520,7 @@ Compare both optimizer.step and model parameters around the bad call.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch an evaluation function that trains (Intermediate): A plausible returned loss does not establish evaluation.
+# Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 graph,state = nnx.split(...)  # TODO: compute graph,state
 # Transform every leaf of the parameter PyTree (`bad_model`).
 bad_model = nnx.merge(...)  # TODO: compute bad_model
@@ -520,18 +530,18 @@ bad_optimizer = nnx.Optimizer(...)  # TODO: compute bad_optimizer
 prior = snapshot(...)  # TODO: compute prior
 # Run `train_step` to perform the next check or state transition.
 train_step(bad_model,bad_optimizer,test_x,test_y)
-# Verify contract: `int(bad_optimizer.step[...]) == 1`.
+# Assert invariant `int(bad_optimizer.step[...])==1` holds
 assert int(bad_optimizer.step[...])  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_mod...` holds
 assert any(not np.array_equal(a,b) for a,b  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(optimizer.step[...])==80` holds
 assert int(optimizer.step[...])  # TODO: complete assertion check
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch an evaluation function that trains (Intermediate): A plausible returned loss does not establish evaluation.
+# Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 graph,state=nnx.split(model)
 # Transform every leaf of the parameter PyTree (`bad_model`).
 bad_model=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
@@ -541,15 +551,15 @@ bad_optimizer=nnx.Optimizer(bad_model,optax.adam(.03),wrt=nnx.Param)
 prior=snapshot(bad_model)
 # Run `train_step` to perform the next check or state transition.
 train_step(bad_model,bad_optimizer,test_x,test_y)
-# Verify contract: `int(bad_optimizer.step[...]) == 1`.
+# Assert invariant `int(bad_optimizer.step[...])==1` holds
 assert int(bad_optimizer.step[...])==1
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_mod...` holds
 assert any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_model)))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(optimizer.step[...])==80` holds
 assert int(optimizer.step[...])==80
 ```
 
-A plausible returned loss does not establish evaluation. Passing held-out data through the update function leaks it into learned state.
+A plausible returned loss is separate from evaluation. Passing held-out data through the update function leaks it into learned state.
 
 </details>
 

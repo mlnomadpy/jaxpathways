@@ -6,19 +6,19 @@
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `mu` with explicit values and shape.
+# Construct `mu` via `jnp.array([1.,-1.])`
 mu=jnp.array([1.,-1.])
-# Initialize array `Sigma` with explicit values and shape.
+# Construct `Sigma` via `jnp.array([[1.,.8],[.8,1.]])`
 Sigma=jnp.array([[1.,.8],[.8,1.]])
-# Initialize array `P` with explicit values and shape.
+# Compute `P` from `jnp.linalg.solve(Sigma,jnp.eye(2))`
 P=jnp.linalg.solve(Sigma,jnp.eye(2))
 # Function `kl(params)` implementing this stage's computation:
 def kl(params):
-    # Evaluate `(location, log_scale)` from the current inputs and state.
+    # Compute `location,log_scale` from `params`
     location,log_scale=params
     # Run `jnp.exp` to compute `variance`.
     variance=jnp.exp(2*log_scale)
-    # Evaluate `delta` from the current inputs and state.
+    # Compute `delta` from `location-mu`
     delta=location-mu
     # Return `0.5 * (jnp.sum(jnp.diag(P) * variance) + delta @ P @ delta - 2 + jnp.linalg.slogdet(Sigma)[1] - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))
@@ -35,38 +35,38 @@ def update(params,_):
     return new,kl(new)
 # Run compiled structured control flow via `jax.lax` (`(params, history)`).
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
-# Evaluate `(location, log_scale)` from the current inputs and state.
+# Compute `location,log_scale` from `params`
 location,log_scale=params
 # Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
 # Print the observed values to compare against the expected result.
 print('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))
 
 # 3. Check a prediction under a changed data-generating process
 # Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.linspace(-2,2,9)`
 x=jnp.linspace(-2,2,9)
-# Initialize array `linear_mean` with explicit values and shape.
+# Construct `linear_mean` via `jnp.zeros_like(x)`
 linear_mean=jnp.zeros_like(x)
-# Evaluate `noise_scale` from the current inputs and state.
+# Compute `noise_scale` from `.25`
 noise_scale=.25
-# Evaluate `curved_targets` from the current inputs and state.
+# Compute `curved_targets` from `x**2-1.`
 curved_targets=x**2-1.
-# Evaluate `standardized_residual` from the current inputs and state.
+# Compute `standardized_residual` from `(curved_targets-linear_mean)/noise_scale`
 standardized_residual=(curved_targets-linear_mean)/noise_scale
 # Aggregate array values to compute `coverage`.
 coverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)
-# Verify contract: `coverage < 0.4`.
+# Assert invariant `coverage<.4` holds
 assert coverage<.4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `standardized_residual[0]>10` holds
 assert standardized_residual[0]>10
 # Print the observed values to compare against the expected result.
 print('synthetic nominal-95% interval coverage:',float(coverage))
@@ -78,19 +78,19 @@ print('standardized residuals:',standardized_residual)
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `mu` with explicit values and shape.
+# Construct `mu` via `jnp.array([1.,-1.])`
 mu=jnp.array([1.,-1.])
-# Initialize array `Sigma` with explicit values and shape.
+# Construct `Sigma` via `jnp.array([[1.,.8],[.8,1.]])`
 Sigma=jnp.array([[1.,.8],[.8,1.]])
-# Initialize array `P` with explicit values and shape.
+# Compute `P` from `jnp.linalg.solve(Sigma,jnp.eye(2))`
 P=jnp.linalg.solve(Sigma,jnp.eye(2))
 # Function `kl(params)` implementing this stage's computation:
 def kl(params):
-    # Evaluate `(location, log_scale)` from the current inputs and state.
+    # Compute `location,log_scale` from `params`
     location,log_scale=params
     # Run `jnp.exp` to compute `variance`.
     variance=jnp.exp(2*log_scale)
-    # Evaluate `delta` from the current inputs and state.
+    # Compute `delta` from `location-mu`
     delta=location-mu
     # Return `0.5 * (jnp.sum(jnp.diag(P) * variance) + delta @ P @ delta - 2 + jnp.linalg.slogdet(Sigma)[1] - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))
@@ -106,37 +106,37 @@ def update(params,_):
     return new,kl(new)
 # Run compiled structured control flow via `jax.lax` (`(params, history)`).
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
-# Evaluate `(location, log_scale)` from the current inputs and state.
+# Compute `location,log_scale` from `params`
 location,log_scale=params
 # Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
 # Print the observed values to compare against the expected result.
 print('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))
 
 # Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.linspace(-2,2,9)`
 x=jnp.linspace(-2,2,9)
-# Initialize array `linear_mean` with explicit values and shape.
+# Construct `linear_mean` via `jnp.zeros_like(x)`
 linear_mean=jnp.zeros_like(x)
-# Evaluate `noise_scale` from the current inputs and state.
+# Compute `noise_scale` from `.25`
 noise_scale=.25
-# Evaluate `curved_targets` from the current inputs and state.
+# Compute `curved_targets` from `x**2-1.`
 curved_targets=x**2-1.
-# Evaluate `standardized_residual` from the current inputs and state.
+# Compute `standardized_residual` from `(curved_targets-linear_mean)/noise_scale`
 standardized_residual=(curved_targets-linear_mean)/noise_scale
 # Aggregate array values to compute `coverage`.
 coverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)
-# Verify contract: `coverage < 0.4`.
+# Assert invariant `coverage<.4` holds
 assert coverage<.4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `standardized_residual[0]>10` holds
 assert standardized_residual[0]>10
 # Print the observed values to compare against the expected result.
 print('synthetic nominal-95% interval coverage:',float(coverage))
@@ -152,9 +152,9 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 # Experiment — Monte Carlo KL through reparameterization: Matching the exact KL validates this estimator on the fixture;...
 # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
 eps=jax.random.normal(jax.random.key(52),(40000,2))
-# Evaluate `z` from the current inputs and state.
+# Compute `z` from `location+jnp.exp(log_scale)*eps`
 z=location+jnp.exp(log_scale)*eps
-# Evaluate `delta` from the current inputs and state.
+# Compute `delta` from `z-mu`
 delta=z-mu
 # Perform matrix contraction / projection to compute `logp`.
 logp=-.5*(jnp.einsum('ni,ij,nj->n',delta,P,delta)+2*jnp.log(2*jnp.pi)+jnp.linalg.slogdet(Sigma)[1])
@@ -162,7 +162,7 @@ logp=-.5*(jnp.einsum('ni,ij,nj->n',delta,P,delta)+2*jnp.log(2*jnp.pi)+jnp.linalg
 logq=-.5*jnp.sum(eps**2,axis=1)-jnp.sum(log_scale)-jnp.log(2*jnp.pi)
 # Aggregate array values to compute `estimate`.
 estimate=jnp.mean(logq-logp)
-# Verify contract: `abs(float(estimate - kl(params))) < 0.03`.
+# Check numerical equivalence within tolerance: `abs(float(estimate-kl(params)))<.03`
 assert abs(float(estimate-kl(params)))<.03
 # Print the observed values to compare against the expected result.
 print('Monte Carlo KL:',float(estimate))
@@ -173,7 +173,7 @@ print('Monte Carlo KL:',float(estimate))
 replicated=.25*jax.random.normal(jax.random.key(83),(40000,))
 # Aggregate array values to compute `model_coverage`.
 model_coverage=jnp.mean(jnp.abs(replicated)<=1.96*.25)
-# Verify contract: `0.94 < model_coverage < 0.96`.
+# Assert invariant `.94<model_coverage<.96` holds
 assert .94<model_coverage<.96
 # Print the observed values to compare against the expected result.
 print("model self-coverage:",float(model_coverage))
@@ -188,7 +188,7 @@ assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)
 
 # Reference practice: A correct diagonal is not a correct covariance
 # A correct diagonal is not a correct covariance (Transfer / diagnosis): Joint predictions can reveal approximation error that...
-# Initialize array `direction` with explicit values and shape.
+# Construct `direction` via `jnp.ones(2)`
 direction=jnp.ones(2)
 # Perform matrix / vector contraction (`@`) to compute `true_sum_var`.
 true_sum_var=direction@Sigma@direction
@@ -196,19 +196,19 @@ true_sum_var=direction@Sigma@direction
 approx_sum_var=jnp.sum(variance)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(true_sum_var,3.6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(approx_sum_var,.72,atol=1e-5)`
 assert jnp.allclose(approx_sum_var,.72,atol=1e-5)
 
 # Reference practice: Repair the changed mean without hiding noise
 # Repair the changed mean without hiding noise (Transfer / diagnosis): Correcting the mean removes systematic residual structure in...
-# Initialize array `truth` with explicit values and shape.
+# Construct `truth` via `jnp.linspace(-2,2,20000)**2-1`
 truth=jnp.linspace(-2,2,20000)**2-1
 # Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 fresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))
-# Evaluate `residual` from the current inputs and state.
+# Compute `residual` from `fresh-truth`
 residual=fresh-truth
-# Verify contract: `abs(float(residual.std()) - 0.25) < 0.01`.
+# Check numerical equivalence within tolerance: `abs(float(residual.std())-.25)<.01`
 assert abs(float(residual.std())-.25)<.01
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(residual.mean()))<.01`
 assert abs(float(residual.mean()))<.01
 print("PASS: probability-04")

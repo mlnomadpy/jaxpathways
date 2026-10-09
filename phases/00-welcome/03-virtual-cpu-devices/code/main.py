@@ -47,9 +47,9 @@ for shard in x.addressable_shards:
     print("Device", shard.device.id, "index", shard.index, "values", np.asarray(shard.data))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(y), 2 * host + 1)
-# Verify contract: `len(x.addressable_shards) == 4`.
+# Assert invariant `len(x.addressable_shards) == 4` holds
 assert len(x.addressable_shards) == 4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(shard.data.shape == (1, 2) for shard in x.addressable_shards)`
 assert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)
 # Print the observed values to compare against the expected result.
 print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
@@ -98,9 +98,9 @@ for shard in x.addressable_shards:
     print("Device", shard.device.id, "index", shard.index, "values", np.asarray(shard.data))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(y), 2 * host + 1)
-# Verify contract: `len(x.addressable_shards) == 4`.
+# Assert invariant `len(x.addressable_shards) == 4` holds
 assert len(x.addressable_shards) == 4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(shard.data.shape == (1, 2) for shard in x.addressable_shards)`
 assert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)
 # Print the observed values to compare against the expected result.
 print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
@@ -111,9 +111,9 @@ print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
 owners = np.empty(host.shape, dtype=int)
 # Loop over `s` in `x.addressable_shards`:
 for s in x.addressable_shards:
-    # Evaluate `owners[s.index]` from the current inputs and state.
+    # Compute `owners[s.index]` from `s.device.id`
     owners[s.index] = s.device.id
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'heatmap', 'values': owners.tolist(), 'unit...`
 visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CPU device ID', 'rows': ['row ' + str(i) for i in range(4)], 'columns': ['feature 0', 'feature 1']}
 
 # Experiment: Keep the shape, change the values
@@ -125,7 +125,7 @@ negative_x = jax.device_put(negative, rows)
 negative_y = jax.jit(lambda a: 2*a+1, in_shardings=rows, out_shardings=rows)(negative_x)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(negative_y), 2*negative+1)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (1,2) for s in negative_x.addressable_shards)`
 assert all(s.data.shape == (1,2) for s in negative_x.addressable_shards)
 # Print the observed values to compare against the expected result.
 print("Negative input result:", np.asarray(negative_y).tolist())
@@ -133,9 +133,9 @@ print("Negative input result:", np.asarray(negative_y).tolist())
 # Experiment: Replicate instead of partitioning
 # Experiment — Replicate instead of partitioning: Replication stores full copies.
 copies = jax.device_put(host, replicated)
-# Verify contract: `copies.is_fully_replicated`.
+# Assert invariant `copies.is_fully_replicated` holds
 assert copies.is_fully_replicated
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `len(copies.addressable_shards) == 4` holds
 assert len(copies.addressable_shards) == 4
 # Iterate over `shard` to step through the computation:
 for shard in copies.addressable_shards:
@@ -152,7 +152,7 @@ twelve = np.arange(24,dtype=np.float32).reshape(12,2)
 z = jax.device_put(twelve, rows)
 # Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
 z2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape == (3,2) for s in z2.addressable_shards)
 # Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
@@ -172,7 +172,7 @@ else:
 fixed = jax.device_put(uneven, replicated)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Verify contract: `fixed.is_fully_replicated`.
+# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated
 
 # Reference practice: Move from four rows to twelve
@@ -183,7 +183,7 @@ twelve = np.arange(24,dtype=np.float32).reshape(12,2)
 z = jax.device_put(twelve, rows)
 # Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
 z2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape == (3,2) for s in z2.addressable_shards)
 # Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
@@ -205,6 +205,6 @@ else:
 fixed = jax.device_put(uneven, replicated)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Verify contract: `fixed.is_fully_replicated`.
+# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated
 print("PASS: welcome-cpu")

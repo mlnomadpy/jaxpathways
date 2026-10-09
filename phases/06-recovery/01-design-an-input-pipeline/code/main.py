@@ -6,7 +6,7 @@
 import numpy as np
 import hashlib
 import time
-# Initialize array `ids` with explicit values and shape.
+# Compute `ids` from `np.arange(11,dtype=np.int64)`
 ids = np.arange(11,dtype=np.int64)
 # Cast or evaluate `features` in explicit floating-point precision.
 features = (ids/10).astype(np.float32)
@@ -43,7 +43,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
     order = epoch_order(seed,epoch)
     # Iterate over `start` to step through the computation:
     for start in range(0,len(order),batch_size):
-        # Evaluate `chosen` from the current inputs and state.
+        # Compute `chosen` from `order[start:start+batch_size]`
         chosen = order[start:start+batch_size]
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
@@ -61,19 +61,19 @@ seen = np.concatenate([b["id"] for b in batches])
 
 # Run the comparison
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
-# Verify contract: `[len(b['id']) for b in batches] == [4, 4, 3]`.
+# Assert invariant `[len(b["id"]) for b in batches] == [4` holds
 assert [len(b["id"]) for b in batches] == [4,4,3]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
-# Verify contract: `len(np.unique(seen)) == len(ids)`.
+# Assert invariant `len(np.unique(seen)) == len(ids)` holds
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
 # Print the observed values to compare against the expected result.
 print("Batch sizes:",[len(b["id"]) for b in batches])
@@ -89,7 +89,7 @@ print("Dataset SHA256:",fingerprint)
 import numpy as np
 import hashlib
 import time
-# Initialize array `ids` with explicit values and shape.
+# Compute `ids` from `np.arange(11,dtype=np.int64)`
 ids = np.arange(11,dtype=np.int64)
 # Cast or evaluate `features` in explicit floating-point precision.
 features = (ids/10).astype(np.float32)
@@ -125,7 +125,7 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
     order = epoch_order(seed,epoch)
     # Iterate over `start` to step through the computation:
     for start in range(0,len(order),batch_size):
-        # Evaluate `chosen` from the current inputs and state.
+        # Compute `chosen` from `order[start:start+batch_size]`
         chosen = order[start:start+batch_size]
         # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
@@ -142,19 +142,19 @@ elapsed = time.perf_counter()-start_time
 seen = np.concatenate([b["id"] for b in batches])
 
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
-# Verify contract: `[len(b['id']) for b in batches] == [4, 4, 3]`.
+# Assert invariant `[len(b["id"]) for b in batches] == [4` holds
 assert [len(b["id"]) for b in batches] == [4,4,3]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
-# Verify contract: `len(np.unique(seen)) == len(ids)`.
+# Assert invariant `len(np.unique(seen)) == len(ids)` holds
 assert len(np.unique(seen)) == len(ids)
 # Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
 # Print the observed values to compare against the expected result.
 print("Batch sizes:",[len(b["id"]) for b in batches])
@@ -167,15 +167,15 @@ print("Dataset SHA256:",fingerprint)
 
 # Figure data experiment
 # Compute figure data for: Shuffling changes order, not dataset membership
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': list(range(len(seen))), 'xlabe...`
 visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}
 
 # Experiment: Compare epochs without a hard-coded order
 # Experiment — Compare epochs without a hard-coded order: Coverage is an invariant; ordering is a deterministic...
 epoch_one = np.concatenate([b["id"] for b in make_batches(17,1)])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(np.sort(epoch_one),ids)`
 np.testing.assert_array_equal(np.sort(epoch_one),ids)
-# Verify contract: `not np.array_equal(epoch_one, seen)`.
+# Assert invariant `not np.array_equal(epoch_one,seen)` holds
 assert not np.array_equal(epoch_one,seen)
 # Print the observed values to compare against the expected result.
 print("Epoch one order:",epoch_one.tolist())
@@ -185,11 +185,11 @@ print("Epoch one order:",epoch_one.tolist())
 dropped = list(make_batches(17,0,drop_last=True))
 # Combine or mask array elements to form `dropped_ids`.
 dropped_ids = np.concatenate([b["id"] for b in dropped])
-# Verify contract: `len(dropped_ids) == 8`.
+# Assert invariant `len(dropped_ids)==8` holds
 assert len(dropped_ids)==8
 # Run `np.setdiff1d` to compute `omitted`.
 omitted = np.setdiff1d(ids,dropped_ids)
-# Verify contract: `len(omitted) == 3`.
+# Assert invariant `len(omitted)==3` holds
 assert len(omitted)==3
 # Print the observed values to compare against the expected result.
 print("Omitted IDs:",omitted.tolist())
@@ -199,7 +199,7 @@ print("Omitted IDs:",omitted.tolist())
 last = batches[-1]["y"]
 # Combine or mask array elements to form `padded_labels`.
 padded_labels = np.pad(last,(0,4-len(last)))
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.fl...`
 mask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)
 # Aggregate array values to compute `masked`.
 masked = (padded_labels*mask).sum()/mask.sum()
@@ -215,12 +215,13 @@ same=dataset_digest(features.copy(),labels.copy())
 reversed_digest=dataset_digest(features[::-1],labels[::-1])
 # Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
-changed_labels=labels.copy();changed_labels[0]+=0.1
+changed_labels=labels.copy()
+changed_labels[0]+=0.1
 # Run `dataset_digest` to compute `changed_digest`.
 changed_digest=dataset_digest(features,changed_labels)
-# Verify contract: `same == fingerprint`.
+# Assert invariant `same==fingerprint` holds
 assert same==fingerprint
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `reversed_digest!=fingerprint and changed_digest!=fingerprint` holds
 assert reversed_digest!=fingerprint and changed_digest!=fingerprint
 # Print the observed values to compare against the expected result.
 print('Copy preserves fingerprint; reordered source and edited labels invalidate it.')
@@ -228,17 +229,18 @@ print('Copy preserves fingerprint; reordered source and edited labels invalidate
 # Reference practice: Catch a feature/label shuffle mismatch
 # Catch a feature/label shuffle mismatch (Challenge): Wrong alignment can preserve shapes and numeric ranges.
 batch = batches[0]
-# Evaluate `wrong_labels` from the current inputs and state.
+# Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = batch["y"][::-1]
 # Verify that the numerical values match the expected reference within tolerance.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)
-# Evaluate `fixed` from the current inputs and state.
+# Compute `fixed` from `labels[batch["id"]]`
 fixed = labels[batch["id"]]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)`
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
 # Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
-changed_labels = labels.copy(); changed_labels[0]+=1
-# Verify contract: `dataset_digest(features, changed_labels) != fingerprint`.
+changed_labels = labels.copy()
+changed_labels[0]+=1
+# Assert invariant `dataset_digest(features,changed_labels)!=fingerprint` holds
 assert dataset_digest(features,changed_labels)!=fingerprint
 print("PASS: recovery-01")

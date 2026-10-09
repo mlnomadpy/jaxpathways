@@ -45,7 +45,7 @@
       "id": "tpu",
       "projectId": "text-harness",
       "title": "Training-system synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/tpu.md",
       "url": "assessments/tpu.html",

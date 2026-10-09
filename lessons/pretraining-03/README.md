@@ -22,7 +22,7 @@ Place one view on each score-matrix axis and mark the intended positive pairs. A
 
 Temperature scales logits and changes concentration and gradient behavior; it does not change the underlying cosine values before scaling. Keep those two quantities on distinct labels.
 
-Read both query directions when the objective trains both directions. A strong diagonal on a tiny fixture does not establish broad semantic retrieval. Inspect changed pairings and ambiguous cases, and avoid inventing a faithful two-dimensional picture of a higher-dimensional representation.
+Read both query directions when the objective trains both directions. A strong diagonal on a tiny fixture is separate from broad semantic retrieval. Inspect changed pairings and ambiguous cases, and avoid inventing a faithful two-dimensional picture of a higher-dimensional representation.
 
 ### Pause and reason
 
@@ -120,17 +120,17 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 
 ```python
 # Step 2 — 2. Construct paired views and an encoder: The fixed perturbations preserve source identity.
-# Initialize array `left` with explicit values and shape.
+# Construct `left` via `jnp.array(`
 left = jnp.array(
     [[1.0, 0.0, 0.2], [0.0, 1.0, -0.2], [-1.0, 0.0, 0.1], [0.0, -1.0, -0.1]]
 )
-# Initialize array `right` with explicit values and shape.
+# Construct `right` via `left + jnp.array(`
 right = left + jnp.array(
     [[0.02, -0.01, 0.0], [-0.01, 0.02, 0.0], [0.01, 0.01, 0.0], [-0.02, -0.01, 0.0]]
 )
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])`
 w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
@@ -151,18 +151,18 @@ for _ in range(60):
     value, g = step(w)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `w` from the current inputs and state.
+    # Compute `w` from `w - 0.03 * g`
     w = w - 0.03 * g
 
-# Verify contract: `history[-1] < history[0]`.
+# Assert invariant `history[-1] < history[0]` holds
 assert history[-1] < history[0]
 # Perform matrix / vector contraction (`@`) to compute `zi`.
 zi = left @ w
 # Perform matrix / vector contraction (`@`) to compute `zt`.
 zt = right @ w
-# Evaluate `zi` from the current inputs and state.
+# Compute `zi` from `zi / jnp.linalg.norm(zi, axis=1, keepdims=True)`
 zi = zi / jnp.linalg.norm(zi, axis=1, keepdims=True)
-# Evaluate `zt` from the current inputs and state.
+# Compute `zt` from `zt / jnp.linalg.norm(zt, axis=1, keepdims=True)`
 zt = zt / jnp.linalg.norm(zt, axis=1, keepdims=True)
 # Perform matrix contraction / projection to compute `scores`.
 scores = zi @ zt.T / 0.2
@@ -182,7 +182,7 @@ np.testing.assert_allclose(
     0.5 * (host_ce(host) + host_ce(host.T)),
     atol=1e-6,
 )
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.array_equal(np.argmax(host, axis=1), np.arange(4))` holds
 assert np.array_equal(np.argmax(host, axis=1), np.arange(4))
 # Create device-backed JAX array `permutation`.
 permutation = jnp.array([2, 0, 3, 1])
@@ -227,17 +227,17 @@ def paired_contrastive(left, right, temperature=0.2):
     )
 
 # Step 2 — 2. Construct paired views and an encoder: The fixed perturbations preserve source identity.
-# Initialize array `left` with explicit values and shape.
+# Construct `left` via `jnp.array(`
 left = jnp.array(
     [[1.0, 0.0, 0.2], [0.0, 1.0, -0.2], [-1.0, 0.0, 0.1], [0.0, -1.0, -0.1]]
 )
-# Initialize array `right` with explicit values and shape.
+# Construct `right` via `left + jnp.array(`
 right = left + jnp.array(
     [[0.02, -0.01, 0.0], [-0.01, 0.02, 0.0], [0.01, 0.01, 0.0], [-0.02, -0.01, 0.0]]
 )
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])`
 w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
@@ -250,18 +250,18 @@ for _ in range(60):
     value, g = step(w)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `w` from the current inputs and state.
+    # Compute `w` from `w - 0.03 * g`
     w = w - 0.03 * g
 
-# Verify contract: `history[-1] < history[0]`.
+# Assert invariant `history[-1] < history[0]` holds
 assert history[-1] < history[0]
 # Perform matrix / vector contraction (`@`) to compute `zi`.
 zi = left @ w
 # Perform matrix / vector contraction (`@`) to compute `zt`.
 zt = right @ w
-# Evaluate `zi` from the current inputs and state.
+# Compute `zi` from `zi / jnp.linalg.norm(zi, axis=1, keepdims=True)`
 zi = zi / jnp.linalg.norm(zi, axis=1, keepdims=True)
-# Evaluate `zt` from the current inputs and state.
+# Compute `zt` from `zt / jnp.linalg.norm(zt, axis=1, keepdims=True)`
 zt = zt / jnp.linalg.norm(zt, axis=1, keepdims=True)
 # Perform matrix contraction / projection to compute `scores`.
 scores = zi @ zt.T / 0.2
@@ -281,7 +281,7 @@ np.testing.assert_allclose(
     0.5 * (host_ce(host) + host_ce(host.T)),
     atol=1e-6,
 )
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.array_equal(np.argmax(host, axis=1), np.arange(4))` holds
 assert np.array_equal(np.argmax(host, axis=1), np.arange(4))
 # Create device-backed JAX array `permutation`.
 permutation = jnp.array([2, 0, 3, 1])
@@ -322,16 +322,16 @@ The shared encoder starts with poorly separated directions and learns an embeddi
 
 ```python
 # Compute figure data for: Contrastive learning: views, positives and negatives — recorded experiment
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'symmetric contrastive loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 # Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Evaluate `panel['x']` from the current inputs and state.
+    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
 # Convert `extra_panel` to a host NumPy array for inspection or verification.
 extra_panel={'kind':'heatmap','values':np.asarray(zi@zt.T).tolist(),'rows':['left 0','left 1','left 2','left 3'],'columns':['right 0','right 1','right 2','right 3'],'unit':'cosine similarity','diverging':True,'xlabel':'right-view source ID','ylabel':'left-view source ID','title':'Final cross-view similarities before temperature scaling'}
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
@@ -360,11 +360,11 @@ PASS: pretraining-03
 
 ```python
 # Experiment — Measure the collapsed baseline: Equal similarity gives each candidate probability one quarter.
-# Initialize array `collapsed` with explicit values and shape.
+# Construct `collapsed` via `jnp.ones((4, 2))`
 collapsed = jnp.ones((4, 2))
 # Evaluate `paired_contrastive(collapsed, collapsed)` and convert the result into Python scalar/collection `collapse_loss`.
 collapse_loss = float(paired_contrastive(collapsed, collapsed))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(collapse_loss, np.log(4), atol=1e-6)`
 np.testing.assert_allclose(collapse_loss, np.log(4), atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Collapsed baseline:', collapse_loss)
@@ -380,13 +380,13 @@ Equal similarity gives each candidate probability one quarter. This baseline cat
 
 ```python
 # Experiment — Separate temperature from ranking: The independent binary-softmax expression checks scale handling...
-# Initialize array `orthogonal` with explicit values and shape.
+# Compute `orthogonal` from `jnp.eye(2)`
 orthogonal = jnp.eye(2)
 # Iterate over `tau` to step through the computation:
 for tau in [0.2, 1.0, 2.0]:
     # Evaluate `paired_contrastive(orthogonal, orthogonal, tau)` and convert the result into Python scalar/collection `observed`.
     observed = float(paired_contrastive(orthogonal, orthogonal, tau))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau...`
     np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau), atol=1e-6)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(
@@ -411,7 +411,7 @@ Permute only the right-hand embeddings after training and demonstrate the effect
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))`.
+1. Assert invariant `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))` holds
 2. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -419,7 +419,7 @@ Permute only the right-hand embeddings after training and demonstrate the effect
 ```python
 # Exercise solution: Permute only the right-hand embeddings after training and demonstrate...
 wrong_pair_loss = float(...)  # TODO: compute wrong_pair_loss
-# Verify contract: `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))`.
+# Assert invariant `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))` holds
 assert wrong_pair_loss  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Incorrect pair mapping loss:', wrong_pair_loss)
@@ -430,7 +430,7 @@ print('Incorrect pair mapping loss:', wrong_pair_loss)
 ```python
 # Exercise solution: Permute only the right-hand embeddings after training and demonstrate...
 wrong_pair_loss = float(paired_contrastive(left @ w, (right @ w)[permutation]))
-# Verify contract: `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))`.
+# Assert invariant `wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))` holds
 assert wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))
 # Print the observed values to compare against the expected result.
 print('Incorrect pair mapping loss:', wrong_pair_loss)
@@ -457,7 +457,7 @@ Each original candidate appears twice, but only one copy is labeled positive.
 
 **Step-by-step implementation plan:**
 1. Perform matrix contraction / projection to compute `original`.
-2. Verify that computed values match the expected reference within numerical tolerance.
+2. Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
 3. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -469,7 +469,7 @@ duplicated = float(...)  # TODO: compute duplicated
 )
 # Perform matrix contraction / projection to compute `original`.
 original = float(...)  # TODO: compute original
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
 np.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)
 # Print the observed values to compare against the expected result.
 print('Duplicated diagonal-only penalty:', duplicated - original)
@@ -484,7 +484,7 @@ duplicated = float(
 )
 # Perform matrix contraction / projection to compute `original`.
 original = float(paired_contrastive(left @ w, right @ w))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(duplicated - original, np.log(2), atol...`
 np.testing.assert_allclose(duplicated - original, np.log(2), atol=1e-5)
 # Print the observed values to compare against the expected result.
 print('Duplicated diagonal-only penalty:', duplicated - original)
@@ -514,17 +514,17 @@ Use a fresh matrix; a gradient near a trained optimum may be too small to diagno
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Initialize array `audit_w` with explicit values and shape.
+1. Construct `audit_w` via `jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])`
 2. Perform matrix contraction / projection to compute `objective`.
 3. Differentiate the objective to obtain `auto` via automatic differentiation.
 4. Iterate over `epsilon` to step through the computation:
-5. Initialize array `delta` with explicit values and shape.
+5. Construct `delta` via `jnp.zeros_like(audit_w).at[0, 0].set(epsilon)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.
-# Initialize array `audit_w` with explicit values and shape.
+# Construct `audit_w` via `jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])`
 audit_w = jnp.array(...)  # TODO: compute audit_w
 # Perform matrix contraction / projection to compute `objective`.
 objective = ...  # TODO: compute objective
@@ -532,13 +532,13 @@ objective = ...  # TODO: compute objective
 auto = float(...)  # TODO: compute auto
 # Iterate over `epsilon` to step through the computation:
 for epsilon in [1e-3, 5e-4]:
-    # Initialize array `delta` with explicit values and shape.
+    # Construct `delta` via `jnp.zeros_like(audit_w).at[0, 0].set(epsilon)`
     delta = jnp.zeros_like(...)  # TODO: compute delta
     # Evaluate `(objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)` and convert the result into Python scalar/collection `estimate`.
     estimate = float(...)  # TODO: compute estimate
         (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)
     )
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)`
     np.testing.assert_allclose(estimate, auto, rtol = ...  # TODO: compute np.testing.assert_allclose(estimate, auto, rtol
     # Print diagnostic summary of the computed outputs.
     print('Step / finite difference / autodiff:', epsilon, estimate, auto)
@@ -548,7 +548,7 @@ for epsilon in [1e-3, 5e-4]:
 
 ```python
 # Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.
-# Initialize array `audit_w` with explicit values and shape.
+# Construct `audit_w` via `jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])`
 audit_w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
 # Perform matrix contraction / projection to compute `objective`.
 objective = lambda weights: paired_contrastive(left @ weights, right @ weights, 0.2)
@@ -556,13 +556,13 @@ objective = lambda weights: paired_contrastive(left @ weights, right @ weights, 
 auto = float(jax.grad(objective)(audit_w)[0, 0])
 # Iterate over `epsilon` to step through the computation:
 for epsilon in [1e-3, 5e-4]:
-    # Initialize array `delta` with explicit values and shape.
+    # Construct `delta` via `jnp.zeros_like(audit_w).at[0, 0].set(epsilon)`
     delta = jnp.zeros_like(audit_w).at[0, 0].set(epsilon)
     # Evaluate `(objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)` and convert the result into Python scalar/collection `estimate`.
     estimate = float(
         (objective(audit_w + delta) - objective(audit_w - delta)) / (2 * epsilon)
     )
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)`
     np.testing.assert_allclose(estimate, auto, rtol=3e-3, atol=1e-3)
     # Print diagnostic summary of the computed outputs.
     print('Step / finite difference / autodiff:', epsilon, estimate, auto)
@@ -584,7 +584,7 @@ What does successful retrieval on the training pairs establish?
 
 The encoder solves those pairs under that pairing and augmentation contract.
 
-It does not establish downstream task quality or robustness to a new data distribution.
+It is separate from downstream task quality or robustness to a new data distribution.
 
 </details>
 

@@ -26,9 +26,9 @@ replicated = NamedSharding(mesh, P())
 
 # Place and compute
 # Step 2 — Place and compute: Mesh axis names describe placement.
-# Initialize array `host_x` with explicit values and shape.
+# Compute `host_x` from `np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],...`
 host_x = np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2]],dtype=np.float32)
-# Initialize array `true_w` with explicit values and shape.
+# Compute `true_w` from `np.array([2.,-1.],dtype=np.float32)`
 true_w = np.array([2.,-1.],dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `host_y`.
 host_y = host_x @ true_w
@@ -66,7 +66,7 @@ np.testing.assert_allclose(np.asarray(new_w),-0.1*expected_gradient,rtol=1e-6,at
 expected_loss = np.mean(host_y**2)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(before), expected_loss,rtol=1e-6)
-# Verify contract: `float(loss(new_w, x, y)) < float(before)`.
+# Assert invariant `float(loss(new_w,x,y)) < float(before)` holds
 assert float(loss(new_w,x,y)) < float(before)
 # Iterate over `shard` to step through the computation:
 for shard in new_w.addressable_shards:
@@ -103,9 +103,9 @@ rows = NamedSharding(mesh, P("data", None))
 replicated = NamedSharding(mesh, P())
 
 # Step 2 — Place and compute: Mesh axis names describe placement.
-# Initialize array `host_x` with explicit values and shape.
+# Compute `host_x` from `np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],...`
 host_x = np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2]],dtype=np.float32)
-# Initialize array `true_w` with explicit values and shape.
+# Compute `true_w` from `np.array([2.,-1.],dtype=np.float32)`
 true_w = np.array([2.,-1.],dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `host_y`.
 host_y = host_x @ true_w
@@ -142,7 +142,7 @@ np.testing.assert_allclose(np.asarray(new_w),-0.1*expected_gradient,rtol=1e-6,at
 expected_loss = np.mean(host_y**2)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(before), expected_loss,rtol=1e-6)
-# Verify contract: `float(loss(new_w, x, y)) < float(before)`.
+# Assert invariant `float(loss(new_w,x,y)) < float(before)` holds
 assert float(loss(new_w,x,y)) < float(before)
 # Iterate over `shard` to step through the computation:
 for shard in new_w.addressable_shards:
@@ -194,9 +194,9 @@ print("Ten-step weights:",np.asarray(cpu_weights))
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Run a changed target/initial-state update, then diagnose the...
-# Initialize array `changed_y` with explicit values and shape.
+# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
-# Initialize array `start` with explicit values and shape.
+# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array([0.2,-0.1],dtype=np.float32)
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
@@ -211,7 +211,7 @@ reference_gradient = 2*host_x.T @ (host_x@start-changed_y)/len(changed_y)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
 
-# Evaluate `local_gradients` from the current inputs and state.
+# Compute `local_gradients` from `[]`
 local_gradients = []
 # Iterate over `(features, labels)` to step through the computation:
 for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
@@ -221,24 +221,24 @@ for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
 # Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 # Print diagnostic summary of the computed outputs.
 print("Summed local means are four times too large; weighted aggregation repaired")
 
 # Reference practice: Transfer to a different target model
 # Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
-# Initialize array `changed_y` with explicit values and shape.
+# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
-# Initialize array `start` with explicit values and shape.
+# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array([0.2,-0.1],dtype=np.float32)
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
@@ -264,15 +264,15 @@ for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
 # Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)`
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Summed local means are four times too large; weighted aggregation repaired")

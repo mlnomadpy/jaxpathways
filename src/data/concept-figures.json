@@ -83,7 +83,7 @@
         "Compare the restored transition with uninterrupted training."
       ]
     ],
-    "note": "This illustrates the lesson’s completed local snapshot boundary. It does not establish power-loss durability, asynchronous failure recovery or multi-host coordination."
+    "note": "This illustrates the lesson’s completed local snapshot boundary. It is verified separately from power-loss durability, asynchronous failure recovery or multi-host coordination."
   },
   "distributed-01": {
     "title": "One global array, four local row shards",

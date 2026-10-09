@@ -120,7 +120,7 @@ Status: authored lesson with CPU exercise.
 
 **Intended outcome:** Distinguish requested, completed, verified and published checkpoint state. Continue a functional update while an asynchronous writer is alive.
 
-**Evidence:** Keep the requested/completed/accepted step log, the restored snapshot comparison, interrupted-publication result and surfaced finalization error. Explain why directory presence alone does not establish acceptance.
+**Evidence:** Keep the requested/completed/accepted step log, the restored snapshot comparison, interrupted-publication result and surfaced finalization error. Explain why directory presence alone is separate from acceptance.
 
 **Checkpoint:** A new checkpoint directory exists but the completion wait raises an exception. Which recovery decision follows this lesson’s protocol?
 
@@ -142,8 +142,9 @@ An interrupted run restored with its full state.
 
 **Demonstrate:** Compare resumed and uninterrupted runs under a stated determinism tolerance.
 
-Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 1, 2, 3 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3.
+Project status: implemented staged practice · [Open source](../../projects/recovery-audit/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3.
 
 Additional project: [Ship a tracked and containerized model release](../../projects/engineering-release/README.md).
+Additional project: [Resume and profile a sharded training run](../../projects/sharded-training/README.md).
 
 [Primary documentation](https://orbax.readthedocs.io/en/latest/).

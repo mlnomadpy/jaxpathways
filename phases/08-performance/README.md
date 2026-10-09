@@ -130,8 +130,8 @@ A trace-backed before-and-after performance report.
 
 **Demonstrate:** Separate compilation, execution, input stalls, and synchronization before claiming a speedup.
 
-Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4` from the top-level folder to verify stage 4.
+Project status: implemented staged practice · [Open source](../../projects/performance-audit/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4` from the top-level folder to verify stage 4.
 
-
+Additional project: [Resume and profile a sharded training run](../../projects/sharded-training/README.md).
 
 [Primary documentation](https://openxla.org/xprof).

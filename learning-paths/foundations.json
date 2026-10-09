@@ -25,7 +25,7 @@
     "projectId": "regression-audit",
     "assessmentDraft": {
       "id": "foundations",
-      "status": "review-draft",
+      "status": "active",
       "source": "assessments/foundations.md",
       "url": "assessments/foundations.html"
     }
@@ -50,7 +50,7 @@
       "id": "math",
       "title": "Math & optimization synthesis",
       "url": "assessments/math.html",
-      "status": "review-draft"
+      "status": "active"
     }
   ],
   "engineeringLessonIds": [

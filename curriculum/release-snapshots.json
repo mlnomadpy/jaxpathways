@@ -2,7 +2,7 @@
   {
     "version": "0.5.3",
     "date": "2026-10-08",
-    "hash": "0f140e277d8a8fabeb6ac82a95cf945039f483c51631d15e694a7e9c0c9e56be",
+    "hash": "239887a57074ca8d5aa7ba30c94be7f8822452ca08d0d3c9414a8242234ed611",
     "notes": {
       "version": "0.5.3",
       "date": "2026-10-08",
@@ -18,619 +18,619 @@
     "lessons": {
       "welcome-01": {
         "title": "Set up your learning workspace",
-        "hash": "8dbf7030b58d80e6ab8d2617ab5948f068955f2c99f8866a262b8fac91e54832",
+        "hash": "7a214463cc2cd9ba43bfd99f43393160df4f782b6ea8a05978cde7dea40145b0",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "welcome-02": {
         "title": "Meet your arrays and devices",
-        "hash": "38a7c74e658ac4acc77478d8a3a185f7b58bf90654a0c15a2acd97b5cd152752",
+        "hash": "877ec3a7f2230ce01f1bcdf7aa06df3c00bc4d5f88b55989aee24c62647bfa65",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "welcome-cpu": {
         "title": "Practice with four virtual CPU devices",
-        "hash": "7739edda975813b11068b94e364e8d80e1d62d6fdb110ed001320154477671e9",
+        "hash": "280a9ec73555e77e3143c534497d1c0e662f93dee7bb22f7870970ca29fd8d86",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "welcome-03": {
         "title": "Move your experiment to a TPU",
-        "hash": "123d54afe2006469a27d8d7c57195e375ca0c2972d1d4ca32d34d9fe4b2e7cca",
+        "hash": "457e0943ace793718224ed2189b70163520aa5909b491e8a4e7fe9718fbe9dd3",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "arrays-01": {
         "title": "From NumPy to jax.numpy",
-        "hash": "6c73ab1a115b2c2679c744a29a852e46ae5116c8fab755d622284b52bf5842de",
+        "hash": "b4f4867cab2e41c55effc3138452eec91ba9d666745720ce5c47314190891981",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "arrays-02": {
         "title": "Shapes, broadcasting, and dtypes",
-        "hash": "34fbee6993950eb63e725bf3ab3388abb7ddcb16012f8e1165424bf3a4c61c73",
+        "hash": "f40bd7e99e282c9de07a7d207374df5a119e8242b764a497c0e06d4cfb173653",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "arrays-03": {
         "title": "Pure functions and explicit inputs",
-        "hash": "324ddcf376ac7a640a6edb01980a77ec90d562b310b523c0e4fb12e7e6c55895",
+        "hash": "f4acc7f911e864986c30545779744c956377863b6b226bc79b6fa4a59bb11951",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "arrays-04": {
         "title": "Immutable updates and indexing",
-        "hash": "92874707cc9133f4cf30d4263273da123c96489e072346405098c02ff65a3157",
+        "hash": "9c3e365127f93fd0b1bbdd5d868fd6ab6c637e0d53eef668c2806e14cd2a0b3a",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "first-gradient": {
         "title": "Your first gradient",
-        "hash": "f10fcdceafc47aa26596a30788e3466386365beaebb17f5def6cd2e1e84d56cd",
+        "hash": "f451042542a6fa138f8f5e1d6760bbe7cad551dff82c2d6aeca3a311a8f39018",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transforms-02": {
         "title": "Losses and value_and_grad",
-        "hash": "ee3a0b14fcfc32571b9c617824e447d732279a4b6650f31e7cc7c9c85bd979fb",
+        "hash": "b91b1b1425000e080ed395e28b714afb5b95f7d7a0cdbe40762e6558e800da26",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transforms-03": {
         "title": "Batch a function with vmap",
-        "hash": "d1070f1c593cb2cbd4f47167e75bbff554a27d2a2d9416c48676d4d1115dbd51",
+        "hash": "b2787e2b6dc119eb9ff939a3afbaa25a7409797104dace0e5cfc4ed43af9d799",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transforms-04": {
         "title": "Compile a function with jit",
-        "hash": "d4b6cc99ce4f54e48302390cfdab3cedd966b8516eab9e3d3070788d7a143b5b",
+        "hash": "1285f750df7acacf5fa59a5299226d39e8bc8f8cc7db199889d27b83135b5669",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transforms-05": {
         "title": "Tracing, static arguments, and recompilation",
-        "hash": "381fb441267e4c04e045eef43508a39046b126308689f6b7e746c1ef7b6cf484",
+        "hash": "2678644443fd693174790b06e1d3bc24e9c0f21894178aa5c3195d84b5728d0f",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "state-01": {
         "title": "Random keys without surprises",
-        "hash": "1fe6dbbbdaa73f9d1eca2bfa3ab60acc70537cde27a7dee40724efb453bae767",
+        "hash": "96a29accdf2a69ff32845662203472eee7844f44e4ed44f693bbb51894e265f6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "state-02": {
         "title": "Pytrees and structured parameters",
-        "hash": "c8feb020e7acc4917fe5e8374945d0cd2751f1e18c95b65c55033bb815314dee",
+        "hash": "13e854c49bead39f7fb1a052cab76df740fea131248b87fe5303653bbb6613af",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "state-03": {
         "title": "Compiled loops with lax.scan",
-        "hash": "bfd4c9fdea5da4f52fb12dd0b5077a0b1caf5863f81050bbab7bb4a6b98f87db",
+        "hash": "4f065936229008b604bb31b16d708841b4302727c2de203df09121acd9301806",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "state-04": {
         "title": "Branches with lax.cond",
-        "hash": "531e461ae8e551f1e21737e93ab0c7765fb65dcbe288ab797d97d3126c9c2b7d",
+        "hash": "7f8a6f2f2cefbf752fd5d803d8a21286936d9780e2c246302d4be60575036ff1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-05": {
         "title": "Vectors, norms, and projections",
-        "hash": "8698178eec96430cf4cf110be27f7107128c4a57c0ca7558acce30a7c0f4373b",
+        "hash": "f20ee7e1259609dc79e87a33c76e0e4d6e294b0b03bda87769ebc8540c067571",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-01": {
         "title": "Linear algebra and loss intuition",
-        "hash": "a569b3cd40250818eb3340c7be93a276f324ea026f316c09a04fb9ed2664bb3a",
+        "hash": "2db389c8ae8164a4257bf8212ad0e50413a90a4df97eb5eb4cf436014eefc192",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-06": {
         "title": "Least squares, rank, and conditioning",
-        "hash": "1b243b34235da8d1c530a6aa031e65484f0ae6b1cea7c863d94bca394db39ffd",
+        "hash": "a57d101caaf7df2e5e18a1b93e58e85994eaeb6310eeb913899f9bda3d7c5505",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-07": {
         "title": "The chain rule, Jacobians, and directions",
-        "hash": "d5cf0e3a094c49e7ac3f73246de98e9f72b583c3a39720a6b43880bb494bd322",
+        "hash": "4ae4053da0b73b8f0c59da8fe441246fb07bb4086d2a6b1c8bad0737c98f1215",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-02": {
         "title": "Gradient checking and numerical accuracy",
-        "hash": "0402be42853192c98daa1426b9c995a16d01a13214828ddd8fe92c090f8521cf",
+        "hash": "1c7403e452d222afe076c457f0e4a6d8dd3cc83b7e9ad281796e49137b6f3deb",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-08": {
         "title": "Curvature, Hessians, and learning rates",
-        "hash": "0035fc42c77f4d75ee776637fba30d58ed6ebdcbf9134b9e2d2168d2f2dcd0ac",
+        "hash": "467df420b432401e40ea1450d6bc88be363e9e4a73e2b41a18d893af67eb7ed2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-03": {
         "title": "Write gradient descent yourself",
-        "hash": "46692091275206fbd7907fd59e7f89be12de07e27cbea0d45451decb1a7c496c",
+        "hash": "34bef0bd1ed17d41fa5541d4c2d95e265ce3e7aef59d7a8a6ff4e9d40f727943",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-09": {
         "title": "Probability, likelihood, and stable losses",
-        "hash": "1831333ece2d8d7faec9c4a0bc37063d8921187d0758eb97d5791f16cc2cb40d",
+        "hash": "4022dddf7164df9faad6b452310bfb93df7d17c8704bbcb1c84e644216a352cb",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-10": {
         "title": "Regularization and honest validation",
-        "hash": "856e981a5975045651e5b6480febbc05acab68d89e68701b8f4c8e06b4d65dff",
+        "hash": "8198448633fd9c9a80997eb12b95eddd2bd329d350fb2e2cf733f7f4e1e5a8ca",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-11": {
         "title": "Minibatches, expectation, and gradient noise",
-        "hash": "0d0175e372c62f31e65dd5f879663b114f98eb2eaae1b3537ee385d97317277e",
+        "hash": "9b727b96e45b73e00b10744dd6a9a46f33021bf97a9d9aecf7d95807855cb3b6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-04": {
         "title": "Optimize with Optax",
-        "hash": "e7061bc74a392c7061e4d4cd1e9aef0b98bfa41ddfbb43204b009ba0d4ae8756",
+        "hash": "cafd0585cff94c05e53c8fb91e6cff971e278c01e89749e0e490ccac3f53ad5d",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization-12": {
         "title": "Adam, clipping, and learning-rate schedules",
-        "hash": "3f7314b8eb4451f77ab6d9fa0fc521a94bca1f72d0e17bc3ca1e24a72efa2908",
+        "hash": "a10aa5ab745fdc0bd95a43863727434ea94056d4519d19cbc700da99e95784f2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks-01": {
         "title": "Build a tiny multilayer perceptron",
-        "hash": "a8cbb1f0022ea22fc2ea2f5d02c72998499cb27bcba5443221f2ac0976224263",
+        "hash": "8aba0bb7691067e11610f9d9d775c931092183f3baa333a2eb08ee195da6dde9",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks-02": {
         "title": "Model and state with Flax NNX",
-        "hash": "cac11d3368d7e7d3fa906f57c2579f2aad79f7abef56879e281393f5577e9ff4",
+        "hash": "0d2abd82eb8cd0e1e55745357c189f1e3cdf47e2b813b0bbc81533a8ab812e61",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks-03": {
         "title": "A compiled train and evaluation step",
-        "hash": "422a81729d544ea548c06c23916168fe5a5fb6e8b7f4367dfda39b3d04f22175",
+        "hash": "aed091b88b16de9610cb826db2c551f8c41f7d11a49032c27410ebf1a8e383f3",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks-04": {
         "title": "Train a CNN on a small dataset",
-        "hash": "64613361792ca5184604cb9d3d65d9360d1622f7a4fe319b27e9b09944ee3db2",
+        "hash": "b145a762f1973d6601ff1ddbfe8061028e2b94cbabb408819f393a442d1a5250",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks-05": {
         "title": "Debug unstable learning",
-        "hash": "c1e6561d9e289cda2264f3db30bb926ea0006c6f3e654ab319e123c9f2f487b5",
+        "hash": "a556d2ab164860592e780a0fc8f57ba137b365d2d854c2aec069982f4558e50e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-01": {
         "title": "Design an input pipeline",
-        "hash": "891392562efeb5a5e66e2945dc0abf652516231c284163d5ab87f420f5252ff3",
+        "hash": "d6896c7fdd5ea74e8cc638cadaf0d980d36678bc01e83db344a688db27876dc7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-02": {
         "title": "Load, batch, and checkpoint order with Grain",
-        "hash": "6e86eb10a182602332243c1b571727248d00208ce655f3b5a3f585daf85af3e6",
+        "hash": "bb7eb4c1f8551ae1e8c4cc47dcc6aa4ac7cc1cdd649d392727b16ff874ac2aa1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-03": {
         "title": "Save model, optimizer, and random state",
-        "hash": "ca63d4fc9b23de5384671ea08dca2e7b86718efc2144f61d3e7fe287b9789918",
+        "hash": "5600fd5c8b84ac27fc77b0019f0c106911348453aee08466281cb6b2cde4aa2c",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-04": {
         "title": "Recover data position and resume",
-        "hash": "33d812909f1a900833fa381322238481de2db6cc1c620341c4c07d8c35082f52",
+        "hash": "18330af3ac0f050e8ac34cd8efe2b66f219285c133b57937ee59840ad9642482",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-05": {
         "title": "Asynchronous checkpoints and failure boundaries",
-        "hash": "59c82e09bb49653035072e4b1b22f1972a3da31c13e958ded3b4c76569e87c1b",
+        "hash": "be1565ad221671becb82cdd5f494785d97ebfc640d7151fd0b49907399ec88f6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery-06": {
         "title": "Track experiments and lineage with MLflow",
-        "hash": "c587ef7488c5d16d3608f2d58b603a07f0caf9e430df064c1b2b69c0e944b90d",
+        "hash": "c82bed739ae1268f58eeda771a75ad4ea5aa47e25642987d42401e96d35ee332",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transformers-01": {
         "title": "Attention from small pieces",
-        "hash": "3537a4bf10ced8f1960b4351ca64971d3dd447c50e22054036d9ae1a592f145b",
+        "hash": "21e557cf25f789bd8947d90961e31b2d6068504e57ec6809cb2ebbd3b796f8ed",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transformers-02": {
         "title": "Masking, tokenization, and sequence packing",
-        "hash": "3ac14c64fe48b8c5d7fa744c3d619ba5c29124e80c8eabe91d7d1c91ae7568fb",
+        "hash": "2e3e79edbee134aceaf4635c9fe1266aa0ce885a642eb9cba765fe8019cbf880",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transformers-03": {
         "title": "A Transformer block and mixed precision",
-        "hash": "907fbeb4f2cadf81f1c5aa46f7a5274749fc5d25e7f136ce7553dc2fa1553fa4",
+        "hash": "3d80d211f7f086cfc38d1394aaa206e7549fb8fa83ac72418edb1a0480eb0b5f",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transformers-04": {
         "title": "Train, checkpoint, and generate",
-        "hash": "d55ed9348cbd6398ed8a246d24d34135762195593db700022a7400eb7b77a477",
+        "hash": "4afcad25bc05f4069fc9c11ed955276d686f438417642486f7589c039065736c",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance-01": {
         "title": "Benchmark asynchronous work correctly",
-        "hash": "2ce6091d57b07766c00da4a841884a549e772fafd4e803573e4d1abcf8becce5",
+        "hash": "8135dc71928813bc54c3f8804302ae443696dc7393e472cbaeaf8250815a67c2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance-02": {
         "title": "Diagnose recompilation and host synchronization",
-        "hash": "4a844dce9fcc91ed78df16ee9fe28932b77d3c39f6fbc247cb62d7d2f2ef7ddb",
+        "hash": "adfdadd6a20cf3b6ebba23af4d2127328a5db53d6f09e8f61e4dfff3b9ca2e84",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance-03": {
         "title": "Read an XProf trace",
-        "hash": "d7c9f8c026db3a4436e45d5d9471d1f87100f135bc93bf2000599144c8184eaa",
+        "hash": "e885e7aea555d614fb60c8020eab2206f8fa958dab8f14f039a2cb762eacbf2f",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance-04": {
         "title": "Reason with HLO and the roofline model",
-        "hash": "07b2bf3bd2af69d557b6370ec7b0926cf782f8200378a696eb9204fe4af8416d",
+        "hash": "0e2f0f6aee7cf0140cccb77568aaf0ce7a5336eb6ce7178b5ffe923e1dd525c4",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance-05": {
         "title": "Memory, rematerialization, and optimization tradeoffs",
-        "hash": "c51b1f2e31c2282f4eb008eb1903869c131f23f702e4917892c1ab4ed12e656d",
+        "hash": "f74073079b4821b50312cac8d366e283274159b36c07fd819822e89a52299256",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "distributed-01": {
         "title": "Arrays, meshes, and sharding",
-        "hash": "37f3ba94b5e7fbff44cc237cc17304b4079200d6f757125a74170c87e86d1589",
+        "hash": "0ce7cf37e2edecdd2fb7ece645f0eb6dda51d703e65422788d9408642327b991",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "distributed-02": {
         "title": "A sharded training step",
-        "hash": "0e6220a02d26a1b58a543e7bc994ea02ba4c884329c36e5574cad371fdc67a94",
+        "hash": "7b8fd0c53e5936673b35bdb5fe32d9b76757758ea7cd55c0753cd9d006e90d11",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "distributed-03": {
         "title": "Communication-efficient algorithms",
-        "hash": "bc179db9071988e84692ce915f76bb71bc608c03ca71a77e8cc9e8b095547c81",
+        "hash": "bc566243e0b50a53d213c250354bd8e6761f63e5916ab3177838619aff9c1081",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "distributed-04": {
         "title": "Resilient distributed training",
-        "hash": "b08cf0205e3a18105d372d1da3254b2b2aacbddae46461b8848d8da901a376ac",
+        "hash": "d22f5761e56fb78349655fc03c7f20ff71dd5ba8eb087f5c563637c6d5dcda08",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "science-01": {
         "title": "A functional physical simulation",
-        "hash": "33c513e9b9987fe5325e997440906fad4cefca20aada40fdf7926549c0aeb70d",
+        "hash": "1ffd168eb33b60995b99be11211240f5dfa8a665791b724d1718a403be822242",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "science-02": {
         "title": "Vectorize trajectories and scan time",
-        "hash": "b53e311774af07d4d4e592ac2b6c4cdb365903946509587e07627cef38784c54",
+        "hash": "c0c508c178d90af8e0acb5ff8c58122f379eb70aad57c1dcc707de477129e885",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "science-03": {
         "title": "Differentiate through a solver",
-        "hash": "73fe3c4552d24d35a6cefd242e95da6caf1ed3f4d384e0c153f61e3da9e2385e",
+        "hash": "e9c32dec8e5736e7df04fdaf4708531ac371038df6b928bb3b46091e7b4624fc",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "science-04": {
         "title": "Fit parameters and scale the simulation",
-        "hash": "02de64b868af4bccf11ae2bc4bad252f668ae93181ae5eadd7e911e4c46299b2",
+        "hash": "0d87f81c3b47f36a8ef9c1910b3047a858690f9803be7d265163001c5aefd5da",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability-01": {
         "title": "Distributions and sampling",
-        "hash": "f187aad9a203a99319ce05a1298e9bf743b780d2c5961074cade70d0d5f16748",
+        "hash": "553dbd940e248e672f3c13368013205023f99cbdcdae66519e40dc66eaa15fff",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability-02": {
         "title": "Build a Bayesian regression",
-        "hash": "7ab79900fabe2e3d177dd4cb809d03c57a8340eac58c8e36b2b883489dc62159",
+        "hash": "09da0e645c58af159f4181d31995842db8fc1085b64fb92a789c15fb51273d47",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability-03": {
         "title": "Hamiltonian Monte Carlo and sampler diagnostics",
-        "hash": "ab17f05e557bcef1a3b3d186801f6ee8b5b5aa70b4060051bc1cd7e3d9152c1a",
+        "hash": "ba48f3667820c278dd2a9bd0b9098cfc625cdb06d9fcc3e16e3e6dfb60b9e9b7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability-04": {
         "title": "Variational inference and model checking",
-        "hash": "da863f64819c58767b41386bee2767721c110ebcc7276ce02df9196ee6fd688d",
+        "hash": "7d91bc1ed30f8160f435af2d48bbb07b04ab521759c02e59e2ff5f76463a56a1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "rl-01": {
         "title": "Write a functional environment",
-        "hash": "cb8a81f62db7bb305d1a4e1daad44ed41543d91451932ca4c6d5abd5c1025b73",
+        "hash": "6da92d3c04e3cee6f1e3bffed27375d40f4743267a7d7c5379a285fbb53ec20f",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "rl-02": {
         "title": "Batch environments and scan rollouts",
-        "hash": "93562a0cc481896a0049cb13a2baec1f9a9b3767afa4365398def091219b4e53",
+        "hash": "4a3b7776f368e62df845fe8dfb135ff5285ed46fc4c3f77aae8f1838d29457c0",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "rl-03": {
         "title": "Policy gradients and PPO",
-        "hash": "418d464b0b2b317f86e16fb7ae690015f65b615b2b69e1fcffba8640055c33c0",
+        "hash": "de3c2ee045b9dab7cc2e88a0573d57407f374f404b7ab89e4a639e3525d5f8dc",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "rl-04": {
         "title": "Evaluate agents across seeds",
-        "hash": "294ffe1f8de30c15c511acefc0a0ae0a53e609c017548ec0132390959395fa6e",
+        "hash": "a5f23d4a7c2b84e37fb20238a067708320cbbfeaeeaa79ffa3523a5a30659ec5",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "kernels-01": {
         "title": "Pallas grids and BlockSpecs",
-        "hash": "c72e9588e35c2128d426fe931b622928b42acb295e03bc61b60202baa47c72db",
+        "hash": "93d0dee5b75566905db20747a66b71fcc81dff4f27500930bbd8bf5b82445440",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "kernels-02": {
         "title": "A first TPU kernel",
-        "hash": "2b3574f31bc8b56baa8314c07d011fb43f8d28f23d5df83b9f462087a1ebed08",
+        "hash": "a8218b024c852f26669d215a42050941f21a9280b90e35f467c9266d142ae443",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "kernels-03": {
         "title": "Tiling, memory, and pipelining",
-        "hash": "99b6de7626391e7a60ef0d14b3922666bf14c74c36d5aa058dff1d0e6333f01a",
+        "hash": "bf2a25b2924762606742295afc7fb2c264f561c15f685c238d5f46233f696df1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "kernels-04": {
         "title": "Iterate with correctness and performance evidence",
-        "hash": "1b50ce66ff50e49a92871308bba06490ac4560f3aed7ddb3997e44afc928033a",
+        "hash": "cf7dffc59284ff56cdf830154b00e304843ed2cdd9127598af6d88993381c074",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "internals-01": {
         "title": "Read your first jaxpr",
-        "hash": "dbf5c3544df7113b86e54374716a20f6155cbd4b0d0b70498d94ef9f5b26b21e",
+        "hash": "65bc7ab47decdb514854c68d5d252a194fa501b9420ce3e03dcac429134056fe",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "internals-02": {
         "title": "JVPs, VJPs, and higher-order derivatives",
-        "hash": "acd3a21a01088c93dd411a9f404ff523a6ca6250bfd320ea40d41972f1cb7b59",
+        "hash": "004ecef2a63eb067dadf6c55e8af83db7018c0fa3f8b551af1d81abb79502dec",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "internals-03": {
         "title": "Custom derivative rules",
-        "hash": "ff98a9bf20ab546303d06ecee5f43ae7fbbcd286022c8b929caceea69c1e6626",
+        "hash": "611a2871bc268aca797de17e40a7f2eaca8d02404aff22e55c86d316e3b81696",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "internals-04": {
         "title": "Lowering, compilation, and a tiny transformation",
-        "hash": "e4c6aced8ce245666b482da1bca269b29340948c9ca572302dec21ab20a026b7",
+        "hash": "d91c20f20c9be7440f57df472335f7d4a27a3f8e1afbf011b5a51640f7b4659a",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-02": {
         "title": "Adapt a pretrained model and choose a post-training objective",
-        "hash": "0a0c08c3d9606fc93d578b4a59fcf9b9ea2d679f0d5715e2ea2d2c267c224de3",
+        "hash": "7e7454e4cec1dd3799c149b67fbc4c4c07b3d28f57871f2d86ef984415a8229a",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-01": {
         "title": "Move models between JAX, Keras, TensorFlow and PyTorch",
-        "hash": "f6dd3f58ff92351ce280a2ded0e1022bf015d935b152d3ba3735db0427da7e99",
+        "hash": "d51a0f423f32d8785314bbe28a56b5703a7c0326703aa2c925a1ecf0c5e2adc1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-08": {
         "title": "Convert PyTorch weights to Flax and locate numerical errors",
-        "hash": "ea3064537c7a3f8d485d477ec63f9bde8a368464ff66e128d36bbe5cc309151f",
+        "hash": "a2bf8b717e147a7919547c1faaf913cf308f3111500d6dcaffc96eea2a55b6b2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-03": {
         "title": "Export a computation and verify its serving contract",
-        "hash": "494f7e3a81aeeb7bb52929684ff9010114392abc146b7f5463f578b254667ecd",
+        "hash": "71f026ed28b46bd894f7efaeacef4ec8e83856e0e0e8655369b120e822e30405",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-05": {
         "title": "Choose weight, activation and accumulation precision",
-        "hash": "3d7e5f747e54e6f0c464a1297ecc2c3753503e55c2c6906fc82e5532a3023250",
+        "hash": "7c6de5d4403d883e9c9d4a634152ff16302d661dd1489497be489339c803f0b8",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-07": {
         "title": "Containerize a model service and verify its boundary",
-        "hash": "ea90a5070f3e3bc4866cea43a3bd6156c960dcbf966bf74707e5f1baca5ab39c",
+        "hash": "da80ad6f72c3e08471c636eaa8bc8567370993ef4888aac9a8a16a5bce678849",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-04": {
         "title": "Inference capacity, batching, and autoscaling",
-        "hash": "8b11c68fdaf1d285e14efc609c02d7c0f496c3c4f705a3a441e14c385311d001",
+        "hash": "4de843f83662c88fa23b9966c2b25182b02a14c534beb367140bbb5970e56f94",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment-06": {
         "title": "Deploy at the edge: conversion, budgets and device checks",
-        "hash": "3ef5943c03c621a9c080f09ba17e271e3e1f28743eb3284a4c07a6b61983e033",
+        "hash": "9f9ae3b24ff7aecb080fc842073419d2f59672315204f115335c5f8493de230e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-01": {
         "title": "Accelerator jobs and runtime lifecycle",
-        "hash": "6774f5b0ff43084505b9b3717714f007e0e367e1ab07fbbaf393e0798e58fbab",
+        "hash": "cfb5c514e759ff0137a56f4139fa7a2765475bdc95e0e3c64e6f0606bebb2bcf",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-02": {
         "title": "Health, logs, and workload observability",
-        "hash": "530a040339f26126cb35073548c2284f43462f66e30a6c57d4b58a28e65b6073",
+        "hash": "f93d8a36ae090b1e74154c5bd4dbf8cbe430eb899325881335cd696ca4b18602",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-03": {
         "title": "Failure recovery and operational runbooks",
-        "hash": "bf27d5e0ff9e5a218396f99ed8ed2df6983e84a5634d138bbca5eb67c7dc6a86",
+        "hash": "2b65e31cfba02377a0250a2678977dd110804da764b92f352b68fdb83400aef1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-04": {
         "title": "Changes, rollback, and artifact provenance",
-        "hash": "7498a92357ffeae57d47748c04a4c44c9eecf416fcccc53b6260128e5e87c90b",
+        "hash": "5e1391c6dff47d7a4571e42f9eac9b904184e0e0febef7afcd8088ffc70be9a7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-05": {
         "title": "Capacity, utilization, and operating cost",
-        "hash": "65f7e0c8123c039bcb1631c43449f9bde3cc028d4bd0b3c26c6df3232f407227",
+        "hash": "db8f86c283417c22e150705e0b8f3413c1d412bfa6d9c825857e05af482dbee9",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-06": {
         "title": "MLOps: data contracts, CI gates and monitoring",
-        "hash": "e37bdf3277b57c9bfe4be754fdba2ebe17fab1c50fc34d77c9283f37e8e57a7d",
+        "hash": "4b2a4cad6795648eb299c29da27013f49a66d7189c5135cc8f8be9a27898d365",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-07": {
         "title": "LLMOps: version prompts, evaluate behavior and trace requests",
-        "hash": "670f5fd1c45f41a705b01a18b53d4629893bcc3cbf74c81cb512bc0bb42f1021",
+        "hash": "6d1b84cb4a804806f0be4390d27bc9113e63acbece23bfcd8df69c28b016c047",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations-08": {
         "title": "ModelOps: own, approve, roll back and retire a model",
-        "hash": "3a7b1a9387f09a9c8e80b603000b3e93709cc8273967fa009304dcd4526fbeaa",
+        "hash": "42ae6b5934a45a84e8f81e351eece7bf48d6b833e4b85021441409db0f3f4703",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "pretraining-01": {
         "title": "Masked language modeling: predict hidden tokens",
-        "hash": "7f1c969e912bf29462e7120759b2b90001e75031cb420146d8d055e113cf53ba",
+        "hash": "4544379c5b700992d4942db9d8dce636d8b48921876cbd7cf94755736fcda2cb",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "pretraining-02": {
         "title": "Masked image modeling: reconstruct missing patches",
-        "hash": "9b11c2c1e2decf9a570ccd2c5eeb20bda02e883967bc11ad92a5b59d62b376d6",
+        "hash": "d9cd9f011c2044a1d6f1f3347f4bbad924cab11ec507101f78b0eb72577005c4",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "pretraining-03": {
         "title": "Contrastive learning: views, positives and negatives",
-        "hash": "240924387324b6932c25b1c97961fc923e43ae99174d79efc36075ff7431e67c",
+        "hash": "e079767fe2c1ec1550a70f8fb0356b275a8296f334df80ca102d8b556974493b",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining-01": {
         "title": "Supervised fine-tuning with response-only token loss",
-        "hash": "0731b4da061c45cd47dc4103dd14ed4ba9eb1a4dc77856cd064df91c5df44a04",
+        "hash": "1bea75a172720e33ed827181b8670eeac5629d0d4080275e1dfc600467c37a31",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining-02": {
         "title": "LoRA: adapt, save and merge low-rank updates",
-        "hash": "b0e5fb798db13593eae55ccf2a08fc288859e47c29f5564fb28b19754f879d05",
+        "hash": "44a39bf545c237bd305e75f63db174d468c0bd02aeff22b52a6f6f21227aba9c",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining-03": {
         "title": "Learn a reward model from pairwise preferences",
-        "hash": "5e230cd2124edc3176aacc0ba4589fc1b3e65188a6df222059859380136370d5",
+        "hash": "74e514fdba25c0c0687f9f1052294f990d84452534815340e206478ee1cd82f5",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining-04": {
         "title": "RLHF mechanics: a frozen reward and PPO policy updates",
-        "hash": "478349e8f462348a96797250ac5468c23c9cfd4b591c7d09102ceced550ba2ee",
+        "hash": "bf046ca2bc67da9a8f4ad0b74a30207446546691d9ee4d4ef20a3b41024f9db6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining-05": {
         "title": "Direct preference optimization and reference-corrected margins",
-        "hash": "350e71b25cd1ac1658e87057613683a5938bb7da0678a4b74d11af09b7e08810",
+        "hash": "7f0b17fe3e07ba292a9dca9c687bdd096e42fc6912d9b131a0eefedac771a31a",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-01": {
         "title": "Select a TPU slice and provision your Cloud TPU VM",
-        "hash": "ed82804fd5b8945a249b6290cc31c2c9b53c1b3a670b5ba80a22626a450de637",
+        "hash": "9ca0ff3cb125ca419174585c608daf0e56dc0710a0fb89dc20b3a96d9247d9d4",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-04": {
         "title": "Bootstrap .venv and verify a TPU runtime receipt",
-        "hash": "5b229d029c70b8786f8d2af8efe9f9074283753a05f9076cc3504cb2dd715d98",
+        "hash": "4524d031d19c86dd4d47d50a5326b269767b1c438ebf20bfff35942b2f6eda49",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-02": {
         "title": "Stage and launch checkpointed TPU jobs",
-        "hash": "e7c0bbfeca234d886bddbc648a6dd63a4bf2decb999d410e81a2186c4e0a3428",
+        "hash": "55f98a7cfd8d5c19b7102d8d2e7de695d908cc0556b571967eb641adaaeb79ce",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-05": {
         "title": "Run course scripts and multi-host TPU Pod slices",
-        "hash": "50a907dabb15198bd36b44f75f59ac7f9154d8f48d9525b1181c7dc31e8282e8",
+        "hash": "ce3391a876e509a934475ff204aa5e7e1cd342148b191add5ef194514eea1358",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-03": {
         "title": "TPU generations and HBM memory budgeting",
-        "hash": "5575eb4179c323a0b797375410b567bc2927e9a1c938a0c7b96dd7a562377de8",
+        "hash": "47893114bab78e842eadfa34ee79bf0a5fb244ac509731baf0c2c259cfb03134",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-06": {
         "title": "bfloat16, int8 precision, and XProf profiling on TPU",
-        "hash": "4fa0d9d96e7f3d3b085efe8f2f3a74dab729b1aca807bbe3e8e9644999df790e",
+        "hash": "5271b17370a945ca4ae4080d19d94a0fa139ffae5e78da9336ac57e40aaf0858",
         "version": "0.5.3",
         "date": "2026-10-08"
       }
@@ -638,133 +638,133 @@
     "phases": {
       "welcome": {
         "title": "Setup & first steps",
-        "hash": "5e11dcaddd3e268322b7042a42c4bd7e89141f70d7e7455cb30eb6bd637051c6",
+        "hash": "31b2a150c155037a62d8d92f5fc05099ae7374113d6b95f0de27d68a58a2ffa7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "arrays": {
         "title": "Arrays & pure functions",
-        "hash": "d0d87a73b6564f01235e5bfcb66b2df74578f56e797b454ec39ba4be6a369e39",
+        "hash": "3ce316977447d72972eb23dff234cf74786372ea9ed6a64cf766631040b40689",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transforms": {
         "title": "JAX transformations",
-        "hash": "3ee79f58804eb017dfbbffbb96f87f6d259d7062df4511f944c97fdffb1f315e",
+        "hash": "672a0509587db91223709c3e1e9b56d99f274e90820f7c36e967c58e9000e8b9",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "state": {
         "title": "State, randomness & control flow",
-        "hash": "0e0bc7a99ee214904aacf3ef83f1d5c4f4cef0fca655fee0a5445a01c3cd027f",
+        "hash": "b0e368b8546aadca5205c5b3475e740721aac1f0dba3b3a5b118291ec0ce011b",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "optimization": {
         "title": "Math & optimization",
-        "hash": "4477d71f63ac75f25f5dd9e56e808b1dff2ad1037b8d5b598b78fd3c90edce6d",
+        "hash": "64180b6c668d85eabe74a552ec9d4976220922015b33fcc49071e4734e16cd04",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "networks": {
         "title": "Neural network training",
-        "hash": "fa0806a5d8f8a2ca22915e21a41ceae85d07091bd38c4314548befbd4c35435c",
+        "hash": "e1616eb50f6acaf4a97dd5907f57884a9f13b6f3a24fe7cf08cf42798f05b38e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "recovery": {
         "title": "Data & checkpoint recovery",
-        "hash": "f066021bb294b4aaf9724e8525245ef8bcdd3d2543b79c15c4cbd958333f63cf",
+        "hash": "9d4193dc63f3a47c5e21adc971f490927353eef467a5500c530f43fedbc4f3af",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "transformers": {
         "title": "Transformers & language models",
-        "hash": "f260ff85dc4c7f9a43196dbccf060b9703878dbcc6c1f41805ff7fcb0104e56b",
+        "hash": "c938c0f7bcbbabd50e16086470d16a39dfddcc3b90164d722006bfe96adb4ac3",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance": {
         "title": "Performance diagnosis",
-        "hash": "203f2d03fadd46bae282bc4c5c9aac07394c97b9eefcb8fcf1ddea5c84e4c1b0",
+        "hash": "f18c11845cc51363b4b115fd5a9fc347663156e21e43050631b20ac7560e3451",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "distributed": {
         "title": "Distributed training",
-        "hash": "bd856338c42fc206217ed86e40423313d6114007d25e72add7ff68779c0983bc",
+        "hash": "a281dfb56609f0abc27df52979f00c0643e241843bbaed32e80a719958627627",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "science": {
         "title": "Scientific computing",
-        "hash": "63404d0d7999c3e8ecc72b4d998af286910dc1782f717897a3f4fefbf689a8fe",
+        "hash": "59dff0a9c076d9e2a0b7c17ecead0b350b8c9b9e1ec798df730c458793684927",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability": {
         "title": "Probabilistic modeling",
-        "hash": "e8b4c8f7e24327fcc4473a65c60f198c8badc83cbc35585aec51f020181ed678",
+        "hash": "6fdb8f2f683026d6eeb4ec45ea33ba43468a8f5f83eb5f97ca9d70b17b305ce7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "rl": {
         "title": "Reinforcement learning",
-        "hash": "e51b73f380212209d01ebc9d926318d4ea7339215117532e2289252c2a347305",
+        "hash": "fbe586b32f59a34ff8b68c276333d867167333ba423e4721f1a9d708fcacd016",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "kernels": {
         "title": "Pallas kernels",
-        "hash": "0af779c66db6a92a65f6276ada692fdc0ecc9a10c9581b451e87ea2f596dc65f",
+        "hash": "7c136eef4cddbff61c4f9b2dd4b68e0c8d8751b33edd64cb8d5fdc1ee44473c8",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "internals": {
         "title": "Autodiff & JAX internals",
-        "hash": "f09d840136f99fe214b0e9aa7c4bb261dabf369f7af600628ebd3498989c662c",
+        "hash": "78655f3bf263e9d223e7e1137b6cacb56eebf7c0036a96a4ffa481dfdcb3b9d1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "deployment": {
         "title": "Deployment, interoperability & edge AI",
-        "hash": "cd91bdc021220884b9c8be48c0ce593779abe11a6d5c187bcd32b303772d7425",
+        "hash": "f0601727097077ad4eb11882402f43743e455dd9b77f10d80781ed23bb3f430e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "operations": {
         "title": "Workload operations",
-        "hash": "e9fae7f7a592a67219b8b5e6636f1b8dca1d4c72f55ec67970d927410404ad0f",
+        "hash": "14482362f1a9608a0db44cf4c6f71370202adbdf0ea15e12f424acbc070d72b2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "pretraining": {
         "title": "Self-supervised pretraining: masked and contrastive learning",
-        "hash": "0e1d375673c697daaa4f0bcac7203d8fbffdec32acd8872909dc1c449867fe96",
+        "hash": "6d5dd6a529ea3cef31b9886782c66a93e69d9c6ecf26615f05a09271528ba429",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "posttraining": {
         "title": "Post-training: SFT, LoRA, reward models and RLHF",
-        "hash": "4d32a50cb18c6645e5e9ee8353be03e8d60632d54de9e4d7e0bac44f01f6618c",
+        "hash": "cfae91c52fc2f7770f6faabd9707c2b303241681cbdac596f49d0bd50a482ff6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu": {
         "title": "TPU Setup: Provisioning & Runtime Verification",
-        "hash": "4aad646836c87773d591789a86d3e114bb191a597ff451eac33a88088b597458",
+        "hash": "ff1a45debe4f053514921b03d61cf6d431055e642284ba8b2d4d92769b2a3ff1",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-workflows": {
         "title": "TPU Workflows: Launching Jobs & Checkpointed Experiments",
-        "hash": "0d066f69391197b7e62bbc8c1884d82c739ff214a353efb34e346e59f8db75c6",
+        "hash": "a2aa20ba66bac6bdc61d92ca8fa810f5cc864939e78041146a04f813a526880d",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "tpu-systems": {
         "title": "TPU Systems: Generations, Memory, Precision & XProf",
-        "hash": "3d4a0c6eb6ef837dcc1b29bdfce3988db4f2a94000973cb70706956bd44842da",
+        "hash": "3bce22c3f426613ae1f276fc8abfeb775888973cc9c0680c1d830b0419b53979",
         "version": "0.5.3",
         "date": "2026-10-08"
       }

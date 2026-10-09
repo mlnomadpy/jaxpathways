@@ -68,10 +68,12 @@ def prepare(directory,weights,calibration,provenance):
     """Write trained weights and six actual serialized inference computations."""
     # Read or serialize artifact data on disk (`directory`).
     # Execute the next step of the computation.
-    directory=Path(directory);directory.mkdir(parents=True,exist_ok=True)
+    directory=Path(directory)
+    directory.mkdir(parents=True,exist_ok=True)
     # Convert `weights` to a host NumPy array for inspection or verification.
     # Convert `calibration` to a host NumPy array for inspection or verification.
-    weights=np.asarray(weights,dtype=np.float32);calibration=np.asarray(calibration,dtype=np.float32)
+    weights=np.asarray(weights,dtype=np.float32)
+    calibration=np.asarray(calibration,dtype=np.float32)
     # Guard input contract (`weights.ndim != 1 or calibration.ndim != 2 or calibration.shape[1] != weights.size or (len(calibration) == 0)`) and fail fast if violated.
     if weights.ndim!=1 or calibration.ndim!=2 or calibration.shape[1]!=weights.size or len(calibration)==0:
         raise ValueError("calibration and weights must have matching feature axes")
@@ -124,7 +126,8 @@ def prepare(directory,weights,calibration,provenance):
             name=f"{policy}-b{batch}.jaxexport"
             # Run `artifact.serialize` to compute `data`.
             # Execute the next step of the computation.
-            data=artifact.serialize();(directory/name).write_bytes(data)
+            data=artifact.serialize()
+            (directory/name).write_bytes(data)
             # Compute deterministic cryptographic digest `artifacts[f'{policy}:{batch}']` for provenance verification.
             artifacts[f"{policy}:{batch}"]={"file":name,"sha256":hashlib.sha256(data).hexdigest()}
     # Compute deterministic cryptographic digest `manifest` for provenance verification.
@@ -198,7 +201,8 @@ def benchmark(payload,manifest,restored,policy="fp32",repeats=30):
     if repeats<2:raise ValueError("need multiple observations")
     # Record execution timing or profiler trace in `began`.
     # Execute the next step of the computation.
-    began=time.perf_counter();request(payload,manifest,restored,policy)
+    began=time.perf_counter()
+    request(payload,manifest,restored,policy)
     # Record execution timing or profiler trace in `first_ms`.
     first_ms=(time.perf_counter()-began)*1000
     # Evaluate `values` from the current inputs and state.
@@ -207,7 +211,8 @@ def benchmark(payload,manifest,restored,policy="fp32",repeats=30):
     for _ in range(repeats):
         # Record execution timing or profiler trace in `began`.
         # Execute the next step of the computation.
-        began=time.perf_counter();request(payload,manifest,restored,policy)
+        began=time.perf_counter()
+        request(payload,manifest,restored,policy)
         # Record execution timing or profiler trace in ``.
         values.append((time.perf_counter()-began)*1000)
     # Read or serialize artifact data on disk (`batch`).
@@ -231,11 +236,13 @@ def simulate(arrival_ms,service_ms):
     if not np.isfinite(service_ms) or service_ms<=0:raise ValueError("positive service milliseconds required")
     # Evaluate `ready` from the current inputs and state.
     # Evaluate `finish` from the current inputs and state.
-    ready=0.;finish=[]
+    ready=0.
+    finish=[]
     # Iterate over `arrival` to step through the computation:
     for arrival in arrivals:
         # Run `max` to compute `ready`.
         # Execute the next step of the computation.
-        ready=max(ready,float(arrival))+service_ms;finish.append(ready)
+        ready=max(ready,float(arrival))+service_ms
+        finish.append(ready)
     # Return `np.asarray(finish) - arrivals` to the caller.
     return np.asarray(finish)-arrivals

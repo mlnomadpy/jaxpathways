@@ -64,7 +64,7 @@ Compare lexical, dense exact, dense ANN, hybrid and reranked systems with a comm
 - **ANN recall–memory plot:** show exact-neighbor recall and index bytes across settings. Explain why matching exact neighbors cannot prove semantic usefulness.
 - **Migration comparison:** plot old/new query results and rank changes on frozen canaries. Trace one changed result to encoder, index, filtering or reranker versions before blaming quantization.
 
-Every figure needs raw measurements, units, corpus/query IDs and an explanation of what it cannot establish. Use BEIR tasks for a declared text-retrieval scope and relevant MTEB retrieval tasks when qualifying a text encoder; list actual tasks and failures instead of claiming the whole benchmark. Use fixed COCO/Flickr30k-style protocols for image–text retrieval where permitted. Audio retrieval needs a separately selected, rights-reviewed audio–text benchmark and explicit caption/clip handling; task selection remains an implementation decision.
+Every figure needs raw measurements, units, corpus/query IDs and an explanation of what it requires separate verification to establish. Use BEIR tasks for a declared text-retrieval scope and relevant MTEB retrieval tasks when qualifying a text encoder; list actual tasks and failures instead of claiming the whole benchmark. Use fixed COCO/Flickr30k-style protocols for image–text retrieval where permitted. Audio retrieval needs a separately selected, rights-reviewed audio–text benchmark and explicit caption/clip handling; task selection remains an implementation decision.
 
 ## Stage 6: precision and the service boundary
 

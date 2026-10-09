@@ -29,6 +29,10 @@ Operations whose arithmetic intensity is below this ridge point (such as batch-$
 
 Before launching a run, you also need to verify HBM capacity. In mixed-precision Adam training, each parameter typically requires $12$ to $16$ bytes of persistent state (master `fp32` weights + `fp32` first and second Adam moments + `bf16` or `fp32` gradients), plus activation memory and any KV cache.
 
+$$
+\text{Throughput}_{\text{tok/s}} = \frac{B_{\text{global}} \times L_{\text{seq}}}{T_{\text{step}}}
+$$
+
 ### TPU HBM-to-MXU dataflow and mixed-precision state budget
 
 **Predict:** Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?
@@ -80,7 +84,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Evaluate `TPU_SPECS` from the current inputs and state.
+# Compute `TPU_SPECS` from `[`
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
@@ -101,9 +105,9 @@ Append estimate_memory_gib and compare 7B vs 1.5B model memory footprints.
 ```python
 # Step 2 — Estimate training-state and KV-cache HBM budgets across precisions: Computing both training state and KV-cache GiB upfront prevents...
 def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_dim=128):
-    # Evaluate `n_params` from the current inputs and state.
+    # Compute `n_params` from `params_billions * 1e9`
     n_params = params_billions * 1e9
-    # Evaluate `kv_elements` from the current inputs and state.
+    # Compute `kv_elements` from `2.0 * layers * kv_tokens * kv_heads * head_dim`
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     # Evaluate `1024 ** 3` and convert the result into Python scalar/collection `gib`.
     gib = float(1024 ** 3)
@@ -121,9 +125,9 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 # Run `estimate_memory_gib` to compute `budget_1p5b`.
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-# Verify contract: `budget_7b['mixed_bf16_train_state_gib'] > 64.0 and budget_7b['mixed_...`.
+# Assert invariant `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mix...` holds
 assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `budget_1p5b["mixed_bf16_train_state_gib"] < 64.0` holds
 assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
 # Print the observed values to compare against the expected result.
 print("TPU ridge points (FLOP/byte):", {s["gen"]: s["ridge_flops_per_byte"] for s in TPU_SPECS})
@@ -135,6 +139,17 @@ print("1.5B memory budget (GiB):", budget_1p5b)
 
 Computing both training state and KV-cache GiB upfront prevents OOM surprises when selecting between `v5litepod-4` (`64` GiB) and `v5litepod-8` / `v6e-4` (`128` GiB).
 
+## Step 3: Verify invariants on the completed state
+
+Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
+
+```python
+assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
+assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
+```
+
+Checking these invariants confirms the computation is ready for the full worked experiment.
+
 ## Run the example
 
 ```python
@@ -144,7 +159,7 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Evaluate `TPU_SPECS` from the current inputs and state.
+# Compute `TPU_SPECS` from `[`
 TPU_SPECS = [
     {"gen": "v5e", "hbm_gib": 16.0, "bw_gbs": 819.0, "bf16_tflops": 197.0},
     {"gen": "v5p", "hbm_gib": 95.0, "bw_gbs": 2765.0, "bf16_tflops": 459.0},
@@ -158,9 +173,9 @@ for s in TPU_SPECS:
 
 # Step 2 — Estimate training-state and KV-cache HBM budgets across precisions: Computing both training state and KV-cache GiB upfront prevents...
 def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_dim=128):
-    # Evaluate `n_params` from the current inputs and state.
+    # Compute `n_params` from `params_billions * 1e9`
     n_params = params_billions * 1e9
-    # Evaluate `kv_elements` from the current inputs and state.
+    # Compute `kv_elements` from `2.0 * layers * kv_tokens * kv_heads * head_dim`
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     # Evaluate `1024 ** 3` and convert the result into Python scalar/collection `gib`.
     gib = float(1024 ** 3)
@@ -178,9 +193,9 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
 budget_7b = estimate_memory_gib(params_billions=7.0, kv_tokens=8192)
 # Run `estimate_memory_gib` to compute `budget_1p5b`.
 budget_1p5b = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-# Verify contract: `budget_7b['mixed_bf16_train_state_gib'] > 64.0 and budget_7b['mixed_...`.
+# Assert invariant `budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mix...` holds
 assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `budget_1p5b["mixed_bf16_train_state_gib"] < 64.0` holds
 assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
 # Print the observed values to compare against the expected result.
 print("TPU ridge points (FLOP/byte):", {s["gen"]: s["ridge_flops_per_byte"] for s in TPU_SPECS})
@@ -210,7 +225,7 @@ The horizontal axis compares three Cloud TPU generations (`v5e`, `v5p`, and `v6e
 
 ```python
 # Compute figure data for: Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{`
 visual_data = {
     'kind': 'bar',
     'labels': [s['gen'] for s in TPU_SPECS],
@@ -251,7 +266,7 @@ PASS: tpu-03
 # Experiment — Compare KV-cache memory across FP32, BF16, and INT8: Halving bytes per element halves both the HBM capacity consumed...
 # Verify that the numerical values match the expected reference within tolerance.
 assert np.isclose(budget_7b["kv_fp32_gib"], 2.0 * budget_7b["kv_bf16_gib"])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.isclose(budget_7b["kv_bf16_gib"]`
 assert np.isclose(budget_7b["kv_bf16_gib"], 2.0 * budget_7b["kv_int8_gib"])
 # Print the observed values to compare against the expected result.
 print("KV cache GiB (FP32 / BF16 / INT8):", budget_7b["kv_fp32_gib"], budget_7b["kv_bf16_gib"], budget_7b["kv_int8_gib"])
@@ -272,7 +287,7 @@ v5e_chip_gib = 16.0
 min_v5e_chips = int(np.ceil(budget_7b["mixed_bf16_train_state_gib"] / (v5e_chip_gib * 0.8)))
 # Print the observed values to compare against the expected result.
 print("7B mixed train state GiB:", budget_7b["mixed_bf16_train_state_gib"], "Min v5e chips (at 80% HBM budget):", min_v5e_chips)
-# Verify contract: `min_v5e_chips > 4 and min_v5e_chips <= 8`.
+# Assert invariant `min_v5e_chips > 4 and min_v5e_chips <= 8` holds
 assert min_v5e_chips > 4 and min_v5e_chips <= 8
 ```
 
@@ -293,7 +308,7 @@ Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens
 
 **Step-by-step implementation plan:**
 1. Print the observed values to compare against the expected result.
-2. Verify contract: `budget_check['mixed_bf16_train_state_gib'] < 20.0 and budget_check['...`.
+2. Assert invariant `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_che...` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -302,7 +317,7 @@ Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens
 budget_check = estimate_memory_gib(...)  # TODO: compute budget_check
 # Print the observed values to compare against the expected result.
 print("1.5B budget (GiB):", budget_check)
-# Verify contract: `budget_check['mixed_bf16_train_state_gib'] < 20.0 and budget_check['...`.
+# Assert invariant `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_che...` holds
 assert budget_check["mixed_bf16_train_state_gib"]  # TODO: complete assertion check
 ```
 
@@ -313,7 +328,7 @@ assert budget_check["mixed_bf16_train_state_gib"]  # TODO: complete assertion ch
 budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
 # Print the observed values to compare against the expected result.
 print("1.5B budget (GiB):", budget_check)
-# Verify contract: `budget_check['mixed_bf16_train_state_gib'] < 20.0 and budget_check['...`.
+# Assert invariant `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_che...` holds
 assert budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]) < 64.0
 ```
 
@@ -340,23 +355,23 @@ For two `N x N` BF16 inputs and one BF16 output, arithmetic intensity simplifies
 
 **Step-by-step implementation plan:**
 1. Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
-2. Evaluate `arith_intensity` from the current inputs and state.
+2. Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
 3. Run `next` to compute `v5e_ridge`.
 4. Print the observed values to compare against the expected result.
-5. Verify contract: `arith_intensity > v5e_ridge`.
+5. Assert invariant `arith_intensity > v5e_ridge` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
 n = ...  # TODO: compute n
-# Evaluate `arith_intensity` from the current inputs and state.
+# Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
 arith_intensity = ...  # TODO: compute arith_intensity
 # Run `next` to compute `v5e_ridge`.
 v5e_ridge = next(...)  # TODO: compute v5e_ridge
 # Print the observed values to compare against the expected result.
 print("Matmul N = ...  # TODO: compute print("Matmul N
-# Verify contract: `arith_intensity > v5e_ridge`.
+# Assert invariant `arith_intensity > v5e_ridge` holds
 assert arith_intensity  # TODO: complete assertion check
 ```
 
@@ -365,13 +380,13 @@ assert arith_intensity  # TODO: complete assertion check
 ```python
 # Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
 n = 1024
-# Evaluate `arith_intensity` from the current inputs and state.
+# Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
 arith_intensity = (2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))
 # Run `next` to compute `v5e_ridge`.
 v5e_ridge = next(s["ridge_flops_per_byte"] for s in TPU_SPECS if s["gen"] == "v5e")
 # Print the observed values to compare against the expected result.
 print("Matmul N=1024 intensity:", round(arith_intensity, 1), "v5e ridge:", v5e_ridge)
-# Verify contract: `arith_intensity > v5e_ridge`.
+# Assert invariant `arith_intensity > v5e_ridge` holds
 assert arith_intensity > v5e_ridge
 ```
 
@@ -399,20 +414,20 @@ Compare `budget_7b['mixed_bf16_train_state_gib']` with `4 * 32.0 * 0.8`.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `fits_v6e4` from the current inputs and state.
+1. Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
 2. Print the observed values to compare against the expected result.
-3. Verify contract: `fits_v6e4 is True`.
+3. Assert invariant `fits_v6e4 is True` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Size a Trillium v6e-4 slice for a 7B training state (Transfer / diagnosis): Because v6e doubles per-chip HBM to 32 GiB (128 GiB across 4...
 v6e4_usable_gib = ...  # TODO: compute v6e4_usable_gib
-# Evaluate `fits_v6e4` from the current inputs and state.
+# Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
 fits_v6e4 = ...  # TODO: compute fits_v6e4
 # Print the observed values to compare against the expected result.
 print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state:", fits_v6e4)
-# Verify contract: `fits_v6e4 is True`.
+# Assert invariant `fits_v6e4 is True` holds
 assert fits_v6e4 is True  # TODO: complete assertion check
 ```
 
@@ -421,11 +436,11 @@ assert fits_v6e4 is True  # TODO: complete assertion check
 ```python
 # Size a Trillium v6e-4 slice for a 7B training state (Transfer / diagnosis): Because v6e doubles per-chip HBM to 32 GiB (128 GiB across 4...
 v6e4_usable_gib = 4 * 32.0 * 0.8
-# Evaluate `fits_v6e4` from the current inputs and state.
+# Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
 fits_v6e4 = budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usable_gib
 # Print the observed values to compare against the expected result.
 print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state:", fits_v6e4)
-# Verify contract: `fits_v6e4 is True`.
+# Assert invariant `fits_v6e4 is True` holds
 assert fits_v6e4 is True
 ```
 

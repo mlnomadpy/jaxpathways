@@ -5,13 +5,13 @@
 # Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Initialize array `X` with explicit values and shape.
+# Construct `X` via `jnp.array([[-1.0], [1.0]])`
 X = jnp.array([[-1.0], [1.0]])
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([-3.0, 3.0])`
 y = jnp.array([-3.0, 3.0])
-# Initialize array `Xv` with explicit values and shape.
+# Construct `Xv` via `jnp.array([[-2.0], [2.0]])`
 Xv = jnp.array([[-2.0], [2.0]])
-# Initialize array `yv` with explicit values and shape.
+# Construct `yv` via `jnp.array([-4.0, 4.0])`
 yv = jnp.array([-4.0, 4.0])
 
 # Function `ridge(X, y, lam)` implementing this stage's computation:
@@ -29,11 +29,11 @@ def mse(w, X, y):
 lam = 0.5
 # Run `ridge` to compute `w`.
 w = ridge(X, y, lam)
-# Evaluate `objective` from the current inputs and state.
+# Compute `objective` from `lambda w: mse(w, X, y) + lam * jnp.dot(w, w)`
 objective = lambda w: mse(w, X, y) + lam * jnp.dot(w, w)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w, jnp.array([2.0]), atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`
 assert jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)
 
 # Separate the quantities you report
@@ -52,13 +52,13 @@ print('train / validation / objective:', train, validation, penalized)
 # Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Initialize array `X` with explicit values and shape.
+# Construct `X` via `jnp.array([[-1.0], [1.0]])`
 X = jnp.array([[-1.0], [1.0]])
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([-3.0, 3.0])`
 y = jnp.array([-3.0, 3.0])
-# Initialize array `Xv` with explicit values and shape.
+# Construct `Xv` via `jnp.array([[-2.0], [2.0]])`
 Xv = jnp.array([[-2.0], [2.0]])
-# Initialize array `yv` with explicit values and shape.
+# Construct `yv` via `jnp.array([-4.0, 4.0])`
 yv = jnp.array([-4.0, 4.0])
 
 # Function `ridge(X, y, lam)` implementing this stage's computation:
@@ -75,11 +75,11 @@ def mse(w, X, y):
 lam = 0.5
 # Run `ridge` to compute `w`.
 w = ridge(X, y, lam)
-# Evaluate `objective` from the current inputs and state.
+# Compute `objective` from `lambda w: mse(w, X, y) + lam * jnp.dot(w, w)`
 objective = lambda w: mse(w, X, y) + lam * jnp.dot(w, w)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w, jnp.array([2.0]), atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)`
 assert jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)
 
 # Step 3 — Separate the quantities you report: Training prediction loss is 1, validation loss is 0, and the...
@@ -97,26 +97,26 @@ print('train / validation / objective:', train, validation, penalized)
 # Compute figure data for: Training error and validation error select different penalties
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 2.0, 41)
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridg...`
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
 
 # Experiment: Sweep the penalty
 # Experiment — Sweep the penalty: Regularization deliberately trades training fit against a...
-# Initialize array `candidates` with explicit values and shape.
+# Construct `candidates` via `jnp.array([0.0, 0.5, 2.0])`
 candidates = jnp.array([0.0, 0.5, 2.0])
 # Combine or mask array elements to form `fits`.
 fits = jnp.stack([ridge(X, y, float(a)) for a in candidates])
-# Initialize array `training` with explicit values and shape.
+# Construct `training` via `jnp.array([mse(a, X, y) for a in fits])`
 training = jnp.array([mse(a, X, y) for a in fits])
-# Initialize array `validation` with explicit values and shape.
+# Construct `validation` via `jnp.array([mse(a, Xv, yv) for a in fits])`
 validation = jnp.array([mse(a, Xv, yv) for a in fits])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(fits[:, 0], jnp.array([3.0, 2.0, 1.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(training, jnp.array([0.0, 1.0, 4.0]))`
 assert jnp.allclose(training, jnp.array([0.0, 1.0, 4.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(validation, jnp.array([4.0, 0.0, 4.0]))`
 assert jnp.allclose(validation, jnp.array([4.0, 0.0, 4.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(jnp.argmin(training)) != int(jnp.argmin(validation))` holds
 assert int(jnp.argmin(training)) != int(jnp.argmin(validation))
 # Print the observed values to compare against the expected result.
 print('penalty / train / validation:', candidates, training, validation)
@@ -129,24 +129,24 @@ assert jnp.allclose(repeat, w, atol=1e-06)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: For a target slope of 4 and penalty \lambda=1, derive the fitted slope...
-# Initialize array `y4` with explicit values and shape.
+# Construct `y4` via `jnp.array([-4.0, 4.0])`
 y4 = jnp.array([-4.0, 4.0])
 # Run `ridge` to compute `w4`.
 w4 = ridge(X, y4, 1.0)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w4, jnp.array([2.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4...`
 assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.zeros(1), atol=1e-06)
 
 # Reference practice: Do not accidentally shrink the intercept
 # Do not accidentally shrink the intercept (Transfer / diagnosis): The mask expresses a modeling choice: shrink feature effects...
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([-1.0, 0.0, 1.0])`
 x = jnp.array([-1.0, 0.0, 1.0])
-# Initialize array `A` with explicit values and shape.
+# Construct `A` via `jnp.stack([x, jnp.ones_like(x)], axis=1)`
 A = jnp.stack([x, jnp.ones_like(x)], axis=1)
-# Initialize array `target` with explicit values and shape.
+# Compute `target` from `jnp.full((3,), 5.0)`
 target = jnp.full((3,), 5.0)
-# Initialize array `mask` with explicit values and shape.
+# Construct `mask` via `jnp.diag(jnp.array([1.0, 0.0]))`
 mask = jnp.diag(jnp.array([1.0, 0.0]))
 # Perform matrix contraction / projection to compute `correct`.
 correct = jnp.linalg.solve(A.T @ A + 3 * mask, A.T @ target)
@@ -154,14 +154,14 @@ correct = jnp.linalg.solve(A.T @ A + 3 * mask, A.T @ target)
 all_penalized = ridge(A, target, 1.0)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(correct, jnp.array([0.0, 5.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))`
 assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))
 
 # Reference practice: Catch preprocessing leakage
 # Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.
-# Initialize array `train_x` with explicit values and shape.
+# Construct `train_x` via `jnp.array([0.0, 2.0])`
 train_x = jnp.array([0.0, 2.0])
-# Initialize array `val_x` with explicit values and shape.
+# Construct `val_x` via `jnp.array([100.0])`
 val_x = jnp.array([100.0])
 # Aggregate array values to compute `train_mean`.
 train_mean = jnp.mean(train_x)
@@ -169,8 +169,8 @@ train_mean = jnp.mean(train_x)
 leaked_mean = jnp.mean(jnp.concatenate([train_x, val_x]))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(train_mean, leaked_mean)`
 assert not jnp.allclose(train_mean, leaked_mean)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(train_x - train_mean), 0.0)`
 assert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)
 print("PASS: optimization-10")

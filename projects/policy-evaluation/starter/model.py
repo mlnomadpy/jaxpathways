@@ -21,7 +21,8 @@ def reset(key):
 def step(state, action, horizon=8):
     """Stage 1: return (State, reward, terminated event, truncated event).
 
-    Binary actions move left/right; boundaries are 0 and goal 3. Active moves
+    Binary actions move left/right
+    boundaries are 0 and goal 3. Active moves
     pay -.01 except entering the goal pays 1. Done states absorb with no reward.
     """
     # Key APIs to use: `jnp.clip`, `jnp.where`, `active.astype`, `State`

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "91533229c270d1cb7b7f8786f61b614813d881a98f2205c059e1247473feaa91",
+  "contentHash": "0c23d7ef80bf7a5c8fc50816b2953c9191442220932196729a9bcd58748431de",
   "executedAt": "2026-10-08T14:03:25.127410+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,19 @@
   "stdout": "Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.\nValidation difference: 0.11994461664726686\nWrong zero model validation MSE: 6.0\nChanged target changes dataset identity.\nPASS: recovery-06\n",
   "notebookCells": [
     {
-      "sourceHash": "62ed07ecaec4c46eaec9281564fddd76066b7fbafa7404e5ac05b3144dcd8f57",
+      "sourceHash": "f6b66379262f139d1d7eefafa6fe078fe7bf899ed96a33aabcc903ed8596a629",
+      "outputs": []
+    },
+    {
+      "sourceHash": "034caca2ecfa3bb4f734e227c1f73114a35dcd68e19fa54465d4a4674e9ba78e",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ecf8e8836608cda3779715505a04598d20d98b0aea8ae2ac2c5bd5c85ee6a796",
+      "outputs": []
+    },
+    {
+      "sourceHash": "8a6d2c5bc8087feee20f487e69b4656940420cff48b5b8aa2cf5af5ddff3c299",
       "outputs": [
         {
           "output_type": "stream",
@@ -39,7 +51,7 @@
       ]
     },
     {
-      "sourceHash": "00eec84df17cbd0e43e8983ecfda30fe0a5c5fd919927faff1ddfcadef37fb23",
+      "sourceHash": "850c313eb097efe3cb907d20bc06199ab9d96b9ea92195b8a5059aa0a8abb066",
       "outputs": []
     },
     {
@@ -58,48 +70,24 @@
       ]
     },
     {
-      "sourceHash": "f557e7a8ec353a4b740dfc868e5af57aedc93e86dd993af46c7408882be0748d",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Validation difference: 0.11994461664726686\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "956774467dc2ca29f99a1550a3053bf7165ee0f5edcc3ac14881891e4a471df0",
+      "sourceHash": "3b8f26245c4edcecc224d8c5f603eb896a5d40672fe6b190bd329cd25cc14f35",
       "outputs": []
     },
     {
-      "sourceHash": "772df7adec96bcbc4009f02fc88a88aa3f136fa32fe9b33ddee51e805e634063",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Wrong zero model validation MSE: 6.0\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "673557f49d53299fa32b9de8b49b8215ad90828ef195e2daa00fc040828c47a6",
+      "sourceHash": "07754830219d37873f1e31857387342cb6a964fdf7342d9b674873bceafdac7e",
       "outputs": []
     },
     {
-      "sourceHash": "deb56d2e3c243bb86584d25e30ef496db1037ba1400380b5d80c19dc144a1265",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Changed target changes dataset identity.\n"
-          ]
-        }
-      ]
+      "sourceHash": "8d7e53211a25176c5a14f45be0793ba64f3c970026ad6c61b41d73c3e30a9075",
+      "outputs": []
+    },
+    {
+      "sourceHash": "a71d732b88be1c23f05451f0ac77cb2ae6404753f762b8b427b8fa234985126d",
+      "outputs": []
+    },
+    {
+      "sourceHash": "48a235fb2fcea7363b48daa3d7b763b56496fbba074a647895d5177fd5cce4d5",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

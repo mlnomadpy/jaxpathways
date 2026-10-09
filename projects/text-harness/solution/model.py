@@ -78,20 +78,24 @@ def make_corpus(seed=31,count=96,split="train",exclude=()):
     # Draw pseudorandom samples for `rng` using the explicit RNG state.
     # Run `set` to compute `seen`.
     # Evaluate `texts` from the current inputs and state.
-    rng=np.random.default_rng(seed);seen=set(exclude);texts=[]
+    rng=np.random.default_rng(seed)
+    seen=set(exclude)
+    texts=[]
     while len(texts)<count:
         length=int(rng.integers(2,5))
         prefix="".join(rng.choice(list("abcdef"),size=length))
         text=prefix+"|"+prefix[::-1]
         if text in seen:continue
-        seen.add(text);texts.append(text)
+        seen.add(text)
+        texts.append(text)
     # Allocate initialized array `tokens` with the specified shape and dtype.
     tokens=np.zeros((count,CONTEXT+1),dtype=np.int32)
     # Iterate over `(i, text)` to step through the computation:
     for i,text in enumerate(texts):
         # Run `encode` to compute `ids`.
         # Evaluate `tokens[i, :len(ids)]` from the current inputs and state.
-        ids=encode(text,eos=True);tokens[i,:len(ids)]=ids
+        ids=encode(text,eos=True)
+        tokens[i,:len(ids)]=ids
     # Return `{'tokens': tokens, 'texts': texts, 'ids': [f'{split}-document-{seed}-{i:04d}' for i in range(count)], 'groups': [f'{split}-source-{seed}-{i:04d}' for i in range(count)], 'provenance': 'generated symbolic reversal strings; not a natural-language benchmark'}` to the caller.
     return {"tokens":tokens,"texts":texts,"ids":[f"{split}-document-{seed}-{i:04d}" for i in range(count)],
             "groups":[f"{split}-source-{seed}-{i:04d}" for i in range(count)],
@@ -105,11 +109,17 @@ def load_text_manifest(path,split):
     # Run `set` to compute `seen_ids`.
     # Evaluate `seen_text` from the current inputs and state.
     # Evaluate `groups` from the current inputs and state.
-    path=Path(path);rows=json.loads(path.read_text());seen_ids=set();seen_text={};groups={}
+    path=Path(path)
+    rows=json.loads(path.read_text())
+    seen_ids=set()
+    seen_text={}
+    groups={}
     # Evaluate `texts` from the current inputs and state.
     # Evaluate `ids` from the current inputs and state.
     # Evaluate `selected_groups` from the current inputs and state.
-    texts=[];ids=[];selected_groups=[]
+    texts=[]
+    ids=[]
+    selected_groups=[]
     # Iterate over `row` to step through the computation:
     for row in rows:
         # Iterate over `key` to step through the computation:
@@ -120,20 +130,25 @@ def load_text_manifest(path,split):
         if row["id"] in seen_ids:raise ValueError("duplicate document identity")
         # Run `seen_ids.add` to perform the next check or state transition.
         # Run `seen_ids.add` to perform the next check or state transition.
-        seen_ids.add(row["id"]);groups.setdefault(row["group"],set()).add(row["split"])
+        seen_ids.add(row["id"])
+        groups.setdefault(row["group"],set()).add(row["split"])
         # Evaluate `raw` from the current inputs and state.
         raw=(path.parent/row["file"]).read_bytes()
         # Guard input contract (`hashlib.sha256(raw).hexdigest() != row['sha256']`) and fail fast if violated.
         if hashlib.sha256(raw).hexdigest()!=row["sha256"]:raise ValueError("text checksum mismatch")
         # Run `raw.decode` to compute `text`.
         # Execute the next step of the computation.
-        text=raw.decode("utf8");encode(text,eos=True)
+        text=raw.decode("utf8")
+        encode(text,eos=True)
         # Guard input contract (`text in seen_text and seen_text[text] != row['split']`) and fail fast if violated.
         if text in seen_text and seen_text[text]!=row["split"]:raise ValueError("duplicate content crosses splits")
         # Evaluate `seen_text[text]` from the current inputs and state.
         seen_text[text]=row["split"]
         # Branch on condition `row['split'] == split`:
-        if row["split"]==split:texts.append(text);ids.append(row["id"]);selected_groups.append(row["group"])
+        if row["split"]==split:
+            texts.append(text)
+            ids.append(row["id"])
+            selected_groups.append(row["group"])
     # Guard input contract (`any((len(values) > 1 for values in groups.values()))`) and fail fast if violated.
     if any(len(values)>1 for values in groups.values()):raise ValueError("source group crosses splits")
     # Guard input contract (`not texts`) and fail fast if violated.
@@ -144,7 +159,8 @@ def load_text_manifest(path,split):
     for i,text in enumerate(texts):
         # Run `encode` to compute `encoded`.
         # Evaluate `tokens[i, :len(encoded)]` from the current inputs and state.
-        encoded=encode(text,eos=True);tokens[i,:len(encoded)]=encoded
+        encoded=encode(text,eos=True)
+        tokens[i,:len(encoded)]=encoded
     # Return `{'tokens': tokens, 'texts': texts, 'ids': ids, 'groups': selected_groups, 'provenance': 'user-permitted UTF-8 documents from ' + str(path)}` to the caller.
     return {"tokens":tokens,"texts":texts,"ids":ids,"groups":selected_groups,
             "provenance":"user-permitted UTF-8 documents from "+str(path)}
@@ -237,10 +253,12 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     v=split_heads(linear(normalized,params["v"],compute_policy))
     # Run `pack_cache` to compute `(stored_k, ks)`.
     # Run `pack_cache` to compute `(stored_v, vs)`.
-    stored_k,ks=pack_cache(k,cache_policy);stored_v,vs=pack_cache(v,cache_policy)
+    stored_k,ks=pack_cache(k,cache_policy)
+    stored_v,vs=pack_cache(v,cache_policy)
     # Run `unpack_cache` to compute `k`.
     # Run `unpack_cache` to compute `v`.
-    k=unpack_cache(stored_k,ks);v=unpack_cache(stored_v,vs)
+    k=unpack_cache(stored_k,ks)
+    v=unpack_cache(stored_v,vs)
     # Perform matrix contraction / projection to compute `score`.
     score=jnp.einsum("bhtd,bhsd->bhts",q,k)/jnp.sqrt(float(HEAD_DIM))
     # Evaluate `allowed` from the current inputs and state.
@@ -251,7 +269,8 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
     attended=linear(join_heads(jnp.einsum("bhts,bhsd->bhtd",attention,v)),params["o"],compute_policy)
     # Branch on condition `key is not None`:
     if key is not None:
-        first,second=jax.random.split(key);attended=dropout(attended,first)
+        first,second=jax.random.split(key)
+        attended=dropout(attended,first)
     # Evaluate `x` from the current inputs and state.
     x=x+attended
     # Apply nonlinear activation or probability normalization to compute `hidden`.
@@ -272,7 +291,8 @@ def forward(params,tokens,key=None,compute_policy="fp32",cache_policy="fp32"):
 def token_loss(params,documents,key=None):
     # Evaluate `inputs` from the current inputs and state.
     # Evaluate `targets` from the current inputs and state.
-    inputs=documents[:,:-1];targets=documents[:,1:]
+    inputs=documents[:,:-1]
+    targets=documents[:,1:]
     # Run `forward` to compute `logits`.
     logits=forward(params,inputs,key)[0]
     # Evaluate numerically stable log-space cross-entropy/likelihood (`logp`).
@@ -304,7 +324,8 @@ def initialize(data,seed=3,batch_size=16,rate=.006):
             raise ValueError("documents require BOS, byte content, one EOS and right padding")
     # Initialize explicit deterministic PRNG key `key`.
     # Evaluate `params` from the current inputs and state.
-    key=jax.random.PRNGKey(seed);params={}
+    key=jax.random.PRNGKey(seed)
+    params={}
     # Loop over `(name, shape)` in `PARAM_SHAPES.items()`:
     for name,shape in PARAM_SHAPES.items():
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
@@ -350,7 +371,8 @@ def step(state,data):
     if result["cursor"]==len(data["ids"]):
         result["key"],order_key=jax.random.split(result["key"])
         result["order"]=jax.random.permutation(order_key,len(data["ids"]))
-        result["cursor"]=0;result["epoch"]+=1
+        result["cursor"]=0
+        result["epoch"]+=1
     # Convert `indices` to a host NumPy array for inspection or verification.
     indices=np.asarray(result["order"][result["cursor"]:result["cursor"]+result["config"]["batch_size"]])
     # Split the PRNG key deterministically into independent subkeys (`(result['key'], dropout_key)`).
@@ -360,7 +382,8 @@ def step(state,data):
         jnp.asarray(data["tokens"][indices]),dropout_key,jnp.asarray(result["step"]+1),result["config"]["rate"])
     # Accumulate the next contribution into `result['step']`.
     # Accumulate the next contribution into `result['cursor']`.
-    result["step"]+=1;result["cursor"]+=len(indices)
+    result["step"]+=1
+    result["cursor"]+=len(indices)
     # Return `(result, {'ids': [data['ids'][int(i)] for i in indices], 'dropout_key': np.asarray(dropout_key).tolist(), 'pre_update_loss': float(loss), 'valid_tokens': int(np.sum(data['tokens'][indices, 1:] != 0)), 'completed_step': result['step']})` to the caller.
     return result,{"ids":[data["ids"][int(i)] for i in indices],"dropout_key":np.asarray(dropout_key).tolist(),
                    "pre_update_loss":float(loss),"valid_tokens":int(np.sum(data["tokens"][indices,1:]!=0)),"completed_step":result["step"]}
@@ -370,7 +393,8 @@ def step(state,data):
 def save_checkpoint(path,state):
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path=Path(path);path.mkdir(parents=True,exist_ok=True)
+    path=Path(path)
+    path.mkdir(parents=True,exist_ok=True)
     # Convert `arrays` to a host NumPy array for inspection or verification.
     arrays={f"{group}__{name}":np.asarray(value) for group in ("params","m","v") for name,value in state[group].items()}
     # Convert `` to a host NumPy array for inspection or verification.
@@ -390,7 +414,8 @@ def save_checkpoint(path,state):
 def load_checkpoint(path,data,config):
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
-    path=Path(path);manifest=json.loads((path/"checkpoint.json").read_text())
+    path=Path(path)
+    manifest=json.loads((path/"checkpoint.json").read_text())
     # Guard input contract (`manifest['data_sha256'] != corpus_hash(data) or manifest['config'] != config`) and fail fast if violated.
     if manifest["data_sha256"]!=corpus_hash(data) or manifest["config"]!=config:raise ValueError("corpus/configuration mismatch")
     # Guard input contract (`manifest['tokenizer'] != TOKENIZER or manifest['jax'] != jax.__version__`) and fail fast if violated.
@@ -416,7 +441,9 @@ def evaluate(params,data,batch_size=11,compute_policy="fp32",cache_policy="fp32"
     # Evaluate `total` from the current inputs and state.
     # Evaluate `count` from the current inputs and state.
     # Evaluate `correct` from the current inputs and state.
-    total=0.;count=0;correct=0
+    total=0.
+    count=0
+    correct=0
     # Loop over `start` in `range(0, len(data['ids']), batch_size)`:
     for start in range(0,len(data["ids"]),batch_size):
         # Evaluate `docs` from the current inputs and state.
@@ -429,12 +456,14 @@ def evaluate(params,data,batch_size=11,compute_policy="fp32",cache_policy="fp32"
         logp=shifted-np.log(np.exp(shifted).sum(-1,keepdims=True))
         # Evaluate `targets` from the current inputs and state.
         # Evaluate `mask` from the current inputs and state.
-        targets=docs[:,1:];mask=targets!=0
+        targets=docs[:,1:]
+        mask=targets!=0
         # Accumulate the next contribution into `total`.
         total+=float(-np.take_along_axis(logp,targets[...,None],axis=-1)[...,0][mask].sum())
         # Accumulate the next contribution into `count`.
         # Accumulate the next contribution into `correct`.
-        count+=int(mask.sum());correct+=int(((logits.argmax(-1)==targets)&mask).sum())
+        count+=int(mask.sum())
+        correct+=int(((logits.argmax(-1)==targets)&mask).sum())
     # Return `{'nll_sum': total, 'valid_tokens': count, 'nll': total / count, 'token_accuracy': correct / count, 'perplexity': float(np.exp(total / count))}` to the caller.
     return {"nll_sum":total,"valid_tokens":count,"nll":total/count,"token_accuracy":correct/count,
             "perplexity":float(np.exp(total/count))}
@@ -480,7 +509,8 @@ def decode_core(params,token,K,V,Ks,Vs,length,compute_policy="fp32",cache_policy
     V=jax.lax.dynamic_update_slice(V,new_v,(0,0,length,0))
     # Run `jax.lax.dynamic_update_slice` to compute `Ks`.
     # Run `jax.lax.dynamic_update_slice` to compute `Vs`.
-    Ks=jax.lax.dynamic_update_slice(Ks,scale_k,(0,0,length,0));Vs=jax.lax.dynamic_update_slice(Vs,scale_v,(0,0,length,0))
+    Ks=jax.lax.dynamic_update_slice(Ks,scale_k,(0,0,length,0))
+    Vs=jax.lax.dynamic_update_slice(Vs,scale_v,(0,0,length,0))
     # Perform matrix contraction / projection to compute `score`.
     score=jnp.einsum("bhtd,bhsd->bhts",q,unpack_cache(K,Ks))/jnp.sqrt(float(HEAD_DIM))
     # Create evenly spaced index values in `allowed`.
@@ -502,7 +532,9 @@ def prefill(params,prompt,compute_policy="fp32",cache_policy="fp32"):
     # Run `validate_prompt` to compute `prompt`.
     # Allocate initialized array `padded` with the specified shape and dtype.
     # Evaluate `padded[0, :len(prompt)]` from the current inputs and state.
-    prompt=validate_prompt(prompt);padded=np.zeros((1,CONTEXT),np.int32);padded[0,:len(prompt)]=prompt
+    prompt=validate_prompt(prompt)
+    padded=np.zeros((1,CONTEXT),np.int32)
+    padded[0,:len(prompt)]=prompt
     # Return `prefill_core(params, jnp.asarray(padded), jnp.asarray(len(prompt), jnp.int32), compute_policy, cache_policy)` to the caller.
     return prefill_core(params,jnp.asarray(padded),jnp.asarray(len(prompt),jnp.int32),compute_policy,cache_policy)
 
@@ -526,7 +558,9 @@ def export_release(path,state):
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
     # Evaluate `artifacts` from the current inputs and state.
-    path=Path(path);path.mkdir(parents=True,exist_ok=True);artifacts={}
+    path=Path(path)
+    path.mkdir(parents=True,exist_ok=True)
+    artifacts={}
     # Loop over `(name, (compute, cache))` in `RELEASE_POLICIES.items()`:
     for name,(compute,cache) in RELEASE_POLICIES.items():
         # Compile and trace the function with XLA (`pre`).
@@ -552,7 +586,9 @@ def export_release(path,state):
             # Run `artifact.serialize` to compute `data`.
             # Evaluate `filename` from the current inputs and state.
             # Execute the next step of the computation.
-            data=artifact.serialize();filename=f"{name}-{endpoint}.jaxexport";(path/filename).write_bytes(data)
+            data=artifact.serialize()
+            filename=f"{name}-{endpoint}.jaxexport"
+            (path/filename).write_bytes(data)
             # Compute deterministic cryptographic digest `artifacts[f'{name}:{endpoint}']` for provenance verification.
             artifacts[f"{name}:{endpoint}"]={"file":filename,"sha256":hashlib.sha256(data).hexdigest()}
     # Convert `parameter_hash` to a host NumPy array for inspection or verification.
@@ -575,7 +611,8 @@ def export_release(path,state):
 def load_release(path):
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
-    path=Path(path);manifest=json.loads((path/"release.json").read_text())
+    path=Path(path)
+    manifest=json.loads((path/"release.json").read_text())
     # Guard input contract (`manifest['tokenizer'] != TOKENIZER or manifest['jax'] != jax.__version__`) and fail fast if violated.
     if manifest["tokenizer"]!=TOKENIZER or manifest["jax"]!=jax.__version__:raise ValueError("tokenizer/runtime mismatch")
     # Evaluate `artifacts` from the current inputs and state.
@@ -599,7 +636,9 @@ def exported_prefill(manifest,artifacts,prompt,policy="fp32"):
     # Run `validate_prompt` to compute `prompt`.
     # Allocate initialized array `tokens` with the specified shape and dtype.
     # Evaluate `tokens[0, :len(prompt)]` from the current inputs and state.
-    prompt=validate_prompt(prompt);tokens=np.zeros((1,CONTEXT),np.int32);tokens[0,:len(prompt)]=prompt
+    prompt=validate_prompt(prompt)
+    tokens=np.zeros((1,CONTEXT),np.int32)
+    tokens[0,:len(prompt)]=prompt
     # Create device-backed JAX array `result`.
     result=artifacts[f"{policy}:prefill"].call(jnp.asarray(tokens),jnp.asarray(len(prompt),jnp.int32))
     # Return `jax.tree.map(lambda x: x.block_until_ready(), result)` to the caller.
@@ -626,15 +665,18 @@ def generate(manifest,artifacts,text,max_new_tokens=4,policy="fp32"):
     if max_new_tokens<0 or len(prompt)+max_new_tokens>CONTEXT:raise ValueError("generation exceeds context budget")
     # Run `exported_prefill` to compute `state`.
     # Evaluate `generated` from the current inputs and state.
-    state=exported_prefill(manifest,artifacts,prompt,policy);generated=[]
+    state=exported_prefill(manifest,artifacts,prompt,policy)
+    generated=[]
     # Repeat the update loop over `range(max_new_tokens)` steps:
     for _ in range(max_new_tokens):
         # Convert `logits` to a host NumPy array for inspection or verification.
         # Evaluate `logits[:2]` from the current inputs and state.
-        logits=np.asarray(state[0])[0].copy();logits[:2]=-np.inf
+        logits=np.asarray(state[0])[0].copy()
+        logits[:2]=-np.inf
         # Evaluate `logits.argmax()` and convert the result into Python scalar/collection `token`.
         # Execute the next step of the computation.
-        token=int(logits.argmax());generated.append(token)
+        token=int(logits.argmax())
+        generated.append(token)
         # Branch on condition `token == 2`:
         if token==2:break
         # Run `exported_decode` to compute `state`.
@@ -652,29 +694,34 @@ def benchmark(manifest,artifacts,prompt,policy="fp32",repeats=30):
     if len(tokens)>=CONTEXT:raise ValueError("one free cache slot needed for decode measurement")
     # Record execution timing or profiler trace in `started`.
     # Run `exported_prefill` to compute `cache`.
-    started=time.perf_counter();cache=exported_prefill(manifest,artifacts,tokens,policy)
+    started=time.perf_counter()
+    cache=exported_prefill(manifest,artifacts,tokens,policy)
     # Record execution timing or profiler trace in `first_prefill`.
     first_prefill=(time.perf_counter()-started)*1000
     # Run `ord` to compute `token`.
     token=ord("a")+3
     # Record execution timing or profiler trace in `started`.
     # Execute the next step of the computation.
-    started=time.perf_counter();exported_decode(manifest,artifacts,token,cache,policy)
+    started=time.perf_counter()
+    exported_decode(manifest,artifacts,token,cache,policy)
     # Record execution timing or profiler trace in `first_decode`.
     first_decode=(time.perf_counter()-started)*1000
     # Evaluate `pre` from the current inputs and state.
     # Evaluate `dec` from the current inputs and state.
-    pre=[];dec=[]
+    pre=[]
+    dec=[]
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
         # Record execution timing or profiler trace in `started`.
         # Execute the next step of the computation.
-        started=time.perf_counter();exported_prefill(manifest,artifacts,tokens,policy)
+        started=time.perf_counter()
+        exported_prefill(manifest,artifacts,tokens,policy)
         # Record execution timing or profiler trace in ``.
         pre.append((time.perf_counter()-started)*1000)
         # Record execution timing or profiler trace in `started`.
         # Execute the next step of the computation.
-        started=time.perf_counter();exported_decode(manifest,artifacts,token,cache,policy)
+        started=time.perf_counter()
+        exported_decode(manifest,artifacts,token,cache,policy)
         # Record execution timing or profiler trace in ``.
         dec.append((time.perf_counter()-started)*1000)
     # Return `{'prompt_tokens': len(tokens), 'first_prefill_ms': first_prefill, 'first_decode_ms': first_decode, 'prefill_samples_ms': pre, 'decode_samples_ms': dec, 'prefill_p50_ms': float(np.percentile(pre, 50)), 'decode_p50_ms': float(np.percentile(dec, 50)), 'decode_p95_ms': float(np.percentile(dec, 95)), 'single_step_tokens_per_second': 1000 / float(np.percentile(dec, 50)), 'cache_bytes_including_scales': sum((np.asarray(x).nbytes for x in cache[1:5])), 'boundary': 'validated token inputs + exported call + complete returned arrays; no networking', 'decode_workload': 'one token from the same fixed prefix cache per timed repetition', 'device': 'CPU'}` to the caller.

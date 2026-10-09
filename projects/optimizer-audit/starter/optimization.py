@@ -49,7 +49,8 @@ def _geometry(w, x, y, penalty):
 
 
 def geometry(w, x, y, penalty=0.):
-    x, y = check_xy(x, y); w = check_weights(w, x.shape[1])
+    x, y = check_xy(x, y)
+    w = check_weights(w, x.shape[1])
     if not np.isfinite(penalty) or penalty < 0:
         raise ValueError('nonnegative finite penalty required')
     value, gradient, hessian = _geometry(w, x, y, np.float32(penalty))
@@ -67,7 +68,8 @@ def fit_scales(x):
 
 
 def apply_scales(x, scales):
-    x = np.asarray(x); scales = np.asarray(scales)
+    x = np.asarray(x)
+    scales = np.asarray(scales)
     check_xy(x, np.zeros(len(x), np.float32))
     if scales.dtype != np.float32 or scales.shape != (x.shape[1],) or not np.isfinite(scales).all() or np.any(scales <= 0):
         raise ValueError('positive finite float32 feature scales required')
@@ -131,8 +133,11 @@ def _run(w, x, y, held_x, held_y, indices, learning_rates, penalty, clip_norm, m
 
 
 def run(w, x, y, held_x, held_y, indices, learning_rates, method='gd', penalty=0., clip_norm=None):
-    x,y=check_xy(x,y); held_x,held_y=check_xy(held_x,held_y); w=check_weights(w,x.shape[1])
-    ids=np.asarray(indices); lr=np.asarray(learning_rates)
+    x,y=check_xy(x,y)
+    held_x,held_y=check_xy(held_x,held_y)
+    w=check_weights(w,x.shape[1])
+    ids=np.asarray(indices)
+    lr=np.asarray(learning_rates)
     if held_x.shape[1]!=x.shape[1] or ids.dtype!=np.int32 or ids.ndim!=2 or min(ids.shape)<1 or np.any((ids<0)|(ids>=len(x))):
         raise ValueError('held feature width or sample plan invalid')
     if lr.dtype!=np.float32 or lr.shape!=(len(ids),) or not np.isfinite(lr).all() or np.any(lr<=0):

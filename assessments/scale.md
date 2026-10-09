@@ -4,6 +4,26 @@
 
 Keep CPU logical-device and interpretation evidence separate from real accelerator evidence. A CPU-only submission can complete the numerical and decision-preparation tasks; it must leave target performance qualification explicitly unresolved. An implemented target runner is not an executed target result.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: count-weighted gradient reduction across uneven shards
+import jax.numpy as jnp
+
+X = jnp.arange(16, dtype=jnp.float32).reshape(8, 2) / 8.0
+w = jnp.array([0.5, -0.25], dtype=jnp.float32)
+y = X @ jnp.array([1.2, -0.8], dtype=jnp.float32)
+
+# Partition into uneven shards of sizes 3 and 5 and compare unweighted vs count-weighted average.
+g1 = (2.0 / 3.0) * X[:3].T @ (X[:3] @ w - y[:3])
+g2 = (2.0 / 5.0) * X[3:].T @ (X[3:] @ w - y[3:])
+g_global = (2.0 / 8.0) * X.T @ (X @ w - y)
+g_weighted = (3.0 * g1 + 5.0 * g2) / 8.0
+print("Count-weighted max error:", float(jnp.max(jnp.abs(g_global - g_weighted))))
+```
+
 ## Task 1: freeze a workload and its reference
 
 Use a regression step with feature matrix \(X\), weights \(w\), targets \(y\) and the global mean objective

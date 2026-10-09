@@ -90,8 +90,8 @@ A checkpoint-resumable TPU job launcher and multi-host staging workflow.
 
 **Demonstrate:** Stage scripts with gcloud compute tpus tpu-vm scp, separate XLA warmup from timed step loops, verify zero-drift checkpoint resume, and build single-host and --worker=all Pod launch commands.
 
-Project status: implemented staged practice · [Open source](../../projects/workload-operations/README.md). Use stages 3 for this phase. Rehearse checkpoint resume and command generation locally first, then stage launch.py to your Cloud TPU VM and copy back the run directory before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 3` from the top-level folder to verify stage 3.
+Project status: implemented staged practice · [Open source](../../projects/tpu-workflow-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Rehearse checkpoint resume and command generation locally first, then stage launch.py to your Cloud TPU VM and copy back the run directory before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 3` from the top-level folder to verify stage 3.
 
-
+Additional project: [Operate and recover a local JAX workload](../../projects/workload-operations/README.md).
 
 [Primary documentation](https://cloud.google.com/tpu/docs/run-calculation-jax).

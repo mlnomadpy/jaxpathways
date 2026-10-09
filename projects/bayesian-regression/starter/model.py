@@ -45,7 +45,8 @@ def sample(key, mean, covariance, starts, step_size=.15, leapfrog_steps=9,
 
 def diagnose(chains):
     """Stage 2: return mean and classical_split_rhat per parameter.
-    Require multiple finite chains; reject zero within-chain variance.
+    Require multiple finite chains
+    reject zero within-chain variance.
     This is classical split R-hat, not rank-normalized R-hat or ESS.
     """
     # Key APIs to use: `np.asarray`, `contract`, `or`, `np.isfinite`, `all`

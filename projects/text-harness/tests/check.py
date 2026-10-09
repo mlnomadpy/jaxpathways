@@ -15,10 +15,13 @@ ROOT=Path(__file__).resolve().parents[1]
 parser=argparse.ArgumentParser()
 parser.add_argument("--implementation",default="starter")
 parser.add_argument("--stage",choices=["1","2","3","4","all"],default="all")
-parser.add_argument("--resume-worker");parser.add_argument("--worker-output")
+parser.add_argument("--resume-worker")
+parser.add_argument("--worker-output")
 args=parser.parse_args()
 path=(ROOT/args.implementation/"model.py" if args.implementation in ("starter","solution") else Path(args.implementation)).resolve()
-spec=importlib.util.spec_from_file_location("learner_text",path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+spec=importlib.util.spec_from_file_location("learner_text",path)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
 stage=4 if args.stage=="all" else int(args.stage)
 
 def rejects(call):
@@ -35,9 +38,11 @@ def same_state(a,b):
 train=m.make_corpus(31,96,"train")
 if args.resume_worker:
     config=json.loads((Path(args.resume_worker)/"checkpoint.json").read_text())["config"]
-    state=m.load_checkpoint(args.resume_worker,train,config);trace=[]
+    state=m.load_checkpoint(args.resume_worker,train,config)
+    trace=[]
     for _ in range(4):
-        state,item=m.step(state,train);trace.append(item)
+        state,item=m.step(state,train)
+        trace.append(item)
     m.save_checkpoint(args.worker_output,state)
     (Path(args.worker_output)/"trace.json").write_text(json.dumps(trace))
     raise SystemExit(0)
@@ -45,14 +50,17 @@ if args.resume_worker:
 held=m.make_corpus(89,32,"held",exclude=train["texts"])
 assert not set(train["texts"])&set(held["texts"])
 assert not set(train["ids"])&set(held["ids"])
-encoded=m.encode("éa");assert encoded==[1,198,172,100] and m.decode(encoded)=="éa"
+encoded=m.encode("éa")
+assert encoded==[1,198,172,100] and m.decode(encoded)=="éa"
 rejects(lambda:m.encode("x"*12))
 rejects(lambda:m.validate_prompt([1,0,100]))
 with tempfile.TemporaryDirectory() as folder:
-    root=Path(folder);(root/"a.txt").write_text("ab|ba")
+    root=Path(folder)
+    (root/"a.txt").write_text("ab|ba")
     row={"id":"external-1","file":"a.txt","split":"train","group":"source-1","license":"owned fixture",
          "source":"generated local test","sha256":hashlib.sha256((root/"a.txt").read_bytes()).hexdigest()}
-    manifest=root/"documents.json";manifest.write_text(json.dumps([row]))
+    manifest=root/"documents.json"
+    manifest.write_text(json.dumps([row]))
     actual=m.load_text_manifest(manifest,"train")
     assert actual["texts"]==["ab|ba"]
     manifest.write_text(json.dumps([row,dict(row,id="other",split="held")]))
@@ -64,15 +72,20 @@ logits,attention,_=m.forward(initial["params"],tokens)
 changed=tokens.at[:,5:].set(110)
 np.testing.assert_allclose(m.forward(initial["params"],changed)[0][:,:5],logits[:,:5],atol=1e-6)
 assert np.max(np.triu(np.asarray(attention),k=1))==0
-params=initial["params"];host=np.asarray(params["embed"])[np.asarray(tokens)]+np.asarray(params["position"])[None,:,:]
+params=initial["params"]
+host=np.asarray(params["embed"])[np.asarray(tokens)]+np.asarray(params["position"])[None,:,:]
 norm=(host-host.mean(-1,keepdims=True))/np.sqrt(np.mean((host-host.mean(-1,keepdims=True))**2,-1,keepdims=True)+1e-5)
 Q=(norm@np.asarray(params["q"])).reshape(2,12,2,12).transpose(0,2,1,3)
 K=(norm@np.asarray(params["k"])).reshape(2,12,2,12).transpose(0,2,1,3)
 row=Q[0,0,3]@K[0,0,:4].T/np.sqrt(12.)
-p=np.exp(row-row.max());p/=p.sum()
+p=np.exp(row-row.max())
+p/=p.sum()
 np.testing.assert_allclose(np.asarray(attention)[0,0,3,:4],p,atol=2e-6,rtol=2e-5)
-targets=np.asarray(train["tokens"][:2,1:]);raw=np.asarray(logits);shift=raw-raw.max(-1,keepdims=True)
-lp=shift-np.log(np.exp(shift).sum(-1,keepdims=True));mask=targets!=0
+targets=np.asarray(train["tokens"][:2,1:])
+raw=np.asarray(logits)
+shift=raw-raw.max(-1,keepdims=True)
+lp=shift-np.log(np.exp(shift).sum(-1,keepdims=True))
+mask=targets!=0
 expected=-np.take_along_axis(lp,targets[...,None],axis=-1)[...,0][mask].mean()
 np.testing.assert_allclose(m.token_loss(params,jnp.asarray(train["tokens"][:2])),expected,rtol=1e-6)
 print("PASS stage 1: UTF-8 bytes, split/content provenance, independent attention and masked token loss, causal invariance")
@@ -88,16 +101,20 @@ if stage>=2:
     state=initial
     for _ in range(5):state,_=m.step(state,train)
     with tempfile.TemporaryDirectory() as folder:
-        saved=Path(folder)/"saved";fresh=Path(folder)/"fresh"
+        saved=Path(folder)/"saved"
+        fresh=Path(folder)/"fresh"
         m.save_checkpoint(saved,state)
-        expected=state;trace=[]
+        expected=state
+        trace=[]
         for _ in range(4):
-            expected,item=m.step(expected,train);trace.append(item)
+            expected,item=m.step(expected,train)
+            trace.append(item)
         result=subprocess.run([sys.executable,str(Path(__file__).resolve()),"--implementation",str(path),
                                "--resume-worker",str(saved),"--worker-output",str(fresh)],
                               capture_output=True,text=True,timeout=120)
         assert result.returncode==0,result.stdout+result.stderr
-        restored=m.load_checkpoint(fresh,train,state["config"]);same_state(expected,restored)
+        restored=m.load_checkpoint(fresh,train,state["config"])
+        same_state(expected,restored)
         assert trace==json.loads((fresh/"trace.json").read_text())
         rejects(lambda:m.load_checkpoint(saved,held,state["config"]))
         rejects(lambda:m.load_checkpoint(saved,train,dict(state["config"],rate=.01)))
@@ -118,15 +135,19 @@ if stage>=2:
     print("Measured held-out token metrics:",report,"changed-seed NLL:",changed_report["nll"])
 
 if stage>=3:
-    params=state["params"];prompt=m.encode("abc|")
+    params=state["params"]
+    prompt=m.encode("abc|")
     for cache_policy in ("fp32","bf16","int8"):
         current=m.prefill(params,prompt,cache_policy=cache_policy)
         expected_dtype={"fp32":jnp.float32,"bf16":jnp.bfloat16,"int8":jnp.int8}[cache_policy]
         assert current[1].dtype==expected_dtype and current[2].dtype==expected_dtype
         prefix=list(prompt)
         for char in "cba":
-            token=ord(char)+3;current=m.decode_step(params,token,current,cache_policy=cache_policy);prefix.append(token)
-            padded=np.zeros((1,12),np.int32);padded[0,:len(prefix)]=prefix
+            token=ord(char)+3
+            current=m.decode_step(params,token,current,cache_policy=cache_policy)
+            prefix.append(token)
+            padded=np.zeros((1,12),np.int32)
+            padded[0,:len(prefix)]=prefix
             full=m.forward(params,jnp.asarray(padded),cache_policy=cache_policy)[0][:,len(prefix)-1,:]
             np.testing.assert_allclose(current[0],full,rtol=5e-5,atol=5e-5)
         # A populated prefix cache must stay unchanged when a new token is appended.
@@ -153,7 +174,9 @@ if stage>=3:
 
 if stage>=4:
     with tempfile.TemporaryDirectory() as folder:
-        release=Path(folder)/"release";manifest=m.export_release(release,state);loaded,artifacts=m.load_release(release)
+        release=Path(folder)/"release"
+        manifest=m.export_release(release,state)
+        loaded,artifacts=m.load_release(release)
         assert len(artifacts)==6
         for name,(compute,cache_policy) in m.RELEASE_POLICIES.items():
             first=m.exported_prefill(loaded,artifacts,prompt,name)
@@ -168,8 +191,12 @@ if stage>=4:
         assert result.returncode==0,result.stdout+result.stderr
         fp=m.exported_prefill(loaded,artifacts,prompt)
         np.testing.assert_allclose(np.load(output),m.exported_decode(loaded,artifacts,102,fp)[0],rtol=1e-6,atol=1e-6)
-        item=next(iter(manifest["artifacts"].values()));artifact=release/item["file"];original=artifact.read_bytes()
-        artifact.write_bytes(original+b"corrupt");rejects(lambda:m.load_release(release));artifact.write_bytes(original)
+        item=next(iter(manifest["artifacts"].values()))
+        artifact=release/item["file"]
+        original=artifact.read_bytes()
+        artifact.write_bytes(original+b"corrupt")
+        rejects(lambda:m.load_release(release))
+        artifact.write_bytes(original)
         rejects(lambda:m.generate(loaded,artifacts,"abc|",max_new_tokens=12))
         with jax.profiler.trace(str(Path(folder)/"profile"),create_perfetto_link=False,create_perfetto_trace=True):
             with jax.profiler.TraceAnnotation("text-prefill-check"):

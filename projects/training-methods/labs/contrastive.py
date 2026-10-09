@@ -1,12 +1,17 @@
 left=jnp.array([[1.,0.,.2],[0.,1.,-.2],[-1.,0.,.1],[0.,-1.,-.1]])
 right=left+jnp.array([[.02,-.01,0.],[-.01,.02,0.],[.01,.01,0.],[-.02,-.01,0.]])
-w=jnp.array([[.2,.1],[.1,.1],[.02,-.01]]);history=[]
+w=jnp.array([[.2,.1],[.1,.1],[.02,-.01]])
+history=[]
 step=jax.jit(jax.value_and_grad(lambda w:paired_contrastive(left@w,right@w,.2)))
 for _ in range(60):
-    value,g=step(w);history.append(float(value));w=w-.03*g
+    value,g=step(w)
+    history.append(float(value))
+    w=w-.03*g
 assert history[-1]<history[0]
-zi=left@w;zt=right@w
-zi=zi/jnp.linalg.norm(zi,axis=1,keepdims=True);zt=zt/jnp.linalg.norm(zt,axis=1,keepdims=True)
+zi=left@w
+zt=right@w
+zi=zi/jnp.linalg.norm(zi,axis=1,keepdims=True)
+zt=zt/jnp.linalg.norm(zt,axis=1,keepdims=True)
 scores=zi@zt.T/.2
 host=np.asarray(scores,dtype=np.float64)
 def host_ce(a):

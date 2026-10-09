@@ -75,7 +75,8 @@ def _geometry(w, x, y, penalty):
 def geometry(w, x, y, penalty=0.):
     # Run `check_xy` to compute `(x, y)`.
     # Run `check_weights` to compute `w`.
-    x, y = check_xy(x, y); w = check_weights(w, x.shape[1])
+    x, y = check_xy(x, y)
+    w = check_weights(w, x.shape[1])
     # Guard input contract (`not np.isfinite(penalty) or penalty < 0`) and fail fast if violated.
     if not np.isfinite(penalty) or penalty < 0:
         raise ValueError('nonnegative finite penalty required')
@@ -102,7 +103,8 @@ def fit_scales(x):
 def apply_scales(x, scales):
     # Convert `x` to a host NumPy array for inspection or verification.
     # Convert `scales` to a host NumPy array for inspection or verification.
-    x = np.asarray(x); scales = np.asarray(scales)
+    x = np.asarray(x)
+    scales = np.asarray(scales)
     # Allocate initialized array `` with the specified shape and dtype.
     check_xy(x, np.zeros(len(x), np.float32))
     # Guard input contract (`scales.dtype != np.float32 or scales.shape != (x.shape[1],) or (not np.isfinite(scales).all()) or np.any(scales <= 0)`) and fail fast if violated.
@@ -117,7 +119,8 @@ def noise_audit(w, x, y, batch_size=2, penalty=0.):
     """Exactly enumerate ordered iid draws WITH replacement; never Monte Carlo here."""
     # Run `check_xy` to compute `(x, y)`.
     # Run `check_weights` to compute `w`.
-    x, y = check_xy(x, y); w = check_weights(w, x.shape[1])
+    x, y = check_xy(x, y)
+    w = check_weights(w, x.shape[1])
     # Guard input contract (`type(batch_size) != int or batch_size < 1 or len(x) ** batch_size > 65536 or (not np.isfinite(penalty)) or (penalty < 0)`) and fail fast if violated.
     if type(batch_size) != int or batch_size < 1 or len(x)**batch_size > 65536 or not np.isfinite(penalty) or penalty < 0:
         raise ValueError('invalid or excessive enumeration')
@@ -220,10 +223,13 @@ def run(w, x, y, held_x, held_y, indices, learning_rates, method='gd', penalty=0
     # Run `check_xy` to compute `(x, y)`.
     # Run `check_xy` to compute `(held_x, held_y)`.
     # Run `check_weights` to compute `w`.
-    x,y=check_xy(x,y); held_x,held_y=check_xy(held_x,held_y); w=check_weights(w,x.shape[1])
+    x,y=check_xy(x,y)
+    held_x,held_y=check_xy(held_x,held_y)
+    w=check_weights(w,x.shape[1])
     # Convert `ids` to a host NumPy array for inspection or verification.
     # Convert `lr` to a host NumPy array for inspection or verification.
-    ids=np.asarray(indices); lr=np.asarray(learning_rates)
+    ids=np.asarray(indices)
+    lr=np.asarray(learning_rates)
     # Guard input contract (`held_x.shape[1] != x.shape[1] or ids.dtype != np.int32 or ids.ndim != 2 or (min(ids.shape) < 1) or np.any((ids < 0) | (ids >= len(x)))`) and fail fast if violated.
     if held_x.shape[1]!=x.shape[1] or ids.dtype!=np.int32 or ids.ndim!=2 or min(ids.shape)<1 or np.any((ids<0)|(ids>=len(x))):
         raise ValueError('held feature width or sample plan invalid')

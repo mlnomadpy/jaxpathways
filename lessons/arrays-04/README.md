@@ -25,6 +25,10 @@ Draw two arrows from the original array, one labeled set and one labeled add. If
 
 Do not infer allocation cost from that drawing. A compiler may reuse storage when it can preserve the program's semantics. First verify old/new values and duplicate-index behavior for the operation you use, then measure memory behavior separately.
 
+$$
+C_{i,k} = \sum_{j=1}^{N} A_{i,j} B_{j,k} = \text{einsum}(\texttt{'ij,jk->ik'}, A, B)
+$$
+
 ### Pause and reason
 
 You call an indexed update but keep using the original variable. Why might later predictions be unchanged?
@@ -63,7 +67,45 @@ A small update test should verify unchanged positions as well as changed positio
 
 A model update is a larger version of the same idea: parameters and gradients produce new parameters. The caller retains or checkpoints state. Functional indexed operations let you describe a selective change without mutating an old array value.
 
-This lesson prepares you to reason about optimizer and simulation state. It does not establish memory efficiency or a training algorithm; those require broader computations and measurements.
+This lesson prepares you to reason about optimizer and simulation state. It is separate from memory efficiency or a training algorithm; those require broader computations and measurements.
+
+## Step 1: Set up imports and input tensors
+
+Import the required JAX modules and define the initial inputs for immutable updates and indexing.
+
+```python
+import jax.numpy as jnp
+# Construct `x` via `jnp.array([1., 2., 3., 4.])`
+x = jnp.array([1., 2., 3., 4.])
+```
+
+Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+
+## Step 2: Apply the core JAX transformation
+
+Write the core computation and transformation step over the initialized inputs.
+
+```python
+y = x.at[1].set(20.)
+# Construct `z` via `x.at[jnp.array([0, 2])].add(5.)`
+z = x.at[jnp.array([0, 2])].add(5.)
+```
+
+This stage executes the primary numerical transformation and binds the intermediate outputs.
+
+## Step 3: Verify shapes and numerical invariants
+
+Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+
+```python
+assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
+# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`
+assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
+# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`
+assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
+```
+
+These assertions lock in the exact numerical contract before you run the full experiment and variations.
 
 ## Run the example
 
@@ -71,11 +113,11 @@ This lesson prepares you to reason about optimizer and simulation state. It does
 # Immutable updates and indexing: An indexed update in JAX returns an array value.
 # Import jax.numpy for this computation.
 import jax.numpy as jnp
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([1., 2., 3., 4.])`
 x = jnp.array([1., 2., 3., 4.])
-# Evaluate `y` from the current inputs and state.
+# Compute `y` from `x.at[1].set(20.)`
 y = x.at[1].set(20.)
-# Initialize array `z` with explicit values and shape.
+# Construct `z` via `x.at[jnp.array([0, 2])].add(5.)`
 z = x.at[jnp.array([0, 2])].add(5.)
 # Print the observed values to compare against the expected result.
 print("Original:", x)
@@ -85,9 +127,9 @@ print("Set:", y)
 print("Add:", z)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(y, jnp.array([1.,20.,3.,4.]))`
 assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(z, jnp.array([6.,2.,8.,4.]))`
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 ```
 
@@ -138,19 +180,19 @@ PASS: arrays-04
 ```python
 # Experiment — See name rebinding without old-value mutation: Assigning a result changes the binding, while ignoring a result...
 original = x
-# Evaluate `rebound` from the current inputs and state.
+# Compute `rebound` from `x`
 rebound = x
-# Evaluate `rebound` from the current inputs and state.
+# Compute `rebound` from `rebound.at[1].set(20.)`
 rebound = rebound.at[1].set(20.)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(original, jnp.array([1., 2., 3., 4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))`
 assert jnp.allclose(rebound, jnp.array([1., 20., 3., 4.]))
-# Evaluate `ignored` from the current inputs and state.
+# Compute `ignored` from `x.at[0].set(99.)`
 ignored = x.at[0].set(99.)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(x, original)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(ignored[0]) == 99.` holds
 assert float(ignored[0]) == 99.
 ```
 
@@ -166,13 +208,13 @@ Assigning a result changes the binding, while ignoring a result leaves the calle
 # Experiment — Accumulate repeated integer contributions: The integer loop reference makes accumulation explicit.
 # Import numpy for this computation.
 import numpy as np
-# Initialize array `indices` with explicit values and shape.
+# Construct `indices` via `jnp.array([1, 1, 3])`
 indices = jnp.array([1, 1, 3])
-# Initialize array `contributions` with explicit values and shape.
+# Construct `contributions` via `jnp.array([2, 3, 7], dtype=jnp.int32)`
 contributions = jnp.array([2, 3, 7], dtype=jnp.int32)
-# Initialize array `base_counts` with explicit values and shape.
+# Construct `base_counts` via `jnp.zeros(4, dtype=jnp.int32)`
 base_counts = jnp.zeros(4, dtype=jnp.int32)
-# Evaluate `counts` from the current inputs and state.
+# Compute `counts` from `base_counts.at[indices].add(contributions)`
 counts = base_counts.at[indices].add(contributions)
 # Allocate initialized array `reference_counts` with the specified shape and dtype.
 reference_counts = np.zeros(4, dtype=np.int32)
@@ -180,11 +222,11 @@ reference_counts = np.zeros(4, dtype=np.int32)
 for index, contribution in zip([1, 1, 3], [2, 3, 7]):
     # Accumulate the next contribution into `reference_counts[index]`.
     reference_counts[index] += contribution
-# Verify contract: `jnp.array_equal(counts, reference_counts)`.
+# Assert invariant `jnp.array_equal(counts, reference_counts)` holds
 assert jnp.array_equal(counts, reference_counts)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))` holds
 assert jnp.array_equal(counts, jnp.array([0, 5, 0, 7]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))` holds
 assert jnp.array_equal(base_counts, jnp.zeros(4, dtype=jnp.int32))
 ```
 
@@ -204,7 +246,7 @@ Replace the last two elements with zero in a new array. Keep $x$ unchanged.
 
 **Step-by-step implementation plan:**
 1. Verify that the numerical values match the expected reference within tolerance.
-2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+2. Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -213,7 +255,7 @@ Replace the last two elements with zero in a new array. Keep $x$ unchanged.
 masked = ...  # TODO: compute masked
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion check
 ```
 
@@ -224,7 +266,7 @@ assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))  # TODO: complete assertion che
 masked = x.at[2:].set(0.)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(x, jnp.array([1.,2.,3.,4.]))`
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
 ```
 
@@ -252,9 +294,9 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 
 **Step-by-step implementation plan:**
 1. Construct and reshape `matrix` into the target tensor dimensions.
-2. Evaluate `updated_matrix` from the current inputs and state.
+2. Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
 3. Verify that the numerical values match the expected reference within tolerance.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -262,11 +304,11 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 # Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
 # Construct and reshape `matrix` into the target tensor dimensions.
 matrix = jnp.arange(...)  # TODO: compute matrix
-# Evaluate `updated_matrix` from the current inputs and state.
+# Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
 updated_matrix = ...  # TODO: compute updated_matrix
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
 assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete assertion check
 ```
 
@@ -276,11 +318,11 @@ assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete asser
 # Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
 # Construct and reshape `matrix` into the target tensor dimensions.
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
-# Evaluate `updated_matrix` from the current inputs and state.
+# Compute `updated_matrix` from `matrix.at[:, -1].set(-1.)`
 updated_matrix = matrix.at[:, -1].set(-1.)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))`
 assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))
 ```
 
@@ -307,26 +349,26 @@ Use where for the fixed-shape result. Boolean indexing produces selected values,
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Evaluate `selected` from the current inputs and state.
-2. Verify that the output tensor shape matches our prediction.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Compute `selected` from `x[x > 2.]`
+2. Check tensor shape invariant: `fixed_shape.shape == (4,)`
+3. Check tensor shape invariant: `selected.shape == (2,)`
+4. Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
+5. Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Keep shape while masking values (Challenge): Both are useful representations, but they are not...
 fixed_shape = jnp.where(...)  # TODO: compute fixed_shape
-# Evaluate `selected` from the current inputs and state.
+# Compute `selected` from `x[x > 2.]`
 selected = ...  # TODO: compute selected
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `fixed_shape.shape == (4,)`
 assert fixed_shape.shape  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `selected.shape == (2,)`
 assert selected.shape  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
 assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
 assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion check
 ```
 
@@ -335,15 +377,15 @@ assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion c
 ```python
 # Keep shape while masking values (Challenge): Both are useful representations, but they are not...
 fixed_shape = jnp.where(x > 2., x, 0.)
-# Evaluate `selected` from the current inputs and state.
+# Compute `selected` from `x[x > 2.]`
 selected = x[x > 2.]
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `fixed_shape.shape == (4,)`
 assert fixed_shape.shape == (4,)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `selected.shape == (2,)`
 assert selected.shape == (2,)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))`
 assert jnp.allclose(fixed_shape, jnp.array([0., 0., 3., 4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(selected, jnp.array([3., 4.]))`
 assert jnp.allclose(selected, jnp.array([3., 4.]))
 ```
 

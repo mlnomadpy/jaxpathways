@@ -68,13 +68,13 @@ Create main.py in your activated CPU course environment. Add the vectors and ver
 # Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
 # Import jax.numpy for this computation.
 import jax.numpy as jnp
-# Initialize array `u` with explicit values and shape.
+# Construct `u` via `jnp.array([3.0, 4.0])`
 u = jnp.array([3.0, 4.0])
-# Initialize array `a` with explicit values and shape.
+# Construct `a` via `jnp.array([1.0, 0.0])`
 a = jnp.array([1.0, 0.0])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(u, a), 3.0)`
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 ```
 
@@ -96,7 +96,7 @@ def project(u, a):
     return jnp.dot(a, u) / denominator * a
 # Run `project` to compute `p`.
 p = project(u, a)
-# Evaluate `r` from the current inputs and state.
+# Compute `r` from `u - p`
 r = u - p
 ```
 
@@ -110,9 +110,9 @@ Append these assertions and run python main.py. Compare with your drawing before
 # Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)`
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))`
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
 # Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
@@ -126,13 +126,13 @@ You should see $[3,0]$ and $[0,4]$; the squared lengths sum to $25$.
 # Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
 # Import jax.numpy for this computation.
 import jax.numpy as jnp
-# Initialize array `u` with explicit values and shape.
+# Construct `u` via `jnp.array([3.0, 4.0])`
 u = jnp.array([3.0, 4.0])
-# Initialize array `a` with explicit values and shape.
+# Construct `a` via `jnp.array([1.0, 0.0])`
 a = jnp.array([1.0, 0.0])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(u, a), 3.0)`
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
@@ -146,15 +146,15 @@ def project(u, a):
     return jnp.dot(a, u) / denominator * a
 # Run `project` to compute `p`.
 p = project(u, a)
-# Evaluate `r` from the current inputs and state.
+# Compute `r` from `u - p`
 r = u - p
 
 # Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)`
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))`
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
 # Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
@@ -184,7 +184,7 @@ The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $
 
 ```python
 # Compute figure data for: Projection and leftover form a right triangle
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'vectors', 'arrows': [{'label': 'input u', ...`
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
@@ -207,9 +207,9 @@ PASS: optimization-05
 # Experiment — Rescale the direction: A line does not change when its nonzero direction is rescaled.
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(project(u, 2 * a), p)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(project(u, -a), p)`
 assert jnp.allclose(project(u, -a), p)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))`
 assert jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))
 ```
 
@@ -223,13 +223,13 @@ A line does not change when its nonzero direction is rescaled. A dot product alo
 
 ```python
 # Experiment — Rotate the line: Changing direction changes what can be explained; merely...
-# Initialize array `diagonal` with explicit values and shape.
+# Construct `diagonal` via `jnp.array([1.0, 1.0])`
 diagonal = jnp.array([1.0, 1.0])
 # Run `project` to compute `p2`.
 p2 = project(u, diagonal)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p2, jnp.array([3.5, 3.5]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)`
 assert jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)
 ```
 
@@ -248,25 +248,25 @@ Project $u=(2,-1,2)$ onto $a=(1,0,1)$. Check the residual by hand first.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `u3` with explicit values and shape.
-2. Initialize array `a3` with explicit values and shape.
+1. Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
+2. Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
 3. Run `project` to compute `p3`.
 4. Verify that the numerical values match the expected reference within tolerance.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
-# Initialize array `u3` with explicit values and shape.
+# Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
 u3 = jnp.array(...)  # TODO: compute u3
-# Initialize array `a3` with explicit values and shape.
+# Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
 a3 = jnp.array(...)  # TODO: compute a3
 # Run `project` to compute `p3`.
 p3 = project(...)  # TODO: compute p3
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`
 assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
 ```
 
@@ -274,15 +274,15 @@ assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
-# Initialize array `u3` with explicit values and shape.
+# Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
 u3 = jnp.array([2.0, -1.0, 2.0])
-# Initialize array `a3` with explicit values and shape.
+# Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
 a3 = jnp.array([1.0, 0.0, 1.0])
 # Run `project` to compute `p3`.
 p3 = project(u3, a3)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`
 assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)
 ```
 
@@ -359,22 +359,22 @@ Check the directions have zero dot product. Nonorthogonal directions can count t
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `a1` with explicit values and shape.
-2. Initialize array `a2` with explicit values and shape.
+1. Construct `a1` via `jnp.array([1.0, 1.0])`
+2. Construct `a2` via `jnp.array([1.0, -1.0])`
 3. Verify that the numerical values match the expected reference within tolerance.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Check numerical equivalence within tolerance: `not jnp.allclose(project(u, a) + project(u, a1), u)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
-# Initialize array `a1` with explicit values and shape.
+# Construct `a1` via `jnp.array([1.0, 1.0])`
 a1 = jnp.array(...)  # TODO: compute a1
-# Initialize array `a2` with explicit values and shape.
+# Construct `a2` via `jnp.array([1.0, -1.0])`
 a2 = jnp.array(...)  # TODO: compute a2
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(project(u, a1) + project(u, a2), u)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(project(u, a) + project(u, a1), u)`
 assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete assertion check
 ```
 
@@ -382,13 +382,13 @@ assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete ass
 
 ```python
 # Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
-# Initialize array `a1` with explicit values and shape.
+# Construct `a1` via `jnp.array([1.0, 1.0])`
 a1 = jnp.array([1.0, 1.0])
-# Initialize array `a2` with explicit values and shape.
+# Construct `a2` via `jnp.array([1.0, -1.0])`
 a2 = jnp.array([1.0, -1.0])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(project(u, a1) + project(u, a2), u)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(project(u, a) + project(u, a1), u)`
 assert not jnp.allclose(project(u, a) + project(u, a1), u)
 ```
 

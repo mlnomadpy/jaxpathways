@@ -9,7 +9,7 @@ import grain.python as grain
 class TutorialSource:
     # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
-        # Evaluate `self.count` from the current inputs and state.
+        # Compute `self.count` from `count`
         self.count = count
     # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
@@ -57,11 +57,11 @@ replayed_batch = next(restored_iterator)
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 # Iterate over `key` to step through the computation:
 for key in ("x","y"):
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Execute `np.testing.assert_array_equal(second_batch[key],replayed_bat`
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 # Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
@@ -84,7 +84,7 @@ import grain.python as grain
 class TutorialSource:
     # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
-        # Evaluate `self.count` from the current inputs and state.
+        # Compute `self.count` from `count`
         self.count = count
     # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
@@ -130,11 +130,11 @@ replayed_batch = next(restored_iterator)
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 # Iterate over `key` to step through the computation:
 for key in ("x","y"):
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Execute `np.testing.assert_array_equal(second_batch[key],replayed_bat`
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 # Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)`
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
@@ -151,15 +151,15 @@ print("Restored next batch matches")
 
 # Figure data experiment
 # Compute figure data for: Restoring the iterator repeats the next batch
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot...`
 visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3'], 'ylabel': 'example ID', 'series': [{'label': 'first batch', 'y': first_batch['id'].tolist()}, {'label': 'next batch', 'y': second_batch['id'].tolist()}, {'label': 'restored next', 'y': replayed_batch['id'].tolist()}]}
 
 # Experiment: A fresh iterator restarts
 # Experiment — A fresh iterator restarts: The seed fixes ordering.
 fresh_first = next(iter(make_loader()))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(fresh_first["id"],first_batch[`
 np.testing.assert_array_equal(fresh_first["id"],first_batch["id"])
-# Verify contract: `not np.array_equal(fresh_first['id'], second_batch['id'])`.
+# Assert invariant `not np.array_equal(fresh_first["id"]` holds
 assert not np.array_equal(fresh_first["id"],second_batch["id"])
 # Print the observed values to compare against the expected result.
 print("Same seed restarts; it does not resume")
@@ -167,7 +167,7 @@ print("Same seed restarts; it does not resume")
 # Experiment: Audit both epochs
 # Experiment — Audit both epochs: Across epochs, repeated IDs are intentional.
 two_epochs = list(make_loader())
-# Verify contract: `len(two_epochs) == 6`.
+# Assert invariant `len(two_epochs)==6` holds
 assert len(two_epochs)==6
 # Iterate over `start` to step through the computation:
 for start in (0,3):
@@ -183,15 +183,17 @@ print("Each epoch covers all twelve IDs")
 later = iter(make_loader())
 # Run `next` to perform the next check or state transition.
 # Run `next` to perform the next check or state transition.
-next(later);next(later)
+next(later)
+next(later)
 # Run `later.get_state` to compute `later_state`.
 later_state = later.get_state()
 # Run `next` to compute `expected_third`.
 expected_third = next(later)
 # Run `iter` to compute `new_iterator`.
 # Execute the next step of the computation.
-new_iterator = iter(make_loader());new_iterator.set_state(later_state)
-# Verify that computed values match the expected reference within numerical tolerance.
+new_iterator = iter(make_loader())
+new_iterator.set_state(later_state)
+# Execute `np.testing.assert_array_equal(next(new_iterator)["id"],expec`
 np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
 
 # Reference practice: Replay through an epoch boundary
@@ -202,11 +204,12 @@ boundary=iter(make_loader())
 for _ in range(3):next(boundary)
 # Run `boundary.get_state` to compute `boundary_state`.
 boundary_state=boundary.get_state()
-# Evaluate `expected` from the current inputs and state.
+# Compute `expected` from `[next(boundary) for _ in range(2)]`
 expected=[next(boundary) for _ in range(2)]
 # Run `iter` to compute `replay`.
 # Execute the next step of the computation.
-replay=iter(make_loader());replay.set_state(boundary_state)
+replay=iter(make_loader())
+replay.set_state(boundary_state)
 # Iterate over `reference` to step through the computation:
 for reference in expected:
     # Run `next` to compute `actual`.
@@ -228,7 +231,8 @@ else:
     raise AssertionError("Expected changed sampler rejection")
 # Run `iter` to compute `compatible`.
 # Execute the next step of the computation.
-compatible = iter(make_loader(seed=42));compatible.set_state(snapshot)
-# Verify that computed values match the expected reference within numerical tolerance.
+compatible = iter(make_loader(seed=42))
+compatible.set_state(snapshot)
+# Execute `np.testing.assert_array_equal(next(compatible)["id"],second_`
 np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
 print("PASS: recovery-02")

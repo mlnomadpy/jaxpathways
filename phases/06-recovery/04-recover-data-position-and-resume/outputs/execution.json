@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "334a0e059f7b55bccda1f42448d517c92156ccd502f54604a9c708f185ec3f8e",
+  "contentHash": "6f2e12cc8ce4f439b9ed28f47e0cd9daff2e56a8c5ba4883f45db5a6c993b72d",
   "executedAt": "2026-10-08T14:03:15.851376+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,15 +14,19 @@
   "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nRestored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nMissing iterator restore repeats earlier IDs and changes the next loss\nCorrect IDs alone do not restore the training transition\nRejected incompatible seed\nRejected incompatible sha256\nOriginal run contract remains valid.\nExpected batch-configuration mismatch\nPASS: recovery-04\n",
   "notebookCells": [
     {
-      "sourceHash": "34160003d633b908939c58ac6df0f2c781466de2eea5915870632a505872a1b1",
+      "sourceHash": "fba2c0a7ee3cda50e40ae9c5e336c6644cfed5f0fabbd24c122a734f645844c0",
       "outputs": []
     },
     {
-      "sourceHash": "ec8d4d454090a36c8b05ee232c3947e769c956a1e95cfc0be4d78bb3a0c4345b",
+      "sourceHash": "2ddb0d9e41ef4170fe206cbdfbfbec3648ee09d98c5eb8d8f691fc3fc32dae0d",
       "outputs": []
     },
     {
-      "sourceHash": "7d6c5aa244356c32f1d8b2ffb1bc6b1d1be85e91f438888fa9284e7b74b2a527",
+      "sourceHash": "8f4fb47078f4b8e9288878867e579b56c0f92a14ba8f624b38d9913d44f66734",
+      "outputs": []
+    },
+    {
+      "sourceHash": "beb46b1c87f2dc1ba660cf22e2c07882df40357026c86e9b5e2e34c21a8af195",
       "outputs": [
         {
           "output_type": "stream",
@@ -36,21 +40,11 @@
       ]
     },
     {
-      "sourceHash": "3c77684df10551ce99d5ed92f5ecd36ad9f72cf14d2474bb6043035e41077e0c",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\n",
-            "Restored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\n",
-            "Full state agrees at step six\n"
-          ]
-        }
-      ]
+      "sourceHash": "6d9c144a44ef3d51594e41415b733d7a1cf11f9f4767c87c4570714452177b48",
+      "outputs": []
     },
     {
-      "sourceHash": "a01a156110dd532427b3552483fede31c4e9810e9eb7f153d2c3930417dbc9df",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",
@@ -65,35 +59,19 @@
       ]
     },
     {
-      "sourceHash": "2ef0398acdfbbab8c23fe02ab6ea181a155f42b894543f84f806303a1b5c83ff",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Missing iterator restore repeats earlier IDs and changes the next loss\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "d5cf9d13002d9550548c92e4f2f9b38d0284c0d1372789ab4d5f5dde2fe726a7",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Correct IDs alone do not restore the training transition\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "8cc5579e591626ffd1cf642b7b014ebea4e4eaa1458338bdc3d0a93d75bb7911",
+      "sourceHash": "26d1cf3700e85298e837412eeceeecfd34bf76440367934426b20f9a9ea4c183",
       "outputs": []
     },
     {
-      "sourceHash": "d167d53a18fd4761ad4e689b2d50b9a21a67d57c6ab01dac393a62265483d2de",
+      "sourceHash": "f6e959257585258df5fe8664974571e4ebf89736afea26255b37b9dc6c349fee",
+      "outputs": []
+    },
+    {
+      "sourceHash": "d9753a6fcd4ae938fdb04d6b39624bd4f726e9e9fe18112439920b15164516d0",
+      "outputs": []
+    },
+    {
+      "sourceHash": "f5163bd1d2927410c1d6d1a21609f5bb8d10a5f9b491ccb9a7b734d084304cee",
       "outputs": []
     },
     {
@@ -102,33 +80,15 @@
     },
     {
       "sourceHash": "d28f7b93e5a530102799dcd1f2bb7e2b59d6a63d5689a239eaa1e74225f38de3",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Rejected incompatible seed\n",
-            "Rejected incompatible sha256\n",
-            "Original run contract remains valid.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "de4d230685f1e2de3ce26b526bc59854f2ba70d2353ad2c787c883b8735b576e",
       "outputs": []
     },
     {
-      "sourceHash": "93ff7c48260b7ec690e6b823c1da37244af154f9277eb3c7ad1be4088fe6493e",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Expected batch-configuration mismatch\n"
-          ]
-        }
-      ]
+      "sourceHash": "991f0727330b65d4739a78bd1ce852cb33d4a4d6e1c02322ef6529803650e8bf",
+      "outputs": []
+    },
+    {
+      "sourceHash": "94ba6c43d248d125267a654e9aac76d53adf7a9a3c1381c7baba383d7a6d00fe",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

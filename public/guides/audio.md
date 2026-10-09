@@ -48,7 +48,7 @@ First compare an energy or simple feature baseline with a small spectrogram clas
 
 ## 3. Make each update explainable
 
-Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.
+Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.
 
 Keep window labels and valid-frame masks aligned. Apply noise or gain augmentation only in training, and verify that padding does not become a class cue.
 
@@ -150,7 +150,7 @@ Use the existing Keras/JAX and TensorFlow conversion labs as preparation. A mode
 - Compare intermediate tensors and final outputs on fixed inputs, including boundary cases.
 - Compare task quality after export and again after quantization; measure the exported runtime itself.
 
-PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example does not establish that every model can round-trip between them.
+PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example is verified separately from that every model can round-trip between them.
 
 ## Grow the harness after the small version works
 

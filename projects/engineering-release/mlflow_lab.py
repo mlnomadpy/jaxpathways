@@ -28,14 +28,18 @@ class LinearModel(mlflow.pyfunc.PythonModel):
 
 
 def run(folder):
-    folder = Path(folder).resolve(); folder.mkdir(parents=True, exist_ok=True)
+    folder = Path(folder).resolve()
+    folder.mkdir(parents=True, exist_ok=True)
     uri = 'sqlite:///' + str(folder / 'mlflow.db')
-    mlflow.set_tracking_uri(uri); mlflow.set_registry_uri(uri)
+    mlflow.set_tracking_uri(uri)
+    mlflow.set_registry_uri(uri)
     client = MlflowClient()
     experiment = client.create_experiment('engineering-release', artifact_location=(folder / 'artifacts').as_uri())
     mlflow.set_experiment(experiment_id=experiment)
-    x = jnp.array([-2., -1., 0., 1., 2.]); y = 2 * x + 1
-    vx = jnp.array([-1.5, -.5, .5, 1.5]); vy = 2 * vx + 1
+    x = jnp.array([-2., -1., 0., 1., 2.])
+    y = 2 * x + 1
+    vx = jnp.array([-1.5, -.5, .5, 1.5])
+    vy = 2 * vx + 1
     loss = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
     update = jax.jit(lambda p, rate: p - rate * jax.grad(loss)(p))
     data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
@@ -51,7 +55,9 @@ def run(folder):
             validation = float(jnp.mean((p[0] * vx + p[1] - vy) ** 2))
             mlflow.log_metric('validation_mse', validation, step=30)
             model = {'schema': 1, 'weight': float(p[0]), 'bias': float(p[1])}
-            raw = json.dumps(model, sort_keys=True).encode(); artifact = folder / f'model-{rate}.json'; artifact.write_bytes(raw)
+            raw = json.dumps(model, sort_keys=True).encode()
+            artifact = folder / f'model-{rate}.json'
+            artifact.write_bytes(raw)
             mlflow.log_dict({'sha256': hashlib.sha256(raw).hexdigest(), 'preprocessing': 'one unscaled scalar feature', 'jax': jax.__version__, 'mlflow': mlflow.__version__}, 'manifest.json')
             info = mlflow.pyfunc.log_model(name='linear-model', python_model=LinearModel(), artifacts={'weights': str(artifact)}, signature=infer_signature(np.array([[0.], [1.]]), np.array([model['bias'], model['weight'] + model['bias']])), input_example=np.array([[0.], [1.]]), pip_requirements=[f'mlflow=={mlflow.__version__}', f'numpy=={np.__version__}'])
             candidates.append({'run_id': active.info.run_id, 'model_uri': info.model_uri, 'mse': validation, 'model': model, 'path': str(artifact)})
@@ -89,14 +95,17 @@ def run(folder):
         root.set_outputs({'passed': True, 'scope': 'deterministic answer replay; no model or paid API call'})
     traces = mlflow.search_traces(experiment_ids=[experiment], return_type='list')
     assert len(traces) == 1 and len(traces[0].data.spans) == 3
-    chosen_raw = Path(best['path']).read_bytes(); (folder / 'model.json').write_bytes(chosen_raw)
+    chosen_raw = Path(best['path']).read_bytes()
+    (folder / 'model.json').write_bytes(chosen_raw)
     report = {'mlflow': mlflow.__version__, 'jax': jax.__version__, 'experiment_id': experiment, 'tracking_uri': uri, 'validation_mse': [c['mse'] for c in candidates], 'rates': [.02, .15], 'run_ids': [c['run_id'] for c in candidates], 'champion_version': champion, 'model_sha256': hashlib.sha256(chosen_raw).hexdigest(), 'prompt_version': str(prompt.version), 'trace_count': len(traces), 'span_count': len(traces[0].data.spans), 'scope': 'Real local SQLite tracking, model reload and registry; synthetic training and deterministic answer replay.'}
     (folder / 'report.json').write_text(json.dumps(report, indent=2) + '\n')
     return report
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(); parser.add_argument('--output', type=Path); args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--output', type=Path)
+    args = parser.parse_args()
     if args.output: print(json.dumps(run(args.output), indent=2))
     else:
         with tempfile.TemporaryDirectory(prefix='course-mlflow-') as folder: print(json.dumps(run(folder), indent=2))

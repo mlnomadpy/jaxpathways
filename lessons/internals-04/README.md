@@ -23,7 +23,7 @@ Imagine an interpreter carrying a value and a directional derivative through eac
 
 Reject unsupported operations instead of silently passing them through with a made-up derivative. Compare the transformed result with an analytic or independently calculated direction on a small composition.
 
-The directional-derivative curve checks the bounded interpreter example. It does not establish a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.
+The directional-derivative curve checks the bounded interpreter example. It is separate from a general-purpose compiler or support for all JAX primitives. Identify which stage your code implements and which later stages JAX supplies.
 
 ### Pause and reason
 
@@ -82,7 +82,7 @@ from jax.extend import core
 # Function `tiny_jvp(closed, primals, tangents)` implementing this stage's computation:
 def tiny_jvp(closed,primals,tangents):
     """Interpret a pure flat jaxpr with floating inputs and explicit tangent rules."""
-    # Evaluate `program` from the current inputs and state.
+    # Compute `program` from `closed.jaxpr`
     program=closed.jaxpr
     # Guard input contract (`program.effects`) and fail fast if violated.
     if program.effects:
@@ -91,13 +91,15 @@ def tiny_jvp(closed,primals,tangents):
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
     # Evaluate `values` from the current inputs and state.
-    # Evaluate `directions` from the current inputs and state.
-    values={};directions={}
+    # Compute `values` from `{}`
+    values={}
+    directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
         # Evaluate `values[var]` from the current inputs and state.
-        # Evaluate `directions[var]` from the current inputs and state.
-        values[var]=value;directions[var]=tangent
+        # Compute `values[var]` from `value`
+        values[var]=value
+        directions[var]=tangent
     # Iterate over `(var, constant)` to step through the computation:
     for var,constant in zip(program.constvars,closed.consts):
         # Allocate initialized array `` with the specified shape and dtype.
@@ -124,7 +126,7 @@ def tiny_jvp(closed,primals,tangents):
         return values[atom],directions[atom]
     # Loop over `equation` in `program.eqns`:
     for equation in program.eqns:
-        # Evaluate `name` from the current inputs and state.
+        # Compute `name` from `equation.primitive.name`
         name=equation.primitive.name
         # Guard input contract (`name not in {'add', 'mul', 'neg', 'sin', 'reduce_sum'}`) and fail fast if violated.
         if name not in {"add","mul","neg","sin","reduce_sum"}:
@@ -132,15 +134,17 @@ def tiny_jvp(closed,primals,tangents):
         # Guard input contract (`len(equation.outvars) != 1`) and fail fast if violated.
         if len(equation.outvars)!=1:
             raise NotImplementedError("multiple-result primitives are outside this interpreter")
-        # Evaluate `operands` from the current inputs and state.
+        # Compute `operands` from `[read(atom) for atom in equation.invars]`
         operands=[read(atom) for atom in equation.invars]
-        # Evaluate `(a, da)` from the current inputs and state.
+        # Compute `a,da` from `operands[0]`
         a,da=operands[0]
         # Branch on condition `name == 'add'`:
         if name=="add":
-            b,db=operands[1];result,tangent=a+b,da+db
+            b,db=operands[1]
+            result,tangent=a+b,da+db
         elif name=="mul":
-            b,db=operands[1];result,tangent=a*b,da*b+a*db
+            b,db=operands[1]
+            result,tangent=a*b,da*b+a*db
         elif name=="neg":result,tangent=-a,-da
         elif name=="sin":result,tangent=jnp.sin(a),jnp.cos(a)*da
         else:
@@ -150,7 +154,7 @@ def tiny_jvp(closed,primals,tangents):
             result,tangent=jnp.sum(a,axis=axes),jnp.sum(da,axis=axes)
         # Run `put` to perform the next check or state transition.
         put(equation.outvars[0],result,tangent)
-    # Evaluate `output` from the current inputs and state.
+    # Compute `output` from `[read(var) for var in program.outvars]`
     output=[read(var) for var in program.outvars]
     # Return `(tuple((v for v, _ in output)), tuple((t for _, t in output)))` to the caller.
     return tuple(v for v,_ in output),tuple(t for _,t in output)
@@ -164,14 +168,15 @@ Create main.py for the first block, then append subsequent blocks in order using
 
 ```python
 # Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
-# Initialize array `offset` with explicit values and shape.
+# Construct `offset` via `jnp.array([0.1,0.2,0.3])`
 offset=jnp.array([0.1,0.2,0.3])
 # Function `program(x)` implementing this stage's computation:
 def program(x):
     # Return `jnp.sum(jnp.sin(x) * x + offset)` to the caller.
     return jnp.sum(jnp.sin(x)*x+offset)
-# Initialize array `x` with explicit values and shape.
-x=jnp.array([-0.8,0.4,1.1]);direction=jnp.array([0.3,-0.2,0.7])
+# Construct `x` via `jnp.array([-0.8,0.4,1.1])`
+x=jnp.array([-0.8,0.4,1.1])
+direction=jnp.array([0.3,-0.2,0.7])
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed=jax.make_jaxpr(program)(x)
 # Run `tiny_jvp` to compute `(primal_outputs, tangent_outputs)`.
@@ -180,9 +185,9 @@ primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
 # Convert `reference_tangent` to a host NumPy array for inspection or verification.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol...`
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,r...`
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
 # Compute forward-mode Jacobian-vector product (``).
 np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol=1e-12)
@@ -205,24 +210,24 @@ transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 lowered=jax.jit(transformed).lower(x,direction)
 # Trace or lower the function to inspect its compiler representation (`stablehlo`).
 stablehlo=str(lowered.compiler_ir(dialect="stablehlo"))
-# Verify contract: `len(stablehlo) > 0`.
+# Assert invariant `len(stablehlo)>0` holds
 assert len(stablehlo)>0
 # Trace or lower the function to inspect its compiler representation (`compiled`).
 compiled=lowered.compile()
 # Run `compiled` to compute `(compiled_primal, compiled_tangent)`.
 compiled_primal,compiled_tangent=compiled(x,direction)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_primal[0],reference_value,rto...`
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,...`
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
-# Evaluate `shape_rejected` from the current inputs and state.
+# Compute `shape_rejected` from `False`
 shape_rejected=False
 # Run the boundary check and catch the expected exception:
 try:
     compiled(jnp.ones(4),jnp.ones(4))
 except TypeError:
     shape_rejected=True
-# Verify contract: `shape_rejected`.
+# Assert invariant `shape_rejected` holds
 assert shape_rejected
 # Print diagnostic summary of the computed outputs.
 print("Lowered IR characters:",len(stablehlo))
@@ -249,7 +254,7 @@ from jax.extend import core
 # Function `tiny_jvp(closed, primals, tangents)` implementing this stage's computation:
 def tiny_jvp(closed,primals,tangents):
     """Interpret a pure flat jaxpr with floating inputs and explicit tangent rules."""
-    # Evaluate `program` from the current inputs and state.
+    # Compute `program` from `closed.jaxpr`
     program=closed.jaxpr
     # Guard input contract (`program.effects`) and fail fast if violated.
     if program.effects:
@@ -258,13 +263,15 @@ def tiny_jvp(closed,primals,tangents):
     if len(primals)!=len(program.invars) or len(tangents)!=len(primals):
         raise ValueError("one primal and tangent per input variable required")
     # Evaluate `values` from the current inputs and state.
-    # Evaluate `directions` from the current inputs and state.
-    values={};directions={}
+    # Compute `values` from `{}`
+    values={}
+    directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
         # Evaluate `values[var]` from the current inputs and state.
-        # Evaluate `directions[var]` from the current inputs and state.
-        values[var]=value;directions[var]=tangent
+        # Compute `values[var]` from `value`
+        values[var]=value
+        directions[var]=tangent
     # Iterate over `(var, constant)` to step through the computation:
     for var,constant in zip(program.constvars,closed.consts):
         # Allocate initialized array `` with the specified shape and dtype.
@@ -291,7 +298,7 @@ def tiny_jvp(closed,primals,tangents):
         return values[atom],directions[atom]
     # Loop over `equation` in `program.eqns`:
     for equation in program.eqns:
-        # Evaluate `name` from the current inputs and state.
+        # Compute `name` from `equation.primitive.name`
         name=equation.primitive.name
         # Guard input contract (`name not in {'add', 'mul', 'neg', 'sin', 'reduce_sum'}`) and fail fast if violated.
         if name not in {"add","mul","neg","sin","reduce_sum"}:
@@ -299,15 +306,17 @@ def tiny_jvp(closed,primals,tangents):
         # Guard input contract (`len(equation.outvars) != 1`) and fail fast if violated.
         if len(equation.outvars)!=1:
             raise NotImplementedError("multiple-result primitives are outside this interpreter")
-        # Evaluate `operands` from the current inputs and state.
+        # Compute `operands` from `[read(atom) for atom in equation.invars]`
         operands=[read(atom) for atom in equation.invars]
-        # Evaluate `(a, da)` from the current inputs and state.
+        # Compute `a,da` from `operands[0]`
         a,da=operands[0]
         # Branch on condition `name == 'add'`:
         if name=="add":
-            b,db=operands[1];result,tangent=a+b,da+db
+            b,db=operands[1]
+            result,tangent=a+b,da+db
         elif name=="mul":
-            b,db=operands[1];result,tangent=a*b,da*b+a*db
+            b,db=operands[1]
+            result,tangent=a*b,da*b+a*db
         elif name=="neg":result,tangent=-a,-da
         elif name=="sin":result,tangent=jnp.sin(a),jnp.cos(a)*da
         else:
@@ -317,20 +326,21 @@ def tiny_jvp(closed,primals,tangents):
             result,tangent=jnp.sum(a,axis=axes),jnp.sum(da,axis=axes)
         # Run `put` to perform the next check or state transition.
         put(equation.outvars[0],result,tangent)
-    # Evaluate `output` from the current inputs and state.
+    # Compute `output` from `[read(var) for var in program.outvars]`
     output=[read(var) for var in program.outvars]
     # Return `(tuple((v for v, _ in output)), tuple((t for _, t in output)))` to the caller.
     return tuple(v for v,_ in output),tuple(t for _,t in output)
 
 # Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
-# Initialize array `offset` with explicit values and shape.
+# Construct `offset` via `jnp.array([0.1,0.2,0.3])`
 offset=jnp.array([0.1,0.2,0.3])
 # Function `program(x)` implementing this stage's computation:
 def program(x):
     # Return `jnp.sum(jnp.sin(x) * x + offset)` to the caller.
     return jnp.sum(jnp.sin(x)*x+offset)
-# Initialize array `x` with explicit values and shape.
-x=jnp.array([-0.8,0.4,1.1]);direction=jnp.array([0.3,-0.2,0.7])
+# Construct `x` via `jnp.array([-0.8,0.4,1.1])`
+x=jnp.array([-0.8,0.4,1.1])
+direction=jnp.array([0.3,-0.2,0.7])
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed=jax.make_jaxpr(program)(x)
 # Run `tiny_jvp` to compute `(primal_outputs, tangent_outputs)`.
@@ -339,9 +349,9 @@ primal_outputs,tangent_outputs=tiny_jvp(closed,(x,),(direction,))
 reference_value=np.sum(np.sin(np.asarray(x))*np.asarray(x)+np.asarray(offset))
 # Convert `reference_tangent` to a host NumPy array for inspection or verification.
 reference_tangent=np.dot(np.sin(np.asarray(x))+np.asarray(x)*np.cos(np.asarray(x)),np.asarray(direction))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(primal_outputs[0],reference_value,rtol...`
 np.testing.assert_allclose(primal_outputs[0],reference_value,rtol=1e-12)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(tangent_outputs[0],reference_tangent,r...`
 np.testing.assert_allclose(tangent_outputs[0],reference_tangent,rtol=1e-12)
 # Compute forward-mode Jacobian-vector product (``).
 np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))[1],rtol=1e-12)
@@ -356,24 +366,24 @@ transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 lowered=jax.jit(transformed).lower(x,direction)
 # Trace or lower the function to inspect its compiler representation (`stablehlo`).
 stablehlo=str(lowered.compiler_ir(dialect="stablehlo"))
-# Verify contract: `len(stablehlo) > 0`.
+# Assert invariant `len(stablehlo)>0` holds
 assert len(stablehlo)>0
 # Trace or lower the function to inspect its compiler representation (`compiled`).
 compiled=lowered.compile()
 # Run `compiled` to compute `(compiled_primal, compiled_tangent)`.
 compiled_primal,compiled_tangent=compiled(x,direction)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_primal[0],reference_value,rto...`
 np.testing.assert_allclose(compiled_primal[0],reference_value,rtol=1e-12)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(compiled_tangent[0],reference_tangent,...`
 np.testing.assert_allclose(compiled_tangent[0],reference_tangent,rtol=1e-12)
-# Evaluate `shape_rejected` from the current inputs and state.
+# Compute `shape_rejected` from `False`
 shape_rejected=False
 # Run the boundary check and catch the expected exception:
 try:
     compiled(jnp.ones(4),jnp.ones(4))
 except TypeError:
     shape_rejected=True
-# Verify contract: `shape_rejected`.
+# Assert invariant `shape_rejected` holds
 assert shape_rejected
 # Print diagnostic summary of the computed outputs.
 print("Lowered IR characters:",len(stablehlo))
@@ -408,11 +418,12 @@ Agreement applies to this primitive subset and tested inputs. It does not valida
 # Generate a uniform grid of points in `alphas`.
 alphas=np.linspace(-1,1,9)
 # Evaluate `interpreted` from the current inputs and state.
-# Evaluate `analytic` from the current inputs and state.
-interpreted=[];analytic=[]
+# Compute `interpreted` from `[]`
+interpreted=[]
+analytic=[]
 # Loop over `alpha` in `alphas`:
 for alpha in alphas:
-    # Evaluate `point` from the current inputs and state.
+    # Compute `point` from `x+alpha*direction`
     point=x+alpha*direction
     # Append the current step result to `interpreted`.
     interpreted.append(float(tiny_jvp(closed,(point,),(direction,))[1][0]))
@@ -420,7 +431,7 @@ for alpha in alphas:
     host=np.asarray(point)
     # Convert `` to a host NumPy array for inspection or verification.
     analytic.append(float(np.dot(np.sin(host)+host*np.cos(host),np.asarray(direction))))
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','x':alphas.tolist(),'xlabel':'base-po...`
 visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement alpha','ylabel':'directional derivative','series':[{'label':'tiny interpreted tangent','y':interpreted},{'label':'whole-expression analytic reference','y':analytic}]}
 ```
 
@@ -454,7 +465,7 @@ PASS: internals-04
 # Experiment — Exercise an unsupported primitive: A numerical result without a supported tangent rule would...
 # Trace or lower the function to inspect its compiler representation (`unsupported`).
 unsupported=jax.make_jaxpr(lambda z:jnp.sum(jnp.exp(z)))(x)
-# Evaluate `rejected` from the current inputs and state.
+# Compute `rejected` from `False`
 rejected=False
 # Run the boundary check and catch the expected exception:
 try:
@@ -463,7 +474,7 @@ except NotImplementedError as error:
     rejected=True
     assert "exp" in str(error)
     print("Expected unsupported primitive:",error)
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected
 ```
 
@@ -477,7 +488,7 @@ A numerical result without a supported tangent rule would falsely advertise deri
 
 ```python
 # Experiment — Change values while preserving the compiled signature: Specialization constrains abstract shape/dtype contracts.
-# Initialize array `changed` with explicit values and shape.
+# Construct `changed` via `x+jnp.array([0.1,-0.4,0.2])`
 changed=x+jnp.array([0.1,-0.4,0.2])
 # Run `compiled` to compute `(cp, ct)`.
 cp,ct=compiled(changed,direction)
@@ -485,9 +496,9 @@ cp,ct=compiled(changed,direction)
 expected=np.sum(np.sin(np.asarray(changed))*np.asarray(changed)+np.asarray(offset))
 # Convert `expected_d` to a host NumPy array for inspection or verification.
 expected_d=np.dot(np.sin(np.asarray(changed))+np.asarray(changed)*np.cos(np.asarray(changed)),np.asarray(direction))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(cp[0],expected,rtol=1e-12)`
 np.testing.assert_allclose(cp[0],expected,rtol=1e-12)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)`
 np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Changed-value compiled tangent:",float(ct[0]))
@@ -585,7 +596,7 @@ The new program has two input variables and needs two tangent arguments.
 **Step-by-step implementation plan:**
 1. Return `jnp.sum(jnp.sin(z) * z + c)` to the caller.
 2. Trace or lower the function to inspect its compiler representation (`explicit_closed`).
-3. Initialize array `constant_direction` with explicit values and shape.
+3. Construct `constant_direction` via `jnp.array([.2,.1,-.4])`
 4. Run `tiny_jvp` to compute `(ev, et)`.
 5. Convert `` to a host NumPy array for inspection or verification.
 
@@ -598,7 +609,7 @@ def explicit(z,c):
     return ...  # TODO: return computed result
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).
 explicit_closed = jax.make_jaxpr(...)  # TODO: compute explicit_closed
-# Initialize array `constant_direction` with explicit values and shape.
+# Construct `constant_direction` via `jnp.array([.2,.1,-.4])`
 constant_direction = jnp.array(...)  # TODO: compute constant_direction
 # Run `tiny_jvp` to compute `(ev, et)`.
 ev,et = tiny_jvp(...)  # TODO: compute ev,et
@@ -617,7 +628,7 @@ def explicit(z,c):
     return jnp.sum(jnp.sin(z)*z+c)
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).
 explicit_closed=jax.make_jaxpr(explicit)(x,offset)
-# Initialize array `constant_direction` with explicit values and shape.
+# Construct `constant_direction` via `jnp.array([.2,.1,-.4])`
 constant_direction=jnp.array([.2,.1,-.4])
 # Run `tiny_jvp` to compute `(ev, et)`.
 ev,et=tiny_jvp(explicit_closed,(x,offset),(direction,constant_direction))
@@ -675,12 +686,12 @@ np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
-# Evaluate `rejected` from the current inputs and state.
+# Compute `rejected` from `False`
 rejected = ...  # TODO: compute rejected
 # Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))
 except ValueError:rejected=True
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Multiple output contract and malformed tangent rejection verified")
@@ -704,12 +715,12 @@ np.testing.assert_allclose(mp[1],-np.asarray(x),rtol=1e-12)
 np.testing.assert_allclose(mt[0],2*np.dot(np.asarray(x),np.asarray(direction)),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(mt[1],-np.asarray(direction),rtol=1e-12)
-# Evaluate `rejected` from the current inputs and state.
+# Compute `rejected` from `False`
 rejected=False
 # Run the boundary check and catch the expected exception:
 try:tiny_jvp(multi_closed,(x,),(jnp.ones(2),))
 except ValueError:rejected=True
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected
 # Print the observed values to compare against the expected result.
 print("Multiple output contract and malformed tangent rejection verified")

@@ -33,9 +33,9 @@ For the original matrix, define \(L_\lambda(w)=\lVert Xw-y\rVert_2^2/3+\lambda\l
 
 Derive the regularized normal equations and compare their solution to gradient-based optimization. Explain which part of the objective shrinks the parameter norm and why the unregularized training residual can increase.
 
-Evaluate both the unregularized and regularized solutions on a fixed new input `[1., 3.]` with target `2.5`. Report prediction and squared error. This single observation illustrates a comparison; it cannot establish a generally superior regularizer. Describe a train/validation/test protocol in which validation chooses the regularization strength and the final test set is used only after that choice.
+Evaluate both the unregularized and regularized solutions on a fixed new input `[1., 3.]` with target `2.5`. Report prediction and squared error. This single observation illustrates a comparison; it requires separate verification to establish a generally superior regularizer. Describe a train/validation/test protocol in which validation chooses the regularization strength and the final test set is used only after that choice.
 
-Draw predictions from both fitted lines alongside the three training points and the distinct held-out point. Name the point used for selection, if any, and explain what the plot can and cannot establish.
+Draw predictions from both fitted lines alongside the three training points and the distinct held-out point. Name the point used for selection, if any, and explain what the plot can and requires separate verification to establish.
 
 **Keep:** both objectives, parameter norms, the two prediction errors, annotated plot and the split protocol. Do not report the penalized objective as if it were ordinary prediction error.
 

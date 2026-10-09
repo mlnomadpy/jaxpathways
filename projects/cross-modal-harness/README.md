@@ -2,7 +2,7 @@
 
 Given an image, retrieve a matching caption. Given a caption, retrieve a matching image. This project connects two encoders, a shared embedding space, complete training recovery, precision policies, exported inference and a measured release decision.
 
-The teaching dataset contains noisy eight-by-eight bars and four literal concepts: vertical/horizontal and thin/thick. These are image arrays paired with text, but this is **not natural-language understanding**. The small fixture makes alignment, false negatives and deployment contracts inspectable. A clean fixture score does not establish retrieval quality on photographs or unrestricted captions.
+The teaching dataset contains noisy eight-by-eight bars and four literal concepts: vertical/horizontal and thin/thick. These are image arrays paired with text, but this is **not natural-language understanding**. The small fixture makes alignment, false negatives and deployment contracts inspectable. A clean fixture score is verified separately from retrieval quality on photographs or unrestricted captions.
 
 ## Start with one question
 
@@ -96,7 +96,7 @@ In the recorded run, all policies retrieve 20/20 clean examples. Maximum score c
 
 Implement `infer` and `activate`. Each request supplies exactly one modality. A missing-modality query is valid only when the other modality is present; supplying neither or both is rejected by this embedding API. Retrieval combines image and caption embeddings outside that request boundary. The exported signatures support batches one and eight, so unsupported batch sizes must fail clearly.
 
-Measure at least 30 warmed requests. The timer begins with an existing NumPy image array and includes validation, placement, exported execution, completion and conversion back to a host array. It excludes file decoding, networking, queueing and artifact loading. The full raw samples, median and sample p95 are recorded. Thirty observations cannot establish a production tail-latency guarantee.
+Measure at least 30 warmed requests. The timer begins with an existing NumPy image array and includes validation, placement, exported execution, completion and conversion back to a host array. It excludes file decoding, networking, queueing and artifact loading. The full raw samples, median and sample p95 are recorded. Thirty observations requires separate verification to establish a production tail-latency guarantee.
 
 The local release gate computes retrieval on eight declared labeled examples before changing `ACTIVE.json`. A zero-weight candidate is rejected based on its actual outputs. Try selecting the quantized release, then rolling back to FP32; the failed candidate must leave the previous pointer unchanged. Local temporary-file replacement is the teaching publication boundary, not a claim about object-store atomicity or machine-power-loss durability.
 

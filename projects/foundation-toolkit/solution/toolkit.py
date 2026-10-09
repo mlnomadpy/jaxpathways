@@ -26,7 +26,8 @@ def normalize_columns(x,valid):
     """Fit masked column statistics; preserve all rows and zero invalid outputs."""
     # Convert `x` to a host NumPy array for inspection or verification.
     # Convert `valid` to a host NumPy array for inspection or verification.
-    x=np.asarray(x);valid=np.asarray(valid)
+    x=np.asarray(x)
+    valid=np.asarray(valid)
     # Guard input contract (`x.dtype != np.float32 or x.ndim != 2 or (not x.shape[1]) or (not np.isfinite(x).all())`) and fail fast if violated.
     if x.dtype!=np.float32 or x.ndim!=2 or not x.shape[1] or not np.isfinite(x).all():
         raise ValueError('finite float32 observation-by-feature matrix required')
@@ -35,7 +36,8 @@ def normalize_columns(x,valid):
         raise ValueError('one boolean per row with at least one valid row required')
     # Create device-backed JAX array `data`.
     # Create device-backed JAX array `mask`.
-    data=jnp.asarray(x);mask=jnp.asarray(valid)
+    data=jnp.asarray(x)
+    mask=jnp.asarray(valid)
     # Aggregate array values to compute `count`.
     count=jnp.sum(mask)
     # Reduce across the target axis to summarize `mean`.
@@ -64,7 +66,9 @@ def batch_gradients(w,x,y):
     # Convert `w` to a host NumPy array for inspection or verification.
     # Convert `x` to a host NumPy array for inspection or verification.
     # Convert `y` to a host NumPy array for inspection or verification.
-    w=np.asarray(w);x=np.asarray(x);y=np.asarray(y)
+    w=np.asarray(w)
+    x=np.asarray(x)
+    y=np.asarray(y)
     # Guard input contract (`w.shape != (2,) or x.ndim != 1 or (not len(x)) or (y.shape != x.shape)`) and fail fast if violated.
     if w.shape!=(2,) or x.ndim!=1 or not len(x) or y.shape!=x.shape:
         raise ValueError('weights (2,), observations/targets matching nonempty vectors required')
@@ -112,7 +116,10 @@ def validate_state(state):
     # Convert `v` to a host NumPy array for inspection or verification.
     # Convert `k` to a host NumPy array for inspection or verification.
     # Convert `s` to a host NumPy array for inspection or verification.
-    p=np.asarray(state['position']);v=np.asarray(state['velocity']);k=np.asarray(state['key']);s=np.asarray(state['step'])
+    p=np.asarray(state['position'])
+    v=np.asarray(state['velocity'])
+    k=np.asarray(state['key'])
+    s=np.asarray(state['step'])
     # Guard input contract (`p.ndim != 2 or p.shape[1] != 2 or (not len(p)) or (v.shape != p.shape) or (p.dtype != np.float32) or (v.dtype != np.float32)`) and fail fast if violated.
     if p.ndim!=2 or p.shape[1]!=2 or not len(p) or v.shape!=p.shape or p.dtype!=np.float32 or v.dtype!=np.float32:
         raise ValueError('position/velocity require matching float32 particle-by-coordinate arrays')

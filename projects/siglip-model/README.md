@@ -51,7 +51,7 @@ A sigmoid score is not automatically a calibrated probability in deployment: the
 - **Loss versus logit:** horizontal axis is the signed match logit; separate positive and negative softplus curves show why the two labels want opposite movements. Label this as an analytic illustration and connect it to a finite-difference check.
 - **Dense versus chunked gradient differences:** plot absolute error against chunk size with dtype and tolerance. Small errors qualify the implementation, not real-image accuracy.
 - **Positive/negative score histograms:** share axes and report counts; overlap identifies ambiguous decisions. A sigmoid transformation bounds scores without proving calibration.
-- **Quality versus pairs seen and measured cost:** compare CLIP/SigLIP retrieval on the same frozen pool. Include repeated seeds and resource observations; different raw loss magnitudes cannot establish the better model.
+- **Quality versus pairs seen and measured cost:** compare CLIP/SigLIP retrieval on the same frozen pool. Include repeated seeds and resource observations; different raw loss magnitudes requires separate verification to establish the better model.
 
 Store raw values, masks, configuration and checkpoint identity. No plots or measurements are claimed by this specification.
 
@@ -59,7 +59,7 @@ Store raw values, masks, configuration and checkpoint identity. No plots or meas
 
 Keep float32 reference logits/loss reductions where needed and explicitly qualify supported lower-precision tower computations. Compare weight-only and weight-plus-activation quantization on a separate calibration split. Track both retrieval degradation and threshold changes. Package processors, projections, weights, scale, bias and training semantics together; validate cross-framework embeddings/logits with layerwise error checks and downstream rankings.
 
-Publish a model card, immutable Hub revision, complete consumer configuration and fixed cold-load canaries after the actual experiments. A SigLIP-style loss implementation does not establish compatibility with an official SigLIP checkpoint architecture. Verify pooling, positional embeddings, tokenizer and all tensor mappings before claiming that compatibility. Containerize the qualified runtime and carry model/processor/index identity into the [retrieval project](../retrieval-system/README.md).
+Publish a model card, immutable Hub revision, complete consumer configuration and fixed cold-load canaries after the actual experiments. A SigLIP-style loss implementation is verified separately from compatibility with an official SigLIP checkpoint architecture. Verify pooling, positional embeddings, tokenizer and all tensor mappings before claiming that compatibility. Containerize the qualified runtime and carry model/processor/index identity into the [retrieval project](../retrieval-system/README.md).
 
 ## Completion evidence and teaching still to implement
 

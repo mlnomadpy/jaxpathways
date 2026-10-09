@@ -31,7 +31,7 @@ Every checkpoint includes data position, augmentation RNG, optimizer/schedule an
 
 ASR uses pinned in-domain and out-of-domain speech test sets with WER/CER, normalization and decoding settings fixed. Include noise/accent/duration/speaker slices with counts, insertions/deletions/substitutions, empty references and silent inputs. Compare greedy decoding and an external language-model decoder separately; do not attribute the latter's gain entirely to acoustic weights.
 
-Use appropriate [SUPERB/S3PRL](https://github.com/s3prl/s3prl) protocols for additional speech-representation claims. Speaker verification requires its own trials and EER convention. Sound-event tasks use declared mAP/F1/class metrics and label-completeness assumptions. A good CTC score does not establish speaker identity or general sound semantics.
+Use appropriate [SUPERB/S3PRL](https://github.com/s3prl/s3prl) protocols for additional speech-representation claims. Speaker verification requires its own trials and EER convention. Sound-event tasks use declared mAP/F1/class metrics and label-completeness assumptions. A good CTC score is verified separately from speaker identity or general sound semantics.
 
 Monitor audio seconds and valid frames, duration/padding, clipping/silence, sample-rate rejection, source/language shares, component losses, gradients and precision failures. During CTC training add blank dominance, alignment feasibility and dev WER/CER. Measure real-time factor, startup and end-to-end latency under the actual streaming/offline boundary.
 

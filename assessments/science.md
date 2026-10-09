@@ -6,6 +6,34 @@
 
 Retain your project implementation and create a separate assessment script and report. Record Python, JAX, NumPy, backend, device count and dtype. Keep predictions, observed values and conclusions separate. Run the project checker first, then transfer the methods to the fixtures below without changing its checks.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: two-compartment RK4 conservation & sensitivity check
+import jax
+import jax.numpy as jnp
+
+def rhs(u: jnp.ndarray, k: float) -> jnp.ndarray:
+    # Compute compartment exchange derivatives da/dt = -k(a - b), db/dt = k(a - b).
+    diff = u[0] - u[1]
+    return jnp.array([-k * diff, k * diff], dtype=jnp.float32)
+
+def rk4_step(u: jnp.ndarray, dt: float, k: float) -> jnp.ndarray:
+    # Advance state u by one fourth-order Runge-Kutta step of size dt.
+    k1 = rhs(u, k)
+    k2 = rhs(u + 0.5 * dt * k1, k)
+    k3 = rhs(u + 0.5 * dt * k2, k)
+    k4 = rhs(u + dt * k3, k)
+    return u + (dt / 6.0) * (k1 + 2.0 * k2 + 2.0 * k3 + k4)
+
+u0 = jnp.array([3.0, 1.0], dtype=jnp.float32)
+sens_a = jax.grad(lambda rate: rk4_step(u0, 0.05, rate)[0])(0.4)
+sens_total = jax.grad(lambda rate: jnp.sum(rk4_step(u0, 0.05, rate)))(0.4)
+print("da/dk:", float(sens_a), "d(a+b)/dk:", float(sens_total))
+```
+
 ## Task 1: demonstrate conservation in a different physical system
 
 Two compartments exchange a conserved substance. Their state is \(u=(a,b)\), with
@@ -38,7 +66,7 @@ Before fitting, reserve a noiseless test trajectory with initial state \((4,0.5)
 
 ## Task 4: explain a figure and defend timing boundaries
 
-Create a two-panel figure: observed first-compartment data with fitted trajectories, then residual versus time. Label units, initial conditions and the known synthetic truth separately from estimates. Describe at least two actual visible values or patterns, and explain what the figure cannot establish.
+Create a two-panel figure: observed first-compartment data with fitted trajectories, then residual versus time. Label units, initial conditions and the known synthetic truth separately from estimates. Describe at least two actual visible values or patterns, and explain which out-of-sample properties require separate experiments.
 
 Measure batches of one, thirty-two and two hundred fifty-six initial states on the available CPU. Compile/warm up each shape, use already-placed inputs, synchronize outputs, and collect at least seven samples. Report median latency and time per trajectory with the batch, grid, precision and saved-output policy. Do not assert a speedup unless the measurements show it. A CPU batch curve provides no TPU or multi-host throughput evidence.
 

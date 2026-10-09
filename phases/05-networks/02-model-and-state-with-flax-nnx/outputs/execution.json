@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-02",
-  "contentHash": "c808425bce50dfb8f8fa1641b657f4f59393c22423f8d8e85e7302c16e87d9f4",
+  "contentHash": "db00e4c968c93ebb1af314e3f9601ce671027b5e1e7f43c7bfb57feaac7ecb49",
   "executedAt": "2026-10-08T14:02:37.033885+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,15 +14,19 @@
   "stdout": "Trainable scalars: 13; other state: 1; clone counters: 1 2\nTrainable scalars: 13; other state: 1; clone counters: 1 2\nClone logits shifted by one; original parameters unchanged.\nPASS: networks-02\n",
   "notebookCells": [
     {
-      "sourceHash": "3e3109b3eaa4cf0b05c05128898219e164f9e2dc8ab8b4f74864f3287f81626b",
+      "sourceHash": "7be64905908e035e5b2d86345d19694afb98fea27ec32c949a6fc516f8f1f0c6",
       "outputs": []
     },
     {
-      "sourceHash": "d8f8cfac49d773e7cec3c56b275d2c24436c585a6538d002f5a33d6fb005bfec",
+      "sourceHash": "e604d4c7f98ca3a605329573fb8dd9a8458d3e0fac8db7d10e5b24a1a2a989e5",
       "outputs": []
     },
     {
-      "sourceHash": "c55bfe4c6a54dda6098e08659709ecd8f5ccfae531242ca995990cea22113f4a",
+      "sourceHash": "c5ce58bbeeae712c7ac375f55e098002966dd4e194825481c52239fb8933f5b1",
+      "outputs": []
+    },
+    {
+      "sourceHash": "03fba0ac13a44c77fac531b96edb109a814da567ed202f1b00f55a43cf2297a3",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,19 +38,11 @@
       ]
     },
     {
-      "sourceHash": "45070b1aa764623239ab549f6cc6f51038c4ed3f9d3fbc8e2627a9f4fe294205",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Trainable scalars: 13; other state: 1; clone counters: 1 2\n"
-          ]
-        }
-      ]
+      "sourceHash": "0023438eda9c4e66e472ea6d2eb58de747c4f6329d6de765c3034729a0fb086b",
+      "outputs": []
     },
     {
-      "sourceHash": "c666d731751bca93f1f35d8baea38d57b0c6ec07d7cf5cb167eb075037c9441f",
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",
@@ -61,43 +57,35 @@
       ]
     },
     {
-      "sourceHash": "38d707ea2d90ba05ff0a85831fef8f29c0d1c9a376a47cfbc2dd1d5ec853e091",
+      "sourceHash": "1c12d208363381a6989a105c8241b3da5cfb4f2f62b302b93fea9797b3a7e32b",
       "outputs": []
     },
     {
-      "sourceHash": "12d5a7f50d1f7aabacc7227756b876129bde31216ae73246d0be5359a4c891ee",
+      "sourceHash": "2cf72f77dfd2f342903a9fbf14d8343d1fdb3833dd0eaa187930917bbabaa403",
       "outputs": []
     },
     {
-      "sourceHash": "9d2eb836a27ca5c15918f3f897e258439f9b2458ea32e08fdcf195856c7c8efc",
+      "sourceHash": "91b5099b9341a2a8869ad6990517fa54344cbb2093ce48a23aa7f5f0da721ae8",
       "outputs": []
     },
     {
-      "sourceHash": "abcc959495f9a0264f3184b1eb2e682b63d38197b3df88735cd2ae5c9622efb8",
+      "sourceHash": "24c294faf8a478f63027da92b8279f6f6b654076438371cecff260367fc22ecb",
       "outputs": []
     },
     {
-      "sourceHash": "51db76c7104e962205da4f7a0bf05c4f3ffe2264cd885f361d552c687d8bc3d6",
+      "sourceHash": "d627ecd544f3a746b240b6322af828649c16ed8aae63ee77ee6a5a914c0fbc40",
       "outputs": []
     },
     {
-      "sourceHash": "6b27d45b6ef4e0f7f62d2c8b7478a6db438d2a8ab9eba27a042b43684136f8e3",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Clone logits shifted by one; original parameters unchanged.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "5403795e0b6c07ac54cf73ab50adf4614e0aae91959ca731648908b3bb65d695",
+      "sourceHash": "d65b6456a410355ebc7e66f1aa86b815f51b52b00d725b471a459a3e3d48c9df",
       "outputs": []
     },
     {
-      "sourceHash": "5c5f2307ebed940efb14d8a08fdb441d7547bb25aa172c4ed6eeb7bc16fa7675",
+      "sourceHash": "0331d5e7c9c9cea0eee26e3c4dfdcdf7fda769f8c9762ff951ae540bef950005",
+      "outputs": []
+    },
+    {
+      "sourceHash": "80aeecab74a4198fd343911cea1f1bc7a6912be768e26a8e4311a31b886db763",
       "outputs": []
     }
   ],

@@ -26,6 +26,10 @@ Then connect each primitive to the corresponding part of the original expression
 
 The intermediate-value heatmap is a numerical aid. Pair it with the typed dependency graph to explain how those values were produced. Lowering and compilation can change representation later; a primitive count alone does not predict executed kernel count or runtime.
 
+$$
+f(x) \;\xrightarrow{\text{trace}}\; \texttt{ClosedJaxpr}(\text{invars}, \text{eqns}, \text{outvars})
+$$
+
 ### Pause and reason
 
 Why avoid a correctness test that compares the entire printed jaxpr string?
@@ -104,7 +108,7 @@ Create main.py in the activated setup environment and add the imports and float3
 import jax
 import jax.numpy as jnp
 
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([1., 2., 3.], dtype=jnp.float32)`
 x = jnp.array([1., 2., 3.], dtype=jnp.float32)
 ```
 
@@ -117,9 +121,9 @@ Append this function. It reads its argument and returns one scalar; no global mu
 ```python
 # Step 2 — 2. Write the pure function: Each assignment names a new value.
 def shifted_square_sum(x):
-    # Evaluate `shifted` from the current inputs and state.
+    # Compute `shifted` from `x + 1.`
     shifted = x + 1.
-    # Evaluate `squared` from the current inputs and state.
+    # Compute `squared` from `shifted * shifted`
     squared = shifted * shifted
     # Return `jnp.sum(squared)` to the caller.
     return jnp.sum(squared)
@@ -152,7 +156,7 @@ gradient = jax.grad(shifted_square_sum)(x)
 print("Value / gradient:", value, gradient)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(value, 29.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -166,13 +170,13 @@ Forward operations include add, mul and reduce_sum, with output shapes $(3,)$, $
 import jax
 import jax.numpy as jnp
 
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([1., 2., 3.], dtype=jnp.float32)`
 x = jnp.array([1., 2., 3.], dtype=jnp.float32)
 # Step 2 — 2. Write the pure function: Each assignment names a new value.
 def shifted_square_sum(x):
-    # Evaluate `shifted` from the current inputs and state.
+    # Compute `shifted` from `x + 1.`
     shifted = x + 1.
-    # Evaluate `squared` from the current inputs and state.
+    # Compute `squared` from `shifted * shifted`
     squared = shifted * shifted
     # Return `jnp.sum(squared)` to the caller.
     return jnp.sum(squared)
@@ -197,7 +201,7 @@ gradient = jax.grad(shifted_square_sum)(x)
 print("Value / gradient:", value, gradient)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(value, 29.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(gradient, jnp.array([4., 6., 8.]))`
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -333,13 +337,13 @@ PASS: internals-01
 derivative_program = jax.make_jaxpr(jax.grad(shifted_square_sum))(x)
 # Print the observed values to compare against the expected result.
 print("Derivative program:", derivative_program)
-# Initialize array `other` with explicit values and shape.
+# Construct `other` via `jnp.array([-1., 0., 2.])`
 other = jnp.array([-1., 0., 2.])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted_square_sum(other), 10.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., ...`
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., 2., 6.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))`
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))
 ```
 
@@ -353,7 +357,7 @@ The new input checks the derivative independently of the original sample; trace 
 
 ```python
 # Experiment — Inspect a captured array: The function signature determines ordinary inputs; closed...
-# Initialize array `offset` with explicit values and shape.
+# Construct `offset` via `jnp.array([1., 2., 3.])`
 offset = jnp.array([1., 2., 3.])
 # Function `captured(z)` implementing this stage's computation:
 def captured(z):
@@ -371,11 +375,11 @@ explicit_program = jax.make_jaxpr(explicit)(x, offset)
 print("Captured:", captured_program)
 # Print diagnostic summary of the computed outputs.
 print("Explicit:", explicit_program)
-# Verify contract: `len(captured_program.jaxpr.invars) == 1`.
+# Assert invariant `len(captured_program.jaxpr.invars) == 1` holds
 assert len(captured_program.jaxpr.invars) == 1
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `len(explicit_program.jaxpr.invars) == 2` holds
 assert len(explicit_program.jaxpr.invars) == 2
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(captured(x), explicit(x, offset))`
 assert jnp.allclose(captured(x), explicit(x, offset))
 ```
 
@@ -396,18 +400,18 @@ Change the scalar offset from $1$ to $2$. Draw the new value flow for $[1, 2, 3]
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Evaluate `shifted` from the current inputs and state.
+1. Compute `shifted` from `z + 2.`
 2. Return `jnp.sum(shifted * shifted)` to the caller.
 3. Print the observed values to compare against the expected result.
 4. Verify that the numerical values match the expected reference within tolerance.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Change the scalar offset from 1 to 2.
 def shifted_two(z):
-    # Evaluate `shifted` from the current inputs and state.
+    # Compute `shifted` from `z + 2.`
     shifted = ...  # TODO: compute shifted
     # Return `jnp.sum(shifted * shifted)` to the caller.
     return ...  # TODO: return computed result
@@ -415,7 +419,7 @@ def shifted_two(z):
 print(jax.make_jaxpr(shifted_two)(x))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted_two(x), 50.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
 assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))  # TODO: complete assertion check
 ```
 
@@ -424,7 +428,7 @@ assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))  # TODO:
 ```python
 # Exercise solution: Change the scalar offset from 1 to 2.
 def shifted_two(z):
-    # Evaluate `shifted` from the current inputs and state.
+    # Compute `shifted` from `z + 2.`
     shifted = z + 2.
     # Return `jnp.sum(shifted * shifted)` to the caller.
     return jnp.sum(shifted * shifted)
@@ -432,7 +436,7 @@ def shifted_two(z):
 print(jax.make_jaxpr(shifted_two)(x))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted_two(x), 50.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))`
 assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))
 ```
 
@@ -459,7 +463,7 @@ The exact four-step result is $1.875$; scan carries a scalar.
 
 **Step-by-step implementation plan:**
 1. Repeat the update loop over `range(4)` steps:
-2. Evaluate `z` from the current inputs and state.
+2. Compute `z` from `0.5*z + 1.`
 3. Return `z` to the caller.
 4. Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
 5. Function `step(carry, _)` implementing this stage's computation:
@@ -471,7 +475,7 @@ The exact four-step result is $1.875$; scan carries a scalar.
 def unrolled(z):
     # Repeat the update loop over `range(4)` steps:
     for _ in range(4):
-        # Evaluate `z` from the current inputs and state.
+        # Compute `z` from `0.5*z + 1.`
         z = ...  # TODO: compute z
     # Return `z` to the caller.
     return ...  # TODO: return computed result
@@ -479,7 +483,7 @@ def unrolled(z):
 def scanned(z):
     # Function `step(carry, _)` implementing this stage's computation:
     def step(carry, _):
-        # Evaluate `new` from the current inputs and state.
+        # Compute `new` from `0.5*carry + 1.`
         new = ...  # TODO: compute new
         # Return `(new, new)` to the caller.
         return ...  # TODO: return computed result
@@ -491,7 +495,7 @@ print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
 print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(scanned(jnp.array(0.)), 1.875)`
 assert jnp.allclose(scanned(jnp.array(0.)), 1.875)  # TODO: complete assertion check
 ```
 
@@ -502,7 +506,7 @@ assert jnp.allclose(scanned(jnp.array(0.)), 1.875)  # TODO: complete assertion c
 def unrolled(z):
     # Repeat the update loop over `range(4)` steps:
     for _ in range(4):
-        # Evaluate `z` from the current inputs and state.
+        # Compute `z` from `0.5*z + 1.`
         z = 0.5*z + 1.
     # Return `z` to the caller.
     return z
@@ -510,7 +514,7 @@ def unrolled(z):
 def scanned(z):
     # Function `step(carry, _)` implementing this stage's computation:
     def step(carry, _):
-        # Evaluate `new` from the current inputs and state.
+        # Compute `new` from `0.5*carry + 1.`
         new = 0.5*carry + 1.
         # Return `(new, new)` to the caller.
         return new, new
@@ -522,11 +526,11 @@ print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
 print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(scanned(jnp.array(0.)), 1.875)`
 assert jnp.allclose(scanned(jnp.array(0.)), 1.875)
 ```
 
-The outer scan equation has a nested body. Equal numeric results and a shorter outer list do not establish a speedup.
+The outer scan equation has a nested body. Equal numeric results and a shorter outer list are separate from a speedup.
 
 </details>
 
@@ -581,7 +585,7 @@ def repaired(z):
 print("Repaired:", jax.make_jaxpr(repaired)(x))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jit(repaired)(x), 6.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(repaired)(-x), 6.)`
 assert jnp.allclose(jax.jit(repaired)(-x), 6.)  # TODO: complete assertion check
 ```
 
@@ -610,7 +614,7 @@ def repaired(z):
 print("Repaired:", jax.make_jaxpr(repaired)(x))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jit(repaired)(x), 6.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.jit(repaired)(-x), 6.)`
 assert jnp.allclose(jax.jit(repaired)(-x), 6.)
 ```
 

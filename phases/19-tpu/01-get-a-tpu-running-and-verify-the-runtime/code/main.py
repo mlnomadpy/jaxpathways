@@ -20,7 +20,7 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     devices = jax.devices()
     # Query the active JAX devices into `local_devices`.
     local_devices = jax.local_devices()
-    # Evaluate `target` from the current inputs and state.
+    # Compute `target` from `expected_backend or backend`
     target = expected_backend or backend
     # Create evenly spaced index values in `x`.
     x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)
@@ -30,13 +30,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     total = float(jax.block_until_ready(jnp.sum(per_device)))
     # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Evaluate `contract_ok` from the current inputs and state.
+    # Compute `contract_ok` from `(`
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Evaluate `receipt` from the current inputs and state.
+    # Compute `receipt` from `{`
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -66,19 +66,23 @@ topologies = [
 ]
 # Iterate over `spec` to step through the computation:
 for spec in topologies:
-    # Evaluate `spec['total_chips']` from the current inputs and state.
+    # Compute `spec["total_chips"]` from `spec["hosts"] * spec["chips_per_host"]`
     spec["total_chips"] = spec["hosts"] * spec["chips_per_host"]
-    # Evaluate `spec['total_hbm_gib']` from the current inputs and state.
+    # Compute `spec["total_hbm_gib"]` from `spec["total_chips"] * spec["hbm_gib_per_chip"]`
     spec["total_hbm_gib"] = spec["total_chips"] * spec["hbm_gib_per_chip"]
 
 # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.
 receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
-# Verify contract: `receipt['contract_ok'] is True`.
+# Assert invariant `receipt["contract_ok"] is True` holds
 assert receipt["contract_ok"] is True
 # Print the observed values to compare against the expected result.
 print("Verified runtime receipt:", json.dumps(receipt, sort_keys=True))
 # Print diagnostic summary of the computed outputs.
 print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"] for t in topologies})
+
+# Step 3: Verify invariants on the completed state
+receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
+assert receipt["contract_ok"] is True
 
 # Step 1 — Write the runtime contract and synchronized pmap verifier: The verifier checks both device discovery and a synchronized pmap...
 # Import hashlib for this computation.
@@ -99,7 +103,7 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     devices = jax.devices()
     # Query the active JAX devices into `local_devices`.
     local_devices = jax.local_devices()
-    # Evaluate `target` from the current inputs and state.
+    # Compute `target` from `expected_backend or backend`
     target = expected_backend or backend
     # Create evenly spaced index values in `x`.
     x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)
@@ -109,13 +113,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     total = float(jax.block_until_ready(jnp.sum(per_device)))
     # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Evaluate `contract_ok` from the current inputs and state.
+    # Compute `contract_ok` from `(`
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Evaluate `receipt` from the current inputs and state.
+    # Compute `receipt` from `{`
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -145,14 +149,14 @@ topologies = [
 ]
 # Iterate over `spec` to step through the computation:
 for spec in topologies:
-    # Evaluate `spec['total_chips']` from the current inputs and state.
+    # Compute `spec["total_chips"]` from `spec["hosts"] * spec["chips_per_host"]`
     spec["total_chips"] = spec["hosts"] * spec["chips_per_host"]
-    # Evaluate `spec['total_hbm_gib']` from the current inputs and state.
+    # Compute `spec["total_hbm_gib"]` from `spec["total_chips"] * spec["hbm_gib_per_chip"]`
     spec["total_hbm_gib"] = spec["total_chips"] * spec["hbm_gib_per_chip"]
 
 # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.
 receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
-# Verify contract: `receipt['contract_ok'] is True`.
+# Assert invariant `receipt["contract_ok"] is True` holds
 assert receipt["contract_ok"] is True
 # Print the observed values to compare against the expected result.
 print("Verified runtime receipt:", json.dumps(receipt, sort_keys=True))
@@ -161,7 +165,7 @@ print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"]
 
 # Figure data experiment
 # Compute figure data for: Single-host Cloud TPU slice chip counts and total HBM capacity
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{`
 visual_data = {
     'kind': 'bar',
     'labels': [t['slice'] for t in topologies],
@@ -178,17 +182,17 @@ visual_data = {
 mismatch = verify_runtime_contract(expected_backend="tpu", min_devices=4)
 # Print the observed values to compare against the expected result.
 print("Mismatch contract_ok:", mismatch["contract_ok"], "observed:", mismatch["observed_backend"], "devices:", mismatch["device_count"])
-# Verify contract: `mismatch['contract_ok'] == (jax.default_backend() == 'tpu' and jax.d...`.
+# Assert invariant `mismatch["contract_ok"] == (jax.default_backend() == "tpu" and ja...` holds
 assert mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)
 
 # Experiment: Verify single-host vs multi-host process counts
 # Experiment — Verify single-host vs multi-host process counts: Single-host TPU VMs attach all chips to one Linux VM; multi-host...
 slice_hosts = {"v5litepod-1": 1, "v5litepod-4": 1, "v5litepod-8": 1, "v5litepod-16": 4}
-# Evaluate `needs_multi_host` from the current inputs and state.
+# Compute `needs_multi_host` from `{k: (v > 1) for k, v in slice_hosts.items()}`
 needs_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}
 # Print the observed values to compare against the expected result.
 print("Requires --worker=all and jax.distributed.initialize():", needs_multi_host)
-# Verify contract: `needs_multi_host['v5litepod-4'] is False and needs_multi_host['v5lit...`.
+# Assert invariant `needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5...` holds
 assert needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True
 
 # Reference solution. Try the exercise before reading this.
@@ -198,7 +202,7 @@ checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_de
 v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
 # Print the observed values to compare against the expected result.
 print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-# Verify contract: `checked['contract_ok'] is True and v5e4['total_chips'] == 4 and (v5e...`.
+# Assert invariant `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v...` holds
 assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
 
 # Reference practice: Check whether a model state fits on a single-host TPU slice
@@ -206,7 +210,7 @@ assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["tot
 fitting_slices = [t["slice"] for t in topologies if t["total_hbm_gib"] >= 48]
 # Print the observed values to compare against the expected result.
 print("Slices fitting 48 GiB:", fitting_slices)
-# Verify contract: `fitting_slices == ['v5litepod-4', 'v5litepod-8', 'v6e-4']`.
+# Assert invariant `fitting_slices == ["v5litepod-4"` holds
 assert fitting_slices == ["v5litepod-4", "v5litepod-8", "v6e-4"]
 
 # Reference practice: Verify the pmap sum-of-squares formula for 4 TPU devices
@@ -215,6 +219,6 @@ assert fitting_slices == ["v5litepod-4", "v5litepod-8", "v6e-4"]
 four_device_expected = float(np.sum(np.arange(4 * 8, dtype=np.float64) ** 2))
 # Print the observed values to compare against the expected result.
 print("Expected 4-device pmap sum of squares:", four_device_expected)
-# Verify contract: `four_device_expected == 10416.0`.
+# Assert invariant `four_device_expected == 10416.0` holds
 assert four_device_expected == 10416.0
 print("PASS: tpu-01")

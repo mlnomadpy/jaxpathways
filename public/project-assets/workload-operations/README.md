@@ -93,7 +93,7 @@ Independent known cases check dimensions and rounding. Another case uses the act
 
 Keep your implementation, environment, configuration, actual events, checkpoint hashes, full and resumed state comparisons, failed-gate trace, rollback IDs and capacity assumptions. Explain one changed checkpoint cadence and one changed workload duration. The generated `validation.json` records the instructor reference checks, source hashes and measured local results; it is not learner evidence.
 
-The synthesis in `assessments/ops.md` requires changed conditions and a written runbook. Reviewer notes are public. Passing the reference fixture alone does not establish job readiness or an independently reviewed qualification.
+The synthesis in `assessments/ops.md` requires changed conditions and a written runbook. Reviewer notes are public. Passing the reference fixture alone is verified separately from job readiness or an independently reviewed qualification.
 
 ## Optional transfer to a prepared accelerator host
 

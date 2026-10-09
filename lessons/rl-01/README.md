@@ -79,11 +79,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -101,17 +101,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -128,7 +128,7 @@ Append this block to main.py. Run python3 main.py in the course CPU environment.
 ```python
 # Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
-# Evaluate `(positions, rewards)` from the current inputs and state.
+# Compute `positions, rewards` from `[int(s.position)], []`
 positions, rewards = [int(s.position)], []
 # Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
@@ -136,18 +136,30 @@ for action in [1, 1, 0, 0]:
     s, reward, terminated, truncated = step(s, jnp.int32(action))
     # Append the current step result to `positions`.
     # Append the current step result to `positions`.
-    positions.append(int(s.position)); rewards.append(float(reward))
-# Verify contract: `positions == [1, 2, 3, 3, 3]`.
+    positions.append(int(s.position))
+    rewards.append(float(reward))
+# Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
 # Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
 ```
 
 The known two-action path produces one terminal reward and then zero padding.
+
+## Step 3: Verify invariants on the completed state
+
+Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
+
+```python
+assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
+assert int(s.elapsed) == 2
+```
+
+Checking these invariants confirms the computation is ready for the full worked experiment.
 
 ## Run the example
 
@@ -164,11 +176,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -186,17 +198,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -205,7 +217,7 @@ def step(state, action, horizon=8):
 
 # Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
-# Evaluate `(positions, rewards)` from the current inputs and state.
+# Compute `positions, rewards` from `[int(s.position)], []`
 positions, rewards = [int(s.position)], []
 # Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
@@ -213,12 +225,13 @@ for action in [1, 1, 0, 0]:
     s, reward, terminated, truncated = step(s, jnp.int32(action))
     # Append the current step result to `positions`.
     # Append the current step result to `positions`.
-    positions.append(int(s.position)); rewards.append(float(reward))
-# Verify contract: `positions == [1, 2, 3, 3, 3]`.
+    positions.append(int(s.position))
+    rewards.append(float(reward))
+# Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
 # Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
@@ -270,7 +283,7 @@ PASS: rl-01
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
 # Run `step` to compute `(s, r, term, trunc)`.
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
-# Verify contract: `bool(term) and (not bool(trunc)) and (float(r) == 1.0)`.
+# Assert invariant `bool(term) and not bool(trunc) and float(r) == 1.` holds
 assert bool(term) and not bool(trunc) and float(r) == 1.
 # Print the observed values to compare against the expected result.
 print('deadline goal:', bool(term), bool(trunc))
@@ -288,13 +301,13 @@ The goal transition defines a completed task, so the two flags remain mutually e
 # Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
-# Evaluate `(a, b)` from the current inputs and state.
+# Compute `a, b` from `reset(key), reset(key)`
 a, b = reset(key), reset(key)
-# Verify contract: `int(a.position) == int(b.position)`.
+# Assert invariant `int(a.position) == int(b.position)` holds
 assert int(a.position) == int(b.position)
 # Create or split explicit PRNG key(s) (`starts`) for reproducible randomness.
 starts = jax.vmap(reset)(jax.random.split(key, 1000)).position
-# Verify contract: `0.4 < float(starts.mean()) < 0.6`.
+# Assert invariant `0.4 < float(starts.mean()) < 0.6` holds
 assert 0.4 < float(starts.mean()) < 0.6
 # Print the observed values to compare against the expected result.
 print('fraction starting at one:', float(starts.mean()))
@@ -316,18 +329,18 @@ Begin at position $0$, choose left for three actions with horizon $3$, and then 
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `total` from the current inputs and state.
+1. Compute `total` from `0.`
 2. Iterate over `i` to step through the computation:
 3. Run `step` to compute `(s, r, term, trunc)`.
 4. Accumulate the next contribution into `total`.
-5. Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
+5. Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
 s = State(...)  # TODO: compute s
-# Evaluate `total` from the current inputs and state.
+# Compute `total` from `0.`
 total = ...  # TODO: compute total
 # Iterate over `i` to step through the computation:
 for i in range(3):
@@ -335,13 +348,13 @@ for i in range(3):
     s, r, term, trunc = step(...)  # TODO: compute s, r, term, trunc
     # Accumulate the next contribution into `total`.
     total += float(r)
-    # Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
+    # Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
     assert not bool(term)  # TODO: complete assertion check
-# Verify contract: `abs(total + 0.03) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(total + .03) < 1e-6`
 assert abs(total + .03)  # TODO: complete assertion check
 # Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(...)  # TODO: compute s2, r, term, trunc
-# Verify contract: `int(s2.position) == 0 and int(s2.elapsed) == 3 and (float(r) == 0.0)`.
+# Assert invariant `int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.` holds
 assert int(s2.position)  # TODO: complete assertion check
 ```
 
@@ -350,7 +363,7 @@ assert int(s2.position)  # TODO: complete assertion check
 ```python
 # Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
-# Evaluate `total` from the current inputs and state.
+# Compute `total` from `0.`
 total = 0.
 # Iterate over `i` to step through the computation:
 for i in range(3):
@@ -358,13 +371,13 @@ for i in range(3):
     s, r, term, trunc = step(s, jnp.int32(0), 3)
     # Accumulate the next contribution into `total`.
     total += float(r)
-    # Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
+    # Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
     assert not bool(term) and bool(trunc) == (i == 2)
-# Verify contract: `abs(total + 0.03) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(total + .03) < 1e-6`
 assert abs(total + .03) < 1e-6
 # Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(s, jnp.int32(1), 3)
-# Verify contract: `int(s2.position) == 0 and int(s2.elapsed) == 3 and (float(r) == 0.0)`.
+# Assert invariant `int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.` holds
 assert int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.
 ```
 
@@ -390,26 +403,26 @@ Use the termination flag for the continuing task. The finite-horizon task assign
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `continuing_timeout` from the current inputs and state.
-2. Evaluate `terminal` from the current inputs and state.
-3. Evaluate `finite_horizon_timeout` from the current inputs and state.
-4. Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Compute `continuing_timeout` from `r + gamma * value`
+2. Compute `terminal` from `r`
+3. Compute `finite_horizon_timeout` from `r`
+4. Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
+5. Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
 r, gamma, value = ...  # TODO: compute r, gamma, value
-# Evaluate `continuing_timeout` from the current inputs and state.
+# Compute `continuing_timeout` from `r + gamma * value`
 continuing_timeout = ...  # TODO: compute continuing_timeout
-# Evaluate `terminal` from the current inputs and state.
+# Compute `terminal` from `r`
 terminal = ...  # TODO: compute terminal
-# Evaluate `finite_horizon_timeout` from the current inputs and state.
+# Compute `finite_horizon_timeout` from `r`
 finite_horizon_timeout = ...  # TODO: compute finite_horizon_timeout
-# Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
+# Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
 assert abs(continuing_timeout - 1.79)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 assert terminal  # TODO: complete assertion check
 ```
 
@@ -418,15 +431,15 @@ assert terminal  # TODO: complete assertion check
 ```python
 # Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
 r, gamma, value = -.01, .9, 2.
-# Evaluate `continuing_timeout` from the current inputs and state.
+# Compute `continuing_timeout` from `r + gamma * value`
 continuing_timeout = r + gamma * value
-# Evaluate `terminal` from the current inputs and state.
+# Compute `terminal` from `r`
 terminal = r
-# Evaluate `finite_horizon_timeout` from the current inputs and state.
+# Compute `finite_horizon_timeout` from `r`
 finite_horizon_timeout = r
-# Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
+# Check numerical equivalence within tolerance: `abs(continuing_timeout - 1.79) < 1e-7`
 assert abs(continuing_timeout - 1.79) < 1e-7
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 assert terminal == finite_horizon_timeout == -.01
 ```
 
@@ -474,11 +487,11 @@ for position in range(3):
         nxt, reward, term, trunc = compiled(...)  # TODO: compute nxt, reward, term, trunc
         # Run `min` to compute `expected`.
         expected = min(...)  # TODO: compute expected
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `int(nxt.position) == expected` holds
         assert int(nxt.position)  # TODO: complete assertion check
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `bool(term) == (expected == 3)` holds
         assert bool(term)  # TODO: complete assertion check
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Check numerical equivalence within tolerance: `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`
         assert abs(float(reward) - (1. if expected  # TODO: complete assertion check
 ```
 
@@ -498,11 +511,11 @@ for position in range(3):
         nxt, reward, term, trunc = compiled(s, jnp.int32(action))
         # Run `min` to compute `expected`.
         expected = min(3, max(0, position + (1 if action else -1)))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `int(nxt.position) == expected` holds
         assert int(nxt.position) == expected
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `bool(term) == (expected == 3)` holds
         assert bool(term) == (expected == 3)
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Check numerical equivalence within tolerance: `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`
         assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6
 ```
 

@@ -73,7 +73,7 @@ Evaluate all four seed × held-out combinations. Verify loss and accuracy agains
 
 A newly changed width/seed/noise fixture has **no guaranteed accuracy threshold** in this assessment. Low accuracy is an observation to diagnose, not a reason to resample the held-out set until it looks good. Acceptance here depends on correct, isolated measurement and reasoned interpretation; public project thresholds still apply to its original fixture.
 
-Snapshot every NNX model-state leaf before and after evaluation and verify exact equality. Snapshot optimizer state too if your assessment retains it. Show one comparison where the same model is evaluated on both fixed sets without fitting between them. Explain why four aggregate accuracies cannot establish broad generalization or fairness.
+Snapshot every NNX model-state leaf before and after evaluation and verify exact equality. Snapshot optimizer state too if your assessment retains it. Show one comparison where the same model is evaluated on both fixed sets without fitting between them. Explain why four aggregate accuracies measures fixed-split performance before subgroup fairness testing.
 
 **Keep:** the frozen held-out generation rule, seed/configuration table, histories, replay comparisons, error IDs, independent metric checks and evaluation-state comparison.
 
@@ -102,9 +102,9 @@ Complete the image harness on its public fixture, then use training seed \(5\), 
 
 Derive the CNN parameter count and check one convolution receptive field against a separate host calculation. Give the adapter a solid blue RGB image of size \(12\times16\); derive its normalized grayscale value under the declared RGB coefficients. Compare uint8 NHWC, transposed NCHW and explicitly declared unit-float paths. Reject malformed channel counts, an empty batch and out-of-range floating inputs.
 
-Create an actual local PNG from a sample, load it through the external manifest API, and retain its file hash, source, permission/license note, label and group. Create a second manifest that leaks a source group across the split and prove it is rejected. Explain why merely changing IDs does not establish independence, and why near-duplicate or related-subject detection still requires data review.
+Create an actual local PNG from a sample, load it through the external manifest API, and retain its file hash, source, permission/license note, label and group. Create a second manifest that leaks a source group across the split and prove it is rejected. Explain why merely changing IDs is verified separately from independence, and why near-duplicate or related-subject detection still requires data review.
 
-Keep raw and preprocessed thumbnails with the axis, range, resize and EXIF contracts. This synthetic or self-generated PNG evidence verifies ingestion; it does not establish accuracy on real photographs.
+Keep raw and preprocessed thumbnails with the axis, range, resize and EXIF contracts. This synthetic or self-generated PNG evidence verifies ingestion; it is verified separately from accuracy on real photographs.
 
 ## Task 7: resume the next image and augmentation, not just the weights
 
@@ -112,7 +112,7 @@ Using the changed dataset/batch configuration, interrupt at update \(17\), save 
 
 The sampler drops incomplete epoch tails under its declared policy. Explain where the interruption lies relative to the current permutation and why retaining only an epoch number would be insufficient. Show one rejected restore after changing a pixel and one after changing the optimizer configuration. Preserve the failure messages rather than weakening the compatibility checks.
 
-Record source/runtime versions and the exact checkpoint data contract. Explain what this local atomic replacement and integrity check does not establish about hostile writers, remote storage or cross-device bitwise replay.
+Record source/runtime versions and the exact checkpoint data contract. Explain what this local atomic replacement and integrity check is verified separately from about hostile writers, remote storage or cross-device bitwise replay.
 
 ## Task 8: interpret error structure and precision tradeoffs
 
@@ -181,4 +181,4 @@ After the pretraining and post-training phases, use the training-methods project
 
 For adaptation, change adapter rank or scaling, retain the base weights exactly and verify merged predictions on new inputs. Compare original-task and adapted-task measurements separately. For text objectives, draw the shifted response mask and distinguish SFT, learned-reward PPO and DPO by their data, reference and rollout requirements. Synthetic preference success is not human alignment evidence.
 
-Use the weight-conversion project to introduce one deliberate operation mismatch. Report the earliest differing intermediate tensor, the numerical error budget and the repaired result, then reload the converted artifact in a fresh process. Passing the provided MLP does not establish parity for a convolutional or attention architecture.
+Use the weight-conversion project to introduce one deliberate operation mismatch. Report the earliest differing intermediate tensor, the numerical error budget and the repaired result, then reload the converted artifact in a fresh process. Passing the provided MLP is verified separately from parity for a convolutional or attention architecture.

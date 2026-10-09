@@ -7,11 +7,16 @@ jax.config.update('jax_enable_x64',True)
 import jax.numpy as jnp
 import numpy as np
 ROOT=Path(__file__).resolve().parents[1]
-p=argparse.ArgumentParser();p.add_argument('--stage',choices=['1','2','3','all'],default='all');p.add_argument('--implementation',default='starter');args=p.parse_args()
+p=argparse.ArgumentParser()
+p.add_argument('--stage',choices=['1','2','3','all'],default='all')
+p.add_argument('--implementation',default='starter')
+args=p.parse_args()
 stage=3 if args.stage=='all' else int(args.stage)
 path=ROOT/args.implementation/'model.py' if args.implementation in ('starter','solution') else Path(args.implementation)
 if not path.is_file():p.error('implementation must name an existing Python file')
-spec=importlib.util.spec_from_file_location('learner_derivatives',path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+spec=importlib.util.spec_from_file_location('learner_derivatives',path)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
 
 def reject(fn,error=ValueError):
     try:fn()
@@ -19,7 +24,10 @@ def reject(fn,error=ValueError):
     raise AssertionError('Expected explicit '+error.__name__)
 
 for point,direction,weight in [([.4,-.7],[1.2,-.3],[.5,2.]),([-.2,.8],[-.5,1.3],[1.1,-.4]),([.9,.1],[.2,.6],[-.8,.3])]:
-    a,b=point;x=jnp.array(point);v=jnp.array(direction);u=jnp.array(weight)
+    a,b=point
+    x=jnp.array(point)
+    v=jnp.array(direction)
+    u=jnp.array(weight)
     jac=np.array([[b,a],[np.cos(a),2*b]])
     value=np.array([a*b,np.sin(a)+b*b])
     hess=jac.T@jac+value[0]*np.array([[0,1],[1,0]])+value[1]*np.array([[-np.sin(a),0],[0,2]])
@@ -41,8 +49,10 @@ if stage>=2:
     curvatures=jax.vmap(jax.grad(jax.grad(m.stable_softplus)))(points)
     np.testing.assert_allclose(curvatures,sigmoid*(1-sigmoid),rtol=1e-11,atol=1e-12)
     for values in ([-.8,.4,1.1],[-3.,.2,2.,5.]):
-        x=jnp.array(values);host=np.asarray(x)
-        weights=np.exp(host-host.max());weights/=weights.sum()
+        x=jnp.array(values)
+        host=np.asarray(x)
+        weights=np.exp(host-host.max())
+        weights/=weights.sum()
         np.testing.assert_allclose(m.stable_logsumexp(x),host.max()+np.log(np.exp(host-host.max()).sum()),rtol=1e-12)
         np.testing.assert_allclose(jax.grad(m.stable_logsumexp)(x),weights,rtol=1e-12)
         hess=jax.jacrev(jax.grad(m.stable_logsumexp))(x)
@@ -56,11 +66,14 @@ if stage>=2:
 if stage>=3:
     rng=np.random.default_rng(71)
     for shape in [(3,),(5,),(2,3)]:
-        x=jnp.asarray(rng.normal(size=shape));v=jnp.asarray(rng.normal(size=shape));offset=jnp.asarray(rng.normal(size=shape))
+        x=jnp.asarray(rng.normal(size=shape))
+        v=jnp.asarray(rng.normal(size=shape))
+        offset=jnp.asarray(rng.normal(size=shape))
         def function(z):return (jnp.sum(z*jnp.sin(z)+offset),-z)
         closed=jax.make_jaxpr(function)(x)
         primal,tangent=m.tiny_jvp(closed,(x,),(v,))
-        host=np.asarray(x);seed=np.asarray(v)
+        host=np.asarray(x)
+        seed=np.asarray(v)
         expected=np.sum((np.sin(host)+host*np.cos(host))*seed)
         np.testing.assert_allclose(primal[0],np.sum(host*np.sin(host)+np.asarray(offset)),rtol=1e-11,atol=1e-12)
         np.testing.assert_allclose(primal[1],-host,rtol=1e-12)
@@ -73,7 +86,10 @@ if stage>=3:
         np.testing.assert_allclose(ct[0],np.sum((np.sin(host)+host*np.cos(host))*seed),rtol=1e-11,atol=1e-12)
         reject(lambda:m.tiny_jvp(closed,(x,),(jnp.ones((1,)),)))
         reject(lambda:compiled(jnp.ones((7,)),jnp.ones((7,))),TypeError)
-    x=jnp.array([.2,-.5,1.]);v=jnp.array([.7,.1,-.4]);c=jnp.array([1.,2.,3.]);dc=jnp.array([.2,-.1,.4])
+    x=jnp.array([.2,-.5,1.])
+    v=jnp.array([.7,.1,-.4])
+    c=jnp.array([1.,2.,3.])
+    dc=jnp.array([.2,-.1,.4])
     explicit=jax.make_jaxpr(lambda z,bias:jnp.sum(z*z+(-2.)*z+bias))(x,c)
     _,dt=m.tiny_jvp(explicit,(x,c),(v,dc))
     np.testing.assert_allclose(dt[0],np.dot(2*np.asarray(x)-2,np.asarray(v))+np.sum(dc),rtol=1e-11)
@@ -85,7 +101,8 @@ if stage>=3:
         return z+z
     effects=jax.make_jaxpr(effectful)(x)
     reject(lambda:m.tiny_jvp(effects,(x,),(v,)),NotImplementedError)
-    integer=jnp.array([1,2,3]);int_trace=jax.make_jaxpr(lambda z:z+z)(integer)
+    integer=jnp.array([1,2,3])
+    int_trace=jax.make_jaxpr(lambda z:z+z)(integer)
     reject(lambda:m.tiny_jvp(int_trace,(integer,),(integer,)))
     # The exercise requires an interpreter, not delegating its derivative to JAX.
     import inspect

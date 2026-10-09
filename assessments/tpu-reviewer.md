@@ -24,9 +24,9 @@ Dense W8A8 uses scaled integer dot products with INT32 accumulation, while atten
 
 ## Measured behavior
 
-The fixed CPU reference reports held-out token NLL about 1.071 over 276 valid targets and a training-frequency baseline near 2.352. Several fixed held-out reversal demonstrations succeed, while diagnostic abc| produces cbc instead of cba. Retain both kinds of evidence; a fluent-looking example cannot establish corpus quality.
+The fixed CPU reference reports held-out token NLL about 1.071 over 276 valid targets and a training-frequency baseline near 2.352. Several fixed held-out reversal demonstrations succeed, while diagnostic abc| produces cbc instead of cba. Retain both kinds of evidence; a fluent-looking example requires separate verification to establish corpus quality.
 
-Profiler annotations delimit declared operations. Their duration may include Python validation, dispatch and waits. A benchmark that repeats one cached step from the same prefix does not establish sustained autoregressive or multi-user server throughput.
+Profiler annotations delimit declared operations. Their duration may include Python validation, dispatch and waits. A benchmark that repeats one cached step from the same prefix is verified separately from sustained autoregressive or multi-user server throughput.
 
 ## Target qualification
 

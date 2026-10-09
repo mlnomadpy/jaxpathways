@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-04",
-  "contentHash": "cb0ea26671cacd6f34f6f2657e5a2d7fb56bee5ffef76a8d6b393a397ba3bb99",
+  "contentHash": "8fac52d57cbf5e7101ad174ff2fbe6083acaae2ce148a8dcfc93f72989e6a5ba",
   "executedAt": "2026-10-08T14:08:15.394886+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,7 +18,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "7bac30f43ac28ce639a2d856bd882a3fd9e443bfe843babdc73b38e8797ad7da",
+      "sourceHash": "8b0a4c68d22a637f91b4914bf1d86f088d52d22f1f7b0c11b4458072cee5a9d0",
+      "outputs": []
+    },
+    {
+      "sourceHash": "e39fea213cc9360fde902be2ad59a5e36980dad93ac38516e5fa9c13b3213eda",
+      "outputs": []
+    },
+    {
+      "sourceHash": "9c118770280acaf6ff75fa1a71cf7df571db677029f03452c80afb19a18e9dcb",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,20 +39,7 @@
       ]
     },
     {
-      "sourceHash": "87c32b945d99496ce42ab0262abbe1e04789fbd44d63afc6c9fc4079b2304ff5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\n",
-            "Expected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "206597a24b44a0132189564eb6570a2ce5477dfcfa90d3a7d04ab73cddd99f5e",
+      "sourceHash": "3aab3c1b4774c3df73d133ef306429bf352bc083a73c82df698e1604ca534be5",
       "outputs": []
     },
     {
@@ -63,76 +58,36 @@
       ]
     },
     {
-      "sourceHash": "323b8fecf6f84dc05b086c6e9e38366de1ec64e8ddc61d5106284c84e860023f",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Per-chip sums on a 4-chip slice: [140.0, 1100.0, 3084.0, 6092.0] Total: 10416.0\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "45ec1a727481198e7f72881963d8fd2a97faaa6f17f63d71f884565a550d54c0",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Teardown verifier passed for empty and non-empty gcloud list outputs.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "446fbe23e792d1815b8f94c15e6671114864a70ed67458d964e945d07a824647",
+      "sourceHash": "53cb6e6482821c0475e42eb28d1744a9256e995c0cd82e9675ad834f95ec2cf5",
       "outputs": []
     },
     {
-      "sourceHash": "2a6e4841e390a14c5ad9359740c5327c461a3eec4cba51d39e34118d4d6ae095",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "4-chip expected sum: 10416.0 8-chip expected sum: 85344.0 receipt hash: 8c6bd0cbe29edc78\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "9151779bd25fcf7f11f282d563e5203c0dae12b3b519c903613a5bb8f246b652",
+      "sourceHash": "bded2e88ded5ef60b5518e34d5885fee7938173a3d8e5cb9b87bf820889ad6cb",
       "outputs": []
     },
     {
-      "sourceHash": "e91534ef350159f6b7aa8c83f843dbc3e4322e1cf2da49f9cf4e98416c764fe8",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Simulated 4-chip TPU check: True Local CPU check: False\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "742d956db67fbbdbfbfbfd57a8911bfb220d494ccfd9f34c4565bfbf96632afd",
+      "sourceHash": "6b95ef374e7931305bc1feddf8ca17cd18748fd4326483d73d58a55e02d6e772",
       "outputs": []
     },
     {
-      "sourceHash": "8c77c0eace4c5dcf59ca1d3e5070295612890cea460b85437445cac3963441e9",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Overnight idle cost avoided (USD): 74.4\n"
-          ]
-        }
-      ]
+      "sourceHash": "ab84667fa56eaa6d036fa1ae7c90a35f31e3288ed31c98b341ea359fcac5266e",
+      "outputs": []
+    },
+    {
+      "sourceHash": "1761f5a62420577e1363ba8093ff6d48509d1470b2adbae26135423a5e55d58f",
+      "outputs": []
+    },
+    {
+      "sourceHash": "256e1dc51fed7be1e95762729abdc7916819dd6ef144789843418301d04ba0db",
+      "outputs": []
+    },
+    {
+      "sourceHash": "99e3b41d852db0775a79b6cfddc0c40531aee26946795176380dc2c36d923209",
+      "outputs": []
+    },
+    {
+      "sourceHash": "b01e9298ce969d33ab953eaaf790a6c2adb17ea93b322fad6b644ea4aeb3a84f",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

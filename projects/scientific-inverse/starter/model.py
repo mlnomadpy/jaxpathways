@@ -52,7 +52,8 @@ def fit(initials, observations, dt=0.05, initial_rate=1.4, updates=250, learning
 def evaluate(rate, initials, observations, dt=0.05):
     """Return mse, rmse, max_abs_error, trajectory_count, observation_count.
 
-    Use observations only for measurement; do not fit or mutate inputs.
+    Use observations only for measurement
+    do not fit or mutate inputs.
     Reject nonfinite/nonpositive rate.
     """
     # Key APIs to use: `contract`, `np.isfinite`, `loss`, `jnp.log`, `simulate`

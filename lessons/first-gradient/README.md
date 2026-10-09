@@ -75,6 +75,43 @@ Both $x^2$ and $x^3$ have derivative zero at $x=0$. The square has a minimum the
 
 When a model produces a surprising zero gradient, ask whether the loss actually depends on the parameter, whether you differentiated the intended argument, and whether the chosen point is stationary. Checking nearby points and a simple analytic case is often more informative than immediately changing the optimizer.
 
+## Step 1: Set up imports and input tensors
+
+Import the required JAX modules and define the initial inputs for your first gradient.
+
+```python
+import jax
+import jax.numpy as jnp
+```
+
+Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+
+## Step 2: Apply the core JAX transformation
+
+Write the core computation and transformation step over the initialized inputs.
+
+```python
+def f(x):
+    # Return `x ** 2` to the caller.
+    return x ** 2
+# Differentiate the objective to obtain `derivative` via automatic differentiation.
+derivative = jax.grad(f)
+```
+
+This stage executes the primary numerical transformation and binds the intermediate outputs.
+
+## Step 3: Verify shapes and numerical invariants
+
+Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+
+```python
+assert jnp.allclose(derivative(3.0), 6.)
+# Check numerical equivalence within tolerance: `jnp.allclose(derivative(0.0), 0.)`
+assert jnp.allclose(derivative(0.0), 0.)
+```
+
+These assertions lock in the exact numerical contract before you run the full experiment and variations.
+
 ## Build a numerical estimate
 
 ```python
@@ -92,7 +129,7 @@ def square(x):
 estimate = central_difference(square, 3.0)
 # Print the observed values to compare against the expected result.
 print("Finite-difference estimate:", estimate)
-# Verify contract: `abs(estimate - 6.0) < 1e-08`.
+# Check numerical equivalence within tolerance: `abs(estimate - 6.0) < 1e-8`
 assert abs(estimate - 6.0) < 1e-8
 ```
 
@@ -115,7 +152,7 @@ derivative = jax.grad(f)
 print(float(derivative(3.0)))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(derivative(3.0), 6.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(derivative(0.0), 0.)`
 assert jnp.allclose(derivative(0.0), 0.)
 ```
 
@@ -145,13 +182,13 @@ The negative part of the dashed line does not mean a square became negative. It 
 # Compute figure data for: A tangent describes local change
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-4.0, 4.0, 81)
-# Evaluate `point` from the current inputs and state.
+# Compute `point` from `3.0`
 point = 3.0
 # Run `derivative` to compute `slope`.
 slope = derivative(point)
 # Vectorize across the batch dimension without a Python loop (`visual_data`).
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input x', 'ylabel': 'function / tangent value', 'series': [{'label': 'f(x) = x squared', 'y': jax.vmap(f)(grid).tolist()}, {'label': 'tangent at x = 3', 'y': (f(point) + slope * (grid - point)).tolist()}]}
-# Evaluate `visual_data['markers']` from the current inputs and state.
+# Compute `visual_data['markers']` from `[{'x': point, 'y': float(f(point)), 'label': 'select...`
 visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected input'}]
 ```
 
@@ -187,11 +224,11 @@ def composed(x):
 for point in (-1., 0., 2.):
     # Differentiate the objective to obtain `observed` via automatic differentiation.
     observed = jax.grad(composed)(point)
-    # Evaluate `expected` from the current inputs and state.
+    # Compute `expected` from `6. * (3. * point + 1.)`
     expected = 6. * (3. * point + 1.)
     # Print the observed values to compare against the expected result.
     print("chain rule:", point, float(observed))
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(observed, expected)`
     assert jnp.allclose(observed, expected)
 ```
 
@@ -208,11 +245,11 @@ The inner derivative contributes a factor of $3$. Omitting that factor is a chai
 def cubic32(x):
     # Return `x ** 3` to the caller.
     return x ** 3
-# Initialize array `point` with explicit values and shape.
+# Construct `point` via `jnp.array(3., dtype=jnp.float32)`
 point = jnp.array(3., dtype=jnp.float32)
 # Iterate over `step` to step through the computation:
 for step in (1e-1, 1e-2, 1e-3, 1e-5, 1e-7):
-    # Evaluate `estimate` from the current inputs and state.
+    # Compute `estimate` from `(cubic32(point + step) - cubic32(point - step)) / (2...`
     estimate = (cubic32(point + step) - cubic32(point - step)) / (2. * step)
     # Print the observed values to compare against the expected result.
     print("h / estimate / error:", step, float(estimate), float(jnp.abs(estimate - 27.)))
@@ -226,7 +263,7 @@ A central difference has truncation error at larger $h$ and cancellation/roundin
 
 ## Make it yours
 
-Foundation · Define $f(x)=x^3$. Derive $f\prime(x)$, predict the values at $-2$, $0$, and $3$, then verify every prediction with JAX. Explain why the zero at $x=0$ does not establish a minimum.
+Foundation · Define $f(x)=x^3$. Derive $f\prime(x)$, predict the values at $-2$, $0$, and $3$, then verify every prediction with JAX. Explain why the zero at $x=0$ is separate from a minimum.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -237,8 +274,8 @@ Foundation · Define $f(x)=x^3$. Derive $f\prime(x)$, predict the values at $-2$
 **Step-by-step implementation plan:**
 1. Return `x ** 3` to the caller.
 2. Iterate over `point` to step through the computation:
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-4. Verify contract: `cubic(-0.1) < cubic(0.0) < cubic(0.1)`.
+3. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)`
+4. Assert invariant `cubic(-0.1) < cubic(0.) < cubic(0.1)` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -249,9 +286,9 @@ def cubic(x):
     return ...  # TODO: return computed result
 # Iterate over `point` to step through the computation:
 for point in (-2., 0., 3.):
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)`
     assert jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)  # TODO: complete assertion check
-# Verify contract: `cubic(-0.1) < cubic(0.0) < cubic(0.1)`.
+# Assert invariant `cubic(-0.1) < cubic(0.) < cubic(0.1)` holds
 assert cubic(-0.1)  # TODO: complete assertion check
 ```
 
@@ -264,9 +301,9 @@ def cubic(x):
     return x ** 3
 # Iterate over `point` to step through the computation:
 for point in (-2., 0., 3.):
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)`
     assert jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)
-# Verify contract: `cubic(-0.1) < cubic(0.0) < cubic(0.1)`.
+# Assert invariant `cubic(-0.1) < cubic(0.) < cubic(0.1)` holds
 assert cubic(-0.1) < cubic(0.) < cubic(0.1)
 ```
 
@@ -293,7 +330,7 @@ grad defaults to `argnums=0.` The other input remains an input to the transforme
 **Step-by-step implementation plan:**
 1. Return `weight * x` to the caller.
 2. Verify that the numerical values match the expected reference within tolerance.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -304,7 +341,7 @@ def scalar_prediction(weight, x):
     return ...  # TODO: return computed result
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)`
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)  # TODO: complete assertion check
 ```
 
@@ -317,7 +354,7 @@ def scalar_prediction(weight, x):
     return weight * x
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)`
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)
 ```
 
@@ -367,7 +404,7 @@ def mean_cost(x):
 for point in (0., 1., 2.):
     # Verify that the numerical values match the expected reference within tolerance.
     assert jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2....`
     assert jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))  # TODO: complete assertion check
 ```
 
@@ -386,7 +423,7 @@ def mean_cost(x):
 for point in (0., 1., 2.):
     # Verify that the numerical values match the expected reference within tolerance.
     assert jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2....`
     assert jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))
 ```
 

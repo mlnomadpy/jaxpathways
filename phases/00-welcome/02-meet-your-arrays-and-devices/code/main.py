@@ -21,9 +21,9 @@ print("Dtype:", x.dtype)
 print("Devices:", x.devices())
 # Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
@@ -42,29 +42,29 @@ print("Dtype:", x.dtype)
 print("Devices:", x.devices())
 # Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 
 # Figure data experiment
 # Compute figure data for: Rows are groups of observations
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'heatmap', 'values': x.tolist(), 'rows': ['...`
 visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}
 
 # Experiment: Center each measurement
 # Experiment — Center each measurement: The calculation reuses one mean per column.
 # Reduce along axis=0 to compute `means`.
 means=x.mean(axis=0,keepdims=True)
-# Evaluate `centered` from the current inputs and state.
+# Compute `centered` from `x-means`
 centered=x-means
 # Print the observed values to compare against the expected result.
 print("Means:",means)
 # Print diagnostic summary of the computed outputs.
 print("Centered:",centered)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `means.shape==(1,3)`
 assert means.shape==(1,3)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`
 assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 
 # Experiment: Keep a host reference
@@ -73,7 +73,7 @@ assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 import numpy as np
 # Convert `host` to a host NumPy array for inspection or verification.
 host=np.asarray(x)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `host.shape==(2,3)`
 assert host.shape==(2,3)
 # Create evenly spaced index values in ``.
 np.testing.assert_array_equal(host,np.arange(6).reshape(2,3))
@@ -84,9 +84,9 @@ print("Host dtype:",host.dtype)
 # Exercise solution: Compute column sums instead.
 # Reduce along axis=0 to compute `column_sums`.
 column_sums = x.sum(axis=0)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape == (3,)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 
 # Reference practice: Add a new observation
@@ -95,7 +95,7 @@ assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
 
 # Reference practice: Diagnose an impossible reshape
@@ -107,6 +107,6 @@ except TypeError:
     print("Expected element-count mismatch")
 else:
     raise AssertionError("Expected reshape to fail")
-# Verify contract: `x.reshape(2, 3).size == 6`.
+# Assert invariant `x.reshape(2,3).size==6` holds
 assert x.reshape(2,3).size==6
 print("PASS: welcome-02")

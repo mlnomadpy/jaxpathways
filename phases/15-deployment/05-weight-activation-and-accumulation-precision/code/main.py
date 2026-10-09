@@ -5,14 +5,14 @@
 # Import numpy for this computation.
 import numpy as np
 import jax.numpy as jnp
-# Initialize array `x` with explicit values and shape.
+# Compute `x` from `np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)`
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
-# Initialize array `w` with explicit values and shape.
+# Compute `w` from `np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.flo...`
 w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
 # Perform matrix / vector contraction (`@`) to compute `reference`.
 reference = x @ w
 
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)`
 np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)
 
 # Round inputs and weights, then accumulate explicitly
@@ -41,7 +41,7 @@ def quantize_weights(weights, bits):
     # Guard input contract (`bits not in (4, 8)`) and fail fast if violated.
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
-    # Evaluate `limit` from the current inputs and state.
+    # Compute `limit` from `2 ** (bits - 1) - 1`
     limit = 2 ** (bits - 1) - 1
     # Reduce along axis=0 to compute `maxima`.
     maxima = np.max(np.abs(weights), axis=0, keepdims=True)
@@ -67,13 +67,13 @@ for bits in (8, 4):
     q, scale = quantize_weights(w, bits)
     # Cast or evaluate `reconstructed` in explicit floating-point precision.
     reconstructed = q.astype(np.float32) * scale
-    # Verify contract: `np.all(np.abs(reconstructed - w) <= scale / 2 + 1e-06)`.
+    # Check numerical equivalence within tolerance: `np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)`
     assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)
     # Independent error bound: |x deltaW| <= |x| |deltaW|.
     error = np.abs(x @ reconstructed-reference)
     # Perform matrix contraction / projection to compute `bound`.
     bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `np.all(error <= bound + 1e-6)` holds
     assert np.all(error <= bound + 1e-6)
     # Print diagnostic summary of the computed outputs.
     print("W%dA32 simulated output error" % bits, float(error.max()))
@@ -82,9 +82,9 @@ for bits in (8, 4):
 # Import numpy for this computation.
 import numpy as np
 import jax.numpy as jnp
-# Initialize array `x` with explicit values and shape.
+# Compute `x` from `np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)`
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
-# Initialize array `w` with explicit values and shape.
+# Compute `w` from `np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.flo...`
 w = np.array([[.11, -1.8], [.7, .2], [-.3, 2.4]], np.float32)
 # Perform matrix / vector contraction (`@`) to compute `reference`.
 reference = x @ w
@@ -112,7 +112,7 @@ def quantize_weights(weights, bits):
     # Guard input contract (`bits not in (4, 8)`) and fail fast if violated.
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
-    # Evaluate `limit` from the current inputs and state.
+    # Compute `limit` from `2 ** (bits - 1) - 1`
     limit = 2 ** (bits - 1) - 1
     # Reduce along axis=0 to compute `maxima`.
     maxima = np.max(np.abs(weights), axis=0, keepdims=True)
@@ -128,22 +128,22 @@ for bits in (8, 4):
     q, scale = quantize_weights(w, bits)
     # Cast or evaluate `reconstructed` in explicit floating-point precision.
     reconstructed = q.astype(np.float32) * scale
-    # Verify contract: `np.all(np.abs(reconstructed - w) <= scale / 2 + 1e-06)`.
+    # Check numerical equivalence within tolerance: `np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)`
     assert np.all(np.abs(reconstructed-w) <= scale / 2 + 1e-6)
     # Independent error bound: |x deltaW| <= |x| |deltaW|.
     error = np.abs(x @ reconstructed-reference)
     # Perform matrix contraction / projection to compute `bound`.
     bound = np.abs(x) @ np.broadcast_to(scale / 2, w.shape)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `np.all(error <= bound + 1e-6)` holds
     assert np.all(error <= bound + 1e-6)
     # Print diagnostic summary of the computed outputs.
     print("W%dA32 simulated output error" % bits, float(error.max()))
 
 # Figure data experiment
 # Compute figure data for: Precision choices trade representation for output error
-# Evaluate `names` from the current inputs and state.
+# Compute `names` from `[]`
 names = []
-# Evaluate `errors` from the current inputs and state.
+# Compute `errors` from `[]`
 errors = []
 # Loop over `(name, dtype)` in `[('FP32', jnp.float32), ('FP16 → FP32', jnp.float16), ('BF16 → FP32', jnp.bfloat16)]`:
 for name, dtype in [('FP32', jnp.float32), ('FP16 → FP32', jnp.float16), ('BF16 → FP32', jnp.bfloat16)]:
@@ -159,7 +159,7 @@ for bits_plot in (8, 4):
     names.append('W' + str(bits_plot) + ' A32')
     # Cast or evaluate `` in explicit floating-point precision.
     errors.append(float(np.max(np.abs(x @ (q_plot.astype(np.float32) * s_plot) - reference))))
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': names, 'ylabel': 'maximum ...`
 visual_data = {'kind': 'bar', 'labels': names, 'ylabel': 'maximum absolute output error', 'series': [{'label': 'CPU reference error', 'y': errors}]}
 # Deliberately exact grid values make an independent hand calculation possible.
 a_sx, a_zx = .25, -3
@@ -175,19 +175,19 @@ a_bias = np.array([.125, -.0625], np.float64)
 a_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)
 # Check the wide result before representing it with an INT32 accumulator.
 a_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(n...` holds
 assert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))
 # Run `a_wide.astype` to compute `a_acc`.
 a_acc = a_wide.astype(np.int32)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_acc, [[5, 15]])`
 np.testing.assert_array_equal(a_acc, [[5, 15]])
 # Run `a_acc.astype` to compute `a_real`.
 a_real = a_acc.astype(np.float64) * a_sx * a_sw
 # Independent real-valued input/weights, written without decoding the codes.
 a_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_real, [[.625, .9375]])`
 np.testing.assert_array_equal(a_real, [[.625, .9375]])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)`
 np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)
 # Function `output_grid(real, scale, zero_point)` implementing this stage's computation:
 def output_grid(real, scale, zero_point):
@@ -199,7 +199,7 @@ def output_grid(real, scale, zero_point):
         raise ValueError('integer INT8 zero point required')
     # Run `np.rint` to compute `unbounded`.
     unbounded = np.rint(real / scale) + zero_point
-    # Evaluate `clipped` from the current inputs and state.
+    # Compute `clipped` from `(unbounded < -128) | (unbounded > 127)`
     clipped = (unbounded < -128) | (unbounded > 127)
     # Combine or mask array elements to form `codes`.
     codes = np.clip(unbounded, -128, 127).astype(np.int8)
@@ -208,28 +208,28 @@ def output_grid(real, scale, zero_point):
 
 # Run `output_grid` to compute `(a_codes, a_restored, a_clipped)`.
 a_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_codes, [[2, 7]])`
 np.testing.assert_array_equal(a_codes, [[2, 7]])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not a_clipped.any()` holds
 assert not a_clipped.any()
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, r...`
 np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)
 # Perform matrix contraction / projection to compute `a_wrong`.
 a_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])`
 np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])
 # Run `output_grid` to compute `(_, a_saturated, a_small_clipped)`.
 _, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `a_small_clipped.all()` holds
 assert a_small_clipped.all()
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_saturated, [[135./256, 135./`
 np.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])
 # Print diagnostic summary of the computed outputs.
 print('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())
 # Print diagnostic summary of the computed outputs.
 print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.tolist(), a_saturated.tolist())
 
-# Evaluate `first_panel` from the current inputs and state.
+# Compute `first_panel` from `visual_data`
 first_panel = visual_data
 # Combine or mask array elements to form `visual_data`.
 visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'output 1'], 'ylabel': 'output value', 'series': [
@@ -239,11 +239,11 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 # Experiment: Calibrate an activation range, then shift it
 # Experiment — Calibrate an activation range, then shift it: Do not recalibrate on the test set to hide this error.
-# Initialize array `calibration` with explicit values and shape.
+# Compute `calibration` from `np.linspace(-1., 1., 101, dtype=np.float32)`
 calibration = np.linspace(-1., 1., 101, dtype=np.float32)
 # Aggregate array values to compute `activation_scale`.
 activation_scale = float(np.max(np.abs(calibration))) / 127
-# Initialize array `held_out` with explicit values and shape.
+# Compute `held_out` from `np.array([.2, .9, 4.], np.float32)`
 held_out = np.array([.2, .9, 4.], np.float32)
 # Combine or mask array elements to form `activation_codes`.
 activation_codes = np.clip(np.rint(held_out / activation_scale), -127, 127).astype(np.int8)
@@ -251,7 +251,7 @@ activation_codes = np.clip(np.rint(held_out / activation_scale), -127, 127).asty
 restored_activations = activation_codes.astype(np.float32) * activation_scale
 # Run `np.count_nonzero` to compute `clipped`.
 clipped = np.count_nonzero(np.abs(held_out) > 127 * activation_scale)
-# Verify contract: `clipped == 1 and abs(float(restored_activations[-1]) - 4.0) > 2.9`.
+# Check numerical equivalence within tolerance: `clipped == 1 and abs(float(restored_activations[-1])-4.) > 2.9`
 assert clipped == 1 and abs(float(restored_activations[-1])-4.) > 2.9
 # Print the observed values to compare against the expected result.
 print("Clipped values:", clipped, "reconstructed:", restored_activations)
@@ -259,31 +259,31 @@ print("Clipped values:", clipped, "reconstructed:", restored_activations)
 # Experiment: Include zero points, bias and the output grid
 # Deliberately exact grid values make an independent hand calculation possible.
 a_sx, a_zx = .25, -3
-# Initialize array `a_sw` with explicit values and shape.
+# Compute `a_sw` from `np.array([.5, .25], np.float64)`
 a_sw = np.array([.5, .25], np.float64)
-# Initialize array `a_qx` with explicit values and shape.
+# Compute `a_qx` from `np.array([[-3, 1, 5]], np.int8)`
 a_qx = np.array([[-3, 1, 5]], np.int8)
-# Initialize array `a_qw` with explicit values and shape.
+# Compute `a_qw` from `np.array([[2, -1], [-1, 2], [1, 1]], np.int8)`
 a_qw = np.array([[2, -1], [-1, 2], [1, 1]], np.int8)
-# Initialize array `a_bias` with explicit values and shape.
+# Compute `a_bias` from `np.array([.125, -.0625], np.float64)`
 a_bias = np.array([.125, -.0625], np.float64)
 # Run `np.rint` to compute `a_bias_codes`.
 a_bias_codes = np.rint(a_bias / (a_sx * a_sw)).astype(np.int64)
 # Check the wide result before representing it with an INT32 accumulator.
 a_wide = (a_qx.astype(np.int64) - a_zx) @ a_qw.astype(np.int64) + a_bias_codes
-# Verify contract: `np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.i...`.
+# Assert invariant `np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(n...` holds
 assert np.all((a_wide >= np.iinfo(np.int32).min) & (a_wide <= np.iinfo(np.int32).max))
 # Run `a_wide.astype` to compute `a_acc`.
 a_acc = a_wide.astype(np.int32)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_acc, [[5, 15]])`
 np.testing.assert_array_equal(a_acc, [[5, 15]])
 # Run `a_acc.astype` to compute `a_real`.
 a_real = a_acc.astype(np.float64) * a_sx * a_sw
 # Independent real-valued input/weights, written without decoding the codes.
 a_reference = np.array([[0., 1., 2.]]) @ np.array([[1., -.25], [-.5, .5], [.5, .25]]) + a_bias
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_real, [[.625, .9375]])`
 np.testing.assert_array_equal(a_real, [[.625, .9375]])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)`
 np.testing.assert_allclose(a_real, a_reference, atol=1e-12, rtol=0)
 # Function `output_grid(real, scale, zero_point)` implementing this stage's computation:
 def output_grid(real, scale, zero_point):
@@ -295,7 +295,7 @@ def output_grid(real, scale, zero_point):
         raise ValueError('integer INT8 zero point required')
     # Run `np.rint` to compute `unbounded`.
     unbounded = np.rint(real / scale) + zero_point
-    # Evaluate `clipped` from the current inputs and state.
+    # Compute `clipped` from `(unbounded < -128) | (unbounded > 127)`
     clipped = (unbounded < -128) | (unbounded > 127)
     # Combine or mask array elements to form `codes`.
     codes = np.clip(unbounded, -128, 127).astype(np.int8)
@@ -304,21 +304,21 @@ def output_grid(real, scale, zero_point):
 
 # Run `output_grid` to compute `(a_codes, a_restored, a_clipped)`.
 a_codes, a_restored, a_clipped = output_grid(a_real, .0625, -8)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_codes, [[2, 7]])`
 np.testing.assert_array_equal(a_codes, [[2, 7]])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not a_clipped.any()` holds
 assert not a_clipped.any()
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, r...`
 np.testing.assert_allclose(a_restored, a_reference, atol=1e-12, rtol=0)
 # Perform matrix contraction / projection to compute `a_wrong`.
 a_wrong = (a_qx.astype(np.int64) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])`
 np.testing.assert_array_equal(a_wrong, [[-.125, .5625]])
 # Run `output_grid` to compute `(_, a_saturated, a_small_clipped)`.
 _, a_saturated, a_small_clipped = output_grid(a_real, 1./256, -8)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `a_small_clipped.all()` holds
 assert a_small_clipped.all()
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a_saturated, [[135./256, 135./`
 np.testing.assert_array_equal(a_saturated, [[135./256, 135./256]])
 # Print diagnostic summary of the computed outputs.
 print('Affine accumulators:', a_acc.tolist(), 'output codes:', a_codes.tolist())
@@ -327,7 +327,7 @@ print('Correct / missing zero point / clipped:', a_restored.tolist(), a_wrong.to
 
 # Experiment: Give small and large output channels different grids
 # Experiment — Give small and large output channels different grids: The global maximum determines a coarse grid for every channel.
-# Initialize array `heterogeneous` with explicit values and shape.
+# Compute `heterogeneous` from `np.array([[.01, 10.], [-.02, -5.], [.03, 2.]], np.fl...`
 heterogeneous = np.array([[.01, 10.], [-.02, -5.], [.03, 2.]], np.float32)
 # Run `quantize_weights` to compute `(channel_codes, channel_scales)`.
 channel_codes, channel_scales = quantize_weights(heterogeneous, 8)
@@ -337,11 +337,11 @@ per_channel = channel_codes.astype(np.float32) * channel_scales
 shared_scale = np.max(np.abs(heterogeneous)) / 127
 # Cast or evaluate `shared` in explicit floating-point precision.
 shared = np.clip(np.rint(heterogeneous/shared_scale), -127, 127).astype(np.int8).astype(np.float32)*shared_scale
-# Verify contract: `np.all(shared[:, 0] == 0)`.
+# Assert invariant `np.all(shared[:,0] == 0)` holds
 assert np.all(shared[:,0] == 0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])) < .001`
 assert np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])) < .001
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(shared[:,0], [0.,0.,0.], atol=0)`
 np.testing.assert_allclose(shared[:,0], [0.,0.,0.], atol=0)
 # Print the observed values to compare against the expected result.
 print('Small-channel max error; shared / per-channel:', np.max(np.abs(shared[:,0]-heterogeneous[:,0])), np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])))
@@ -353,9 +353,9 @@ with_zero = np.column_stack((w, np.zeros(3, np.float32)))
 q, scale = quantize_weights(with_zero, 8)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(q[:, -1], 0)`
 np.testing.assert_array_equal(q[:, -1], 0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal((q * scale)[:, -1], 0)`
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
 # Print the observed values to compare against the expected result.
 print("Zero channel handled")
@@ -372,9 +372,9 @@ qw, sw = quantize_weights(w, 8)
 accumulator = qx.astype(np.int32) @ qw.astype(np.int32)
 # Cast or evaluate `y_integer` in explicit floating-point precision.
 y_integer = accumulator.astype(np.float32) * sx * sw
-# Verify contract: `accumulator.dtype == np.int32`.
+# Assert invariant `accumulator.dtype == np.int32` holds
 assert accumulator.dtype == np.int32
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(y_integer, reference, atol=.06, rtol=0)`
 np.testing.assert_allclose(y_integer, reference, atol=.06, rtol=0)
 # Print the observed values to compare against the expected result.
 print("W8A8 fixture error", float(np.max(np.abs(y_integer-reference))))
@@ -384,19 +384,19 @@ print("W8A8 fixture error", float(np.max(np.abs(y_integer-reference))))
 shifted_zx = 17
 # Run `a_qx.astype` to compute `shifted_codes_wide`.
 shifted_codes_wide = a_qx.astype(np.int64) + (shifted_zx - a_zx)
-# Verify contract: `np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))`.
+# Assert invariant `np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))` holds
 assert np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))
 # Run `shifted_codes_wide.astype` to compute `shifted_codes`.
 shifted_codes = shifted_codes_wide.astype(np.int8)
 # Perform matrix contraction / projection to compute `shifted_acc`.
 shifted_acc = (shifted_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(shifted_acc, a_acc)`
 np.testing.assert_array_equal(shifted_acc, a_acc)
 # Run `np.full` to compute `zero_codes`.
 zero_codes = np.full((1, 3), shifted_zx, np.int8)
 # Perform matrix contraction / projection to compute `zero_result`.
 zero_result = ((zero_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(zero_result, a_bias[None, :])`
 np.testing.assert_array_equal(zero_result, a_bias[None, :])
 # Iterate over `bad_scale` to step through the computation:
 for bad_scale in (0., -1., float('nan')):
@@ -409,13 +409,13 @@ print('Code-origin invariance and bias-only zero input verified.')
 # Reference practice: Account for actual low-bit storage
 # Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
 q4, s4 = quantize_weights(w, 4)
-# Evaluate `float_weight_bytes` from the current inputs and state.
+# Compute `float_weight_bytes` from `w.nbytes`
 float_weight_bytes = w.nbytes
-# Evaluate `simulated_weight_and_scale_bytes` from the current inputs and state.
+# Compute `simulated_weight_and_scale_bytes` from `q4.nbytes + s4.nbytes`
 simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes
-# Evaluate `ideal_packed_weight_and_scale_bytes` from the current inputs and state.
+# Compute `ideal_packed_weight_and_scale_bytes` from `(w.size + 1)//2 + s4.nbytes`
 ideal_packed_weight_and_scale_bytes = (w.size + 1)//2 + s4.nbytes
-# Verify contract: `(float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_...`.
+# Assert invariant `(float_weight_bytes, simulated_weight_and_scale_bytes, ideal_pack...` holds
 assert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes) == (24,14,11)
 # Print the observed values to compare against the expected result.
 print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)

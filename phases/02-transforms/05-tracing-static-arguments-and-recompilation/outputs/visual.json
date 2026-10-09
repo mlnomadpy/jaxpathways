@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-05",
-  "contentHash": "4114f84833c3e284bc852412d692841c9da0c4141085dba841e0ed477c85bad6",
+  "contentHash": "1e6efabd4583780a4093c648d2993c7ce25c494a90d5bb29eb1545309f8f04e5",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
-  "kind": "conceptual",
-  "generatedAt": "2026-10-06T15:35:06.373401+00:00",
+  "kind": "executed",
+  "generatedAt": "2026-10-09T12:23:06.803243+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,14 +14,25 @@
   },
   "stdout": "Sum: 6.0\nMean: 2.0\n",
   "data": {
-    "kind": "flow",
-    "nodes": [
-      "Static mode: sum or mean",
-      "Trace Python branch",
-      "Compile selected operations",
-      "Pass dynamic array values",
-      "Return reduced result"
+    "kind": "bar",
+    "x": [
+      0,
+      1
     ],
-    "layout": "sequence"
+    "labels": [
+      "sum",
+      "mean"
+    ],
+    "xlabel": "static mode argument",
+    "ylabel": "compiled(x, mode) output",
+    "series": [
+      {
+        "label": "compiled(x, mode)",
+        "y": [
+          6.0,
+          2.0
+        ]
+      }
+    ]
   }
 }

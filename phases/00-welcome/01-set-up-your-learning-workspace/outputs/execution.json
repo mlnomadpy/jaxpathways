@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-01",
-  "contentHash": "3e23e7950028ae270257e542c8edd4d6f16f598123d7c8a9a860f6b1fbf478e2",
+  "contentHash": "0cdd92d8c8b335b67a3ace087e106f0870905617ce969f8e770a77eb23e2b48e",
   "executedAt": "2026-10-08T14:01:07.065447+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,19 @@
   "stdout": "Python: 3.14.3\nJAX: 0.9.2\nNumPy: 2.4.4\nBackend: cpu\nDevices: [CpuDevice(id=0)]\nSum: 6.0\nChanged experiment sum: 15.0\nPASS: welcome-01\n",
   "notebookCells": [
     {
-      "sourceHash": "3bc908d8a43d013407d8b28cbe11c36e0018ebb10ed3da2ac05bb4957169c62b",
+      "sourceHash": "3181195c9288555b6db37efaaff861c7c5e01458334c2b2b26e58185c240c98e",
+      "outputs": []
+    },
+    {
+      "sourceHash": "03214a36adabf9eaf5ff9b8ed0b88a8bbe8f18a4c7e92ee8a8e87f4a8f5cd96a",
+      "outputs": []
+    },
+    {
+      "sourceHash": "d9a92847f30cb85e14c45f0d87e735a925b94f9fc129d7a923e36accac0250f5",
+      "outputs": []
+    },
+    {
+      "sourceHash": "2e529e5d8c35c413e12b8ce36c00f0dc5c6fbda7ae1f19cc534db7cc79223235",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +43,11 @@
       ]
     },
     {
-      "sourceHash": "893edbce1132a4184357676c05725b3af0a94b423d778b0aab8ed09eaf228d04",
+      "sourceHash": "3a1394b1cc79bd8d5dfd003c8e992e3df2dfe5be2d354b75b98367906d52dff3",
+      "outputs": []
+    },
+    {
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",
@@ -46,20 +62,12 @@
       ]
     },
     {
-      "sourceHash": "a2c816f26ab5e110cfc4f9153222b76dfcc9e076e2643f196c3ba86710c180b9",
+      "sourceHash": "4f0006a340e73c80cfa19894a4eb4493a37ff5d2f9bbc5ef61270cc3eae7d117",
       "outputs": []
     },
     {
-      "sourceHash": "3406e38c9114e384efc70e9e2af8c457d3331f61f6242eb0e0fad5252d0476b5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Changed experiment sum: 15.0\n"
-          ]
-        }
-      ]
+      "sourceHash": "3e503e768ad6afb8a325fa278c410b8daa5e11267ebfe790dd04f85ae8378214",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

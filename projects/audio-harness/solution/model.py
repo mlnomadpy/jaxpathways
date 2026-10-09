@@ -33,7 +33,9 @@ def digest_arrays(*arrays):
         # Update state in place with the new values.
         # Update state in place with the new values.
         # Update state in place with the new values.
-        h.update(str(a.dtype).encode());h.update(str(a.shape).encode());h.update(a.tobytes())
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
     # Return `h.hexdigest()` to the caller.
     return h.hexdigest()
 
@@ -181,7 +183,8 @@ def update_arrays(W,b,vW,vb,normalized,labels,rate,momentum):
     loss,(gW,gb)=jax.value_and_grad(objective,argnums=(0,1))(W,b,normalized,labels)
     # Evaluate `vW` from the current inputs and state.
     # Evaluate `vb` from the current inputs and state.
-    vW=momentum*vW+gW;vb=momentum*vb+gb
+    vW=momentum*vW+gW
+    vb=momentum*vb+gb
     # Return `(W - rate * vW, b - rate * vb, vW, vb, loss)` to the caller.
     return W-rate*vW,b-rate*vb,vW,vb,loss
 
@@ -197,7 +200,8 @@ def step(state,data):
     if state["cursor"]==len(data["labels"]):
         state["key"],order_key=jax.random.split(state["key"])
         state["order"]=jax.random.permutation(order_key,len(data["labels"]))
-        state["cursor"]=0;state["epoch"]+=1
+        state["cursor"]=0
+        state["epoch"]+=1
     # Evaluate `cursor` from the current inputs and state.
     cursor=state["cursor"]
     # Convert `indices` to a host NumPy array for inspection or verification.
@@ -224,7 +228,8 @@ def step(state,data):
         jnp.asarray(data["labels"][indices]),state["config"]["rate"],state["config"]["momentum"])
     # Accumulate the next contribution into `state['cursor']`.
     # Accumulate the next contribution into `state['step']`.
-    state["cursor"]+=len(indices);state["step"]+=1
+    state["cursor"]+=len(indices)
+    state["step"]+=1
     # Convert `trace` to a host NumPy array for inspection or verification.
     trace={"ids":[data["ids"][int(i)] for i in indices],"crop_offsets":np.asarray(offsets).tolist(),
            "gains":np.asarray(gains).ravel().tolist(),"feature_sha256":digest_arrays(np.asarray(feat)),
@@ -241,7 +246,8 @@ ARRAY_FIELDS=("W","b","vW","vb","mean","std","key","order")
 def save_checkpoint(path,state):
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path=Path(path);path.mkdir(parents=True,exist_ok=True)
+    path=Path(path)
+    path.mkdir(parents=True,exist_ok=True)
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(path/"state.npz",**{k:np.asarray(state[k]) for k in ARRAY_FIELDS})
     # Compute deterministic cryptographic digest `manifest` for provenance verification.
@@ -257,7 +263,8 @@ def save_checkpoint(path,state):
 def load_checkpoint(path,data,config):
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
-    path=Path(path);manifest=json.loads((path/"checkpoint.json").read_text())
+    path=Path(path)
+    manifest=json.loads((path/"checkpoint.json").read_text())
     # Guard input contract (`manifest['dataset_sha256'] != dataset_hash(data) or manifest['config'] != config`) and fail fast if violated.
     if manifest["dataset_sha256"]!=dataset_hash(data) or manifest["config"]!=config:
         raise ValueError("dataset or training configuration mismatch")
@@ -291,7 +298,10 @@ def evaluate(state,data,batch_size=13):
     # Evaluate `loss_sum` from the current inputs and state.
     # Evaluate `correct` from the current inputs and state.
     # Allocate initialized array `confusion` with the specified shape and dtype.
-    count=0;loss_sum=0.;correct=0;confusion=np.zeros((3,3),dtype=np.int64)
+    count=0
+    loss_sum=0.
+    correct=0
+    confusion=np.zeros((3,3),dtype=np.int64)
     # Run `fixed_windows` to compute `windows`.
     windows=fixed_windows(data)
     # Loop over `start` in `range(0, len(windows), batch_size)`:
@@ -308,7 +318,8 @@ def evaluate(state,data,batch_size=13):
         predicted=logits.argmax(axis=1)
         # Accumulate the next contribution into `loss_sum`.
         # Accumulate the next contribution into `count`.
-        loss_sum+=float(-logp[np.arange(len(y)),y].sum());count+=len(y)
+        loss_sum+=float(-logp[np.arange(len(y)),y].sum())
+        count+=len(y)
         # Accumulate the next contribution into `correct`.
         correct+=int((predicted==y).sum())
         # Run `np.add.at` to perform the next check or state transition.
@@ -331,7 +342,8 @@ def calibrate(state,training_data):
     activation_scale=max(float(np.max(np.abs(normalized)))/127,1e-8)
     # Convert `W` to a host NumPy array for inspection or verification.
     # Reduce across the target axis to summarize `maximum`.
-    W=np.asarray(state["W"]);maximum=np.max(np.abs(W),axis=0,keepdims=True)
+    W=np.asarray(state["W"])
+    maximum=np.max(np.abs(W),axis=0,keepdims=True)
     # Cast or evaluate `weight_scales` in explicit floating-point precision.
     weight_scales=np.where(maximum==0,1.,maximum/127).astype(np.float32)
     # Combine or mask array elements to form `q`.
@@ -349,7 +361,8 @@ def policy_scores(state,waveforms,calibration,policy="fp32"):
     if policy=="fp32":return x@state["W"]+state["b"]
     # Create device-backed JAX array `q`.
     # Create device-backed JAX array `s`.
-    q=jnp.asarray(calibration["qW"]);s=jnp.asarray(calibration["weight_scales"])
+    q=jnp.asarray(calibration["qW"])
+    s=jnp.asarray(calibration["weight_scales"])
     # Branch on condition `policy == 'w8a32'`:
     if policy=="w8a32":return x@(q.astype(jnp.float32)*s)+state["b"]
     # Guard input contract (`policy != 'w8a8'`) and fail fast if violated.
@@ -368,7 +381,8 @@ def policy_scores(state,waveforms,calibration,policy="fp32"):
 def export_release(path,state,calibration):
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path=Path(path);path.mkdir(parents=True,exist_ok=True)
+    path=Path(path)
+    path.mkdir(parents=True,exist_ok=True)
     # Guard input contract (`calibration['calibration_sha256'] != state['dataset_sha256']`) and fail fast if violated.
     if calibration["calibration_sha256"]!=state["dataset_sha256"]:
         raise ValueError("calibration provenance mismatch")
@@ -384,7 +398,8 @@ def export_release(path,state,calibration):
             data=export.export(function)(jax.ShapeDtypeStruct((batch,1024),jnp.float32)).serialize()
             # Evaluate `name` from the current inputs and state.
             # Execute the next step of the computation.
-            name=f"{policy}-b{batch}.jaxexport";(path/name).write_bytes(data)
+            name=f"{policy}-b{batch}.jaxexport"
+            (path/name).write_bytes(data)
             # Compute deterministic cryptographic digest `artifacts[f'{policy}:{batch}']` for provenance verification.
             artifacts[f"{policy}:{batch}"]={"file":name,"sha256":hashlib.sha256(data).hexdigest()}
     # Convert `manifest` to a host NumPy array for inspection or verification.
@@ -409,7 +424,8 @@ def export_release(path,state,calibration):
 def load_release(path):
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
-    path=Path(path);manifest=json.loads((path/"release.json").read_text())
+    path=Path(path)
+    manifest=json.loads((path/"release.json").read_text())
     # Guard input contract (`manifest['preprocessing'] != PREPROCESS or manifest['jax'] != jax.__version__`) and fail fast if violated.
     if manifest["preprocessing"]!=PREPROCESS or manifest["jax"]!=jax.__version__:
         raise ValueError("release preprocessing/runtime mismatch")
@@ -445,7 +461,8 @@ def infer_release(manifest,artifacts,waveforms,sample_rate=8000,channels=1,
 def benchmark(manifest,artifacts,waveforms,policy="fp32",repeats=30):
     # Record execution timing or profiler trace in `began`.
     # Execute the next step of the computation.
-    began=time.perf_counter();infer_release(manifest,artifacts,waveforms,policy=policy)
+    began=time.perf_counter()
+    infer_release(manifest,artifacts,waveforms,policy=policy)
     # Record execution timing or profiler trace in `first_ms`.
     first_ms=(time.perf_counter()-began)*1000
     # Evaluate `samples` from the current inputs and state.
@@ -454,7 +471,8 @@ def benchmark(manifest,artifacts,waveforms,policy="fp32",repeats=30):
     for _ in range(repeats):
         # Record execution timing or profiler trace in `began`.
         # Execute the next step of the computation.
-        began=time.perf_counter();infer_release(manifest,artifacts,waveforms,policy=policy)
+        began=time.perf_counter()
+        infer_release(manifest,artifacts,waveforms,policy=policy)
         # Record execution timing or profiler trace in ``.
         samples.append((time.perf_counter()-began)*1000)
     # Return `{'first_request_ms': first_ms, 'samples_ms': samples, 'p50_ms': float(np.percentile(samples, 50)), 'p95_ms': float(np.percentile(samples, 95)), 'boundary': 'validated decoded PCM + placement + exported STFT/normalization/classifier + wait + host outputs', 'excluded': 'file decoding, audio capture, window buffering, networking', 'device': 'CPU', 'audio_duration_ms': 128.0, 'examples_per_second': 1000 * len(waveforms) / float(np.percentile(samples, 50))}` to the caller.
@@ -470,10 +488,12 @@ def load_wav_manifest(manifest_path,split):
     """Ingest user-provided licensed PCM16/mono/8kHz files; no implicit resampling."""
     # Read or serialize artifact data on disk (`manifest_path`).
     # Read or serialize artifact data on disk (`rows`).
-    manifest_path=Path(manifest_path);rows=json.loads(manifest_path.read_text())
+    manifest_path=Path(manifest_path)
+    rows=json.loads(manifest_path.read_text())
     # Evaluate `groups` from the current inputs and state.
     # Run `set` to compute `ids`.
-    groups={};ids=set()
+    groups={}
+    ids=set()
     # Loop over `row` in `rows`:
     for row in rows:
         # Loop over `field` in `('id', 'file', 'label', 'split', 'group', 'license', 'source', 'sha256')`:
@@ -484,13 +504,16 @@ def load_wav_manifest(manifest_path,split):
         if row["id"] in ids:raise ValueError("duplicate recording identity")
         # Run `ids.add` to perform the next check or state transition.
         # Run `ids.add` to perform the next check or state transition.
-        ids.add(row["id"]);groups.setdefault(row["group"],set()).add(row["split"])
+        ids.add(row["id"])
+        groups.setdefault(row["group"],set()).add(row["split"])
     # Guard input contract (`any((len(splits) > 1 for splits in groups.values()))`) and fail fast if violated.
     if any(len(splits)>1 for splits in groups.values()):raise ValueError("recording group leaks across splits")
     # Evaluate `output` from the current inputs and state.
     # Evaluate `labels` from the current inputs and state.
     # Evaluate `selected` from the current inputs and state.
-    output=[];labels=[];selected=[]
+    output=[]
+    labels=[]
+    selected=[]
     # Loop over `row` in `rows`:
     for row in rows:
         # Branch on condition `row['split'] != split`:
@@ -513,7 +536,9 @@ def load_wav_manifest(manifest_path,split):
         # Append the current step result to `output`.
         # Append the current step result to `output`.
         # Append the current step result to `output`.
-        output.append(samples[offset:offset+1280]);labels.append(row["label"]);selected.append(row)
+        output.append(samples[offset:offset+1280])
+        labels.append(row["label"])
+        selected.append(row)
     # Guard input contract (`not output`) and fail fast if violated.
     if not output:raise ValueError("requested split is empty")
     # Return `{'waveforms': np.asarray(output, dtype=np.float32), 'labels': np.asarray(labels, dtype=np.int32), 'ids': [r['id'] for r in selected], 'groups': [r['group'] for r in selected], 'sample_rate': 8000, 'provenance': 'user-provided WAV manifest ' + str(manifest_path)}` to the caller.

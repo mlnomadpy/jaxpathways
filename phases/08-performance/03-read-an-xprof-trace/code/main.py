@@ -50,7 +50,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 # Run `sorted` to compute `traces`.
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
-# Verify contract: `traces and list(trace_root.rglob('*.xplane.pb'))`.
+# Assert invariant `traces and list(trace_root.rglob('*.xplane.pb'))` holds
 assert traces and list(trace_root.rglob('*.xplane.pb'))
 # Read or serialize artifact data on disk (`events`).
 events=json.loads(gzip.decompress(traces[-1].read_bytes()))['traceEvents']
@@ -61,24 +61,26 @@ def complete(name):
 # Run `complete` to compute `steps`.
 # Run `complete` to compute `input_events`.
 # Run `complete` to compute `model_events`.
-steps=complete('learner_step');input_events=complete('input_wait');model_events=complete('model_and_wait')
-# Verify contract: `len(steps) == len(input_events) == len(model_events) == 4`.
+steps=complete('learner_step')
+input_events=complete('input_wait')
+model_events=complete('model_and_wait')
+# Assert invariant `len(steps)==len(input_events)==len(model_events)==4` holds
 assert len(steps)==len(input_events)==len(model_events)==4
 # Iterate over `(outer, waiting, compute)` to step through the computation:
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
-    # Verify contract: `waiting['ts'] + waiting['dur'] <= compute['ts'] + 1`.
+    # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
-# Evaluate `input_us` from the current inputs and state.
+# Compute `input_us` from `[e['dur'] for e in input_events]`
 input_us=[e['dur'] for e in input_events]
-# Evaluate `model_us` from the current inputs and state.
+# Compute `model_us` from `[e['dur'] for e in model_events]`
 model_us=[e['dur'] for e in model_events]
-# Evaluate `step_us` from the current inputs and state.
+# Compute `step_us` from `[e['dur'] for e in steps]`
 step_us=[e['dur'] for e in steps]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(t>=0 for t in input_us+model_us+step_us)` holds
 assert all(t>=0 for t in input_us+model_us+step_us)
 # Print diagnostic summary of the computed outputs.
 print('Trace directory:',trace_root)
@@ -86,6 +88,10 @@ print('Trace directory:',trace_root)
 print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us':step_us},indent=2))
 # Print diagnostic summary of the computed outputs.
 print('Four named steps verified; host annotations are not isolated device kernels.')
+
+# Step 3: Verify invariants on the completed state
+step_us=[e['dur'] for e in steps]
+assert all(t>=0 for t in input_us+model_us+step_us)
 
 # Step 1 — Prepare a traceable workload: Inputs and compilation precede the measured steps.
 # Import gzip for this computation.
@@ -135,7 +141,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 # Run `sorted` to compute `traces`.
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
-# Verify contract: `traces and list(trace_root.rglob('*.xplane.pb'))`.
+# Assert invariant `traces and list(trace_root.rglob('*.xplane.pb'))` holds
 assert traces and list(trace_root.rglob('*.xplane.pb'))
 # Read or serialize artifact data on disk (`events`).
 events=json.loads(gzip.decompress(traces[-1].read_bytes()))['traceEvents']
@@ -146,24 +152,26 @@ def complete(name):
 # Run `complete` to compute `steps`.
 # Run `complete` to compute `input_events`.
 # Run `complete` to compute `model_events`.
-steps=complete('learner_step');input_events=complete('input_wait');model_events=complete('model_and_wait')
-# Verify contract: `len(steps) == len(input_events) == len(model_events) == 4`.
+steps=complete('learner_step')
+input_events=complete('input_wait')
+model_events=complete('model_and_wait')
+# Assert invariant `len(steps)==len(input_events)==len(model_events)==4` holds
 assert len(steps)==len(input_events)==len(model_events)==4
 # Iterate over `(outer, waiting, compute)` to step through the computation:
 for outer,waiting,compute in zip(steps,input_events,model_events):
     # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+o...` holds
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
-    # Verify contract: `waiting['ts'] + waiting['dur'] <= compute['ts'] + 1`.
+    # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
-# Evaluate `input_us` from the current inputs and state.
+# Compute `input_us` from `[e['dur'] for e in input_events]`
 input_us=[e['dur'] for e in input_events]
-# Evaluate `model_us` from the current inputs and state.
+# Compute `model_us` from `[e['dur'] for e in model_events]`
 model_us=[e['dur'] for e in model_events]
-# Evaluate `step_us` from the current inputs and state.
+# Compute `step_us` from `[e['dur'] for e in steps]`
 step_us=[e['dur'] for e in steps]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(t>=0 for t in input_us+model_us+step_us)` holds
 assert all(t>=0 for t in input_us+model_us+step_us)
 # Print diagnostic summary of the computed outputs.
 print('Trace directory:',trace_root)
@@ -174,17 +182,17 @@ print('Four named steps verified; host annotations are not isolated device kerne
 
 # Figure data experiment
 # Compute figure data for: Where four annotated steps spent host time
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','x':[0,1,2,3],'xlabel':'captured step...`
 visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
 
 # Experiment: Account for the enclosing step
 # Experiment — Account for the enclosing step: Outer and child intervals describe nested boundaries.
 overhead=np.asarray(step_us)-np.asarray(input_us)-np.asarray(model_us)
-# Verify contract: `np.all(overhead >= -2)`.
+# Assert invariant `np.all(overhead>=-2)` holds
 assert np.all(overhead>=-2)
 # Convert `wrong` to a host NumPy array for inspection or verification.
 wrong=np.asarray(step_us)+np.asarray(input_us)+np.asarray(model_us)
-# Verify contract: `np.all(wrong >= np.asarray(step_us))`.
+# Assert invariant `np.all(wrong>=np.asarray(step_us))` holds
 assert np.all(wrong>=np.asarray(step_us))
 # Print the observed values to compare against the expected result.
 print('Unattributed outer time, microseconds:',overhead.tolist())
@@ -196,9 +204,9 @@ print('Wrong double-counted totals:',wrong.tolist())
 model_ms=np.asarray(model_us)/1000
 # Aggregate array values to compute `summary`.
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
-# Verify contract: `summary['minimum_ms'] <= summary['median_ms'] <= summary['maximum_ms...`.
+# Assert invariant `summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']` holds
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
 # Print the observed values to compare against the expected result.
 print(summary)
@@ -207,8 +215,9 @@ print(summary)
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
     # Evaluate `total` from the current inputs and state.
-    # Evaluate `left, right` from the current inputs and state.
-    total=0;left=right=None
+    # Compute `total` from `0`
+    total=0
+    left=right=None
     # Iterate over `(start, end)` to step through the computation:
     for start,end in sorted(intervals):
         # Guard input contract (`end < start`) and fail fast if violated.
@@ -216,12 +225,14 @@ def union_duration(intervals):
         # Branch on condition `right is None`:
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)
-        else:total+=right-left;left,right=start,end
+        else:
+            total+=right-left
+            left,right=start,end
     # Return `total + (0 if right is None else right - left)` to the caller.
     return total+(0 if right is None else right-left)
-# Verify contract: `union_duration([(0, 10), (2, 7), (8, 12)]) == 12`.
+# Assert invariant `union_duration([(0,10),(2,7),(8,12)])==12` holds
 assert union_duration([(0,10),(2,7),(8,12)])==12
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19` holds
 assert sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19
 # Print the observed values to compare against the expected result.
 print('Hypothetical union: 12 microseconds; summed duration: 19.')

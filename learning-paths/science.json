@@ -29,7 +29,7 @@
       "id": "science",
       "projectId": "scientific-inverse",
       "title": "Scientific inverse-problem synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/science.md",
       "url": "assessments/science.html"

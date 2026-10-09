@@ -25,6 +25,10 @@ Keep completion signals separate from the record used to select accepted snapsho
 
 The saved/live/accepted bars represent different boundaries. Their gaps describe work at risk of replay or loss, not necessarily a defect. Interpret them against the failure location and the checkpoint API's stated guarantees.
 
+$$
+T_{\text{commit}} = \max_{h \in \{1,\dots,H\}} T_{\text{write}}^{(h)} < T_{\text{rename}}
+$$
+
 ### Pause and reason
 
 Can a “save requested” message justify deleting the previous accepted checkpoint?
@@ -88,7 +92,7 @@ def transition(state):
     return {'weight':state['weight']+.25,'step':state['step']+1}
 # Function `publish(path, step)` implementing this stage's computation:
 def publish(path, step):
-    # Evaluate `pending` from the current inputs and state.
+    # Compute `pending` from `root/'LATEST.pending'`
     pending=root/'LATEST.pending'
     # Read or serialize artifact data on disk (``).
     pending.write_text(json.dumps({'path':str(path),'step':step}))
@@ -108,11 +112,11 @@ Create a Python file in the course environment. Add this block after the precedi
 
 ```python
 # Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
-# Initialize array `state` with explicit values and shape.
+# Construct `state` via `{'weight':jnp.arange(1024,dtype=jnp.float32),'step':...`
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 # Run `transition` to compute `snapshot`.
 snapshot=transition(state)
-# Evaluate `path` from the current inputs and state.
+# Compute `path` from `root/'step_1'`
 path=root/'step_1'
 # Record execution timing or profiler trace in `t0`.
 t0=time.perf_counter()
@@ -122,7 +126,7 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     # Record execution timing or profiler trace in `returned`.
     returned=time.perf_counter()
-    # Verify contract: `not (root / 'LATEST.json').exists()`.
+    # Assert invariant `not (root/'LATEST.json').exists()` holds
     assert not (root/'LATEST.json').exists()
     # Run `transition` to compute `live`.
     live=transition(snapshot)
@@ -132,16 +136,16 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     committed=time.perf_counter()
     # Run `cp.restore` to compute `restored`.
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `int(restored['step'])==1 and int(live['step'])==2` holds
     assert int(restored['step'])==1 and int(live['step'])==2
     # Run `publish` to perform the next check or state transition.
     publish(path,1)
-# Evaluate `report` from the current inputs and state.
+# Compute `report` from `{'save_call_seconds':returned-t0,'remaining_work_and...`
 report={'save_call_seconds':returned-t0,'remaining_work_and_wait_seconds':committed-returned,
         'accepted_step':accepted()['step'],'live_step':int(live['step'])}
-# Verify contract: `report['accepted_step'] == 1`.
+# Assert invariant `report['accepted_step']==1` holds
 assert report['accepted_step']==1
 ```
 
@@ -165,15 +169,15 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
-# Verify contract: `accepted()['step'] == 1`.
+# Assert invariant `accepted()['step']==1` holds
 assert accepted()['step']==1
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     # Run `cp.restore` to compute `previous`.
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
-# Verify contract: `int(previous['step']) == 1`.
+# Assert invariant `int(previous['step'])==1` holds
 assert int(previous['step'])==1
 # Print the observed values to compare against the expected result.
 print('Checkpoint workspace:',root)
@@ -206,7 +210,7 @@ def transition(state):
     return {'weight':state['weight']+.25,'step':state['step']+1}
 # Function `publish(path, step)` implementing this stage's computation:
 def publish(path, step):
-    # Evaluate `pending` from the current inputs and state.
+    # Compute `pending` from `root/'LATEST.pending'`
     pending=root/'LATEST.pending'
     # Read or serialize artifact data on disk (``).
     pending.write_text(json.dumps({'path':str(path),'step':step}))
@@ -218,11 +222,11 @@ def accepted():
     return json.loads((root/'LATEST.json').read_text())
 
 # Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
-# Initialize array `state` with explicit values and shape.
+# Construct `state` via `{'weight':jnp.arange(1024,dtype=jnp.float32),'step':...`
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 # Run `transition` to compute `snapshot`.
 snapshot=transition(state)
-# Evaluate `path` from the current inputs and state.
+# Compute `path` from `root/'step_1'`
 path=root/'step_1'
 # Record execution timing or profiler trace in `t0`.
 t0=time.perf_counter()
@@ -232,7 +236,7 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     # Record execution timing or profiler trace in `returned`.
     returned=time.perf_counter()
-    # Verify contract: `not (root / 'LATEST.json').exists()`.
+    # Assert invariant `not (root/'LATEST.json').exists()` holds
     assert not (root/'LATEST.json').exists()
     # Run `transition` to compute `live`.
     live=transition(snapshot)
@@ -242,16 +246,16 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     committed=time.perf_counter()
     # Run `cp.restore` to compute `restored`.
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `int(restored['step'])==1 and int(live['step'])==2` holds
     assert int(restored['step'])==1 and int(live['step'])==2
     # Run `publish` to perform the next check or state transition.
     publish(path,1)
-# Evaluate `report` from the current inputs and state.
+# Compute `report` from `{'save_call_seconds':returned-t0,'remaining_work_and...`
 report={'save_call_seconds':returned-t0,'remaining_work_and_wait_seconds':committed-returned,
         'accepted_step':accepted()['step'],'live_step':int(live['step'])}
-# Verify contract: `report['accepted_step'] == 1`.
+# Assert invariant `report['accepted_step']==1` holds
 assert report['accepted_step']==1
 
 # A deliberately interrupted application publication leaves the previous commit selected.
@@ -267,15 +271,15 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
-# Verify contract: `accepted()['step'] == 1`.
+# Assert invariant `accepted()['step']==1` holds
 assert accepted()['step']==1
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     # Run `cp.restore` to compute `previous`.
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
-# Verify contract: `int(previous['step']) == 1`.
+# Assert invariant `int(previous['step'])==1` holds
 assert int(previous['step'])==1
 # Print the observed values to compare against the expected result.
 print('Checkpoint workspace:',root)
@@ -309,7 +313,7 @@ This plot is a local controlled failure experiment. It does not measure checkpoi
 
 ```python
 # Compute figure data for: A live step can be ahead of the accepted checkpoint
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':['saved snapshot','live state...`
 visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted checkpoint'],'ylabel':'completed step','series':[{'label':'local publication experiment','y':[int(snapshot["step"]),int(live["step"]),report["accepted_step"]]}]}
 ```
 
@@ -349,7 +353,7 @@ PASS: recovery-05
 # Experiment — Trigger an asynchronous error: The controlled failure happens in the finalization callback.
 def injected_failure():
     raise RuntimeError('injected finalization callback failure')
-# Evaluate `failed_path` from the current inputs and state.
+# Compute `failed_path` from `root/'callback_failure'`
 failed_path=root/'callback_failure'
 # Run `ocp.AsyncCheckpointer` to compute `cp`.
 cp=ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler(),async_options=ocp.options.AsyncOptions(post_finalization_callback=injected_failure))
@@ -366,7 +370,7 @@ try:
         raise AssertionError('background error was hidden')
 finally:
     cp.close()
-# Verify contract: `accepted()['step'] == 1`.
+# Assert invariant `accepted()['step']==1` holds
 assert accepted()['step']==1
 ```
 
@@ -388,8 +392,8 @@ Verify and publish the already written second checkpoint. Restore it and compare
 **Step-by-step implementation plan:**
 1. Enter `ocp.StandardCheckpointer()` context block:
 2. Run `cp.restore` to compute `verified`.
-3. Verify that computed values match the expected reference within numerical tolerance.
-4. Verify contract: `int(verified['step']) == 2`.
+3. Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
+4. Assert invariant `int(verified['step'])==2` holds
 5. Run `publish` to perform the next check or state transition.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -400,15 +404,15 @@ Verify and publish the already written second checkpoint. Restore it and compare
 with ocp.StandardCheckpointer() as cp:
     # Run `cp.restore` to compute `verified`.
     verified = cp.restore(...)  # TODO: compute verified
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
 np.testing.assert_array_equal(verified['weight'],live['weight'])
-# Verify contract: `int(verified['step']) == 2`.
+# Assert invariant `int(verified['step'])==2` holds
 assert int(verified['step'])  # TODO: complete assertion check
 # Run `publish` to perform the next check or state transition.
 publish(unpublished,2)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(transition(verified)['weight']`
 np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
-# Verify contract: `accepted()['step'] == 2 and int(snapshot['step']) == 1`.
+# Assert invariant `accepted()['step']==2 and int(snapshot['step'])==1` holds
 assert accepted()['step']  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Step two verified and accepted; next transition agrees.')
@@ -422,15 +426,15 @@ print('Step two verified and accepted; next transition agrees.')
 with ocp.StandardCheckpointer() as cp:
     # Run `cp.restore` to compute `verified`.
     verified=cp.restore(unpublished,target=live)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
 np.testing.assert_array_equal(verified['weight'],live['weight'])
-# Verify contract: `int(verified['step']) == 2`.
+# Assert invariant `int(verified['step'])==2` holds
 assert int(verified['step'])==2
 # Run `publish` to perform the next check or state transition.
 publish(unpublished,2)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(transition(verified)['weight']`
 np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
-# Verify contract: `accepted()['step'] == 2 and int(snapshot['step']) == 1`.
+# Assert invariant `accepted()['step']==2 and int(snapshot['step'])==1` holds
 assert accepted()['step']==2 and int(snapshot['step'])==1
 # Print the observed values to compare against the expected result.
 print('Step two verified and accepted; next transition agrees.')
@@ -462,7 +466,7 @@ Check path existence and the declared step before restoration; still compare res
 2. Return `record` to the caller.
 3. Run `accepted` to compute `before`.
 4. Run the boundary check and catch the expected exception:
-5. Verify contract: `accepted() == before`.
+5. Assert invariant `accepted()==before` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -480,7 +484,7 @@ before = accepted(...)  # TODO: compute before
 try:preflight({'path':str(root/'never_saved'),'step':99})
 except ValueError:pass
 else:raise AssertionError('missing target accepted')
-# Verify contract: `accepted() == before`.
+# Assert invariant `accepted()==before` holds
 assert accepted()  # TODO: complete assertion check
 # Run `preflight` to perform the next check or state transition.
 preflight(before)
@@ -504,7 +508,7 @@ before=accepted()
 try:preflight({'path':str(root/'never_saved'),'step':99})
 except ValueError:pass
 else:raise AssertionError('missing target accepted')
-# Verify contract: `accepted() == before`.
+# Assert invariant `accepted()==before` holds
 assert accepted()==before
 # Run `preflight` to perform the next check or state transition.
 preflight(before)
@@ -544,7 +548,7 @@ If the accepted step is ahead of the restored state, inspect publication order a
 
 ## Keep your evidence
 
-Keep the requested/completed/accepted step log, the restored snapshot comparison, interrupted-publication result and surfaced finalization error. Explain why directory presence alone does not establish acceptance.
+Keep the requested/completed/accepted step log, the restored snapshot comparison, interrupted-publication result and surfaced finalization error. Explain why directory presence alone is separate from acceptance.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

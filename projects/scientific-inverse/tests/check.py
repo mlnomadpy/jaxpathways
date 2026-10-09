@@ -16,7 +16,8 @@ stage=3 if args.stage=='all' else int(args.stage)
 path=ROOT/args.implementation/'model.py' if args.implementation in ('starter','solution') else Path(args.implementation)
 if not path.is_file():parser.error('implementation must name an existing Python file')
 spec=importlib.util.spec_from_file_location('learner_science',path)
-m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
 
 def reject(fn):
     try:fn()
@@ -24,7 +25,8 @@ def reject(fn):
     raise AssertionError('Expected an explicit ValueError for malformed input')
 
 def oracle(k,initials,n,h):
-    z=-k*h;r=1+z+z*z/2+z**3/6+z**4/24
+    z=-k*h
+    r=1+z+z*z/2+z**3/6+z**4/24
     return np.asarray(initials)[:,None]*r**np.arange(n+1)
 
 for k,starts,n,h in [(0.3,[.4,1.2,2.8],20,.1),(1.1,[1.7],40,.05)]:
@@ -42,7 +44,8 @@ reject(lambda:m.simulate(.7,jnp.ones(2),5,-.05))
 print('PASS stage 1: two rates, grids, independent polynomial and exponential oracles, axes, invalid inputs')
 
 if stage>=2:
-    starts=jnp.array([.8,1.7,2.2]); n,h=40,.05
+    starts=jnp.array([.8,1.7,2.2])
+    n,h=40,.05
     observed=jnp.asarray(np.asarray(starts)[:,None]*np.exp(-.65*np.arange(n+1)*h))
     for candidate in (.4,1.0):
         theta=np.log(candidate)
@@ -58,7 +61,9 @@ if stage>=2:
     print('PASS stage 2: independent objective, log-rate finite differences at two probes, malformed-target rejection')
 
 if stage>=3:
-    train=jnp.array([.7,1.5,2.3]); held=jnp.array([.4,1.1,3.2]); times=np.arange(41)*.05
+    train=jnp.array([.7,1.5,2.3])
+    held=jnp.array([.4,1.1,3.2])
+    times=np.arange(41)*.05
     for truth,start in [(.35,.9),(1.05,1.8)]:
         labels=jnp.asarray(np.asarray(train)[:,None]*np.exp(-truth*times))
         test=jnp.asarray(np.asarray(held)[:,None]*np.exp(-truth*times))

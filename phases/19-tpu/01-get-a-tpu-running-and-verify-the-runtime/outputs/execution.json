@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-01",
-  "contentHash": "225c817b016b10918331becc23626d23f8ba0cf3c39b11e368343d7867506eae",
+  "contentHash": "065fbee0e9557cb1dd5d24d2a4b20f626a66cd642a554605aec72f0c5ded336e",
   "executedAt": "2026-10-08T14:08:13.721093+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,19 @@
   "stdout": "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nVerified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\nMismatch contract_ok: False observed: cpu devices: 1\nRequires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}\nChecked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64\nSlices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\nExpected 4-device pmap sum of squares: 10416.0\nPASS: tpu-01\n",
   "notebookCells": [
     {
-      "sourceHash": "fda2afc84f8de19891a6dfea0f07958f118cb9f28abec2f5e1acac83d81c041e",
+      "sourceHash": "f57e7e3d56438e6d8b92189ca5f69f980663b1e0bd103916abeb90a15854be2f",
       "outputs": []
     },
     {
-      "sourceHash": "4b0e63eed10458bd8965c2ebbf1dd1d99cb0a89720631ab9f605ae891b893858",
+      "sourceHash": "39fb2db355f5800f11534960e7336cd4c9472f37e2f0adfd47e35bbe0c94eca4",
+      "outputs": []
+    },
+    {
+      "sourceHash": "c67ad94209f2275a8667d4db75a6112e421598f15c9878b71d464b9c982d8ef2",
+      "outputs": []
+    },
+    {
+      "sourceHash": "9257611a89e561cf54a6b93047059845bc0f770dd821fa0f94ffbe719577fd02",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,20 +39,7 @@
       ]
     },
     {
-      "sourceHash": "929165dff1ccfb43d9c1558259f5ba0ded7150477d3a630783da9b517f561236",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\n",
-            "Single-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "06b592046633820e43643155efe5c4d685d4c5969b172e23581d9eff70e29726",
+      "sourceHash": "72ab6160e0e887805133d8c05affe810279586764bb2b300707604a4c6c5f62c",
       "outputs": []
     },
     {
@@ -63,76 +58,36 @@
       ]
     },
     {
-      "sourceHash": "36217828d92a9b85c95550e50cca1d46a53898d809d788dbf3fa312bd3d3a543",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Mismatch contract_ok: False observed: cpu devices: 1\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "725199d7134ccf9aeaa7a87f1c4b3abfac7216a5b5e0f65516efd49b26210bdb",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Requires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "8a477a9468aab8cfefca96b635da78ae9401c39c360402e43573e3c28e0a8d79",
+      "sourceHash": "e552b6929ac109d081141c982248820a97b8de4af878077f924b7012169199cf",
       "outputs": []
     },
     {
-      "sourceHash": "f7bb9e9e3f9014be2d5678f7557b9b86ed293803b28031087b309ea963010d6e",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Checked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "5c9c2eec7e040585508437dac3538b0ede7dc6b20efff75ae000dfa3053f47ab",
+      "sourceHash": "0ab6afcc4de10f7ac7d4d2a67169ccbac9a506f9bb50747ae40f86d0d313d523",
       "outputs": []
     },
     {
-      "sourceHash": "66dda1e48b4789501f8b32e6e511508fa6ea192827bab6aaca62452a924dfeeb",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Slices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "982c0470e24c100f8cb9e4d71f9de7b4db40656362c9f63e697d42b1998f073d",
+      "sourceHash": "873d2e7be471b25f9424f4ce7c2e6a4d9a6a0a7fe0e3c1de9d3c0084d930023d",
       "outputs": []
     },
     {
-      "sourceHash": "9b7a44fae4ffdc116cfe8a893bad397cbe78640cb19ae2d36c0a1ee817aebe27",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Expected 4-device pmap sum of squares: 10416.0\n"
-          ]
-        }
-      ]
+      "sourceHash": "9020f93aa9e3044bcd40436713d262f560474b28424fcea1554926811e7ae445",
+      "outputs": []
+    },
+    {
+      "sourceHash": "bac64dede2019172f1a9507e1050c37a0fcbf55374c9e5e61e16b7f6ba1169fd",
+      "outputs": []
+    },
+    {
+      "sourceHash": "8560f2373f21461323bfe12b5eec7ae8a1d3a4ee5467e90febc6afdbe504a9d3",
+      "outputs": []
+    },
+    {
+      "sourceHash": "1671397498d9345743e78246feaf4b46899268b2844f00faed7ce95c4b0f4861",
+      "outputs": []
+    },
+    {
+      "sourceHash": "adc5509c4d7ea623eae040e45ce249fa17e92b036ae043a0054caa1e29cf6371",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

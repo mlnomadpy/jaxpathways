@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-02",
-  "contentHash": "0c30c6ab559d465288e58e12cb389976f1db38e9c01fb335ee6dabfe8d649d06",
+  "contentHash": "9dbb189cf26f3bb509c778554166a6531c07e8fc0b71acafb497a6623346aa29",
   "executedAt": "2026-10-08T14:05:21.947777+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,11 @@
   "stdout": "Interpretation max error: 0.0\nZero fraction and endpoint: 0.48578811369509045 2.4000000953674316\nExpected target refusal: Real TPU inputs/backend required; CPU fallback is disabled\nInterpretation max error: 0.0\nZero fraction and endpoint: 0.48578811369509045 2.4000000953674316\nExpected target refusal: Real TPU inputs/backend required; CPU fallback is disabled\nbfloat16 represented-input reference matched exactly\nBoundary fixture: [[0. 0. 0.]\n [2. 0. 0.]]\nChanged tails and two TPU-compatible blocks verified in interpretation\nMalformed bias axes rejected\nColumn/bias pairing survives a joint permutation\nPASS: kernels-02\n",
   "notebookCells": [
     {
-      "sourceHash": "b653089a4c0383f434d32b2a8ef4d2ad9fb4a014e48a000f8821343db2e59e9f",
+      "sourceHash": "95dafb4ddc85c544ec61a524711e10168054336575bd744dbbcdb054df22817d",
       "outputs": []
     },
     {
-      "sourceHash": "d70afc509b46191d635cb1a3fc266bdd67d03268b3d5a45885f86663e6d03bf6",
+      "sourceHash": "8abc16b542369259440597f0fe3a0ad3d87e4d12099e515d06076e2e6b2698da",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "4ae6889bb4ebce00b9b9b471b793e008dd854ea93f6d268b10d287416f2c7459",
+      "sourceHash": "dc6b2f406c1351988ebe42b7fc6c698792b29f5ab658b7d73702ce17cc23bffd",
       "outputs": [
         {
           "output_type": "stream",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "70e4fe633a0dd73bdd9986b21ef4a81f77eb40e002b75e2f11465bfc298b6b74",
+      "sourceHash": "0b4784e278897d7bc26aee8ec029237dcceefb982bdb15be4557752010b1494a",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "939ded3bb15959af095e87798c2ff1bbcf9894c07c65b1ad4e5f469c8eb5be3e",
+      "sourceHash": "43840a3217c502f85c2b9767e80eea8e0988ed8914aa8aa1e959020b6617062a",
       "outputs": [
         {
           "output_type": "stream",
@@ -101,11 +101,11 @@
       ]
     },
     {
-      "sourceHash": "4071f45a1fdf7c87838d41ec2e25a1ac77f8288142cd762b213f2eb5f4d93356",
+      "sourceHash": "947aa9556260055a03d3361ce91496ad34db4ff830bb31985e29557b9b0498fc",
       "outputs": []
     },
     {
-      "sourceHash": "6577947b83dec30a5fa5710a5021384a66e72b8e6c2354fc5e40dd424bd20d05",
+      "sourceHash": "1c7cc9d1d5cf43034a72aeac55c0d56fffc795a54ec33b900938288b2a1c6960",
       "outputs": [
         {
           "output_type": "stream",
@@ -117,11 +117,11 @@
       ]
     },
     {
-      "sourceHash": "9db781aeded023cb1672e5fd99ca43f4a1f3a700ee513091f436368a9355be84",
+      "sourceHash": "0a9b03b99865b5e1c4f22042cd80482b487865325eed5a40eaa1f401c1983bc1",
       "outputs": []
     },
     {
-      "sourceHash": "b84eb9f0093efb06264ba293e3f9e3924a4d740b6156df1430817eb5b2d754bc",
+      "sourceHash": "460d20a93c753e301654d0adf8305823006b218ae2cf3977fde388c1f83c43b2",
       "outputs": [
         {
           "output_type": "stream",
@@ -133,11 +133,11 @@
       ]
     },
     {
-      "sourceHash": "c5abcf151ad4c40a6dbfd00f5cf98c7a3db315d756ad018467fbe6c27474ed32",
+      "sourceHash": "280e1307db0cf469fc6f96755cc675e8b0a9605a4a409b266568f660241dff09",
       "outputs": []
     },
     {
-      "sourceHash": "8718fb46f4ec78c28bd6e6f9f56588dd2172962b74f17a26f05adab7cc3d13d9",
+      "sourceHash": "af45e6f068c930cb85bbb2c4e9547935904c7b3775cc345601dfae05ceb2b345",
       "outputs": [
         {
           "output_type": "stream",

@@ -96,7 +96,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -104,7 +105,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -132,17 +134,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -154,14 +159,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -172,15 +183,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -225,7 +240,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -234,27 +250,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -264,7 +284,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -284,13 +304,14 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
 def summarize(result):
-    # Evaluate `updates` from the current inputs and state.
+    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Evaluate `checkpoints` from the current inputs and state.
+    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
     # Run `sum` to compute `count`.
     # Run `sum` to compute `update_s`.
-    count=sum(e['examples'] for e in updates);update_s=sum(e['update_s'] for e in updates)
+    count=sum(e['examples'] for e in updates)
+    update_s=sum(e['update_s'] for e in updates)
     # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
     # Run `max` to compute `checkpoint`.
@@ -305,7 +326,7 @@ def summarize(result):
 # Function `capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, ...)` implementing this stage's computation:
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
-    # Evaluate `values` from the current inputs and state.
+    # Compute `values` from `[measured_job_s,arrivals_per_hour,hourly_rate,reserv...`
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
     # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
@@ -313,9 +334,9 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
-    # Evaluate `offered` from the current inputs and state.
+    # Compute `offered` from `arrivals_per_hour*measured_job_s/3600`
     offered=arrivals_per_hour*measured_job_s/3600
-    # Evaluate `load` from the current inputs and state.
+    # Compute `load` from `offered/workers`
     load=offered/workers
     # Run `max` to compute `required`.
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
@@ -341,7 +362,7 @@ with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
     for steps in [8,32,64]:
         # Read or serialize artifact data on disk (`run`).
         run=launch(Path(folder)/str(steps),dict(steps=steps))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `run['status']=='completed'` holds
         assert run['status']=='completed'
         # Append the current step result to `samples`.
         samples.append((steps,run,summarize(run)))
@@ -349,7 +370,7 @@ with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
 measured=max(run['wall_s'] for _,run,_ in samples)
 # Run `capacity` to compute `plan`.
 plan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)
-# Verify contract: `plan['hourly_budget'] == 3.0`.
+# Assert invariant `plan['hourly_budget']==3.` holds
 assert plan['hourly_budget']==3.
 # Print the observed values to compare against the expected result.
 print('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])
@@ -389,7 +410,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -397,7 +419,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -417,17 +440,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -439,14 +465,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -457,15 +489,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -502,7 +538,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -511,27 +548,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -541,7 +582,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -553,13 +594,14 @@ def launch(root, config=None, timeout=10.):
 
 # Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
 def summarize(result):
-    # Evaluate `updates` from the current inputs and state.
+    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Evaluate `checkpoints` from the current inputs and state.
+    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
     # Run `sum` to compute `count`.
     # Run `sum` to compute `update_s`.
-    count=sum(e['examples'] for e in updates);update_s=sum(e['update_s'] for e in updates)
+    count=sum(e['examples'] for e in updates)
+    update_s=sum(e['update_s'] for e in updates)
     # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
     # Run `max` to compute `checkpoint`.
@@ -574,7 +616,7 @@ def summarize(result):
 # Function `capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, ...)` implementing this stage's computation:
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
-    # Evaluate `values` from the current inputs and state.
+    # Compute `values` from `[measured_job_s,arrivals_per_hour,hourly_rate,reserv...`
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
     # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
@@ -582,9 +624,9 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
-    # Evaluate `offered` from the current inputs and state.
+    # Compute `offered` from `arrivals_per_hour*measured_job_s/3600`
     offered=arrivals_per_hour*measured_job_s/3600
-    # Evaluate `load` from the current inputs and state.
+    # Compute `load` from `offered/workers`
     load=offered/workers
     # Run `max` to compute `required`.
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
@@ -602,7 +644,7 @@ with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
     for steps in [8,32,64]:
         # Read or serialize artifact data on disk (`run`).
         run=launch(Path(folder)/str(steps),dict(steps=steps))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `run['status']=='completed'` holds
         assert run['status']=='completed'
         # Append the current step result to `samples`.
         samples.append((steps,run,summarize(run)))
@@ -610,7 +652,7 @@ with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
 measured=max(run['wall_s'] for _,run,_ in samples)
 # Run `capacity` to compute `plan`.
 plan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)
-# Verify contract: `plan['hourly_budget'] == 3.0`.
+# Assert invariant `plan['hourly_budget']==3.` holds
 assert plan['hourly_budget']==3.
 # Print the observed values to compare against the expected result.
 print('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])
@@ -640,7 +682,7 @@ The lower-panel values are much smaller than the complete-job values because sta
 
 ```python
 # Compute figure data for: Short jobs spend time outside the update loop
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'panels':[{'kind':'bar','labels':[str(n) for n,_,_ ...`
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
 ```
 
@@ -668,15 +710,15 @@ PASS: operations-05
 ```python
 # Experiment — Check units with known arithmetic: This independent arithmetic checks the calculator without...
 known=capacity(90.,80.,4,2.,.25)
-# Verify contract: `known['offered_worker_hours_per_hour'] == 2.0`.
+# Assert invariant `known['offered_worker_hours_per_hour']==2.` holds
 assert known['offered_worker_hours_per_hour']==2.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `known['load_fraction']==.5` holds
 assert known['load_fraction']==.5
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `known['minimum_workers_with_reserve']==3` holds
 assert known['minimum_workers_with_reserve']==3
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `known['hypothetical_cost_per_job']==.05` holds
 assert known['hypothetical_cost_per_job']==.05
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `known['hourly_budget']==8.` holds
 assert known['hourly_budget']==8.
 ```
 
@@ -693,9 +735,9 @@ This independent arithmetic checks the calculator without treating invented inpu
 one=capacity(measured,600,2,1.5,.25)
 # Run `capacity` to compute `two`.
 two=capacity(measured,1200,2,1.5,.25)
-# Verify contract: `abs(two['load_fraction'] - 2 * one['load_fraction']) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(two['load_fraction']-2*one['load_fraction'])<1e-12`
 assert abs(two['load_fraction']-2*one['load_fraction'])<1e-12
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `two['hypothetical_cost_per_job']==one['hypothetical_cost_per_job']` holds
 assert two['hypothetical_cost_per_job']==one['hypothetical_cost_per_job']
 # Print the observed values to compare against the expected result.
 print('nominal load at two demand scenarios:',one['load_fraction'],two['load_fraction'])
@@ -716,9 +758,9 @@ Using the measured service-time input, calculate the minimum worker count for $1
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `required` from the current inputs and state.
-2. Evaluate `demand` from the current inputs and state.
-3. Verify contract: `demand / required <= 0.6 + 1e-12`.
+1. Compute `required` from `changed['minimum_workers_with_reserve']`
+2. Compute `demand` from `1200*measured/3600`
+3. Assert invariant `demand/required <= .6 + 1e-12` holds
 4. Branch on condition `required > 1`:
 5. Print the observed values to compare against the expected result.
 
@@ -727,11 +769,11 @@ Using the measured service-time input, calculate the minimum worker count for $1
 ```python
 # Exercise solution: Using the measured service-time input, calculate the minimum worker...
 changed = capacity(...)  # TODO: compute changed
-# Evaluate `required` from the current inputs and state.
+# Compute `required` from `changed['minimum_workers_with_reserve']`
 required = ...  # TODO: compute required
-# Evaluate `demand` from the current inputs and state.
+# Compute `demand` from `1200*measured/3600`
 demand = ...  # TODO: compute demand
-# Verify contract: `demand / required <= 0.6 + 1e-12`.
+# Assert invariant `demand/required <= .6 + 1e-12` holds
 assert demand/required  # TODO: complete assertion check
 # Branch on condition `required > 1`:
 if required>1: assert demand/(required-1) > .6
@@ -744,11 +786,11 @@ print('required workers under changed hypothetical reserve:',required)
 ```python
 # Exercise solution: Using the measured service-time input, calculate the minimum worker...
 changed=capacity(measured,1200,2,1.5,.4)
-# Evaluate `required` from the current inputs and state.
+# Compute `required` from `changed['minimum_workers_with_reserve']`
 required=changed['minimum_workers_with_reserve']
-# Evaluate `demand` from the current inputs and state.
+# Compute `demand` from `1200*measured/3600`
 demand=1200*measured/3600
-# Verify contract: `demand / required <= 0.6 + 1e-12`.
+# Assert invariant `demand/required <= .6 + 1e-12` holds
 assert demand/required <= .6 + 1e-12
 # Branch on condition `required > 1`:
 if required>1: assert demand/(required-1) > .6
@@ -778,17 +820,17 @@ Every attempt consumes resources under this hypothetical model.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `per_completion` from the current inputs and state.
-2. Verify contract: `abs(per_completion - 1.25 * per_attempt) < 1e-12`.
+1. Compute `per_completion` from `125*per_attempt/100`
+2. Check numerical equivalence within tolerance: `abs(per_completion-1.25*per_attempt)<1e-12`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
 per_attempt = ...  # TODO: compute per_attempt
-# Evaluate `per_completion` from the current inputs and state.
+# Compute `per_completion` from `125*per_attempt/100`
 per_completion = ...  # TODO: compute per_completion
-# Verify contract: `abs(per_completion - 1.25 * per_attempt) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(per_completion-1.25*per_attempt)<1e-12`
 assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
 ```
 
@@ -797,9 +839,9 @@ assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
 ```python
 # Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
 per_attempt=measured*1.5/3600
-# Evaluate `per_completion` from the current inputs and state.
+# Compute `per_completion` from `125*per_attempt/100`
 per_completion=125*per_attempt/100
-# Verify contract: `abs(per_completion - 1.25 * per_attempt) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(per_completion-1.25*per_attempt)<1e-12`
 assert abs(per_completion-1.25*per_attempt)<1e-12
 ```
 
@@ -840,6 +882,7 @@ for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=flo
     # Evaluate `measured_job_s=measured, arrivals_per_hour=600, workers=2, hourly_rate=1.5` and convert the result into Python scalar/collection `inputs`.
     # Execute the next step of the computation.
     inputs = dict(...)  # TODO: compute inputs
+    inputs.update(change)
     # Run the boundary check and catch the expected exception:
     try:capacity(**inputs)
     except ValueError:pass
@@ -854,7 +897,8 @@ for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=flo
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     # Evaluate `measured_job_s=measured, arrivals_per_hour=600, workers=2, hourly_rate=1.5` and convert the result into Python scalar/collection `inputs`.
     # Execute the next step of the computation.
-    inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5);inputs.update(change)
+    inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)
+    inputs.update(change)
     # Run the boundary check and catch the expected exception:
     try:capacity(**inputs)
     except ValueError:pass

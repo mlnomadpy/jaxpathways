@@ -50,13 +50,16 @@ def next_batch(state, x, y, batch_size, mesh):
         result.update(key=np.asarray(key), order=np.asarray(jax.random.permutation(order_key, len(x))), cursor=np.asarray(0,np.int32))
     # Evaluate `result['cursor']` and convert the result into Python scalar/collection `start`.
     # Evaluate `ids` from the current inputs and state.
-    start = int(result['cursor']); ids = result['order'][start:start+batch_size]
+    start = int(result['cursor'])
+    ids = result['order'][start:start+batch_size]
     # Run `len` to compute `size`.
     # Evaluate `padded` from the current inputs and state.
-    size = len(ids); padded = ((size+3)//4)*4
+    size = len(ids)
+    padded = ((size+3)//4)*4
     # Allocate initialized array `xb` with the specified shape and dtype.
     # Allocate initialized array `yb` with the specified shape and dtype.
-    xb = np.zeros((padded,x.shape[1]),np.float32); yb = np.zeros(padded,np.float32)
+    xb = np.zeros((padded,x.shape[1]),np.float32)
+    yb = np.zeros(padded,np.float32)
     # Allocate initialized array `mask` with the specified shape and dtype.
     mask = np.zeros(padded,np.float32)
     # Evaluate `(xb[:size], yb[:size], mask[:size])` from the current inputs and state.
@@ -119,7 +122,9 @@ def contract(x,y,batch_size,seed):
         # Update state in place with the new values.
         # Update state in place with the new values.
         # Update state in place with the new values.
-        digest.update(str(a.shape).encode()); digest.update(a.dtype.str.encode()); digest.update(a.tobytes())
+        digest.update(str(a.shape).encode())
+        digest.update(a.dtype.str.encode())
+        digest.update(a.tobytes())
     # Return `dict(schema=1, dataset_sha256=digest.hexdigest(), batch_size=batch_size, seed=seed, learning_rate=0.03, momentum=0.8, feature_width=x.shape[1], dataset_size=len(x), devices=4)` to the caller.
     return dict(schema=1, dataset_sha256=digest.hexdigest(), batch_size=batch_size, seed=seed,
                 learning_rate=.03,momentum=.8,feature_width=x.shape[1],dataset_size=len(x),devices=4)

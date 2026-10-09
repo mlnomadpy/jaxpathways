@@ -35,13 +35,13 @@ def evaluate_precision_policies(seed=0):
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    # Evaluate `policies` from the current inputs and state.
+    # Compute `policies` from `[`
     policies = [
         ("bf16 (fp32 accum)", out_bf16_fp32acc),
         ("bf16 (bf16 accum)", out_bf16_bf16acc),
         ("int8 per-col (fp32 accum)", out_int8_fp32acc),
     ]
-    # Evaluate `results` from the current inputs and state.
+    # Compute `results` from `[]`
     results = []
     # Loop over `(label, tensor)` in `policies`:
     for label, tensor in policies:
@@ -59,7 +59,7 @@ def evaluate_precision_policies(seed=0):
 # Capture a warmed XProf trace and verify *.xplane.pb output
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
 def capture_warmed_trace(steps=4):
-    # Initialize array `x` with explicit values and shape.
+    # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
@@ -93,14 +93,18 @@ def capture_warmed_trace(steps=4):
 prec_table = evaluate_precision_policies()
 # Run `capture_warmed_trace` to compute `trace_info`.
 trace_info = capture_warmed_trace()
-# Verify contract: `trace_info['xplane_count'] >= 1`.
+# Assert invariant `trace_info["xplane_count"] >= 1` holds
 assert trace_info["xplane_count"] >= 1
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
 assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 # Print the observed values to compare against the expected result.
 print("Precision comparison:", prec_table)
 # Print diagnostic summary of the computed outputs.
 print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
+
+# Step 3: Verify invariants on the completed state
+assert trace_info["xplane_count"] >= 1
+assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 
 # Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
 # Import pathlib (Path) for this computation.
@@ -136,13 +140,13 @@ def evaluate_precision_policies(seed=0):
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
-    # Evaluate `policies` from the current inputs and state.
+    # Compute `policies` from `[`
     policies = [
         ("bf16 (fp32 accum)", out_bf16_fp32acc),
         ("bf16 (bf16 accum)", out_bf16_bf16acc),
         ("int8 per-col (fp32 accum)", out_int8_fp32acc),
     ]
-    # Evaluate `results` from the current inputs and state.
+    # Compute `results` from `[]`
     results = []
     # Loop over `(label, tensor)` in `policies`:
     for label, tensor in policies:
@@ -160,7 +164,7 @@ def evaluate_precision_policies(seed=0):
 
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
 def capture_warmed_trace(steps=4):
-    # Initialize array `x` with explicit values and shape.
+    # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
@@ -194,9 +198,9 @@ def capture_warmed_trace(steps=4):
 prec_table = evaluate_precision_policies()
 # Run `capture_warmed_trace` to compute `trace_info`.
 trace_info = capture_warmed_trace()
-# Verify contract: `trace_info['xplane_count'] >= 1`.
+# Assert invariant `trace_info["xplane_count"] >= 1` holds
 assert trace_info["xplane_count"] >= 1
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]` holds
 assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 # Print the observed values to compare against the expected result.
 print("Precision comparison:", prec_table)
@@ -220,20 +224,20 @@ visual_data = {
 # Experiment: Compare FP32 accumulation vs BF16 accumulation error ratio
 # Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio: Passing preferred_element_type=jnp.float32 to jnp.dot or...
 fp32_acc_err = prec_table[0]["max_abs_err"]
-# Evaluate `bf16_acc_err` from the current inputs and state.
+# Compute `bf16_acc_err` from `prec_table[1]["max_abs_err"]`
 bf16_acc_err = prec_table[1]["max_abs_err"]
 # Run `round` to compute `ratio`.
 ratio = round(bf16_acc_err / fp32_acc_err, 2)
 # Print the observed values to compare against the expected result.
 print("BF16-accum / FP32-accum max error ratio:", ratio)
-# Verify contract: `ratio > 1.3`.
+# Assert invariant `ratio > 1.3` holds
 assert ratio > 1.3
 
 # Experiment: Compare warmup duration vs traced steady-state step duration
 # Experiment — Compare warmup duration vs traced steady-state step duration: Keeping warmup outside jax.profiler.trace prevents XLA...
 # Print the observed values to compare against the expected result.
 print("Warmup ms:", round(trace_info["warmup_ms"], 3), "Traced steady step ms:", round(trace_info["steady_ms"], 4))
-# Verify contract: `trace_info['warmup_ms'] > trace_info['steady_ms']`.
+# Assert invariant `trace_info["warmup_ms"] > trace_info["steady_ms"]` holds
 assert trace_info["warmup_ms"] > trace_info["steady_ms"]
 
 # Reference solution. Try the exercise before reading this.
@@ -243,14 +247,14 @@ p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
 # Print the observed values to compare against the expected result.
 print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
-# Verify contract: `p42[0]['mean_abs_err'] < p42[1]['mean_abs_err'] and t3['xplane_count...`.
+# Assert invariant `p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_co...` holds
 assert p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1
 
 # Reference practice: Compare per-channel vs per-tensor INT8 quantization error
 # Compare per-channel vs per-tensor INT8 quantization error (Foundations): One outlier channel stretches a per-tensor scale factor and...
 # Create or split explicit PRNG key(s) (`w_skew`) for reproducible randomness.
 w_skew = jax.random.normal(jax.random.PRNGKey(9), (128, 32), dtype=jnp.float32) * 0.2
-# Evaluate `w_skew` from the current inputs and state.
+# Compute `w_skew` from `w_skew.at[:, 0].multiply(10.0)`
 w_skew = w_skew.at[:, 0].multiply(10.0)
 # Create or split explicit PRNG key(s) (`x_in`) for reproducible randomness.
 x_in = jax.random.normal(jax.random.PRNGKey(10), (32, 128), dtype=jnp.float32)
@@ -270,14 +274,14 @@ err_col = float(jnp.mean(jnp.abs(jnp.dot(x_in, q_col.astype(jnp.float32) * s_col
 err_glb = float(jnp.mean(jnp.abs(jnp.dot(x_in, q_glb.astype(jnp.float32) * s_glb) - ref)))
 # Print diagnostic summary of the computed outputs.
 print("Mean error (per-channel vs per-tensor):", round(err_col, 5), round(err_glb, 5))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `err_col < err_glb` holds
 assert err_col < err_glb
 
 # Reference practice: Verify non-empty XProf *.xplane.pb byte size
 # Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis): Verifying a non-empty *.xplane.pb file confirms the profiler...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix="tpu-xplane-size-") as d:
-    # Initialize array `a` with explicit values and shape.
+    # Construct `a` via `jnp.ones((128, 128), dtype=jnp.bfloat16)`
     a = jnp.ones((128, 128), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.
     fn = jax.jit(lambda z: z @ z)
@@ -293,6 +297,6 @@ with tempfile.TemporaryDirectory(prefix="tpu-xplane-size-") as d:
     size_bytes = pb.stat().st_size
 # Print the observed values to compare against the expected result.
 print("xplane.pb bytes:", size_bytes)
-# Verify contract: `size_bytes > 0`.
+# Assert invariant `size_bytes > 0` holds
 assert size_bytes > 0
 print("PASS: tpu-06")

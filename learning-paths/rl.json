@@ -30,7 +30,7 @@
       "id": "rl",
       "projectId": "policy-evaluation",
       "title": "Reinforcement-learning synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/rl.md",
       "url": "assessments/rl.html"

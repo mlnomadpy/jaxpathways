@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-03",
-  "contentHash": "7921e96d0df5408c0bb5ab3f0e6bec5410bfb556bf3126f4809d418ceee62c07",
+  "contentHash": "f21357e6b7f6667aed79e082c5e85c9d8211c000085b5067a0ad16806dbd2a5e",
   "executedAt": "2026-10-08T14:03:53.484208+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,7 +18,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "96f0620e1440b131b12b2537259d99c69473a75b9e9f172c75969df4c6f34d54",
+      "sourceHash": "d4eaaaec4bcd448fbb379fc7c0de4afbbbf4991d0a77857159bcbe4f07c0f3e7",
+      "outputs": []
+    },
+    {
+      "sourceHash": "3b0879708af5f068c79cd7d10dcf7f3da1025a6e260907ed6ad555360b8d383e",
+      "outputs": []
+    },
+    {
+      "sourceHash": "4f21ad0810c4d04dbec737c6a9ed882efeb57ab19a5614c982e7d9ca00a4d142",
       "outputs": [
         {
           "output_type": "stream",
@@ -51,40 +59,7 @@
       ]
     },
     {
-      "sourceHash": "dc4cfa42a0fe5b64fc26ee39c4baa51a3f71e15de49657fc3b26352dc71a0048",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-z4ikx95u\n",
-            "{\n",
-            "  \"input_wait_us\": [\n",
-            "    1259,\n",
-            "    1258,\n",
-            "    1260,\n",
-            "    1255\n",
-            "  ],\n",
-            "  \"model_and_wait_us\": [\n",
-            "    35,\n",
-            "    34,\n",
-            "    29,\n",
-            "    28\n",
-            "  ],\n",
-            "  \"step_us\": [\n",
-            "    1298,\n",
-            "    1294,\n",
-            "    1291,\n",
-            "    1285\n",
-            "  ]\n",
-            "}\n",
-            "Four named steps verified; host annotations are not isolated device kernels.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "9dca1fe0f400ea52a9c6635e399cd423e0ae28814620313c56e4bbb62196b65f",
+      "sourceHash": "9c67aefeb54a74ad11a5016e0aa2e1e27272bca698997e70470b02d23f75763a",
       "outputs": []
     },
     {
@@ -103,49 +78,24 @@
       ]
     },
     {
-      "sourceHash": "de42311fc1f9d6980457ef3ea18f6e5f7a85d0df30f8c158f047b03b530fa86f",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Unattributed outer time, microseconds: [4, 2, 2, 2]\n",
-            "Wrong double-counted totals: [2592, 2586, 2580, 2568]\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "3f94f26c1b9f41fe9a9b77127ba4c9509228eac102b281a2d4c9f9eba1ddf197",
+      "sourceHash": "980da0110c3edefd1bbfc9e0a5b98e0b75fe01f7f482e4d3605b83106e0cb67e",
       "outputs": []
     },
     {
-      "sourceHash": "0603a27b136f33a2e1b70ef04c7fd4e850749d5a43a8fdf037688461e023d366",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "{'minimum_ms': 0.028, 'median_ms': 0.0315, 'maximum_ms': 0.035}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "b316bcf2213a28a2019f319be577909915c985fa454452b4be3b67b05d3f9dcf",
+      "sourceHash": "d821ce536d6d9e627214fcd7fdbcb658f5519aba5b7ada896601f7734df572f5",
       "outputs": []
     },
     {
-      "sourceHash": "71bfc5f0fed5a6001904d9bd38fe3f71569076b0c815d69e2f266be78090c0d6",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Hypothetical union: 12 microseconds; summed duration: 19.\n"
-          ]
-        }
-      ]
+      "sourceHash": "9161c3965ca6b42b2eb5ff5ffb8aba2fbb858336a64742c744c986997c14e4e4",
+      "outputs": []
+    },
+    {
+      "sourceHash": "378aa980b627a44d11ae1f889e23b1d0a3d2cfd7f43ba3890ffa2f358d59feab",
+      "outputs": []
+    },
+    {
+      "sourceHash": "acfcfa6acd1455cd8d85b09222e0a084897975c965f72a96aef674b01751ad86",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

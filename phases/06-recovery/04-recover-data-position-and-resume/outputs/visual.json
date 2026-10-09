@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "334a0e059f7b55bccda1f42448d517c92156ccd502f54604a9c708f185ec3f8e",
+  "contentHash": "6f2e12cc8ce4f439b9ed28f47e0cd9daff2e56a8c5ba4883f45db5a6c993b72d",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
-  "kind": "conceptual",
-  "generatedAt": "2026-10-06T15:41:27.745261+00:00",
+  "kind": "executed",
+  "generatedAt": "2026-10-09T12:23:14.717687+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,35 @@
   },
   "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\n",
   "data": {
-    "kind": "flow",
-    "nodes": [
-      "Model and optimizer state",
-      "Random state",
-      "Dataset identity and iterator position",
-      "Restore one shared boundary",
-      "Same next batch \u2192 same transition"
+    "kind": "line",
+    "x": [
+      3,
+      4,
+      5,
+      6
     ],
-    "layout": "merge"
+    "xlabel": "training step after checkpoint",
+    "ylabel": "batch loss",
+    "series": [
+      {
+        "label": "uninterrupted reference_losses",
+        "y": [
+          0.5496272444725037,
+          0.8390463590621948,
+          0.07169045507907867,
+          0.32427603006362915
+        ]
+      },
+      {
+        "label": "checkpoint resumed_losses",
+        "y": [
+          0.5496272444725037,
+          0.8390463590621948,
+          0.07169045507907867,
+          0.32427603006362915
+        ]
+      }
+    ]
   },
   "diagram": {
     "title": "One checkpoint, one completed-step boundary",

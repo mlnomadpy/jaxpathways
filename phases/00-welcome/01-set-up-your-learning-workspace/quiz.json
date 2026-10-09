@@ -11,7 +11,7 @@
         "The name of your editor"
       ],
       "correct": 1,
-      "explanation": "The script records what ran; versions and device information record where it ran. CPU success does not establish TPU compatibility."
+      "explanation": "The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility."
     }
   ]
 }

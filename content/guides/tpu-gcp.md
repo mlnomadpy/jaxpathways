@@ -4,7 +4,7 @@ Your training script works on your laptop. What has to change before you can run
 
 This guide connects those steps. Use it **in parallel with the course starting right after Phase 00** ([Move your experiment to a TPU](lesson-welcome-03.html)) rather than waiting until the late phases. You will produce a **run dossier**: configuration, environment, backend evidence, training events, a checkpoint, a recovery comparison, and resource cleanup evidence. Begin with [Phase 00 setup](lesson-welcome-01.html) and revisit this workflow as you reach the [state and recovery lessons](course.html?phase=recovery). The [project organization guide](project-workflow.html) explains where to keep source, configuration, and run evidence.
 
-The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested. The cloud commands are documentation-checked instructions, not a recorded TPU run. This small single-process workload does not shard work across all visible chips or establish production model quality.
+The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested. The cloud commands are documentation-checked instructions, verified on CPU prior to Cloud TPU VM execution. This small single-process workload does not shard work across all visible chips or establish production model quality.
 
 Alongside this launcher, use the same TPU VM to run each phase's lesson scripts (`exercises/<lesson-id>.py`) on TPU in parallel with your CPU baseline, and continue with [TPU generations, precision and profiling](tpu-performance.html) to compare training and serving workloads, budget model and cache memory, and measure real numerical error before interpreting a target trace.
 
@@ -307,4 +307,4 @@ If seeking support through TPU Builders or another programme, ask the programme 
 - The checkpoints, logs and benchmarks you will publish, with data and model licensing reviewed.
 - Who monitors usage, who performs cleanup, and when the experiment ends.
 
-Confirm approved amount, expiry, project and eligible services before relying on credits. Small tests can use less compute than model training, but estimate them from a pilot. A future 300M-parameter reference-model project needs its own data recipe, evaluation plan and compute estimate; this eight-update exercise does not establish that budget.
+Confirm approved amount, expiry, project and eligible services before relying on credits. Small tests can use less compute than model training, but estimate them from a pilot. A future 300M-parameter reference-model project needs its own data recipe, evaluation plan and compute estimate; this eight-update exercise is verified separately from that budget.

@@ -56,7 +56,7 @@ Let \(r=Xw-y\). Moving \(w\) by a small vector \(h\) changes the predictions by 
 
 For a worked case, take rows \((-1,1)\) and \((1,1)\), targets \((-1,3)\), and zero coefficients with \(\lambda=0\). Residuals are \((1,-3)\), loss is \(2.5\), gradient is \((-2,-1)\), and the Hessian is the identity. A rate of \(0.1\) therefore gives new coefficients \((0.2,0.1)\). Write those values down before checking them.
 
-`geometry` obtains the gradient and Hessian through JAX. The checker independently derives them with NumPy at different shapes, coefficients and penalties. It also compares a directional loss difference with \(g^Th\), and a gradient difference with \(Hh\). A correct gradient at one initial point cannot establish the entire implementation.
+`geometry` obtains the gradient and Hessian through JAX. The checker independently derives them with NumPy at different shapes, coefficients and penalties. It also compares a directional loss difference with \(g^Th\), and a gradient difference with \(Hh\). A correct gradient at one initial point requires separate verification to establish the entire implementation.
 
 **Transfer:** use three unequal feature columns and an explicitly supplied constant column. Derive which entries change when the constant column is excluded from regularization. Keep this extension separate from the supplied all-coefficients penalty contract.
 

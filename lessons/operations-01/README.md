@@ -14,7 +14,7 @@ A training command starts, but that does not tell us whether its runtime is corr
 
 ## The idea
 
-Workload lifecycle states describe what a job can do now. Creation, startup, readiness, execution, completion and failure are different transitions. Observing the process alone does not establish that its useful work is available.
+Workload lifecycle states describe what a job can do now. Creation, startup, readiness, execution, completion and failure are different transitions. Observing the process alone is separate from that its useful work is available.
 
 ## A running process is not necessarily a ready service
 
@@ -23,6 +23,10 @@ A process can exist while loading weights, waiting for resources or failing repe
 Attach each transition to an observed event and define timeouts. If a job is rejected before launch, do not record that as a completed training run. If it terminates, preserve whether useful work completed or a failure interrupted it.
 
 The lifetime bars compare actual process intervals in this fixture. They do not by themselves show readiness or accelerator utilization. Use the state timeline to explain what each interval includes.
+
+$$
+\text{State}_{\text{job}} \in \{\texttt{provisioned}, \texttt{started}, \texttt{completed}, \texttt{timed\_out}, \texttt{cleaned\_up}\}
+$$
 
 ### Pause and reason
 
@@ -99,7 +103,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -107,7 +112,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -135,17 +141,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -157,14 +166,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -175,15 +190,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -228,7 +247,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -237,27 +257,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -267,7 +291,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -296,13 +320,13 @@ with tempfile.TemporaryDirectory(prefix='ops-lifecycle-') as folder:
     rejected = launch(base/'wrong-runtime',dict(min_devices=999))
     # Run `launch` to compute `stalled`.
     stalled = launch(base/'timeout',dict(stall_at=0,stall_seconds=20),timeout=6)
-# Verify contract: `successful['status'] == 'completed'`.
+# Assert invariant `successful['status'] == 'completed'` holds
 assert successful['status'] == 'completed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `rejected['status'] == 'failed' and rejected['returncode'] != 0` holds
 assert rejected['status'] == 'failed' and rejected['returncode'] != 0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `stalled['status'] == 'timed_out' and stalled['returncode'] != 0` holds
 assert stalled['status'] == 'timed_out' and stalled['returncode'] != 0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(e['event']=='stall_injected' for e in stalled['events'])` holds
 assert any(e['event']=='stall_injected' for e in stalled['events'])
 # Print the observed values to compare against the expected result.
 print('statuses:',successful['status'],rejected['status'],stalled['status'])
@@ -340,7 +364,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -348,7 +373,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -368,17 +394,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -390,14 +419,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -408,15 +443,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -453,7 +492,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -462,27 +502,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -492,7 +536,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -513,13 +557,13 @@ with tempfile.TemporaryDirectory(prefix='ops-lifecycle-') as folder:
     rejected = launch(base/'wrong-runtime',dict(min_devices=999))
     # Run `launch` to compute `stalled`.
     stalled = launch(base/'timeout',dict(stall_at=0,stall_seconds=20),timeout=6)
-# Verify contract: `successful['status'] == 'completed'`.
+# Assert invariant `successful['status'] == 'completed'` holds
 assert successful['status'] == 'completed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `rejected['status'] == 'failed' and rejected['returncode'] != 0` holds
 assert rejected['status'] == 'failed' and rejected['returncode'] != 0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `stalled['status'] == 'timed_out' and stalled['returncode'] != 0` holds
 assert stalled['status'] == 'timed_out' and stalled['returncode'] != 0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(e['event']=='stall_injected' for e in stalled['events'])` holds
 assert any(e['event']=='stall_injected' for e in stalled['events'])
 # Print the observed values to compare against the expected result.
 print('statuses:',successful['status'],rejected['status'],stalled['status'])
@@ -547,7 +591,7 @@ Compare the bars with the event traces, not by height alone. The completed run c
 
 ```python
 # Compute figure data for: Three actual process lifetimes
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':['completed','runtime rejecte...`
 visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],'xlabel':'observed outcome','ylabel':'supervisor wall time (seconds)','series':[{'label':'actual local process','y':[successful['wall_s'],rejected['wall_s'],stalled['wall_s']]}]}
 ```
 
@@ -571,9 +615,9 @@ PASS: operations-01
 
 ```python
 # Experiment — A child that fails before training: This check links the failure classification to a concrete...
-# Verify contract: `any((e['event'] == 'failed' and 'runtime' in e['message'] for e in r...`.
+# Assert invariant `any(e['event']=='failed' and 'runtime' in e['message'] for e in r...` holds
 assert any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not any(e['event']=='progress' for e in rejected['events'])` holds
 assert not any(e['event']=='progress' for e in rejected['events'])
 ```
 
@@ -588,9 +632,9 @@ This check links the failure classification to a concrete boundary in the worker
 ```python
 # Experiment — A started process need not be ready: The sequence rules out startup failure in this controlled drill.
 names=[e['event'] for e in stalled['events']]
-# Verify contract: `names.index('started') < names.index('ready') < names.index('stall_i...`.
+# Assert invariant `names.index('started') < names.index('ready') < names.index('stal...` holds
 assert names.index('started') < names.index('ready') < names.index('stall_injected')
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `'completed' not in names` holds
 assert 'completed' not in names
 # Print the observed values to compare against the expected result.
 print('timed-out worker events:',names)
@@ -614,9 +658,9 @@ Launch a changed job with $3$ updates and batch size $5$. Verify the observed pr
 **Step-by-step implementation plan:**
 1. Create an isolated temporary directory to run and inspect artifacts safely:
 2. Run `launch` to compute `short`.
-3. Verify contract: `short['status'] == 'completed'`.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Assert invariant `short['status']=='completed'` holds
+4. Assert invariant `[e['step'] for e in short['events'] if e['event']=='progress']==[1` holds
+5. Assert invariant `short['events'][-1]['step']==3` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -626,11 +670,11 @@ Launch a changed job with $3$ updates and batch size $5$. Verify the observed pr
 with tempfile.TemporaryDirectory() as folder:
     # Run `launch` to compute `short`.
     short = launch(...)  # TODO: compute short
-# Verify contract: `short['status'] == 'completed'`.
+# Assert invariant `short['status']=='completed'` holds
 assert short['status']  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `[e['step'] for e in short['events'] if e['event']=='progress']==[1` holds
 assert [e['step'] for e  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `short['events'][-1]['step']==3` holds
 assert short['events'][-1]['step']  # TODO: complete assertion check
 ```
 
@@ -642,11 +686,11 @@ assert short['events'][-1]['step']  # TODO: complete assertion check
 with tempfile.TemporaryDirectory() as folder:
     # Run `launch` to compute `short`.
     short=launch(folder,dict(steps=3,batch_size=5))
-# Verify contract: `short['status'] == 'completed'`.
+# Assert invariant `short['status']=='completed'` holds
 assert short['status']=='completed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `[e['step'] for e in short['events'] if e['event']=='progress']==[1` holds
 assert [e['step'] for e in short['events'] if e['event']=='progress']==[1,2,3]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `short['events'][-1]['step']==3` holds
 assert short['events'][-1]['step']==3
 ```
 
@@ -723,7 +767,7 @@ Read the files before leaving the temporary-directory context.
 2. Run `launch` to compute `result`.
 3. Read or serialize artifact data on disk (`saved`).
 4. Read or serialize artifact data on disk (`record`).
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Assert invariant `saved['step']==4 and record['status']=='completed'` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -737,9 +781,9 @@ with tempfile.TemporaryDirectory() as folder:
     saved = json.loads(...)  # TODO: compute saved
     # Read or serialize artifact data on disk (`record`).
     record = json.loads(...)  # TODO: compute record
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `saved['step']==4 and record['status']=='completed'` holds
     assert saved['step']  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `record['worker_hash']==saved['worker_hash']` holds
     assert record['worker_hash']  # TODO: complete assertion check
 ```
 
@@ -755,9 +799,9 @@ with tempfile.TemporaryDirectory() as folder:
     saved=json.loads((Path(folder)/'checkpoint.json').read_text())
     # Read or serialize artifact data on disk (`record`).
     record=json.loads((Path(folder)/'run.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `saved['step']==4 and record['status']=='completed'` holds
     assert saved['step']==4 and record['status']=='completed'
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `record['worker_hash']==saved['worker_hash']` holds
     assert record['worker_hash']==saved['worker_hash']
 ```
 

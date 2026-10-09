@@ -14,8 +14,10 @@ parser.add_argument('--implementation',choices=['starter','solution'],default='s
 parser.add_argument('--stage',choices=['1','2','3','4','all'],default='all')
 args=parser.parse_args()
 spec=importlib.util.spec_from_file_location('learner_model',ROOT/args.implementation/'model.py')
-model=importlib.util.module_from_spec(spec);spec.loader.exec_module(model)
-x=jnp.linspace(-1.,1.,21);y=2*x+1
+model=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(model)
+x=jnp.linspace(-1.,1.,21)
+y=2*x+1
 start={'weight':jnp.array(0.),'bias':jnp.array(0.)}
 try:
     if args.stage in ['1','all']:
@@ -54,4 +56,5 @@ try:
         print('PASS stage 4: held-out checks, replay, and failure diagnosis')
         print(json.dumps(report,indent=2))
 except (AssertionError,NotImplementedError) as error:
-    print(f'FAIL: {error}');raise SystemExit(1)
+    print(f'FAIL: {error}')
+    raise SystemExit(1)

@@ -32,7 +32,7 @@ For representative measured duration \(t\) seconds, arrival rate \(900\) jobs/ho
 
 If \(150\) attempts produce \(120\) completions, active-time cost per completion is \(1.25\) times per-attempt cost. Reserved-capacity billing and idle time can give a different result. Require explicit units, measured samples, hypothetical prices and workload boundaries. Three samples do not justify a strong tail-latency claim.
 
-Review the runbook as a sequence of evidence-driven actions. Require the observed symptom, diagnosis, actual repair and verification result, plus material limits. Passing a public reference test or copying the instructor result does not establish independent operational competence.
+Review the runbook as a sequence of evidence-driven actions. Require the observed symptom, diagnosis, actual repair and verification result, plus material limits. Passing a public reference test or copying the instructor result is verified separately from independent operational competence.
 
 ## Engineering extension review
 

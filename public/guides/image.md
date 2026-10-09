@@ -48,7 +48,7 @@ Start with the small CNN. Trace batch, height, width and channel axes through co
 
 ## 3. Make each update explainable
 
-Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.
+Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.
 
 Compare the CNN against a declared simple baseline. Keep augmentation on the training path and evaluate the original held-out images without stochastic augmentation. The training-methods project supplies separate objective labs for these methods; follow each phase prerequisite before attempting them. Integrating every objective into this modality harness remains an extension.
 
@@ -150,7 +150,7 @@ Use the existing Keras/JAX and TensorFlow conversion labs as preparation. A mode
 - Compare intermediate tensors and final outputs on fixed inputs, including boundary cases.
 - Compare task quality after export and again after quantization; measure the exported runtime itself.
 
-PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example does not establish that every model can round-trip between them.
+PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example is verified separately from that every model can round-trip between them.
 
 ## Grow the harness after the small version works
 

@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-04",
-  "contentHash": "d57505b6d5e7ccd76b453eb4691a4c494bf8302e1a59f94502e05e04c8a8c25f",
+  "contentHash": "b199a0366dbbc9d2155bd17073d474817d2690cdf5330b21c194a7b2f1185422",
   "executedAt": "2026-10-08T14:05:51.428412+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,11 @@
   "stdout": "Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']\nInterpreted primal and tangent: 2.3099803057106576 0.4391291800455618\nLowered IR characters: 1421\nCompiled transformed outputs match; changed shape explicitly rejected\nSupported primitives: ['sin', 'mul', 'add', 'reduce_sum']\nInterpreted primal and tangent: 2.3099803057106576 0.4391291800455618\nLowered IR characters: 1421\nCompiled transformed outputs match; changed shape explicitly rejected\nExpected unsupported primitive: unsupported primitive: exp\nChanged-value compiled tangent: 0.5640324983393596\nChanged polynomial transformed and compiled\nExplicit offset tangent contribution: -0.09999999999999998\nMultiple output contract and malformed tangent rejection verified\nPASS: internals-04\n",
   "notebookCells": [
     {
-      "sourceHash": "d261de09bb379031ff48eb8debd6d91eeccb59962a1458ad3c35ad8eba63c609",
+      "sourceHash": "fd9c711754fd6205f4db4b56eb094b339f8eb45ad38215513860f9b687bbd322",
       "outputs": []
     },
     {
-      "sourceHash": "0aa5d5c6dd1774e25faccd3011490882036da93e59cc8e0adb0af9928485dcda",
+      "sourceHash": "2587251cdd7eab5998e1d2111f53fc1f9a5067730afc3639c67fc43740dbf12b",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "9287b47ec9d56063620a1286f1d9a18afdd7e38f4bd341506ba445006b227c22",
+      "sourceHash": "efd0512d7e0a3e64c61a60193ff04962ceddeeca7dc5920c1c675b2a58503b72",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "0b3f028c26c60d0f232b0ecf9fbe5c2e7f721488041124d5273b2f6d5b8ba5a3",
+      "sourceHash": "d29ac89b76b9cb1c6388e238fc70640e2527b1022bdeb46cd7b29aeb65f63d95",
       "outputs": [
         {
           "output_type": "stream",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "sourceHash": "13f9599688a71d9ed70c4765c79522dd022aeb3296746ff8e893ff528d5558ac",
+      "sourceHash": "b9a4f2c537714958ae422077abde61bf9ea18f7f37d82a038fbc114a95fc3673",
       "outputs": []
     },
     {
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "02fe3ae303c956abdeb7dbb9bedeabe7f4fe95d26133c65d5404b49d883e173d",
+      "sourceHash": "6a82482aa5cabdaf1817ad61e70d9ab897dd583b190dc5e9771b624dcf636844",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "eb6990cc9babe3d78c34d4226679722d1c2ec5bfb05eeca92570b9e7b4f30b86",
+      "sourceHash": "c57cfe2d5bbd273f421adbdf9ced9ed6b42464b8d8af8a2e44ef7e83874d8f48",
       "outputs": [
         {
           "output_type": "stream",
@@ -118,11 +118,11 @@
       ]
     },
     {
-      "sourceHash": "e4b4320f5b3ce26a36c44145e6dedacac55a8a305c1631ccc7954f53cf457d29",
+      "sourceHash": "e5fafd051d34f6e4f324cbd5313283eb153a91a31c9d1d998187e2e7abd11ac7",
       "outputs": []
     },
     {
-      "sourceHash": "c45bbd8cd88f363c4a10acbd4e10587dae0f1c249f38c546d7f73d2ede8c99a0",
+      "sourceHash": "a2f01fc26c57fb9adbb421886bf3fe5f95b8641dbba6abd69eed5b806ceb643d",
       "outputs": [
         {
           "output_type": "stream",
@@ -134,11 +134,11 @@
       ]
     },
     {
-      "sourceHash": "fac06b1b97621be901f7f810f125c1265365f794df5e3746e289beb0157f9802",
+      "sourceHash": "4dfe1cda2767b0923c0ea7132c18ff8f59518be59ad3660aeff12c5f006ab1e8",
       "outputs": []
     },
     {
-      "sourceHash": "244569f06afe54db0de8bee7830e5626fe61894afbee5238bf675e952fc143a5",
+      "sourceHash": "df1da3c615ccc76f0299df733a3a8be84828a1ca76b693263cb21316cdb67a7f",
       "outputs": [
         {
           "output_type": "stream",

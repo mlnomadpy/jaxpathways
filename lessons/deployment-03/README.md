@@ -24,6 +24,10 @@ Serialize, load the file again and call the restored computation on new inputs. 
 
 If preprocessing lives outside the export, version it alongside the model. A correct graph can still return wrong application results when the caller normalizes inputs differently. A local round trip does not automatically qualify another runtime, hardware target or version.
 
+$$
+\hat{y}_{\text{deserialized}}(x) = \hat{y}_{\text{eager}}(x), \qquad \forall x \in \mathcal{D}_{\text{canary}}
+$$
+
 ### Four different deployment boundaries
 
 **Predict:** Which row is tested by the exported object alone?
@@ -83,9 +87,9 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import export
-# Initialize array `weights` with explicit values and shape.
+# Construct `weights` via `jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=j...`
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)
-# Initialize array `bias` with explicit values and shape.
+# Construct `bias` via `jnp.array([.1, -.2], dtype=jnp.float32)`
 bias = jnp.array([.1, -.2], dtype=jnp.float32)
 # Define and JIT-compile `inference(x)` so XLA traces and fuses the operations:
 @jax.jit
@@ -110,7 +114,7 @@ signature = jax.ShapeDtypeStruct((1, 3), jnp.float32)
 # Run `export.export` to compute `artifact`.
 artifact = export.export(inference)(signature)
 
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `artifact.in_avals[0].shape == (1,3)`
 assert artifact.in_avals[0].shape == (1,3)
 ```
 
@@ -134,7 +138,7 @@ with tempfile.TemporaryDirectory() as folder:
     sample = np.array([[1., 2., -1.]], np.float32)
     # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)`
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
     # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
@@ -153,9 +157,9 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import export
-# Initialize array `weights` with explicit values and shape.
+# Construct `weights` via `jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=j...`
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)
-# Initialize array `bias` with explicit values and shape.
+# Construct `bias` via `jnp.array([.1, -.2], dtype=jnp.float32)`
 bias = jnp.array([.1, -.2], dtype=jnp.float32)
 # Define and JIT-compile `inference(x)` so XLA traces and fuses the operations:
 @jax.jit
@@ -179,7 +183,7 @@ with tempfile.TemporaryDirectory() as folder:
     sample = np.array([[1., 2., -1.]], np.float32)
     # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)`
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
     # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
@@ -205,13 +209,13 @@ The matching heights show numerical agreement. The bars are adjacent, rather tha
 
 This is the first behavior to check after serialization: does the restored computation preserve the result within the declared tolerance? The figure makes a coordinate-by-coordinate mismatch visible instead of reducing all outputs to one aggregate number.
 
-The example exports a specific float32 input signature with shape $(1,3)$. Agreement for this case does not establish acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.
+The example exports a specific float32 input signature with shape $(1,3)$. Agreement for this case is separate from acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.
 
 ```python
 # Compute figure data for: Serialization preserves the declared computation
 # Convert `direct` to a host NumPy array for inspection or verification.
 direct = np.asarray(inference(sample))
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': ['score 0', 'score 1'], 'y...`
 visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'output score', 'series': [{'label': 'direct', 'y': direct[0].tolist()}, {'label': 'restored artifact', 'y': actual[0].tolist()}]}
 ```
 
@@ -279,7 +283,7 @@ with tempfile.TemporaryDirectory() as directory:
     completed = subprocess.run([sys.executable, '-c', worker, str(exported_path)], input=json.dumps({'features': [[1.,2.,-1.]]}), text=True, capture_output=True, check=True, env=dict(os.environ, JAX_PLATFORMS='cpu'), timeout=60)
     # Read or serialize artifact data on disk (`worker_scores`).
     worker_scores = json.loads(completed.stdout)['scores']
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)`
 np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Fresh interpreter loaded bytes and matched the known scores.')
@@ -299,20 +303,20 @@ Verify a new input $[-2, 0, 3]$ against an independent NumPy expression.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `changed` with explicit values and shape.
+1. Compute `changed` from `np.array([[-2., 0., 3.]], np.float32)`
 2. Convert `expected` to a host NumPy array for inspection or verification.
-3. Verify that computed values match the expected reference within numerical tolerance.
+3. Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
 4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Verify a new input [-2, 0, 3] against an independent NumPy expression.
-# Initialize array `changed` with explicit values and shape.
+# Compute `changed` from `np.array([[-2., 0., 3.]], np.float32)`
 changed = np.array(...)  # TODO: compute changed
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected = ...  # TODO: compute expected
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
 np.testing.assert_allclose(restored.call(changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(restored.call(changed), expected, atol
 # Print the observed values to compare against the expected result.
 print("Changed exported request verified")
@@ -322,11 +326,11 @@ print("Changed exported request verified")
 
 ```python
 # Exercise solution: Verify a new input [-2, 0, 3] against an independent NumPy expression.
-# Initialize array `changed` with explicit values and shape.
+# Compute `changed` from `np.array([[-2., 0., 3.]], np.float32)`
 changed = np.array([[-2., 0., 3.]], np.float32)
 # Convert `expected` to a host NumPy array for inspection or verification.
 expected = changed @ np.asarray(weights) + np.asarray(bias)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(changed), expected, atol...`
 np.testing.assert_allclose(restored.call(changed), expected, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed exported request verified")
@@ -357,7 +361,7 @@ Validate shape and finiteness on the host before calling inference. Include a si
 2. Guard input contract (`array.shape != (1, 3) or not np.isfinite(array).all()`) and fail fast if violated.
 3. Return `array` to the caller.
 4. Iterate over `invalid` to step through the computation:
-5. Verify that computed values match the expected reference within numerical tolerance.
+5. Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -379,7 +383,7 @@ for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
         pass
     else:
         raise AssertionError("invalid input accepted")
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
 np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
 ```
 
@@ -403,7 +407,7 @@ for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
         pass
     else:
         raise AssertionError("invalid input accepted")
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(restored.call(validate_request([[1.,2....`
 np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
 ```
 
@@ -453,11 +457,11 @@ for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
     try: checked_prediction(invalid)
     except ValueError: pass
     else: raise AssertionError('invalid request reached inference')
-# Verify contract: `inference_calls[0] == 0`.
+# Assert invariant `inference_calls[0] == 0` holds
 assert inference_calls[0]  # TODO: complete assertion check
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3...`
 np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
-# Verify contract: `inference_calls[0] == 1`.
+# Assert invariant `inference_calls[0] == 1` holds
 assert inference_calls[0]  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Invalid requests rejected before the one valid inference call.')
@@ -481,11 +485,11 @@ for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
     try: checked_prediction(invalid)
     except ValueError: pass
     else: raise AssertionError('invalid request reached inference')
-# Verify contract: `inference_calls[0] == 0`.
+# Assert invariant `inference_calls[0] == 0` holds
 assert inference_calls[0] == 0
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3...`
 np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
-# Verify contract: `inference_calls[0] == 1`.
+# Assert invariant `inference_calls[0] == 1` holds
 assert inference_calls[0] == 1
 # Print the observed values to compare against the expected result.
 print('Invalid requests rejected before the one valid inference call.')

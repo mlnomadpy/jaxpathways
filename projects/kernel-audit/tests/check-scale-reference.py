@@ -1,7 +1,8 @@
 """Independent public scale-assessment arithmetic on four logical CPU devices.
 
 This verifies partition semantics, not network or accelerator performance.
-Run in a fresh process; device configuration precedes backend initialization.
+Run in a fresh process
+device configuration precedes backend initialization.
 """
 import jax
 jax.config.update('jax_platforms','cpu')

@@ -101,7 +101,9 @@ def fixture(seed=0, per_class=12, shift=0):
             # Append the current step result to `images`.
             # Append the current step result to `images`.
             # Append the current step result to `images`.
-            images.append(x); captions.append(caption); labels.append(label)
+            images.append(x)
+            captions.append(caption)
+            labels.append(label)
     # Return `{'images': np.stack(images), 'captions': captions, 'labels': np.asarray(labels, np.int32), 'ids': [f'synthetic:{seed}:{shift}:{i}' for i in range(4 * per_class)], 'provenance': {'kind': 'synthetic-bars', 'seed': seed, 'shift': shift, 'per_class': per_class}}` to the caller.
     return {'images': np.stack(images), 'captions': captions, 'labels': np.asarray(labels, np.int32),
             'ids': [f'synthetic:{seed}:{shift}:{i}' for i in range(4 * per_class)],
@@ -111,7 +113,8 @@ def fixture(seed=0, per_class=12, shift=0):
 def dataset_hash(data):
     # Run `image_features` to compute `x`.
     # Run `text_features` to compute `t`.
-    x = image_features(data['images']); t = text_features(data['captions'])
+    x = image_features(data['images'])
+    t = text_features(data['captions'])
     # Convert `labels` to a host NumPy array for inspection or verification.
     labels = np.asarray(data['labels'])
     # Guard input contract (`labels.shape != (len(x),) or labels.dtype != np.int32 or np.any((labels < 0) | (labels >= 4))`) and fail fast if violated.
@@ -127,7 +130,8 @@ def dataset_hash(data):
 def check_splits(train, held):
     # Run `dataset_hash` to perform the next check or state transition.
     # Run `dataset_hash` to perform the next check or state transition.
-    dataset_hash(train); dataset_hash(held)
+    dataset_hash(train)
+    dataset_hash(held)
     # Guard input contract (`set(train['ids']) & set(held['ids']) or set(train.get('groups', [])) & set(held.get('groups', []))`) and fail fast if violated.
     if set(train['ids']) & set(held['ids']) or set(train.get('groups',[])) & set(held.get('groups',[])):
         raise ValueError('pair IDs leak across splits')
@@ -207,7 +211,8 @@ def transition(state, data):
     chosen = order[cursor:cursor + state['batch_size']]
     # Run `image_features` to compute `x`.
     # Run `text_features` to compute `t`.
-    x = image_features(data['images'][chosen]); t = text_features([data['captions'][i] for i in chosen])
+    x = image_features(data['images'][chosen])
+    t = text_features([data['captions'][i] for i in chosen])
     # Create device-backed JAX array `(params, momentum, loss)`.
     params, momentum, loss = _update(state['params'], state['momentum'], jnp.asarray(x), jnp.asarray(t), jnp.asarray(data['labels'][chosen]))
     # Synchronize host execution until asynchronous device computation completes.
@@ -262,7 +267,8 @@ def _host_state(state):
 def save_checkpoint(folder, state):
     # Read or serialize artifact data on disk (`folder`).
     # Execute the next step of the computation.
-    folder = Path(folder); folder.mkdir(parents=True, exist_ok=False)
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=False)
     # Evaluate `payload` from the current inputs and state.
     payload = {'contract': CONTRACT, 'training': TRAINING, 'implementation_hash': implementation_hash(), 'state': _host_state(state)}
     # Read or serialize artifact data on disk (``).
@@ -274,7 +280,8 @@ def load_checkpoint(folder, data, batch_size=16):
     record = json.loads((Path(folder)/'checkpoint.json').read_text())
     # Evaluate `p` from the current inputs and state.
     # Evaluate `s` from the current inputs and state.
-    p = record['payload']; s = p['state']
+    p = record['payload']
+    s = p['state']
     # Guard input contract (`digest(p) != record['sha256'] or p['contract'] != CONTRACT or p.get('training') != TRAINING or (p.get('implementation_hash') != implementation_hash()) or (s['data_hash'] != dataset_hash(data)) or (s['batch_size'] != batch_size)`) and fail fast if violated.
     if digest(p) != record['sha256'] or p['contract'] != CONTRACT or p.get('training') != TRAINING or p.get('implementation_hash') != implementation_hash() or s['data_hash'] != dataset_hash(data) or s['batch_size'] != batch_size:
         raise ValueError('checkpoint identity, configuration or checksum mismatch')
@@ -295,7 +302,8 @@ def load_checkpoint(folder, data, batch_size=16):
             s[group][k] = jnp.asarray(v)
     # Create device-backed JAX array `s['key']`.
     # Convert `s['order']` to a host NumPy array for inspection or verification.
-    s['key'] = jnp.asarray(s['key'], jnp.uint32); s['order'] = np.asarray(s['order'], np.int32)
+    s['key'] = jnp.asarray(s['key'], jnp.uint32)
+    s['order'] = np.asarray(s['order'], np.int32)
     # Return `s` to the caller.
     return s
 
@@ -322,7 +330,8 @@ def encoder(params, branch, policy, calibration):
         raise ValueError('unsupported branch or precision')
     # Create device-backed JAX array `w`.
     # Run `quantize_weights` to compute `(qw, scale)`.
-    w = jnp.asarray(params[branch]); qw, scale = quantize_weights(w)
+    w = jnp.asarray(params[branch])
+    qw, scale = quantize_weights(w)
     # Branch on condition `policy == 'fp32'`:
     if policy == 'fp32': return lambda x: normalize(x @ w)
     # Branch on condition `policy == 'w8a32'`:
@@ -346,7 +355,8 @@ def encoder(params, branch, policy, calibration):
 def export_artifact(folder, params, calibration, policy='fp32'):
     # Read or serialize artifact data on disk (`folder`).
     # Execute the next step of the computation.
-    folder = Path(folder); folder.mkdir(parents=True, exist_ok=False)
+    folder = Path(folder)
+    folder.mkdir(parents=True, exist_ok=False)
     # Evaluate `files` from the current inputs and state.
     files = {}
     # Loop over `(branch, width)` in `[('image', 64), ('text', 4)]`:
@@ -377,7 +387,9 @@ def load_artifact(folder):
     # Read or serialize artifact data on disk (`folder`).
     # Read or serialize artifact data on disk (`record`).
     # Evaluate `meta` from the current inputs and state.
-    folder = Path(folder); record = json.loads((folder/'manifest.json').read_text()); meta = record['payload']
+    folder = Path(folder)
+    record = json.loads((folder/'manifest.json').read_text())
+    meta = record['payload']
     # Evaluate `names` from the current inputs and state.
     names = {f'{branch}-{batch}.jax' for branch in ['image','text'] for batch in [1,8]}
     # Guard input contract (`record['sha256'] != digest(meta) or meta['contract'] != CONTRACT or set(meta['files']) != names`) and fail fast if violated.
@@ -429,7 +441,9 @@ def measure(artifact, images, repeats=30):
         # Record execution timing or profiler trace in `start`.
         # Execute the next step of the computation.
         # Record execution timing or profiler trace in ``.
-        start=time.perf_counter();infer(artifact,images=images);samples.append((time.perf_counter()-start)*1000)
+        start=time.perf_counter()
+        infer(artifact,images=images)
+        samples.append((time.perf_counter()-start)*1000)
     # Return `{'milliseconds': samples, 'p50_ms': float(np.median(samples)), 'p95_ms': float(np.percentile(samples, 95)), 'batch': len(images), 'scope': 'resident NumPy inputs through validation/placement/exported inference/host output; no file decode or network'}` to the caller.
     return {'milliseconds':samples,'p50_ms':float(np.median(samples)),'p95_ms':float(np.percentile(samples,95)),
             'batch':len(images),'scope':'resident NumPy inputs through validation/placement/exported inference/host output; no file decode or network'}
@@ -448,7 +462,8 @@ def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_
     bank = ['vertical thin','vertical thick','horizontal thin','horizontal thick'] * 2
     # Run `infer` to compute `zi`.
     # Run `infer` to compute `zt`.
-    zi = infer(artifact, images=evaluation_images); zt = infer(artifact, captions=bank)
+    zi = infer(artifact, images=evaluation_images)
+    zt = infer(artifact, captions=bank)
     # Create evenly spaced index values in `predicted`.
     predicted = np.arange(8)[(zi @ zt.T).argmax(axis=1)] % 4
     # Reduce across the target axis to summarize `score`.
@@ -457,13 +472,16 @@ def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_
     if score < minimum_accuracy: raise ValueError('candidate failed measured retrieval gate')
     # Read or serialize artifact data on disk (`registry`).
     # Execute the next step of the computation.
-    registry=Path(registry);registry.mkdir(parents=True,exist_ok=True)
+    registry=Path(registry)
+    registry.mkdir(parents=True,exist_ok=True)
     # Read or serialize artifact data on disk (`record`).
     record={'folder':str(Path(candidate).resolve()),'manifest_sha256':hashlib.sha256((Path(candidate)/'manifest.json').read_bytes()).hexdigest(),'gate_accuracy':score}
     # Evaluate `temporary` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
     # Execute the next step of the computation.
-    temporary=registry/'ACTIVE.tmp';temporary.write_text(json.dumps(record));temporary.replace(registry/'ACTIVE.json')
+    temporary=registry/'ACTIVE.tmp'
+    temporary.write_text(json.dumps(record))
+    temporary.replace(registry/'ACTIVE.json')
     # Return `record` to the caller.
     return record
 
@@ -472,7 +490,8 @@ def load_pairs(manifest_path, split):
     """Read explicitly licensed local .npy image/caption pairs; no downloads."""
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
-    path=Path(manifest_path).resolve();manifest=json.loads(path.read_text())
+    path=Path(manifest_path).resolve()
+    manifest=json.loads(path.read_text())
     # Guard input contract (`split not in ['train', 'held'] or not manifest.get('provenance') or (not manifest.get('license'))`) and fail fast if violated.
     if split not in ['train','held'] or not manifest.get('provenance') or not manifest.get('license'):
         raise ValueError('split, provenance and rights statement required')
@@ -493,7 +512,9 @@ def load_pairs(manifest_path, split):
     # Evaluate `images` from the current inputs and state.
     # Evaluate `captions` from the current inputs and state.
     # Evaluate `labels` from the current inputs and state.
-    images=[];captions=[];labels=[]
+    images=[]
+    captions=[]
+    labels=[]
     # Loop over `r` in `rows`:
     for r in rows:
         # Evaluate `image_path` from the current inputs and state.
@@ -504,13 +525,16 @@ def load_pairs(manifest_path, split):
         pixels=np.load(image_path,allow_pickle=False)
         # Run `image_features` to perform the next check or state transition.
         # Run `text_features` to compute `feat`.
-        image_features(pixels[None,...]);feat=text_features([r['caption']])[0]
+        image_features(pixels[None,...])
+        feat=text_features([r['caption']])[0]
         # Evaluate `label` from the current inputs and state.
         label=(0 if feat[0] else 2)+(1 if feat[3] else 0)
         # Append the current step result to `images`.
         # Append the current step result to `images`.
         # Append the current step result to `images`.
-        images.append(pixels);captions.append(r['caption']);labels.append(label)
+        images.append(pixels)
+        captions.append(r['caption'])
+        labels.append(label)
     # Convert `data` to a host NumPy array for inspection or verification.
     data={'images':np.stack(images),'captions':captions,'labels':np.asarray(labels,np.int32),
           'ids':[r['id'] for r in rows], 'groups':[r['group'] for r in rows],

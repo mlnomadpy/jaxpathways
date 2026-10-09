@@ -26,21 +26,27 @@ def digest_json(value):
 def digest_arrays(*arrays):
     h=hashlib.sha256()
     for value in arrays:
-        a=np.ascontiguousarray(value);h.update(str(a.dtype).encode());h.update(str(a.shape).encode());h.update(a.tobytes())
+        a=np.ascontiguousarray(value)
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
     return h.hexdigest()
 
 def make_dataset(seed=11,count=96,split='train',corruption=False):
     if count<3:raise ValueError('at least three images required')
-    rng=np.random.default_rng(seed);labels=np.arange(count,dtype=np.int32)%3
+    rng=np.random.default_rng(seed)
+    labels=np.arange(count,dtype=np.int32)%3
     images=np.empty((count,8,8,1),np.uint8)
     for i,label in enumerate(labels):
-        canvas=rng.normal(18,5,(8,8)); row,col=rng.integers(1,6,size=2)
+        canvas=rng.normal(18,5,(8,8))
+        row,col=rng.integers(1,6,size=2)
         if label in (0,2):canvas[:,col:col+2]+=rng.uniform(170,210)
         if label in (1,2):canvas[row:row+2,:]+=rng.uniform(170,210)
         images[i,:,:,0]=np.clip(canvas,0,255).astype(np.uint8)
     if corruption:
         # Apply a separate random stream after clean generation: pairs remain aligned.
-        altered=images.astype(np.float32);altered[:,:,2:6,:]=18
+        altered=images.astype(np.float32)
+        altered[:,:,2:6,:]=18
         altered+=np.random.default_rng(seed+5000).normal(0,28,altered.shape)
         images=np.clip(altered,0,255).astype(np.uint8)
     return dict(images=images,labels=labels,ids=[f'{split}-{seed}-{i:04d}' for i in range(count)],

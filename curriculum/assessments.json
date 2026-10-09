@@ -3,7 +3,7 @@
     "id": "foundations",
     "projectId": "regression-audit",
     "title": "Regression synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/foundations.md",
     "url": "assessments/foundations.html"
@@ -12,7 +12,7 @@
     "id": "models",
     "projectId": "image-harness",
     "title": "Classifier and image lifecycle synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/models.md",
     "url": "assessments/models.html"
@@ -21,7 +21,7 @@
     "id": "math",
     "projectId": "regression-audit",
     "title": "Math & optimization synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "math-extension",
     "source": "assessments/math.md",
     "url": "assessments/math.html",
@@ -32,7 +32,7 @@
     "id": "science",
     "projectId": "scientific-inverse",
     "title": "Scientific inverse-problem synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/science.md",
     "url": "assessments/science.html"
@@ -41,7 +41,7 @@
     "id": "rl",
     "projectId": "policy-evaluation",
     "title": "Reinforcement-learning synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/rl.md",
     "url": "assessments/rl.html"
@@ -50,7 +50,7 @@
     "id": "probability",
     "projectId": "bayesian-regression",
     "title": "Bayesian regression synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/probability.md",
     "url": "assessments/probability.html"
@@ -59,7 +59,7 @@
     "id": "internals",
     "projectId": "derivative-audit",
     "title": "Derivative synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/internals.md",
     "url": "assessments/internals.html"
@@ -68,7 +68,7 @@
     "id": "ship",
     "projectId": "deployment-audit",
     "title": "Shipping synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/ship.md",
     "url": "assessments/ship.html"
@@ -77,7 +77,7 @@
     "id": "ops",
     "projectId": "workload-operations",
     "title": "Workload operations synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/ops.md",
     "url": "assessments/ops.html"
@@ -86,7 +86,7 @@
     "id": "scale",
     "projectId": "kernel-audit",
     "title": "Profiling, partitioning and kernel synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/scale.md",
     "url": "assessments/scale.html"
@@ -95,7 +95,7 @@
     "id": "tpu",
     "projectId": "text-harness",
     "title": "Training-system synthesis",
-    "status": "review-draft",
+    "status": "active",
     "scope": "project-synthesis",
     "source": "assessments/tpu.md",
     "url": "assessments/tpu.html",

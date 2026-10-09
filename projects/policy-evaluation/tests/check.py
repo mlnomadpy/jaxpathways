@@ -66,7 +66,8 @@ if a.stage >= 2:
         np.testing.assert_array_equal(r['reward'][~r['active']], 0)
         # Reconstruct every trajectory using Python, independent of the JAX step.
         for b in range(batch):
-            position = int(r['observation'][0, b]); done = False
+            position = int(r['observation'][0, b])
+            done = False
             for t in range(horizon):
                 assert int(r['observation'][t,b]) == position
                 assert bool(r['active'][t,b]) == (not done)
@@ -107,7 +108,8 @@ if a.stage >= 3:
     np.testing.assert_allclose(m.policy_loss(theta,r), expected,rtol=1e-6)
     logp_grad = jax.grad(lambda old: m.policy_loss(theta, dict(r,old_logp=old)))(r['old_logp'])
     reward_grad = jax.grad(lambda rew: m.policy_loss(theta, dict(r,reward=rew)))(r['reward'])
-    np.testing.assert_array_equal(logp_grad,0); np.testing.assert_array_equal(reward_grad,0)
+    np.testing.assert_array_equal(logp_grad,0)
+    np.testing.assert_array_equal(reward_grad,0)
     # Fresh Monte Carlo policy gradient agrees with differentiating an enumerated expectation.
     theta = jnp.array([-.2,.3,.7])
     r = m.rollout(theta,jax.random.key(902),32768,8)[1]
@@ -121,7 +123,8 @@ if a.stage >= 4:
         for seed in (0, 7, 23):
             theta, history = m.train(seed=seed,method=method,epochs=epochs)
             replay, rh = m.train(seed=seed,method=method,epochs=epochs)
-            np.testing.assert_array_equal(theta,replay); np.testing.assert_array_equal(history,rh)
+            np.testing.assert_array_equal(theta,replay)
+            np.testing.assert_array_equal(history,rh)
             assert history.shape == (41,) and np.isfinite(history).all()
             assert float(history[-1]) > .90 and float(history[-1]-history[0]) > .35
             before = np.array(theta,copy=True)

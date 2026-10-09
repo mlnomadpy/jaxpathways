@@ -27,11 +27,13 @@ class TorchModel(torch.nn.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Run `torch.nn.functional.gelu` to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=torch.nn.functional.gelu(n,approximate='none')
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=torch.nn.functional.gelu(n,approximate='none')
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
-# Verify that the output tensor shape matches our prediction.
+# Assert invariant `TorchModel().eval()(torch.zeros((2` holds
 assert TorchModel().eval()(torch.zeros((2,3)))['output'].shape == (2,2)
 
 # Write the same operations in Flax
@@ -51,25 +53,27 @@ class FlaxModel(nnx.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Apply nonlinear activation or probability normalization to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=jax.nn.gelu(n,approximate=False)
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=jax.nn.gelu(n,approximate=False)
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
-# Verify that the output tensor shape matches our prediction.
+# Assert invariant `FlaxModel()(jnp.zeros((2` holds
 assert FlaxModel()(jnp.zeros((2,3)))['output'].shape == (2,2)
 
 # Map each parameter and declare tolerances
 # Step 3 — Map each parameter and declare tolerances: The hidden-layer check passes after transposing the source kernel.
 def convert(state,eps=1e-5):
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `{'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weig...`
     shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
     # Guard input contract (`set(state) != set(shapes)`) and fail fast if violated.
     if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
-    # Evaluate `arrays` from the current inputs and state.
+    # Compute `arrays` from `{}`
     arrays={}
     # Iterate over `(name, shape)` to step through the computation:
     for name,shape in shapes.items():
-        # Evaluate `value` from the current inputs and state.
+        # Compute `value` from `state[name].detach().cpu().numpy()`
         value=state[name].detach().cpu().numpy()
         # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
         if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
@@ -97,7 +101,8 @@ def convert(state,eps=1e-5):
 def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     # Convert `reference` to a host NumPy array for inspection or verification.
     # Convert `actual` to a host NumPy array for inspection or verification.
-    reference=np.asarray(reference,dtype=np.float64);actual=np.asarray(actual,dtype=np.float64)
+    reference=np.asarray(reference,dtype=np.float64)
+    actual=np.asarray(actual,dtype=np.float64)
     # Guard input contract (`reference.shape != actual.shape or not np.isfinite(reference).all() or (not np.isfinite(actual).all())`) and fail fast if violated.
     if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
         raise ValueError('shape or finite-value mismatch')
@@ -105,7 +110,7 @@ def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
     # Run `np.abs` to compute `absolute`.
     absolute=np.abs(actual-reference)
-    # Evaluate `budget` from the current inputs and state.
+    # Compute `budget` from `atol+rtol*np.abs(reference)`
     budget=atol+rtol*np.abs(reference)
     # Return `{'max_abs': float(absolute.max()), 'relative_l2': float(np.linalg.norm(actual - reference) / max(np.linalg.norm(reference), 1e-12)), 'passed': bool(np.all(absolute <= budget))}` to the caller.
     return {'max_abs':float(absolute.max()),'relative_l2':float(np.linalg.norm(actual-reference)/max(np.linalg.norm(reference),1e-12)),
@@ -115,7 +120,7 @@ def error_report(reference,actual,atol=2e-6,rtol=2e-5):
 step_source = TorchModel().eval()
 # Run `convert` to compute `step_target`.
 step_target = convert(step_source.state_dict())
-# Initialize array `step_input` with explicit values and shape.
+# Compute `step_input` from `np.array([[1., -2., .5]], np.float32)`
 step_input = np.array([[1., -2., .5]], np.float32)
 # Perform matrix contraction / projection to compute `step_expected`.
 step_expected = step_input @ step_source.hidden.weight.detach().numpy().T + step_source.hidden.bias.detach().numpy()
@@ -133,7 +138,7 @@ def save_flax(model,path):
 
 # Function `load_flax(path)` implementing this stage's computation:
 def load_flax(path):
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `{'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scal...`
     shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
     # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path,allow_pickle=False) as archive:
@@ -147,11 +152,11 @@ def load_flax(path):
         eps=float(archive['epsilon'])
         # Guard input contract (`not np.isfinite(eps) or eps <= 0`) and fail fast if violated.
         if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
-        # Evaluate `arrays` from the current inputs and state.
+        # Compute `arrays` from `{}`
         arrays={}
         # Iterate over `(key, shape)` to step through the computation:
         for key,shape in shapes.items():
-            # Evaluate `value` from the current inputs and state.
+            # Compute `value` from `archive[key]`
             value=archive[key]
             # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
             if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)
@@ -195,7 +200,8 @@ source=TorchModel().eval()
 with tempfile.TemporaryDirectory() as folder:
     # Read or serialize artifact data on disk (`checkpoint`).
     # Execute the next step of the computation.
-    checkpoint=Path(folder)/'weights.pt';torch.save(source.state_dict(),checkpoint)
+    checkpoint=Path(folder)/'weights.pt'
+    torch.save(source.state_dict(),checkpoint)
     # Run `torch.load` to compute `state`.
     state=torch.load(checkpoint,map_location='cpu',weights_only=True)
     # Run `convert` to compute `target`.
@@ -206,7 +212,7 @@ with tempfile.TemporaryDirectory() as folder:
     save_flax(target,converted)
     # Run `load_flax` to compute `target`.
     target=load_flax(converted)
-    # Evaluate `errors` from the current inputs and state.
+    # Compute `errors` from `{name:[] for name in ['hidden','norm','activation','...`
     errors={name:[] for name in ['hidden','norm','activation','output']}
     # Loop over `(batch, scale)` in `[(1, 1.0), (7, 0.001), (5, 4.0)]`:
     for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:
@@ -215,27 +221,30 @@ with tempfile.TemporaryDirectory() as folder:
         # Run `torch.tensor` to compute `tx`.
         # Run `source` to compute `torch_values`.
         # Create device-backed JAX array `flax_values`.
-        tx=torch.tensor(inputs,requires_grad=True);torch_values=source(tx);flax_values=target(jnp.asarray(inputs))
+        tx=torch.tensor(inputs,requires_grad=True)
+        torch_values=source(tx)
+        flax_values=target(jnp.asarray(inputs))
         # Loop over `name` in `errors`:
         for name in errors:
             # Run `error_report` to compute `report`.
-            # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-            report=error_report(torch_values[name].detach().numpy(),flax_values[name]);assert report['passed'],(name,report)
+            # Compute `report` from `error_report(torch_values[name].detach().numpy(),fla...`
+            report=error_report(torch_values[name].detach().numpy(),flax_values[name])
+            assert report['passed'],(name,report)
             # Execute the next step of the computation.
             errors[name].append(report['max_abs'])
         # Reduce across the target axis to summarize ``.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `error_report(tx.grad.numpy()` holds
         assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']
     # Run `convert` to compute `wrong`.
     wrong=convert(state,eps=.1)
-    # Evaluate `reference` from the current inputs and state.
+    # Compute `reference` from `{k:v.detach().numpy() for k,v in source(torch.tensor...`
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
     # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['...` holds
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     # Loop over `bad` in `[dict(state, unexpected=torch.zeros(1)), {k: v for k, v in state.items() if k != 'norm.bias'}]`:
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -273,7 +282,9 @@ class TorchModel(torch.nn.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Run `torch.nn.functional.gelu` to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=torch.nn.functional.gelu(n,approximate='none')
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=torch.nn.functional.gelu(n,approximate='none')
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
@@ -292,21 +303,23 @@ class FlaxModel(nnx.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Apply nonlinear activation or probability normalization to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=jax.nn.gelu(n,approximate=False)
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=jax.nn.gelu(n,approximate=False)
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
 # Function `convert(state, eps)` implementing this stage's computation:
 def convert(state,eps=1e-5):
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `{'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weig...`
     shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
     # Guard input contract (`set(state) != set(shapes)`) and fail fast if violated.
     if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
-    # Evaluate `arrays` from the current inputs and state.
+    # Compute `arrays` from `{}`
     arrays={}
     # Iterate over `(name, shape)` to step through the computation:
     for name,shape in shapes.items():
-        # Evaluate `value` from the current inputs and state.
+        # Compute `value` from `state[name].detach().cpu().numpy()`
         value=state[name].detach().cpu().numpy()
         # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
         if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
@@ -334,7 +347,8 @@ def convert(state,eps=1e-5):
 def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     # Convert `reference` to a host NumPy array for inspection or verification.
     # Convert `actual` to a host NumPy array for inspection or verification.
-    reference=np.asarray(reference,dtype=np.float64);actual=np.asarray(actual,dtype=np.float64)
+    reference=np.asarray(reference,dtype=np.float64)
+    actual=np.asarray(actual,dtype=np.float64)
     # Guard input contract (`reference.shape != actual.shape or not np.isfinite(reference).all() or (not np.isfinite(actual).all())`) and fail fast if violated.
     if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
         raise ValueError('shape or finite-value mismatch')
@@ -342,7 +356,7 @@ def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
     # Run `np.abs` to compute `absolute`.
     absolute=np.abs(actual-reference)
-    # Evaluate `budget` from the current inputs and state.
+    # Compute `budget` from `atol+rtol*np.abs(reference)`
     budget=atol+rtol*np.abs(reference)
     # Return `{'max_abs': float(absolute.max()), 'relative_l2': float(np.linalg.norm(actual - reference) / max(np.linalg.norm(reference), 1e-12)), 'passed': bool(np.all(absolute <= budget))}` to the caller.
     return {'max_abs':float(absolute.max()),'relative_l2':float(np.linalg.norm(actual-reference)/max(np.linalg.norm(reference),1e-12)),
@@ -358,7 +372,7 @@ def save_flax(model,path):
 
 # Function `load_flax(path)` implementing this stage's computation:
 def load_flax(path):
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `{'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scal...`
     shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
     # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path,allow_pickle=False) as archive:
@@ -372,11 +386,11 @@ def load_flax(path):
         eps=float(archive['epsilon'])
         # Guard input contract (`not np.isfinite(eps) or eps <= 0`) and fail fast if violated.
         if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
-        # Evaluate `arrays` from the current inputs and state.
+        # Compute `arrays` from `{}`
         arrays={}
         # Iterate over `(key, shape)` to step through the computation:
         for key,shape in shapes.items():
-            # Evaluate `value` from the current inputs and state.
+            # Compute `value` from `archive[key]`
             value=archive[key]
             # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
             if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)
@@ -404,7 +418,8 @@ source=TorchModel().eval()
 with tempfile.TemporaryDirectory() as folder:
     # Read or serialize artifact data on disk (`checkpoint`).
     # Execute the next step of the computation.
-    checkpoint=Path(folder)/'weights.pt';torch.save(source.state_dict(),checkpoint)
+    checkpoint=Path(folder)/'weights.pt'
+    torch.save(source.state_dict(),checkpoint)
     # Run `torch.load` to compute `state`.
     state=torch.load(checkpoint,map_location='cpu',weights_only=True)
     # Run `convert` to compute `target`.
@@ -415,7 +430,7 @@ with tempfile.TemporaryDirectory() as folder:
     save_flax(target,converted)
     # Run `load_flax` to compute `target`.
     target=load_flax(converted)
-    # Evaluate `errors` from the current inputs and state.
+    # Compute `errors` from `{name:[] for name in ['hidden','norm','activation','...`
     errors={name:[] for name in ['hidden','norm','activation','output']}
     # Loop over `(batch, scale)` in `[(1, 1.0), (7, 0.001), (5, 4.0)]`:
     for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:
@@ -424,27 +439,30 @@ with tempfile.TemporaryDirectory() as folder:
         # Run `torch.tensor` to compute `tx`.
         # Run `source` to compute `torch_values`.
         # Create device-backed JAX array `flax_values`.
-        tx=torch.tensor(inputs,requires_grad=True);torch_values=source(tx);flax_values=target(jnp.asarray(inputs))
+        tx=torch.tensor(inputs,requires_grad=True)
+        torch_values=source(tx)
+        flax_values=target(jnp.asarray(inputs))
         # Loop over `name` in `errors`:
         for name in errors:
             # Run `error_report` to compute `report`.
-            # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-            report=error_report(torch_values[name].detach().numpy(),flax_values[name]);assert report['passed'],(name,report)
+            # Compute `report` from `error_report(torch_values[name].detach().numpy(),fla...`
+            report=error_report(torch_values[name].detach().numpy(),flax_values[name])
+            assert report['passed'],(name,report)
             # Execute the next step of the computation.
             errors[name].append(report['max_abs'])
         # Reduce across the target axis to summarize ``.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `error_report(tx.grad.numpy()` holds
         assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']
     # Run `convert` to compute `wrong`.
     wrong=convert(state,eps=.1)
-    # Evaluate `reference` from the current inputs and state.
+    # Compute `reference` from `{k:v.detach().numpy() for k,v in source(torch.tensor...`
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
     # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `wrong_reports['hidden']['passed'] and not wrong_reports['norm']['...` holds
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     # Loop over `bad` in `[dict(state, unexpected=torch.zeros(1)), {k: v for k, v in state.items() if k != 'norm.bias'}]`:
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -458,14 +476,14 @@ print('Wrong epsilon: first mismatch is norm; intermediate outputs and input gra
 
 # Figure data experiment
 # Compute figure data for: Locate the first divergent layer
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':list(errors),'xlabel':'operat...`
 visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution order','ylabel':'maximum absolute output error','series':[{'label':'matched architecture (max across inputs)','y':[max(v) for v in errors.values()]},{'label':'wrong epsilon (last input batch)','y':[wrong_reports[k]['max_abs'] for k in errors]}]}
 
 # Experiment: Inspect the wrong-epsilon signature
 # Experiment — Inspect the wrong-epsilon signature: Localize the first divergent operation before remapping...
-# Verify contract: `wrong_reports['hidden']['passed']`.
+# Assert invariant `wrong_reports['hidden']['passed']` holds
 assert wrong_reports['hidden']['passed']
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not wrong_reports['norm']['passed']` holds
 assert not wrong_reports['norm']['passed']
 # Print the observed values to compare against the expected result.
 print('Per-layer wrong-epsilon report:',wrong_reports)
@@ -477,23 +495,24 @@ near_zero = error_report([0.], [1e-6])
 near_zero_fail = error_report([0.], [3e-6])
 # Run `error_report` to compute `large_value`.
 large_value = error_report([100.], [100.001])
-# Verify contract: `near_zero['passed'] and (not near_zero_fail['passed']) and large_val...`.
+# Assert invariant `near_zero['passed'] and not near_zero_fail['passed'] and large_va...` holds
 assert near_zero['passed'] and not near_zero_fail['passed'] and large_value['passed']
 # Print the observed values to compare against the expected result.
 print('Near-zero, excessive near-zero, large-value:', near_zero['passed'], near_zero_fail['passed'], large_value['passed'])
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Compare a near-zero reference against two candidate errors.
-# Verify contract: `error_report([0.0, 1.0], [1e-07, 1.000001])['passed']`.
+# Assert invariant `error_report([0.` holds
 assert error_report([0.,1.],[1e-7,1.000001])['passed']
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not error_report([0.` holds
 assert not error_report([0.,1.],[1e-3,1.])['passed']
 # Print the observed values to compare against the expected result.
 print('Near-zero acceptance and rejection verified.')
 
 # Reference practice: Reject a plausible but wrong tensor layout
 # Reject a plausible but wrong tensor layout (Transfer): Asymmetric dimensions expose orientation errors that square...
-bad_state=dict(state);bad_state['hidden.weight']=state['hidden.weight'].T
+bad_state=dict(state)
+bad_state['hidden.weight']=state['hidden.weight'].T
 # Run the boundary check and catch the expected exception:
 try:convert(bad_state)
 except ValueError:print('Wrong source layout rejected')
@@ -501,9 +520,9 @@ else:raise AssertionError('layout mismatch accepted')
 
 # Reference practice: Check a nonuniform output sensitivity
 # Check a nonuniform output sensitivity (Transfer / diagnosis): This checks J^{\mathsf T}v for a second, nonuniform direction.
-# Initialize array `probe_inputs` with explicit values and shape.
+# Compute `probe_inputs` from `np.array([[.2, -.7, 1.1], [1., .4, -.5]], np.float32)`
 probe_inputs = np.array([[.2, -.7, 1.1], [1., .4, -.5]], np.float32)
-# Initialize array `cotangent` with explicit values and shape.
+# Compute `cotangent` from `np.array([[1., -.5], [2., .25]], np.float32)`
 cotangent = np.array([[1., -.5], [2., .25]], np.float32)
 # Run `torch.tensor` to compute `probe_torch`.
 probe_torch = torch.tensor(probe_inputs, requires_grad=True)
@@ -515,7 +534,7 @@ weighted_source.backward()
 weighted_target = jax.grad(lambda z: jnp.sum(target(z)['output'] * jnp.asarray(cotangent)))(jnp.asarray(probe_inputs))
 # Run `error_report` to compute `vjp_report`.
 vjp_report = error_report(probe_torch.grad.numpy(), weighted_target, atol=5e-6, rtol=5e-5)
-# Verify contract: `vjp_report['passed']`.
+# Assert invariant `vjp_report['passed']` holds
 assert vjp_report['passed'], vjp_report
 # Print the observed values to compare against the expected result.
 print('Nonuniform cotangent input-gradient parity:', vjp_report)

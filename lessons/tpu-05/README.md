@@ -26,6 +26,10 @@ Larger TPU Pod slices span multiple Linux VMs connected over the Inter-Chip Inte
 1. You must pass `--worker=all` to `gcloud compute tpus tpu-vm scp` and `gcloud compute tpus tpu-vm ssh` so every host receives the script and starts Python at the same time.
 2. Your Python script must call `jax.distributed.initialize()` before querying `jax.devices()` so the hosts discover each other and form a unified $16$-chip mesh.
 
+$$
+g_{\text{global}} = \frac{1}{P}\sum_{p=0}^{P-1} g^{(p)} = \operatorname{psum}(g^{(p)}, \texttt{'data'}) / P
+$$
+
 ### Pause and reason
 
 If a TPU slice has `hosts = 4` and `chips_per_host = 4` (`v5litepod-16`), what are `jax.local_device_count()` and `jax.device_count()` on each host after `jax.distributed.initialize()`?
@@ -89,7 +93,7 @@ import json
 import jax
 import numpy as np
 
-# Evaluate `SLICE_CATALOG` from the current inputs and state.
+# Compute `SLICE_CATALOG` from `[`
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
@@ -98,11 +102,11 @@ SLICE_CATALOG = [
 ]
 # Iterate over `entry` to step through the computation:
 for entry in SLICE_CATALOG:
-    # Evaluate `entry['global_chips']` from the current inputs and state.
+    # Compute `entry["global_chips"]` from `entry["hosts"] * entry["chips_per_host"]`
     entry["global_chips"] = entry["hosts"] * entry["chips_per_host"]
-    # Evaluate `entry['total_hbm_gib']` from the current inputs and state.
+    # Compute `entry["total_hbm_gib"]` from `entry["global_chips"] * entry["hbm_per_chip_gib"]`
     entry["total_hbm_gib"] = entry["global_chips"] * entry["hbm_per_chip_gib"]
-    # Evaluate `entry['multi_host']` from the current inputs and state.
+    # Compute `entry["multi_host"]` from `entry["hosts"] > 1`
     entry["multi_host"] = entry["hosts"] > 1
 ```
 
@@ -115,13 +119,13 @@ Append build_tpu_experiment_commands and verify the single-host vs Pod commands.
 ```python
 # Step 2 — Generate single-host and multi-host gcloud command pipelines: Generating the stage, run, and fetch commands from the host count...
 def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
-    # Evaluate `worker_flag` from the current inputs and state.
+    # Compute `worker_flag` from `" --worker=all" if hosts > 1 else ""`
     worker_flag = " --worker=all" if hosts > 1 else ""
-    # Evaluate `scp_stage` from the current inputs and state.
+    # Compute `scp_stage` from `f"gcloud compute tpus tpu-vm scp public/exercises/{l...`
     scp_stage = f"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}"
-    # Evaluate `ssh_run` from the current inputs and state.
+    # Compute `ssh_run` from `f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={...`
     ssh_run = f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'"
-    # Evaluate `scp_fetch` from the current inputs and state.
+    # Compute `scp_fetch` from `f"gcloud compute tpus tpu-vm scp --recurse {tpu_name...`
     scp_fetch = f"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}"
     # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.
     return {"scp_stage": scp_stage, "ssh_run": ssh_run, "scp_fetch": scp_fetch, "multi_host": hosts > 1}
@@ -131,9 +135,9 @@ def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
 single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1)
 # Run `build_tpu_experiment_commands` to compute `pod_cmds`.
 pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
-# Verify contract: `'--worker=all' not in single_cmds['ssh_run']`.
+# Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
 assert "--worker=all" not in single_cmds["ssh_run"]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod...` holds
 assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
 # Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
@@ -142,6 +146,17 @@ print("Pod SSH command:", pod_cmds["ssh_run"])
 ```
 
 Generating the stage, run, and fetch commands from the host count prevents forgetting `--worker=all` when scaling from `v5litepod-4` to `v5litepod-16`.
+
+## Step 3: Verify invariants on the completed state
+
+Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
+
+```python
+assert "--worker=all" not in single_cmds["ssh_run"]
+assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
+```
+
+Checking these invariants confirms the computation is ready for the full worked experiment.
 
 ## Run the example
 
@@ -152,7 +167,7 @@ import json
 import jax
 import numpy as np
 
-# Evaluate `SLICE_CATALOG` from the current inputs and state.
+# Compute `SLICE_CATALOG` from `[`
 SLICE_CATALOG = [
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_per_chip_gib": 16},
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_per_chip_gib": 16},
@@ -161,21 +176,21 @@ SLICE_CATALOG = [
 ]
 # Iterate over `entry` to step through the computation:
 for entry in SLICE_CATALOG:
-    # Evaluate `entry['global_chips']` from the current inputs and state.
+    # Compute `entry["global_chips"]` from `entry["hosts"] * entry["chips_per_host"]`
     entry["global_chips"] = entry["hosts"] * entry["chips_per_host"]
-    # Evaluate `entry['total_hbm_gib']` from the current inputs and state.
+    # Compute `entry["total_hbm_gib"]` from `entry["global_chips"] * entry["hbm_per_chip_gib"]`
     entry["total_hbm_gib"] = entry["global_chips"] * entry["hbm_per_chip_gib"]
-    # Evaluate `entry['multi_host']` from the current inputs and state.
+    # Compute `entry["multi_host"]` from `entry["hosts"] > 1`
     entry["multi_host"] = entry["hosts"] > 1
 
 
 # Function `build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts)` implementing this stage's computation:
 def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
-    # Evaluate `worker_flag` from the current inputs and state.
+    # Compute `worker_flag` from `" --worker=all" if hosts > 1 else ""`
     worker_flag = " --worker=all" if hosts > 1 else ""
-    # Evaluate `dist_init` from the current inputs and state.
+    # Compute `dist_init` from `"import jax; jax.distributed.initialize(); " if host...`
     dist_init = "import jax; jax.distributed.initialize(); " if hosts > 1 else ""
-    # Evaluate `scp_stage` from the current inputs and state.
+    # Compute `scp_stage` from `f"gcloud compute tpus tpu-vm scp public/exercises/{l...`
     scp_stage = f"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}"
     # Read or serialize artifact data on disk (`ssh_run`).
     ssh_run = (
@@ -184,7 +199,7 @@ def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
         if False
         else f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'"
     )
-    # Evaluate `scp_fetch` from the current inputs and state.
+    # Compute `scp_fetch` from `f"gcloud compute tpus tpu-vm scp --recurse {tpu_name...`
     scp_fetch = f"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}"
     # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.
     return {"scp_stage": scp_stage, "ssh_run": ssh_run, "scp_fetch": scp_fetch, "multi_host": hosts > 1}
@@ -194,9 +209,9 @@ def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
 single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1)
 # Run `build_tpu_experiment_commands` to compute `pod_cmds`.
 pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
-# Verify contract: `'--worker=all' not in single_cmds['ssh_run']`.
+# Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
 assert "--worker=all" not in single_cmds["ssh_run"]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod...` holds
 assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
 # Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
@@ -224,7 +239,7 @@ The horizontal axis compares four Cloud TPU slices (`v5litepod-4`, `v5litepod-8`
 
 ```python
 # Compute figure data for: Host count, per-host local chips, and global TPU chips across single-host and Pod slices
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{`
 visual_data = {
     'kind': 'bar',
     'labels': [s['slice'] for s in SLICE_CATALOG],
@@ -264,11 +279,11 @@ PASS: tpu-05
 ```python
 # Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...
 v5e16 = next(s for s in SLICE_CATALOG if s["slice"] == "v5litepod-16")
-# Evaluate `idle_without_worker_all` from the current inputs and state.
+# Compute `idle_without_worker_all` from `v5e16["global_chips"] - v5e16["chips_per_host"]`
 idle_without_worker_all = v5e16["global_chips"] - v5e16["chips_per_host"]
 # Print the observed values to compare against the expected result.
 print("v5litepod-16 global chips:", v5e16["global_chips"], "Idle chips without --worker=all:", idle_without_worker_all)
-# Verify contract: `idle_without_worker_all == 12`.
+# Assert invariant `idle_without_worker_all == 12` holds
 assert idle_without_worker_all == 12
 ```
 
@@ -285,7 +300,7 @@ Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` ch
 hbm_by_slice = {s["slice"]: s["total_hbm_gib"] for s in SLICE_CATALOG}
 # Print the observed values to compare against the expected result.
 print("Total HBM GiB by slice:", hbm_by_slice)
-# Verify contract: `hbm_by_slice['v6e-16'] == 512 and hbm_by_slice['v5litepod-16'] == 25...`.
+# Assert invariant `hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] ==...` holds
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
 ```
 
@@ -306,7 +321,7 @@ Call `build_tpu_experiment_commands('jax-tpu-pod', 'us-east5-a', 'transformers-0
 **Step-by-step implementation plan:**
 1. Print the observed values to compare against the expected result.
 2. Print diagnostic summary of the computed outputs.
-3. Verify contract: `'--worker=all' in tx_cmds['scp_stage'] and '--worker=all' in tx_cmds...`.
+3. Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -317,7 +332,7 @@ tx_cmds = build_tpu_experiment_commands(...)  # TODO: compute tx_cmds
 print("Stage:", tx_cmds["scp_stage"])
 # Print diagnostic summary of the computed outputs.
 print("Run:", tx_cmds["ssh_run"])
-# Verify contract: `'--worker=all' in tx_cmds['scp_stage'] and '--worker=all' in tx_cmds...`.
+# Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
 assert "--worker=all"  # TODO: complete assertion check
 ```
 
@@ -330,7 +345,7 @@ tx_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-east5-a", "transforme
 print("Stage:", tx_cmds["scp_stage"])
 # Print diagnostic summary of the computed outputs.
 print("Run:", tx_cmds["ssh_run"])
-# Verify contract: `'--worker=all' in tx_cmds['scp_stage'] and '--worker=all' in tx_cmds...`.
+# Assert invariant `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_c...` holds
 assert "--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transformers-04.py" in tx_cmds["ssh_run"]
 ```
 
@@ -358,7 +373,7 @@ Filter by `s['multi_host']`.
 **Step-by-step implementation plan:**
 1. Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
 2. Print the observed values to compare against the expected result.
-3. Verify contract: `pod_slices == ['v5litepod-16', 'v6e-16']`.
+3. Assert invariant `pod_slices == ["v5litepod-16"` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -367,7 +382,7 @@ Filter by `s['multi_host']`.
 pod_slices = ...  # TODO: compute pod_slices
 # Print the observed values to compare against the expected result.
 print("Multi-host Pod slices:", pod_slices)
-# Verify contract: `pod_slices == ['v5litepod-16', 'v6e-16']`.
+# Assert invariant `pod_slices == ["v5litepod-16"` holds
 assert pod_slices  # TODO: complete assertion check
 ```
 
@@ -378,7 +393,7 @@ assert pod_slices  # TODO: complete assertion check
 pod_slices = [s["slice"] for s in SLICE_CATALOG if s["multi_host"]]
 # Print the observed values to compare against the expected result.
 print("Multi-host Pod slices:", pod_slices)
-# Verify contract: `pod_slices == ['v5litepod-16', 'v6e-16']`.
+# Assert invariant `pod_slices == ["v5litepod-16"` holds
 assert pod_slices == ["v5litepod-16", "v6e-16"]
 ```
 
@@ -406,23 +421,23 @@ Multiply `8 * chips_per_host` and `8 * global_chips`.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `per_host_batch` from the current inputs and state.
-2. Evaluate `global_batch` from the current inputs and state.
+1. Compute `per_host_batch` from `microbatch_per_chip * 4`
+2. Compute `global_batch` from `microbatch_per_chip * 16`
 3. Print the observed values to compare against the expected result.
-4. Verify contract: `per_host_batch == 32 and global_batch == 128`.
+4. Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Compute per-host vs global batch size on a 4-host Pod slice (Transfer / diagnosis): Each host feeds its 4 local chips (32 sequences per host),...
 microbatch_per_chip = ...  # TODO: compute microbatch_per_chip
-# Evaluate `per_host_batch` from the current inputs and state.
+# Compute `per_host_batch` from `microbatch_per_chip * 4`
 per_host_batch = ...  # TODO: compute per_host_batch
-# Evaluate `global_batch` from the current inputs and state.
+# Compute `global_batch` from `microbatch_per_chip * 16`
 global_batch = ...  # TODO: compute global_batch
 # Print the observed values to compare against the expected result.
 print("Per-host batch:", per_host_batch, "Global batch:", global_batch)
-# Verify contract: `per_host_batch == 32 and global_batch == 128`.
+# Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 assert per_host_batch  # TODO: complete assertion check
 ```
 
@@ -431,13 +446,13 @@ assert per_host_batch  # TODO: complete assertion check
 ```python
 # Compute per-host vs global batch size on a 4-host Pod slice (Transfer / diagnosis): Each host feeds its 4 local chips (32 sequences per host),...
 microbatch_per_chip = 8
-# Evaluate `per_host_batch` from the current inputs and state.
+# Compute `per_host_batch` from `microbatch_per_chip * 4`
 per_host_batch = microbatch_per_chip * 4
-# Evaluate `global_batch` from the current inputs and state.
+# Compute `global_batch` from `microbatch_per_chip * 16`
 global_batch = microbatch_per_chip * 16
 # Print the observed values to compare against the expected result.
 print("Per-host batch:", per_host_batch, "Global batch:", global_batch)
-# Verify contract: `per_host_batch == 32 and global_batch == 128`.
+# Assert invariant `per_host_batch == 32 and global_batch == 128` holds
 assert per_host_batch == 32 and global_batch == 128
 ```
 

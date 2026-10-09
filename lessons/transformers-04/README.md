@@ -22,9 +22,13 @@ Training provides known shifted targets. Generation predicts a next-token distri
 
 For probabilities $0.6,0.3,0.1$, greedy decoding selects the first token. Sampling may select another nonzero-probability token. That different choice changes the context and therefore the distribution at the following step.
 
-Read each row of the probability figure before interpreting the generated string. Confidence on the fixture's target shows behavior on this small task; it does not establish broad language ability.
+Read each row of the probability figure before interpreting the generated string. Confidence on the fixture's target shows behavior on this small task; it is separate from broad language ability.
 
 Keep tokenizer identity, context limit and termination rules with the checkpoint. Correct weights with a changed token-to-ID mapping define a different system. The text harness adds explicit cache behavior later; do not infer that this lesson's simple generation loop already implements it.
+
+$$
+\mathcal{L}_{\text{CE}} = -\frac{1}{\sum_{t} m_t} \sum_{t=1}^{T} m_t \log P_\theta(y_t \mid y_{<t})
+$$
 
 ### Pause and reason
 
@@ -50,7 +54,7 @@ shifted targets (B, T) → mean cross entropy → scalar
 
 ## Separate a learning experiment from a benchmark
 
-The training string repeats abc; the held-out string begins with bca. Splitting strings makes the evaluation call distinct, but repeated periodic contexts mean that the split does not establish unseen-context generalization. The expected greedy sequence follows a known cycle, so it is a correctness fixture.
+The training string repeats abc; the held-out string begins with bca. Splitting strings makes the evaluation call distinct, but repeated periodic contexts mean that the split is separate from unseen-context generalization. The expected greedy sequence follows a known cycle, so it is a correctness fixture.
 
 Record initial loss, final held-out loss and accuracy, and inspect target alignment by hand. A model could learn this rule with a simpler architecture. This exercise demonstrates the Transformer training plumbing; it does not demonstrate that attention is necessary for the task or that the model understands language.
 
@@ -68,7 +72,7 @@ Recomputing the whole window is simple but inefficient for a large model. This l
 
 ## Use failures to test the experiment boundary
 
-Zero logits should give `log(3)`; a future-token perturbation should not affect earlier logits; a mismatched checkpoint vocabulary should be rejected; and an empty prompt should fail. These cases test different contracts, so passing one does not certify the others.
+Zero logits should give `log(3)`; a future-token perturbation should not affect earlier logits; a mismatched checkpoint vocabulary should be rejected; and an empty prompt should fail. These cases test different contracts, so passing one is verified separately from the others.
 
 Keep the corpus, vocabulary, context, model seed, optimizer settings, package versions and numeric outputs with your work. The deterministic fixture has no shuffled data position or dropout key after initialization; a production resume must preserve those additional states when present.
 
@@ -87,9 +91,9 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-# Evaluate `VOCAB` from the current inputs and state.
+# Compute `VOCAB` from `{"a":0, "b":1, "c":2}`
 VOCAB = {"a":0, "b":1, "c":2}
-# Evaluate `CONTEXT` from the current inputs and state.
+# Compute `CONTEXT` from `4`
 CONTEXT = 4
 ```
 
@@ -113,7 +117,7 @@ def layer_norm(x):
 def init_block(key, width=8):
     # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(key, 6)
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `[(width,width)]*4 + [(width,2*width),(2*width,width)]`
     shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]
     # Return `{name: jax.random.normal(k, s) * 0.1 for name, k, s in zip(['q', 'k', 'v', 'o', 'up', 'down'], keys, shapes)}` to the caller.
     return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(
@@ -156,14 +160,14 @@ def init_lm(key):
 
 # Function `logits(p, tokens)` implementing this stage's computation:
 def logits(p, tokens):
-    # Evaluate `h` from the current inputs and state.
+    # Compute `h` from `p["embed"][tokens] + p["position"][:tokens.shape[0]]`
     h = p["embed"][tokens] + p["position"][:tokens.shape[0]]
     # Return `layer_norm(block_forward(p['block'], h)) @ p['head']` to the caller.
     return layer_norm(block_forward(p["block"],h))@p["head"]
 
 # Function `make_examples(text)` implementing this stage's computation:
 def make_examples(text):
-    # Initialize array `ids` with explicit values and shape.
+    # Compute `ids` from `np.array([VOCAB[c] for c in text],dtype=np.int32)`
     ids = np.array([VOCAB[c] for c in text],dtype=np.int32)
     # Combine or mask array elements to form `rows`.
     rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])
@@ -236,7 +240,7 @@ def save_snapshot(folder, p, state, step):
     leaves, _ = jax.tree.flatten((p,state))
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(folder/"state.npz", **{f"leaf_{i}":np.asarray(x) for i,x in enumerate(leaves)})
-    # Evaluate `manifest` from the current inputs and state.
+    # Compute `manifest` from `{"schema":1,"step":step,"vocabulary":VOCAB,"context"...`
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
@@ -257,7 +261,7 @@ def load_snapshot(folder):
     template = init_lm(jax.random.key(0))
     # Run `jax.tree.flatten` to compute `(template_leaves, structure)`.
     template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))
-    # Evaluate `arrays` from the current inputs and state.
+    # Compute `arrays` from `[]`
     arrays = []
     # Enter managed runtime/context scope for this block:
     with np.load(folder/"state.npz",allow_pickle=False) as data:
@@ -266,7 +270,7 @@ def load_snapshot(folder):
             raise ValueError("checkpoint leaf count mismatch")
         # Loop over `(i, leaf)` in `enumerate(template_leaves)`:
         for i, leaf in enumerate(template_leaves):
-            # Evaluate `saved` from the current inputs and state.
+            # Compute `saved` from `data[f"leaf_{i}"]`
             saved = data[f"leaf_{i}"]
             # Guard input contract (`saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype`) and fail fast if violated.
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
@@ -298,13 +302,13 @@ with TemporaryDirectory() as directory:
     save_snapshot(folder,params,state,20)
     # Run `load_snapshot` to compute `(restored, restored_state, step)`.
     restored, restored_state, step = load_snapshot(folder)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `step == 20` holds
     assert step == 20
     # Run `train_step` to compute `(next_a, state_a, _)`.
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
     # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
 # Repeat the update loop over `range(80)` steps:
@@ -319,9 +323,9 @@ accuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)
 final_loss = lm_loss(params,held_x,held_y)
 # Print the observed values to compare against the expected result.
 print("Initial / held loss / held accuracy:",initial,float(final_loss),float(accuracy))
-# Verify contract: `final_loss < 0.05`.
+# Assert invariant `final_loss < 0.05` holds
 assert final_loss < 0.05
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `accuracy > 0.99` holds
 assert accuracy > 0.99
 ```
 
@@ -334,16 +338,16 @@ Append the prompt encoder and generation loop. Locate the context truncation and
 ```python
 # Step 8 — 8. Define greedy decoding: The generator recomputes a short window each step.
 def generate(p, prompt, count):
-    # Evaluate `tokens` from the current inputs and state.
+    # Compute `tokens` from `[VOCAB[c] for c in prompt]`
     tokens = [VOCAB[c] for c in prompt]
     # Guard input contract (`not tokens`) and fail fast if violated.
     if not tokens:
         raise ValueError("generation needs a nonempty prompt")
-    # Evaluate `inverse` from the current inputs and state.
+    # Compute `inverse` from `{i:c for c,i in VOCAB.items()}`
     inverse = {i:c for c,i in VOCAB.items()}
     # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
-        # Initialize array `window` with explicit values and shape.
+        # Construct `window` via `jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)`
         window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)
         # Evaluate `jnp.argmax(logits(p, window)[-1])` and convert the result into Python scalar/collection `new`.
         new = int(jnp.argmax(logits(p,window)[-1]))
@@ -364,7 +368,7 @@ Append the final call and run python main.py. Compare the continuation to the ab
 continuation = generate(params,"abca",8)
 # Print the observed values to compare against the expected result.
 print("Greedy continuation:",continuation)
-# Verify contract: `continuation == 'abcabcabcabc'`.
+# Assert invariant `continuation == "abcabcabcabc"` holds
 assert continuation == "abcabcabcabc"
 ```
 
@@ -383,9 +387,9 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-# Evaluate `VOCAB` from the current inputs and state.
+# Compute `VOCAB` from `{"a":0, "b":1, "c":2}`
 VOCAB = {"a":0, "b":1, "c":2}
-# Evaluate `CONTEXT` from the current inputs and state.
+# Compute `CONTEXT` from `4`
 CONTEXT = 4
 # Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
 def layer_norm(x):
@@ -400,7 +404,7 @@ def layer_norm(x):
 def init_block(key, width=8):
     # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(key, 6)
-    # Evaluate `shapes` from the current inputs and state.
+    # Compute `shapes` from `[(width,width)]*4 + [(width,2*width),(2*width,width)]`
     shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]
     # Return `{name: jax.random.normal(k, s) * 0.1 for name, k, s in zip(['q', 'k', 'v', 'o', 'up', 'down'], keys, shapes)}` to the caller.
     return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(
@@ -435,14 +439,14 @@ def init_lm(key):
 
 # Function `logits(p, tokens)` implementing this stage's computation:
 def logits(p, tokens):
-    # Evaluate `h` from the current inputs and state.
+    # Compute `h` from `p["embed"][tokens] + p["position"][:tokens.shape[0]]`
     h = p["embed"][tokens] + p["position"][:tokens.shape[0]]
     # Return `layer_norm(block_forward(p['block'], h)) @ p['head']` to the caller.
     return layer_norm(block_forward(p["block"],h))@p["head"]
 
 # Function `make_examples(text)` implementing this stage's computation:
 def make_examples(text):
-    # Initialize array `ids` with explicit values and shape.
+    # Compute `ids` from `np.array([VOCAB[c] for c in text],dtype=np.int32)`
     ids = np.array([VOCAB[c] for c in text],dtype=np.int32)
     # Combine or mask array elements to form `rows`.
     rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])
@@ -490,7 +494,7 @@ def save_snapshot(folder, p, state, step):
     leaves, _ = jax.tree.flatten((p,state))
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(folder/"state.npz", **{f"leaf_{i}":np.asarray(x) for i,x in enumerate(leaves)})
-    # Evaluate `manifest` from the current inputs and state.
+    # Compute `manifest` from `{"schema":1,"step":step,"vocabulary":VOCAB,"context"...`
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
@@ -511,7 +515,7 @@ def load_snapshot(folder):
     template = init_lm(jax.random.key(0))
     # Run `jax.tree.flatten` to compute `(template_leaves, structure)`.
     template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))
-    # Evaluate `arrays` from the current inputs and state.
+    # Compute `arrays` from `[]`
     arrays = []
     # Enter managed runtime/context scope for this block:
     with np.load(folder/"state.npz",allow_pickle=False) as data:
@@ -520,7 +524,7 @@ def load_snapshot(folder):
             raise ValueError("checkpoint leaf count mismatch")
         # Loop over `(i, leaf)` in `enumerate(template_leaves)`:
         for i, leaf in enumerate(template_leaves):
-            # Evaluate `saved` from the current inputs and state.
+            # Compute `saved` from `data[f"leaf_{i}"]`
             saved = data[f"leaf_{i}"]
             # Guard input contract (`saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype`) and fail fast if violated.
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
@@ -544,13 +548,13 @@ with TemporaryDirectory() as directory:
     save_snapshot(folder,params,state,20)
     # Run `load_snapshot` to compute `(restored, restored_state, step)`.
     restored, restored_state, step = load_snapshot(folder)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `step == 20` holds
     assert step == 20
     # Run `train_step` to compute `(next_a, state_a, _)`.
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
     # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(`
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
 # Repeat the update loop over `range(80)` steps:
@@ -565,23 +569,23 @@ accuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)
 final_loss = lm_loss(params,held_x,held_y)
 # Print the observed values to compare against the expected result.
 print("Initial / held loss / held accuracy:",initial,float(final_loss),float(accuracy))
-# Verify contract: `final_loss < 0.05`.
+# Assert invariant `final_loss < 0.05` holds
 assert final_loss < 0.05
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `accuracy > 0.99` holds
 assert accuracy > 0.99
 
 # Step 8 — 8. Define greedy decoding: The generator recomputes a short window each step.
 def generate(p, prompt, count):
-    # Evaluate `tokens` from the current inputs and state.
+    # Compute `tokens` from `[VOCAB[c] for c in prompt]`
     tokens = [VOCAB[c] for c in prompt]
     # Guard input contract (`not tokens`) and fail fast if violated.
     if not tokens:
         raise ValueError("generation needs a nonempty prompt")
-    # Evaluate `inverse` from the current inputs and state.
+    # Compute `inverse` from `{i:c for c,i in VOCAB.items()}`
     inverse = {i:c for c,i in VOCAB.items()}
     # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
-        # Initialize array `window` with explicit values and shape.
+        # Construct `window` via `jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)`
         window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)
         # Evaluate `jnp.argmax(logits(p, window)[-1])` and convert the result into Python scalar/collection `new`.
         new = int(jnp.argmax(logits(p,window)[-1]))
@@ -594,7 +598,7 @@ def generate(p, prompt, count):
 continuation = generate(params,"abca",8)
 # Print the observed values to compare against the expected result.
 print("Greedy continuation:",continuation)
-# Verify contract: `continuation == 'abcabcabcabc'`.
+# Assert invariant `continuation == "abcabcabcabc"` holds
 assert continuation == "abcabcabcabc"
 ```
 
@@ -618,13 +622,13 @@ Read the darkest column in each row: c, a, b, then c. Their probabilities are al
 
 Greedy decoding takes the largest-probability token from the relevant row. The final context position therefore chooses c as the next token. The earlier rows show predictions for earlier prefixes; they are not four independently generated continuations from the final position.
 
-These probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern do not establish general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.
+These probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern are separate from general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.
 
 ```python
 # Compute figure data for: Inspect next-token probabilities before greedy decoding
 # Apply nonlinear activation or probability normalization to compute `probs`.
 probs = jax.nn.softmax(held_logits[0], axis=-1)
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'heatmap', 'values': probs.tolist(), 'rows'...`
 visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position ' + str(i) for i in range(CONTEXT)], 'columns': list(VOCAB.keys()), 'unit': 'next-token probability'}
 ```
 
@@ -647,7 +651,7 @@ PASS: transformers-04
 
 ```python
 # Experiment — Verify uniform-logit cross entropy: A known probability distribution independently checks target...
-# Initialize array `zero_head` with explicit values and shape.
+# Construct `zero_head` via `{**params,"head":jnp.zeros_like(params["head"])}`
 zero_head = {**params,"head":jnp.zeros_like(params["head"])}
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)
@@ -663,7 +667,7 @@ A known probability distribution independently checks target handling and reduct
 
 ```python
 # Experiment — Test causality at the final model output: Causal independence should hold for the full model, not only the...
-# Initialize array `example` with explicit values and shape.
+# Construct `example` via `jnp.array([0,1,2,0])`
 example = jnp.array([0,1,2,0])
 # Run `logits` to compute `original`.
 original = logits(params,example)
@@ -679,7 +683,7 @@ Causal independence should hold for the full model, not only the standalone atte
 
 ## Make it yours
 
-Generate twelve new tokens from prompt bcab. Derive the expected cycle first; verify the string. Explain why success on this periodic example does not establish natural-language performance.
+Generate twelve new tokens from prompt bcab. Derive the expected cycle first; verify the string. Explain why success on this periodic example is separate from natural-language performance.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -688,13 +692,13 @@ Generate twelve new tokens from prompt bcab. Derive the expected cycle first; ve
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
+1. Assert invariant `generate(params` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Generate twelve new tokens from prompt bcab.
-# Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
+# Assert invariant `generate(params` holds
 assert generate(params,"bcab",12)  # TODO: complete assertion check
 ```
 
@@ -702,7 +706,7 @@ assert generate(params,"bcab",12)  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Generate twelve new tokens from prompt bcab.
-# Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
+# Assert invariant `generate(params` holds
 assert generate(params,"bcab",12) == "bcabcabcabcabcab"
 ```
 
@@ -730,7 +734,7 @@ Change one vocabulary mapping rather than numeric leaves.
 1. Create an isolated temporary directory to run and inspect artifacts safely:
 2. Read or serialize artifact data on disk (`folder`).
 3. Run `save_snapshot` to perform the next check or state transition.
-4. Evaluate `metadata_path` from the current inputs and state.
+4. Compute `metadata_path` from `folder/"manifest.json"`
 5. Read or serialize artifact data on disk (`correct`).
 
 **Starter code scaffold (fill in the TODOs):**
@@ -743,13 +747,13 @@ with TemporaryDirectory() as directory:
     folder = Path(...)  # TODO: compute folder
     # Run `save_snapshot` to perform the next check or state transition.
     save_snapshot(folder,params,state,100)
-    # Evaluate `metadata_path` from the current inputs and state.
+    # Compute `metadata_path` from `folder/"manifest.json"`
     metadata_path = ...  # TODO: compute metadata_path
     # Read or serialize artifact data on disk (`correct`).
     correct = metadata_path.read_text(...)  # TODO: compute correct
     # Read or serialize artifact data on disk (`metadata`).
     metadata = json.loads(...)  # TODO: compute metadata
-    # Evaluate `metadata['vocabulary']` from the current inputs and state.
+    # Compute `metadata["vocabulary"]` from `{"a":1,"b":0,"c":2}`
     metadata["vocabulary"] = ...  # TODO: compute metadata["vocabulary"]
     # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(metadata))
@@ -761,7 +765,7 @@ with TemporaryDirectory() as directory:
         raise AssertionError("wrong vocabulary accepted")
     # Read or serialize artifact data on disk (`forged_step`).
     forged_step = json.loads(...)  # TODO: compute forged_step
-    # Evaluate `forged_step['step']` from the current inputs and state.
+    # Compute `forged_step["step"]` from `101`
     forged_step["step"] = ...  # TODO: compute forged_step["step"]
     # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(forged_step))
@@ -775,9 +779,9 @@ with TemporaryDirectory() as directory:
     metadata_path.write_text(correct)
     # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
     recovered, _, recovered_step = load_snapshot(...)  # TODO: compute recovered, _, recovered_step
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `recovered_step == 100` holds
     assert recovered_step  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params...`
     assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))  # TODO: complete assertion check
 ```
 
@@ -791,13 +795,13 @@ with TemporaryDirectory() as directory:
     folder = Path(directory)
     # Run `save_snapshot` to perform the next check or state transition.
     save_snapshot(folder,params,state,100)
-    # Evaluate `metadata_path` from the current inputs and state.
+    # Compute `metadata_path` from `folder/"manifest.json"`
     metadata_path = folder/"manifest.json"
     # Read or serialize artifact data on disk (`correct`).
     correct = metadata_path.read_text()
     # Read or serialize artifact data on disk (`metadata`).
     metadata = json.loads(correct)
-    # Evaluate `metadata['vocabulary']` from the current inputs and state.
+    # Compute `metadata["vocabulary"]` from `{"a":1,"b":0,"c":2}`
     metadata["vocabulary"] = {"a":1,"b":0,"c":2}
     # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(metadata))
@@ -809,7 +813,7 @@ with TemporaryDirectory() as directory:
         raise AssertionError("wrong vocabulary accepted")
     # Read or serialize artifact data on disk (`forged_step`).
     forged_step = json.loads(correct)
-    # Evaluate `forged_step['step']` from the current inputs and state.
+    # Compute `forged_step["step"]` from `101`
     forged_step["step"] = 101
     # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(forged_step))
@@ -823,9 +827,9 @@ with TemporaryDirectory() as directory:
     metadata_path.write_text(correct)
     # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
     recovered, _, recovered_step = load_snapshot(folder)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `recovered_step == 100` holds
     assert recovered_step == 100
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params...`
     assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))
 ```
 
@@ -855,7 +859,7 @@ The vocabulary mapping intentionally accepts only a, b and c.
 **Step-by-step implementation plan:**
 1. Run the boundary check and catch the expected exception:
 2. Run the boundary check and catch the expected exception:
-3. Verify contract: `generate(params, 'abca', 0) == 'abca'`.
+3. Assert invariant `generate(params` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -875,7 +879,7 @@ except KeyError:
     pass
 else:
     raise AssertionError("unknown token accepted")
-# Verify contract: `generate(params, 'abca', 0) == 'abca'`.
+# Assert invariant `generate(params` holds
 assert generate(params,"abca",0)  # TODO: complete assertion check
 ```
 
@@ -897,7 +901,7 @@ except KeyError:
     pass
 else:
     raise AssertionError("unknown token accepted")
-# Verify contract: `generate(params, 'abca', 0) == 'abca'`.
+# Assert invariant `generate(params` holds
 assert generate(params,"abca",0) == "abca"
 ```
 

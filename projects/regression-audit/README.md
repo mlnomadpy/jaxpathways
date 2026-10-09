@@ -54,5 +54,5 @@ Try your implementation before reading `projects/regression-audit/solution/model
 
 ## Portfolio evidence
 
-Keep your implementation in `projects/regression-audit/starter/model.py`, the commands, environment details, passing stage output, learning curve, unstable-rate failure run, and a brief explanation of what the checks establish. Passing public checks supports this bounded synthetic task; it does not establish production training, TPU operation, expert review, or career readiness.
+Keep your implementation in `projects/regression-audit/starter/model.py`, the commands, environment details, passing stage output, learning curve, unstable-rate failure run, and a brief explanation of what the checks establish. Passing public checks supports this bounded synthetic task; it is verified separately from production training, TPU operation, expert review, or career readiness.
 

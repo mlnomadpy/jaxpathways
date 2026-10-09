@@ -34,7 +34,8 @@ def run(model_path):
         probe = '''import json,time,urllib.request,urllib.error,os
 for attempt in range(40):
     try:
-        ready=json.loads(urllib.request.urlopen('http://127.0.0.1:8080/ready',timeout=1).read());break
+        ready=json.loads(urllib.request.urlopen('http://127.0.0.1:8080/ready',timeout=1).read())
+        break
     except OSError:time.sleep(.1)
 else:raise RuntimeError('service did not become ready')
 assert ready['ready'] is True and os.getuid()==10001
@@ -53,6 +54,11 @@ print(json.dumps({'uid':os.getuid(),'ready':ready,'response':response,'invalid_r
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(); parser.add_argument('--model', required=True); parser.add_argument('--output', type=Path, required=True); args = parser.parse_args()
-    report = run(args.model); args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report, indent=2) + '\n'); print(json.dumps(report, indent=2))
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--model', required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    args = parser.parse_args()
+    report = run(args.model)
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    args.output.write_text(json.dumps(report, indent=2) + '\n')
+    print(json.dumps(report, indent=2))

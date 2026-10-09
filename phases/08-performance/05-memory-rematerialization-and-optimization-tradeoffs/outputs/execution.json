@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-05",
-  "contentHash": "83d03755dff28703e76eadd4e0be484d5a5a3fb9b29fdfe3a96ac19260db62ba",
+  "contentHash": "5e90dd23fb169596a376e087a02ae2ac4e1464127e070adec332db1d03a2474c",
   "executedAt": "2026-10-08T14:03:57.545581+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,19 @@
   "stdout": "Saved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of sub from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of sub from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of sub from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of sub from <string>:14:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nf32[16] output of tanh from <string>:14:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[3.591598942875862e-05, 1.554097980260849e-05, 1.0082963854074478e-05, 9.790994226932526e-06, 1.0209158062934875e-05], [1.8999911844730377e-05, 1.1750031262636185e-05, 1.0792165994644165e-05, 7.2089023888111115e-06, 7.832888513803482e-06]]\nIndependent reverse recurrence agrees with both gradients.\nSaved residual descriptions:\nplain \nf32[16,16] from a constant\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of sub from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of sub from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of sub from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of sub from <string>:63:20 (layer)\nremat \nf32[16,16] from a constant\nf32[16] from the argument v\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nf32[16] output of tanh from <string>:63:20 (layer)\nCompiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\nSynchronized gradient samples: [[3.0374620109796524e-05, 1.5833880752325058e-05, 1.0499730706214905e-05, 1.020822674036026e-05, 7.166992872953415e-06], [1.67088583111763e-05, 7.541850209236145e-06, 7.291790097951889e-06, 7.457565516233444e-06, 6.875023245811462e-06]]\nIndependent reverse recurrence agrees with both gradients.\nWhole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']\nWhole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)\nDirectional derivative finite/automatic: 0.007404538337141275 0.00740453926846385 epsilon 0.001\nHigher-order directional derivatives agree.\nPASS: performance-05\n",
   "notebookCells": [
     {
-      "sourceHash": "fc2d9be46efdc8364d0c2927514940de79490ba09570e8fc437e90f0a5734763",
+      "sourceHash": "61c4c630c626f94238a914f1bf50116e2ed9ba93b6a6430bcac64e0bfc98d9e8",
       "outputs": []
     },
     {
-      "sourceHash": "3e856d15178e3c0b619de03e4db729aec1faeee9d093f259a6d4375c3759beab",
+      "sourceHash": "0f3b03e5dc3eec96c8d6439af970efcccd15f2259c65d6dbac881cd2bc6f0834",
+      "outputs": []
+    },
+    {
+      "sourceHash": "7bbd8b6d35ebcd2277d0e89399a7c18fa80b22c283f9fac66e9a0d1ade1e8301",
+      "outputs": []
+    },
+    {
+      "sourceHash": "5e0203c1e9c1e9546bb9c3d71ca495bc82ec719cf3717247ddc635c2e2cdbe8f",
       "outputs": [
         {
           "output_type": "stream",
@@ -50,39 +58,7 @@
       ]
     },
     {
-      "sourceHash": "c196d522b7895ff61c5d87804f77bc3cf8814479ec70788f7ccf0cdfec7e9677",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Saved residual descriptions:\n",
-            "plain \n",
-            "f32[16,16] from a constant\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of sub from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "remat \n",
-            "f32[16,16] from a constant\n",
-            "f32[16] from the argument v\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "f32[16] output of tanh from /Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/08-performance/05-memory-rematerialization-and-optimization-tradeoffs/notebooks/exercise.ipynb:cell-3:11:20 (layer)\n",
-            "Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]\n",
-            "Synchronized gradient samples: [[3.254180774092674e-05, 2.4625100195407867e-05, 1.5082769095897675e-05, 8.37491825222969e-06, 1.0624993592500687e-05], [1.800013706088066e-05, 1.1875294148921967e-05, 7.333233952522278e-06, 8.124858140945435e-06, 7.374677807092667e-06]]\n",
-            "Independent reverse recurrence agrees with both gradients.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "940f9d3070aa64ba3c794519c531373c8e2f1eb36cd89350e36584cd334306c0",
+      "sourceHash": "958b83251f9e00aad9313a672de385a4bc04fa849dd89416ec405b6d7e78569f",
       "outputs": []
     },
     {
@@ -102,48 +78,23 @@
     },
     {
       "sourceHash": "6e4e69fcab5c1f41b851e77d2bb1b70c8094331d21642a9f31919cb5622a41c9",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']\n",
-            "Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "55049ab5450e013e831ee7a5363b2adde6d162c411fbda56a44f0f19bbd7f080",
       "outputs": []
     },
     {
-      "sourceHash": "5598bdfb58e6b779465630664930b0059d2951e2cde277ccfb75bf35cc41d3a5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Directional derivative finite/automatic: 0.007404538337141275 0.00740453926846385 epsilon 0.001\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "a206fcad875a97b0791577d00227d20719bba2eb286895ef3d8571f44fa94a1c",
+      "sourceHash": "d284cb79a46d975573fed2f54f53dc6a12ca9fdb53cf47a30ad6e6bf7125a142",
       "outputs": []
     },
     {
-      "sourceHash": "91dd0c485b6e7eacec1df9f4d7a66a5f8a97104e08190fabd607ec80d5e557a9",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Higher-order directional derivatives agree.\n"
-          ]
-        }
-      ]
+      "sourceHash": "a54de889e9220d05da6a30140ece88df2f88b4f6306ce38ae32993141e1f1650",
+      "outputs": []
+    },
+    {
+      "sourceHash": "3b4b009ce7212b4e21821f67964784eb1ea0029657c589dcde6adbb9807a032b",
+      "outputs": []
+    },
+    {
+      "sourceHash": "a008d3c3f21118de9bc1d85ada83c91398eda22d05c6b89d40fd7770fcf30cd9",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

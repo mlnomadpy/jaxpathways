@@ -10,7 +10,7 @@ import jax
 import jax.numpy as jnp
 # Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
-# Evaluate `trace_events` from the current inputs and state.
+# Compute `trace_events` from `[]`
 trace_events = []
 # Function `score(x, gain)` implementing this stage's computation:
 def score(x, gain):
@@ -21,9 +21,9 @@ def score(x, gain):
     return jnp.sum((x * gain)**2)
 # Wrap with `jax.jit` (`compiled_score`) so XLA traces and compiles the function.
 compiled_score = jax.jit(score)
-# Initialize array `x8` with explicit values and shape.
+# Compute `x8` from `jax.device_put(np.arange(8, dtype=np.float32), cpu)`
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
-# Initialize array `x12` with explicit values and shape.
+# Compute `x12` from `jax.device_put(np.arange(12, dtype=np.float32), cpu)`
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
 # Synchronize host execution until asynchronous device computation completes.
 jax.block_until_ready((x8, x12))
@@ -62,11 +62,11 @@ observed_call("different input shape", x12, 1.)
 # Print the observed values to compare against the expected result.
 print(json.dumps({"jax": jax.__version__, "backend": str(cpu),
                   "calls": call_rows, "python_trace_events": trace_events}, indent=2))
-# Verify contract: `call_rows[0]['result'] == 140.0`.
+# Assert invariant `call_rows[0]["result"] == 140.` holds
 assert call_rows[0]["result"] == 140.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `call_rows[2]["result"] == 560.` holds
 assert call_rows[2]["result"] == 560.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `call_rows[3]["result"] == 506.` holds
 assert call_rows[3]["result"] == 506.
 
 # Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
@@ -78,7 +78,7 @@ import jax
 import jax.numpy as jnp
 # Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
-# Evaluate `trace_events` from the current inputs and state.
+# Compute `trace_events` from `[]`
 trace_events = []
 # Function `score(x, gain)` implementing this stage's computation:
 def score(x, gain):
@@ -89,9 +89,9 @@ def score(x, gain):
     return jnp.sum((x * gain)**2)
 # Wrap with `jax.jit` (`compiled_score`) so XLA traces and compiles the function.
 compiled_score = jax.jit(score)
-# Initialize array `x8` with explicit values and shape.
+# Compute `x8` from `jax.device_put(np.arange(8, dtype=np.float32), cpu)`
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
-# Initialize array `x12` with explicit values and shape.
+# Compute `x12` from `jax.device_put(np.arange(12, dtype=np.float32), cpu)`
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
 # Synchronize host execution until asynchronous device computation completes.
 jax.block_until_ready((x8, x12))
@@ -126,16 +126,16 @@ observed_call("different input shape", x12, 1.)
 # Print the observed values to compare against the expected result.
 print(json.dumps({"jax": jax.__version__, "backend": str(cpu),
                   "calls": call_rows, "python_trace_events": trace_events}, indent=2))
-# Verify contract: `call_rows[0]['result'] == 140.0`.
+# Assert invariant `call_rows[0]["result"] == 140.` holds
 assert call_rows[0]["result"] == 140.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `call_rows[2]["result"] == 560.` holds
 assert call_rows[2]["result"] == 560.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `call_rows[3]["result"] == 506.` holds
 assert call_rows[3]["result"] == 506.
 
 # Figure data experiment
 # Compute figure data for: A new value is not necessarily a new trace
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': ['initial', 'new values', ...`
 visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}
 
 # Experiment: Contrast static branch metadata with a dynamic gain
@@ -168,9 +168,9 @@ initial = jax.device_put(np.float32(0.), cpu)
 update(initial).block_until_ready()
 # Function `metric_run(read_each)` implementing this stage's computation:
 def metric_run(read_each):
-    # Evaluate `value` from the current inputs and state.
+    # Compute `value` from `initial`
     value = initial
-    # Evaluate `observed` from the current inputs and state.
+    # Compute `observed` from `[]`
     observed = []
     # Record execution timing or profiler trace in `start`.
     start = time.perf_counter()
@@ -191,13 +191,13 @@ def metric_run(read_each):
 read_result, read_seconds, metrics = metric_run(True)
 # Run `metric_run` to compute `(final_result, final_seconds, _)`.
 final_result, final_seconds, _ = metric_run(False)
-# Evaluate `reference_value` from the current inputs and state.
+# Compute `reference_value` from `10. * (1. - 0.9**6)`
 reference_value = 10. * (1. - 0.9**6)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(read_result), reference_value, rtol=2e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(final_result), reference_value, rtol=2e-5)
-# Verify contract: `len(metrics) == 6`.
+# Assert invariant `len(metrics) == 6` holds
 assert len(metrics) == 6
 # Print diagnostic summary of the computed outputs.
 print("Per-step host reads seconds:", read_seconds)
@@ -206,11 +206,11 @@ print("Final-only wait seconds:", final_seconds)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Add a call with sixteen float32 elements.
-# Initialize array `x16` with explicit values and shape.
+# Compute `x16` from `jax.device_put(np.arange(16, dtype=np.float32), cpu)`
 x16 = jax.device_put(np.arange(16, dtype=np.float32), cpu)
 # Run `observed_call` to perform the next check or state transition.
 observed_call("new length sixteen", x16, 1.)
-# Verify contract: `call_rows[-1]['result'] == sum((i * i for i in range(16)))`.
+# Assert invariant `call_rows[-1]["result"] == sum(i*i for i in range(16))` holds
 assert call_rows[-1]["result"] == sum(i*i for i in range(16))
 # Print the observed values to compare against the expected result.
 print("Added ledger row:", call_rows[-1])
@@ -219,11 +219,11 @@ print("Added ledger row:", call_rows[-1])
 # Pad a final batch while preserving the objective (Transfer): The mask removes three synthetic rows.
 # Wrap with `jax.jit` (`masked_score`) so XLA traces and compiles the function.
 masked_score = jax.jit(lambda values, mask: jnp.sum(jnp.where(mask, (values + 1.)**2, 0.)))
-# Initialize array `five` with explicit values and shape.
+# Compute `five` from `np.arange(5, dtype=np.float32)`
 five = np.arange(5, dtype=np.float32)
 # Place `padded` explicitly onto the target JAX device.
 padded = jax.device_put(np.pad(five, (0, 3)), cpu)
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `jax.device_put(np.arange(8) < 5, cpu)`
 mask = jax.device_put(np.arange(8) < 5, cpu)
 # Combine or mask array elements to form `masked`.
 masked = masked_score(padded, mask)
@@ -231,7 +231,7 @@ masked = masked_score(padded, mask)
 np.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))
 # Aggregate array values to compute `wrong`.
 wrong = jnp.sum((padded + 1.)**2)
-# Verify contract: `float(wrong) == float(masked) + 3.0`.
+# Assert invariant `float(wrong) == float(masked) + 3.` holds
 assert float(wrong) == float(masked) + 3.
 # Print the observed values to compare against the expected result.
 print("Masked versus unmasked padded objective:", float(masked), float(wrong))

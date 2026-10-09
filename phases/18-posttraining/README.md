@@ -138,8 +138,8 @@ An audited pretraining and adaptation objective toolkit.
 
 **Demonstrate:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
-Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 4, 5, 6, 7, 8 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4` from the top-level folder to verify stages 4, 5, 6, 7, 8.
+Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4` from the top-level folder to verify stages 4, 5, 6, 7, 8.
 
-
+Additional project: [Audit pretraining and post-training objectives](../../projects/training-methods/README.md).
 
 [Primary documentation](https://docs.jax.dev/en/latest/).

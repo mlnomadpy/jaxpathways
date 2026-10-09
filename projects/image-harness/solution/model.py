@@ -35,7 +35,10 @@ def digest_arrays(*arrays):
         # Execute the next step of the computation.
         # Execute the next step of the computation.
         # Execute the next step of the computation.
-        a=np.ascontiguousarray(value);h.update(str(a.dtype).encode());h.update(str(a.shape).encode());h.update(a.tobytes())
+        a=np.ascontiguousarray(value)
+        h.update(str(a.dtype).encode())
+        h.update(str(a.shape).encode())
+        h.update(a.tobytes())
     # Return `h.hexdigest()` to the caller.
     return h.hexdigest()
 
@@ -46,14 +49,16 @@ def make_dataset(seed=11,count=96,split='train',corruption=False):
     if count<3:raise ValueError('at least three images required')
     # Draw pseudorandom samples for `rng` using the explicit RNG state.
     # Create evenly spaced index values in `labels`.
-    rng=np.random.default_rng(seed);labels=np.arange(count,dtype=np.int32)%3
+    rng=np.random.default_rng(seed)
+    labels=np.arange(count,dtype=np.int32)%3
     # Run `np.empty` to compute `images`.
     images=np.empty((count,8,8,1),np.uint8)
     # Iterate over `(i, label)` to step through the computation:
     for i,label in enumerate(labels):
         # Draw pseudorandom samples for `canvas` using the explicit RNG state.
         # Draw pseudorandom samples for `(row, col)` using the explicit RNG state.
-        canvas=rng.normal(18,5,(8,8)); row,col=rng.integers(1,6,size=2)
+        canvas=rng.normal(18,5,(8,8))
+        row,col=rng.integers(1,6,size=2)
         # Branch on condition `label in (0, 2)`:
         if label in (0,2):canvas[:,col:col+2]+=rng.uniform(170,210)
         # Branch on condition `label in (1, 2)`:
@@ -63,7 +68,8 @@ def make_dataset(seed=11,count=96,split='train',corruption=False):
     # Branch on condition `corruption`:
     if corruption:
         # Apply a separate random stream after clean generation: pairs remain aligned.
-        altered=images.astype(np.float32);altered[:,:,2:6,:]=18
+        altered=images.astype(np.float32)
+        altered[:,:,2:6,:]=18
         altered+=np.random.default_rng(seed+5000).normal(0,28,altered.shape)
         images=np.clip(altered,0,255).astype(np.uint8)
     # Return `dict(images=images, labels=labels, ids=[f'{split}-{seed}-{i:04d}' for i in range(count)], groups=[f'{split}-synthetic-{seed}-{i:04d}' for i in range(count)], provenance={'kind': 'synthetic teaching fixture', 'seed': seed, 'split': split, 'corruption': corruption, 'license': 'original generated fixture; no external photographs'})` to the caller.
@@ -118,7 +124,8 @@ def preprocess(images,layout='NHWC',input_range='uint8'):
         a=a.astype(np.float32)
     else:raise ValueError('unsupported input range')
     # Initialize array `rows` with explicit values and shape.
-    rows=(np.arange(8)*a.shape[1]//8);cols=(np.arange(8)*a.shape[2]//8)
+    rows=(np.arange(8)*a.shape[1]//8)
+    cols=(np.arange(8)*a.shape[2]//8)
     # Evaluate `a` from the current inputs and state.
     a=a[:,rows][:,:,cols]
     # Branch on condition `a.shape[-1] == 3`:
@@ -152,7 +159,9 @@ def load_external_manifest(path):
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`manifest`).
     # Run `path.parent.resolve` to compute `root`.
-    path=Path(path);manifest=json.loads(path.read_text());root=path.parent.resolve()
+    path=Path(path)
+    manifest=json.loads(path.read_text())
+    root=path.parent.resolve()
     # Guard input contract (`not all((manifest.get(k) for k in ('split', 'source', 'license', 'items')))`) and fail fast if violated.
     if not all(manifest.get(k) for k in ('split','source','license','items')):raise ValueError('data provenance and items required')
     # Evaluate `images` from the current inputs and state.
@@ -160,7 +169,11 @@ def load_external_manifest(path):
     # Evaluate `ids` from the current inputs and state.
     # Evaluate `groups` from the current inputs and state.
     # Evaluate `file_hashes` from the current inputs and state.
-    images=[];labels=[];ids=[];groups=[];file_hashes=[]
+    images=[]
+    labels=[]
+    ids=[]
+    groups=[]
+    file_hashes=[]
     # Loop over `item` in `manifest['items']`:
     for item in manifest['items']:
         # Evaluate `image_path` from the current inputs and state.
@@ -175,14 +188,18 @@ def load_external_manifest(path):
         raw=read_image(image_path)
         # Create evenly spaced index values in `rows`.
         # Create evenly spaced index values in `cols`.
-        rows=np.arange(8)*raw.shape[1]//8;cols=np.arange(8)*raw.shape[2]//8
+        rows=np.arange(8)*raw.shape[1]//8
+        cols=np.arange(8)*raw.shape[2]//8
         # Append the current step result to `images`.
         # Append the current step result to `images`.
-        images.append(raw[0][rows][:,cols]);labels.append(CLASSES.index(item['label']))
+        images.append(raw[0][rows][:,cols])
+        labels.append(CLASSES.index(item['label']))
         # Append the current step result to `ids`.
         # Append the current step result to `ids`.
         # Compute deterministic cryptographic digest `` for provenance verification.
-        ids.append(item['id']);groups.append(item['group']);file_hashes.append(hashlib.sha256(image_path.read_bytes()).hexdigest())
+        ids.append(item['id'])
+        groups.append(item['group'])
+        file_hashes.append(hashlib.sha256(image_path.read_bytes()).hexdigest())
     # Guard input contract (`len(set(ids)) != len(ids)`) and fail fast if violated.
     if len(set(ids))!=len(ids):raise ValueError('duplicate image IDs')
     # Return `dict(images=np.stack(images), labels=np.asarray(labels, np.int32), ids=ids, groups=groups, provenance=dict(kind='user-supplied image files', split=manifest['split'], source=manifest['source'], license=manifest['license'], file_hashes=file_hashes))` to the caller.
@@ -239,7 +256,8 @@ def config(batch_size=12,learning_rate=.08,momentum=.9):
 def start(data,seed=0,settings=None):
     # Run `config` to compute `settings`.
     # Run `init_params` to compute `params`.
-    settings=config(**(settings or {}));params=init_params(seed)
+    settings=config(**(settings or {}))
+    params=init_params(seed)
     # Initialize explicit deterministic PRNG key `(key, order_key)`.
     key,order_key=jax.random.split(jax.random.PRNGKey(seed+100))
     # Convert `order` to a host NumPy array for inspection or verification.
@@ -280,7 +298,10 @@ def advance(state,data,updates=1):
     # Evaluate `records` from the current inputs and state.
     # Run `len` to compute `n`.
     # Evaluate `batch` from the current inputs and state.
-    s=dict(state);records=[];n=len(data['images']);batch=s['settings']['batch_size']
+    s=dict(state)
+    records=[]
+    n=len(data['images'])
+    batch=s['settings']['batch_size']
     # Guard input contract (`batch > n`) and fail fast if violated.
     if batch>n:raise ValueError('batch exceeds dataset')
     # Run `preprocess` to compute `all_x`.
@@ -289,14 +310,18 @@ def advance(state,data,updates=1):
     for _ in range(updates):
         # Branch on condition `s['position'] + batch > n`:
         if s['position']+batch>n:
-            s['key'],k=jax.random.split(s['key']);s['order']=np.asarray(jax.random.permutation(k,n));s['position']=0;s['epoch']+=1
+            s['key'],k=jax.random.split(s['key'])
+            s['order']=np.asarray(jax.random.permutation(k,n))
+            s['position']=0
+            s['epoch']+=1
         # Evaluate `indices` from the current inputs and state.
         indices=s['order'][s['position']:s['position']+batch]
         # Create device-backed JAX array `(p, v, k, loss, aug)`.
         p,v,k,loss,aug=_update(s['params'],s['velocity'],s['key'],jnp.asarray(all_x[indices]),jnp.asarray(data['labels'][indices]),s['settings']['learning_rate'],s['settings']['momentum'])
         # Synchronize host execution until asynchronous device computation completes.
         # Synchronize host execution until asynchronous device computation completes.
-        jax.block_until_ready((p,v,k,loss,aug));s.update(params=p,velocity=v,key=k,position=s['position']+batch,step=s['step']+1)
+        jax.block_until_ready((p,v,k,loss,aug))
+        s.update(params=p,velocity=v,key=k,position=s['position']+batch,step=s['step']+1)
         # Append the current step result to `records`.
         records.append(dict(step=s['step'],loss=float(loss),ids=[data['ids'][i] for i in indices],augmented_hash=digest_arrays(aug)))
     # Return `(s, records)` to the caller.
@@ -309,7 +334,8 @@ def evaluate(params,data,batch_size=17,compute='float32'):
     if batch_size<1 or not len(data['images']):raise ValueError('positive evaluation batch and nonempty data required')
     # Run `preprocess` to compute `x`.
     # Convert `y` to a host NumPy array for inspection or verification.
-    x=preprocess(data['images']);y=np.asarray(data['labels'])
+    x=preprocess(data['images'])
+    y=np.asarray(data['labels'])
     # Guard input contract (`y.shape != (len(x),) or not np.issubdtype(y.dtype, np.integer) or np.any((y < 0) | (y >= 3))`) and fail fast if violated.
     if y.shape!=(len(x),) or not np.issubdtype(y.dtype,np.integer) or np.any((y<0)|(y>=3)):raise ValueError('valid integer vector labels required')
     # Create device-backed JAX array `logits`.
@@ -322,7 +348,8 @@ def evaluate(params,data,batch_size=17,compute='float32'):
 def metrics(logits,labels,ids):
     # Convert `logits` to a host NumPy array for inspection or verification.
     # Convert `labels` to a host NumPy array for inspection or verification.
-    logits=np.asarray(logits,dtype=np.float64);labels=np.asarray(labels)
+    logits=np.asarray(logits,dtype=np.float64)
+    labels=np.asarray(labels)
     # Guard input contract (`logits.ndim != 2 or logits.shape[1] != 3 or len(logits) == 0 or (not np.isfinite(logits).all()) or (labels.shape != (len(logits),)) or (not np.issubdtype(labels.dtype, np.integer)) or np.any((labels < 0) | (labels >= 3)) or (len(ids) != len(logits))`) and fail fast if violated.
     if logits.ndim!=2 or logits.shape[1]!=3 or len(logits)==0 or not np.isfinite(logits).all() or labels.shape!=(len(logits),) or not np.issubdtype(labels.dtype,np.integer) or np.any((labels<0)|(labels>=3)) or len(ids)!=len(logits):raise ValueError('invalid evaluation arrays')
     # Reduce across the target axis to summarize `shifted`.
@@ -331,7 +358,8 @@ def metrics(logits,labels,ids):
     losses=np.log(np.exp(shifted).sum(1))-shifted[np.arange(len(labels)),labels]
     # Run `np.argmax` to compute `predicted`.
     # Allocate initialized array `confusion` with the specified shape and dtype.
-    predicted=np.argmax(logits,1);confusion=np.zeros((3,3),int)
+    predicted=np.argmax(logits,1)
+    confusion=np.zeros((3,3),int)
     # Run `np.add.at` to perform the next check or state transition.
     np.add.at(confusion,(labels,predicted),1)
     # Return `dict(count=len(labels), loss=float(losses.mean()), loss_sum=float(losses.sum()), correct=int((predicted == labels).sum()), accuracy=float((predicted == labels).mean()), confusion=confusion.tolist(), error_ids=[ids[i] for i in np.flatnonzero(predicted != labels)], logits=logits, predictions=predicted)` to the caller.
@@ -343,19 +371,23 @@ def metrics(logits,labels,ids):
 def save_checkpoint(path,state):
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
+    path=Path(path)
+    path.parent.mkdir(parents=True,exist_ok=True)
     # Convert `arrays` to a host NumPy array for inspection or verification.
     arrays={**{'p_'+k:np.asarray(v) for k,v in state['params'].items()},**{'v_'+k:np.asarray(v) for k,v in state['velocity'].items()},'key':np.asarray(state['key']),'order':np.asarray(state['order'])}
     # Evaluate `meta` from the current inputs and state.
     # Execute the next step of the computation.
-    meta={k:state[k] for k in ('step','position','epoch','seed','data_hash','settings')};meta.update(version=1,jax_version=jax.__version__,numpy_version=np.__version__,preprocess=PREPROCESS,arrays_hash=digest_arrays(*[arrays[k] for k in sorted(arrays)]))
+    meta={k:state[k] for k in ('step','position','epoch','seed','data_hash','settings')}
+    meta.update(version=1,jax_version=jax.__version__,numpy_version=np.__version__,preprocess=PREPROCESS,arrays_hash=digest_arrays(*[arrays[k] for k in sorted(arrays)]))
     # Run `digest_json` to compute `meta['metadata_hash']`.
     meta['metadata_hash']=digest_json(meta)
     # Run `tempfile.mkstemp` to compute `(fd, name)`.
     fd,name=tempfile.mkstemp(dir=path.parent,suffix='.npz')
     try:
         with os.fdopen(fd,'wb') as out:
-            np.savez(out,**arrays,metadata=np.array(json.dumps(meta,sort_keys=True)));out.flush();os.fsync(out.fileno())
+            np.savez(out,**arrays,metadata=np.array(json.dumps(meta,sort_keys=True)))
+            out.flush()
+            os.fsync(out.fileno())
         os.replace(name,path)
     finally:
         if os.path.exists(name):os.unlink(name)
@@ -367,7 +399,8 @@ def restore_checkpoint(path,data,settings=None):
     with np.load(path,allow_pickle=False) as bundle:
         # Evaluate `arrays` from the current inputs and state.
         # Read or serialize artifact data on disk (`meta`).
-        arrays={k:bundle[k].copy() for k in bundle.files if k!='metadata'};meta=json.loads(str(bundle['metadata']))
+        arrays={k:bundle[k].copy() for k in bundle.files if k!='metadata'}
+        meta=json.loads(str(bundle['metadata']))
     # Run `meta.pop` to compute `metadata_hash`.
     metadata_hash=meta.pop('metadata_hash',None)
     # Guard input contract (`metadata_hash != digest_json(meta)`) and fail fast if violated.
@@ -384,7 +417,8 @@ def restore_checkpoint(path,data,settings=None):
     if sorted(arrays['order'].tolist())!=list(range(len(data['images']))) or not 0<=meta['position']<=len(data['images']) or meta['step']<0 or meta['epoch']<0:raise ValueError('invalid sampler state')
     # Create device-backed JAX array `params`.
     # Create device-backed JAX array `velocity`.
-    params={k: jnp.asarray(arrays['p_'+k]) for k in init_params()};velocity={k:jnp.asarray(arrays['v_'+k]) for k in params}
+    params={k: jnp.asarray(arrays['p_'+k]) for k in init_params()}
+    velocity={k:jnp.asarray(arrays['v_'+k]) for k in params}
     # Loop over `(k, template)` in `init_params().items()`:
     for k,template in init_params().items():
         # Guard input contract (`params[k].shape != template.shape or velocity[k].shape != template.shape or (not np.isfinite(params[k]).all()) or (not np.isfinite(velocity[k]).all())`) and fail fast if violated.
@@ -411,17 +445,20 @@ def calibrate(params,data,percentile=99.):
     if not 0<percentile<=100:raise ValueError('invalid calibration percentile')
     # Run `preprocess` to compute `x`.
     # Create device-backed JAX array `(_, hidden)`.
-    x=preprocess(data['images']);_,hidden=forward(params,jnp.asarray(x),return_hidden=True)
+    x=preprocess(data['images'])
+    _,hidden=forward(params,jnp.asarray(x),return_hidden=True)
     # Run `max` to compute `input_scale`.
     input_scale=max(float(np.percentile(np.abs(x),percentile))/127,1e-8)
     # Run `max` to compute `hidden_scale`.
     hidden_scale=max(float(np.percentile(np.abs(hidden),percentile))/127,1e-8)
     # Convert `conv` to a host NumPy array for inspection or verification.
     # Convert `head` to a host NumPy array for inspection or verification.
-    conv=np.asarray(params['conv']).reshape(9,6);head=np.asarray(params['head'])
+    conv=np.asarray(params['conv']).reshape(9,6)
+    head=np.asarray(params['head'])
     # Reduce across the target axis to summarize `cs`.
     # Reduce across the target axis to summarize `hs`.
-    cs=np.maximum(np.max(np.abs(conv),axis=0)/127,1e-8);hs=np.maximum(np.max(np.abs(head),axis=0)/127,1e-8)
+    cs=np.maximum(np.max(np.abs(conv),axis=0)/127,1e-8)
+    hs=np.maximum(np.max(np.abs(head),axis=0)/127,1e-8)
     # Return `dict(conv=quantize(conv, cs), conv_scale=cs, conv_bias=np.asarray(params['conv_bias']), head=quantize(head, hs), head_scale=hs, head_bias=np.asarray(params['head_bias']), input_scale=np.array(input_scale, np.float32), hidden_scale=np.array(hidden_scale, np.float32), calibration_hash=np.array(dataset_hash(data)), percentile=np.array(percentile))` to the caller.
     return dict(conv=quantize(conv,cs),conv_scale=cs,conv_bias=np.asarray(params['conv_bias']),head=quantize(head,hs),head_scale=hs,head_bias=np.asarray(params['head_bias']),input_scale=np.array(input_scale,np.float32),hidden_scale=np.array(hidden_scale,np.float32),calibration_hash=np.array(dataset_hash(data)),percentile=np.array(percentile))
 
@@ -433,7 +470,9 @@ def integer_forward(quantized,x,accumulator='int32'):
     # Evaluate `q` from the current inputs and state.
     # Convert `raw` to a host NumPy array for inspection or verification.
     # Run `quantize` to compute `ix`.
-    q=quantized;raw=np.asarray(x);ix=quantize(raw,q['input_scale'])
+    q=quantized
+    raw=np.asarray(x)
+    ix=quantize(raw,q['input_scale'])
     # Perform matrix contraction / projection to compute `acc`.
     acc=patches(ix).astype(np.int32) @ q['conv'].astype(np.int32)
     # Cast or evaluate `hidden` in explicit floating-point precision.
@@ -478,7 +517,8 @@ def export_model(folder,state,quantized):
 def load_model(folder,expected_preprocess=PREPROCESS):
     # Read or serialize artifact data on disk (`folder`).
     # Read or serialize artifact data on disk (`meta`).
-    folder=Path(folder);meta=json.loads((folder/'manifest.json').read_text())
+    folder=Path(folder)
+    meta=json.loads((folder/'manifest.json').read_text())
     # Guard input contract (`meta['version'] != 1 or meta['preprocess'] != expected_preprocess or meta['classes'] != CLASSES or (meta['batches'] != [1, 4]) or (meta['integer_accumulator'] != 'int32')`) and fail fast if violated.
     if meta['version']!=1 or meta['preprocess']!=expected_preprocess or meta['classes']!=CLASSES or meta['batches']!=[1,4] or meta['integer_accumulator']!='int32':raise ValueError('incompatible artifact contract')
     # Evaluate `names` from the current inputs and state.
@@ -508,11 +548,14 @@ def infer(runtime,images,layout='NHWC',input_range='uint8',precision='float32'):
     if precision!='float32':raise ValueError('runtime supports float32 exported graph or int8 reference')
     # Evaluate `outputs` from the current inputs and state.
     # Evaluate `position` from the current inputs and state.
-    outputs=[];position=0
+    outputs=[]
+    position=0
     while position<len(x):
         batch=4 if len(x)-position>=4 else 1
-        result=runtime['models'][batch].call(jnp.asarray(x[position:position+batch]));result.block_until_ready()
-        outputs.append(np.asarray(result));position+=batch
+        result=runtime['models'][batch].call(jnp.asarray(x[position:position+batch]))
+        result.block_until_ready()
+        outputs.append(np.asarray(result))
+        position+=batch
     # Return `np.concatenate(outputs)` to the caller.
     return np.concatenate(outputs)
 
@@ -524,7 +567,9 @@ def benchmark(runtime,images,repeats=12,precision='float32'):
     # Record execution timing or profiler trace in `start`.
     # Execute the next step of the computation.
     # Record execution timing or profiler trace in `warmup`.
-    start=time.perf_counter();infer(runtime,images,precision=precision);warmup=time.perf_counter()-start
+    start=time.perf_counter()
+    infer(runtime,images,precision=precision)
+    warmup=time.perf_counter()-start
     # Evaluate `samples` from the current inputs and state.
     samples=[]
     # Repeat the update loop over `range(repeats)` steps:
@@ -532,7 +577,9 @@ def benchmark(runtime,images,repeats=12,precision='float32'):
         # Record execution timing or profiler trace in `start`.
         # Execute the next step of the computation.
         # Record execution timing or profiler trace in ``.
-        start=time.perf_counter();infer(runtime,images,precision=precision);samples.append(time.perf_counter()-start)
+        start=time.perf_counter()
+        infer(runtime,images,precision=precision)
+        samples.append(time.perf_counter()-start)
     # Return `dict(precision=precision, backend=jax.default_backend(), device=str(jax.devices()[0]), batch=len(images), repeats=repeats, warmup_s=warmup, samples_s=samples, median_ms=1000 * float(np.median(samples)), p95_ms=1000 * float(np.percentile(samples, 95)), images_per_s=len(images) * repeats / sum(samples), scope='host preprocessing + synchronous inference; excludes file decoding')` to the caller.
     return dict(precision=precision,backend=jax.default_backend(),device=str(jax.devices()[0]),batch=len(images),repeats=repeats,warmup_s=warmup,samples_s=samples,median_ms=1000*float(np.median(samples)),p95_ms=1000*float(np.percentile(samples,95)),images_per_s=len(images)*repeats/sum(samples),scope='host preprocessing + synchronous inference; excludes file decoding')
 

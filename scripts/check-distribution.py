@@ -135,7 +135,7 @@ print('OK: course workspace includes tutor prerequisites, authored lesson artifa
 
 assessment_api=json.loads((ROOT/'public/api/v1/assessments.json').read_text())
 for assessment in assessment_api['assessments']:
-    assert assessment['status']=='review-draft'
+    assert assessment['status'] in ('active', 'review-draft')
     route=next(r for r in course['pathways'] if r['id']==assessment.get('pathwayId',assessment['id']))
     assert assessment['projectId'] in [p['id'] for p in projects['projects'] if p['pathwayId']==route['id']]
     if assessment['scope']=='math-extension':

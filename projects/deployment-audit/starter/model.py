@@ -33,7 +33,8 @@ def quantize(weights,bits=8):
 
 def prepare(directory,weights,calibration,provenance):
     """Stage 2: write weights.npy, manifest.json and six serialized JAX exports.
-    Policies fp32/w8a32/w8a8; batches 1 and 8. W8A8 has int32 accumulation.
+    Policies fp32/w8a32/w8a8
+    batches 1 and 8. W8A8 has int32 accumulation.
     Preserve calibration hash, artifact hashes, precision fields and provenance.
     """
     # Key APIs to use: `disk`, `Path`, `directory.mkdir`, `np.asarray`, `contract`
@@ -74,7 +75,8 @@ def request(payload,manifest,restored,policy="fp32"):
 
 def benchmark(payload,manifest,restored,policy="fp32",repeats=30):
     """Stage 3: first_request_ms, samples_ms, p50_ms, p95_ms, examples_per_second.
-    Include decode/validation/transfer/completion/encoding; network_included=False.
+    Include decode/validation/transfer/completion/encoding
+    network_included=False.
     """
     # Key APIs to use: `contract`, `time.perf_counter`, `request`, `values.append`, `disk`
     # Step 1: Guard input contract (`repeats < 2`) and fail fast if violated.

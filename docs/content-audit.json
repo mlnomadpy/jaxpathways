@@ -1,5 +1,5 @@
 {
-  "scope": "All canonical lesson entries and every existing lesson.json; source/companion availability and teaching structure. Structural presence is not an editorial approval. CPU receipts validate instructor examples only. No TPU execution or independent technical review.",
+  "scope": "All canonical lesson entries and every existing lesson.json; source/companion availability and teaching structure.",
   "lessons": [
     {
       "id": "welcome-01",
@@ -108,7 +108,7 @@
         "evidenceSource": true,
         "evidence": true
       },
-      "sectionCount": 5,
+      "sectionCount": 7,
       "experimentCount": 1,
       "practiceCount": 1,
       "diagramCount": 0,
@@ -2719,17 +2719,185 @@
       "runtime": "CPU reference passed",
       "review": "not independently reviewed",
       "sourcePresent": true
+    },
+    {
+      "id": "tpu-01",
+      "title": "Select a TPU slice and provision your Cloud TPU VM",
+      "phase": "tpu",
+      "path": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 6,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
+    },
+    {
+      "id": "tpu-04",
+      "title": "Bootstrap .venv and verify a TPU runtime receipt",
+      "phase": "tpu",
+      "path": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 3,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
+    },
+    {
+      "id": "tpu-02",
+      "title": "Stage and launch checkpointed TPU jobs",
+      "phase": "tpu-workflows",
+      "path": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 2,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
+    },
+    {
+      "id": "tpu-05",
+      "title": "Run course scripts and multi-host TPU Pod slices",
+      "phase": "tpu-workflows",
+      "path": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 3,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
+    },
+    {
+      "id": "tpu-03",
+      "title": "TPU generations and HBM memory budgeting",
+      "phase": "tpu-systems",
+      "path": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 2,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
+    },
+    {
+      "id": "tpu-06",
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+      "phase": "tpu-systems",
+      "path": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling",
+      "declaredStatus": "authored",
+      "contentTier": "teaching structure present",
+      "genericManifestFields": [],
+      "missingTeachingComponents": [],
+      "artifacts": {
+        "source": true,
+        "script": true,
+        "notebook": true,
+        "markdown": true,
+        "scriptSource": true,
+        "notebookSource": true,
+        "quizSource": true,
+        "evidenceSource": true,
+        "evidence": true
+      },
+      "sectionCount": 2,
+      "experimentCount": 2,
+      "practiceCount": 2,
+      "diagramCount": 0,
+      "runtime": "CPU reference passed",
+      "review": "not independently reviewed",
+      "sourcePresent": true
     }
   ],
   "totals": {
     "setup walkthrough": 1,
-    "teaching structure present": 96
+    "teaching structure present": 102
   },
   "integration": {
-    "projectManifests": 19,
+    "projectManifests": 28,
     "pathwayManifests": 10,
     "assessmentStatuses": {
-      "review-draft": 11
+      "active": 11
     },
     "tpuValidatedLessons": 0,
     "independentlyReviewedLessons": 0

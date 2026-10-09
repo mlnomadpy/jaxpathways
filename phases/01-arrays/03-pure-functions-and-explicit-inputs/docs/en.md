@@ -25,6 +25,10 @@ Pass the bias as an explicit argument instead. Then two calls with different bia
 
 Purity does not mean a whole application has no state. It means the numerical function receives the state it needs and returns any new state. Files, logs and orchestration can live outside that numerical boundary.
 
+$$
+X'[i] = \begin{cases} v & \text{if } i = k \\ X[i] & \text{otherwise} \end{cases}
+$$
+
 ### Pause and reason
 
 Where should a changing training step or random key live?
@@ -70,6 +74,43 @@ Calling a function twice with fixed inputs checks a useful property, but it does
 
 Keep the evidence proportional to the claim: these tests establish the behavior of this predictor and update pattern, not the replay of an entire distributed training job.
 
+## Step 1: Set up imports and input tensors
+
+Import the required JAX modules and define the initial inputs for pure functions and explicit inputs.
+
+```python
+import jax.numpy as jnp
+```
+
+Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+
+## Step 2: Apply the core JAX transformation
+
+Write the core computation and transformation step over the initialized inputs.
+
+```python
+def predict(params, x):
+    # Return `params['weight'] * x + params['bias']` to the caller.
+    return params["weight"] * x + params["bias"]
+# Construct `params` via `{"weight": jnp.array(2.), "bias": jnp.array(1.)}`
+params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
+```
+
+This stage executes the primary numerical transformation and binds the intermediate outputs.
+
+## Step 3: Verify shapes and numerical invariants
+
+Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+
+```python
+x = jnp.array([0., 1., 2.])
+# Print the observed values to compare against the expected result.
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
+```
+
+These assertions lock in the exact numerical contract before you run the full experiment and variations.
+
 ## Run the example
 
 ```python
@@ -80,9 +121,9 @@ import jax.numpy as jnp
 def predict(params, x):
     # Return `params['weight'] * x + params['bias']` to the caller.
     return params["weight"] * x + params["bias"]
-# Initialize array `params` with explicit values and shape.
+# Construct `params` via `{"weight": jnp.array(2.), "bias": jnp.array(1.)}`
 params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([0., 1., 2.])`
 x = jnp.array([0., 1., 2.])
 # Print the observed values to compare against the expected result.
 print(predict(params, x))
@@ -116,7 +157,7 @@ This makes the function’s inputs inspectable: the change in the output follows
 # Compute figure data for: Explicit parameters make predictions inspectable
 # Create device-backed JAX array `changed`.
 changed = {**params, 'bias': jnp.array(3.0)}
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': x.tolist(), 'xlabel': 'input',...`
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}
 ```
 
@@ -138,15 +179,15 @@ PASS: arrays-03
 
 ```python
 # Experiment — Expose a mutable container alias: The mutation concerns Python container bindings.
-# Initialize array `container` with explicit values and shape.
+# Construct `container` via `{"weight": jnp.array(2.), "bias": jnp.array(1.)}`
 container = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
-# Evaluate `alias` from the current inputs and state.
+# Compute `alias` from `container`
 alias = container
-# Initialize array `alias['weight']` with explicit values and shape.
+# Construct `alias["weight"]` via `jnp.array(9.)`
 alias["weight"] = jnp.array(9.)
-# Verify contract: `float(container['weight']) == 9.0`.
+# Assert invariant `float(container["weight"]) == 9.` holds
 assert float(container["weight"]) == 9.
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(params["weight"]) == 2.` holds
 assert float(params["weight"]) == 2.
 # Print the observed values to compare against the expected result.
 print("aliased container weight:", float(container["weight"]))
@@ -162,9 +203,9 @@ The mutation concerns Python container bindings. It does not contradict JAX arra
 
 ```python
 # Experiment — Replay two independent model configurations: Independent configurations reveal the benefit of explicit inputs...
-# Initialize array `first_params` with explicit values and shape.
+# Construct `first_params` via `{"weight": jnp.array(2.), "bias": jnp.array(1.)}`
 first_params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
-# Initialize array `second_params` with explicit values and shape.
+# Construct `second_params` via `{"weight": jnp.array(-1.), "bias": jnp.array(4.)}`
 second_params = {"weight": jnp.array(-1.), "bias": jnp.array(4.)}
 # Run `predict` to compute `first_output`.
 first_output = predict(first_params, x)
@@ -172,11 +213,11 @@ first_output = predict(first_params, x)
 second_output = predict(second_params, x)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(first_output, jnp.array([1., 3., 5.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(second_output, jnp.array([4., 3., 2.]))`
 assert jnp.allclose(second_output, jnp.array([4., 3., 2.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(first_params, x), first_output)`
 assert jnp.allclose(predict(first_params, x), first_output)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(second_params, x), second_output)`
 assert jnp.allclose(predict(second_params, x), second_output)
 ```
 
@@ -195,19 +236,19 @@ Create new parameters with weight $3$ while retaining the original bias. Show th
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `updated` with explicit values and shape.
+1. Construct `updated` via `{**params, "weight": jnp.array(3.)}`
 2. Verify that the numerical values match the expected reference within tolerance.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Assert invariant `float(params["weight"]) == 2.0` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Create new parameters with weight 3 while retaining the original bias.
-# Initialize array `updated` with explicit values and shape.
+# Construct `updated` via `{**params, "weight": jnp.array(3.)}`
 updated = ...  # TODO: compute updated
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(params["weight"]) == 2.0` holds
 assert float(params["weight"])  # TODO: complete assertion check
 ```
 
@@ -215,11 +256,11 @@ assert float(params["weight"])  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Create new parameters with weight 3 while retaining the original bias.
-# Initialize array `updated` with explicit values and shape.
+# Construct `updated` via `{**params, "weight": jnp.array(3.)}`
 updated = {**params, "weight": jnp.array(3.)}
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(params["weight"]) == 2.0` holds
 assert float(params["weight"]) == 2.0
 ```
 
@@ -246,9 +287,9 @@ A new dictionary is required; changing a binding in the original dictionary brea
 **Step-by-step implementation plan:**
 1. Return `{**parameters, 'bias': jnp.asarray(new_bias)}` to the caller.
 2. Run `with_bias` to compute `changed_bias`.
-3. Verify contract: `changed_bias is not params`.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Assert invariant `changed_bias is not params` holds
+4. Check numerical equivalence within tolerance: `jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))`
+5. Check numerical equivalence within tolerance: `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -259,11 +300,11 @@ def with_bias(parameters, new_bias):
     return ...  # TODO: return computed result
 # Run `with_bias` to compute `changed_bias`.
 changed_bias = with_bias(...)  # TODO: compute changed_bias
-# Verify contract: `changed_bias is not params`.
+# Assert invariant `changed_bias is not params` holds
 assert changed_bias is not params  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))`
 assert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))  # TODO: complete assertion check
 ```
 
@@ -276,11 +317,11 @@ def with_bias(parameters, new_bias):
     return {**parameters, "bias": jnp.asarray(new_bias)}
 # Run `with_bias` to compute `changed_bias`.
 changed_bias = with_bias(params, -2.)
-# Verify contract: `changed_bias is not params`.
+# Assert invariant `changed_bias is not params` holds
 assert changed_bias is not params
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))`
 assert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))`
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 ```
 
@@ -310,7 +351,7 @@ Compute data inside the numerical core and report it outside. A tuple return doe
 **Step-by-step implementation plan:**
 1. Run `predict` to compute `predictions`.
 2. Return `(predictions, jnp.mean((predictions - targets) ** 2))` to the caller.
-3. Initialize array `labels` with explicit values and shape.
+3. Construct `labels` via `jnp.array([1., 3., 5.])`
 4. Run `evaluate` to compute `(outputs, error)`.
 5. Run `evaluate` to compute `(other_outputs, other_error)`.
 
@@ -323,19 +364,19 @@ def evaluate(parameters, inputs, targets):
     predictions = predict(...)  # TODO: compute predictions
     # Return `(predictions, jnp.mean((predictions - targets) ** 2))` to the caller.
     return ...  # TODO: return computed result
-# Initialize array `labels` with explicit values and shape.
+# Construct `labels` via `jnp.array([1., 3., 5.])`
 labels = jnp.array(...)  # TODO: compute labels
 # Run `evaluate` to compute `(outputs, error)`.
 outputs, error = evaluate(...)  # TODO: compute outputs, error
 # Run `evaluate` to compute `(other_outputs, other_error)`.
 other_outputs, other_error = evaluate(...)  # TODO: compute other_outputs, other_error
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `error.shape == ()`
 assert error.shape  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(error, 0.)`
 assert jnp.allclose(error, 0.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(other_error, 6.)`
 assert jnp.allclose(other_error, 6.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(outputs, first_output)`
 assert jnp.allclose(outputs, first_output)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("evaluation losses:", float(error), float(other_error))
@@ -350,19 +391,19 @@ def evaluate(parameters, inputs, targets):
     predictions = predict(parameters, inputs)
     # Return `(predictions, jnp.mean((predictions - targets) ** 2))` to the caller.
     return predictions, jnp.mean((predictions - targets) ** 2)
-# Initialize array `labels` with explicit values and shape.
+# Construct `labels` via `jnp.array([1., 3., 5.])`
 labels = jnp.array([1., 3., 5.])
 # Run `evaluate` to compute `(outputs, error)`.
 outputs, error = evaluate(first_params, x, labels)
 # Run `evaluate` to compute `(other_outputs, other_error)`.
 other_outputs, other_error = evaluate(second_params, x, labels)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `error.shape == ()`
 assert error.shape == ()
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(error, 0.)`
 assert jnp.allclose(error, 0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(other_error, 6.)`
 assert jnp.allclose(other_error, 6.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(outputs, first_output)`
 assert jnp.allclose(outputs, first_output)
 # Print the observed values to compare against the expected result.
 print("evaluation losses:", float(error), float(other_error))

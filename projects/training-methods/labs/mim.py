@@ -9,11 +9,14 @@ validate_mask(hidden,patches.shape[:2])
 # The encoder receives only visible patches; original hidden pixels are targets only.
 visible = patches[:,[0,3],:]
 features = jnp.concatenate([visible.reshape(4,-1),jnp.ones((4,1))],axis=1)
-w = jnp.zeros((9,16)); history=[]
+w = jnp.zeros((9,16))
+history=[]
 loss=lambda w:masked_mse((features@w).reshape(4,4,4),patches,hidden)
 step=jax.jit(jax.value_and_grad(loss))
 for _ in range(100):
-    value,g=step(w);history.append(float(value));w=w-.15*g
+    value,g=step(w)
+    history.append(float(value))
+    w=w-.15*g
 prediction=(features@w).reshape(4,4,4)
 assert history[-1] < history[0]*.02
 # A scalar host loop is independent of the vectorized reduction.

@@ -26,9 +26,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -46,7 +47,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -62,7 +63,7 @@ def blocked_axpy(x,y,block=(2,4)):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
@@ -109,7 +110,7 @@ def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulat
 # Step 2 — Compare synchronous and buffered pipeline semantics: Both schedules execute real pipeline semantics under CPU simulation.
 # Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-1,1,17*257,dtype=jnp.float32).reshape(17,257)
-# Initialize array `y` with explicit values and shape.
+# Compute `y` from `jnp.full_like(x,.25)`
 y=jnp.full_like(x,.25)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=2*np.asarray(x)+np.asarray(y)
@@ -117,11 +118,11 @@ reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 # Run `pipelined_axpy` to compute `buffered`.
 buffered=pipelined_axpy(x,y,no_pipelining=False)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1...`
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
 # Print the observed values to compare against the expected result.
 print("Actual backend:",jax.default_backend(),"simulated layout: TPU v5 lite")
@@ -131,23 +132,25 @@ print("Synchronous/buffered endpoints:",float(buffered[0,0]),float(buffered[-1,-
 # Quantify tile tradeoffs before measuring hardware
 # Step 3 — Quantify tile tradeoffs before measuring hardware: This footprint counts only the declared data buffers.
 configurations=[(8,128),(16,128),(16,256)]
-# Evaluate `metadata` from the current inputs and state.
+# Compute `metadata` from `[]`
 metadata=[]
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
     # Evaluate `gm` from the current inputs and state.
-    # Evaluate `gn` from the current inputs and state.
-    gm=(17+bm-1)//bm;gn=(257+bn-1)//bn
+    # Compute `gm` from `(17+bm-1)//bm`
+    gm=(17+bm-1)//bm
+    gn=(257+bn-1)//bn
     # Evaluate `programs` from the current inputs and state.
-    # Evaluate `padded_elements` from the current inputs and state.
-    programs=gm*gn;padded_elements=programs*bm*bn
+    # Compute `programs` from `gm*gn`
+    programs=gm*gn
+    padded_elements=programs*bm*bn
     # Two input buffers and one output buffer, each double buffered, FP32.
     modeled_buffer_bytes=3*2*bm*bn*4
     # Combine or mask array elements to form ``.
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     # Run `pipelined_axpy` to compute `result`.
     result=pipelined_axpy(x,y,(bm,bn))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)`
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
@@ -177,9 +180,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -197,7 +201,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -213,7 +217,7 @@ def blocked_axpy(x,y,block=(2,4)):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
@@ -259,7 +263,7 @@ def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulat
 # Step 2 — Compare synchronous and buffered pipeline semantics: Both schedules execute real pipeline semantics under CPU simulation.
 # Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-1,1,17*257,dtype=jnp.float32).reshape(17,257)
-# Initialize array `y` with explicit values and shape.
+# Compute `y` from `jnp.full_like(x,.25)`
 y=jnp.full_like(x,.25)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=2*np.asarray(x)+np.asarray(y)
@@ -267,11 +271,11 @@ reference=2*np.asarray(x)+np.asarray(y)
 synchronous=pipelined_axpy(x,y,no_pipelining=True)
 # Run `pipelined_axpy` to compute `buffered`.
 buffered=pipelined_axpy(x,y,no_pipelining=False)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1...`
 np.testing.assert_allclose(synchronous,reference,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(buffered,reference,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(synchronous,buffered)`
 np.testing.assert_array_equal(synchronous,buffered)
 # Print the observed values to compare against the expected result.
 print("Actual backend:",jax.default_backend(),"simulated layout: TPU v5 lite")
@@ -280,40 +284,42 @@ print("Synchronous/buffered endpoints:",float(buffered[0,0]),float(buffered[-1,-
 
 # Step 3 — Quantify tile tradeoffs before measuring hardware: This footprint counts only the declared data buffers.
 configurations=[(8,128),(16,128),(16,256)]
-# Evaluate `metadata` from the current inputs and state.
+# Compute `metadata` from `[]`
 metadata=[]
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
     # Evaluate `gm` from the current inputs and state.
-    # Evaluate `gn` from the current inputs and state.
-    gm=(17+bm-1)//bm;gn=(257+bn-1)//bn
+    # Compute `gm` from `(17+bm-1)//bm`
+    gm=(17+bm-1)//bm
+    gn=(257+bn-1)//bn
     # Evaluate `programs` from the current inputs and state.
-    # Evaluate `padded_elements` from the current inputs and state.
-    programs=gm*gn;padded_elements=programs*bm*bn
+    # Compute `programs` from `gm*gn`
+    programs=gm*gn
+    padded_elements=programs*bm*bn
     # Two input buffers and one output buffer, each double buffered, FP32.
     modeled_buffer_bytes=3*2*bm*bn*4
     # Combine or mask array elements to form ``.
     metadata.append((programs,padded_elements,modeled_buffer_bytes))
     # Run `pipelined_axpy` to compute `result`.
     result=pipelined_axpy(x,y,(bm,bn))
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)`
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
 
 # Figure data experiment
 # Compute figure data for: Fewer tile programs can require more work and local storage
-# Evaluate `labels` from the current inputs and state.
+# Compute `labels` from `['8 x 128','16 x 128','16 x 256']`
 labels=['8 x 128','16 x 128','16 x 256']
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'panels':[{'kind':'bar','labels':labels,'ylabel':'p...`
 visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}
 
 # Experiment: Change input buffer count without changing the result
 # Experiment — Change input buffer count without changing the result: More input buffering changes potential overlap and storage, not...
 three=pipelined_axpy(x,y,buffers=3)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(three,buffered)`
 np.testing.assert_array_equal(three,buffered)
 # Print the observed values to compare against the expected result.
 print("Three-buffer schedule matches the two-buffer result")
@@ -322,7 +328,7 @@ print("Three-buffer schedule matches the two-buffer result")
 # Experiment — Check a one-tile pipeline: A one-tile pipeline has no next tile with which to overlap its...
 # Construct and reshape `small_x` into the target tensor dimensions.
 small_x=jnp.arange(8*128,dtype=jnp.float32).reshape(8,128)/100
-# Initialize array `small_y` with explicit values and shape.
+# Construct `small_y` via `jnp.ones_like(small_x)`
 small_y=jnp.ones_like(small_x)
 # Run `pipelined_axpy` to compute `small`.
 small=pipelined_axpy(small_x,small_y)
@@ -357,7 +363,7 @@ rejected=False
 # Run the boundary check and catch the expected exception:
 try:pipelined_axpy(x,y,(3,5))
 except ValueError:rejected=True
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected
 # Print the observed values to compare against the expected result.
 print("Unsupported pipeline tile rejected")
@@ -367,9 +373,10 @@ print("Unsupported pipeline tile rejected")
 # Iterate over `(bm, bn)` to step through the computation:
 for bm,bn in configurations:
     # Evaluate `two` from the current inputs and state.
-    # Evaluate `three` from the current inputs and state.
-    two=(2*2+2)*bm*bn*4;three=(2*3+2)*bm*bn*4
-    # Verify contract: `three * 3 == two * 4`.
+    # Compute `two` from `(2*2+2)*bm*bn*4`
+    two=(2*2+2)*bm*bn*4
+    three=(2*3+2)*bm*bn*4
+    # Assert invariant `three*3==two*4` holds
     assert three*3==two*4
     # Print the observed values to compare against the expected result.
     print("Tile, two/three-input-slot modeled bytes:",(bm,bn),two,three)

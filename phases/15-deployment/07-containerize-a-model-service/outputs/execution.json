@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "ecff2afb947799e7def3d540c839b2c2d6e4618aa06b6330dd7d79021c47aa3f",
+  "contentHash": "e9c015dfe8900920d5f94adcfd995724eed6b63e0f47bef9a70014e3dce55ad5",
   "executedAt": "2026-10-08T14:06:16.305452+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,7 @@
   "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nFresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nMatching digest did not bypass model validation.\nChanged artifact requires a new recorded digest.\nNonfinite input rejected before output.\nNew artifact loads, but the old behavioral expectation no longer passes.\nPASS: deployment-07\n",
   "notebookCells": [
     {
-      "sourceHash": "aeb8c7e844d2fe054f41fc0ff88589ecfecab88385e183e69b4c812d63e4bd40",
+      "sourceHash": "10f8019e178ff68a4c2794f28eb842c882839d5b6d6a8dde4cb202e1ac618021",
       "outputs": []
     },
     {
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "29c18def856c0b00e39e1d3c61c78b0417d3bb115479e47f3587c980eab19989",
+      "sourceHash": "b70e6ee2b88ed3a679f127b8af56edc2459050f96abb43a4dfe28cf750567542",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "ab7e18c777cd36630b298749d07d62832402c18c03a390b5e1191015fe532288",
+      "sourceHash": "70d1dc2c4cd823358fa9a3599fc816688f84a0e887c4c19bdf3f68e60a38e1c9",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "b77f9b3a191d5ba6096ef064059947f38305933bfbf0053f8585d040d2b15380",
+      "sourceHash": "3efb0cdac91776f94a8f9bb401021f329149f8248a8ea51063914970a93bc678",
       "outputs": []
     },
     {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "sourceHash": "a5e472b9eb0600b58081699e8367cb941890a30588c0e59d66db274c55fc78d5",
+      "sourceHash": "d119061ee146435bb551493428290e80732dbc645a25bea8ec77b0cff6db2702",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "5d5d78f7a19c88bc304c9306683987e5b3d1309cfbf4508a23f3f250688e9315",
+      "sourceHash": "f0220c790830977f24c4a4350e3c566eb7958ae6cf2c594f401db205254852c4",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "7edb0ca5ae1897f0ffba23390d45c847fd5668abcf705d9031c752e9b96aa2b7",
+      "sourceHash": "92551923c139bfb77d974ab07199ae5e4f9ad0b7cddfb7338ff52fc61fa30324",
       "outputs": []
     },
     {
-      "sourceHash": "d11313fbd0715e1448d9ce7cc6ada52653318b73282e7bd5305a592ea2a50694",
+      "sourceHash": "4a8094deebbd4a5b0a3d814c23f2e80af118bd1112f02ac67d14528c875d88ef",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "16ad72344d11d1de7d5061daefca867b8c858009285a2348fa8a46ff48351d2e",
+      "sourceHash": "32f6cae486742aaba47b3a1f085cf5e601b60aa979e8afa32d8abce9540487a5",
       "outputs": []
     },
     {
-      "sourceHash": "725ed176efedb599eaf76581ac1b40dd0b42e1cb547da6d07b2c581e650207d4",
+      "sourceHash": "ab0fa584ebe9f8ad5daa6a831610ee25011e5ace1ba77222e75a6e88f9f44e91",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "168fc1884a627fac8bad0791bff7f60a69ec2ac5b49d79ac29ee9974c5220946",
+      "sourceHash": "4e728e48e8dbfeb26b508ae7b3225935a07cf78630e57c8e897837e7e6dd15ef",
       "outputs": []
     },
     {
-      "sourceHash": "86925f39de24f43a18fc0f7b8f92ff579f5c3b080511a831ce2a69b83868c4af",
+      "sourceHash": "20a02a4f4a982d4a6e1d950da2ecc74c24723ccb4c1b993e26f1e0fdbc7db36d",
       "outputs": [
         {
           "output_type": "stream",

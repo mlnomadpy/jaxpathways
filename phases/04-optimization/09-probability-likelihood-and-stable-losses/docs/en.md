@@ -83,9 +83,9 @@ import optax
 def binary_loss(z, y):
     # Return `jax.nn.softplus(z) - y * z` to the caller.
     return jax.nn.softplus(z) - y * z
-# Initialize array `z` with explicit values and shape.
+# Construct `z` via `jnp.array(0.0)`
 z = jnp.array(0.0)
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array(1.0)`
 y = jnp.array(1.0)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(z, y), jnp.log(2.0))
@@ -101,9 +101,9 @@ Append the analytic gradient and a library comparison at moderate scores.
 # Step 2 — Check the derivative independently: The derivative points toward assigning more probability to the...
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(binary_loss)(z, y), -0.5)
-# Initialize array `logits` with explicit values and shape.
+# Construct `logits` via `jnp.array([-2.0, 0.0, 2.0])`
 logits = jnp.array([-2.0, 0.0, 2.0])
-# Initialize array `labels` with explicit values and shape.
+# Construct `labels` via `jnp.array([0.0, 1.0, 1.0])`
 labels = jnp.array([0.0, 1.0, 1.0])
 # Run `jax.nn.sigmoid` to compute `analytic`.
 analytic = jax.nn.sigmoid(logits) - labels
@@ -111,7 +111,7 @@ analytic = jax.nn.sigmoid(logits) - labels
 actual = jax.vmap(jax.grad(binary_loss))(logits, labels)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(actual, analytic, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cr...`
 assert jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cross_entropy(logits, labels), atol=1e-06)
 ```
 
@@ -125,7 +125,7 @@ Append the extreme case and run python main.py.
 # Step 3 — Check a confident mistake: The confident mistake has a large finite loss and derivative near -1.
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(jnp.array(-100.0), jnp.array(1.0)), 100.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(binary_loss)(jnp.array(-100.0), jnp.array(1...`
 assert jnp.allclose(jax.grad(binary_loss)(jnp.array(-100.0), jnp.array(1.0)), -1.0)
 # Print the observed values to compare against the expected result.
 print('uncertain loss / confident-wrong loss:', binary_loss(z, y), binary_loss(-100.0, 1.0))
@@ -146,9 +146,9 @@ import optax
 def binary_loss(z, y):
     # Return `jax.nn.softplus(z) - y * z` to the caller.
     return jax.nn.softplus(z) - y * z
-# Initialize array `z` with explicit values and shape.
+# Construct `z` via `jnp.array(0.0)`
 z = jnp.array(0.0)
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array(1.0)`
 y = jnp.array(1.0)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(z, y), jnp.log(2.0))
@@ -156,9 +156,9 @@ assert jnp.allclose(binary_loss(z, y), jnp.log(2.0))
 # Step 2 — Check the derivative independently: The derivative points toward assigning more probability to the...
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(binary_loss)(z, y), -0.5)
-# Initialize array `logits` with explicit values and shape.
+# Construct `logits` via `jnp.array([-2.0, 0.0, 2.0])`
 logits = jnp.array([-2.0, 0.0, 2.0])
-# Initialize array `labels` with explicit values and shape.
+# Construct `labels` via `jnp.array([0.0, 1.0, 1.0])`
 labels = jnp.array([0.0, 1.0, 1.0])
 # Run `jax.nn.sigmoid` to compute `analytic`.
 analytic = jax.nn.sigmoid(logits) - labels
@@ -166,13 +166,13 @@ analytic = jax.nn.sigmoid(logits) - labels
 actual = jax.vmap(jax.grad(binary_loss))(logits, labels)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(actual, analytic, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cr...`
 assert jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cross_entropy(logits, labels), atol=1e-06)
 
 # Step 3 — Check a confident mistake: The confident mistake has a large finite loss and derivative near -1.
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(jnp.array(-100.0), jnp.array(1.0)), 100.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(binary_loss)(jnp.array(-100.0), jnp.array(1...`
 assert jnp.allclose(jax.grad(binary_loss)(jnp.array(-100.0), jnp.array(1.0)), -1.0)
 # Print the observed values to compare against the expected result.
 print('uncertain loss / confident-wrong loss:', binary_loss(z, y), binary_loss(-100.0, 1.0))
@@ -204,7 +204,7 @@ Loss is not a probability or classification accuracy, so values above $1$ are va
 # Compute figure data for: Confidence is rewarded only when it matches the label
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-10.0, 10.0, 81)
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logi...`
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
 ```
 
@@ -225,15 +225,15 @@ PASS: optimization-09
 
 ```python
 # Experiment — Break the probability-first implementation: A stable final answer requires stable intermediate computations.
-# Initialize array `p` with explicit values and shape.
+# Construct `p` via `jax.nn.sigmoid(jnp.array(100.0))`
 p = jax.nn.sigmoid(jnp.array(100.0))
-# Evaluate `naive` from the current inputs and state.
+# Compute `naive` from `-jnp.log(1 - p)`
 naive = -jnp.log(1 - p)
-# Initialize array `stable` with explicit values and shape.
+# Construct `stable` via `binary_loss(jnp.array(100.0), jnp.array(0.0))`
 stable = binary_loss(jnp.array(100.0), jnp.array(0.0))
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert not jnp.isfinite(naive)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.isfinite(stable) and jnp.allclose(stable, 100.0)`
 assert jnp.isfinite(stable) and jnp.allclose(stable, 100.0)
 ```
 
@@ -247,9 +247,9 @@ A stable final answer requires stable intermediate computations.
 
 ```python
 # Experiment — Shift every class score: Only relative class scores matter.
-# Initialize array `scores` with explicit values and shape.
+# Construct `scores` via `jnp.array([1.0, 2.0, 3.0])`
 scores = jnp.array([1.0, 2.0, 3.0])
-# Evaluate `target` from the current inputs and state.
+# Compute `target` from `2`
 target = 2
 # Evaluate numerically stable log-space cross-entropy/likelihood (`nll`).
 nll = -jax.nn.log_softmax(scores)[target]
@@ -278,22 +278,22 @@ Compute the binary losses for positive labels at probabilities $0.8$ and $0.2$, 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `probabilities` with explicit values and shape.
+1. Construct `probabilities` via `jnp.array([0.8, 0.2])`
 2. Run `jnp.log` to compute `z_from_p`.
 3. Verify that the numerical values match the expected reference within tolerance.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Assert invariant `binary_loss(z_from_p[0], 1.0) < binary_loss(z_from_p[1], 1.0)` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Compute the binary losses for positive labels at probabilities 0.8 and...
-# Initialize array `probabilities` with explicit values and shape.
+# Construct `probabilities` via `jnp.array([0.8, 0.2])`
 probabilities = jnp.array(...)  # TODO: compute probabilities
 # Run `jnp.log` to compute `z_from_p`.
 z_from_p = jnp.log(...)  # TODO: compute z_from_p
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `binary_loss(z_from_p[0], 1.0) < binary_loss(z_from_p[1], 1.0)` holds
 assert binary_loss(z_from_p[0], 1.0)  # TODO: complete assertion check
 ```
 
@@ -301,13 +301,13 @@ assert binary_loss(z_from_p[0], 1.0)  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Compute the binary losses for positive labels at probabilities 0.8 and...
-# Initialize array `probabilities` with explicit values and shape.
+# Construct `probabilities` via `jnp.array([0.8, 0.2])`
 probabilities = jnp.array([0.8, 0.2])
 # Run `jnp.log` to compute `z_from_p`.
 z_from_p = jnp.log(probabilities) - jnp.log1p(-probabilities)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `binary_loss(z_from_p[0], 1.0) < binary_loss(z_from_p[1], 1.0)` holds
 assert binary_loss(z_from_p[0], 1.0) < binary_loss(z_from_p[1], 1.0)
 ```
 
@@ -334,17 +334,17 @@ The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Initialize array `ys` with explicit values and shape.
+1. Construct `ys` via `jnp.array([1.0, 1.0, 1.0, 0.0])`
 2. Aggregate array values to compute `constant_loss`.
 3. Run `jnp.log` to compute `optimum`.
 4. Verify that the numerical values match the expected reference within tolerance.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Assert invariant `constant_loss(optimum) < constant_loss(jnp.array(0.0))` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
-# Initialize array `ys` with explicit values and shape.
+# Construct `ys` via `jnp.array([1.0, 1.0, 1.0, 0.0])`
 ys = jnp.array(...)  # TODO: compute ys
 # Aggregate array values to compute `constant_loss`.
 constant_loss = ...  # TODO: compute constant_loss
@@ -352,7 +352,7 @@ constant_loss = ...  # TODO: compute constant_loss
 optimum = jnp.log(...)  # TODO: compute optimum
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `constant_loss(optimum) < constant_loss(jnp.array(0.0))` holds
 assert constant_loss(optimum)  # TODO: complete assertion check
 ```
 
@@ -360,7 +360,7 @@ assert constant_loss(optimum)  # TODO: complete assertion check
 
 ```python
 # Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
-# Initialize array `ys` with explicit values and shape.
+# Construct `ys` via `jnp.array([1.0, 1.0, 1.0, 0.0])`
 ys = jnp.array([1.0, 1.0, 1.0, 0.0])
 # Aggregate array values to compute `constant_loss`.
 constant_loss = lambda z: jnp.mean(binary_loss(z, ys))
@@ -368,7 +368,7 @@ constant_loss = lambda z: jnp.mean(binary_loss(z, ys))
 optimum = jnp.log(3.0)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `constant_loss(optimum) < constant_loss(jnp.array(0.0))` holds
 assert constant_loss(optimum) < constant_loss(jnp.array(0.0))
 ```
 
@@ -397,8 +397,8 @@ The mean divides by the new observation count; the sum does not.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Initialize array `zs` with explicit values and shape.
-2. Initialize array `ys2` with explicit values and shape.
+1. Construct `zs` via `jnp.array([-1.0, 2.0])`
+2. Construct `ys2` via `jnp.array([0.0, 1.0])`
 3. Run `binary_loss` to compute `original`.
 4. Run `binary_loss` to compute `doubled`.
 5. Verify that the numerical values match the expected reference within tolerance.
@@ -407,9 +407,9 @@ The mean divides by the new observation count; the sum does not.
 
 ```python
 # Catch a reduction mistake (Transfer / diagnosis): Reduction conventions affect gradient scale and...
-# Initialize array `zs` with explicit values and shape.
+# Construct `zs` via `jnp.array([-1.0, 2.0])`
 zs = jnp.array(...)  # TODO: compute zs
-# Initialize array `ys2` with explicit values and shape.
+# Construct `ys2` via `jnp.array([0.0, 1.0])`
 ys2 = jnp.array(...)  # TODO: compute ys2
 # Run `binary_loss` to compute `original`.
 original = binary_loss(...)  # TODO: compute original
@@ -417,7 +417,7 @@ original = binary_loss(...)  # TODO: compute original
 doubled = binary_loss(...)  # TODO: compute doubled
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))`
 assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))  # TODO: complete assertion check
 # Differentiate the objective to obtain `mean_grad` via automatic differentiation.
 mean_grad = ...  # TODO: compute mean_grad
@@ -431,9 +431,9 @@ assert jnp.allclose(mean_grad(zs), duplicated_grad)  # TODO: complete assertion 
 
 ```python
 # Catch a reduction mistake (Transfer / diagnosis): Reduction conventions affect gradient scale and...
-# Initialize array `zs` with explicit values and shape.
+# Construct `zs` via `jnp.array([-1.0, 2.0])`
 zs = jnp.array([-1.0, 2.0])
-# Initialize array `ys2` with explicit values and shape.
+# Construct `ys2` via `jnp.array([0.0, 1.0])`
 ys2 = jnp.array([0.0, 1.0])
 # Run `binary_loss` to compute `original`.
 original = binary_loss(zs, ys2)
@@ -441,7 +441,7 @@ original = binary_loss(zs, ys2)
 doubled = binary_loss(jnp.tile(zs, 2), jnp.tile(ys2, 2))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))`
 assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))
 # Differentiate the objective to obtain `mean_grad` via automatic differentiation.
 mean_grad = lambda z: jax.grad(lambda t: jnp.mean(binary_loss(t * z, ys2)))(1.0)

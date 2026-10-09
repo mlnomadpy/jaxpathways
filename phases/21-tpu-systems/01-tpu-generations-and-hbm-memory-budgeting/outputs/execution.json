@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "6c0de718c914f07f4a2ca45dec670710bebb4afee1e43caa369b48023a90df2b",
+  "contentHash": "91d5116b89754a7ef7d7e24f724ed10a991268069fdabc0788896f214a0db24a",
   "executedAt": "2026-10-08T14:08:21.911895+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,19 @@
   "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\nTPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\nKV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5\n7B mixed train state GiB: 78.231 Min v5e chips (at 80% HBM budget): 7\n1.5B budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\nMatmul N=1024 intensity: 341.3 v5e ridge: 240.5\nv6e-4 80% usable GiB: 102.4 Fits 7B state: True\nPASS: tpu-03\n",
   "notebookCells": [
     {
-      "sourceHash": "e7efac70b81b0dcbc24a121d2d1fd5488ff0871e23ede19f71c5e6aaec31b894",
+      "sourceHash": "5581d4b1dba979b849b79a5a2eb82c0d712408c88923daf8a0f9562a12d47b9d",
       "outputs": []
     },
     {
-      "sourceHash": "38c0bb1dab3d992371ef5ae79b85df4f9bc8bae0e8f26ca88a8a865f6d3c319d",
+      "sourceHash": "09d581022078bc03e6969edbba62082ec39347154dd833c100d3f725dd6591ad",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ecbda9172940b94cb442b17e120b2bc89510c5a20135dd553d74f2195d256da1",
+      "outputs": []
+    },
+    {
+      "sourceHash": "31236a26004328f7a16031f503ff13bf89aaaa8418066e292e47a1ba59bfb8e3",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,21 +40,7 @@
       ]
     },
     {
-      "sourceHash": "0083953d65fea07a5bd68d3fc9d4c5bf6b9514fd665e9e86a27b59e3a6b14e1e",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n",
-            "7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n",
-            "1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "5b9ac179fd03293b195484e104154ea1edf7088b6e2a33ad8f5fe2c4e6281d98",
+      "sourceHash": "0f6adf86f222001cef39d3cb044979d77ae901ca92259c31f1337f2c6f33aeb3",
       "outputs": []
     },
     {
@@ -65,76 +59,36 @@
       ]
     },
     {
-      "sourceHash": "fe12a3715a730e8eedb1578b2c9e1219d418fd99be91898ca7a0d944f2b4d2e5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "KV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "f33983bf53f70177bd0a325007faa319e4a446427582b2c9cb61009518361b4c",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "7B mixed train state GiB: 78.231 Min v5e chips (at 80% HBM budget): 7\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "89764dbc894f854bf4223d9d57103caf92c63fefd950b020c0b0cd845ed5dff6",
+      "sourceHash": "a7a662bcfa3f2cc2803cb65bf8d992f73d77e6e7951fb78e0b49584fb48f230d",
       "outputs": []
     },
     {
-      "sourceHash": "4baeff2dccf94f8c4066c141ff784ca3dee014331b57088f48f9912f1569432c",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "1.5B budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "a3fff747f588754aa90abafc9d9eadea96acc836258a62615ed7d1f5aff7611d",
+      "sourceHash": "2a80e72051cc042a7a6c14876120d6df7455929fc7e03428bc3475584bb2d371",
       "outputs": []
     },
     {
-      "sourceHash": "e0e2aa0f68ea2970d2e8ba5f32f48f3dfa98b4fae05c865f6e0ee62cdbd2d793",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Matmul N=1024 intensity: 341.3 v5e ridge: 240.5\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "647d54d3b50dd1c2b8c048fb115c8e03d8cbfcdc62472ee5f903c58b08c76835",
+      "sourceHash": "05351ff89b65f76e397251246879425e2e154f0db489ff305eba92a5d89db200",
       "outputs": []
     },
     {
-      "sourceHash": "191fd8da1273e4bd4001c62ff4f909730bbc8c8094528138dfe7f3fb5eabd928",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "v6e-4 80% usable GiB: 102.4 Fits 7B state: True\n"
-          ]
-        }
-      ]
+      "sourceHash": "656ea8207fd3332abbcc0b4d22989615cec2682b3cc957b946c4c9ce96aeae15",
+      "outputs": []
+    },
+    {
+      "sourceHash": "2a190368f6e967a82496611c0771b6f75386e88530fbe9913b967a31cb7a1b99",
+      "outputs": []
+    },
+    {
+      "sourceHash": "c10590265508b3187fda8750d2a045f8cb297e14d1bb49d58dde5e9cff2d3179",
+      "outputs": []
+    },
+    {
+      "sourceHash": "5c7b2440ca79e48d08fe235451b49aa9617dd2a1ab7c3ab4e54a602f34860db0",
+      "outputs": []
+    },
+    {
+      "sourceHash": "75e2369b4245ac4b138a049d6863a43abe91170bba671682a10dd2ca407ea87a",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

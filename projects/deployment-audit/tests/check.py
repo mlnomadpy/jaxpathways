@@ -16,14 +16,17 @@ parser.add_argument("--stage",choices=["1","2","3","all"],default="all")
 args=parser.parse_args()
 stage=3 if args.stage=="all" else int(args.stage)
 path=root/args.implementation/"model.py" if args.implementation in ("starter","solution") else Path(args.implementation)
-spec=importlib.util.spec_from_file_location("learner",path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
+spec=importlib.util.spec_from_file_location("learner",path)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
 def rejects(call):
     try:call()
     except ValueError:return
     raise AssertionError("Expected ValueError for invalid input")
 
 rng=np.random.default_rng(51)
-X=rng.normal(size=(80,3)).astype(np.float32);X[:,-1]=1.
+X=rng.normal(size=(80,3)).astype(np.float32)
+X[:,-1]=1.
 teacher=np.array([1.,-.5,.2],np.float32)
 targets=1/(1+np.exp(-(X@teacher)))
 initial=jnp.zeros(3)
@@ -34,10 +37,12 @@ np.testing.assert_allclose(history[0],np.log(2),rtol=1e-6)
 assert history[-1]<history[0]-.05
 assert np.isfinite(history).all() and history.shape==(250,)
 zero,empty=m.train(trained,jnp.array(X),jnp.array(targets),steps=0)
-np.testing.assert_array_equal(zero,trained);assert empty.shape==(0,)
+np.testing.assert_array_equal(zero,trained)
+assert empty.shape==(0,)
 # Saved and reloaded base is actually trained; adaptation is a distinct target.
 with tempfile.TemporaryDirectory() as checkpoint_dir:
-    checkpoint=Path(checkpoint_dir)/"base.npy";np.save(checkpoint,np.asarray(trained))
+    checkpoint=Path(checkpoint_dir)/"base.npy"
+    np.save(checkpoint,np.asarray(trained))
     base_hash=hashlib.sha256(checkpoint.read_bytes()).hexdigest()
     restored=jnp.asarray(np.load(checkpoint,allow_pickle=False))
     new_target=1/(1+np.exp(-(X@np.array([-.4,1.2,-.1]))))
@@ -68,7 +73,8 @@ if stage>=2:
         assert loaded["policies"]["w8a8"]["accumulator"]=="int32"
         q,s=m.quantize(np.asarray(adapted)[:,None],8)
         for batch in (1,8):
-            probe=rng.normal(0,.4,(batch,3)).astype(np.float32);probe[:,-1]=1.
+            probe=rng.normal(0,.4,(batch,3)).astype(np.float32)
+            probe[:,-1]=1.
             float_expected=probe@np.asarray(adapted)
             for policy in ("fp32","w8a32","w8a8"):
                 actual=np.asarray(exports[f"{policy}:{batch}"].call(jnp.asarray(probe)))
@@ -82,13 +88,17 @@ if stage>=2:
                 assert np.max(np.abs(actual-float_expected))<.04
         # Corrupt the file actually loaded and require rejection.
         item=next(iter(loaded["artifacts"].values()))
-        damaged=Path(folder)/item["file"];saved=damaged.read_bytes();damaged.write_bytes(saved+b"bad")
-        rejects(lambda:m.load(folder));damaged.write_bytes(saved)
+        damaged=Path(folder)/item["file"]
+        saved=damaged.read_bytes()
+        damaged.write_bytes(saved+b"bad")
+        rejects(lambda:m.load(folder))
+        damaged.write_bytes(saved)
         print("PASS stage 2: six exported round trips, independent precision arithmetic, calibration provenance and corruption rejection")
         if stage>=3:
             reports=[]
             for batch in (1,8):
-                probe=rng.normal(0,.4,(batch,3)).astype(np.float32);probe[:,-1]=1.
+                probe=rng.normal(0,.4,(batch,3)).astype(np.float32)
+                probe[:,-1]=1.
                 payload=json.dumps({"features":probe.tolist()})
                 response=json.loads(m.request(payload,loaded,exports))
                 np.testing.assert_allclose(response["scores"],probe@np.asarray(adapted),atol=2e-6)

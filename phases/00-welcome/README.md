@@ -114,8 +114,8 @@ A reproducible environment report.
 
 **Demonstrate:** Explain which device ran your code and reproduce the result in a fresh environment.
 
-Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 1 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` from the top-level folder to verify stage 1.
+Project status: implemented staged practice · [Open source](../../projects/welcome-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` from the top-level folder to verify stage 1.
 
-
+Additional project: [Connect arrays, transformations and explicit state](../../projects/foundation-toolkit/README.md).
 
 [Primary documentation](https://docs.jax.dev/en/latest/installation.html).

@@ -1,6 +1,29 @@
 """Tracing, static arguments, and recompilation: worked experiments and reference solutions. CPU checks."""
 
+# Step 1: Set up imports and input tensors
+import jax
+import jax.numpy as jnp
 
+# Step 2: Apply the core JAX transformation
+def reduce_values(x, mode):
+    # Branch on condition `mode == 'sum'`:
+    if mode == "sum":
+        return x.sum()
+    # Branch on condition `mode == 'mean'`:
+    if mode == "mean":
+        return x.mean()
+    raise ValueError("mode must be sum or mean")
+# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
+compiled = jax.jit(reduce_values, static_argnames=("mode",))
+
+# Step 3: Verify shapes and numerical invariants
+x = jnp.array([1., 2., 3.])
+# Print the observed values to compare against the expected result.
+# Print diagnostic summary of the computed outputs.
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(compiled(x, mode="sum"), 6.)
+# Check numerical equivalence within tolerance: `jnp.allclose(compiled(x`
+assert jnp.allclose(compiled(x, mode="mean"), 2.)
 
 # Tracing, static arguments, and recompilation: Tracing observes how Python builds an array computation from...
 # Import jax for this computation.
@@ -17,7 +40,7 @@ def reduce_values(x, mode):
     raise ValueError("mode must be sum or mean")
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(reduce_values, static_argnames=("mode",))
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([1., 2., 3.])`
 x = jnp.array([1., 2., 3.])
 # Print the observed values to compare against the expected result.
 print("Sum:", float(compiled(x, mode="sum")))
@@ -25,8 +48,14 @@ print("Sum:", float(compiled(x, mode="sum")))
 print("Mean:", float(compiled(x, mode="mean")))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(compiled(x`
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
+
+# Figure data experiment
+# Compare compiled execution in 'sum' mode and 'mean' mode:
+out_sum = float(compiled(x, 'sum'))
+out_mean = float(compiled(x, 'mean'))
+visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 'static mode argument', 'ylabel': 'compiled(x, mode) output', 'series': [{'label': 'compiled(x, mode)', 'y': [out_sum, out_mean]}]}
 
 # Experiment: Look at the staged numerical work
 # Experiment — Look at the staged numerical work: The second call supplies new values with the same shape/dtype.
@@ -41,7 +70,7 @@ print(jax.make_jaxpr(sum_squares)(x))
 staged_squares = jax.jit(sum_squares)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(staged_squares(x), 14.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(staged_squares(x + 1.), 29.)`
 assert jnp.allclose(staged_squares(x + 1.), 29.)
 
 # Experiment: Reproduce and repair a dynamic branch
@@ -52,7 +81,7 @@ def python_branch(value):
         return value ** 2
     # Return `-value` to the caller.
     return -value
-# Verify contract: `python_branch(-2.0) == 2.0`.
+# Assert invariant `python_branch(-2.) == 2.` holds
 assert python_branch(-2.) == 2.
 # Run the boundary check and catch the expected exception:
 try:
@@ -69,7 +98,7 @@ def runtime_branch(value):
 compiled_branch = jax.jit(runtime_branch)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(compiled_branch(jnp.array(-2.)), 2.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(compiled_branch(jnp.array(3.)), 9.)`
 assert jnp.allclose(compiled_branch(jnp.array(3.)), 9.)
 
 # Reference solution. Try the exercise before reading this.
@@ -91,7 +120,7 @@ choose = jax.jit(choose_reduction, static_argnames=("mode",))
 for values in (x, jnp.array([-4., -1., -2.])):
     # Loop over `(mode, reference)` in `(('sum', jnp.sum), ('mean', jnp.mean), ('max', jnp.max))`:
     for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Check numerical equivalence within tolerance: `jnp.allclose(choose(values, mode=mode), reference(values))`
         assert jnp.allclose(choose(values, mode=mode), reference(values))
 # Run the boundary check and catch the expected exception:
 try:
@@ -110,7 +139,7 @@ def elementwise_absolute(values):
 compiled_absolute = jax.jit(elementwise_absolute)
 # Iterate over `values` to step through the computation:
 for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(compiled_absolute(values), jnp.abs(values))`
     assert jnp.allclose(compiled_absolute(values), jnp.abs(values))
 
 # Reference practice: Audit a shape-dependent specialization
@@ -128,6 +157,6 @@ for length in (3, 5):
         values = jnp.arange(length, dtype=jnp.float32) + shift
         # Run `sum` to compute `expected`.
         expected = sum(float(v) ** 2 for v in values)
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Check numerical equivalence within tolerance: `jnp.allclose(compiled_squares(values), expected)`
         assert jnp.allclose(compiled_squares(values), expected)
 print("PASS: transforms-05")

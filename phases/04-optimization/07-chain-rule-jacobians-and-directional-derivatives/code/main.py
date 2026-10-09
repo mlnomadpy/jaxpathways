@@ -10,11 +10,11 @@ import jax.numpy as jnp
 def f(x):
     # Return `jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])` to the caller.
     return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([2.0, 3.0])`
 x = jnp.array([2.0, 3.0])
-# Initialize array `v` with explicit values and shape.
+# Construct `v` via `jnp.array([1.0, -1.0])`
 v = jnp.array([1.0, -1.0])
-# Initialize array `J` with explicit values and shape.
+# Construct `J` via `jnp.array([[4.0, 1.0], [3.0, 2.0]])`
 J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
@@ -25,13 +25,13 @@ assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 out, jv = jax.jvp(f, (x,), (v,))
 # Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
-# Evaluate `c` from the current inputs and state.
+# Compute `c` from `out`
 c = out
 # Run `pullback` to compute `jt_c`.
 jt_c = pullback(c)[0]
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jv, jnp.array([3.0, 1.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`
 assert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))
 
 # Connect to a scalar loss
@@ -41,9 +41,9 @@ def loss(x):
     return 0.5 * jnp.sum(f(x) ** 2)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jacfwd(f)(x), J)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(loss)(x), J.T @ c)`
 assert jnp.allclose(jax.grad(loss)(x), J.T @ c)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`
 assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 # Print the observed values to compare against the expected result.
 print('Jv / loss gradient:', jv, jt_c)
@@ -57,11 +57,11 @@ import jax.numpy as jnp
 def f(x):
     # Return `jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])` to the caller.
     return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([2.0, 3.0])`
 x = jnp.array([2.0, 3.0])
-# Initialize array `v` with explicit values and shape.
+# Construct `v` via `jnp.array([1.0, -1.0])`
 v = jnp.array([1.0, -1.0])
-# Initialize array `J` with explicit values and shape.
+# Construct `J` via `jnp.array([[4.0, 1.0], [3.0, 2.0]])`
 J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
@@ -71,13 +71,13 @@ assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 out, jv = jax.jvp(f, (x,), (v,))
 # Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
-# Evaluate `c` from the current inputs and state.
+# Compute `c` from `out`
 c = out
 # Run `pullback` to compute `jt_c`.
 jt_c = pullback(c)[0]
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jv, jnp.array([3.0, 1.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jt_c, jnp.array([46.0, 19.0]))`
 assert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))
 
 # Step 3 — Connect to a scalar loss: Both routes give directional loss derivative 27.
@@ -86,9 +86,9 @@ def loss(x):
     return 0.5 * jnp.sum(f(x) ** 2)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jacfwd(f)(x), J)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(loss)(x), J.T @ c)`
 assert jnp.allclose(jax.grad(loss)(x), J.T @ c)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))`
 assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 # Print the observed values to compare against the expected result.
 print('Jv / loss gradient:', jv, jt_c)
@@ -101,20 +101,20 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 # Experiment: Check a finite input move
 # Experiment — Check a finite input move: A numerical perturbation provides a check independent of autodiff.
 h = 0.01
-# Evaluate `fd` from the current inputs and state.
+# Compute `fd` from `(f(x + h * v) - f(x - h * v)) / (2 * h)`
 fd = (f(x + h * v) - f(x - h * v)) / (2 * h)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(fd, J @ v, atol=0.0001, rtol=0.0001)
 
 # Experiment: Change the point
 # Experiment — Change the point: The Jacobian describes sensitivity at the current point; it is...
-# Initialize array `x2` with explicit values and shape.
+# Construct `x2` via `jnp.array([0.0, 1.0])`
 x2 = jnp.array([0.0, 1.0])
-# Initialize array `J2` with explicit values and shape.
+# Construct `J2` via `jnp.array([[0.0, 1.0], [1.0, 0.0]])`
 J2 = jnp.array([[0.0, 1.0], [1.0, 0.0]])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jacrev(f)(x2), J2)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)`
 assert jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)
 
 # Reference solution. Try the exercise before reading this.
@@ -135,21 +135,21 @@ def detached(x):
     return jnp.array([a * a + x[1], a * x[1]])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(detached(x), f(x))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.arr...`
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0...`
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))
 
 # Reference practice: Transfer to unequal dimensions
 # Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...
-# Initialize array `A` with explicit values and shape.
+# Construct `A` via `jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])`
 A = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
-# Initialize array `c3` with explicit values and shape.
+# Construct `c3` via `jnp.array([1.0, -1.0, 2.0])`
 c3 = jnp.array([1.0, -1.0, 2.0])
 # Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
 _, back = jax.vjp(lambda z: A @ z, x)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape == (2,)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))`
 assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))
 print("PASS: optimization-07")

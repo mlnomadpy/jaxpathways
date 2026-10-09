@@ -29,7 +29,7 @@ Implement `fused_bias_relu`, with matrix activations and a vector bias that foll
 python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 2
 ```
 
-Expose explicit `interpret` and `tpu` modes. Target mode must require a real TPU backend/placed inputs and pass `interpret=False`; it must never retry through interpretation. Use the conservative target tile family with dimensions divisible by eight and one hundred twenty-eight. This project does not establish that all other TPU shapes are forbidden.
+Expose explicit `interpret` and `tpu` modes. Target mode must require a real TPU backend/placed inputs and pass `interpret=False`; it must never retry through interpretation. Use the conservative target tile family with dimensions divisible by eight and one hundred twenty-eight. This project is verified separately from that all other TPU shapes are forbidden.
 
 ## Stage 3: pipeline and evidence boundary
 

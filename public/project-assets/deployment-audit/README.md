@@ -66,7 +66,7 @@ python3 projects/deployment-audit/tests/check.py --implementation projects/deplo
 
 **Keep:** request parity, actual timing samples, units, boundary declaration and a separate queue simulation. Check arrivals at 0, 1 and 4 milliseconds with two-millisecond service by hand; response times are 2, 3 and 2 milliseconds. Include a burst and an overloaded schedule. A replica estimate remains hypothetical until a real service load test measures routing, networking, startup and sustained concurrency.
 
-For production or edge deployment, follow the runtime/operator/precision and device-validation contract from deployment-06. Desktop integer arithmetic and local export compatibility cannot establish NPU execution or device latency.
+For production or edge deployment, follow the runtime/operator/precision and device-validation contract from deployment-06. Desktop integer arithmetic and local export compatibility requires separate verification to establish NPU execution or device latency.
 
 ## Reference
 
@@ -74,4 +74,4 @@ For production or edge deployment, follow the runtime/operator/precision and dev
 python3 projects/deployment-audit/tests/check.py --implementation solution --stage all
 ~~~
 
-The public reference prints measured local request times and clearly labels missing network/device measurements. Passing reference checks does not establish independent learner work or professional readiness. Complete the ship synthesis assessment to review the complete release decision.
+The public reference prints measured local request times and clearly labels missing network/device measurements. Passing reference checks is verified separately from independent learner work or professional readiness. Complete the ship synthesis assessment to review the complete release decision.

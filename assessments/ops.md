@@ -15,6 +15,22 @@ python3 projects/workload-operations/tests/check.py --implementation projects/wo
 
 Record source hashes, Python/JAX/NumPy versions, actual backend/device count, dtype and storage location. Keep public test execution separate from the changed-condition evidence below.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: harmonic vs arithmetic throughput & active-time capacity plan
+import jax.numpy as jnp
+
+# Two equal batches of 100 examples taking 2s and 6s: true rate is 200 / 8 = 25 ex/s.
+batch_examples = jnp.array([100.0, 100.0])
+batch_seconds = jnp.array([2.0, 6.0])
+true_throughput = jnp.sum(batch_examples) / jnp.sum(batch_seconds)
+naive_mean_rate = jnp.mean(batch_examples / batch_seconds)
+print("True throughput:", float(true_throughput), "Naive average of rates:", float(naive_mean_rate))
+```
+
 ## Task 1: classify real process outcomes
 
 Run three jobs: a normal job with \(7\) updates and batch size \(5\); a job requiring more devices than are actually available; and a job that stalls after completing \(2\) updates. Choose and record a bounded deadline that allows this environment to initialize before the injected stall.

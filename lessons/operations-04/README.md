@@ -24,6 +24,10 @@ Rollback should select a known compatible artifact together with its processor a
 
 The artifact-selection bars summarize discrete identities; their numeric height is not a quality score. Read them as a sequence of accepted or rejected transitions. A state diagram makes the unchanged active identity on rejection easier to verify.
 
+$$
+\text{ArtifactID} = \operatorname{sha256}(\text{weights} \;\|\; \text{config} \;\|\; \text{tokenizer})
+$$
+
 ### Rejected candidates do not become active
 
 **Predict:** Should a rejected candidate change the active artifact pointer?
@@ -98,7 +102,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -106,7 +111,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -134,17 +140,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -156,14 +165,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -174,15 +189,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -227,7 +246,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -236,27 +256,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -266,7 +290,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -289,7 +313,8 @@ def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     # Read or serialize artifact data on disk (`store`).
     # Run `digest` to compute `identifier`.
-    store=Path(store);identifier=digest(artifact)
+    store=Path(store)
+    identifier=digest(artifact)
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(store/'artifacts'/(identifier+'.json'),artifact)
     # Return `identifier` to the caller.
@@ -317,7 +342,7 @@ def artifact_metrics(artifact):
     # Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
     if len(params)!=2 or any(not math.isfinite(float(v)) for v in params):
         raise ValueError('invalid model parameters')
-    # Evaluate `inputs` from the current inputs and state.
+    # Compute `inputs` from `(-1.5,-.37,.22,1.5)`
     inputs=(-1.5,-.37,.22,1.5)
     # Run `sum` to compute `mse`.
     mse=sum((params[0]*x+params[1]-(2*x+1))**2 for x in inputs)/len(inputs)
@@ -332,7 +357,7 @@ def activate(store, identifier):
     # Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
     if artifact.get('validation',{}).get('passed') is not True:
         raise ValueError('artifact has no passing validation evidence')
-    # Evaluate `required` from the current inputs and state.
+    # Compute `required` from `['worker_hash','config_hash','data_hash','state']`
     required=['worker_hash','config_hash','data_hash','state']
     # Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
     if any(name not in artifact for name in required): raise ValueError('artifact provenance incomplete')
@@ -340,7 +365,8 @@ def activate(store, identifier):
     if not artifact_metrics(artifact)['passed']: raise ValueError('held-out model validation failed')
     # Evaluate `previous` from the current inputs and state.
     # Read or serialize artifact data on disk (`pointer`).
-    previous=None;pointer=Path(store)/'active.json'
+    previous=None
+    pointer=Path(store)/'active.json'
     # Branch on condition `pointer.exists()`:
     if pointer.exists():previous=json.loads(pointer.read_text())['current']
     # Run `atomic_json` to perform the next check or state transition.
@@ -371,16 +397,17 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     # Read or serialize artifact data on disk (`base`).
     # Run `launch` to compute `run`.
-    base=Path(folder);run=launch(base/'run')
+    base=Path(folder)
+    run=launch(base/'run')
     # Read or serialize artifact data on disk (`state`).
     state=json.loads((base/'run'/'checkpoint.json').read_text())
-    # Evaluate `store` from the current inputs and state.
+    # Compute `store` from `base/'registry'`
     store=base/'registry'
     # Evaluate `worker_hash=run['worker_hash'], config_hash=state['config_hash'], data_hash=state['data_hash'], state=state, validation={'passed': True, 'check': 'completed CPU fixture and checksum'}` and convert the result into Python scalar/collection `artifact`.
     artifact=dict(worker_hash=run['worker_hash'],config_hash=state['config_hash'],data_hash=state['data_hash'],state=state,validation={'passed':True,'check':'completed CPU fixture and checksum'})
     # Run `publish` to compute `version_a`.
     version_a=publish(store,artifact)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `not (store/'active.json').exists()` holds
     assert not (store/'active.json').exists()
     # Run `activate` to perform the next check or state transition.
     activate(store,version_a)
@@ -390,18 +417,18 @@ with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     activate(store,version_b)
     # Run `publish` to compute `rejected`.
     rejected=publish(store,dict(artifact,validation={'passed':False}))
-    # Evaluate `before` from the current inputs and state.
+    # Compute `before` from `(store/'active.json').read_bytes()`
     before=(store/'active.json').read_bytes()
     try: activate(store,rejected)
     except ValueError: rejected_without_change=(store/'active.json').read_bytes()==before
     else: raise AssertionError('bad release activated')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `rejected_without_change` holds
     assert rejected_without_change
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `rollback(store)==version_a` holds
     assert rollback(store)==version_a
     # Read or serialize artifact data on disk (`chosen`).
     chosen=json.loads((store/'active.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `chosen['current']==version_a` holds
     assert chosen['current']==version_a
 # Print the observed values to compare against the expected result.
 print('first / second content IDs:',version_a,version_b)
@@ -439,7 +466,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -447,7 +475,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -467,17 +496,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -489,14 +521,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -507,15 +545,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -552,7 +594,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -561,27 +604,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -591,7 +638,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -606,7 +653,8 @@ def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     # Read or serialize artifact data on disk (`store`).
     # Run `digest` to compute `identifier`.
-    store=Path(store);identifier=digest(artifact)
+    store=Path(store)
+    identifier=digest(artifact)
     # Run `atomic_json` to perform the next check or state transition.
     atomic_json(store/'artifacts'/(identifier+'.json'),artifact)
     # Return `identifier` to the caller.
@@ -634,7 +682,7 @@ def artifact_metrics(artifact):
     # Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
     if len(params)!=2 or any(not math.isfinite(float(v)) for v in params):
         raise ValueError('invalid model parameters')
-    # Evaluate `inputs` from the current inputs and state.
+    # Compute `inputs` from `(-1.5,-.37,.22,1.5)`
     inputs=(-1.5,-.37,.22,1.5)
     # Run `sum` to compute `mse`.
     mse=sum((params[0]*x+params[1]-(2*x+1))**2 for x in inputs)/len(inputs)
@@ -649,7 +697,7 @@ def activate(store, identifier):
     # Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
     if artifact.get('validation',{}).get('passed') is not True:
         raise ValueError('artifact has no passing validation evidence')
-    # Evaluate `required` from the current inputs and state.
+    # Compute `required` from `['worker_hash','config_hash','data_hash','state']`
     required=['worker_hash','config_hash','data_hash','state']
     # Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
     if any(name not in artifact for name in required): raise ValueError('artifact provenance incomplete')
@@ -657,7 +705,8 @@ def activate(store, identifier):
     if not artifact_metrics(artifact)['passed']: raise ValueError('held-out model validation failed')
     # Evaluate `previous` from the current inputs and state.
     # Read or serialize artifact data on disk (`pointer`).
-    previous=None;pointer=Path(store)/'active.json'
+    previous=None
+    pointer=Path(store)/'active.json'
     # Branch on condition `pointer.exists()`:
     if pointer.exists():previous=json.loads(pointer.read_text())['current']
     # Run `atomic_json` to perform the next check or state transition.
@@ -680,16 +729,17 @@ def rollback(store):
 with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     # Read or serialize artifact data on disk (`base`).
     # Run `launch` to compute `run`.
-    base=Path(folder);run=launch(base/'run')
+    base=Path(folder)
+    run=launch(base/'run')
     # Read or serialize artifact data on disk (`state`).
     state=json.loads((base/'run'/'checkpoint.json').read_text())
-    # Evaluate `store` from the current inputs and state.
+    # Compute `store` from `base/'registry'`
     store=base/'registry'
     # Evaluate `worker_hash=run['worker_hash'], config_hash=state['config_hash'], data_hash=state['data_hash'], state=state, validation={'passed': True, 'check': 'completed CPU fixture and checksum'}` and convert the result into Python scalar/collection `artifact`.
     artifact=dict(worker_hash=run['worker_hash'],config_hash=state['config_hash'],data_hash=state['data_hash'],state=state,validation={'passed':True,'check':'completed CPU fixture and checksum'})
     # Run `publish` to compute `version_a`.
     version_a=publish(store,artifact)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `not (store/'active.json').exists()` holds
     assert not (store/'active.json').exists()
     # Run `activate` to perform the next check or state transition.
     activate(store,version_a)
@@ -699,18 +749,18 @@ with tempfile.TemporaryDirectory(prefix='ops-release-') as folder:
     activate(store,version_b)
     # Run `publish` to compute `rejected`.
     rejected=publish(store,dict(artifact,validation={'passed':False}))
-    # Evaluate `before` from the current inputs and state.
+    # Compute `before` from `(store/'active.json').read_bytes()`
     before=(store/'active.json').read_bytes()
     try: activate(store,rejected)
     except ValueError: rejected_without_change=(store/'active.json').read_bytes()==before
     else: raise AssertionError('bad release activated')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `rejected_without_change` holds
     assert rejected_without_change
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `rollback(store)==version_a` holds
     assert rollback(store)==version_a
     # Read or serialize artifact data on disk (`chosen`).
     chosen=json.loads((store/'active.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `chosen['current']==version_a` holds
     assert chosen['current']==version_a
 # Print the observed values to compare against the expected result.
 print('first / second content IDs:',version_a,version_b)
@@ -742,15 +792,18 @@ The flat pair around the rejected gate is the important invariant: failure must 
 with tempfile.TemporaryDirectory() as folder:
     # Run `publish` to compute `a`.
     # Execute the next step of the computation.
-    a=publish(folder,artifact);activate(folder,a)
-    # Evaluate `values` from the current inputs and state.
+    a=publish(folder,artifact)
+    activate(folder,a)
+    # Compute `values` from `[1]`
     values=[1]
     # Run `publish` to compute `b`.
     # Read or serialize artifact data on disk (``).
-    b=publish(folder,dict(artifact,release_note='B'));values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
+    b=publish(folder,dict(artifact,release_note='B'))
+    values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
     # Run `activate` to perform the next check or state transition.
     # Read or serialize artifact data on disk (``).
-    activate(folder,b);values.append(2 if json.loads((Path(folder)/'active.json').read_text())['current']==b else 1)
+    activate(folder,b)
+    values.append(2 if json.loads((Path(folder)/'active.json').read_text())['current']==b else 1)
     # Run `publish` to compute `bad`.
     bad=publish(folder,dict(artifact,validation={'passed':False}))
     try:activate(folder,bad)
@@ -759,10 +812,11 @@ with tempfile.TemporaryDirectory() as folder:
     values.append(2 if json.loads((Path(folder)/'active.json').read_text())['current']==b else 1)
     # Run `rollback` to perform the next check or state transition.
     # Read or serialize artifact data on disk (``).
-    rollback(folder);values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    rollback(folder)
+    values.append(1 if json.loads((Path(folder)/'active.json').read_text())['current']==a else 2)
+# Assert invariant `values==[1,1,2,2,1]` holds
 assert values==[1,1,2,2,1]
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':['activate A','publish B','ac...`
 visual_data={'kind':'bar','labels':['activate A','publish B','activate B','reject candidate','rollback'],'xlabel':'executed local operation','ylabel':'selected artifact code: 1=A, 2=B','series':[{'label':'observed active pointer','y':values}]}
 ```
 
@@ -785,9 +839,9 @@ PASS: operations-04
 
 ```python
 # Experiment — Identity follows content rather than key insertion order: Canonical encoding removes an incidental representation...
-# Verify contract: `digest({'a': 1, 'b': 2}) == digest({'b': 2, 'a': 1})`.
+# Assert invariant `digest({'a':1` holds
 assert digest({'a':1,'b':2})==digest({'b':2,'a':1})
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `digest({'a':1` holds
 assert digest({'a':1,'b':2})!=digest({'a':1,'b':3})
 ```
 
@@ -811,7 +865,7 @@ with tempfile.TemporaryDirectory() as folder:
     try: activate(folder,identifier)
     except ValueError as error: assert 'digest' in str(error)
     else: raise AssertionError('corruption accepted')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `not (Path(folder)/'active.json').exists()` holds
     assert not (Path(folder)/'active.json').exists()
 ```
 
@@ -829,19 +883,20 @@ A filename containing a hash is not enough: the reader must recompute and compar
 with tempfile.TemporaryDirectory() as folder:
     # Run `publish` to compute `stable`.
     # Execute the next step of the computation.
-    stable=publish(folder,artifact);activate(folder,stable)
+    stable=publish(folder,artifact)
+    activate(folder,stable)
     # Evaluate `artifact, state=dict(artifact['state'], params=[100.0, -100.0])` and convert the result into Python scalar/collection `degraded`.
     degraded=dict(artifact,state=dict(artifact['state'],params=[100.,-100.]))
     # Run `publish` to compute `candidate`.
     candidate=publish(folder,degraded)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `artifact_metrics(degraded)['held_out_mse'] > 1.` holds
     assert artifact_metrics(degraded)['held_out_mse'] > 1.
     # Read or serialize artifact data on disk (`before`).
     before=(Path(folder)/'active.json').read_bytes()
     try:activate(folder,candidate)
     except ValueError as error:assert 'held-out' in str(error)
     else:raise AssertionError('degraded model activated')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `before==(Path(folder)/'active.json').read_bytes()` holds
     assert before==(Path(folder)/'active.json').read_bytes()
 ```
 
@@ -879,10 +934,11 @@ with tempfile.TemporaryDirectory() as folder:
     two = publish(...)  # TODO: compute two
     # Run `activate` to perform the next check or state transition.
     # Run `activate` to perform the next check or state transition.
-    activate(folder,one);activate(folder,two)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    activate(folder,one)
+    activate(folder,two)
+    # Assert invariant `rollback(folder)==one` holds
     assert rollback(folder)  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `read_artifact(folder` holds
     assert read_artifact(folder,one)['release_note']  # TODO: complete assertion check
 ```
 
@@ -898,10 +954,11 @@ with tempfile.TemporaryDirectory() as folder:
     two=publish(folder,dict(artifact,release_note='candidate two'))
     # Run `activate` to perform the next check or state transition.
     # Run `activate` to perform the next check or state transition.
-    activate(folder,one);activate(folder,two)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    activate(folder,one)
+    activate(folder,two)
+    # Assert invariant `rollback(folder)==one` holds
     assert rollback(folder)==one
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `read_artifact(folder` holds
     assert read_artifact(folder,one)['release_note']=='candidate one'
 ```
 
@@ -939,6 +996,7 @@ A boolean flag does not replace required source/config/data evidence.
 with tempfile.TemporaryDirectory() as folder:
     # Evaluate `artifact` and convert the result into Python scalar/collection `incomplete`.
     incomplete = dict(...)  # TODO: compute incomplete
+    del incomplete['worker_hash']
     # Run `publish` to compute `identifier`.
     identifier = publish(...)  # TODO: compute identifier
     # Run the boundary check and catch the expected exception:
@@ -954,7 +1012,8 @@ with tempfile.TemporaryDirectory() as folder:
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
     # Evaluate `artifact` and convert the result into Python scalar/collection `incomplete`.
-    incomplete=dict(artifact);del incomplete['worker_hash']
+    incomplete=dict(artifact)
+    del incomplete['worker_hash']
     # Run `publish` to compute `identifier`.
     identifier=publish(folder,incomplete)
     # Run the boundary check and catch the expected exception:
@@ -1002,13 +1061,14 @@ with tempfile.TemporaryDirectory() as folder:
     # Run `publish` to compute `identifier`.
     # Execute the next step of the computation.
     identifier = publish(...)  # TODO: compute identifier
+    activate(folder,identifier)
     # Read or serialize artifact data on disk (`before`).
     before = ...  # TODO: compute before
     # Run the boundary check and catch the expected exception:
     try: rollback(folder)
     except ValueError: pass
     else: raise AssertionError('invented rollback history')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `before==(Path(folder)/'active.json').read_bytes()` holds
     assert before  # TODO: complete assertion check
 ```
 
@@ -1020,14 +1080,15 @@ with tempfile.TemporaryDirectory() as folder:
 with tempfile.TemporaryDirectory() as folder:
     # Run `publish` to compute `identifier`.
     # Execute the next step of the computation.
-    identifier=publish(folder,artifact);activate(folder,identifier)
+    identifier=publish(folder,artifact)
+    activate(folder,identifier)
     # Read or serialize artifact data on disk (`before`).
     before=(Path(folder)/'active.json').read_bytes()
     # Run the boundary check and catch the expected exception:
     try: rollback(folder)
     except ValueError: pass
     else: raise AssertionError('invented rollback history')
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `before==(Path(folder)/'active.json').read_bytes()` holds
     assert before==(Path(folder)/'active.json').read_bytes()
 ```
 

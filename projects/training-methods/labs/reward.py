@@ -1,9 +1,13 @@
 features=jnp.array([[1.,0.],[0.,1.],[-1.,-1.]])
-chosen=features[jnp.array([0,0,1])];rejected=features[jnp.array([1,2,2])]
-w=jnp.zeros(2);history=[]
+chosen=features[jnp.array([0,0,1])]
+rejected=features[jnp.array([1,2,2])]
+w=jnp.zeros(2)
+history=[]
 step=jax.jit(jax.value_and_grad(lambda w:preference_loss(w,chosen,rejected)))
 for _ in range(100):
-    value,g=step(w);history.append(float(value));w=w-.1*g
+    value,g=step(w)
+    history.append(float(value))
+    w=w-.1*g
 rewards=features@w
 assert rewards[0]>rewards[1]>rewards[2]
 np.testing.assert_allclose(history[0],np.log(2),atol=1e-6)

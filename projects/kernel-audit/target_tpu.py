@@ -27,8 +27,12 @@ if min(args.shape)<1 or args.block[0]%8 or args.block[1]%128 or min(args.block)<
     p.error('positive shape, block multiples of (8,128), and at least five repeats required')
 path=ROOT/args.implementation/'model.py' if args.implementation in ('starter','solution') else Path(args.implementation)
 if not path.is_file():p.error('implementation must be an existing Python file')
-spec=importlib.util.spec_from_file_location('kernel_implementation',path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-device=jax.devices('tpu')[0];dtype=getattr(jnp,args.dtype);rng=np.random.default_rng(71)
+spec=importlib.util.spec_from_file_location('kernel_implementation',path)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+device=jax.devices('tpu')[0]
+dtype=getattr(jnp,args.dtype)
+rng=np.random.default_rng(71)
 x=jax.device_put(jnp.asarray(rng.normal(size=tuple(args.shape)),dtype=dtype),device)
 if args.kernel=='fused':
     y=jax.device_put(jnp.asarray(rng.normal(size=args.shape[1]),dtype=dtype),device)

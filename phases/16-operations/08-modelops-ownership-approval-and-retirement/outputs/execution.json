@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-08",
-  "contentHash": "4a8d3526fe2b2c6c40c67de2d333a1b36437e7c333655c6d97444c9f02aaf521",
+  "contentHash": "333136ef900f0d1824419424a3043f79c36cced3adfd053a1b5fa373ec3cf269",
   "executedAt": "2026-10-08T14:07:41.936954+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,7 +18,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "4e0e82cbbb197ca486bbb4ac3eed1cb67f3128e50640844933a1647a3d264cca",
+      "sourceHash": "cc167db45cc74c79c0298c30cec9bad66500842b09f38a35f6fc080e0a754d4a",
+      "outputs": []
+    },
+    {
+      "sourceHash": "7591afae01f1e896044616c7545d3a111c7765480f9fa757f9939380adf6aa2b",
+      "outputs": []
+    },
+    {
+      "sourceHash": "c668497d2b9f62e4d7d45af7d2b96587d34e4974fc6ccbcd1f66c84daab00c59",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,20 +39,7 @@
       ]
     },
     {
-      "sourceHash": "a6af05bba1c16a813da3dfecfa3577297ebfddb659b80185b049a1e665c2729c",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\n",
-            "All failed gates preserved the selected version. This fixture does not authenticate reviewers.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "6bb233642b3b565283f403f8cf283b5b4e040d9dac920043e9937fa87b09d9cd",
+      "sourceHash": "a2e3da3a459f0623888c884202e97fdb34036daf32e67600c0e0dd4e60da3ce1",
       "outputs": []
     },
     {
@@ -63,16 +58,8 @@
       ]
     },
     {
-      "sourceHash": "de5e8f5cf8363474a5b1ef3139071b358274168cefc6e2decfe770a0727f73f5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Expiry is exclusive: 199 accepted, 200 rejected.\n"
-          ]
-        }
-      ]
+      "sourceHash": "5b04c836a4d905ea8db7c65b73022be26a521612c349b356d66afec0ea662856",
+      "outputs": []
     },
     {
       "sourceHash": "be05faf0a77491a8e4c663ef972b3939496d26ec883c7c09dc2ff650e251dec2",
@@ -80,31 +67,15 @@
     },
     {
       "sourceHash": "d33e7fde9482ad3ca4bf13390489c59cb08512d9720e4c9f1c1f1308a16014a8",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Changed evaluation invalidates the old approval.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "599660a6e3068a5e3f2964010b4569f49d737743b86835e798d8689897fc24ac",
       "outputs": []
     },
     {
-      "sourceHash": "15f72cb759232815887b1b8f900c6d80796b30c652eae3ae40a11c2e755adacb",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Ownership change requires renewed review.\n"
-          ]
-        }
-      ]
+      "sourceHash": "2fc33a882384ce1512b5c10f838ddf56054274a04063c1cc830183b83ad42000",
+      "outputs": []
+    },
+    {
+      "sourceHash": "f12edbd4bf2de02108149a687e2a1208de1c48a61d08e55eb8c44551f79ed394",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

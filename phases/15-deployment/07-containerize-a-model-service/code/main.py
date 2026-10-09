@@ -5,10 +5,10 @@
 # Import hashlib, json, os, subprocess, sys, tempfile for this computation.
 import hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
-# Evaluate `MODEL` from the current inputs and state.
+# Compute `MODEL` from `{'schema': 1, 'weight': 2., 'bias': 1.}`
 MODEL = {'schema': 1, 'weight': 2., 'bias': 1.}
 
-# Verify contract: `MODEL['weight'] * 2 + MODEL['bias'] == 5`.
+# Assert invariant `MODEL['weight']*2+MODEL['bias']==5` holds
 assert MODEL['weight']*2+MODEL['bias']==5
 
 # Write the service boundary
@@ -33,11 +33,14 @@ accepted, rejected = 0, 0
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     # Read or serialize artifact data on disk (`root`).
     # Evaluate `artifact` from the current inputs and state.
-    # Evaluate `service` from the current inputs and state.
-    root = Path(folder); artifact = root / 'model.json'; service = root / 'service.py'
+    # Compute `root` from `Path(folder)`
+    root = Path(folder)
+    artifact = root / 'model.json'
+    service = root / 'service.py'
     # Read or serialize artifact data on disk (``).
     # Read or serialize artifact data on disk (``).
-    artifact.write_text(json.dumps(MODEL, sort_keys=True)); service.write_text(SERVICE)
+    artifact.write_text(json.dumps(MODEL, sort_keys=True))
+    service.write_text(SERVICE)
     # Compute deterministic cryptographic digest `sha` for provenance verification.
     sha = hashlib.sha256(artifact.read_bytes()).hexdigest()
     # Configure environment variable before initializing the runtime.
@@ -48,7 +51,7 @@ with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps({'inputs': values}), text=True, capture_output=True, env=env, check=True)
         # Read or serialize artifact data on disk (`actual`).
         actual = json.loads(completed.stdout)['predictions']
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `actual == [2 * value + 1 for value in values]` holds
         assert actual == [2 * value + 1 for value in values]
         # Accumulate the next contribution into `accepted`.
         accepted += 1
@@ -56,9 +59,10 @@ with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     for payload, changes in [({'inputs': []}, {}), ({'inputs': [True]}, {}), ({'inputs': [0.]}, {'MODEL_SHA256': '0' * 64})]:
         # Read or serialize artifact data on disk (`completed`).
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps(payload), text=True, capture_output=True, env=dict(env, **changes))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert that the computed values satisfy the numerical and structural contract.
         # Accumulate the next contribution into `rejected`.
-        assert completed.returncode != 0; rejected += 1
+        assert completed.returncode != 0
+        rejected += 1
 # Print the observed values to compare against the expected result.
 print('Fresh-process valid requests:', accepted, 'rejected boundaries:', rejected)
 # Print diagnostic summary of the computed outputs.
@@ -68,7 +72,7 @@ print('This companion tests the process/artifact contract. Run the Docker lab fo
 # Import hashlib, json, os, subprocess, sys, tempfile for this computation.
 import hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
-# Evaluate `MODEL` from the current inputs and state.
+# Compute `MODEL` from `{'schema': 1, 'weight': 2., 'bias': 1.}`
 MODEL = {'schema': 1, 'weight': 2., 'bias': 1.}
 # The deployment contract uses exported coefficients, not a training environment.
 SERVICE = '''import hashlib,json,math,os,sys
@@ -83,17 +87,20 @@ if not isinstance(x,list) or not 1<=len(x)<=32: raise ValueError('batch limit')
 if any(type(v) not in (int,float) or not math.isfinite(v) for v in x): raise ValueError('invalid input')
 print(json.dumps({'predictions':[m['weight']*v+m['bias'] for v in x]},allow_nan=False))
 '''
-# Evaluate `(accepted, rejected)` from the current inputs and state.
+# Compute `accepted, rejected` from `0, 0`
 accepted, rejected = 0, 0
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     # Read or serialize artifact data on disk (`root`).
     # Evaluate `artifact` from the current inputs and state.
-    # Evaluate `service` from the current inputs and state.
-    root = Path(folder); artifact = root / 'model.json'; service = root / 'service.py'
+    # Compute `root` from `Path(folder)`
+    root = Path(folder)
+    artifact = root / 'model.json'
+    service = root / 'service.py'
     # Read or serialize artifact data on disk (``).
     # Read or serialize artifact data on disk (``).
-    artifact.write_text(json.dumps(MODEL, sort_keys=True)); service.write_text(SERVICE)
+    artifact.write_text(json.dumps(MODEL, sort_keys=True))
+    service.write_text(SERVICE)
     # Compute deterministic cryptographic digest `sha` for provenance verification.
     sha = hashlib.sha256(artifact.read_bytes()).hexdigest()
     # Configure environment variable before initializing the runtime.
@@ -104,7 +111,7 @@ with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps({'inputs': values}), text=True, capture_output=True, env=env, check=True)
         # Read or serialize artifact data on disk (`actual`).
         actual = json.loads(completed.stdout)['predictions']
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert invariant `actual == [2 * value + 1 for value in values]` holds
         assert actual == [2 * value + 1 for value in values]
         # Accumulate the next contribution into `accepted`.
         accepted += 1
@@ -112,9 +119,10 @@ with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     for payload, changes in [({'inputs': []}, {}), ({'inputs': [True]}, {}), ({'inputs': [0.]}, {'MODEL_SHA256': '0' * 64})]:
         # Read or serialize artifact data on disk (`completed`).
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps(payload), text=True, capture_output=True, env=dict(env, **changes))
-        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        # Assert that the computed values satisfy the numerical and structural contract.
         # Accumulate the next contribution into `rejected`.
-        assert completed.returncode != 0; rejected += 1
+        assert completed.returncode != 0
+        rejected += 1
 # Print the observed values to compare against the expected result.
 print('Fresh-process valid requests:', accepted, 'rejected boundaries:', rejected)
 # Print diagnostic summary of the computed outputs.
@@ -122,13 +130,13 @@ print('This companion tests the process/artifact contract. Run the Docker lab fo
 
 # Figure data experiment
 # Compute figure data for: Observe the process boundary before containerizing it
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':['valid predictions','expecte...`
 visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'xlabel':'local process contract','ylabel':'observed case count','series':[{'label':'executed CPU cases','y':[accepted,rejected]}]}
 
 # Experiment: Change the batch without changing the model
 # Experiment — Change the batch without changing the model: Batching changes transport shape, not the per-observation...
 batch=[-.25,.75,2.]
-# Verify contract: `[MODEL['weight'] * x + MODEL['bias'] for x in batch] == [0.5, 2.5, 5...`.
+# Assert invariant `[MODEL['weight']*x+MODEL['bias'] for x in batch]==[.5` holds
 assert [MODEL['weight']*x+MODEL['bias'] for x in batch]==[.5,2.5,5.]
 # Print the observed values to compare against the expected result.
 print('Independent three-input predictions: 0.5, 2.5, 5.0')
@@ -144,12 +152,13 @@ with tempfile.TemporaryDirectory() as directory:
     runner_path = Path(directory)/'service.py'
     # Read or serialize artifact data on disk (``).
     # Read or serialize artifact data on disk (``).
-    invalid_path.write_text(json.dumps(invalid_model)); runner_path.write_text(SERVICE)
+    invalid_path.write_text(json.dumps(invalid_model))
+    runner_path.write_text(SERVICE)
     # Compute deterministic cryptographic digest `matching_digest` for provenance verification.
     matching_digest = hashlib.sha256(invalid_path.read_bytes()).hexdigest()
     # Configure environment variable before initializing the runtime.
     invalid_result = subprocess.run([sys.executable,str(runner_path)], input=json.dumps({'inputs':[0.]}), text=True,capture_output=True,env=dict(os.environ,MODEL_PATH=str(invalid_path),MODEL_SHA256=matching_digest),timeout=30)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `invalid_result.returncode != 0 and 'invalid coefficient' in inval...` holds
     assert invalid_result.returncode != 0 and 'invalid coefficient' in invalid_result.stderr
 # Print the observed values to compare against the expected result.
 print('Matching digest did not bypass model validation.')
@@ -159,7 +168,7 @@ print('Matching digest did not bypass model validation.')
 original=json.dumps(MODEL,sort_keys=True).encode()
 # Read or serialize artifact data on disk (`mutated`).
 mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
-# Verify contract: `hashlib.sha256(original).hexdigest() != hashlib.sha256(mutated).hexd...`.
+# Assert invariant `hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hex...` holds
 assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
 # Print the observed values to compare against the expected result.
 print('Changed artifact requires a new recorded digest.')
@@ -171,12 +180,14 @@ with tempfile.TemporaryDirectory() as tmp:
     # Read or serialize artifact data on disk (`p`).
     # Read or serialize artifact data on disk (``).
     # Read or serialize artifact data on disk (``).
-    p=Path(tmp);(p/'model').write_text(json.dumps(MODEL));(p/'service.py').write_text(SERVICE)
+    p=Path(tmp)
+    (p/'model').write_text(json.dumps(MODEL))
+    (p/'service.py').write_text(SERVICE)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,MODEL_PATH=str(p/'model'),MODEL_SHA256=hashlib.sha256((p/'model').read_bytes()).hexdigest())
     # Read or serialize artifact data on disk (`bad`).
     bad=subprocess.run([sys.executable,str(p/'service.py')],input=json.dumps({'inputs':[float('inf')]}),text=True,capture_output=True,env=env)
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `bad.returncode != 0` holds
     assert bad.returncode != 0
 # Print the observed values to compare against the expected result.
 print('Nonfinite input rejected before output.')
@@ -187,17 +198,19 @@ print('Nonfinite input rejected before output.')
 with tempfile.TemporaryDirectory() as directory:
     # Read or serialize artifact data on disk (`model_path`).
     # Read or serialize artifact data on disk (`runner_path`).
-    model_path=Path(directory)/'model.json';runner_path=Path(directory)/'service.py'
+    model_path=Path(directory)/'model.json'
+    runner_path=Path(directory)/'service.py'
     # Read or serialize artifact data on disk (``).
     # Read or serialize artifact data on disk (``).
-    model_path.write_text(json.dumps(dict(MODEL,weight=3.)));runner_path.write_text(SERVICE)
+    model_path.write_text(json.dumps(dict(MODEL,weight=3.)))
+    runner_path.write_text(SERVICE)
     # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest=hashlib.sha256(model_path.read_bytes()).hexdigest()
     # Configure environment variable before initializing the runtime.
     changed=subprocess.run([sys.executable,str(runner_path)],input=json.dumps({'inputs':[2.]}),text=True,capture_output=True,check=True,env=dict(os.environ,MODEL_PATH=str(model_path),MODEL_SHA256=digest),timeout=30)
     # Read or serialize artifact data on disk (`values`).
     values=json.loads(changed.stdout)['predictions']
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `values==[7.] and values!=[5.]` holds
     assert values==[7.] and values!=[5.]
 # Print the observed values to compare against the expected result.
 print('New artifact loads, but the old behavioral expectation no longer passes.')

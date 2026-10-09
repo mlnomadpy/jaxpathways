@@ -25,6 +25,10 @@ Think of the first-call path as preparation followed by execution. A warm-call t
 
 First compare compiled and ordinary outputs on several inputs. Then, if speed is your question, state the input size, device, warmup and synchronization boundary. Three equal bars demonstrate agreement; they do not demonstrate acceleration.
 
+$$
+(s_{t+1}, y_t) = f(s_t, x_t), \qquad t = 0, \dots, T-1
+$$
+
 ### Pause and reason
 
 Why can a tiny function be slower on its first compiled call?
@@ -76,6 +80,64 @@ A long compilation can be worthwhile if a computation runs many times. A one-off
 
 This lesson does not measure TPU execution, multi-device scaling, or a model training speedup. Its artifact is a reproducible correctness/timing report that records the backend, shapes, dtype, synchronization policy, warmup, repeat count, and observed durations.
 
+## Step 1: Set up imports and input tensors
+
+Import the required JAX modules and define the initial inputs for compile a function with jit.
+
+```python
+import time
+import jax
+import jax.numpy as jnp
+# Function `loss(w, x, y)` implementing this stage's computation:
+def loss(w, x, y):
+    # Return `jnp.mean((x @ w - y) ** 2)` to the caller.
+    return jnp.mean((x @ w - y) ** 2)
+# Construct and reshape `x` into the target tensor dimensions.
+x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
+```
+
+Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+
+## Step 2: Apply the core JAX transformation
+
+Write the core computation and transformation step over the initialized inputs.
+
+```python
+w = jnp.array([1., 2., -1.])
+# Construct `y` via `jnp.ones(4)`
+y = jnp.ones(4)
+# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
+compiled = jax.jit(loss)
+# Record execution timing or profiler trace in `t0`.
+t0 = time.perf_counter()
+# Synchronize host execution until asynchronous device computation completes.
+first = compiled(w, x, y).block_until_ready()
+```
+
+This stage executes the primary numerical transformation and binds the intermediate outputs.
+
+## Step 3: Verify shapes and numerical invariants
+
+Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+
+```python
+first_seconds = time.perf_counter() - t0
+# Record execution timing or profiler trace in `t0`.
+t0 = time.perf_counter()
+# Synchronize host execution until asynchronous device computation completes.
+second = compiled(w, x, y).block_until_ready()
+# Record execution timing or profiler trace in `repeat_seconds`.
+repeat_seconds = time.perf_counter() - t0
+# Print diagnostic summary of the computed outputs.
+# Print diagnostic summary of the computed outputs.
+# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
+assert jnp.allclose(first, loss(w, x, y))
+# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
+assert jnp.allclose(second, first)
+```
+
+These assertions lock in the exact numerical contract before you run the full experiment and variations.
+
 ## Run the example
 
 ```python
@@ -90,9 +152,9 @@ def loss(w, x, y):
     return jnp.mean((x @ w - y) ** 2)
 # Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array([1., 2., -1.])`
 w = jnp.array([1., 2., -1.])
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.ones(4)`
 y = jnp.ones(4)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(loss)
@@ -112,9 +174,9 @@ repeat_seconds = time.perf_counter() - t0
 print("Loss:", float(second))
 # Print diagnostic summary of the computed outputs.
 print("First/repeat seconds:", first_seconds, repeat_seconds)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(first, loss(w, x, y))`
 assert jnp.allclose(first, loss(w, x, y))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(second, first)`
 assert jnp.allclose(second, first)
 ```
 
@@ -142,7 +204,7 @@ To measure speed, you need a time axis, synchronization, warm-up, and repeated m
 
 ```python
 # Compute figure data for: Compilation preserves the result
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': ['eager', 'first compiled'...`
 visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat compiled'], 'ylabel': 'mean squared loss', 'series': [{'label': 'evaluated loss', 'y': [float(loss(w, x, y)), float(first), float(second)]}]}
 ```
 
@@ -167,11 +229,11 @@ PASS: transforms-04
 
 ```python
 # Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
-# Initialize array `expected_predictions` with explicit values and shape.
+# Construct `expected_predictions` via `jnp.array([0., 0.6, 1.2, 1.8])`
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)`
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
 # Perform matrix / vector contraction (`@`) to compute `manual_gradient`.
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
@@ -199,7 +261,7 @@ import statistics
 def completed_samples(function, repeats=20):
     # Synchronize host execution until asynchronous device computation completes.
     function(w, x, y).block_until_ready()
-    # Evaluate `durations` from the current inputs and state.
+    # Compute `durations` from `[]`
     durations = []
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
@@ -241,7 +303,7 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 2. Run `compiled_step` to compute `(v, g)`.
 3. Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 4. Verify that the numerical values match the expected reference within tolerance.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -255,7 +317,7 @@ v, g = compiled_step(...)  # TODO: compute v, g
 expected_v, expected_g = jax.value_and_grad(...)  # TODO: compute expected_v, expected_g
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(v, expected_v)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
 assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
 ```
 
@@ -271,7 +333,7 @@ v, g = compiled_step(w, x, y)
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(v, expected_v)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(g, expected_g)`
 assert jnp.allclose(g, expected_g)
 ```
 
@@ -354,7 +416,7 @@ Use `jax.tree.map` to block on every returned array, then stop the timer.
 **Step-by-step implementation plan:**
 1. Return `jax.tree.map(lambda array: array.block_until_ready(), outputs)` to the caller.
 2. Run `wait_for_outputs` to perform the next check or state transition.
-3. Evaluate `gradient_times` from the current inputs and state.
+3. Compute `gradient_times` from `[]`
 4. Repeat the update loop over `range(20)` steps:
 5. Record execution timing or profiler trace in `started`.
 
@@ -367,7 +429,7 @@ def wait_for_outputs(outputs):
     return ...  # TODO: return computed result
 # Run `wait_for_outputs` to perform the next check or state transition.
 wait_for_outputs(compiled_value_gradient(w, x, y))
-# Evaluate `gradient_times` from the current inputs and state.
+# Compute `gradient_times` from `[]`
 gradient_times = ...  # TODO: compute gradient_times
 # Repeat the update loop over `range(20)` steps:
 for _ in range(20):
@@ -379,7 +441,7 @@ for _ in range(20):
     gradient_times.append(time.perf_counter() - started)
 # Print the observed values to compare against the expected result.
 print("compiled value-and-grad median seconds:", statistics.median(gradient_times))
-# Verify contract: `len(gradient_times) == 20`.
+# Assert invariant `len(gradient_times) == 20` holds
 assert len(gradient_times)  # TODO: complete assertion check
 ```
 
@@ -392,7 +454,7 @@ def wait_for_outputs(outputs):
     return jax.tree.map(lambda array: array.block_until_ready(), outputs)
 # Run `wait_for_outputs` to perform the next check or state transition.
 wait_for_outputs(compiled_value_gradient(w, x, y))
-# Evaluate `gradient_times` from the current inputs and state.
+# Compute `gradient_times` from `[]`
 gradient_times = []
 # Repeat the update loop over `range(20)` steps:
 for _ in range(20):
@@ -404,7 +466,7 @@ for _ in range(20):
     gradient_times.append(time.perf_counter() - started)
 # Print the observed values to compare against the expected result.
 print("compiled value-and-grad median seconds:", statistics.median(gradient_times))
-# Verify contract: `len(gradient_times) == 20`.
+# Assert invariant `len(gradient_times) == 20` holds
 assert len(gradient_times) == 20
 ```
 

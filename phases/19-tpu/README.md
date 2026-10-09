@@ -90,8 +90,8 @@ A provisioned Cloud TPU VM and a cryptographically hashed JAX runtime receipt.
 
 **Demonstrate:** Select a single-host TPU topology, provision a Cloud TPU VM (or Colab TPU), bootstrap jax[tpu] in an isolated .venv, verify pmap execution, and confirm clean VM deletion.
 
-Project status: implemented staged practice · [Open source](../../projects/workload-operations/README.md). Use stages 1 for this phase. Verify the runtime receipt locally on CPU first, then run the exact same check on your Cloud TPU VM and copy back tpu-receipt.txt before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify stage 1.
+Project status: implemented staged practice · [Open source](../../projects/tpu-runtime-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Verify the runtime receipt locally on CPU first, then run the exact same check on your Cloud TPU VM and copy back tpu-receipt.txt before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify stage 1.
 
-
+Additional project: [Operate and recover a local JAX workload](../../projects/workload-operations/README.md).
 
 [Primary documentation](https://cloud.google.com/tpu/docs/run-calculation-jax).

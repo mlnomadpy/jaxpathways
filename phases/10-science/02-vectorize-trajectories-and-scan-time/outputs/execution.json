@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-02",
-  "contentHash": "62856baf0fb6d42c677853b2d812da5990bfeb891b4d6520299cb958228504d5",
+  "contentHash": "4507eeb6d3c444e5b9c08b5c811169617f75f5600681cddfee7493b17057b2bd",
   "executedAt": "2026-10-08T14:04:12.461254+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,11 @@
   "stdout": "Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]\nscan(vectors) transposed equals vmap(scan)\nShape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]\nscan(vectors) transposed equals vmap(scan)\nRK4 polynomial maximum difference: 1.4432899320127035e-15\nPaired-rate endpoints: [0.33516002 0.24659697 0.22160636]\nPermutation preserves trajectory identity\nOnly final states returned: [0.12329848 0.24659697 0.49319394]\nGrid axes: rate, initial condition, time (3, 3, 41)\nPASS: science-02\n",
   "notebookCells": [
     {
-      "sourceHash": "4d5e5b7b045dbdec29c4796b3065ac61e31dd280ad342647f65bc05b9814e005",
+      "sourceHash": "d625e485c77c4430624d813754d12b74f30f7feeee535f5133c18e63366e06f7",
       "outputs": []
     },
     {
-      "sourceHash": "e451fd873dccd625a927d6d256a75c173fd0bf98e8e54d0e2912f93e19ceac8a",
+      "sourceHash": "6c7f3f9140ba30957f33945966a3f42be1f4f8b945891d78bbb1a10fce777137",
       "outputs": [
         {
           "output_type": "stream",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "sourceHash": "4d03a92f52d572ee03d20f6912862abe447aed7d3ad50fa096aef13c9a303ea6",
+      "sourceHash": "1260b942a3f9956868bc96361e7daf58b0542a4e23a22cf19fca98c5b1812d15",
       "outputs": [
         {
           "output_type": "stream",
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "sourceHash": "48520e83cfb06591f437855ecc0b6f89a3a4d0f94d1c9a7ebb993e013078f1ab",
+      "sourceHash": "a612339a02457d553aae9f0049f6375cf5b8a60eff978d340a07d1ad7d05c89b",
       "outputs": [
         {
           "output_type": "stream",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "sourceHash": "fdf7898df9a21c4840819c3d6f5f98c3104126e7d74639500d5bb471420a89c1",
+      "sourceHash": "3221b2fcf3cad35e1dbcf8ed3685eeb96c37bcf56c5f3d11c7fb154a02938cd7",
       "outputs": [
         {
           "output_type": "stream",
@@ -86,7 +86,7 @@
       ]
     },
     {
-      "sourceHash": "bf19e2f225e052f02d4af84a88cee2807a9dbf8ad919880988af5afdabb416b5",
+      "sourceHash": "101f1286a1e19c722a72f35b84c9bc134ee0c83d002b5ed53aebb00d762f0dd8",
       "outputs": [
         {
           "output_type": "stream",
@@ -98,11 +98,11 @@
       ]
     },
     {
-      "sourceHash": "e4628d866731fad23e1fb825d218bc7f5b08579ec19e572915be889dfef97890",
+      "sourceHash": "d21154dc3779897406ca96c1a1a95a4d982dde547b8d3fd563738415ad481b72",
       "outputs": []
     },
     {
-      "sourceHash": "99559ebf79b632422048c287e43160c1ad5f83056c39caeb03fa203b7c66ffb9",
+      "sourceHash": "feadb719c9df3230b222fe310a3dc7bda5b8a412a49b2ef340f778c4669596c5",
       "outputs": [
         {
           "output_type": "stream",
@@ -114,11 +114,11 @@
       ]
     },
     {
-      "sourceHash": "dd2f77e053e221ce3e79f31e5912e45269c5823a903c41ed02d5f2fb032f7915",
+      "sourceHash": "5984bd24b0f6cfa07962997abcd3c386df7cf1c4c5bce6167ce3673b6cecac07",
       "outputs": []
     },
     {
-      "sourceHash": "2b54d468c9da899a978547b12da1f292606558b187c7d84c56a75d73e7618be1",
+      "sourceHash": "a08c7640c88306adb0f7acbe0f3a1c0660141819b7727b2816286cf9d24a4525",
       "outputs": [
         {
           "output_type": "stream",
@@ -130,11 +130,11 @@
       ]
     },
     {
-      "sourceHash": "e0809ab14bc782df198daf77b4ff60fc487686dfba0f116cd15a58d9fc5c35df",
+      "sourceHash": "f221f2adc9197dd1a35e18187939d09f366200024767cea26b735950af9f9659",
       "outputs": []
     },
     {
-      "sourceHash": "b2a9d76d4938a3fe429458c13ef6fc990312e9a6655fb29f42a6b6944b616c8e",
+      "sourceHash": "f5962bb9941bcd6765ce60d60b0ff5a27f0f2b09c53d0d600d0082882ca981d1",
       "outputs": [
         {
           "output_type": "stream",

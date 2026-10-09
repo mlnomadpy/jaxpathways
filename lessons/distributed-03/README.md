@@ -113,7 +113,7 @@ Add this block after the preceding block in a fresh Python file, then run the co
 
 ```python
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
-# Verify contract: `jax.local_device_count() == 4`.
+# Assert invariant `jax.local_device_count() == 4` holds
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -125,9 +125,9 @@ replicated = NamedSharding(mesh, P())
 features = NamedSharding(mesh, P('data'))
 # Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
-# Initialize array `yh` with explicit values and shape.
+# Compute `yh` from `xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)`
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
-# Initialize array `wh` with explicit values and shape.
+# Compute `wh` from `np.linspace(0.1, -0.2, 8, dtype=np.float32)`
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
@@ -205,17 +205,17 @@ reference = 2 * xh.T @ (xh @ wh - yh) / 16
 for result in [ga, gs, gg]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (8,) for s in ga.addressable_shards)`
 assert all(s.data.shape == (8,) for s in ga.addressable_shards)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(s.data.shape == (2,) for s in gs.addressable_shards)`
 assert all(s.data.shape == (2,) for s in gs.addressable_shards)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(s.data.shape == (8,) for s in gg.addressable_shards)`
 assert all(s.data.shape == (8,) for s in gg.addressable_shards)
 # Trace or lower the function to inspect its compiler representation (`hlo_all`).
 hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 # Run `str` to compute `hlo_shard`.
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard` holds
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 ```
 
@@ -230,7 +230,7 @@ Add this block after the preceding block in a fresh Python file, then run the co
 def completed_samples(fn, *args):
     # Synchronize host execution until asynchronous device computation completes.
     fn(*args).block_until_ready()
-    # Evaluate `samples` from the current inputs and state.
+    # Compute `samples` from `[]`
     samples = []
     # Repeat the update loop over `range(7)` steps:
     for _ in range(7):
@@ -250,9 +250,9 @@ shard_us = completed_samples(shard_gradient, x, y, w)
 gather_us = completed_samples(gather, gs)
 # Idealized ring payload per rank; not a network measurement.
 ranks, gradient_bytes = 4, wh.nbytes
-# Evaluate `ring_scatter_bytes` from the current inputs and state.
+# Compute `ring_scatter_bytes` from `(ranks - 1) / ranks * gradient_bytes`
 ring_scatter_bytes = (ranks - 1) / ranks * gradient_bytes
-# Evaluate `ring_all_bytes` from the current inputs and state.
+# Compute `ring_all_bytes` from `2 * ring_scatter_bytes`
 ring_all_bytes = 2 * ring_scatter_bytes
 # Print the observed values to compare against the expected result.
 print('Gradient reference:', reference.tolist())
@@ -285,7 +285,7 @@ from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 from time import perf_counter
 
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
-# Verify contract: `jax.local_device_count() == 4`.
+# Assert invariant `jax.local_device_count() == 4` holds
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -297,9 +297,9 @@ replicated = NamedSharding(mesh, P())
 features = NamedSharding(mesh, P('data'))
 # Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
-# Initialize array `yh` with explicit values and shape.
+# Compute `yh` from `xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)`
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
-# Initialize array `wh` with explicit values and shape.
+# Compute `wh` from `np.linspace(0.1, -0.2, 8, dtype=np.float32)`
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
@@ -345,24 +345,24 @@ reference = 2 * xh.T @ (xh @ wh - yh) / 16
 for result in [ga, gs, gg]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (8,) for s in ga.addressable_shards)`
 assert all(s.data.shape == (8,) for s in ga.addressable_shards)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(s.data.shape == (2,) for s in gs.addressable_shards)`
 assert all(s.data.shape == (2,) for s in gs.addressable_shards)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check tensor shape invariant: `all(s.data.shape == (8,) for s in gg.addressable_shards)`
 assert all(s.data.shape == (8,) for s in gg.addressable_shards)
 # Trace or lower the function to inspect its compiler representation (`hlo_all`).
 hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 # Run `str` to compute `hlo_shard`.
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard` holds
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
 # Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def completed_samples(fn, *args):
     # Synchronize host execution until asynchronous device computation completes.
     fn(*args).block_until_ready()
-    # Evaluate `samples` from the current inputs and state.
+    # Compute `samples` from `[]`
     samples = []
     # Repeat the update loop over `range(7)` steps:
     for _ in range(7):
@@ -382,9 +382,9 @@ shard_us = completed_samples(shard_gradient, x, y, w)
 gather_us = completed_samples(gather, gs)
 # Idealized ring payload per rank; not a network measurement.
 ranks, gradient_bytes = 4, wh.nbytes
-# Evaluate `ring_scatter_bytes` from the current inputs and state.
+# Compute `ring_scatter_bytes` from `(ranks - 1) / ranks * gradient_bytes`
 ring_scatter_bytes = (ranks - 1) / ranks * gradient_bytes
-# Evaluate `ring_all_bytes` from the current inputs and state.
+# Compute `ring_all_bytes` from `2 * ring_scatter_bytes`
 ring_all_bytes = 2 * ring_scatter_bytes
 # Print the observed values to compare against the expected result.
 print('Gradient reference:', reference.tolist())
@@ -414,11 +414,11 @@ The upper panel counts values in one local result: eight for all-reduce, two for
 
 ### Connect it to the computation
 
-The reduction in the middle storage bar comes from partitioning the summed gradient. The return of both bars after gathering explains why a local memory benefit and a complete communication benefit are different claims. The momentum experiment consumes slices before reconstructing weights. Its numerical comparison checks correctness; the separate synchronized CPU samples check a different question and cannot establish accelerator speed.
+The reduction in the middle storage bar comes from partitioning the summed gradient. The return of both bars after gathering explains why a local memory benefit and a complete communication benefit are different claims. The momentum experiment consumes slices before reconstructing weights. Its numerical comparison checks correctness; the separate synchronized CPU samples check a different question and is distinct from accelerator speed.
 
 ```python
 # Compute figure data for: One mathematical gradient, different local storage
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'panels':[{'kind':'bar','labels':['all-reduce','red...`
 visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','after gather'],'ylabel':'values stored per device','series':[{'label':'observed local shape','y':[ga.addressable_shards[0].data.size,gs.addressable_shards[0].data.size,gg.addressable_shards[0].data.size]}]},{'kind':'bar','labels':['all-reduce','reduce-scatter','scatter + gather'],'ylabel':'modeled bytes per rank','series':[{'label':'idealized ring payload','y':[ring_all_bytes,ring_scatter_bytes,ring_scatter_bytes*2]}]}]}
 ```
 
@@ -448,19 +448,19 @@ PASS: distributed-03
 
 ```python
 # Experiment — Update slices before gathering: An elementwise update can consume the partitioned gradient.
-# Initialize array `v_host` with explicit values and shape.
+# Compute `v_host` from `np.linspace(-0.02, 0.03, 8, dtype=np.float32)`
 v_host = np.linspace(-0.02, 0.03, 8, dtype=np.float32)
 # Place `ws` explicitly onto the target JAX device.
 ws = jax.device_put(wh, features)
 # Place `vs` explicitly onto the target JAX device.
 vs = jax.device_put(v_host, features)
-# Evaluate `new_v` from the current inputs and state.
+# Compute `new_v` from `0.9 * vs + gs`
 new_v = 0.9 * vs + gs
-# Evaluate `new_w` from the current inputs and state.
+# Compute `new_w` from `ws - 0.1 * new_v`
 new_w = ws - 0.1 * new_v
 # Run `gather` to compute `updated`.
 updated = gather(new_w)
-# Evaluate `expected_w` from the current inputs and state.
+# Compute `expected_w` from `wh - 0.1 * (0.9 * v_host + reference)`
 expected_w = wh - 0.1 * (0.9 * v_host + reference)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(updated), expected_w, atol=2e-6, rtol=2e-6)
@@ -468,7 +468,7 @@ np.testing.assert_allclose(np.asarray(updated), expected_w, atol=2e-6, rtol=2e-6
 for shard in updated.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(shard.data), expected_w, atol=2e-6, rtol=2e-6)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (2,) for s in new_v.addressable_shards)`
 assert all(s.data.shape == (2,) for s in new_v.addressable_shards)
 # Print diagnostic summary of the computed outputs.
 print('Sharded momentum matches the independent elementwise update.')
@@ -518,7 +518,7 @@ for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
 # Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = ...  # TODO: compute wrong_labels
-# Verify contract: `np.max(np.abs(wrong_labels - r2)) > 0.01`.
+# Check numerical equivalence within tolerance: `np.max(np.abs(wrong_labels-r2)) > 0.01`
 assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')
@@ -547,7 +547,7 @@ for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol=2e-6, rtol=2e-6)
 # Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = 2 * xh.T @ (xh @ w2h - yh[::-1]) / 16
-# Verify contract: `np.max(np.abs(wrong_labels - r2)) > 0.01`.
+# Check numerical equivalence within tolerance: `np.max(np.abs(wrong_labels-r2)) > 0.01`
 assert np.max(np.abs(wrong_labels-r2)) > 0.01
 # Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')
@@ -576,10 +576,10 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 
 **Step-by-step implementation plan:**
 1. Iterate over `p` to step through the computation:
-2. Evaluate `size` from the current inputs and state.
-3. Evaluate `rs` from the current inputs and state.
-4. Evaluate `ar` from the current inputs and state.
-5. Evaluate `cycle` from the current inputs and state.
+2. Compute `size` from `2**20`
+3. Compute `rs` from `size * (p - 1) // p`
+4. Compute `ar` from `2 * rs`
+5. Compute `cycle` from `rs + rs`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -588,22 +588,22 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 budget = ...  # TODO: compute budget
 # Iterate over `p` to step through the computation:
 for p in [2, 4, 8]:
-    # Evaluate `size` from the current inputs and state.
+    # Compute `size` from `2**20`
     size = ...  # TODO: compute size
-    # Evaluate `rs` from the current inputs and state.
+    # Compute `rs` from `size * (p - 1) // p`
     rs = ...  # TODO: compute rs
-    # Evaluate `ar` from the current inputs and state.
+    # Compute `ar` from `2 * rs`
     ar = ...  # TODO: compute ar
-    # Evaluate `cycle` from the current inputs and state.
+    # Compute `cycle` from `rs + rs`
     cycle = ...  # TODO: compute cycle
-    # Verify contract: `ar == cycle`.
+    # Assert invariant `ar == cycle` holds
     assert ar  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `size // p * p == size` holds
     assert size // p * p  # TODO: complete assertion check
     # Append the current step result to `budget`.
     budget.append({'ranks': p, 'all_reduce_bytes': ar,
                    'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-# Verify contract: `[row['all_reduce_bytes'] for row in budget] == [1048576, 1572864, 18...`.
+# Assert invariant `[row['all_reduce_bytes'] for row in budget] == [1048576` holds
 assert [row['all_reduce_bytes'] for row  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Idealized payload/storage budget, not observed network traffic:', budget)
@@ -616,22 +616,22 @@ print('Idealized payload/storage budget, not observed network traffic:', budget)
 budget = []
 # Iterate over `p` to step through the computation:
 for p in [2, 4, 8]:
-    # Evaluate `size` from the current inputs and state.
+    # Compute `size` from `2**20`
     size = 2**20
-    # Evaluate `rs` from the current inputs and state.
+    # Compute `rs` from `size * (p - 1) // p`
     rs = size * (p - 1) // p
-    # Evaluate `ar` from the current inputs and state.
+    # Compute `ar` from `2 * rs`
     ar = 2 * rs
-    # Evaluate `cycle` from the current inputs and state.
+    # Compute `cycle` from `rs + rs`
     cycle = rs + rs
-    # Verify contract: `ar == cycle`.
+    # Assert invariant `ar == cycle` holds
     assert ar == cycle
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `size // p * p == size` holds
     assert size // p * p == size
     # Append the current step result to `budget`.
     budget.append({'ranks': p, 'all_reduce_bytes': ar,
                    'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-# Verify contract: `[row['all_reduce_bytes'] for row in budget] == [1048576, 1572864, 18...`.
+# Assert invariant `[row['all_reduce_bytes'] for row in budget] == [1048576` holds
 assert [row['all_reduce_bytes'] for row in budget] == [1048576, 1572864, 1835008]
 # Print the observed values to compare against the expected result.
 print('Idealized payload/storage budget, not observed network traffic:', budget)

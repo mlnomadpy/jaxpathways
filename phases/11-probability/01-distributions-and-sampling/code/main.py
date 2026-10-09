@@ -22,32 +22,32 @@ key_a, key_b = jax.random.split(jax.random.key(23))
 a = 2. + 3.*jax.random.normal(key_a, (20000,))
 # Sample deterministic random values into `b` using an explicit PRNG key.
 b = 2. + 3.*jax.random.normal(key_b, (20000,))
-# Evaluate `(expected_mean, expected_variance)` from the current inputs and state.
+# Compute `expected_mean, expected_variance` from `2., 9.`
 expected_mean, expected_variance = 2., 9.
-# Verify contract: `abs(float(a.mean()) - expected_mean) < 5 * 3 / math.sqrt(a.size)`.
+# Check numerical equivalence within tolerance: `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`
 assert abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(a.var())-expected_variance) < .4`
 assert abs(float(a.var())-expected_variance) < .4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not jnp.array_equal(a,b)` holds
 assert not jnp.array_equal(a,b)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))` holds
 assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 
 # 3. Compare an independent calculation
 # Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
-# Initialize array `actual` with explicit values and shape.
+# Construct `actual` via `normal_logpdf(jnp.array([2.,5.]),2.,3.)`
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
-# Evaluate `reference` from the current inputs and state.
+# Compute `reference` from `[-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*m...`
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6)`
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
-# Initialize array `components` with explicit values and shape.
+# Construct `components` via `jnp.array([-1000.,-1001.])`
 components = jnp.array([-1000.,-1001.])
 # Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.isneginf(jnp.log(jnp.exp(components).mean()))` holds
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 # Print the observed values to compare against the expected result.
 print('sample mean, variance:',float(a.mean()),float(a.var()))
@@ -74,31 +74,31 @@ key_a, key_b = jax.random.split(jax.random.key(23))
 a = 2. + 3.*jax.random.normal(key_a, (20000,))
 # Sample deterministic random values into `b` using an explicit PRNG key.
 b = 2. + 3.*jax.random.normal(key_b, (20000,))
-# Evaluate `(expected_mean, expected_variance)` from the current inputs and state.
+# Compute `expected_mean, expected_variance` from `2., 9.`
 expected_mean, expected_variance = 2., 9.
-# Verify contract: `abs(float(a.mean()) - expected_mean) < 5 * 3 / math.sqrt(a.size)`.
+# Check numerical equivalence within tolerance: `abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)`
 assert abs(float(a.mean())-expected_mean) < 5*3/math.sqrt(a.size)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(a.var())-expected_variance) < .4`
 assert abs(float(a.var())-expected_variance) < .4
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not jnp.array_equal(a,b)` holds
 assert not jnp.array_equal(a,b)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))` holds
 assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 
 # Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
-# Initialize array `actual` with explicit values and shape.
+# Construct `actual` via `normal_logpdf(jnp.array([2.,5.]),2.,3.)`
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
-# Evaluate `reference` from the current inputs and state.
+# Compute `reference` from `[-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*m...`
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6)`
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
-# Initialize array `components` with explicit values and shape.
+# Construct `components` via `jnp.array([-1000.,-1001.])`
 components = jnp.array([-1000.,-1001.])
 # Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.isneginf(jnp.log(jnp.exp(components).mean()))` holds
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 # Print the observed values to compare against the expected result.
 print('sample mean, variance:',float(a.mean()),float(a.var()))
@@ -109,20 +109,20 @@ print('stable equal-mixture log density:',float(stable))
 # Compute figure data for: A precise mean does not remove observation noise
 # Convert `sizes` to a host NumPy array for inspection or verification.
 sizes = np.array([1,4,16,64,100,400])
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"kind":"line","x":sizes.tolist(),"xlabel":"independ...`
 visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observations N","ylabel":"standard deviation (reading units)","xscale":"log","series":[{"label":"individual reading","y":[3.]*len(sizes)},{"label":"average of N readings","y":(3/np.sqrt(sizes)).tolist()}]}
 
 # Experiment: Density can exceed one
 # Experiment — Density can exceed one: A narrow continuous density can exceed one; its area, not its...
 peak = jnp.exp(normal_logpdf(0.,0.,.1))
-# Verify contract: `peak > 1`.
+# Assert invariant `peak > 1` holds
 assert peak > 1
 # Print the observed values to compare against the expected result.
 print("peak density:",float(peak))
 
 # Experiment: Separate sum and mixture
 # Experiment — Separate sum and mixture: Independence multiplies probabilities, while alternative mixture...
-# Initialize array `values` with explicit values and shape.
+# Construct `values` via `jnp.array([-2.,-3.])`
 values = jnp.array([-2.,-3.])
 # Aggregate array values to compute `independent_log`.
 independent_log = values.sum()
@@ -130,7 +130,7 @@ independent_log = values.sum()
 mixture_log = logsumexp(values)-jnp.log(2.)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(independent_log,-5.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `mixture_log > -3.` holds
 assert mixture_log > -3.
 # Print the observed values to compare against the expected result.
 print(float(independent_log),float(mixture_log))
@@ -139,14 +139,14 @@ print(float(independent_log),float(mixture_log))
 # Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = -1.+.5*jax.random.normal(jax.random.key(51),(30000,))
-# Verify contract: `abs(float(changed.mean()) + 1.0) < 5 * 0.5 / math.sqrt(30000)`.
+# Check numerical equivalence within tolerance: `abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)`
 assert abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(changed.var())-.25) < .015`
 assert abs(float(changed.var())-.25) < .015
 
 # Reference practice: Detect a missing normalization
 # Detect a missing normalization (Transfer / diagnosis): Scale changes density even with identical zero residuals.
-# Initialize array `scores` with explicit values and shape.
+# Construct `scores` via `normal_logpdf(0.,0.,jnp.array([1.,2.]))`
 scores = normal_logpdf(0.,0.,jnp.array([1.,2.]))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))
@@ -159,8 +159,8 @@ left,right = jax.random.split(jax.random.key(17))
 first = jax.random.normal(left,(32,))
 # Sample deterministic random values into `second` using an explicit PRNG key.
 second = jax.random.normal(right,(32,))
-# Verify contract: `jnp.array_equal(first, jax.random.normal(left, (32,)))`.
+# Assert invariant `jnp.array_equal(first,jax.random.normal(left,(32,)))` holds
 assert jnp.array_equal(first,jax.random.normal(left,(32,)))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not jnp.array_equal(first,second)` holds
 assert not jnp.array_equal(first,second)
 print("PASS: probability-01")

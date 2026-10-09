@@ -9,7 +9,7 @@ import numpy as np
 
 # Function `lora_forward(x, base, a, b, ...)` implementing this stage's computation:
 def lora_forward(x, base, a, b, alpha=1.0):
-    # Evaluate `rank` from the current inputs and state.
+    # Compute `rank` from `a.shape[1]`
     rank = a.shape[1]
     # Return `x @ base + alpha / rank * (x @ a @ b)` to the caller.
     return x @ base + (alpha / rank) * (x @ a @ b)
@@ -19,21 +19,21 @@ def lora_forward(x, base, a, b, alpha=1.0):
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 # Construct and reshape `source_w` into the target tensor dimensions.
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
-# Initialize array `base` with explicit values and shape.
+# Construct `base` via `jnp.zeros_like(source_w)`
 base = jnp.zeros_like(source_w)
 # Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 # Repeat the update loop over `range(150)` steps:
 for _ in range(150):
-    # Evaluate `base` from the current inputs and state.
+    # Compute `base` from `base - 0.15 * base_step(base)`
     base = base - 0.15 * base_step(base)
-# Verify contract: `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 0.0001`.
+# Assert invariant `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4` holds
 assert float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4
 # Convert `frozen` to a host NumPy array for inspection or verification.
 frozen = np.asarray(base).copy()
-# Initialize array `u` with explicit values and shape.
+# Construct `u` via `jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])`
 u = jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])
-# Initialize array `v` with explicit values and shape.
+# Construct `v` via `jnp.array([[0.5, -0.2, 0.3, 0.1]])`
 v = jnp.array([[0.5, -0.2, 0.3, 0.1]])
 # Perform matrix / vector contraction (`@`) to compute `target`.
 target = x @ (base + u @ v)
@@ -41,19 +41,19 @@ target = x @ (base + u @ v)
 a = jax.random.normal(jax.random.key(4), (6, 1)) * 0.1
 # Allocate initialized array `b` with the specified shape and dtype.
 b = jnp.zeros((1, 4))
-# Evaluate `params` from the current inputs and state.
+# Compute `params` from `(a, b)`
 params = (a, b)
 # Reduce across the target axis to summarize `loss`.
 loss = lambda ab: jnp.mean((lora_forward(x, base, *ab, alpha=1.0) - target) ** 2)
 # Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(loss))
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Run `step` to compute `initial_grads`.
 initial_grads = step(params)[1]
 # Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(initial_grads[0], np.zeros((6, 1)))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.linalg.norm(initial_grads[1]) > 0` holds
 assert np.linalg.norm(initial_grads[1]) > 0
 
 # 3. Adapt and verify the serving merge
@@ -66,11 +66,11 @@ for _ in range(250):
     # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
-# Evaluate `(a, b)` from the current inputs and state.
+# Compute `a, b` from `params`
 a, b = params
-# Verify contract: `history[-1] < history[0] * 0.02`.
+# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(base, frozen)`
 np.testing.assert_array_equal(base, frozen)
 # Perform matrix contraction / projection to compute `merged`.
 merged = base + a @ b
@@ -97,7 +97,7 @@ import numpy as np
 
 # Function `lora_forward(x, base, a, b, ...)` implementing this stage's computation:
 def lora_forward(x, base, a, b, alpha=1.0):
-    # Evaluate `rank` from the current inputs and state.
+    # Compute `rank` from `a.shape[1]`
     rank = a.shape[1]
     # Return `x @ base + alpha / rank * (x @ a @ b)` to the caller.
     return x @ base + (alpha / rank) * (x @ a @ b)
@@ -106,21 +106,21 @@ def lora_forward(x, base, a, b, alpha=1.0):
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 # Construct and reshape `source_w` into the target tensor dimensions.
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
-# Initialize array `base` with explicit values and shape.
+# Construct `base` via `jnp.zeros_like(source_w)`
 base = jnp.zeros_like(source_w)
 # Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 # Repeat the update loop over `range(150)` steps:
 for _ in range(150):
-    # Evaluate `base` from the current inputs and state.
+    # Compute `base` from `base - 0.15 * base_step(base)`
     base = base - 0.15 * base_step(base)
-# Verify contract: `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 0.0001`.
+# Assert invariant `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4` holds
 assert float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4
 # Convert `frozen` to a host NumPy array for inspection or verification.
 frozen = np.asarray(base).copy()
-# Initialize array `u` with explicit values and shape.
+# Construct `u` via `jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])`
 u = jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])
-# Initialize array `v` with explicit values and shape.
+# Construct `v` via `jnp.array([[0.5, -0.2, 0.3, 0.1]])`
 v = jnp.array([[0.5, -0.2, 0.3, 0.1]])
 # Perform matrix / vector contraction (`@`) to compute `target`.
 target = x @ (base + u @ v)
@@ -128,19 +128,19 @@ target = x @ (base + u @ v)
 a = jax.random.normal(jax.random.key(4), (6, 1)) * 0.1
 # Allocate initialized array `b` with the specified shape and dtype.
 b = jnp.zeros((1, 4))
-# Evaluate `params` from the current inputs and state.
+# Compute `params` from `(a, b)`
 params = (a, b)
 # Reduce across the target axis to summarize `loss`.
 loss = lambda ab: jnp.mean((lora_forward(x, base, *ab, alpha=1.0) - target) ** 2)
 # Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(loss))
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Run `step` to compute `initial_grads`.
 initial_grads = step(params)[1]
 # Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(initial_grads[0], np.zeros((6, 1)))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.linalg.norm(initial_grads[1]) > 0` holds
 assert np.linalg.norm(initial_grads[1]) > 0
 
 # Step 3 — 3. Adapt and verify the serving merge: The reference target has rank one by construction.
@@ -152,11 +152,11 @@ for _ in range(250):
     # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
-# Evaluate `(a, b)` from the current inputs and state.
+# Compute `a, b` from `params`
 a, b = params
-# Verify contract: `history[-1] < history[0] * 0.02`.
+# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(base, frozen)`
 np.testing.assert_array_equal(base, frozen)
 # Perform matrix contraction / projection to compute `merged`.
 merged = base + a @ b
@@ -177,25 +177,25 @@ print(
 
 # Figure data experiment
 # Compute figure data for: LoRA: adapt, save and merge low-rank updates — recorded experiment
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'adaptation MSE (squared output units)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 # Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Evaluate `panel['x']` from the current inputs and state.
+    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
-# Evaluate `extra_panel` from the current inputs and state.
+# Compute `extra_panel` from `{'kind':'bar','x':[0,1],'labels':['factor A','factor...`
 extra_panel={'kind':'bar','x':[0,1],'labels':['factor A','factor B'],'series':[{'label':'initial gradient norm','y':[float(jnp.linalg.norm(initial_grads[0])),float(jnp.linalg.norm(initial_grads[1]))]}],'xlabel':'trainable factor','ylabel':'gradient L2 norm','title':'Why the first update changes only B'}
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 # Experiment: Show why two zero factors cannot start learning
 # Experiment — Show why two zero factors cannot start learning: Each factor’s derivative contains the other factor.
-# Initialize array `zero` with explicit values and shape.
+# Construct `zero` via `(jnp.zeros_like(a), jnp.zeros_like(b))`
 zero = (jnp.zeros_like(a), jnp.zeros_like(b))
 # Differentiate the objective to obtain `zero_grad` via automatic differentiation.
 zero_grad = jax.grad(loss)(zero)
-# Verify that the output tensor shape matches our prediction.
+# Assert invariant `all(` holds
 assert all(
     np.array_equal(np.asarray(g), np.zeros(g.shape)) for g in zero_grad
 )
@@ -209,9 +209,9 @@ rng = np.random.default_rng(14)
 a_probe = jnp.asarray(rng.normal(size=(6, 2)) * 0.1, jnp.float32)
 # Create device-backed JAX array `b_probe`.
 b_probe = jnp.asarray(rng.normal(size=(2, 4)) * 0.1, jnp.float32)
-# Evaluate `scale` from the current inputs and state.
+# Compute `scale` from `3.0 / 2`
 scale = 3.0 / 2
-# Evaluate `output_gradient` from the current inputs and state.
+# Compute `output_gradient` from `(`
 output_gradient = (
     2 * (lora_forward(x, base, a_probe, b_probe, 3.0) - target) / target.size
 )
@@ -226,9 +226,9 @@ actual_a, actual_b = jax.grad(
     ),
     argnums=(0, 1),
 )(a_probe, b_probe)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual_a, expected_a, atol=1e-6)`
 np.testing.assert_allclose(actual_a, expected_a, atol=1e-6)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)`
 np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')
@@ -253,7 +253,7 @@ with tempfile.TemporaryDirectory() as folder:
     )
     # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path, allow_pickle=False) as z:
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
         assert int(z['rank']) == z['a'].shape[1]
         # Perform matrix contraction / projection to compute ``.
         np.testing.assert_allclose(
@@ -272,7 +272,7 @@ new_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
 )
-# Verify contract: `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merge...`.
+# Assert invariant `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ me...` holds
 assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3
 # Print the observed values to compare against the expected result.
 print('New-input merge passes; accidental double merge changes outputs.')

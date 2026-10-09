@@ -25,6 +25,10 @@ If the first comparison passes while the second shows a gap, changing indexing i
 
 The error bars should keep those comparisons separate and state scale, dtype and tolerance. A passed numerical check also says nothing about speed. Keep workload identity, synchronization and target-device measurements with any optimization claim.
 
+$$
+\text{Speedup}(S_{\text{total}}) = \frac{1}{(1 - p) + p / s_{\text{kernel}}}
+$$
+
 ### Pause and reason
 
 Which comparison should you inspect before blaming quantization for a wrong output?
@@ -89,9 +93,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -109,7 +114,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -125,7 +130,7 @@ def blocked_axpy(x,y,block=(2,4)):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
@@ -178,7 +183,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         raise ValueError("at least five repeated target measurements required")
     # Import time for this computation.
     import time
-    # Evaluate `records` from the current inputs and state.
+    # Compute `records` from `{}`
     records={}
     # Iterate over `(label, function)` to step through the computation:
     for label,function in (("candidate",candidate),("baseline",baseline)):
@@ -191,7 +196,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         # Repeat the update loop over `range(5)` steps:
         # Synchronize host execution until asynchronous device computation completes.
         for _ in range(5):compiled(*args).block_until_ready()
-        # Evaluate `samples` from the current inputs and state.
+        # Compute `samples` from `[]`
         samples=[]
         # Repeat the update loop over `range(repeats)` steps:
         for _ in range(repeats):
@@ -201,7 +206,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
             compiled(*args).block_until_ready()
             # Record execution timing or profiler trace in ``.
             samples.append((time.perf_counter()-started)*1000)
-        # Evaluate `records[label]` from the current inputs and state.
+        # Compute `records[label]` from `{"compile_seconds":compile_seconds,"samples_ms":samp...`
         records[label]={"compile_seconds":compile_seconds,"samples_ms":samples,
             "median_ms":float(np.median(samples)),"p90_ms":float(np.percentile(samples,90))}
     # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `records['actual_backend']`.
@@ -224,24 +229,27 @@ Create main.py for the first block, then append each block in order in your cour
 # Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
 rng=np.random.default_rng(42)
 # Evaluate `correctness` from the current inputs and state.
-# Evaluate `precision_gaps` from the current inputs and state.
-correctness=[];precision_gaps=[]
+# Compute `correctness` from `[]`
+correctness=[]
+precision_gaps=[]
 # Iterate over `shape` to step through the computation:
 for shape in [(1,1),(8,128),(9,129),(17,257)]:
     # Cast or evaluate `original_x` in explicit floating-point precision.
     original_x=rng.normal(size=shape).astype(np.float32)
     # Cast or evaluate `original_y` in explicit floating-point precision.
     original_y=rng.normal(size=shape).astype(np.float32)
-    # Evaluate `ideal` from the current inputs and state.
+    # Compute `ideal` from `2*original_x+original_y`
     ideal=2*original_x+original_y
     # Evaluate `row` from the current inputs and state.
-    # Evaluate `gaps` from the current inputs and state.
-    row=[];gaps=[]
+    # Compute `row` from `[]`
+    row=[]
+    gaps=[]
     # Loop over `dtype` in `(jnp.float32, jnp.bfloat16)`:
     for dtype in (jnp.float32,jnp.bfloat16):
         # Create device-backed JAX array `a`.
         # Create device-backed JAX array `b`.
-        a=jnp.asarray(original_x,dtype=dtype);b=jnp.asarray(original_y,dtype=dtype)
+        a=jnp.asarray(original_x,dtype=dtype)
+        b=jnp.asarray(original_y,dtype=dtype)
         # Run `pipelined_axpy` to compute `actual`.
         actual=pipelined_axpy(a,b)
         # Cast or evaluate `represented` in explicit floating-point precision.
@@ -254,10 +262,12 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
         gap=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-ideal)))
         # Append the current step result to `row`.
         # Append the current step result to `row`.
-        row.append(error);gaps.append(gap)
+        row.append(error)
+        gaps.append(gap)
     # Append the current step result to `correctness`.
     # Append the current step result to `correctness`.
-    correctness.append(row);precision_gaps.append(gaps)
+    correctness.append(row)
+    precision_gaps.append(gaps)
 # Print the observed values to compare against the expected result.
 print("Kernel errors versus represented-input oracle:",correctness)
 # Print diagnostic summary of the computed outputs.
@@ -277,7 +287,8 @@ if jax.default_backend()=="cpu":
     rejected=False
     try:target_benchmark(lambda a,b:pipelined_axpy(a,b,mode="tpu"),lambda a,b:2*a+b,(probe,probe))
     except RuntimeError as error:
-        rejected=True;print("Expected benchmark refusal:",error)
+        rejected=True
+        print("Expected benchmark refusal:",error)
     assert rejected
 # Print the observed values to compare against the expected result.
 print("CPU correctness audit complete; no TPU latency or speedup measured")
@@ -313,9 +324,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -333,7 +345,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -349,7 +361,7 @@ def blocked_axpy(x,y,block=(2,4)):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode="simulate"):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Guard input contract (`bm % 8 or bn % 128`) and fail fast if violated.
     if bm%8 or bn%128:
@@ -402,7 +414,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         raise ValueError("at least five repeated target measurements required")
     # Import time for this computation.
     import time
-    # Evaluate `records` from the current inputs and state.
+    # Compute `records` from `{}`
     records={}
     # Iterate over `(label, function)` to step through the computation:
     for label,function in (("candidate",candidate),("baseline",baseline)):
@@ -415,7 +427,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
         # Repeat the update loop over `range(5)` steps:
         # Synchronize host execution until asynchronous device computation completes.
         for _ in range(5):compiled(*args).block_until_ready()
-        # Evaluate `samples` from the current inputs and state.
+        # Compute `samples` from `[]`
         samples=[]
         # Repeat the update loop over `range(repeats)` steps:
         for _ in range(repeats):
@@ -425,7 +437,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
             compiled(*args).block_until_ready()
             # Record execution timing or profiler trace in ``.
             samples.append((time.perf_counter()-started)*1000)
-        # Evaluate `records[label]` from the current inputs and state.
+        # Compute `records[label]` from `{"compile_seconds":compile_seconds,"samples_ms":samp...`
         records[label]={"compile_seconds":compile_seconds,"samples_ms":samples,
             "median_ms":float(np.median(samples)),"p90_ms":float(np.percentile(samples,90))}
     # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `records['actual_backend']`.
@@ -440,24 +452,27 @@ def target_benchmark(candidate,baseline,args,repeats=20):
 # Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
 rng=np.random.default_rng(42)
 # Evaluate `correctness` from the current inputs and state.
-# Evaluate `precision_gaps` from the current inputs and state.
-correctness=[];precision_gaps=[]
+# Compute `correctness` from `[]`
+correctness=[]
+precision_gaps=[]
 # Iterate over `shape` to step through the computation:
 for shape in [(1,1),(8,128),(9,129),(17,257)]:
     # Cast or evaluate `original_x` in explicit floating-point precision.
     original_x=rng.normal(size=shape).astype(np.float32)
     # Cast or evaluate `original_y` in explicit floating-point precision.
     original_y=rng.normal(size=shape).astype(np.float32)
-    # Evaluate `ideal` from the current inputs and state.
+    # Compute `ideal` from `2*original_x+original_y`
     ideal=2*original_x+original_y
     # Evaluate `row` from the current inputs and state.
-    # Evaluate `gaps` from the current inputs and state.
-    row=[];gaps=[]
+    # Compute `row` from `[]`
+    row=[]
+    gaps=[]
     # Loop over `dtype` in `(jnp.float32, jnp.bfloat16)`:
     for dtype in (jnp.float32,jnp.bfloat16):
         # Create device-backed JAX array `a`.
         # Create device-backed JAX array `b`.
-        a=jnp.asarray(original_x,dtype=dtype);b=jnp.asarray(original_y,dtype=dtype)
+        a=jnp.asarray(original_x,dtype=dtype)
+        b=jnp.asarray(original_y,dtype=dtype)
         # Run `pipelined_axpy` to compute `actual`.
         actual=pipelined_axpy(a,b)
         # Cast or evaluate `represented` in explicit floating-point precision.
@@ -470,10 +485,12 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
         gap=float(np.max(np.abs(np.asarray(actual,dtype=np.float32)-ideal)))
         # Append the current step result to `row`.
         # Append the current step result to `row`.
-        row.append(error);gaps.append(gap)
+        row.append(error)
+        gaps.append(gap)
     # Append the current step result to `correctness`.
     # Append the current step result to `correctness`.
-    correctness.append(row);precision_gaps.append(gaps)
+    correctness.append(row)
+    precision_gaps.append(gaps)
 # Print the observed values to compare against the expected result.
 print("Kernel errors versus represented-input oracle:",correctness)
 # Print diagnostic summary of the computed outputs.
@@ -485,7 +502,8 @@ if jax.default_backend()=="cpu":
     rejected=False
     try:target_benchmark(lambda a,b:pipelined_axpy(a,b,mode="tpu"),lambda a,b:2*a+b,(probe,probe))
     except RuntimeError as error:
-        rejected=True;print("Expected benchmark refusal:",error)
+        rejected=True
+        print("Expected benchmark refusal:",error)
     assert rejected
 # Print the observed values to compare against the expected result.
 print("CPU correctness audit complete; no TPU latency or speedup measured")
@@ -505,19 +523,19 @@ Expected: All eight shape/dtype cases exactly match the represented-input oracle
 
 The horizontal axis names four frozen matrix fixtures. The vertical axis is maximum absolute difference between the actual simulated Pallas output and the original float32 dataset calculation. Float32 bars have zero height; bfloat16 bars are positive because stored inputs and final outputs are rounded.
 
-The bfloat16 gaps are approximately $0.000862$, $0.02522$, $0.03079$ and $0.02922$. The largest matrix does not have the largest gap in this run. These are different frozen inputs, so the bar heights do not establish a monotonic law relating shape and error.
+The bfloat16 gaps are approximately $0.000862$, $0.02522$, $0.03079$ and $0.02922$. The largest matrix does not have the largest gap in this run. These are different frozen inputs, so the bar heights are separate from a monotonic law relating shape and error.
 
 ### Connect it to the computation
 
 The separate represented-input oracle checks in the code report zero implementation error for every shape and dtype. This plot answers the additional precision question: what changed relative to the original float32 values despite correct execution of the chosen contract?
 
-The figure contains no runtime or target-memory data. It cannot establish throughput, pipeline overlap or TPU correctness. Those claims require the guarded target runner and actual completed accelerator execution.
+The figure contains no runtime or target-memory data. It is distinct from throughput, pipeline overlap or TPU correctness. Those claims require the guarded target runner and actual completed accelerator execution.
 
 ```python
 # Compute figure data for: Precision gaps remain after kernel correctness passes
-# Evaluate `labels` from the current inputs and state.
+# Compute `labels` from `['1 x 1','8 x 128','9 x 129','17 x 257']`
 labels=['1 x 1','8 x 128','9 x 129','17 x 257']
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':labels,'ylabel':'max gap vers...`
 visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original float32 values','series':[{'label':'float32','y':[r[0] for r in precision_gaps]},{'label':'bfloat16','y':[r[1] for r in precision_gaps]}]}
 ```
 
@@ -555,7 +573,7 @@ PASS: kernels-04
 a=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
 # Create device-backed JAX array `b`.
 b=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
-# Initialize array `order` with explicit values and shape.
+# Construct `order` via `jnp.array([8,0,7,1,6,2,5,3,4])`
 order=jnp.array([8,0,7,1,6,2,5,3,4])
 # Run `jnp.argsort` to compute `inverse`.
 inverse=jnp.argsort(order)
@@ -579,15 +597,15 @@ This operation has no coupling between rows. A failure suggests ownership or dat
 
 ```python
 # Experiment — Make a precision-policy counterexample: The order of representation changes is part of the numerical...
-# Initialize array `first` with explicit values and shape.
+# Construct `first` via `jnp.array([1.00390625],dtype=jnp.float32)`
 first=jnp.array([1.00390625],dtype=jnp.float32)
-# Initialize array `second` with explicit values and shape.
+# Construct `second` via `jnp.array([0.00390625],dtype=jnp.float32)`
 second=jnp.array([0.00390625],dtype=jnp.float32)
 # Cast or evaluate `early` in explicit floating-point precision.
 early=(first.astype(jnp.bfloat16).astype(jnp.float32)+second).astype(jnp.bfloat16)
 # Cast or evaluate `late` in explicit floating-point precision.
 late=(first+second).astype(jnp.bfloat16)
-# Verify contract: `float(early[0]) != float(late[0])`.
+# Assert invariant `float(early[0])!=float(late[0])` holds
 assert float(early[0])!=float(late[0])
 # Print the observed values to compare against the expected result.
 print("Early/final-only rounding:",float(early[0]),float(late[0]))
@@ -628,11 +646,12 @@ for block in [(8,128),(16,256)]:
     for buffers in (2,3):
         # Run `pipelined_axpy` to compute `result`.
         result = pipelined_axpy(...)  # TODO: compute result
-        # Verify that computed values match the expected reference within numerical tolerance.
+        # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)`
         np.testing.assert_allclose(result,expected,rtol = ...  # TODO: compute np.testing.assert_allclose(result,expected,rtol
         # Evaluate `gm` from the current inputs and state.
-        # Evaluate `gn` from the current inputs and state.
+        # Compute `gm` from `(15+block[0]-1)//block[0]`
         gm = ...  # TODO: compute gm
+        gn = ...  # TODO: compute gn
         # Print diagnostic summary of the computed outputs.
         print("Configuration, padded elements:",block,buffers,gm*gn*block[0]*block[1])
 ```
@@ -652,11 +671,12 @@ for block in [(8,128),(16,256)]:
     for buffers in (2,3):
         # Run `pipelined_axpy` to compute `result`.
         result=pipelined_axpy(a,b,block,buffers=buffers)
-        # Verify that computed values match the expected reference within numerical tolerance.
+        # Check numerical equivalence within tolerance: `np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)`
         np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)
         # Evaluate `gm` from the current inputs and state.
-        # Evaluate `gn` from the current inputs and state.
-        gm=(15+block[0]-1)//block[0];gn=(255+block[1]-1)//block[1]
+        # Compute `gm` from `(15+block[0]-1)//block[0]`
+        gm=(15+block[0]-1)//block[0]
+        gn=(255+block[1]-1)//block[1]
         # Print diagnostic summary of the computed outputs.
         print("Configuration, padded elements:",block,buffers,gm*gn*block[0]*block[1])
 ```
@@ -682,9 +702,9 @@ The wrapper promises matching float32 or bfloat16 inputs.
 
 **Step-by-step implementation plan:**
 1. Iterate over `(first, second)` to step through the computation:
-2. Evaluate `rejected` from the current inputs and state.
+2. Compute `rejected` from `False`
 3. Run the boundary check and catch the expected exception:
-4. Verify contract: `rejected`.
+4. Assert invariant `rejected` holds
 5. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -693,12 +713,12 @@ The wrapper promises matching float32 or bfloat16 inputs.
 # Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.
 # Iterate over `(first, second)` to step through the computation:
 for first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:
-    # Evaluate `rejected` from the current inputs and state.
+    # Compute `rejected` from `False`
     rejected = ...  # TODO: compute rejected
     # Run the boundary check and catch the expected exception:
     try:pipelined_axpy(first,second)
     except ValueError:rejected=True
-    # Verify contract: `rejected`.
+    # Assert invariant `rejected` holds
     assert rejected  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Mixed and integer dtypes rejected")
@@ -710,12 +730,12 @@ print("Mixed and integer dtypes rejected")
 # Reject unsupported dtype mixing (Practice): Supported dtype boundaries are a correctness decision.
 # Iterate over `(first, second)` to step through the computation:
 for first,second in [(jnp.ones((8,128),jnp.float32),jnp.ones((8,128),jnp.bfloat16)),(jnp.ones((8,128),jnp.int32),jnp.ones((8,128),jnp.int32))]:
-    # Evaluate `rejected` from the current inputs and state.
+    # Compute `rejected` from `False`
     rejected=False
     # Run the boundary check and catch the expected exception:
     try:pipelined_axpy(first,second)
     except ValueError:rejected=True
-    # Verify contract: `rejected`.
+    # Assert invariant `rejected` holds
     assert rejected
 # Print the observed values to compare against the expected result.
 print("Mixed and integer dtypes rejected")
@@ -743,26 +763,26 @@ Keep the remaining workload time unchanged in the calculation.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Evaluate `local_speedup` from the current inputs and state.
-2. Evaluate `end_to_end` from the current inputs and state.
-3. Evaluate `limit` from the current inputs and state.
-4. Verify that computed values match the expected reference within numerical tolerance.
-5. Verify that computed values match the expected reference within numerical tolerance.
+1. Compute `local_speedup` from `2.0`
+2. Compute `end_to_end` from `1/((1-fraction)+fraction/local_speedup)`
+3. Compute `limit` from `1/(1-fraction)`
+4. Execute `np.testing.assert_allclose(end_to_end,1.1764705882352942)`
+5. Execute `np.testing.assert_allclose(limit,1.4285714285714286)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Bound the end-to-end opportunity (Challenge): These are conditional analytic estimates, not measured speedups.
 fraction = ...  # TODO: compute fraction
-# Evaluate `local_speedup` from the current inputs and state.
+# Compute `local_speedup` from `2.0`
 local_speedup = ...  # TODO: compute local_speedup
-# Evaluate `end_to_end` from the current inputs and state.
+# Compute `end_to_end` from `1/((1-fraction)+fraction/local_speedup)`
 end_to_end = ...  # TODO: compute end_to_end
-# Evaluate `limit` from the current inputs and state.
+# Compute `limit` from `1/(1-fraction)`
 limit = ...  # TODO: compute limit
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(end_to_end,1.1764705882352942)`
 np.testing.assert_allclose(end_to_end,1.1764705882352942)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(limit,1.4285714285714286)`
 np.testing.assert_allclose(limit,1.4285714285714286)
 # Print the observed values to compare against the expected result.
 print("Modeled twofold-local speedup and zero-cost limit:",end_to_end,limit)
@@ -773,15 +793,15 @@ print("Modeled twofold-local speedup and zero-cost limit:",end_to_end,limit)
 ```python
 # Bound the end-to-end opportunity (Challenge): These are conditional analytic estimates, not measured speedups.
 fraction=.3
-# Evaluate `local_speedup` from the current inputs and state.
+# Compute `local_speedup` from `2.0`
 local_speedup=2.0
-# Evaluate `end_to_end` from the current inputs and state.
+# Compute `end_to_end` from `1/((1-fraction)+fraction/local_speedup)`
 end_to_end=1/((1-fraction)+fraction/local_speedup)
-# Evaluate `limit` from the current inputs and state.
+# Compute `limit` from `1/(1-fraction)`
 limit=1/(1-fraction)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(end_to_end,1.1764705882352942)`
 np.testing.assert_allclose(end_to_end,1.1764705882352942)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(limit,1.4285714285714286)`
 np.testing.assert_allclose(limit,1.4285714285714286)
 # Print the observed values to compare against the expected result.
 print("Modeled twofold-local speedup and zero-cost limit:",end_to_end,limit)

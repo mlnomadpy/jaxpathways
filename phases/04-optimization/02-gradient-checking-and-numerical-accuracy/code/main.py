@@ -11,17 +11,17 @@ import jax.numpy as jnp
 def objective(w):
     # Return `jnp.sum((w - jnp.array([2.0, -1.0])) ** 2)` to the caller.
     return jnp.sum((w - jnp.array([2., -1.])) ** 2)
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array([0.5, 0.25], dtype=jnp.float32)`
 w = jnp.array([0.5, 0.25], dtype=jnp.float32)
-# Evaluate `h` from the current inputs and state.
+# Compute `h` from `1e-2`
 h = 1e-2
-# Initialize array `basis` with explicit values and shape.
+# Compute `basis` from `jnp.eye(2)`
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
 # Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
-# Initialize array `analytic` with explicit values and shape.
+# Construct `analytic` via `2 * (w - jnp.array([2., -1.]))`
 analytic = 2 * (w - jnp.array([2., -1.]))
 
 # 3. Measure and verify
@@ -32,7 +32,7 @@ print("Finite difference:", finite)
 print("Autodiff:", automatic)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(automatic, analytic)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 
 # Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
@@ -43,17 +43,17 @@ import jax.numpy as jnp
 def objective(w):
     # Return `jnp.sum((w - jnp.array([2.0, -1.0])) ** 2)` to the caller.
     return jnp.sum((w - jnp.array([2., -1.])) ** 2)
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array([0.5, 0.25], dtype=jnp.float32)`
 w = jnp.array([0.5, 0.25], dtype=jnp.float32)
-# Evaluate `h` from the current inputs and state.
+# Compute `h` from `1e-2`
 h = 1e-2
-# Initialize array `basis` with explicit values and shape.
+# Compute `basis` from `jnp.eye(2)`
 basis = jnp.eye(2)
 # Vectorize across the batch dimension with `jax.vmap` (`finite`).
 finite = jax.vmap(lambda e: (objective(w+h*e)-objective(w-h*e))/(2*h))(basis)
 # Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic = jax.grad(objective)(w)
-# Initialize array `analytic` with explicit values and shape.
+# Construct `analytic` via `2 * (w - jnp.array([2., -1.]))`
 analytic = 2 * (w - jnp.array([2., -1.]))
 # Step 3 — 3. Measure and verify: Both gradients are approximately [-3., 2.5].
 # Print the observed values to compare against the expected result.
@@ -62,14 +62,14 @@ print("Finite difference:", finite)
 print("Autodiff:", automatic)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(automatic, analytic)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)`
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 
 # Figure data experiment
 # Compute figure data for: Smaller perturbations eventually lose accuracy
 # Run `jnp.logspace` to compute `steps`.
 steps = jnp.logspace(-8.0, -1.0, 22)
-# Evaluate `errors` from the current inputs and state.
+# Compute `errors` from `[]`
 errors = []
 # Loop over `h_plot` in `steps`:
 for h_plot in steps:
@@ -77,9 +77,9 @@ for h_plot in steps:
     estimate = jax.vmap(lambda e: (objective(w + h_plot * e) - objective(w - h_plot * e)) / (2 * h_plot))(basis)
     # Reduce across the target axis to summarize ``.
     errors.append(float(jnp.max(jnp.abs(estimate - analytic))))
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': steps.tolist(), 'xscale': 'log...`
 visual_data = {'kind': 'line', 'x': steps.tolist(), 'xscale': 'log', 'xlabel': 'finite-difference step', 'ylabel': 'maximum absolute gradient error', 'series': [{'label': 'float32 central difference', 'y': errors}]}
-# Evaluate `visual_data['yscale']` from the current inputs and state.
+# Compute `visual_data['yscale']` from `'log'`
 visual_data['yscale'] = 'log'
 
 # Experiment: Sweep the perturbation size
@@ -97,45 +97,45 @@ assert not jnp.allclose(tiny, analytic, atol=1e-3)
 
 # Experiment: Check a new direction
 # Experiment — Check a new direction: A new projection supplies a separate numerical check, though it...
-# Initialize array `direction` with explicit values and shape.
+# Construct `direction` via `jnp.array([1., -2.])`
 direction = jnp.array([1., -2.])
-# Evaluate `directional` from the current inputs and state.
+# Compute `directional` from `(objective(w+h*direction)-objective(w-h*direction))/...`
 directional = (objective(w+h*direction)-objective(w-h*direction))/(2*h)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(directional, -8., atol=2e-4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.dot(automatic, direction), -8.)`
 assert jnp.allclose(jnp.dot(automatic, direction), -8.)
 
 # Experiment: A symmetric probe can hide a kink
 # Experiment — A symmetric probe can hide a kink: Agreement with one numerical probe can conceal nondifferentiability.
 h_kink = 0.01
-# Evaluate `symmetric` from the current inputs and state.
+# Compute `symmetric` from `(jnp.abs(h_kink)-jnp.abs(-h_kink))/(2*h_kink)`
 symmetric = (jnp.abs(h_kink)-jnp.abs(-h_kink))/(2*h_kink)
-# Evaluate `left` from the current inputs and state.
+# Compute `left` from `(jnp.abs(0.)-jnp.abs(-h_kink))/h_kink`
 left = (jnp.abs(0.)-jnp.abs(-h_kink))/h_kink
-# Evaluate `right` from the current inputs and state.
+# Compute `right` from `(jnp.abs(h_kink)-jnp.abs(0.))/h_kink`
 right = (jnp.abs(h_kink)-jnp.abs(0.))/h_kink
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(symmetric,0.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(left,-1.) and jnp.allclose(right,1.)`
 assert jnp.allclose(left,-1.) and jnp.allclose(right,1.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)`
 assert jnp.allclose(jax.grad(jnp.abs)(jnp.array(-2.)),-1.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)`
 assert jnp.allclose(jax.grad(jnp.abs)(jnp.array(2.)),1.)
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Check the gradient again at w=[2., -1.].
-# Initialize array `minimum` with explicit values and shape.
+# Construct `minimum` via `jnp.array([2., -1.])`
 minimum = jnp.array([2., -1.])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(objective)(minimum), jnp.zeros(2))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(objective(minimum), 0.)`
 assert jnp.allclose(objective(minimum), 0.)
 
 # Reference practice: Move to a different smooth objective
 # Move to a different smooth objective (Transfer / diagnosis): The analytic reference checks a nonquadratic function at a...
-# Initialize array `z` with explicit values and shape.
+# Construct `z` via `jnp.array([0.2, -0.7])`
 z = jnp.array([0.2, -0.7])
 # Function `trig_loss(z)` implementing this stage's computation:
 def trig_loss(z):
@@ -145,7 +145,7 @@ def trig_loss(z):
 fd = jax.vmap(lambda e: (trig_loss(z+1e-2*e)-trig_loss(z-1e-2*e))/(2e-2))(jnp.eye(2))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)`
 assert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)
 
 # Reference practice: Catch the wrong objective despite correct gradients
@@ -157,8 +157,8 @@ def incomplete(z):
 bad = jax.grad(incomplete)(w)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(bad, jnp.array([-3., 0.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(bad, analytic)`
 assert not jnp.allclose(bad, analytic)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(objective)(w), analytic)`
 assert jnp.allclose(jax.grad(objective)(w), analytic)
 print("PASS: optimization-02")

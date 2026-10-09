@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-06",
-  "contentHash": "a425324232f8566b276cd8508e2cb5df3e3e12e19714af58f83850359c0812f4",
+  "contentHash": "cc70117c770e4cce08f67b7d80e013f8961d4eab532e6f849232d77d1dec3d06",
   "executedAt": "2026-10-08T14:07:34.211365+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,7 +18,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "6d2060fea88ed0061b8971cf4349a8b1ea9fa266e1f36fecc88e6b048ebba197",
+      "sourceHash": "427c7c62bc255ad9cd705b6c2d97e288aae773ebfba537f7eedd4758316f1e23",
+      "outputs": []
+    },
+    {
+      "sourceHash": "0559249d42b548b0965f5d981fe340c8e18ffa884b8a1c05efde84298bf09a7d",
+      "outputs": []
+    },
+    {
+      "sourceHash": "7061b80395dbb91a0374ce42003ed9c88e62fe7a22cce55a40d43ae3d7488b13",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,20 +39,7 @@
       ]
     },
     {
-      "sourceHash": "2958059b48a951b34e8f515895f94fa2e2375a9933494bf01c4c19a52f451b16",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Overall MSE: 0.409 high-slice MSE: 4.0 release: False\n",
-            "Two-bin input total variation: 0.4 (requires investigation; not an automatic retraining order)\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "6581650bfa623c9c0d24aa4c69cc4c7c0d500c739fe8e3d7fb6ccd54aef4f929",
+      "sourceHash": "1106724ef800e2611cebc7f97da2d9af0cbc8e8c9c5980e9d683a6d4c4f744d7",
       "outputs": []
     },
     {
@@ -63,16 +58,8 @@
       ]
     },
     {
-      "sourceHash": "6515d3160ec2abfd7e2dba590dc89c3561030ca2be73783c45badf812ec94ae8",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Aggregate-only acceptance would miss the high-slice failure.\n"
-          ]
-        }
-      ]
+      "sourceHash": "a137ef866ac3736ae9c9982486320e669c0f41e76aaa7b6d225acbe91523e85e",
+      "outputs": []
     },
     {
       "sourceHash": "b9ba245ff09d704aacccb7cede95ee16894d17c985c8f1f0747e39b70ff7052b",
@@ -80,31 +67,15 @@
     },
     {
       "sourceHash": "3b90d4c73bebb1a37dbc06394bd465bcad2c56505fb501ecbd58423814c37433",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Unweighted slice average: 2.005\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "441d9b368cc0f010399e1af19f70e7cb0cee80f06b102f5ce0bf94b1910c6a6f",
       "outputs": []
     },
     {
-      "sourceHash": "53be85cfe6a37f7b04af4a85b0af0af6370729608ee39b79cc1ff7c79b038d89",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "New population MSE: 3.601\n"
-          ]
-        }
-      ]
+      "sourceHash": "1e16c5a88babcb761426cedb8ae13193e7e98cf796d385ddb44b4b241e0df377",
+      "outputs": []
+    },
+    {
+      "sourceHash": "7f37bdcdc51ff854427a334a2dd0e2784bc77e5362cf12fdd37112ede49d3748",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

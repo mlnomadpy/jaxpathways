@@ -89,9 +89,9 @@ Append this block below the inputs in the same file.
 
 ```python
 # Step 2 — Build the computation: loss reads both parameter leaves.
-# Initialize array `params` with explicit values and shape.
+# Construct `params` via `{"weight": jnp.array([1., -1.]), "bias": jnp.array(0.)}`
 params = {"weight": jnp.array([1., -1.]), "bias": jnp.array(0.)}
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([2., 1.])`
 x = jnp.array([2., 1.])
 # Function `loss(p)` implementing this stage's computation:
 def loss(p):
@@ -115,9 +115,9 @@ value, grads = jax.value_and_grad(loss)(params)
 updated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
 # Print the observed values to compare against the expected result.
 print("Before/after:", float(value), float(loss(updated)))
-# Verify contract: `grads.keys() == params.keys()`.
+# Assert invariant `grads.keys() == params.keys()` holds
 assert grads.keys() == params.keys()
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `loss(updated) < value` holds
 assert loss(updated) < value
 ```
 
@@ -131,9 +131,9 @@ Compare the output to the expected result below before making the exercise chang
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: loss reads both parameter leaves.
-# Initialize array `params` with explicit values and shape.
+# Construct `params` via `{"weight": jnp.array([1., -1.]), "bias": jnp.array(0.)}`
 params = {"weight": jnp.array([1., -1.]), "bias": jnp.array(0.)}
-# Initialize array `x` with explicit values and shape.
+# Construct `x` via `jnp.array([2., 1.])`
 x = jnp.array([2., 1.])
 # Function `loss(p)` implementing this stage's computation:
 def loss(p):
@@ -148,9 +148,9 @@ value, grads = jax.value_and_grad(loss)(params)
 updated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
 # Print the observed values to compare against the expected result.
 print("Before/after:", float(value), float(loss(updated)))
-# Verify contract: `grads.keys() == params.keys()`.
+# Assert invariant `grads.keys() == params.keys()` holds
 assert grads.keys() == params.keys()
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `loss(updated) < value` holds
 assert loss(updated) < value
 ```
 
@@ -178,7 +178,7 @@ The updated prediction is $2.2$, so squared error falls from $4$ to $0.64$. The 
 
 ```python
 # Compute figure data for: A gradient tree matches parameter leaves
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'bar', 'labels': ['weight[0]', 'weight[1]',...`
 visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'ylabel': 'parameter value', 'series': [{'label': 'before', 'y': [float(params['weight'][0]), float(params['weight'][1]), float(params['bias'])]}, {'label': 'after', 'y': [float(updated['weight'][0]), float(updated['weight'][1]), float(updated['bias'])]}]}
 ```
 
@@ -202,13 +202,13 @@ PASS: state-02
 # Experiment — Verify every gradient leaf: This check verifies parameter identity and the actual gradient...
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(grads["bias"]`
 assert jnp.allclose(grads["bias"],-4.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(updated["weight"]`
 assert jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(updated["bias"]`
 assert jnp.allclose(updated["bias"],0.2)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(loss(updated),0.64,atol=1e-6)`
 assert jnp.allclose(loss(updated),0.64,atol=1e-6)
 ```
 
@@ -225,11 +225,11 @@ This check verifies parameter identity and the actual gradient values, not just 
 leaves,definition=jax.tree.flatten(params)
 # Run `jax.tree.unflatten` to compute `rebuilt`.
 rebuilt=jax.tree.unflatten(definition,leaves)
-# Verify contract: `jax.tree.structure(rebuilt) == jax.tree.structure(params)`.
+# Assert invariant `jax.tree.structure(rebuilt)==jax.tree.structure(params)` holds
 assert jax.tree.structure(rebuilt)==jax.tree.structure(params)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(rebuilt["weight"]` holds
 assert jnp.array_equal(rebuilt["weight"],params["weight"])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(rebuilt["bias"]` holds
 assert jnp.array_equal(rebuilt["bias"],params["bias"])
 ```
 
@@ -251,7 +251,7 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 1. Transform every leaf of the parameter PyTree (`norm_squared`).
 2. Aggregate array values to compute `manual`.
 3. Verify that the numerical values match the expected reference within tolerance.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -263,7 +263,7 @@ norm_squared = sum(...)  # TODO: compute norm_squared
 manual = jnp.sum(...)  # TODO: compute manual
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(norm_squared, manual)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
 assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
 ```
 
@@ -277,7 +277,7 @@ norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(norm_squared, manual)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(norm_squared, 96.)`
 assert jnp.allclose(norm_squared, 96.)
 ```
 
@@ -303,9 +303,9 @@ At the starting point prediction is $1$ and residual is $-2$, so the scale deriv
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Initialize array `nested` with explicit values and shape.
+1. Construct `nested` via `{"layer":params,"scale":jnp.array(1.)}`
 2. Function `nested_loss(p)` implementing this stage's computation:
-3. Evaluate `pred` from the current inputs and state.
+3. Compute `pred` from `p["scale"]*(jnp.dot(p["layer"]["weight"],x)+p["layer...`
 4. Return `(pred - 3.0) ** 2` to the caller.
 5. Differentiate the objective to obtain `g` via automatic differentiation.
 
@@ -313,19 +313,19 @@ At the starting point prediction is $1$ and residual is $-2$, so the scale deriv
 
 ```python
 # Extend to a nested model (Practice): Nested parameter identity survives differentiation.
-# Initialize array `nested` with explicit values and shape.
+# Construct `nested` via `{"layer":params,"scale":jnp.array(1.)}`
 nested = ...  # TODO: compute nested
 # Function `nested_loss(p)` implementing this stage's computation:
 def nested_loss(p):
-    # Evaluate `pred` from the current inputs and state.
+    # Compute `pred` from `p["scale"]*(jnp.dot(p["layer"]["weight"],x)+p["layer...`
     pred = ...  # TODO: compute pred
     # Return `(pred - 3.0) ** 2` to the caller.
     return ...  # TODO: return computed result
 # Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(...)  # TODO: compute g
-# Verify contract: `jax.tree.structure(g) == jax.tree.structure(nested)`.
+# Assert invariant `jax.tree.structure(g)==jax.tree.structure(nested)` holds
 assert jax.tree.structure(g)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(g["scale"]`
 assert jnp.allclose(g["scale"],-4.)  # TODO: complete assertion check
 ```
 
@@ -333,19 +333,19 @@ assert jnp.allclose(g["scale"],-4.)  # TODO: complete assertion check
 
 ```python
 # Extend to a nested model (Practice): Nested parameter identity survives differentiation.
-# Initialize array `nested` with explicit values and shape.
+# Construct `nested` via `{"layer":params,"scale":jnp.array(1.)}`
 nested={"layer":params,"scale":jnp.array(1.)}
 # Function `nested_loss(p)` implementing this stage's computation:
 def nested_loss(p):
-    # Evaluate `pred` from the current inputs and state.
+    # Compute `pred` from `p["scale"]*(jnp.dot(p["layer"]["weight"],x)+p["layer...`
     pred=p["scale"]*(jnp.dot(p["layer"]["weight"],x)+p["layer"]["bias"])
     # Return `(pred - 3.0) ** 2` to the caller.
     return (pred-3.)**2
 # Differentiate the objective to obtain `g` via automatic differentiation.
 g=jax.grad(nested_loss)(nested)
-# Verify contract: `jax.tree.structure(g) == jax.tree.structure(nested)`.
+# Assert invariant `jax.tree.structure(g)==jax.tree.structure(nested)` holds
 assert jax.tree.structure(g)==jax.tree.structure(nested)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(g["scale"]`
 assert jnp.allclose(g["scale"],-4.)
 ```
 

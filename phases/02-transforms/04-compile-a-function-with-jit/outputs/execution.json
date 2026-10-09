@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "461234214613961c843bce92ed9a1776ef55505be19d80eab048eadbdcfb0b92",
+  "contentHash": "c55850be47478d273c4014562180a259f430774037c3f9d883bc27c387c5b88b",
   "executedAt": "2026-10-08T14:01:30.842629+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,19 @@
   "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.02730379207059741 2.637505531311035e-05\neager median / min / max seconds: 3.3082906156778336e-05 3.1665898859500885e-05 5.350029096007347e-05\ncompiled median / min / max seconds: 5.062902346253395e-06 4.791188985109329e-06 7.000286132097244e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 8.333474397659302e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
-      "sourceHash": "4455d9ff608acd72ef1869aa762be37049c42e5e9bd361a2980b044388b03d41",
+      "sourceHash": "d8425668d731e7b296b9a16056cbf167ecbdafd9af71edbe52b7799a4454a185",
+      "outputs": []
+    },
+    {
+      "sourceHash": "5268d627c1dce25cf9d62775076207ee4818bf13b72924b5b1608f81b0a2cc27",
+      "outputs": []
+    },
+    {
+      "sourceHash": "58531c1b93bdb5954445baca8ded06b8fb795778513fefdad14d275b8767a1e1",
+      "outputs": []
+    },
+    {
+      "sourceHash": "59d5e9005b78dbf06baa5ea1138fb8aa172b381d60dfed5f8d9813248b718b61",
       "outputs": [
         {
           "output_type": "stream",
@@ -27,7 +39,7 @@
       ]
     },
     {
-      "sourceHash": "bf9b37975322edd38b30c405068d52190a6c3cbefb72bebcb2ff8d68cd4a6f45",
+      "sourceHash": "bcb1d675fba75f3390370c844df997181ba0f975ffd2af928529d1b27920fad6",
       "outputs": []
     },
     {
@@ -46,29 +58,19 @@
       ]
     },
     {
-      "sourceHash": "255cfe91e20bb12ea9c4e081c59254cb4fa11900bf92cd0a8557bd96852c1544",
+      "sourceHash": "96ea70c34496a2bcc1a320db9484da294806914b182583ef568fb4cc30250159",
       "outputs": []
     },
     {
-      "sourceHash": "8a00c1ceae43021b032676260119652d16a6afe43e92bb37e5d0329b1107e708",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "eager median / min / max seconds: 3.0458439141511917e-05 2.970779314637184e-05 4.833284765481949e-05\n",
-            "compiled median / min / max seconds: 4.729023203253746e-06 4.582572728395462e-06 5.916692316532135e-06\n",
-            "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "27f044a204721bd0cee6218545871e2c15cce084b715d51d5c9b3ab1f25bab48",
+      "sourceHash": "5f3823f85cc0638412dbaa4fe253f79c8ff7c077010bdec229209cbd66247528",
       "outputs": []
     },
     {
-      "sourceHash": "27cca4e5cee9e0a87e382e4eb5812945cd7ec1975f572d66295725d47311b881",
+      "sourceHash": "139929076ae6a85280243fa1d12fc6ae8e56419c8df3e4150f6f826a7903e39c",
+      "outputs": []
+    },
+    {
+      "sourceHash": "f772ca160eab407616ae261a9ad91610f895f877e44b6d07bfa36439cf9a29c7",
       "outputs": []
     },
     {
@@ -80,20 +82,12 @@
       "outputs": []
     },
     {
-      "sourceHash": "fb1fff86a9ecd94e29801247e390eb7745eb47c99bb3aa3f8256692e87666bcb",
+      "sourceHash": "d8924b1733ebfeeda8e5eb1a1c055766be8c412ed2dba1ac99c24752816915e6",
       "outputs": []
     },
     {
-      "sourceHash": "1a642d64033a896376f23263edc9f0866ffd648831a26ceda709b884a0a63eb3",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "compiled value-and-grad median seconds: 9.292270988225937e-06\n"
-          ]
-        }
-      ]
+      "sourceHash": "2c6708c4d9998495cc65382b411d492959e62371fa6e2866c0af12953c513dc9",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

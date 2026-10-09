@@ -37,7 +37,7 @@ The arithmetic comparison passed. The requested placement did not. Investigate r
 
 ## Carry a prediction, not just an installation
 
-We will move one small function between runtimes: a matrix-vector prediction with a scalar bias. Each row is an observation; three columns are three features. The weights are fixed so we can calculate the answer independently. For the first row, $[0,1/8,2/8]$, the prediction is $0-1/32+1/4+1/8=11/32$. A working package import is useful, but it does not establish where this computation finished.
+We will move one small function between runtimes: a matrix-vector prediction with a scalar bias. Each row is an observation; three columns are three features. The weights are fixed so we can calculate the answer independently. For the first row, $[0,1/8,2/8]$, the prediction is $0-1/32+1/4+1/8=11/32$. A working package import is useful, but it is separate from where this computation finished.
 
 $$
 \hat y_i=\sum_{j=1}^{3}x_{ij}w_j+b,\qquad X\in\mathbb{R}^{8\times3},\quad w\in\mathbb{R}^{3},\quad b=1/8
@@ -47,7 +47,7 @@ $$
 
 Save the assembled code as main.py in your course workspace and run it in a fresh process. By default COURSE_EXPECT_PLATFORM is cpu. The program selects that backend explicitly, places both inputs on its first device and waits for the compiled prediction to finish. NumPy independently calculates the same arithmetic. Keep the environment report and predictions.
 
-The tolerance allows small floating-point differences; a successful comparison means this prediction agrees within that tolerance. It does not establish accuracy for a larger model. We use float32 inputs deliberately. Implicit dtype changes and reduced-precision matrix multiplication should be separate experiments after the placement check.
+The tolerance allows small floating-point differences; a successful comparison means this prediction agrees within that tolerance. It is separate from accuracy for a larger model. We use float32 inputs deliberately. Implicit dtype changes and reduced-precision matrix multiplication should be separate experiments after the placement check.
 
 **Run the CPU reference**
 
@@ -174,11 +174,11 @@ if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
-# Verify contract: `devices and all((d.platform == expected for d in devices))`.
+# Assert invariant `devices and all(d.platform == expected for d in devices)` holds
 assert devices and all(d.platform == expected for d in devices)
 # Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
-# Initialize array `w_host` with explicit values and shape.
+# Compute `w_host` from `np.array([0.5, -0.25, 1.0], dtype=np.float32)`
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, devices[0])
@@ -194,7 +194,7 @@ y.block_until_ready()
 reference = x_host @ w_host + np.float32(0.125)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `{d.platform for d in y.devices()} == {expected}` holds
 assert {d.platform for d in y.devices()} == {expected}
 # Convert `report` to a host NumPy array for inspection or verification.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
@@ -209,6 +209,17 @@ print('Completed prediction:', np.asarray(y).tolist())
 ```
 
 Keep the requested backend, observed output placement and independent arithmetic check together in the final report.
+
+## Step 3: Verify invariants on the completed state
+
+Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
+
+```python
+              max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),
+              process_index=jax.process_index(), process_count=jax.process_count())
+```
+
+Checking these invariants confirms the computation is ready for the full worked experiment.
 
 ## Run the example
 
@@ -229,11 +240,11 @@ if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
-# Verify contract: `devices and all((d.platform == expected for d in devices))`.
+# Assert invariant `devices and all(d.platform == expected for d in devices)` holds
 assert devices and all(d.platform == expected for d in devices)
 # Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
-# Initialize array `w_host` with explicit values and shape.
+# Compute `w_host` from `np.array([0.5, -0.25, 1.0], dtype=np.float32)`
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, devices[0])
@@ -249,7 +260,7 @@ y.block_until_ready()
 reference = x_host @ w_host + np.float32(0.125)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `{d.platform for d in y.devices()} == {expected}` holds
 assert {d.platform for d in y.devices()} == {expected}
 # Convert `report` to a host NumPy array for inspection or verification.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
@@ -348,9 +359,9 @@ def verify_report(record, required):
         raise ValueError('prediction contract changed')
     # Return `True` to the caller.
     return True
-# Verify contract: `verify_report(report, expected)`.
+# Assert invariant `verify_report(report, expected)` holds
 assert verify_report(report, expected)
-# Evaluate `wrong` from the current inputs and state.
+# Compute `wrong` from `{**report, 'platform': 'cpu' if expected == 'tpu' el...`
 wrong = {**report, 'platform': 'cpu' if expected == 'tpu' else 'tpu'}
 # Run the boundary check and catch the expected exception:
 try:
@@ -397,7 +408,7 @@ changed.block_until_ready()
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
-# Verify contract: `{d.platform for d in changed.devices()} == {expected}`.
+# Assert invariant `{d.platform for d in changed.devices()} == {expected}` holds
 assert {d.platform for d  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Changed bias, first prediction:', float(changed[0]))
@@ -417,7 +428,7 @@ changed.block_until_ready()
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
-# Verify contract: `{d.platform for d in changed.devices()} == {expected}`.
+# Assert invariant `{d.platform for d in changed.devices()} == {expected}` holds
 assert {d.platform for d in changed.devices()} == {expected}
 # Print the observed values to compare against the expected result.
 print('Changed bias, first prediction:', float(changed[0]))
@@ -448,8 +459,8 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 1. Run `predict` to compute `reversed_y`.
 2. Synchronize host execution until asynchronous device computation completes.
 3. Convert `` to a host NumPy array for inspection or verification.
-4. Verify contract: `{d.platform for d in reversed_y.devices()} == {expected}`.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
+5. Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -462,11 +473,11 @@ reversed_y = predict(...)  # TODO: compute reversed_y
 reversed_y.block_until_ready()
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
-# Verify contract: `{d.platform for d in reversed_y.devices()} == {expected}`.
+# Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
 assert np.isclose(float(reversed_y[0]), 3.625)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[-1]), 0.34375)`
 assert np.isclose(float(reversed_y[-1]), 0.34375)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')
@@ -483,11 +494,11 @@ reversed_y = predict(reversed_x, w)
 reversed_y.block_until_ready()
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
-# Verify contract: `{d.platform for d in reversed_y.devices()} == {expected}`.
+# Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d in reversed_y.devices()} == {expected}
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[0]), 3.625)`
 assert np.isclose(float(reversed_y[0]), 3.625)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.isclose(float(reversed_y[-1]), 0.34375)`
 assert np.isclose(float(reversed_y[-1]), 0.34375)
 # Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')

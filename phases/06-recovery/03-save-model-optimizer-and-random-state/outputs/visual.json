@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "cbed95bc40547078da72dde44d635abd136b8e97f53e9a58386c27255230e967",
+  "contentHash": "20312ee7f5b2a93fba25b7e80d0e7af0eab3fc6247055aedb930acd0deb28752",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
-  "kind": "conceptual",
-  "generatedAt": "2026-10-06T15:35:32.712839+00:00",
+  "kind": "executed",
+  "generatedAt": "2026-10-09T12:23:11.362063+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,14 +14,32 @@
   },
   "stdout": "Restored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\n",
   "data": {
-    "kind": "flow",
-    "nodes": [
-      "Parameters at completed step",
-      "Optimizer moments and count",
-      "Random key and step metadata",
-      "Save one completed snapshot",
-      "Restore and compare next update"
+    "kind": "bar",
+    "x": [
+      0,
+      1
     ],
-    "layout": "merge"
+    "labels": [
+      "leaf 0",
+      "leaf 1"
+    ],
+    "xlabel": "checkpoint parameter leaf index",
+    "ylabel": "L2 norm",
+    "series": [
+      {
+        "label": "uninterrupted step",
+        "y": [
+          0.07066326588392258,
+          0.19857126474380493
+        ]
+      },
+      {
+        "label": "restored from Orbax",
+        "y": [
+          0.07066326588392258,
+          0.19857126474380493
+        ]
+      }
+    ]
   }
 }

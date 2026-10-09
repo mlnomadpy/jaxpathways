@@ -4,6 +4,27 @@
 
 Create probability_assessment.py and a report. Write predictions before running experiments, record actual arrays and seeds, and retain failures. Use CPU float32 JAX calculations and independent float64 NumPy references with justified tolerances.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: exact conjugate Gaussian posterior & KL(q || p) check
+import jax
+import jax.numpy as jnp
+
+X = jnp.array([[1.0, -1.0], [1.0, 0.0], [1.0, 1.0]], dtype=jnp.float32)
+y = jnp.array([-1.0, 1.0, 3.0], dtype=jnp.float32)
+sigma2 = 1.0
+tau2 = 4.0
+
+# Compute exact posterior precision, covariance, and mean vector.
+post_prec = (X.T @ X) / sigma2 + jnp.eye(2, dtype=jnp.float32) / tau2
+post_cov = jnp.linalg.inv(post_prec)
+post_mean = post_cov @ (X.T @ y / sigma2)
+print("Posterior mean:", post_mean, "Posterior diag var:", jnp.diag(post_cov))
+```
+
 ## Task 1: derive a posterior before approximating it
 
 Use design rows \((1,-1),(1,0),(1,1)\), targets \((-1,1,3)\), observation standard deviation \(\sigma=1\) and prior standard deviation \(\tau=2\). State which variables are random and which are conditioned on.
@@ -25,7 +46,7 @@ Run four dispersed HMC chains against the exact posterior or an explicitly decla
 4. Compute classical split R-hat and explicitly distinguish it from modern rank-normalized split R-hat.
 5. Reproduce unstable integration with a larger step and stuck/disagreeing chains with a synthetic fixture. Explain why pooling chains or removing repeated rejected states conceals a failure.
 
-**Keep:** code, environment, actual energy-error summaries, numerical tolerances, traces and a statement of what these checks cannot establish. Explain why high acceptance alone does not imply effective exploration.
+**Keep:** code, environment, actual energy-error summaries, numerical tolerances, traces and a statement of which target-scale properties require additional validation. Explain why high acceptance alone does not imply effective exploration.
 
 ## Task 3: measure variational family error
 
@@ -51,7 +72,7 @@ For the original regression model, compute predictions at inputs zero and two. R
 
 Draw posterior weights and independent observation noise. Verify the empirical prediction variance against the analytic result. Then construct a deliberately shifted or curved outcome fixture, without changing the fitted model, and measure how its residual pattern and interval coverage differ.
 
-Explain why model-generated self-coverage checks arithmetic but cannot establish real-data calibration. Propose a real-data protocol with frozen splits, provenance, group sizes, a predeclared discrepancy and a final held-out report. Do not describe that proposed study as executed.
+Explain why model-generated self-coverage checks arithmetic but verifies arithmetic consistency before external calibration. Propose a real-data protocol with frozen splits, provenance, group sizes, a predeclared discrepancy and a final held-out report. Do not describe that proposed study as executed.
 
 **Keep:** a prediction plot with axes, units and interpreted values; model-consistent and mismatched results; and the proposed external-validation protocol.
 

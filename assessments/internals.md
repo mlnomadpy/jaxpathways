@@ -4,6 +4,30 @@
 
 Record Python/JAX/NumPy versions, actual backend/device count, dtype, commands and tolerances. Preserve your implementation and create a separate assessment harness/report. State predictions before running. Do not change public tests to make a result pass.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: rectangular JVP, VJP, and adjoint dot-product identity
+import jax
+import jax.numpy as jnp
+
+def f_rect(x: jnp.ndarray) -> jnp.ndarray:
+    a, b = x[0], x[1]
+    return jnp.stack([a * b, jnp.sin(a) + b ** 2, a ** 2 - b])
+
+x0 = jnp.array([0.3, -0.6], dtype=jnp.float32)
+v = jnp.array([0.7, -0.2], dtype=jnp.float32)
+u = jnp.array([0.5, -0.8, 1.2], dtype=jnp.float32)
+
+# Verify <u, J(x0) v> == <J(x0)^T u, v> to machine precision.
+_, jvp_out = jax.jvp(f_rect, (x0,), (v,))
+_, vjp_fn = jax.vjp(f_rect, x0)
+vjp_out = vjp_fn(u)[0]
+print("Adjoint gap:", float(jnp.abs(jnp.dot(u, jvp_out) - jnp.dot(vjp_out, v))))
+```
+
 ## Task 1: a rectangular derivative map
 
 Use

@@ -740,9 +740,9 @@ These guides connect the full lifecycle and identify available harnesses separat
 
 ## Where the three notebook topics belong
 
-- Notebook 1: Flax NNX + Optax training system → 05: Neural network training. Source pending.
-- Notebook 2: Grain + Orbax reproducible training → 06: Data & checkpoint recovery. Source pending.
-- Notebook 3: XProf performance → 08: Performance diagnosis. Source pending.
+- Notebook 1: Flax NNX + Optax training system → 05: Neural network training. integrated.
+- Notebook 2: Grain + Orbax reproducible training → 06: Data & checkpoint recovery. integrated.
+- Notebook 3: XProf performance → 08: Performance diagnosis. integrated.
 
 **TODO (Legacy Notebook Split):** Import and split the three legacy standalone notebooks into phase integration labs.
 

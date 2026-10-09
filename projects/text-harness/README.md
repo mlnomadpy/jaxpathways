@@ -2,7 +2,7 @@
 
 A generated string is the last step of a system. Before trusting it, we need to know which bytes became tokens, which targets contributed to loss, whether a resumed run sees the same next examples, and whether cached inference computes the same causal function.
 
-This project connects those pieces in a real one-block, two-head Transformer. It trains on short synthetic reversal strings such as abc|cba. The fixture makes masking, state and cache mistakes inspectable. It is not a pretrained language model and does not establish natural-language quality.
+This project connects those pieces in a real one-block, two-head Transformer. It trains on short synthetic reversal strings such as abc|cba. The fixture makes masking, state and cache mistakes inspectable. It is not a pretrained language model and is verified separately from natural-language quality.
 
 ## Run the learner stages
 

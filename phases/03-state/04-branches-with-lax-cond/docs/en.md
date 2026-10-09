@@ -25,6 +25,10 @@ The plot of magnitudes shows what the branch computes, not the tracing process. 
 
 After batching or other transformations, the implementation of control flow can change; for example, batching a conditional can turn it into selection. Keep claims about execution scope tied to the actual transformed program.
 
+$$
+\mathcal{T} = (\text{Leaves}(\mathcal{T}),\; \text{TreeDef}(\mathcal{T})), \qquad \operatorname{map}(g, \mathcal{T})_k = g(\mathcal{T}_k)
+$$
+
 ### Pause and reason
 
 Can one branch return a vector and the other a scalar if your current input only selects the vector?
@@ -105,7 +109,7 @@ Append the checks, save main.py, and run python main.py from this folder using y
 print(float(magnitude(-3.)))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(magnitude(2.), 2.)`
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -130,7 +134,7 @@ def magnitude(x):
 print(float(magnitude(-3.)))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(magnitude(2.), 2.)`
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -189,7 +193,7 @@ def eager_branch(v):
         return v
     # Return `-v` to the caller.
     return -v
-# Verify contract: `eager_branch(-3.0) == 3.0`.
+# Assert invariant `eager_branch(-3.)==3.` holds
 assert eager_branch(-3.)==3.
 # Run the boundary check and catch the expected exception:
 try:
@@ -200,7 +204,7 @@ else:
     raise AssertionError("Expected branch error")
 # Iterate over `v` to step through the computation:
 for v in [-3.,0.,2.]:
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Check numerical equivalence within tolerance: `jnp.allclose(magnitude(v),abs(v))`
     assert jnp.allclose(magnitude(v),abs(v))
 ```
 
@@ -214,11 +218,11 @@ The repair changes where the decision is represented. It does not make $x$ stati
 
 ```python
 # Experiment — Check a batched numerical selection: Correct values under batching do not imply a conditional branch...
-# Initialize array `values` with explicit values and shape.
+# Construct `values` via `jnp.array([-3.,-1.,2.,4.])`
 values=jnp.array([-3.,-1.,2.,4.])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1....`
 assert jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))
 ```
 
@@ -241,7 +245,7 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 2. Function `choose_update(x)` implementing this stage's computation:
 3. Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
 4. Verify that the numerical values match the expected reference within tolerance.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -255,9 +259,9 @@ def choose_update(x):
     return ...  # TODO: return computed result
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(choose_update(3.), 6.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
 assert jnp.allclose(choose_update(-3.), -5.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(0.), -2.)`
 assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 ```
 
@@ -273,9 +277,9 @@ def choose_update(x):
     return jax.lax.cond(x > 0., lambda v: v * 2., lambda v: v - 2., x)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(choose_update(3.), 6.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(-3.), -5.)`
 assert jnp.allclose(choose_update(-3.), -5.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(choose_update(0.), -2.)`
 assert jnp.allclose(choose_update(0.), -2.)
 ```
 
@@ -304,8 +308,8 @@ At $x=1$ the false branch is selected.
 **Step-by-step implementation plan:**
 1. Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
 2. Verify that the numerical values match the expected reference within tolerance.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
+4. Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -316,9 +320,9 @@ def piecewise(v):
     return ...  # TODO: return computed result
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion check
 ```
 
@@ -331,9 +335,9 @@ def piecewise(v):
     return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(-1.),2.)`
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jax.grad(piecewise)(2.),4.)`
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)
 ```
 

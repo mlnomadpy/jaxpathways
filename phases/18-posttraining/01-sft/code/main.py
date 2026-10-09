@@ -27,13 +27,13 @@ def validate_mask(selected, shape):
 # 2. Align prompt, response and target masks
 # Token 0/1 is a prompt; 2/3 is its response; 4 marks the end.
 tokens = jnp.array([[0, 2, 4], [1, 3, 4]], jnp.int32)
-# Initialize array `roles` with explicit values and shape.
+# Construct `roles` via `jnp.array([[False, True, True]] * 2)`
 roles = jnp.array([[False, True, True]] * 2)
 # Run `validate_mask` to perform the next check or state transition.
 validate_mask(roles[:, 1:], tokens[:, 1:].shape)
-# Initialize array `p` with explicit values and shape.
+# Construct `p` via `jnp.zeros((5, 5))`
 p = jnp.zeros((5, 5))
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 
 # Function `sft_objective(p)` implementing this stage's computation:
@@ -51,20 +51,20 @@ for _ in range(100):
     value, g = step(p)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `p` from the current inputs and state.
+    # Compute `p` from `p - 0.5 * g`
     p = p - 0.5 * g
 
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)`
 np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
-# Verify contract: `history[-1] < 0.15`.
+# Assert invariant `history[-1] < 0.15` holds
 assert history[-1] < 0.15
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])` holds
 assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
-# Evaluate `changed` from the current inputs and state.
+# Compute `changed` from `base_logits.at[:, -1, :].set(100.0)`
 changed = base_logits.at[:, -1, :].set(100.0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -97,13 +97,13 @@ def validate_mask(selected, shape):
 
 # Token 0/1 is a prompt; 2/3 is its response; 4 marks the end.
 tokens = jnp.array([[0, 2, 4], [1, 3, 4]], jnp.int32)
-# Initialize array `roles` with explicit values and shape.
+# Construct `roles` via `jnp.array([[False, True, True]] * 2)`
 roles = jnp.array([[False, True, True]] * 2)
 # Run `validate_mask` to perform the next check or state transition.
 validate_mask(roles[:, 1:], tokens[:, 1:].shape)
-# Initialize array `p` with explicit values and shape.
+# Construct `p` via `jnp.zeros((5, 5))`
 p = jnp.zeros((5, 5))
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 
 # Function `sft_objective(p)` implementing this stage's computation:
@@ -120,20 +120,20 @@ for _ in range(100):
     value, g = step(p)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `p` from the current inputs and state.
+    # Compute `p` from `p - 0.5 * g`
     p = p - 0.5 * g
 
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)`
 np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
-# Verify contract: `history[-1] < 0.15`.
+# Assert invariant `history[-1] < 0.15` holds
 assert history[-1] < 0.15
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])` holds
 assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
-# Evaluate `changed` from the current inputs and state.
+# Compute `changed` from `base_logits.at[:, -1, :].set(100.0)`
 changed = base_logits.at[:, -1, :].set(100.0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -143,25 +143,25 @@ print('Response-only token NLL initial/final:', history[0], history[-1])
 
 # Figure data experiment
 # Compute figure data for: Supervised fine-tuning with response-only token loss — recorded experiment
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'response-token NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 # Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Evaluate `panel['x']` from the current inputs and state.
+    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
 # Allocate initialized array `initial_output_grads` with the specified shape and dtype.
 initial_output_grads=jax.grad(lambda values:-jnp.sum(response_logps(values,tokens,roles))/jnp.sum(roles[:,1:]))(jnp.zeros((2,3,5)))
 # Convert `extra_panel` to a host NumPy array for inspection or verification.
 extra_panel={'kind':'heatmap','values':np.asarray(jnp.linalg.norm(initial_output_grads,axis=-1)).tolist(),'rows':['prompt 0 / answer 2','prompt 1 / answer 3'],'columns':['input position 0','input position 1','input position 2'],'unit':'output-logit gradient L2 norm','xlabel':'position producing the prediction','ylabel':'sequence','title':'Initial supervised gradient by output position'}
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 # Experiment: Prove the target-mask shift
 # Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
 # Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
-# Verify contract: `np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g...`.
+# Assert invariant `np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarra...` holds
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(g)[4], 0.0)
@@ -170,9 +170,9 @@ print('Prompt rows learn to predict first answers; the final end-token row has n
 
 # Experiment: Check a ragged batch against a scalar loop
 # Experiment — Check a ragged batch against a scalar loop: Padding and role masks affect the target after shifting.
-# Initialize array `ragged_tokens` with explicit values and shape.
+# Construct `ragged_tokens` via `jnp.array([[0, 2, 4, 4], [1, 3, 2, 4]])`
 ragged_tokens = jnp.array([[0, 2, 4, 4], [1, 3, 2, 4]])
-# Initialize array `ragged_roles` with explicit values and shape.
+# Construct `ragged_roles` via `jnp.array([[False, True, True, False], [False, True,...`
 ragged_roles = jnp.array([[False, True, True, False], [False, True, True, True]])
 # Construct and reshape `ragged_logits` into the target tensor dimensions.
 ragged_logits = jnp.arange(2 * 4 * 5, dtype=jnp.float32).reshape(2, 4, 5) / 19
@@ -180,11 +180,11 @@ ragged_logits = jnp.arange(2 * 4 * 5, dtype=jnp.float32).reshape(2, 4, 5) / 19
 observed = response_logps(ragged_logits, ragged_tokens, ragged_roles)
 # Convert `arr` to a host NumPy array for inspection or verification.
 arr = np.asarray(ragged_logits, dtype=np.float64)
-# Evaluate `expected` from the current inputs and state.
+# Compute `expected` from `[]`
 expected = []
 # Iterate over `row` to step through the computation:
 for row in range(2):
-    # Evaluate `total` from the current inputs and state.
+    # Compute `total` from `0.0`
     total = 0.0
     # Iterate over `position` to step through the computation:
     for position in range(3):
@@ -195,7 +195,7 @@ for row in range(2):
             total += values[int(ragged_tokens[row, position + 1])] - log_normalizer
     # Append the current step result to `expected`.
     expected.append(total)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(observed, expected, atol=1e-6)`
 np.testing.assert_allclose(observed, expected, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print('Supervised targets per sequence:', np.asarray(ragged_roles[:, 1:].sum(1)))
@@ -207,9 +207,9 @@ first_only = roles.at[:, 2].set(False)
 value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
     first_only[:, 1:]
 )
-# Verify contract: `int(jnp.sum(first_only[:, 1:])) == 2`.
+# Assert invariant `int(jnp.sum(first_only[:, 1:])) == 2` holds
 assert int(jnp.sum(first_only[:, 1:])) == 2
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Ensure all array elements remain finite: `np.isfinite(float(value))`
 assert np.isfinite(float(value))
 # Print the observed values to compare against the expected result.
 print('Two first-response targets:', float(value))
@@ -226,15 +226,15 @@ else:
 
 # Reference practice: Create a failure this model cannot fix
 # Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
-# Initialize array `contexts` with explicit values and shape.
+# Construct `contexts` via `jnp.array([[1, 0], [3, 0]])`
 contexts = jnp.array([[1, 0], [3, 0]])
-# Evaluate `last_logits` from the current inputs and state.
+# Compute `last_logits` from `p[contexts[:, -1]]`
 last_logits = p[contexts[:, -1]]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(last_logits[0], last_logits[1]`
 np.testing.assert_array_equal(last_logits[0], last_logits[1])
-# Initialize array `conflicting_targets` with explicit values and shape.
+# Construct `conflicting_targets` via `jnp.array([2, 3])`
 conflicting_targets = jnp.array([2, 3])
-# Verify contract: `conflicting_targets[0] != conflicting_targets[1]`.
+# Assert invariant `conflicting_targets[0] != conflicting_targets[1]` holds
 assert conflicting_targets[0] != conflicting_targets[1]
 # Print the observed values to compare against the expected result.
 print('Identical final tokens force identical table predictions despite different contexts.')

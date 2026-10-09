@@ -8,14 +8,19 @@ frozen=np.asarray(base).copy()
 u=jnp.array([[.2],[-.3],[.1],[.2],[-.1],[.4]])
 v=jnp.array([[.5,-.2,.3,.1]])
 target=x@(base+u@v)
-a=jax.random.normal(jax.random.key(4),(6,1))*.1;b=jnp.zeros((1,4));params=(a,b)
+a=jax.random.normal(jax.random.key(4),(6,1))*.1
+b=jnp.zeros((1,4))
+params=(a,b)
 loss=lambda ab:jnp.mean((lora_forward(x,base,*ab,alpha=1.)-target)**2)
-step=jax.jit(jax.value_and_grad(loss));history=[]
+step=jax.jit(jax.value_and_grad(loss))
+history=[]
 initial_grads=step(params)[1]
 np.testing.assert_array_equal(initial_grads[0],np.zeros((6,1)))
 assert np.linalg.norm(initial_grads[1])>0
 for _ in range(250):
-    value,g=step(params);history.append(float(value));params=jax.tree.map(lambda a,b:a-.4*b,params,g)
+    value,g=step(params)
+    history.append(float(value))
+    params=jax.tree.map(lambda a,b:a-.4*b,params,g)
 a,b=params
 assert history[-1]<history[0]*.02
 np.testing.assert_array_equal(base,frozen)

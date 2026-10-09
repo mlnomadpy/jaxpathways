@@ -23,7 +23,9 @@ class TorchModel(torch.nn.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Run `torch.nn.functional.gelu` to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=torch.nn.functional.gelu(n,approximate='none')
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=torch.nn.functional.gelu(n,approximate='none')
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
@@ -42,7 +44,9 @@ class FlaxModel(nnx.Module):
         # Run `self.hidden` to compute `h`.
         # Run `self.norm` to compute `n`.
         # Apply nonlinear activation or probability normalization to compute `a`.
-        h=self.hidden(x);n=self.norm(h);a=jax.nn.gelu(n,approximate=False)
+        h=self.hidden(x)
+        n=self.norm(h)
+        a=jax.nn.gelu(n,approximate=False)
         # Return `{'hidden': h, 'norm': n, 'activation': a, 'output': self.out(a)}` to the caller.
         return {'hidden':h,'norm':n,'activation':a,'output':self.out(a)}
 
@@ -84,7 +88,8 @@ def convert(state,eps=1e-5):
 def error_report(reference,actual,atol=2e-6,rtol=2e-5):
     # Convert `reference` to a host NumPy array for inspection or verification.
     # Convert `actual` to a host NumPy array for inspection or verification.
-    reference=np.asarray(reference,dtype=np.float64);actual=np.asarray(actual,dtype=np.float64)
+    reference=np.asarray(reference,dtype=np.float64)
+    actual=np.asarray(actual,dtype=np.float64)
     # Guard input contract (`reference.shape != actual.shape or not np.isfinite(reference).all() or (not np.isfinite(actual).all())`) and fail fast if violated.
     if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
         raise ValueError('shape or finite-value mismatch')

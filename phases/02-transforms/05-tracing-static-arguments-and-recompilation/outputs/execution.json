@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-05",
-  "contentHash": "4114f84833c3e284bc852412d692841c9da0c4141085dba841e0ed477c85bad6",
+  "contentHash": "1e6efabd4583780a4093c648d2993c7ce25c494a90d5bb29eb1545309f8f04e5",
   "executedAt": "2026-10-08T14:01:32.925571+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,7 +14,19 @@
   "stdout": "Sum: 6.0\nMean: 2.0\nTracing sum_squares; shape: (3,)\n{ lambda ; a:f32[3]. let\n    b:f32[3] = mul a a\n    c:f32[] = reduce_sum[axes=(0,) out_sharding=None] b\n  in (c,) }\nExpected dynamic Boolean conversion error\nPASS: transforms-05\n",
   "notebookCells": [
     {
-      "sourceHash": "87473823434b1bb922aba75338a5aa5bbe7bde197a98b4256dd147464520ff8a",
+      "sourceHash": "9f169a99fd56a87bed362d86214ee9837fb7ede4b9551be6f03c098d3d045997",
+      "outputs": []
+    },
+    {
+      "sourceHash": "69206dc35b5b1f91e97a636eeae1624a26ebaef90c9cd06e4d6e4218e32b7009",
+      "outputs": []
+    },
+    {
+      "sourceHash": "eab8eca46235c37bb19a13da0314272b2bc059125607a5d39f96aa21a7b1d2b2",
+      "outputs": []
+    },
+    {
+      "sourceHash": "685585e05e3f684d39d415ed482857ab0a28558d1dbcfd0466a6e685866cb968",
       "outputs": [
         {
           "output_type": "stream",
@@ -27,7 +39,11 @@
       ]
     },
     {
-      "sourceHash": "d5b15b013eef8f2b1ca50d6f7664f88c05b0f95b5376df5b55d042374dcbccc5",
+      "sourceHash": "3141cb8f7f4b266278445ee49f1fe0350e2aa0f97dc77853239fa2cfea45914d",
+      "outputs": []
+    },
+    {
+      "sourceHash": "25df6d662f9d3f0c4e984c6a201f79fa0cfd7a2633dc4b0773dfba6c2dd4ee6c",
       "outputs": [
         {
           "output_type": "display_data",
@@ -42,55 +58,35 @@
       ]
     },
     {
-      "sourceHash": "0d18a240a034222b56a0f6968a1a00c340ba5fc8d9274529f198bf8959a02d35",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Tracing sum_squares; shape: (3,)\n",
-            "{ lambda ; a:f32[3]. let\n",
-            "    b:f32[3] = mul a a\n",
-            "    c:f32[] = reduce_sum[axes=(0,) out_sharding=None] b\n",
-            "  in (c,) }\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "069e12dcc583cc56c15add377e1580d8e8492ba1090aab5db4cf72012e429b26",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Expected dynamic Boolean conversion error\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "5040145f536a97029408368f6410a34119252a5f3d7abddcc45b31a792011fbd",
+      "sourceHash": "2f8d0303804db7337a51352c657d03e86c4c539fc8be59d831a9f093518e93ff",
       "outputs": []
     },
     {
-      "sourceHash": "dd193e23a4641c62a1f611f3a7a53a4a0ef8f8718ed648550467a52565b8bc4f",
+      "sourceHash": "b5aa5c36f5c76a10f59f5324b7785464231738ac9169a0ba0420e58175e192b4",
       "outputs": []
     },
     {
-      "sourceHash": "67637249021f01423f2bee0cf027f89f5361df50806d0be287e09e162f98b65d",
+      "sourceHash": "01236b3e82714611babaa2a980d78e44df0bc352ac3a8b117b6f875a91e12d76",
       "outputs": []
     },
     {
-      "sourceHash": "c00481c8f4061e5088c9a60dec6ed492aa49b61157841430ea749a813901f44f",
+      "sourceHash": "8b18c291ce66d09553ef55f4d371f9df14f53ce88aa64672427071675b54bf34",
       "outputs": []
     },
     {
-      "sourceHash": "911a7b64ab28bc7312d6757ae2140782f753a9afb939d80772d1c356901067aa",
+      "sourceHash": "16cd40f4a00415b4a278929eef620c397c0b8d101bb8bf5a1dda7bc84e4987f8",
       "outputs": []
     },
     {
-      "sourceHash": "98de5f457c6761605fec4a81de0c26baf38f247f64e6b199db2a95e5d8db1e0f",
+      "sourceHash": "d9926feb4e6cadd0f08cbfd0c98d92c4cc3d2a23f274e7ab2581a111afe826d2",
+      "outputs": []
+    },
+    {
+      "sourceHash": "0a1af7ca768705e4f2b379433345f544cf0b011c0e36e075a337135a0be929c1",
+      "outputs": []
+    },
+    {
+      "sourceHash": "59fc31bf79b7cfc1dbb5a5452552dfd5fed30201890a4f15944a93acb5c174a7",
       "outputs": []
     }
   ],

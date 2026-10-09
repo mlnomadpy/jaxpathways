@@ -25,6 +25,10 @@ Draw one vertical boundary after an update and align parameters, optimizer, key 
 
 When comparing loss trajectories, align measurement conventions too. A loss before an update and a loss after it describe different states. Compare IDs and state values alongside loss, because similar scalar losses can conceal different training histories.
 
+$$
+(k_{t+1}, k_{\text{step}}) = \operatorname{split}(k_t), \qquad i_{t+1} = (i_t + B) \bmod N
+$$
+
 ### One checkpoint, one completed-step boundary
 
 **Predict:** Why reject a resume even when its first loss nearly matches the reference?
@@ -104,7 +108,7 @@ from pathlib import Path
 tx = optax.adam(0.05)
 # Function `initial_state()` implementing this stage's computation:
 def initial_state():
-    # Initialize array `params` with explicit values and shape.
+    # Construct `params` via `{"weight":jnp.array(0.,jnp.float32),"bias":jnp.array...`
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
     # Return `{'params': params, 'optimizer': tx.init(params), 'key_data': jax.random.key_data(jax.random.key(7, impl='threefry2x32')), 'step': jnp.array(0, jnp.int32)}` to the caller.
     return {"params":params,"optimizer":tx.init(params),
@@ -132,13 +136,13 @@ def unpack_bytes(packed):
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 # Function `same_tree(left, right)` implementing this stage's computation:
 def same_tree(left,right):
-    # Verify contract: `jax.tree.structure(left) == jax.tree.structure(right)`.
+    # Assert invariant `jax.tree.structure(left)==jax.tree.structure(right)` holds
     assert jax.tree.structure(left)==jax.tree.structure(right)
     # Iterate over `(a, b)` to step through the computation:
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
         # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
         host_a,host_b = np.asarray(a),np.asarray(b)
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
         # Branch on condition `np.issubdtype(host_a.dtype, np.integer)`:
         if np.issubdtype(host_a.dtype,np.integer):
@@ -155,7 +159,7 @@ def step(state,x,y):
     target_noise = 0.01*jax.random.normal(sample_key,y.shape)
     # Function `objective(params)` implementing this stage's computation:
     def objective(params):
-        # Evaluate `residual` from the current inputs and state.
+        # Compute `residual` from `params["weight"]*x+params["bias"]-(y+target_noise)`
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         # Return `jnp.mean(residual ** 2)` to the caller.
         return jnp.mean(residual**2)
@@ -198,7 +202,7 @@ import grain.python as grain
 class TutorialSource:
     # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
-        # Evaluate `self.count` from the current inputs and state.
+        # Compute `self.count` from `count`
         self.count = count
     # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
@@ -235,7 +239,7 @@ Append this block to the same file; follow the named state objects through each 
 def data_contract(seed=42):
     # Run `TutorialSource` to compute `source`.
     source = TutorialSource()
-    # Initialize array `values` with explicit values and shape.
+    # Compute `values` from `np.array([[source[i]["x"],source[i]["y"]] for i in r...`
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
     # Return `{'schema': 1, 'seed': seed, 'batch_size': 4, 'count': 12, 'source': 'TutorialSource(v1,n=12)', 'sha256': hashlib.sha256(values.tobytes()).hexdigest(), 'learning_rate': 0.05, 'optimizer': 'adam', 'key_impl': 'threefry2x32', 'versions': dict(package_versions(), grain=__import__('importlib.metadata', fromlist=['version']).version('grain'))}` to the caller.
     return {"schema":1,"seed":seed,"batch_size":4,"count":12,"source":"TutorialSource(v1,n=12)",
@@ -245,8 +249,9 @@ def data_contract(seed=42):
 # Function `consume(state, iterator, count)` implementing this stage's computation:
 def consume(state,iterator,count):
     # Evaluate `losses` from the current inputs and state.
-    # Evaluate `orders` from the current inputs and state.
-    losses=[];orders=[]
+    # Compute `losses` from `[]`
+    losses=[]
+    orders=[]
     # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
         # Run `next` to compute `batch`.
@@ -265,9 +270,9 @@ contract = data_contract()
 reference_iterator = iter(make_loader())
 # Run `consume` to compute `(reference_state, _, _)`.
 reference_state,_,_ = consume(initial_state(),reference_iterator,2)
-# Evaluate `payload` from the current inputs and state.
+# Compute `payload` from `{"training":reference_state,"pipeline":pack_bytes(re...`
 payload = {"training":reference_state,"pipeline":pack_bytes(reference_iterator.get_state()),"contract":encode_contract(contract)}
-# Evaluate `resume_path` from the current inputs and state.
+# Compute `resume_path` from `root/"completed_step_2"`
 resume_path = root/"completed_step_2"
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
@@ -298,11 +303,11 @@ reference_final,reference_losses,reference_ids = consume(reference_state,referen
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1...`
 np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(reference_final,resumed_final)
-# Verify contract: `int(resumed_final['step']) == 6`.
+# Assert invariant `int(resumed_final["step"])==6` holds
 assert int(resumed_final["step"])==6
 # Print the observed values to compare against the expected result.
 print("Restored next four ID batches:",[a.tolist() for a in resumed_ids])
@@ -335,7 +340,7 @@ from pathlib import Path
 tx = optax.adam(0.05)
 # Function `initial_state()` implementing this stage's computation:
 def initial_state():
-    # Initialize array `params` with explicit values and shape.
+    # Construct `params` via `{"weight":jnp.array(0.,jnp.float32),"bias":jnp.array...`
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
     # Return `{'params': params, 'optimizer': tx.init(params), 'key_data': jax.random.key_data(jax.random.key(7, impl='threefry2x32')), 'step': jnp.array(0, jnp.int32)}` to the caller.
     return {"params":params,"optimizer":tx.init(params),
@@ -363,13 +368,13 @@ def unpack_bytes(packed):
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 # Function `same_tree(left, right)` implementing this stage's computation:
 def same_tree(left,right):
-    # Verify contract: `jax.tree.structure(left) == jax.tree.structure(right)`.
+    # Assert invariant `jax.tree.structure(left)==jax.tree.structure(right)` holds
     assert jax.tree.structure(left)==jax.tree.structure(right)
     # Iterate over `(a, b)` to step through the computation:
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
         # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
         host_a,host_b = np.asarray(a),np.asarray(b)
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
         # Branch on condition `np.issubdtype(host_a.dtype, np.integer)`:
         if np.issubdtype(host_a.dtype,np.integer):
@@ -386,7 +391,7 @@ def step(state,x,y):
     target_noise = 0.01*jax.random.normal(sample_key,y.shape)
     # Function `objective(params)` implementing this stage's computation:
     def objective(params):
-        # Evaluate `residual` from the current inputs and state.
+        # Compute `residual` from `params["weight"]*x+params["bias"]-(y+target_noise)`
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         # Return `jnp.mean(residual ** 2)` to the caller.
         return jnp.mean(residual**2)
@@ -429,7 +434,7 @@ import grain.python as grain
 class TutorialSource:
     # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
-        # Evaluate `self.count` from the current inputs and state.
+        # Compute `self.count` from `count`
         self.count = count
     # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
@@ -458,7 +463,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
 def data_contract(seed=42):
     # Run `TutorialSource` to compute `source`.
     source = TutorialSource()
-    # Initialize array `values` with explicit values and shape.
+    # Compute `values` from `np.array([[source[i]["x"],source[i]["y"]] for i in r...`
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
     # Return `{'schema': 1, 'seed': seed, 'batch_size': 4, 'count': 12, 'source': 'TutorialSource(v1,n=12)', 'sha256': hashlib.sha256(values.tobytes()).hexdigest(), 'learning_rate': 0.05, 'optimizer': 'adam', 'key_impl': 'threefry2x32', 'versions': dict(package_versions(), grain=__import__('importlib.metadata', fromlist=['version']).version('grain'))}` to the caller.
     return {"schema":1,"seed":seed,"batch_size":4,"count":12,"source":"TutorialSource(v1,n=12)",
@@ -468,8 +473,9 @@ def data_contract(seed=42):
 # Function `consume(state, iterator, count)` implementing this stage's computation:
 def consume(state,iterator,count):
     # Evaluate `losses` from the current inputs and state.
-    # Evaluate `orders` from the current inputs and state.
-    losses=[];orders=[]
+    # Compute `losses` from `[]`
+    losses=[]
+    orders=[]
     # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
         # Run `next` to compute `batch`.
@@ -488,9 +494,9 @@ contract = data_contract()
 reference_iterator = iter(make_loader())
 # Run `consume` to compute `(reference_state, _, _)`.
 reference_state,_,_ = consume(initial_state(),reference_iterator,2)
-# Evaluate `payload` from the current inputs and state.
+# Compute `payload` from `{"training":reference_state,"pipeline":pack_bytes(re...`
 payload = {"training":reference_state,"pipeline":pack_bytes(reference_iterator.get_state()),"contract":encode_contract(contract)}
-# Evaluate `resume_path` from the current inputs and state.
+# Compute `resume_path` from `root/"completed_step_2"`
 resume_path = root/"completed_step_2"
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
@@ -513,11 +519,11 @@ reference_final,reference_losses,reference_ids = consume(reference_state,referen
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 # Iterate over `(a, b)` to step through the computation:
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1...`
 np.testing.assert_allclose(reference_losses,resumed_losses,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(reference_final,resumed_final)
-# Verify contract: `int(resumed_final['step']) == 6`.
+# Assert invariant `int(resumed_final["step"])==6` holds
 assert int(resumed_final["step"])==6
 # Print the observed values to compare against the expected result.
 print("Restored next four ID batches:",[a.tolist() for a in resumed_ids])
@@ -529,25 +535,26 @@ print("Full state agrees at step six")
 
 Expected: The next four ID batches and losses match; parameters, Adam state, continuation key and step agree at step six. One epoch boundary is crossed.
 
-## Data position completes the recovery boundary
+## Loss trajectory parity: uninterrupted vs. checkpoint-resumed run
 
-**Predict:** What changes if the model resumes with the wrong next batch?
+**Predict:** Predict whether resuming training at step 2 with restored optimizer, iterator, and PRNG state matches an uninterrupted trajectory.
 
-![Data position completes the recovery boundary](../../phases/06-recovery/04-recover-data-position-and-resume/outputs/figure.svg)
+![Loss trajectory parity: uninterrupted vs. checkpoint-resumed run](../../phases/06-recovery/04-recover-data-position-and-resume/outputs/figure.svg)
 
-**Conceptual diagram**
+**Recorded CPU computation**
 
 ### Read the figure
 
-The top boxes bring together model and optimizer state, random state, and dataset identity with iterator position. Their arrows converge on “Restore one shared boundary.” The layout emphasizes that none of these inputs can be recovered independently from a different training step.
-
-The final box connects the same next batch to the same next transition. An unchanged model is not enough if the resumed iterator supplies different examples: the next gradient can then differ.
+The uninterrupted and resumed loss curves overlap to machine precision across steps 3 through 6.
 
 ### Connect it to the computation
 
-Think of the boundary as just after a completed update. The parameter values and optimizer history describe that update, the random state identifies the next draws, and the data position identifies the next examples. Dataset identity matters because the same numeric position in a different dataset need not mean the same batch.
+Saving and restoring the step counter, PRNG key, data iterator state, and optimizer moments alongside model weights ensures exact continuation.
 
-The diagram is conceptual; its box sizes do not measure storage or runtime. The executable checks below compare batch IDs and resulting state. Follow that chain when diagnosing recovery: first establish the same inputs to the update, then compare the update’s outputs.
+```python
+# Compare step losses for the 4 post-checkpoint updates (`reference_losses` vs `resumed_losses`):
+visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after checkpoint', 'ylabel': 'batch loss', 'series': [{'label': 'uninterrupted reference_losses', 'y': [float(v) for v in reference_losses]}, {'label': 'checkpoint resumed_losses', 'y': [float(v) for v in resumed_losses]}]}
+```
 
 ## Recorded reference execution
 
@@ -579,9 +586,9 @@ PASS: recovery-04
 fresh = iter(make_loader())
 # Run `consume` to compute `(wrong_state, wrong_losses, wrong_ids)`.
 wrong_state,wrong_losses,wrong_ids = consume(restored_payload["training"],fresh,1)
-# Verify contract: `not np.array_equal(wrong_ids[0], reference_ids[0])`.
+# Assert invariant `not np.array_equal(wrong_ids[0],reference_ids[0])` holds
 assert not np.array_equal(wrong_ids[0],reference_ids[0])
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol...`
 assert not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Missing iterator restore repeats earlier IDs and changes the next loss")
@@ -597,14 +604,15 @@ A model step counter does not automatically seek a data iterator.
 
 ```python
 # Experiment — Restore only the reader: Input replay and model-state replay are complementary...
-reader_only = iter(make_loader());reader_only.set_state(unpack_bytes(restored_payload["pipeline"]))
+reader_only = iter(make_loader())
+reader_only.set_state(unpack_bytes(restored_payload["pipeline"]))
 # Run `consume` to compute `(wrong_model, wrong_model_losses, correct_ids)`.
 wrong_model,wrong_model_losses,correct_ids = consume(initial_state(),reader_only,1)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(correct_ids[0],reference_ids[0`
 np.testing.assert_array_equal(correct_ids[0],reference_ids[0])
 # Verify that the numerical values match the expected reference within tolerance.
 assert not np.isclose(wrong_model_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(wrong_model["step"])==1` holds
 assert int(wrong_model["step"])==1
 # Print the observed values to compare against the expected result.
 print("Correct IDs alone do not restore the training transition")
@@ -625,7 +633,7 @@ Repeat the protocol after one batch and compare the next five batches through st
 
 **Step-by-step implementation plan:**
 1. Run `consume` to compute `(other_state, _, _)`.
-2. Evaluate `other_payload` from the current inputs and state.
+2. Compute `other_payload` from `{"training":other_state,"pipeline":pack_bytes(other_...`
 3. Enter `ocp.StandardCheckpointer()` context block:
 4. Read or serialize artifact data on disk (`other_path`).
 5. Run `cp.save` to perform the next check or state transition.
@@ -637,7 +645,7 @@ Repeat the protocol after one batch and compare the next five batches through st
 other_iterator = iter(...)  # TODO: compute other_iterator
 # Run `consume` to compute `(other_state, _, _)`.
 other_state,_,_ = consume(...)  # TODO: compute other_state,_,_
-# Evaluate `other_payload` from the current inputs and state.
+# Compute `other_payload` from `{"training":other_state,"pipeline":pack_bytes(other_...`
 other_payload = ...  # TODO: compute other_payload
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
@@ -652,17 +660,18 @@ with ocp.StandardCheckpointer() as cp:
 # Run `iter` to compute `other_resumed`.
 # Execute the next step of the computation.
 other_resumed = iter(...)  # TODO: compute other_resumed
+other_resumed.set_state(unpack_bytes(other_saved["pipeline"]))
 # Run `consume` to compute `(a, loss_a, ids_a)`.
 a,loss_a,ids_a = consume(...)  # TODO: compute a,loss_a,ids_a
 # Run `consume` to compute `(b, loss_b, ids_b)`.
 b,loss_b,ids_b = consume(...)  # TODO: compute b,loss_b,ids_b
 # Iterate over `(l, r)` to step through the computation:
 for l,r in zip(ids_a,ids_b):np.testing.assert_array_equal(l,r)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)`
 np.testing.assert_allclose(loss_a,loss_b,rtol = ...  # TODO: compute np.testing.assert_allclose(loss_a,loss_b,rtol
 # Run `same_tree` to perform the next check or state transition.
 same_tree(a,b)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(b["step"])==6` holds
 assert int(b["step"])  # TODO: complete assertion check
 ```
 
@@ -673,7 +682,7 @@ assert int(b["step"])  # TODO: complete assertion check
 other_iterator = iter(make_loader())
 # Run `consume` to compute `(other_state, _, _)`.
 other_state,_,_ = consume(initial_state(),other_iterator,1)
-# Evaluate `other_payload` from the current inputs and state.
+# Compute `other_payload` from `{"training":other_state,"pipeline":pack_bytes(other_...`
 other_payload = {"training":other_state,"pipeline":pack_bytes(other_iterator.get_state()),"contract":encode_contract(contract)}
 # Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
@@ -687,18 +696,19 @@ with ocp.StandardCheckpointer() as cp:
     other_saved = cp.restore(other_path,target={"training":initial_state(),"pipeline":pack_bytes(b""),"contract":encode_contract(contract)})
 # Run `iter` to compute `other_resumed`.
 # Execute the next step of the computation.
-other_resumed = iter(make_loader());other_resumed.set_state(unpack_bytes(other_saved["pipeline"]))
+other_resumed = iter(make_loader())
+other_resumed.set_state(unpack_bytes(other_saved["pipeline"]))
 # Run `consume` to compute `(a, loss_a, ids_a)`.
 a,loss_a,ids_a = consume(other_state,other_iterator,5)
 # Run `consume` to compute `(b, loss_b, ids_b)`.
 b,loss_b,ids_b = consume(other_saved["training"],other_resumed,5)
 # Iterate over `(l, r)` to step through the computation:
 for l,r in zip(ids_a,ids_b):np.testing.assert_array_equal(l,r)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)`
 np.testing.assert_allclose(loss_a,loss_b,rtol=1e-6,atol=1e-7)
 # Run `same_tree` to perform the next check or state transition.
 same_tree(a,b)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `int(b["step"])==6` holds
 assert int(b["step"])==6
 ```
 
@@ -792,7 +802,7 @@ The stored cursor is interpreted in a particular pipeline configuration.
 2. Run `validate_contract` to perform the next check or state transition.
 3. Run `iter` to compute `fixed_reader`.
 4. Execute the next step of the computation.
-5. Verify that computed values match the expected reference within numerical tolerance.
+5. Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -811,7 +821,8 @@ validate_contract(restored_payload["contract"],contract)
 # Run `iter` to compute `fixed_reader`.
 # Execute the next step of the computation.
 fixed_reader = iter(...)  # TODO: compute fixed_reader
-# Verify that computed values match the expected reference within numerical tolerance.
+fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
+# Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
 np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
 ```
 
@@ -831,8 +842,9 @@ else:
 validate_contract(restored_payload["contract"],contract)
 # Run `iter` to compute `fixed_reader`.
 # Execute the next step of the computation.
-fixed_reader = iter(make_loader());fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
-# Verify that computed values match the expected reference within numerical tolerance.
+fixed_reader = iter(make_loader())
+fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
+# Execute `np.testing.assert_array_equal(next(fixed_reader)["id"],refer`
 np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
 ```
 

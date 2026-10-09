@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-02",
-  "contentHash": "c4f315e7a0d45165df3a683d3af8b6db64c4092c883259c71e161cac998e31d4",
+  "contentHash": "7f2ee0b16c4b00e6885c6d987b6a4d829fc279f69c56928492781b6f26e012c4",
   "executedAt": "2026-10-08T14:08:02.686592+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,15 +14,15 @@
   "stdout": "LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nLoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24\nBoth zero factors produce zero first gradients.\nBoth LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.\nAdapter round trip and merge checked.\nNew-input merge passes; accidental double merge changes outputs.\nNonunit scaling passes; best rank-one identity-input MSE is 0.25.\nPASS: posttraining-02\n",
   "notebookCells": [
     {
-      "sourceHash": "48a60a02c8d54a38af9ff260309077bd749684a662e45aa8f12e824f6358baf4",
+      "sourceHash": "53209f6293f431f6972626b806586335e3f0d732a601349773c495167ce0159e",
       "outputs": []
     },
     {
-      "sourceHash": "3467b44ea5410f5ac952d916ac1ff8d1903fc218fbbd9fc34683224d7d4cbee0",
+      "sourceHash": "5ff61ca2076a80c39f20203cb57b6ce018afc71752a88f3193277d3c2b23b3bc",
       "outputs": []
     },
     {
-      "sourceHash": "d9eb937de2f542216a72f22a2ea3e826825cb5652feff2e981e91999601cca86",
+      "sourceHash": "d0d24d16c7e4c16565a75a7fafd5eb2dc699fb4a6172440a275a81b9606ede1b",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "b373e3480a98356b28a69641171846ab63c531f9efd5c7264ea0dff9a535032e",
+      "sourceHash": "15c935b3a31787c2df70339aa7065379695bd09803030c0cd69eac6675d6df76",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "076a88c5639c8fd47db3e1b65b17a99fe8006a2408ff1471a9e866100027fe2b",
+      "sourceHash": "b8ed03ebd311ad53493500772c1456f55dc21184649ff0cbf5386e1280839c4d",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "9e310c92a27e7d18a33bf72e657a181d82c40430a5b7d703043b3bbfe1bdb273",
+      "sourceHash": "62b214e5e829e2782edc34a1923fc12013269cfa9b694407b023929397aa5004",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "ff789ff62736a8342fcb5fc7c7f6aee040f351dd51c4c30dc5675b727e3ecf5b",
+      "sourceHash": "29898746a0de3f9cad555c337cd104d88f471bbbd214c2a17a4868f7a38c6416",
       "outputs": [
         {
           "output_type": "stream",
@@ -89,11 +89,11 @@
       ]
     },
     {
-      "sourceHash": "977fb8405a3b3934329b73ea9e95c7f61ae29a0dec069474dacb4ea76785965b",
+      "sourceHash": "be2fb232e67367e90627b30640007d64d873006e45ebd39a2285aca0eb8643bc",
       "outputs": []
     },
     {
-      "sourceHash": "ec276d5456a08bab58215f12cacb332ba7337a2dfd409a13d1ca91d928156d38",
+      "sourceHash": "c3d09aba2cd1ef74fe1f57860f4484ce2d431a3fb0266720a84fdf082a784f4e",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "79c20c3651c565c506aaf7dc968afe3aa625df771f134f5a07bd40eabc854cc9",
+      "sourceHash": "4dd287d6c8694b074c25579e9158abf53b677cd2088139d99e46465098c3c179",
       "outputs": []
     },
     {
-      "sourceHash": "b52ec01cdebd5e34cc5963b0987d70115dc0db5e34c118451fe0e94d25c64d88",
+      "sourceHash": "08a0e747ff40519ad5d5b657d6117824fa319e9aabb2037120669a71167faa14",
       "outputs": [
         {
           "output_type": "stream",

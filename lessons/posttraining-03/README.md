@@ -113,15 +113,15 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 
 ```python
 # Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
-# Initialize array `features` with explicit values and shape.
+# Construct `features` via `jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])`
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
-# Initialize array `chosen` with explicit values and shape.
+# Construct `chosen` via `features[jnp.array([0, 0, 1])]`
 chosen = features[jnp.array([0, 0, 1])]
-# Initialize array `rejected` with explicit values and shape.
+# Construct `rejected` via `features[jnp.array([1, 2, 2])]`
 rejected = features[jnp.array([1, 2, 2])]
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.zeros(2)`
 w = jnp.zeros(2)
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
@@ -142,16 +142,16 @@ for _ in range(100):
     value, g = step(w)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `w` from the current inputs and state.
+    # Compute `w` from `w - 0.1 * g`
     w = w - 0.1 * g
 
 # Perform matrix / vector contraction (`@`) to compute `rewards`.
 rewards = features @ w
-# Verify contract: `rewards[0] > rewards[1] > rewards[2]`.
+# Assert invariant `rewards[0] > rewards[1] > rewards[2]` holds
 assert rewards[0] > rewards[1] > rewards[2]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)`
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
-# Verify contract: `history[-1] < 0.1`.
+# Assert invariant `history[-1] < 0.1` holds
 assert history[-1] < 0.1
 # Convert `margins` to a host NumPy array for inspection or verification.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
@@ -196,15 +196,15 @@ def preference_loss(w, chosen, rejected):
     return jnp.mean(jax.nn.softplus(-margin))
 
 # Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
-# Initialize array `features` with explicit values and shape.
+# Construct `features` via `jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])`
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
-# Initialize array `chosen` with explicit values and shape.
+# Construct `chosen` via `features[jnp.array([0, 0, 1])]`
 chosen = features[jnp.array([0, 0, 1])]
-# Initialize array `rejected` with explicit values and shape.
+# Construct `rejected` via `features[jnp.array([1, 2, 2])]`
 rejected = features[jnp.array([1, 2, 2])]
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.zeros(2)`
 w = jnp.zeros(2)
-# Evaluate `history` from the current inputs and state.
+# Compute `history` from `[]`
 history = []
 # Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
@@ -217,16 +217,16 @@ for _ in range(100):
     value, g = step(w)
     # Append the current step result to `history`.
     history.append(float(value))
-    # Evaluate `w` from the current inputs and state.
+    # Compute `w` from `w - 0.1 * g`
     w = w - 0.1 * g
 
 # Perform matrix / vector contraction (`@`) to compute `rewards`.
 rewards = features @ w
-# Verify contract: `rewards[0] > rewards[1] > rewards[2]`.
+# Assert invariant `rewards[0] > rewards[1] > rewards[2]` holds
 assert rewards[0] > rewards[1] > rewards[2]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)`
 np.testing.assert_allclose(history[0], np.log(2), atol=1e-6)
-# Verify contract: `history[-1] < 0.1`.
+# Assert invariant `history[-1] < 0.1` holds
 assert history[-1] < 0.1
 # Convert `margins` to a host NumPy array for inspection or verification.
 margins = np.asarray((chosen - rejected) @ w, dtype=np.float64)
@@ -274,16 +274,16 @@ The initial zero weights tie all response scores. Training increases the chosen-
 
 ```python
 # Compute figure data for: Learn a reward model from pairwise preferences — recorded experiment
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'pairwise preference NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 # Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Evaluate `panel['x']` from the current inputs and state.
+    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
 # Convert `extra_panel` to a host NumPy array for inspection or verification.
 extra_panel={'kind':'bar','x':[0,1,2],'labels':['0 preferred to 1','0 preferred to 2','1 preferred to 2'],'series':[{'label':'final score difference','y':np.asarray((chosen-rejected)@w).tolist()}],'xlabel':'synthetic comparison','ylabel':'chosen minus rejected reward','title':'Which comparisons the reward model fitted'}
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
@@ -312,7 +312,7 @@ PASS: posttraining-03
 forward = float(preference_loss(w, chosen, rejected))
 # Evaluate `preference_loss(w, rejected, chosen)` and convert the result into Python scalar/collection `reverse`.
 reverse = float(preference_loss(w, rejected, chosen))
-# Verify contract: `reverse > forward`.
+# Assert invariant `reverse > forward` holds
 assert reverse > forward
 # Print the observed values to compare against the expected result.
 print('Forward/reversed preference NLL:', forward, reverse)
@@ -331,13 +331,13 @@ This checks label direction. A decreasing incorrectly signed loss can train a co
 conflict = lambda margin: 0.5 * (
     jax.nn.softplus(-margin) + jax.nn.softplus(margin)
 )
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)`
 np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)
-# Verify contract: `float(conflict(2.0)) > float(conflict(0.0))`.
+# Assert invariant `float(conflict(2.0)) > float(conflict(0.0))` holds
 assert float(conflict(2.0)) > float(conflict(0.0))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose(conflict(2.0), conflict(-2.0))`
 np.testing.assert_allclose(conflict(2.0), conflict(-2.0))
 # Print the observed values to compare against the expected result.
 print('Balanced conflicting labels prefer a zero margin.')
@@ -358,7 +358,7 @@ Calculate the initial loss for tied reward scores independently and verify the t
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `np.all(np.asarray((chosen - rejected) @ w) > 0)`.
+1. Assert invariant `np.all(np.asarray((chosen - rejected) @ w) > 0)` holds
 2. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -368,7 +368,7 @@ Calculate the initial loss for tied reward scores independently and verify the t
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
-# Verify contract: `np.all(np.asarray((chosen - rejected) @ w) > 0)`.
+# Assert invariant `np.all(np.asarray((chosen - rejected) @ w) > 0)` holds
 assert np.all(np.asarray((chosen - rejected) @ w)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Tied baseline and preference directions verified.')
@@ -381,7 +381,7 @@ print('Tied baseline and preference directions verified.')
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
-# Verify contract: `np.all(np.asarray((chosen - rejected) @ w) > 0)`.
+# Assert invariant `np.all(np.asarray((chosen - rejected) @ w) > 0)` holds
 assert np.all(np.asarray((chosen - rejected) @ w) > 0)
 # Print the observed values to compare against the expected result.
 print('Tied baseline and preference directions verified.')
@@ -410,8 +410,8 @@ Positive scaling preserves ordering but sharpens probabilities.
 
 **Step-by-step implementation plan:**
 1. Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
-2. Verify that computed values match the expected reference within numerical tolerance.
-3. Verify contract: `float(preference_loss(2 * w, chosen, rejected)) < float(preference_l...`.
+2. Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
+3. Assert invariant `float(preference_loss(2 * w, chosen, rejected)) < float(` holds
 4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -420,9 +420,9 @@ Positive scaling preserves ordering but sharpens probabilities.
 # Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
 # Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
 scaled_rewards = ...  # TODO: compute scaled_rewards
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
 np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
-# Verify contract: `float(preference_loss(2 * w, chosen, rejected)) < float(preference_l...`.
+# Assert invariant `float(preference_loss(2 * w, chosen, rejected)) < float(` holds
 assert float(preference_loss(2 * w, chosen, rejected))  # TODO: complete assertion check
     preference_loss(w, chosen, rejected)
 )
@@ -436,9 +436,9 @@ print('Ranking unchanged; confidence and downstream reward scale change.')
 # Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.
 # Perform matrix / vector contraction (`@`) to compute `scaled_rewards`.
 scaled_rewards = features @ (2 * w)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(np.argsort(rewards), np.argsor`
 np.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))
-# Verify contract: `float(preference_loss(2 * w, chosen, rejected)) < float(preference_l...`.
+# Assert invariant `float(preference_loss(2 * w, chosen, rejected)) < float(` holds
 assert float(preference_loss(2 * w, chosen, rejected)) < float(
     preference_loss(w, chosen, rejected)
 )
@@ -446,7 +446,7 @@ assert float(preference_loss(2 * w, chosen, rejected)) < float(
 print('Ranking unchanged; confidence and downstream reward scale change.')
 ```
 
-A policy’s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone cannot establish an equivalent RL objective.
+A policy’s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone is distinct from an equivalent RL objective.
 
 </details>
 
@@ -471,7 +471,7 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Initialize array `probe_w` with explicit values and shape.
+1. Construct `probe_w` via `jnp.array([0.2, -0.4])`
 2. Iterate over `(positive, negative)` to step through the computation:
 3. Convert `difference` to a host NumPy array for inspection or verification.
 4. Perform matrix / vector contraction (`@`) to compute `margin_host`.
@@ -481,7 +481,7 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 
 ```python
 # Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
-# Initialize array `probe_w` with explicit values and shape.
+# Construct `probe_w` via `jnp.array([0.2, -0.4])`
 probe_w = jnp.array(...)  # TODO: compute probe_w
 # Iterate over `(positive, negative)` to step through the computation:
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
@@ -507,7 +507,7 @@ print('Independent reward gradients agree in both label directions.')
 
 ```python
 # Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
-# Initialize array `probe_w` with explicit values and shape.
+# Construct `probe_w` via `jnp.array([0.2, -0.4])`
 probe_w = jnp.array([0.2, -0.4])
 # Iterate over `(positive, negative)` to step through the computation:
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:

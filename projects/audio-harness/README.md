@@ -20,7 +20,7 @@ python3 projects/audio-harness/tests/check.py --implementation solution --stage 
 python3 projects/audio-harness/run.py --implementation solution
 ~~~
 
-The second command writes plots, a report, a complete interrupted checkpoint and six exported computations under projects/audio-harness/outputs. It defaults to the public reference implementation; a passing reference run does not establish your independent work.
+The second command writes plots, a report, a complete interrupted checkpoint and six exported computations under projects/audio-harness/outputs. It defaults to the public reference implementation; a passing reference run is verified separately from your independent work.
 
 ## Stage 1: make the waveform contract concrete
 
@@ -86,7 +86,7 @@ Calibrate the maximum absolute **normalized feature** using the declared trainin
 | Dot accumulation | FP32 | FP32 after weight dequantization | INT32 |
 | Bias and output logits | FP32 | FP32 | FP32 after rescaling |
 
-The W8A8 integer dot is executed and checked against an independent NumPy INT64 reference before converting back to FP32. This verifies the chosen integer arithmetic. It does not establish a native fast INT8 kernel or a target-device speedup. The activation quantization happens after spectral preprocessing; calling the entire FFT pipeline “fully integer” would be false.
+The W8A8 integer dot is executed and checked against an independent NumPy INT64 reference before converting back to FP32. This verifies the chosen integer arithmetic. It is verified separately from a native fast INT8 kernel or a target-device speedup. The activation quantization happens after spectral preprocessing; calling the entire FFT pipeline “fully integer” would be false.
 
 The reference held-out maximum logit error is approximately \(0.0315\) for W8A32 and \(0.0468\) for W8A8. W8A8 clips one held-out normalized feature value beyond the training calibration range, yet its class decisions still match FP32 on this set. Matching accuracy does not mean matching scores, nor does one set establish robustness to larger shifts.
 

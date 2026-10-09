@@ -87,12 +87,14 @@ def tiny_jvp(closed,primals,tangents):
         raise ValueError("one primal and tangent per input variable required")
     # Evaluate `values` from the current inputs and state.
     # Evaluate `directions` from the current inputs and state.
-    values={};directions={}
+    values={}
+    directions={}
     # Function `put(var, value, tangent)` implementing this stage's computation:
     def put(var,value,tangent):
         # Evaluate `values[var]` from the current inputs and state.
         # Evaluate `directions[var]` from the current inputs and state.
-        values[var]=value;directions[var]=tangent
+        values[var]=value
+        directions[var]=tangent
     # Loop over `(var, constant)` in `zip(program.constvars, closed.consts)`:
     for var,constant in zip(program.constvars,closed.consts):
         # Allocate initialized array `` with the specified shape and dtype.
@@ -133,9 +135,11 @@ def tiny_jvp(closed,primals,tangents):
         a,da=operands[0]
         # Branch on condition `name == 'add'`:
         if name=="add":
-            b,db=operands[1];result,tangent=a+b,da+db
+            b,db=operands[1]
+            result,tangent=a+b,da+db
         elif name=="mul":
-            b,db=operands[1];result,tangent=a*b,da*b+a*db
+            b,db=operands[1]
+            result,tangent=a*b,da*b+a*db
         elif name=="neg":result,tangent=-a,-da
         elif name=="sin":result,tangent=jnp.sin(a),jnp.cos(a)*da
         else:

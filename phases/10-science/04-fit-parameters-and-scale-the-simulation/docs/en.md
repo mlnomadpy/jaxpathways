@@ -23,7 +23,7 @@ For exponential decay $y(t)=y_0e^{-at}$, an observation only at $t=0$ equals $y_
 
 The fitting loop changes the parameter, runs the solver at the declared observation times and compares with the data. Keep those times fixed when comparing candidate parameters. Solver error can otherwise be mistaken for a physical parameter effect.
 
-Read the fitted trajectory alongside the residuals and objective history. A decreasing objective shows progress on that objective; it does not establish uniqueness or uncertainty. Test a changed observation schedule to see which part of the result is supported by data.
+Read the fitted trajectory alongside the residuals and objective history. A decreasing objective shows progress on that objective; it is separate from uniqueness or uncertainty. Test a changed observation schedule to see which part of the result is supported by data.
 
 ### Pause and reason
 
@@ -49,7 +49,7 @@ $$
 
 ## Inspect the recovered model beyond the training curve
 
-The recovered rate is about $0.700000009$, close to the known $0.7$. The tiny difference is numerical: RK4 slightly approximates the exponential. We test new initial conditions $0.4$, $1.1$ and $3.2$, then halve the simulation step. A fitted parameter that changes materially under grid refinement may be compensating for solver error. Good held-out performance here tests the same equation on new starts; it does not establish generalization to a different physical law. On this noiseless fixture, the fitted rate compensates for the tiny RK4 bias: the original-grid held-out error is near roundoff, while finer-grid error is about $7.3\times10^{-9}$. Refinement can therefore increase this already tiny residual. The check requires a small error, not automatic improvement.
+The recovered rate is about $0.700000009$, close to the known $0.7$. The tiny difference is numerical: RK4 slightly approximates the exponential. We test new initial conditions $0.4$, $1.1$ and $3.2$, then halve the simulation step. A fitted parameter that changes materially under grid refinement may be compensating for solver error. Good held-out performance here tests the same equation on new starts; it is separate from generalization to a different physical law. On this noiseless fixture, the fitted rate compensates for the tiny RK4 bias: the original-grid held-out error is near roundoff, while finer-grid error is about $7.3\times10^{-9}$. Refinement can therefore increase this already tiny residual. The check requires a small error, not automatic improvement.
 
 ## Recognize observations that cannot identify a parameter
 
@@ -87,13 +87,13 @@ import numpy as np
 
 # Function `rk4_step(rate, value, dt)` implementing this stage's computation:
 def rk4_step(rate, value, dt):
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` from `-rate*value`
     a = -rate*value
-    # Evaluate `b` from the current inputs and state.
+    # Compute `b` from `-rate*(value + dt*a/2)`
     b = -rate*(value + dt*a/2)
-    # Evaluate `c` from the current inputs and state.
+    # Compute `c` from `-rate*(value + dt*b/2)`
     c = -rate*(value + dt*b/2)
-    # Evaluate `d` from the current inputs and state.
+    # Compute `d` from `-rate*(value + dt*c)`
     d = -rate*(value + dt*c)
     # Return `value + dt * (a + 2 * b + 2 * c + d) / 6` to the caller.
     return value + dt*(a + 2*b + 2*c + d)/6
@@ -111,13 +111,13 @@ def solve(rate, initial, steps=40, dt=0.05):
     # Return `jnp.concatenate((jnp.atleast_1d(initial), tail))` to the caller.
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
-# Initialize array `train_initials` with explicit values and shape.
+# Construct `train_initials` via `jnp.array([0.7,1.5,2.3])`
 train_initials = jnp.array([0.7,1.5,2.3])
-# Initialize array `times` with explicit values and shape.
+# Construct `times` via `jnp.arange(41)*0.05`
 times = jnp.arange(41)*0.05
-# Evaluate `true_rate` from the current inputs and state.
+# Compute `true_rate` from `0.7`
 true_rate = 0.7
-# Evaluate `observations` from the current inputs and state.
+# Compute `observations` from `train_initials[:,None]*jnp.exp(-true_rate*times)`
 observations = train_initials[:,None]*jnp.exp(-true_rate*times)
 # Function `predict(rate, initials)` implementing this stage's computation:
 def predict(rate, initials):
@@ -147,9 +147,9 @@ def update(log_rate):
     return log_rate - 0.4*jax.grad(objective)(log_rate)
 # Run `jnp.log` to compute `log_rate`.
 log_rate = jnp.log(1.4)
-# Evaluate `loss_history` from the current inputs and state.
+# Compute `loss_history` from `[float(objective(log_rate))]`
 loss_history = [float(objective(log_rate))]
-# Evaluate `rate_history` from the current inputs and state.
+# Compute `rate_history` from `[float(jnp.exp(log_rate))]`
 rate_history = [float(jnp.exp(log_rate))]
 # Repeat the update loop over `range(160)` steps:
 for _ in range(160):
@@ -161,9 +161,9 @@ for _ in range(160):
     rate_history.append(float(jnp.exp(log_rate)))
 # Evaluate `jnp.exp(log_rate)` and convert the result into Python scalar/collection `fitted_rate`.
 fitted_rate = float(jnp.exp(log_rate))
-# Verify contract: `abs(fitted_rate - true_rate) < 2e-07`.
+# Check numerical equivalence within tolerance: `abs(fitted_rate-true_rate) < 2e-7`
 assert abs(fitted_rate-true_rate) < 2e-7
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `loss_history[-1] < 1e-20` holds
 assert loss_history[-1] < 1e-20
 # Print the observed values to compare against the expected result.
 print("Initial/fitted rate:",rate_history[0],fitted_rate)
@@ -179,7 +179,7 @@ Append this block to main.py in your CPU course environment; for the first block
 
 ```python
 # Step 3 — Validate on unseen initial conditions and a finer grid: Held-out starts test transfer within this known equation.
-# Initialize array `held_initials` with explicit values and shape.
+# Construct `held_initials` via `jnp.array([0.4,1.1,3.2])`
 held_initials=jnp.array([0.4,1.1,3.2])
 # Convert `held_truth` to a host NumPy array for inspection or verification.
 held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times))
@@ -187,17 +187,17 @@ held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times)
 held_prediction=np.asarray(predict(fitted_rate,held_initials))
 # Aggregate array values to compute `held_rmse`.
 held_rmse=float(np.sqrt(np.mean((held_prediction-held_truth)**2)))
-# Verify contract: `held_rmse < 1e-07`.
+# Assert invariant `held_rmse < 1e-7` holds
 assert held_rmse < 1e-7
 # Vectorize across the batch dimension with `jax.vmap` (`fine`).
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 # Aggregate array values to compute `fine_rmse`.
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
-# Verify contract: `fine_rmse < 1e-07`.
+# Assert invariant `fine_rmse < 1e-7` holds
 assert fine_rmse < 1e-7
 # Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
-# Verify contract: `float(initial_only_gradient) == 0.0`.
+# Assert invariant `float(initial_only_gradient)==0.0` holds
 assert float(initial_only_gradient)==0.0
 # Print diagnostic summary of the computed outputs.
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -221,13 +221,13 @@ import numpy as np
 
 # Function `rk4_step(rate, value, dt)` implementing this stage's computation:
 def rk4_step(rate, value, dt):
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` from `-rate*value`
     a = -rate*value
-    # Evaluate `b` from the current inputs and state.
+    # Compute `b` from `-rate*(value + dt*a/2)`
     b = -rate*(value + dt*a/2)
-    # Evaluate `c` from the current inputs and state.
+    # Compute `c` from `-rate*(value + dt*b/2)`
     c = -rate*(value + dt*b/2)
-    # Evaluate `d` from the current inputs and state.
+    # Compute `d` from `-rate*(value + dt*c)`
     d = -rate*(value + dt*c)
     # Return `value + dt * (a + 2 * b + 2 * c + d) / 6` to the caller.
     return value + dt*(a + 2*b + 2*c + d)/6
@@ -245,13 +245,13 @@ def solve(rate, initial, steps=40, dt=0.05):
     # Return `jnp.concatenate((jnp.atleast_1d(initial), tail))` to the caller.
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
-# Initialize array `train_initials` with explicit values and shape.
+# Construct `train_initials` via `jnp.array([0.7,1.5,2.3])`
 train_initials = jnp.array([0.7,1.5,2.3])
-# Initialize array `times` with explicit values and shape.
+# Construct `times` via `jnp.arange(41)*0.05`
 times = jnp.arange(41)*0.05
-# Evaluate `true_rate` from the current inputs and state.
+# Compute `true_rate` from `0.7`
 true_rate = 0.7
-# Evaluate `observations` from the current inputs and state.
+# Compute `observations` from `train_initials[:,None]*jnp.exp(-true_rate*times)`
 observations = train_initials[:,None]*jnp.exp(-true_rate*times)
 # Function `predict(rate, initials)` implementing this stage's computation:
 def predict(rate, initials):
@@ -273,9 +273,9 @@ def update(log_rate):
     return log_rate - 0.4*jax.grad(objective)(log_rate)
 # Run `jnp.log` to compute `log_rate`.
 log_rate = jnp.log(1.4)
-# Evaluate `loss_history` from the current inputs and state.
+# Compute `loss_history` from `[float(objective(log_rate))]`
 loss_history = [float(objective(log_rate))]
-# Evaluate `rate_history` from the current inputs and state.
+# Compute `rate_history` from `[float(jnp.exp(log_rate))]`
 rate_history = [float(jnp.exp(log_rate))]
 # Repeat the update loop over `range(160)` steps:
 for _ in range(160):
@@ -287,9 +287,9 @@ for _ in range(160):
     rate_history.append(float(jnp.exp(log_rate)))
 # Evaluate `jnp.exp(log_rate)` and convert the result into Python scalar/collection `fitted_rate`.
 fitted_rate = float(jnp.exp(log_rate))
-# Verify contract: `abs(fitted_rate - true_rate) < 2e-07`.
+# Check numerical equivalence within tolerance: `abs(fitted_rate-true_rate) < 2e-7`
 assert abs(fitted_rate-true_rate) < 2e-7
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `loss_history[-1] < 1e-20` holds
 assert loss_history[-1] < 1e-20
 # Print the observed values to compare against the expected result.
 print("Initial/fitted rate:",rate_history[0],fitted_rate)
@@ -297,7 +297,7 @@ print("Initial/fitted rate:",rate_history[0],fitted_rate)
 print("Initial/final loss:",loss_history[0],loss_history[-1])
 
 # Step 3 — Validate on unseen initial conditions and a finer grid: Held-out starts test transfer within this known equation.
-# Initialize array `held_initials` with explicit values and shape.
+# Construct `held_initials` via `jnp.array([0.4,1.1,3.2])`
 held_initials=jnp.array([0.4,1.1,3.2])
 # Convert `held_truth` to a host NumPy array for inspection or verification.
 held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times))
@@ -305,17 +305,17 @@ held_truth=np.asarray(held_initials)[:,None]*np.exp(-true_rate*np.asarray(times)
 held_prediction=np.asarray(predict(fitted_rate,held_initials))
 # Aggregate array values to compute `held_rmse`.
 held_rmse=float(np.sqrt(np.mean((held_prediction-held_truth)**2)))
-# Verify contract: `held_rmse < 1e-07`.
+# Assert invariant `held_rmse < 1e-7` holds
 assert held_rmse < 1e-7
 # Vectorize across the batch dimension with `jax.vmap` (`fine`).
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 # Aggregate array values to compute `fine_rmse`.
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
-# Verify contract: `fine_rmse < 1e-07`.
+# Assert invariant `fine_rmse < 1e-7` holds
 assert fine_rmse < 1e-7
 # Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
-# Verify contract: `float(initial_only_gradient) == 0.0`.
+# Assert invariant `float(initial_only_gradient)==0.0` holds
 assert float(initial_only_gradient)==0.0
 # Print diagnostic summary of the computed outputs.
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -349,7 +349,7 @@ A tiny final loss is plausible for noiseless synthetic data and a single smooth 
 # Compute figure data for: Recover a physical rate, then check what the fit means
 # Evaluate `range(61)` and convert the result into Python scalar/collection `indices`.
 indices=list(range(61))
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'panels':[{'kind':'line','x':indices,'xlabel':'comp...`
 visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'rate (inverse seconds)','series':[{'label':'fitted rate','y':rate_history[:61]},{'label':'known synthetic rate','y':[true_rate]*61}]},{'kind':'line','x':indices,'xlabel':'completed updates','ylabel':'mean squared trajectory error','yscale':'log','series':[{'label':'training error','y':loss_history[:61]}]}]}
 ```
 
@@ -382,15 +382,15 @@ PASS: science-04
 ```python
 # Experiment — A perfect Euler fit can infer the wrong rate: The model parameter absorbs discretization error.
 h=0.5
-# Evaluate `biased_rate` from the current inputs and state.
+# Compute `biased_rate` from `(1-np.exp(-true_rate*h))/h`
 biased_rate=(1-np.exp(-true_rate*h))/h
-# Initialize array `coarse_times` with explicit values and shape.
+# Compute `coarse_times` from `np.arange(5)*h`
 coarse_times=np.arange(5)*h
-# Initialize array `matched` with explicit values and shape.
+# Compute `matched` from `2*(1-biased_rate*h)**np.arange(5)`
 matched=2*(1-biased_rate*h)**np.arange(5)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(matched,2*np.exp(-true_rate*coarse_tim...`
 np.testing.assert_allclose(matched,2*np.exp(-true_rate*coarse_times),rtol=1e-12)
-# Verify contract: `abs(biased_rate - true_rate) > 0.1`.
+# Check numerical equivalence within tolerance: `abs(biased_rate-true_rate)>0.1`
 assert abs(biased_rate-true_rate)>0.1
 # Print the observed values to compare against the expected result.
 print("True rate:",true_rate,"perfect coarse Euler rate:",biased_rate)
@@ -408,17 +408,17 @@ The model parameter absorbs discretization error. Refining the numerical model i
 # Experiment — Measure fixed-shape CPU batches: The warmed, synchronized boundary excludes compilation and...
 # Import time for this computation.
 import time
-# Evaluate `measurements` from the current inputs and state.
+# Compute `measurements` from `[]`
 measurements=[]
 # Iterate over `batch_size` to step through the computation:
 for batch_size in (1,16,256):
-    # Initialize array `starts` with explicit values and shape.
+    # Construct `starts` via `jnp.linspace(0.4,3.2,batch_size)`
     starts=jnp.linspace(0.4,3.2,batch_size)
     # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
     compiled=jax.jit(lambda values:predict(fitted_rate,values))
     # Synchronize host execution until asynchronous device computation completes.
     compiled(starts).block_until_ready()
-    # Evaluate `samples` from the current inputs and state.
+    # Compute `samples` from `[]`
     samples=[]
     # Repeat the update loop over `range(7)` steps:
     for _ in range(7):
@@ -430,7 +430,7 @@ for batch_size in (1,16,256):
         samples.append((time.perf_counter()-beginning)*1000)
     # Evaluate `np.median(samples)` and convert the result into Python scalar/collection `median_ms`.
     median_ms=float(np.median(samples))
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `median_ms>0` holds
     assert median_ms>0
     # Append the current step result to `measurements`.
     measurements.append((batch_size,median_ms,median_ms/batch_size))
@@ -455,7 +455,7 @@ Repeat inference for a new true rate $0.4$ using analytically generated observat
 - `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
 
 **Step-by-step implementation plan:**
-1. Evaluate `changed_observations` from the current inputs and state.
+1. Compute `changed_observations` from `train_initials[:,None]*jnp.exp(-changed_truth*times)`
 2. Function `changed_objective(theta)` implementing this stage's computation:
 3. Return `jnp.mean((predict(jnp.exp(theta), train_initials) - changed_observations) ** 2)` to the caller.
 4. Differentiate the objective to obtain `changed_update` via automatic differentiation.
@@ -466,7 +466,7 @@ Repeat inference for a new true rate $0.4$ using analytically generated observat
 ```python
 # Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
 changed_truth = ...  # TODO: compute changed_truth
-# Evaluate `changed_observations` from the current inputs and state.
+# Compute `changed_observations` from `train_initials[:,None]*jnp.exp(-changed_truth*times)`
 changed_observations = ...  # TODO: compute changed_observations
 # Function `changed_objective(theta)` implementing this stage's computation:
 def changed_objective(theta):
@@ -482,11 +482,11 @@ for _ in range(200):
     changed_theta = changed_update(...)  # TODO: compute changed_theta
 # Evaluate `jnp.exp(changed_theta)` and convert the result into Python scalar/collection `changed_rate`.
 changed_rate = float(...)  # TODO: compute changed_rate
-# Verify contract: `abs(changed_rate - changed_truth) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(changed_rate-changed_truth)<1e-6`
 assert abs(changed_rate-changed_truth)  # TODO: complete assertion check
 # Convert `changed_held` to a host NumPy array for inspection or verification.
 changed_held = np.asarray(...)  # TODO: compute changed_held
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(changed_rate,held_initials),ch...`
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol = ...  # TODO: compute np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol
 # Print the observed values to compare against the expected result.
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -497,7 +497,7 @@ print("Changed true/recovered rate:",changed_truth,changed_rate)
 ```python
 # Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
 changed_truth=0.4
-# Evaluate `changed_observations` from the current inputs and state.
+# Compute `changed_observations` from `train_initials[:,None]*jnp.exp(-changed_truth*times)`
 changed_observations=train_initials[:,None]*jnp.exp(-changed_truth*times)
 # Function `changed_objective(theta)` implementing this stage's computation:
 def changed_objective(theta):
@@ -513,11 +513,11 @@ for _ in range(200):
     changed_theta=changed_update(changed_theta)
 # Evaluate `jnp.exp(changed_theta)` and convert the result into Python scalar/collection `changed_rate`.
 changed_rate=float(jnp.exp(changed_theta))
-# Verify contract: `abs(changed_rate - changed_truth) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(changed_rate-changed_truth)<1e-6`
 assert abs(changed_rate-changed_truth)<1e-6
 # Convert `changed_held` to a host NumPy array for inspection or verification.
 changed_held=np.asarray(held_initials)[:,None]*np.exp(-changed_truth*np.asarray(times))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(predict(changed_rate,held_initials),ch...`
 np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol=2e-6,atol=1e-7)
 # Print the observed values to compare against the expected result.
 print("Changed true/recovered rate:",changed_truth,changed_rate)
@@ -544,10 +544,10 @@ At fixed rate, predictions are amplitude multiplied by a known decay vector.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Evaluate `unknown_initial` from the current inputs and state.
-2. Evaluate `measured` from the current inputs and state.
+1. Compute `unknown_initial` from `2.8`
+2. Compute `measured` from `unknown_initial*basis`
 3. Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
-4. Verify contract: `abs(estimate - unknown_initial) < 1e-12`.
+4. Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
 5. Function `amplitude_loss(amplitude)` implementing this stage's computation:
 
 **Starter code scaffold (fill in the TODOs):**
@@ -555,19 +555,19 @@ At fixed rate, predictions are amplitude multiplied by a known decay vector.
 ```python
 # Infer a different physical quantity (Practice): The inverse problem becomes linear when rate is fixed.
 basis = np.exp(...)  # TODO: compute basis
-# Evaluate `unknown_initial` from the current inputs and state.
+# Compute `unknown_initial` from `2.8`
 unknown_initial = ...  # TODO: compute unknown_initial
-# Evaluate `measured` from the current inputs and state.
+# Compute `measured` from `unknown_initial*basis`
 measured = ...  # TODO: compute measured
 # Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
 estimate = float(...)  # TODO: compute estimate
-# Verify contract: `abs(estimate - unknown_initial) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
 assert abs(estimate-unknown_initial)  # TODO: complete assertion check
 # Function `amplitude_loss(amplitude)` implementing this stage's computation:
 def amplitude_loss(amplitude):
     # Return `jnp.mean((amplitude * jnp.asarray(basis) - jnp.asarray(measured)) ** 2)` to the caller.
     return ...  # TODO: return computed result
-# Verify contract: `abs(float(jax.grad(amplitude_loss)(estimate))) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`
 assert abs(float(jax.grad(amplitude_loss)(estimate)))  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Recovered initial amplitude:",estimate)
@@ -578,19 +578,19 @@ print("Recovered initial amplitude:",estimate)
 ```python
 # Infer a different physical quantity (Practice): The inverse problem becomes linear when rate is fixed.
 basis=np.exp(-0.7*np.asarray(times))
-# Evaluate `unknown_initial` from the current inputs and state.
+# Compute `unknown_initial` from `2.8`
 unknown_initial=2.8
-# Evaluate `measured` from the current inputs and state.
+# Compute `measured` from `unknown_initial*basis`
 measured=unknown_initial*basis
 # Evaluate `np.dot(basis, measured) / np.dot(basis, basis)` and convert the result into Python scalar/collection `estimate`.
 estimate=float(np.dot(basis,measured)/np.dot(basis,basis))
-# Verify contract: `abs(estimate - unknown_initial) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(estimate-unknown_initial)<1e-12`
 assert abs(estimate-unknown_initial)<1e-12
 # Function `amplitude_loss(amplitude)` implementing this stage's computation:
 def amplitude_loss(amplitude):
     # Return `jnp.mean((amplitude * jnp.asarray(basis) - jnp.asarray(measured)) ** 2)` to the caller.
     return jnp.mean((amplitude*jnp.asarray(basis)-jnp.asarray(measured))**2)
-# Verify contract: `abs(float(jax.grad(amplitude_loss)(estimate))) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12`
 assert abs(float(jax.grad(amplitude_loss)(estimate)))<1e-12
 # Print the observed values to compare against the expected result.
 print("Recovered initial amplitude:",estimate)
@@ -618,18 +618,18 @@ Search a dense one-dimensional grid using the analytic forward model and report 
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Initialize array `candidates` with explicit values and shape.
+1. Compute `candidates` from `np.linspace(0.65,0.75,1001)`
 2. Convert `reference_predictions` to a host NumPy array for inspection or verification.
 3. Reduce along axis=(1 to compute `reference_losses`.
 4. Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
-5. Verify contract: `abs(best - 0.7) < 0.01`.
+5. Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.
 noisy = np.asarray(...)  # TODO: compute noisy
-# Initialize array `candidates` with explicit values and shape.
+# Compute `candidates` from `np.linspace(0.65,0.75,1001)`
 candidates = np.linspace(...)  # TODO: compute candidates
 # Convert `reference_predictions` to a host NumPy array for inspection or verification.
 reference_predictions = np.asarray(...)  # TODO: compute reference_predictions
@@ -637,9 +637,9 @@ reference_predictions = np.asarray(...)  # TODO: compute reference_predictions
 reference_losses = np.mean(...)  # TODO: compute reference_losses
 # Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
 best = float(...)  # TODO: compute best
-# Verify contract: `abs(best - 0.7) < 0.01`.
+# Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
 assert abs(best-0.7)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(np.min(reference_losses))>0` holds
 assert float(np.min(reference_losses))  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_losses)))
@@ -650,7 +650,7 @@ print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_
 ```python
 # Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.
 noisy=np.asarray(observations)+0.005*np.random.default_rng(19).normal(size=observations.shape)
-# Initialize array `candidates` with explicit values and shape.
+# Compute `candidates` from `np.linspace(0.65,0.75,1001)`
 candidates=np.linspace(0.65,0.75,1001)
 # Convert `reference_predictions` to a host NumPy array for inspection or verification.
 reference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates[:,None,None]*np.asarray(times)[None,None,:])
@@ -658,9 +658,9 @@ reference_predictions=np.asarray(train_initials)[None,:,None]*np.exp(-candidates
 reference_losses=np.mean((reference_predictions-noisy[None,:,:])**2,axis=(1,2))
 # Evaluate `candidates[np.argmin(reference_losses)]` and convert the result into Python scalar/collection `best`.
 best=float(candidates[np.argmin(reference_losses)])
-# Verify contract: `abs(best - 0.7) < 0.01`.
+# Check numerical equivalence within tolerance: `abs(best-0.7)<0.01`
 assert abs(best-0.7)<0.01
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `float(np.min(reference_losses))>0` holds
 assert float(np.min(reference_losses))>0
 # Print the observed values to compare against the expected result.
 print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_losses)))

@@ -79,11 +79,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -101,17 +101,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -138,7 +138,7 @@ def rollout(theta, key, batch_size=256, horizon=8):
     time_keys = jax.random.split(action_key, horizon)
     # Function `body(states, time_key)` implementing this stage's computation:
     def body(states, time_key):
-        # Evaluate `observations` from the current inputs and state.
+        # Compute `observations` from `states.position`
         observations = states.position
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
@@ -195,15 +195,15 @@ def exact_return(theta, horizon=8):
     """Dynamic programming over states, independent of sampled rollouts."""
     # Run `jax.nn.sigmoid` to compute `p`.
     p = jax.nn.sigmoid(theta)
-    # Initialize array `states` with explicit values and shape.
+    # Construct `states` via `jnp.arange(3)`
     states = jnp.arange(3)
     # Reduce across the target axis to summarize `left`.
     left = jnp.maximum(states-1, 0)
-    # Evaluate `right` from the current inputs and state.
+    # Compute `right` from `states+1`
     right = states+1
     # Function `backup(_, values)` implementing this stage's computation:
     def backup(_, values):
-        # Evaluate `q_left` from the current inputs and state.
+        # Compute `q_left` from `-.01 + values[left]`
         q_left = -.01 + values[left]
         # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
@@ -221,11 +221,11 @@ def exact_return(theta, horizon=8):
 def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
-    # Initialize array `theta` with explicit values and shape.
+    # Construct `theta` via `jnp.zeros(3)`
     theta = jnp.zeros(3)
     # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
-        # Evaluate `(theta, key)` from the current inputs and state.
+        # Compute `theta, key` from `carry`
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
@@ -298,9 +298,9 @@ Append this block to main.py. Run python3 main.py in the course CPU environment.
 ```python
 # Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
 training_seeds = [0,7,23,41,59]
-# Evaluate `evaluation_seeds` from the current inputs and state.
+# Compute `evaluation_seeds` from `[1000,1001,1002,1003]`
 evaluation_seeds = [1000,1001,1002,1003]
-# Evaluate `(policies, histories, reports)` from the current inputs and state.
+# Compute `policies, histories, reports` from `[], [], []`
 policies, histories, reports = [], [], []
 # Iterate over `seed` to step through the computation:
 for seed in training_seeds:
@@ -308,18 +308,19 @@ for seed in training_seeds:
     policy, history = train(seed=seed)
     # Append the current step result to `policies`.
     # Append the current step result to `policies`.
-    policies.append(policy); histories.append(history)
+    policies.append(policy)
+    histories.append(history)
     # Append the current step result to `reports`.
     reports.append(evaluate(policy,evaluation_seeds))
-# Initialize array `trained_means` with explicit values and shape.
+# Compute `trained_means` from `np.array([r['mean'] for r in reports])`
 trained_means = np.array([r['mean'] for r in reports])
-# Initialize array `exact_means` with explicit values and shape.
+# Compute `exact_means` from `np.array([r['exact'] for r in reports])`
 exact_means = np.array([r['exact'] for r in reports])
-# Initialize array `baseline` with explicit values and shape.
+# Construct `baseline` via `evaluate(jnp.zeros(3),evaluation_seeds)`
 baseline = evaluate(jnp.zeros(3),evaluation_seeds)
-# Verify contract: `np.all(trained_means > baseline['mean'] + 0.4)`.
+# Assert invariant `np.all(trained_means > baseline['mean'] + .4)` holds
 assert np.all(trained_means > baseline['mean'] + .4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.all(np.abs(trained_means-exact_means) < .03)`
 assert np.all(np.abs(trained_means-exact_means) < .03)
 # Print the observed values to compare against the expected result.
 print('training seeds:', training_seeds)
@@ -350,11 +351,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -372,17 +373,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -409,7 +410,7 @@ def rollout(theta, key, batch_size=256, horizon=8):
     time_keys = jax.random.split(action_key, horizon)
     # Function `body(states, time_key)` implementing this stage's computation:
     def body(states, time_key):
-        # Evaluate `observations` from the current inputs and state.
+        # Compute `observations` from `states.position`
         observations = states.position
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
@@ -466,15 +467,15 @@ def exact_return(theta, horizon=8):
     """Dynamic programming over states, independent of sampled rollouts."""
     # Run `jax.nn.sigmoid` to compute `p`.
     p = jax.nn.sigmoid(theta)
-    # Initialize array `states` with explicit values and shape.
+    # Construct `states` via `jnp.arange(3)`
     states = jnp.arange(3)
     # Reduce across the target axis to summarize `left`.
     left = jnp.maximum(states-1, 0)
-    # Evaluate `right` from the current inputs and state.
+    # Compute `right` from `states+1`
     right = states+1
     # Function `backup(_, values)` implementing this stage's computation:
     def backup(_, values):
-        # Evaluate `q_left` from the current inputs and state.
+        # Compute `q_left` from `-.01 + values[left]`
         q_left = -.01 + values[left]
         # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
@@ -492,11 +493,11 @@ def exact_return(theta, horizon=8):
 def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
-    # Initialize array `theta` with explicit values and shape.
+    # Construct `theta` via `jnp.zeros(3)`
     theta = jnp.zeros(3)
     # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
-        # Evaluate `(theta, key)` from the current inputs and state.
+        # Compute `theta, key` from `carry`
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
@@ -553,9 +554,9 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
 
 # Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
 training_seeds = [0,7,23,41,59]
-# Evaluate `evaluation_seeds` from the current inputs and state.
+# Compute `evaluation_seeds` from `[1000,1001,1002,1003]`
 evaluation_seeds = [1000,1001,1002,1003]
-# Evaluate `(policies, histories, reports)` from the current inputs and state.
+# Compute `policies, histories, reports` from `[], [], []`
 policies, histories, reports = [], [], []
 # Iterate over `seed` to step through the computation:
 for seed in training_seeds:
@@ -563,18 +564,19 @@ for seed in training_seeds:
     policy, history = train(seed=seed)
     # Append the current step result to `policies`.
     # Append the current step result to `policies`.
-    policies.append(policy); histories.append(history)
+    policies.append(policy)
+    histories.append(history)
     # Append the current step result to `reports`.
     reports.append(evaluate(policy,evaluation_seeds))
-# Initialize array `trained_means` with explicit values and shape.
+# Compute `trained_means` from `np.array([r['mean'] for r in reports])`
 trained_means = np.array([r['mean'] for r in reports])
-# Initialize array `exact_means` with explicit values and shape.
+# Compute `exact_means` from `np.array([r['exact'] for r in reports])`
 exact_means = np.array([r['exact'] for r in reports])
-# Initialize array `baseline` with explicit values and shape.
+# Construct `baseline` via `evaluate(jnp.zeros(3),evaluation_seeds)`
 baseline = evaluate(jnp.zeros(3),evaluation_seeds)
-# Verify contract: `np.all(trained_means > baseline['mean'] + 0.4)`.
+# Assert invariant `np.all(trained_means > baseline['mean'] + .4)` holds
 assert np.all(trained_means > baseline['mean'] + .4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.all(np.abs(trained_means-exact_means) < .03)`
 assert np.all(np.abs(trained_means-exact_means) < .03)
 # Print the observed values to compare against the expected result.
 print('training seeds:', training_seeds)
@@ -608,7 +610,7 @@ The trained policies cluster close to the always-right limit of $0.985$, while t
 
 ```python
 # Compute figure data for: Held-out returns for independently trained agents
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'bar','labels':[str(s) for s in training_see...`
 visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'training seed','ylabel':'mean episode return','series':[{'label':'held-out sampled','y':trained_means.tolist()},{'label':'exact expectation','y':exact_means.tolist()},{'label':'uniform baseline (shared)','y':[baseline['mean']]*5}]}
 ```
 
@@ -641,17 +643,17 @@ PASS: rl-04
 
 ```python
 # Experiment — Check baselines with known returns: The baseline check can fail an evaluator even when the learned...
-# Initialize array `left` with explicit values and shape.
+# Compute `left` from `evaluate(jnp.full(3,-100.),evaluation_seeds)`
 left = evaluate(jnp.full(3,-100.),evaluation_seeds)
-# Initialize array `right` with explicit values and shape.
+# Compute `right` from `evaluate(jnp.full(3,100.),evaluation_seeds)`
 right = evaluate(jnp.full(3,100.),evaluation_seeds)
-# Verify contract: `abs(left['mean'] + 0.08) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(left['mean']+.08) < 1e-6`
 assert abs(left['mean']+.08) < 1e-6
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(right['mean']-.985) < .002`
 assert abs(right['mean']-.985) < .002
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `left['mean'] < baseline['mean'] < right['mean']` holds
 assert left['mean'] < baseline['mean'] < right['mean']
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(baseline['mean']-.466875) < .04`
 assert abs(baseline['mean']-.466875) < .04
 # Print the observed values to compare against the expected result.
 print('left / random / right:', left['mean'], baseline['mean'], right['mean'])
@@ -667,19 +669,19 @@ The baseline check can fail an evaluator even when the learned policy appears su
 
 ```python
 # Experiment — Prove isolation and replay: Repeatability is useful for debugging.
-# Initialize array `before` with explicit values and shape.
+# Compute `before` from `np.array(policies[0],copy=True)`
 before = np.array(policies[0],copy=True)
 # Run `evaluate` to compute `a`.
 a = evaluate(policies[0],evaluation_seeds)
 # Run `evaluate` to compute `b`.
 b = evaluate(policies[0],evaluation_seeds)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(before,policies[0])`
 np.testing.assert_array_equal(before,policies[0])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(a['episode_returns'],b['episod`
 np.testing.assert_array_equal(a['episode_returns'],b['episode_returns'])
 # Run `evaluate` to compute `c`.
 c = evaluate(policies[0],[2000,2001,2002,2003])
-# Verify contract: `not np.array_equal(a['episode_returns'], c['episode_returns'])`.
+# Assert invariant `not np.array_equal(a['episode_returns']` holds
 assert not np.array_equal(a['episode_returns'],c['episode_returns'])
 ```
 
@@ -697,8 +699,8 @@ Compute the paired held-out improvement over the uniform baseline for each train
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Verify that the output tensor shape matches our prediction.
-2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Check tensor shape invariant: `deltas.shape == (5,)`
+2. Assert invariant `np.all(deltas > .4)` holds
 3. Print the observed values to compare against the expected result.
 4. Print diagnostic summary of the computed outputs.
 
@@ -707,9 +709,9 @@ Compute the paired held-out improvement over the uniform baseline for each train
 ```python
 # Exercise solution: Compute the paired held-out improvement over the uniform baseline for...
 deltas = ...  # TODO: compute deltas
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `deltas.shape == (5,)`
 assert deltas.shape  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.all(deltas > .4)` holds
 assert np.all(deltas  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('paired improvements:', deltas)
@@ -722,9 +724,9 @@ print('mean improvement across trained agents:', deltas.mean())
 ```python
 # Exercise solution: Compute the paired held-out improvement over the uniform baseline for...
 deltas = trained_means - baseline['mean']
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `deltas.shape == (5,)`
 assert deltas.shape == (5,)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `np.all(deltas > .4)` holds
 assert np.all(deltas > .4)
 # Print the observed values to compare against the expected result.
 print('paired improvements:', deltas)
@@ -752,19 +754,21 @@ Weight each shard mean by its episode count.
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Initialize array `means` with explicit values and shape.
+1. Compute `means` from `np.array([1.,0.])`
 2. Aggregate array values to compute `wrong`.
-3. Verify contract: `wrong == 0.5 and right == 0.1`.
+3. Assert invariant `wrong == .5 and right == .1` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
-# Initialize array `means` with explicit values and shape.
+# Compute `means` from `np.array([1.,0.])`
 means = np.array(...)  # TODO: compute means
+counts = np.array(...)  # TODO: compute counts
 # Aggregate array values to compute `wrong`.
 wrong = means.mean(...)  # TODO: compute wrong
-# Verify contract: `wrong == 0.5 and right == 0.1`.
+right = np.average(...)  # TODO: compute right
+# Assert invariant `wrong == .5 and right == .1` holds
 assert wrong  # TODO: complete assertion check
 ```
 
@@ -772,11 +776,13 @@ assert wrong  # TODO: complete assertion check
 
 ```python
 # Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
-# Initialize array `means` with explicit values and shape.
-means = np.array([1.,0.]); counts = np.array([1,9])
+# Compute `means` from `np.array([1.,0.])`
+means = np.array([1.,0.])
+counts = np.array([1,9])
 # Aggregate array values to compute `wrong`.
-wrong = means.mean(); right = np.average(means,weights=counts)
-# Verify contract: `wrong == 0.5 and right == 0.1`.
+wrong = means.mean()
+right = np.average(means,weights=counts)
+# Assert invariant `wrong == .5 and right == .1` holds
 assert wrong == .5 and right == .1
 ```
 
@@ -804,25 +810,25 @@ Use sample standard deviation with ddof=1; a standard error divides by the squar
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Initialize array `values` with explicit values and shape.
+1. Compute `values` from `np.array([.8,.9,1.])`
 2. Aggregate array values to compute `sd`.
-3. Evaluate `naive_se` from the current inputs and state.
-4. Verify contract: `abs(sd - 0.1) < 1e-12`.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Compute `naive_se` from `sd/np.sqrt(3)`
+4. Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
+5. Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula does not establish its sampling...
-# Initialize array `values` with explicit values and shape.
+# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
+# Compute `values` from `np.array([.8,.9,1.])`
 values = np.array(...)  # TODO: compute values
 # Aggregate array values to compute `sd`.
 sd = values.std(...)  # TODO: compute sd
-# Evaluate `naive_se` from the current inputs and state.
+# Compute `naive_se` from `sd/np.sqrt(3)`
 naive_se = ...  # TODO: compute naive_se
-# Verify contract: `abs(sd - 0.1) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
 assert abs(sd-.1)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
 assert abs(naive_se-.0577350269)  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('sample sd / independence-assuming SE:',sd,naive_se)
@@ -831,22 +837,22 @@ print('sample sd / independence-assuming SE:',sd,naive_se)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula does not establish its sampling...
-# Initialize array `values` with explicit values and shape.
+# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
+# Compute `values` from `np.array([.8,.9,1.])`
 values = np.array([.8,.9,1.])
 # Aggregate array values to compute `sd`.
 sd = values.std(ddof=1)
-# Evaluate `naive_se` from the current inputs and state.
+# Compute `naive_se` from `sd/np.sqrt(3)`
 naive_se = sd/np.sqrt(3)
-# Verify contract: `abs(sd - 0.1) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(sd-.1) < 1e-12`
 assert abs(sd-.1) < 1e-12
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(naive_se-.0577350269) < 1e-9`
 assert abs(naive_se-.0577350269) < 1e-9
 # Print the observed values to compare against the expected result.
 print('sample sd / independence-assuming SE:',sd,naive_se)
 ```
 
-The numerical formula does not establish its sampling assumptions. Shared evaluation streams and only five training runs warrant a descriptive report, not a confident general claim.
+The numerical formula is separate from its sampling assumptions. Shared evaluation streams and only five training runs warrant a descriptive report, not a confident general claim.
 
 </details>
 

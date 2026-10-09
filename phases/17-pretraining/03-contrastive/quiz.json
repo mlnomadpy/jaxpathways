@@ -11,7 +11,7 @@
         "Diagonal-only supervision automatically merges duplicate semantic examples into a single positive target."
       ],
       "correct": 0,
-      "explanation": "It does not establish downstream task quality or robustness to a new data distribution."
+      "explanation": "It is separate from downstream task quality or robustness to a new data distribution."
     }
   ]
 }

@@ -25,6 +25,10 @@ Replication gives each participant the full value instead of a disjoint portion.
 
 Connect each PartitionSpec entry to its array axis and named mesh axis. Inspect actual addressable shards and compare reconstructed values with a global reference. Logical CPU devices validate this placement exercise without reproducing a multi-host network.
 
+$$
+\text{Mesh}(D, (\texttt{'data'}, \texttt{'model'})) \implies \operatorname{shard}(X) \in \mathbb{R}^{(B/P_d) \times (H/P_m)}
+$$
+
 ### Pause and reason
 
 Must changing row sharding to column sharding change the answer?
@@ -147,13 +151,13 @@ Append the checks, save the file and run python main.py with the setup lesson en
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 # Iterate over `shard` to step through the computation:
 for shard in x.addressable_shards:
-    # Verify that the output tensor shape matches our prediction.
+    # Check tensor shape invariant: `shard.data.shape == (2,4)`
     assert shard.data.shape == (2,4)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), host[shard.index])
 # Iterate over `shard` to step through the computation:
 for shard in x_columns.addressable_shards:
-    # Verify that the output tensor shape matches our prediction.
+    # Check tensor shape invariant: `shard.data.shape == (8,1)`
     assert shard.data.shape == (8,1)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), host[shard.index])
@@ -165,7 +169,7 @@ print("Column-shard shapes:", [s.data.shape for s in x_columns.addressable_shard
 print("Column sums:", np.asarray(sum_rows))
 ```
 
-Assertions compare against host calculations or hand-derived values; printing a sharding object alone does not establish correctness.
+Assertions compare against host calculations or hand-derived values; printing a sharding object alone is separate from correctness.
 
 ## Run the example
 
@@ -211,13 +215,13 @@ sum_rows.block_until_ready()
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 # Iterate over `shard` to step through the computation:
 for shard in x.addressable_shards:
-    # Verify that the output tensor shape matches our prediction.
+    # Check tensor shape invariant: `shard.data.shape == (2,4)`
     assert shard.data.shape == (2,4)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), host[shard.index])
 # Iterate over `shard` to step through the computation:
 for shard in x_columns.addressable_shards:
-    # Verify that the output tensor shape matches our prediction.
+    # Check tensor shape invariant: `shard.data.shape == (8,1)`
     assert shard.data.shape == (8,1)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), host[shard.index])
@@ -253,7 +257,7 @@ For example, a whole row is locally available in the upper layout but split acro
 
 ```python
 # Compute figure data for: Row sharding and column sharding place the same array differently
-# Evaluate `panels` from the current inputs and state.
+# Compute `panels` from `[]`
 panels = []
 # Loop over `(name, array)` in `[('Row partition', x), ('Column partition', x_columns)]`:
 for name, array in [('Row partition', x), ('Column partition', x_columns)]:
@@ -261,11 +265,11 @@ for name, array in [('Row partition', x), ('Column partition', x_columns)]:
     owner = np.empty(host.shape, dtype=int)
     # Loop over `s` in `array.addressable_shards`:
     for s in array.addressable_shards:
-        # Evaluate `owner[s.index]` from the current inputs and state.
+        # Compute `owner[s.index]` from `s.device.id`
         owner[s.index] = s.device.id
     # Append the current step result to `panels`.
     panels.append({'kind': 'heatmap', 'title': name, 'values': owner.tolist(), 'unit': 'logical CPU device ID'})
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'panels', 'panels': panels}`
 visual_data = {'kind': 'panels', 'panels': panels}
 ```
 
@@ -297,7 +301,7 @@ PASS: distributed-01
 moved = jax.device_put(x, columns)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(moved), host)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (8,1) for s in moved.addressable_shards)`
 assert all(s.data.shape == (8,1) for s in moved.addressable_shards)
 # Print the observed values to compare against the expected result.
 print("Resharded values preserved")
@@ -319,7 +323,7 @@ vector_rows = NamedSharding(mesh, P("data"))
 per_row = jax.jit(lambda a:a.sum(axis=1), in_shardings=rows, out_shardings=vector_rows)(x)
 # Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.asarray(per_row), np.arange(6,119,16,dtype=np.float32))
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `all(s.data.shape == (2,) for s in per_row.addressable_shards)`
 assert all(s.data.shape == (2,) for s in per_row.addressable_shards)
 # Print the observed values to compare against the expected result.
 print("Row sums:", np.asarray(per_row))
@@ -346,7 +350,7 @@ Compare row and column layouts of a $(12,8)$ array, and repair a ten-row mean wi
 2. Iterate over `(spec, expected)` to step through the computation:
 3. Place `placed` explicitly onto the target JAX device.
 4. Iterate over `shard` to step through the computation:
-5. Verify that the output tensor shape matches our prediction.
+5. Check tensor shape invariant: `shard.data.shape == expected`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -360,7 +364,7 @@ for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     placed = jax.device_put(...)  # TODO: compute placed
     # Iterate over `shard` to step through the computation:
     for shard in placed.addressable_shards:
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `shard.data.shape == expected`
         assert shard.data.shape  # TODO: complete assertion check
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
@@ -378,7 +382,7 @@ else:
 padded = jax.device_put(...)  # TODO: compute padded
 # Configure multi-device placement / sharding specification (`mask_sharding`).
 mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `jax.device_put(np.array([1]*10+[0]*2,dtype=np.float3...`
 mask = jax.device_put(...)  # TODO: compute mask
 # Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
 masked_mean = jax.jit(...)  # TODO: compute masked_mean
@@ -400,7 +404,7 @@ for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     placed = jax.device_put(other,spec)
     # Iterate over `shard` to step through the computation:
     for shard in placed.addressable_shards:
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `shard.data.shape == expected`
         assert shard.data.shape == expected
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
@@ -418,7 +422,7 @@ else:
 padded = jax.device_put(np.pad(original,((0,2),(0,0))),rows)
 # Configure multi-device placement / sharding specification (`mask_sharding`).
 mask_sharding = NamedSharding(mesh,P("data"))
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `jax.device_put(np.array([1]*10+[0]*2,dtype=np.float3...`
 mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 # Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)
@@ -453,7 +457,7 @@ Four devices divide twelve rows or eight columns.
 2. Iterate over `(spec, expected)` to step through the computation:
 3. Place `placed` explicitly onto the target JAX device.
 4. Iterate over `shard` to step through the computation:
-5. Verify that the output tensor shape matches our prediction.
+5. Check tensor shape invariant: `shard.data.shape == expected`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -467,7 +471,7 @@ for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     placed = jax.device_put(...)  # TODO: compute placed
     # Iterate over `shard` to step through the computation:
     for shard in placed.addressable_shards:
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `shard.data.shape == expected`
         assert shard.data.shape  # TODO: complete assertion check
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
@@ -485,7 +489,7 @@ for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     placed = jax.device_put(other,spec)
     # Iterate over `shard` to step through the computation:
     for shard in placed.addressable_shards:
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `shard.data.shape == expected`
         assert shard.data.shape == expected
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
@@ -520,7 +524,7 @@ The divisor is the sum of the mask, not padded length.
 2. Run the boundary check and catch the expected exception:
 3. Place `padded` explicitly onto the target JAX device.
 4. Configure multi-device placement / sharding specification (`mask_sharding`).
-5. Initialize array `mask` with explicit values and shape.
+5. Compute `mask` from `jax.device_put(np.array([1]*10+[0]*2,dtype=np.float3...`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -539,7 +543,7 @@ else:
 padded = jax.device_put(...)  # TODO: compute padded
 # Configure multi-device placement / sharding specification (`mask_sharding`).
 mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `jax.device_put(np.array([1]*10+[0]*2,dtype=np.float3...`
 mask = jax.device_put(...)  # TODO: compute mask
 # Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
 masked_mean = jax.jit(...)  # TODO: compute masked_mean
@@ -566,7 +570,7 @@ else:
 padded = jax.device_put(np.pad(original,((0,2),(0,0))),rows)
 # Configure multi-device placement / sharding specification (`mask_sharding`).
 mask_sharding = NamedSharding(mesh,P("data"))
-# Initialize array `mask` with explicit values and shape.
+# Compute `mask` from `jax.device_put(np.array([1]*10+[0]*2,dtype=np.float3...`
 mask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)
 # Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
 masked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)

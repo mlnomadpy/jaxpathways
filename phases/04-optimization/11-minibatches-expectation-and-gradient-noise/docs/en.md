@@ -69,9 +69,9 @@ Create main.py. Keep the parameter fixed while measuring the sampling distributi
 # Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([1.0, 2.0, 3.0, 4.0])`
 y = jnp.array([1.0, 2.0, 3.0, 4.0])
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array(0.0)`
 w = jnp.array(0.0)
 
 # Function `example_loss(w, y)` implementing this stage's computation:
@@ -84,7 +84,7 @@ per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(full, -2.5)`
 assert jnp.allclose(full, -2.5)
 ```
 
@@ -97,13 +97,13 @@ Append the exact with-replacement distribution. No random simulation is needed f
 ```python
 # Step 2 — Enumerate every pair: All ordered pairs are equally likely under independent uniform draws.
 pairs = (per[:, None] + per[None, :]) / 2
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairs), full)`
 assert jnp.allclose(jnp.mean(pairs), full)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(per), 1.25)`
 assert jnp.allclose(jnp.var(per), 1.25)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(pairs), 0.625)`
 assert jnp.allclose(jnp.var(pairs), 0.625)
 ```
 
@@ -121,7 +121,7 @@ key = jax.random.key(7)
 indices = jax.random.choice(key, 4, shape=(2,), replace=True)
 # Sample deterministic random values into `replay` using an explicit PRNG key.
 replay = jax.random.choice(key, 4, shape=(2,), replace=True)
-# Verify contract: `jnp.array_equal(indices, replay)`.
+# Assert invariant `jnp.array_equal(indices, replay)` holds
 assert jnp.array_equal(indices, replay)
 # Print the observed values to compare against the expected result.
 print('full gradient / single variance / pair variance:', full, jnp.var(per), jnp.var(pairs))
@@ -138,9 +138,9 @@ Replay checks reproducibility. One sample does not estimate the full sampling di
 # Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Initialize array `y` with explicit values and shape.
+# Construct `y` via `jnp.array([1.0, 2.0, 3.0, 4.0])`
 y = jnp.array([1.0, 2.0, 3.0, 4.0])
-# Initialize array `w` with explicit values and shape.
+# Construct `w` via `jnp.array(0.0)`
 w = jnp.array(0.0)
 
 # Function `example_loss(w, y)` implementing this stage's computation:
@@ -153,18 +153,18 @@ per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(full, -2.5)`
 assert jnp.allclose(full, -2.5)
 
 # Step 2 — Enumerate every pair: All ordered pairs are equally likely under independent uniform draws.
 pairs = (per[:, None] + per[None, :]) / 2
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(pairs), full)`
 assert jnp.allclose(jnp.mean(pairs), full)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(per), 1.25)`
 assert jnp.allclose(jnp.var(per), 1.25)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(pairs), 0.625)`
 assert jnp.allclose(jnp.var(pairs), 0.625)
 
 # Step 3 — Sample and replay one batch: Replay checks reproducibility.
@@ -174,7 +174,7 @@ key = jax.random.key(7)
 indices = jax.random.choice(key, 4, shape=(2,), replace=True)
 # Sample deterministic random values into `replay` using an explicit PRNG key.
 replay = jax.random.choice(key, 4, shape=(2,), replace=True)
-# Verify contract: `jnp.array_equal(indices, replay)`.
+# Assert invariant `jnp.array_equal(indices, replay)` holds
 assert jnp.array_equal(indices, replay)
 # Print the observed values to compare against the expected result.
 print('full gradient / single variance / pair variance:', full, jnp.var(per), jnp.var(pairs))
@@ -206,7 +206,7 @@ The bar heights are squared gradient units, not loss or gradient magnitude. A sh
 
 ```python
 # Compute figure data for: Averaging independent gradients reduces variance
-# Evaluate `triples` from the current inputs and state.
+# Compute `triples` from `(per[:, None, None] + per[None, :, None] + per[None,...`
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 # Reduce across the target axis to summarize `visual_data`.
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
@@ -235,13 +235,13 @@ PASS: optimization-11
 first = jnp.mean(per[:3])
 # Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
-# Evaluate `wrong` from the current inputs and state.
+# Compute `wrong` from `(first + last) / 2`
 wrong = (first + last) / 2
-# Evaluate `correct` from the current inputs and state.
+# Compute `correct` from `(3 * first + last) / 4`
 correct = (3 * first + last) / 4
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(wrong, -3.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(correct, full)`
 assert jnp.allclose(correct, full)
 ```
 
@@ -257,13 +257,13 @@ Batch means require example-count weights when batch sizes differ.
 # Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
 # Aggregate array values to compute `full_loss`.
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
-# Initialize array `optimum` with explicit values and shape.
+# Construct `optimum` via `jnp.array(2.5)`
 optimum = jnp.array(2.5)
 # Differentiate the objective to obtain `noisy` via automatic differentiation.
 noisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `full_loss(noisy) > full_loss(optimum)` holds
 assert full_loss(noisy) > full_loss(optimum)
 ```
 
@@ -282,20 +282,20 @@ Enumerate all $64$ ordered batches of size $3$. Check their mean and variance ag
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `triples.size == 64`.
-2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Assert invariant `triples.size == 64` holds
+2. Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`
+3. Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Enumerate all 64 ordered batches of size 3.
 triples = ...  # TODO: compute triples
-# Verify contract: `triples.size == 64`.
+# Assert invariant `triples.size == 64` holds
 assert triples.size  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`
 assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete assertion check
 ```
 
@@ -304,11 +304,11 @@ assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete as
 ```python
 # Exercise solution: Enumerate all 64 ordered batches of size 3.
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
-# Verify contract: `triples.size == 64`.
+# Assert invariant `triples.size == 64` holds
 assert triples.size == 64
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`
 assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)
 ```
 
@@ -336,7 +336,7 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `g1` via automatic differentiation.
 2. Differentiate the objective to obtain `g2` via automatic differentiation.
-3. Evaluate `accumulated` from the current inputs and state.
+3. Compute `accumulated` from `(3 * g1 + g2) / 4`
 4. Verify that the numerical values match the expected reference within tolerance.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -347,7 +347,7 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 g1 = jax.grad(...)  # TODO: compute g1
 # Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(...)  # TODO: compute g2
-# Evaluate `accumulated` from the current inputs and state.
+# Compute `accumulated` from `(3 * g1 + g2) / 4`
 accumulated = ...  # TODO: compute accumulated
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete assertion check
@@ -361,7 +361,7 @@ assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete ass
 g1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)
 # Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)
-# Evaluate `accumulated` from the current inputs and state.
+# Compute `accumulated` from `(3 * g1 + g2) / 4`
 accumulated = (3 * g1 + g2) / 4
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)
@@ -390,7 +390,7 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 
 **Step-by-step implementation plan:**
 1. Verify that the numerical values match the expected reference within tolerance.
-2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+2. Check numerical equivalence within tolerance: `not jnp.allclose(biased, full)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -399,7 +399,7 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 biased = ...  # TODO: compute biased
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(biased, -1.3)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(biased, full)`
 assert not jnp.allclose(biased, full)  # TODO: complete assertion check
 ```
 
@@ -410,7 +410,7 @@ assert not jnp.allclose(biased, full)  # TODO: complete assertion check
 biased = 0.9 * per[0] + 0.1 * per[3]
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(biased, -1.3)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `not jnp.allclose(biased, full)`
 assert not jnp.allclose(biased, full)
 ```
 

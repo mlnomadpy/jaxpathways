@@ -29,6 +29,10 @@ S(D) = \sum_{k=0}^{8D - 1} k^2 = \frac{(8D - 1)(8D)(16D - 1)}{6}
 $$
 Checking that the `pmap` result equals $S(D)$ (for example, $S(1) = 140$, $S(4) = 10416$, $S(8) = 85344$) verifies both device discovery and multi-chip execution in one step.
 
+$$
+M_{\text{state}} = N_{\text{params}} \times (\text{bytes}_{\text{param}} + \text{bytes}_{\text{grad}} + 2 \cdot \text{bytes}_{\text{moment}})
+$$
+
 ### Pause and reason
 
 What happens if you close your SSH terminal without running `gcloud compute tpus tpu-vm delete`?
@@ -157,7 +161,7 @@ slice_expectations = [
 ]
 # Run `build_runtime_receipt` to compute `receipt`.
 receipt = build_runtime_receipt()
-# Verify contract: `receipt['verified'] is True`.
+# Assert invariant `receipt["verified"] is True` holds
 assert receipt["verified"] is True
 # Print the observed values to compare against the expected result.
 print("Runtime receipt:", json.dumps(receipt, sort_keys=True))
@@ -166,6 +170,17 @@ print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in sl
 ```
 
 Knowing the exact expected sum for 1, 4, and 8 devices lets you immediately spot if a 4-chip or 8-chip TPU VM only initialized a single device.
+
+## Step 3: Verify invariants on the completed state
+
+Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
+
+```python
+receipt = build_runtime_receipt()
+assert receipt["verified"] is True
+```
+
+Checking these invariants confirms the computation is ready for the full worked experiment.
 
 ## Run the example
 
@@ -229,7 +244,7 @@ slice_expectations = [
 ]
 # Run `build_runtime_receipt` to compute `receipt`.
 receipt = build_runtime_receipt()
-# Verify contract: `receipt['verified'] is True`.
+# Assert invariant `receipt["verified"] is True` holds
 assert receipt["verified"] is True
 # Print the observed values to compare against the expected result.
 print("Runtime receipt:", json.dumps(receipt, sort_keys=True))
@@ -259,9 +274,9 @@ Because `x` is reshaped to `(4, 8)`, every chip executes the same `pmap` program
 # Compute figure data for: Per-chip contribution to the 4-device synchronized pmap verification receipt
 # Create evenly spaced index values in `per_chip`.
 per_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]
-# Evaluate `cumulative` from the current inputs and state.
+# Compute `cumulative` from `[float(sum(per_chip[: i + 1])) for i in range(4)]`
 cumulative = [float(sum(per_chip[: i + 1])) for i in range(4)]
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{`
 visual_data = {
     'kind': 'bar',
     'labels': ['chip 0 (0..7)', 'chip 1 (8..15)', 'chip 2 (16..23)', 'chip 3 (24..31)'],
@@ -304,7 +319,7 @@ x4 = jnp.arange(4 * 8, dtype=jnp.float32).reshape(4, 8)
 row_sums_4 = [float(v) for v in jnp.sum(x4 * x4, axis=1)]
 # Print the observed values to compare against the expected result.
 print("Per-chip sums on a 4-chip slice:", row_sums_4, "Total:", sum(row_sums_4))
-# Verify contract: `row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) ==...`.
+# Assert invariant `row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4)...` holds
 assert row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) == 10416.0
 ```
 
@@ -324,9 +339,9 @@ def is_tpu_zone_clean(gcloud_list_json):
     # Return `len(items) == 0` to the caller.
     return len(items) == 0
 
-# Verify contract: `is_tpu_zone_clean('[]') is True`.
+# Assert invariant `is_tpu_zone_clean("[]") is True` holds
 assert is_tpu_zone_clean("[]") is True
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `is_tpu_zone_clean('[{"name": "jax-tpu-course"` holds
 assert is_tpu_zone_clean('[{"name": "jax-tpu-course", "state": "READY"}]') is False
 # Print the observed values to compare against the expected result.
 print("Teardown verifier passed for empty and non-empty gcloud list outputs.")
@@ -344,13 +359,12 @@ Compute `closed_form_sum_of_squares(4)` and `closed_form_sum_of_squares(8)`, ver
 
 **Key functions & syntax to use:**
 - `closed_form_sum_of_squares(...)` — Call `closed_form_sum_of_squares` with your updated parameters or inputs from this lesson's workspace.
-- `and(...)` — Call `and` with your updated parameters or inputs from this lesson's workspace.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Run `closed_form_sum_of_squares` to compute `s8`.
 2. Print the observed values to compare against the expected result.
-3. Verify contract: `s4 == 10416.0 and s8 == 85344.0 and (receipt['verified'] is True)`.
+3. Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -361,7 +375,7 @@ s4 = closed_form_sum_of_squares(...)  # TODO: compute s4
 s8 = closed_form_sum_of_squares(...)  # TODO: compute s8
 # Print the observed values to compare against the expected result.
 print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
-# Verify contract: `s4 == 10416.0 and s8 == 85344.0 and (receipt['verified'] is True)`.
+# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
 assert s4  # TODO: complete assertion check
 ```
 
@@ -374,7 +388,7 @@ s4 = closed_form_sum_of_squares(4)
 s8 = closed_form_sum_of_squares(8)
 # Print the observed values to compare against the expected result.
 print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
-# Verify contract: `s4 == 10416.0 and s8 == 85344.0 and (receipt['verified'] is True)`.
+# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
 assert s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True
 ```
 
@@ -402,9 +416,9 @@ Check all three fields in the receipt dictionary.
 **Step-by-step implementation plan:**
 1. Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations): Requiring backend == 'tpu', local_device_count == 4, and the...
 2. Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
-3. Evaluate `simulated_tpu` from the current inputs and state.
+3. Compute `simulated_tpu` from `{"backend": "tpu", "local_device_count": 4, "observe...`
 4. Print the observed values to compare against the expected result.
-5. Verify contract: `is_four_chip_tpu_receipt(simulated_tpu) is True`.
+5. Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -414,11 +428,11 @@ def is_four_chip_tpu_receipt(r):
     # Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
     return bool(r["backend"] = ...  # TODO: compute return bool(r["backend"]
 
-# Evaluate `simulated_tpu` from the current inputs and state.
+# Compute `simulated_tpu` from `{"backend": "tpu", "local_device_count": 4, "observe...`
 simulated_tpu = ...  # TODO: compute simulated_tpu
 # Print the observed values to compare against the expected result.
 print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "Local CPU check:", is_four_chip_tpu_receipt(receipt))
-# Verify contract: `is_four_chip_tpu_receipt(simulated_tpu) is True`.
+# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
 assert is_four_chip_tpu_receipt(simulated_tpu) is True  # TODO: complete assertion check
 ```
 
@@ -430,11 +444,11 @@ def is_four_chip_tpu_receipt(r):
     # Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
     return bool(r["backend"] == "tpu" and r["local_device_count"] == 4 and np.isclose(r["observed_total"], 10416.0))
 
-# Evaluate `simulated_tpu` from the current inputs and state.
+# Compute `simulated_tpu` from `{"backend": "tpu", "local_device_count": 4, "observe...`
 simulated_tpu = {"backend": "tpu", "local_device_count": 4, "observed_total": 10416.0}
 # Print the observed values to compare against the expected result.
 print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "Local CPU check:", is_four_chip_tpu_receipt(receipt))
-# Verify contract: `is_four_chip_tpu_receipt(simulated_tpu) is True`.
+# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
 assert is_four_chip_tpu_receipt(simulated_tpu) is True
 ```
 
@@ -464,7 +478,7 @@ Compare `16.0 * 4.80` against `0.5 * 4.80`.
 **Step-by-step implementation plan:**
 1. Run `round` to compute `saved_usd`.
 2. Print the observed values to compare against the expected result.
-3. Verify contract: `saved_usd == 74.4`.
+3. Assert invariant `saved_usd == 74.4` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -475,7 +489,7 @@ hourly_rate = ...  # TODO: compute hourly_rate
 saved_usd = round(...)  # TODO: compute saved_usd
 # Print the observed values to compare against the expected result.
 print("Overnight idle cost avoided (USD):", saved_usd)
-# Verify contract: `saved_usd == 74.4`.
+# Assert invariant `saved_usd == 74.4` holds
 assert saved_usd  # TODO: complete assertion check
 ```
 
@@ -488,7 +502,7 @@ hourly_rate = 4.80
 saved_usd = round((16.0 - 0.5) * hourly_rate, 2)
 # Print the observed values to compare against the expected result.
 print("Overnight idle cost avoided (USD):", saved_usd)
-# Verify contract: `saved_usd == 74.4`.
+# Assert invariant `saved_usd == 74.4` holds
 assert saved_usd == 74.4
 ```
 

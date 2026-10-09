@@ -149,7 +149,7 @@ These commands list available lessons, display the MLflow lesson, and print a pr
 
 A harness connects data, a model, training, evaluation and state recovery through repeatable interfaces. Use the same separation for text, images, audio and cross-modal work. The shared run manifest stays stable; each modality supplies its own preprocessing contract, data revisions, objective and evaluation protocol.
 
-A config is a record of intent, not a checkpoint. Exact continuation can require model and optimizer state, random keys, scheduler step, data iterator position and precision settings. Save these together and test an interrupted run against uninterrupted work. A weights-only export is appropriate for some inference uses but cannot establish training continuation.
+A config is a record of intent, not a checkpoint. Exact continuation can require model and optimizer state, random keys, scheduler step, data iterator position and precision settings. Save these together and test an interrupted run against uninterrupted work. A weights-only export is appropriate for some inference uses but requires separate verification to establish training continuation.
 
 Keep deployment artifacts separate from training checkpoints. An inference bundle needs the expected input/output contract, preprocessing/tokenizer, weights, precision, runtime dependencies and validation evidence. A container packages software; it does not automatically include your data or prove compatible accelerator drivers.
 

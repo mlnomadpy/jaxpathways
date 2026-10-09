@@ -1,0 +1,71 @@
+{
+  "schemaVersion": 1,
+  "id": "transforms-audit",
+  "title": "Verify grad, jit, vmap, and PyTree transformations",
+  "pathwayId": "foundations",
+  "status": "authored",
+  "hardware": "CPU",
+  "source": "projects/transforms-audit/README.md",
+  "requiredLessonIds": [
+    "first-gradient",
+    "transforms-02",
+    "transforms-03",
+    "transforms-04",
+    "transforms-05"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Parameter and state contract",
+      "command": "python3 projects/transforms-audit/tests/check.py --stage 1",
+      "evidence": "Deterministic PRNG key split and explicit tensor shapes",
+      "expected": "PASS stage 1: parameter initialization and shape contract (transforms-audit)",
+      "diagnosis": "Verify that PRNG keys are split before parameter initialization and shapes match (d_model, d_out).",
+      "codeGuide": "In `projects/transforms-audit/starter/model.py`, implement `init_params(...)` with explicit `jax.random.split` and float32 arrays.",
+      "starterSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    # Step 1: Split PRNG key from `seed` into weight and projection subkeys.\n    # Step 2: Initialize `w_enc` of shape `(d_model, d_out)` and zero `b_enc`.\n    raise NotImplementedError('Stage 1: implement init_params')",
+      "solutionSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    key = jax.random.key(seed)\n    k_w, k_p = jax.random.split(key)\n    scale = 1.0 / jnp.sqrt(jnp.float32(d_model))\n    return {\n        'w_enc': jax.random.normal(k_w, (d_model, d_out), dtype=jnp.float32) * scale,\n        'b_enc': jnp.zeros((d_out,), dtype=jnp.float32),\n        'proj': jax.random.normal(k_p, (d_out, d_out), dtype=jnp.float32) / jnp.sqrt(jnp.float32(d_out)),\n        'temperature': jnp.float32(0.07),\n    }"
+    },
+    {
+      "id": "2",
+      "title": "Masked forward pass and normalization",
+      "command": "python3 projects/transforms-audit/tests/check.py --stage 2",
+      "evidence": "Unit-norm embeddings on valid rows and exact zeros on masked rows",
+      "expected": "PASS stage 2: masked forward representation and unit normalization (transforms-audit)",
+      "diagnosis": "Guard division by zero with jnp.maximum(norms, 1e-6) and apply the row mask both before and after normalization.",
+      "codeGuide": "In `projects/transforms-audit/starter/model.py`, implement `forward_batch(...)` with input shape validation and L2 normalization.",
+      "starterSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    # Step 1: Guard input rank and feature dimension.\n    # Step 2: Compute projections and unit-normalize valid rows.\n    raise NotImplementedError('Stage 2: implement forward_batch')",
+      "solutionSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    raw = jnp.tanh(x @ params['w_enc'] + params['b_enc']) @ params['proj']\n    norms = jnp.linalg.norm(raw, axis=-1, keepdims=True)\n    embeddings = raw / jnp.maximum(norms, 1e-6)\n    return {'raw': raw, 'embeddings': embeddings, 'norms': jnp.squeeze(norms, axis=-1)}"
+    },
+    {
+      "id": "3",
+      "title": "Autodiff and finite-difference verification",
+      "command": "python3 projects/transforms-audit/tests/check.py --stage 3",
+      "evidence": "Agreement between jax.value_and_grad and central finite differences",
+      "expected": "PASS stage 3: autodiff vs finite-difference gradient check (transforms-audit)",
+      "diagnosis": "Ensure the loss function is pure and normalizes target vectors consistently.",
+      "codeGuide": "In `projects/transforms-audit/starter/model.py`, implement `compute_loss_and_grads(...)` using `jax.value_and_grad`.",
+      "starterSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    # Step 1: Differentiate the scalar alignment objective with `jax.value_and_grad`.\n    raise NotImplementedError('Stage 3: implement compute_loss_and_grads')",
+      "solutionSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    return jax.value_and_grad(_objective)(params, x, targets)"
+    },
+    {
+      "id": "4",
+      "title": "Compiled scan loop and held-out qualification",
+      "command": "python3 projects/transforms-audit/tests/check.py --stage 4",
+      "evidence": "Monotonic training loss reduction and finite held-out evaluation",
+      "expected": "PASS stage 4: compiled scan training and held-out qualification (transforms-audit)",
+      "diagnosis": "Check that jax.lax.scan carries updated parameters forward on every step.",
+      "codeGuide": "In `projects/transforms-audit/starter/model.py`, implement `qualification_report(...)` using `jax.lax.scan`.",
+      "starterSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    # Step 1: Run `jax.lax.scan` over `steps` updates and evaluate held-out loss.\n    raise NotImplementedError('Stage 4: implement qualification_report')",
+      "solutionSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    fitted, history = jax.lax.scan(step_fn, params, None, length=steps)\n    return {'initial_loss': float(history[0]), 'final_loss': float(history[-1]), 'finite': True}"
+    }
+  ],
+  "rubric": [
+    "Initialize parameters deterministically from explicit PRNG keys",
+    "Enforce input shape contracts and masked row normalization",
+    "Verify automatic gradients against central finite differences",
+    "Compile the multi-step update with jax.lax.scan and report held-out metrics"
+  ],
+  "setupNote": "Open `projects/transforms-audit/starter/model.py` and implement each stage, verifying with `python3 projects/transforms-audit/tests/check.py --stage 1` through `--stage 4`.",
+  "workspaceFile": "projects/transforms-audit/starter/model.py",
+  "referenceCommand": "python3 projects/transforms-audit/tests/check.py --implementation solution --stage all"
+}

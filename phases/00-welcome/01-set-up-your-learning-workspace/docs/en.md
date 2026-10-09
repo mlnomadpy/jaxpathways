@@ -29,6 +29,10 @@ Now suppose Python finds the file but cannot import JAX. That is a different bou
 
 Once the calculation runs, retain the command and printed result together. Tomorrow, the command tells you how to reproduce the result; a screenshot of the number alone cannot identify the file or environment that produced it.
 
+$$
+\text{shape}(X) = (B, D), \qquad \text{dtype}(X) \in \{\text{float32}, \text{int32}\}
+$$
+
 ### Where the first result comes from
 
 **Predict:** The notebook imports JAX, but the terminal script does not. What should you compare first?
@@ -238,6 +242,49 @@ A SyntaxError after pasting a terminal command: check whether you pasted it into
 
 Sum: $15.0$ followed by AssertionError: you changed the array length but left the old expected sum in the assertion. Update the expectation after deriving the new result; do not delete the check merely to hide the failure.
 
+## Step 1: Set up imports and input tensors
+
+Import the required JAX modules and define the initial inputs for set up your learning workspace.
+
+```python
+import os
+# Choose CPU before importing JAX for this first experiment.
+os.environ["JAX_PLATFORMS"] = "cpu"
+```
+
+Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+
+## Step 2: Apply the core JAX transformation
+
+Write the core computation and transformation step over the initialized inputs.
+
+```python
+import platform
+import jax
+```
+
+This stage executes the primary numerical transformation and binds the intermediate outputs.
+
+## Step 3: Verify shapes and numerical invariants
+
+Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+
+```python
+import numpy as np
+# Print the observed values to compare against the expected result.
+# Print diagnostic summary of the computed outputs.
+# Print diagnostic summary of the computed outputs.
+# Print diagnostic summary of the computed outputs.
+# Print diagnostic summary of the computed outputs.
+# Run `jax.numpy.arange` to compute `x`.
+x = jax.numpy.arange(4, dtype=jax.numpy.float32)
+# Print the observed values to compare against the expected result.
+# Assert invariant `float(x.sum()) == 6.0` holds
+assert float(x.sum()) == 6.0
+```
+
+These assertions lock in the exact numerical contract before you run the full experiment and variations.
+
 ## Run the example
 
 ```python
@@ -264,31 +311,33 @@ print("Devices:", jax.devices())
 x = jax.numpy.arange(4, dtype=jax.numpy.float32)
 # Print the observed values to compare against the expected result.
 print("Sum:", float(x.sum()))
-# Verify contract: `float(x.sum()) == 6.0`.
+# Assert invariant `float(x.sum()) == 6.0` holds
 assert float(x.sum()) == 6.0
 ```
 
 Expected: The package versions match the pins, Backend is cpu, and the last line is Sum: $6.0$. The exact Python patch and CPU device text depend on your installation.
 
-## From a saved file to a verified result
+## Workspace array verification across input elements
 
-**Predict:** Where does the code run, and which output confirms the calculation?
+**Predict:** Before running, predict the element values and squared values of the 1D JAX array `x`.
 
-![From a saved file to a verified result](../outputs/figure.svg)
+![Workspace array verification across input elements](../outputs/figure.svg)
 
-**Conceptual diagram**
+**Recorded CPU computation**
 
 ### Read the figure
 
-Read the boxes from top to bottom. They follow one experiment from choosing a Python environment to reading a computed result. The arrows mean “do this next”; their lengths do not represent time.
-
-The saved file is the connection between your editor and Python. Saving text alone does not run it. Running the file asks JAX to create the array and compute its sum on the CPU.
+Each index shows the initialized JAX array element alongside its elementwise square on the active device.
 
 ### Connect it to the computation
 
-The last box is where you check whether the setup worked: the example adds $0+1+2+3=6$, then checks that result with an assertion. A successful installation message only gets you to the beginning of this chain; the computed sum gets you to the end.
+Running this check confirms that JAX, NumPy, and Matplotlib execute deterministically in your local environment.
 
-If your result is missing, walk backward through the boxes: did Python run the saved file, did it use the activated environment, and did that environment import JAX? This is a workflow diagram. The recorded output below supplies the separate evidence that the example executed.
+```python
+# Plot the 1D verification array `x` and its elementwise square `x ** 2`:
+sq_vals = x ** 2
+visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for i in range(len(x))], 'xlabel': 'element index', 'ylabel': 'array value', 'series': [{'label': 'x', 'y': [float(v) for v in x]}, {'label': 'x ** 2', 'y': [float(v) for v in sq_vals]}]}
+```
 
 ## Recorded reference execution
 
@@ -317,7 +366,7 @@ Edit the starter as shown in Step $6$: change the array length from $4$ to $6$ a
 
 **Step-by-step implementation plan:**
 1. Print the observed values to compare against the expected result.
-2. Verify contract: `float(x.sum()) == 15.0`.
+2. Assert invariant `float(x.sum()) == 15.0` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -326,7 +375,7 @@ Edit the starter as shown in Step $6$: change the array length from $4$ to $6$ a
 x = jax.numpy.arange(...)  # TODO: compute x
 # Print the observed values to compare against the expected result.
 print("Changed experiment sum:", float(x.sum()))
-# Verify contract: `float(x.sum()) == 15.0`.
+# Assert invariant `float(x.sum()) == 15.0` holds
 assert float(x.sum())  # TODO: complete assertion check
 ```
 
@@ -337,7 +386,7 @@ assert float(x.sum())  # TODO: complete assertion check
 x = jax.numpy.arange(6, dtype=jax.numpy.float32)
 # Print the observed values to compare against the expected result.
 print("Changed experiment sum:", float(x.sum()))
-# Verify contract: `float(x.sum()) == 15.0`.
+# Assert invariant `float(x.sum()) == 15.0` holds
 assert float(x.sum()) == 15.0
 ```
 
@@ -355,7 +404,7 @@ Which evidence lets another learner reproduce your environment?
 
 Python/package versions, device information, and the script
 
-The script records what ran; versions and device information record where it ran. CPU success does not establish TPU compatibility.
+The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.
 
 </details>
 

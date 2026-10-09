@@ -37,7 +37,7 @@ Learners must rehearse at least: wrong masking denominator; duplicated positive 
 
 ## After deployment
 
-Track request/error counts, rejected lengths/payloads, queue depth, timeouts, cancellation, batch sizes, cold-start time, end-to-end p50/p95/p99 with sample counts, throughput, resource use and accepted model/tokenizer/processor/index IDs. A few local samples cannot establish a reliable tail percentile.
+Track request/error counts, rejected lengths/payloads, queue depth, timeouts, cancellation, batch sizes, cold-start time, end-to-end p50/p95/p99 with sample counts, throughput, resource use and accepted model/tokenizer/processor/index IDs. A few local samples requires separate verification to establish a reliable tail percentile.
 
 Embedding-specific service monitoring includes output dimension/dtype/norm, zero/nonfinite outputs, truncation rates, input/domain/language shifts and query/index incompatibility. Retrieval quality requires delayed labels, sampled judgments or a controlled evaluation panel; input drift or click changes alone do not prove a model regression.
 

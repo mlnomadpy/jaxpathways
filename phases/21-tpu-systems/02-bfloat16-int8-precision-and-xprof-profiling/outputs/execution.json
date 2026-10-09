@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-06",
-  "contentHash": "41d1ac0fb74985a5475458a8529ca593c153ac20a0c22f51aa4251302b98a0dc",
+  "contentHash": "ab390355eafb9e5585a455103dae3f99acee9c4395172530ca075e00553ab163",
   "executedAt": "2026-10-08T14:08:25.927372+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,19 @@
   "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0972\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0731\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 20.57 Traced steady step ms: 0.0731\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 257376\nPASS: tpu-06\n",
   "notebookCells": [
     {
-      "sourceHash": "0ff7de5878a909bc90cd636f858d5b4fc47ccb0588376e3bbb299c38a6f518c1",
+      "sourceHash": "6a567352869a5eba213bae61d91d1862bbe3040bd22b7e5c8dc575b327478316",
       "outputs": []
     },
     {
-      "sourceHash": "811deffbc3a57cb5e46d45ab8cf7d187afa92a8d188186ff0e0a121f647469c4",
+      "sourceHash": "5d4276339a861633fa8e7e582e2ab0921a06a229168fd12931121b82fa9d8b43",
+      "outputs": []
+    },
+    {
+      "sourceHash": "928508b0f74214b4681107fb9d2de649d561f2e1ca0d2a711eaeef89daf87587",
+      "outputs": []
+    },
+    {
+      "sourceHash": "e9707e3ad3d2e8229d32b526e10f8c200783b004286fe5a44a4b0117e3a902ac",
       "outputs": [
         {
           "output_type": "stream",
@@ -26,19 +34,6 @@
           "text": [
             "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\n",
             "Captured *.xplane.pb trace count: 1 steady_ms: 0.0998\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "e06b26f7bfe1dfd5d4ae3b916a9b9d547eb43e3fe206462d73b883a5974ede9a",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\n",
-            "Captured *.xplane.pb trace count: 1 steady_ms: 0.0901\n"
           ]
         }
       ]
@@ -63,76 +58,36 @@
       ]
     },
     {
-      "sourceHash": "e95f0bed6ef9bd55147c107ff876abf29f54e89f758945fa2a0bc681f282fbaa",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "BF16-accum / FP32-accum max error ratio: 1.49\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "beba360f4994c46f09785a5ccb022ea056421853aacd9ce1d2efd822e1adbef2",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Warmup ms: 20.498 Traced steady step ms: 0.0901\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "cdf518e0d812ea4a2f826dc2364ec4c2995e51b16800cda3516084b3140c881c",
+      "sourceHash": "86f73d90c12e7b88a5b74ce0ff8035d7993a997a4524e4f2a55a872bd677540a",
       "outputs": []
     },
     {
-      "sourceHash": "06c114a0ebbe263abdb42f3bbedac6610ddde689f63fa8f474be1c04939d0758",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "06f10dcc0bbb4b32e815c89934bf1e51bd2706fcf240d3816499e30582d6ea44",
+      "sourceHash": "baf53034a8b0183a2e461d8b1808677f50b275def8310454cab6b6249fb1e6ad",
       "outputs": []
     },
     {
-      "sourceHash": "c1f114e1e229bea66c2f852af9e46aec3598902eb146743da7a008c7cb3355db",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Mean error (per-channel vs per-tensor): 0.01389 0.0979\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "361033ab8d681f302a15a81d2078d99d86f8219231b15298661cf80018c33042",
+      "sourceHash": "3ad9b51eaf089b5d7c37aa789f3ac57a613ef90eaa03b498d122ffdb9403bb5c",
       "outputs": []
     },
     {
-      "sourceHash": "ab97a3ce4a6a83f0dd2449fc6ca2939fb0bbeb349e7011151c1850ad75aa1dc6",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "xplane.pb bytes: 271921\n"
-          ]
-        }
-      ]
+      "sourceHash": "4038b126362a8e2ba2b9f3dc17c87c4b6023f0f24eaaa28002b1ba6403f9f8df",
+      "outputs": []
+    },
+    {
+      "sourceHash": "4dc6e21de6657b323bdf35fe169f29e39a64ad4885e73092b83cc498901e4c9f",
+      "outputs": []
+    },
+    {
+      "sourceHash": "691556b6eda49107054041df51736a8c0c6bb1b1c156c0911d57896c0e83e698",
+      "outputs": []
+    },
+    {
+      "sourceHash": "64b77bb80c05cce8d838e4d486ecf4a1b1050635e158f8f1ea2fde1f9bee284d",
+      "outputs": []
+    },
+    {
+      "sourceHash": "48034c4d7970d2cdf97f8d7b89797c4be2bb992076c4c51b95dc9e5596630ed6",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

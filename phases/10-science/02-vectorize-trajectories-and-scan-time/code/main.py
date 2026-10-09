@@ -12,13 +12,13 @@ import numpy as np
 
 # Function `rk4_step(rate, value, dt)` implementing this stage's computation:
 def rk4_step(rate, value, dt):
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` from `-rate*value`
     a = -rate*value
-    # Evaluate `b` from the current inputs and state.
+    # Compute `b` from `-rate*(value + dt*a/2)`
     b = -rate*(value + dt*a/2)
-    # Evaluate `c` from the current inputs and state.
+    # Compute `c` from `-rate*(value + dt*b/2)`
     c = -rate*(value + dt*b/2)
-    # Evaluate `d` from the current inputs and state.
+    # Compute `d` from `-rate*(value + dt*c)`
     d = -rate*(value + dt*c)
     # Return `value + dt * (a + 2 * b + 2 * c + d) / 6` to the caller.
     return value + dt*(a + 2*b + 2*c + d)/6
@@ -38,21 +38,21 @@ def solve(rate, initial, steps=40, dt=0.05):
 
 # Batch initial conditions while sharing the model
 # Step 2 — Batch initial conditions while sharing the model: The batch axis is independent initial conditions, not time.
-# Initialize array `initials` with explicit values and shape.
+# Construct `initials` via `jnp.array([0.5, 1.0, 2.0])`
 initials = jnp.array([0.5, 1.0, 2.0])
-# Evaluate `(rate, dt, steps)` from the current inputs and state.
+# Compute `rate, dt, steps` from `0.7, 0.05, 40`
 rate, dt, steps = 0.7, 0.05, 40
 # Vectorize across the batch dimension with `jax.vmap` (`simulate_batch`).
 simulate_batch = jax.jit(jax.vmap(lambda initial: solve(rate, initial, steps, dt)))
 # Run `simulate_batch` to compute `trajectories`.
 trajectories = simulate_batch(initials)
-# Initialize array `times` with explicit values and shape.
+# Compute `times` from `np.arange(steps+1)*dt`
 times = np.arange(steps+1)*dt
 # Convert `oracle` to a host NumPy array for inspection or verification.
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=...`
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
@@ -75,9 +75,9 @@ def scan_batch(rate, values, steps=40, dt=0.05):
     return jnp.concatenate((values[None,:], tail), axis=0)
 # Run compiled structured control flow via `jax.lax` (`time_major`).
 time_major = scan_batch(rate, initials)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12...`
 np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("scan(vectors) transposed equals vmap(scan)")
@@ -93,13 +93,13 @@ import numpy as np
 
 # Function `rk4_step(rate, value, dt)` implementing this stage's computation:
 def rk4_step(rate, value, dt):
-    # Evaluate `a` from the current inputs and state.
+    # Compute `a` from `-rate*value`
     a = -rate*value
-    # Evaluate `b` from the current inputs and state.
+    # Compute `b` from `-rate*(value + dt*a/2)`
     b = -rate*(value + dt*a/2)
-    # Evaluate `c` from the current inputs and state.
+    # Compute `c` from `-rate*(value + dt*b/2)`
     c = -rate*(value + dt*b/2)
-    # Evaluate `d` from the current inputs and state.
+    # Compute `d` from `-rate*(value + dt*c)`
     d = -rate*(value + dt*c)
     # Return `value + dt * (a + 2 * b + 2 * c + d) / 6` to the caller.
     return value + dt*(a + 2*b + 2*c + d)/6
@@ -118,21 +118,21 @@ def solve(rate, initial, steps=40, dt=0.05):
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
 # Step 2 — Batch initial conditions while sharing the model: The batch axis is independent initial conditions, not time.
-# Initialize array `initials` with explicit values and shape.
+# Construct `initials` via `jnp.array([0.5, 1.0, 2.0])`
 initials = jnp.array([0.5, 1.0, 2.0])
-# Evaluate `(rate, dt, steps)` from the current inputs and state.
+# Compute `rate, dt, steps` from `0.7, 0.05, 40`
 rate, dt, steps = 0.7, 0.05, 40
 # Vectorize across the batch dimension with `jax.vmap` (`simulate_batch`).
 simulate_batch = jax.jit(jax.vmap(lambda initial: solve(rate, initial, steps, dt)))
 # Run `simulate_batch` to compute `trajectories`.
 trajectories = simulate_batch(initials)
-# Initialize array `times` with explicit values and shape.
+# Compute `times` from `np.arange(steps+1)*dt`
 times = np.arange(steps+1)*dt
 # Convert `oracle` to a host NumPy array for inspection or verification.
 oracle = np.asarray(initials)[:,None]*np.exp(-rate*times[None,:])
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `trajectories.shape == (3, 41)`
 assert trajectories.shape == (3, 41)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=...`
 np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
@@ -154,9 +154,9 @@ def scan_batch(rate, values, steps=40, dt=0.05):
     return jnp.concatenate((values[None,:], tail), axis=0)
 # Run compiled structured control flow via `jax.lax` (`time_major`).
 time_major = scan_batch(rate, initials)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `time_major.shape == (41, 3)`
 assert time_major.shape == (41, 3)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12...`
 np.testing.assert_allclose(time_major.T, trajectories, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("scan(vectors) transposed equals vmap(scan)")
@@ -169,43 +169,43 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 # Experiment: Compare RK4 with an independent polynomial
 # Experiment — Compare RK4 with an independent polynomial: This checks the discrete algorithm independently of the...
 z = -rate*dt
-# Evaluate `multiplier` from the current inputs and state.
+# Compute `multiplier` from `1 + z + z*z/2 + z**3/6 + z**4/24`
 multiplier = 1 + z + z*z/2 + z**3/6 + z**4/24
-# Initialize array `polynomial` with explicit values and shape.
+# Compute `polynomial` from `np.asarray(initials)[:,None]*multiplier**np.arange(s...`
 polynomial = np.asarray(initials)[:,None]*multiplier**np.arange(steps+1)[None,:]
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectories, polynomial, rtol=1e-12, ...`
 np.testing.assert_allclose(trajectories, polynomial, rtol=1e-12, atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("RK4 polynomial maximum difference:", np.max(np.abs(np.asarray(trajectories)-polynomial)))
 
 # Experiment: Let each trajectory have its own rate
 # Experiment — Let each trajectory have its own rate: Mapping both axes pairs corresponding entries.
-# Initialize array `rates` with explicit values and shape.
+# Construct `rates` via `jnp.array([0.2, 0.7, 1.1])`
 rates = jnp.array([0.2, 0.7, 1.1])
 # Vectorize across the batch dimension with `jax.vmap` (`paired`).
 paired = jax.vmap(lambda k, u: solve(k,u), in_axes=(0,0))(rates,initials)
 # Convert `paired_reference` to a host NumPy array for inspection or verification.
 paired_reference = np.asarray(initials)[:,None]*np.exp(-np.asarray(rates)[:,None]*times)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol...`
 np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol=1e-10)
 # Print the observed values to compare against the expected result.
 print("Paired-rate endpoints:", np.asarray(paired)[:,-1])
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Add a fourth initial condition, verify the changed output shape and...
-# Initialize array `changed_initials` with explicit values and shape.
+# Construct `changed_initials` via `jnp.array([0.5, 1.0, 2.0, 3.0])`
 changed_initials = jnp.array([0.5, 1.0, 2.0, 3.0])
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(lambda u: solve(0.7,u))(changed_initials)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `changed.shape == (4,41)`
 assert changed.shape == (4,41)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(changed,np.asarray(changed_initials)[:,None]*np.exp(-0.7*times),rtol=3e-8)
-# Initialize array `order` with explicit values and shape.
+# Construct `order` via `jnp.array([3,0,2,1])`
 order = jnp.array([3,0,2,1])
 # Vectorize across the batch dimension with `jax.vmap` (`reordered`).
 reordered = jax.vmap(lambda u: solve(0.7,u))(changed_initials[order])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(reordered,changed[order],rtol=1e-12)`
 np.testing.assert_allclose(reordered,changed[order],rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Permutation preserves trajectory identity")
@@ -222,7 +222,7 @@ def final_only(rate, initial, steps=40, dt=0.05):
     return jax.lax.scan(advance,initial,None,length=steps)[0]
 # Vectorize across the batch dimension with `jax.vmap` (`finals`).
 finals = jax.vmap(lambda u: final_only(0.7,u))(initials)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)`
 np.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Only final states returned:", np.asarray(finals))
@@ -231,7 +231,7 @@ print("Only final states returned:", np.asarray(finals))
 # Pairing versus Cartesian products (Challenge): Paired batches and Cartesian products are different experiments.
 # Vectorize across the batch dimension with `jax.vmap` (`grid`).
 grid = jax.vmap(lambda k: jax.vmap(lambda u: solve(k,u))(initials))(rates)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape == (3,3,41)
 # Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol=1e-12)

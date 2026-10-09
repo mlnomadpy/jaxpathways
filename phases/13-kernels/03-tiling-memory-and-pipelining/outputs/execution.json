@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-03",
-  "contentHash": "4dbd1ea72a2c6617ee55c130696d88cefa3163df50c6f4120f60c7ad8477b1c5",
+  "contentHash": "d53a8a5542a3ab98b2a1ffa276a675189a4976b57e7c5e055c9f153f4ff848ff",
   "executedAt": "2026-10-08T14:05:30.554746+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,11 @@
   "stdout": "Actual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nActual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nThree-buffer schedule matches the two-buffer result\nSingle-tile pipeline checked\nChanged shape, dtype and schedules verified\nUnsupported pipeline tile rejected\nTile, two/three-input-slot modeled bytes: (8, 128) 24576 32768\nTile, two/three-input-slot modeled bytes: (16, 128) 49152 65536\nTile, two/three-input-slot modeled bytes: (16, 256) 98304 131072\nPASS: kernels-03\n",
   "notebookCells": [
     {
-      "sourceHash": "2307c62228d1996d70dc41d9db6fd7600663436b67e3570591d82d351dd23922",
+      "sourceHash": "4d9ffa682115bb40960165cb329215bd400bcc33ae58d3bc8e196c6b09d80279",
       "outputs": []
     },
     {
-      "sourceHash": "9cf72841cd439916b0943007032ce15f9e86234c07a0b0d546bc0cb23f0243a7",
+      "sourceHash": "0144a9048e9d76f7bf51c9783dc07746f10b3e29045385f1726ec7f9196b4c4a",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "843e2f64420535d597d2626513a48203cdff99a309ec771e3f23f2ed85649c16",
+      "sourceHash": "33fc091e1e4a6bf6062618d72efdab82586222b1064065fda34d638549477f3e",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "2c32f0d8b01a3c5fd12fdf604a2f6bdeb85d0a35ae2e337085f0d9207cedf74b",
+      "sourceHash": "3053a4abc3563efa837995d9c715067521cacf6398faaec14763ed974602d2ce",
       "outputs": [
         {
           "output_type": "stream",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "sourceHash": "21b5029e5c331198a84ebeba37cf1a400f42b34456f123d47f7e00fae1312442",
+      "sourceHash": "fa2f2d49a9bf2bdb638406a39bd18ed2c6f28e216d8b0d549f6b9c6d2b978224",
       "outputs": []
     },
     {
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "9f93916ed42fa66d6b584e74361ca4facf5c8441865014a84c40e5c921f35b4b",
+      "sourceHash": "d51c512d51be486459f3eb6ca4667fe33059d889b1d0464a8714d5b9b15c86c9",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "fe8182bf3c1dbc4138cbc295debe3a27685198a6d92077b3868e4a093dc7bd79",
+      "sourceHash": "9c371a5d887dfcdcaf85cf134fecfd4273fbaef1e786529480e4012b6aa9e9e1",
       "outputs": [
         {
           "output_type": "stream",
@@ -116,11 +116,11 @@
       ]
     },
     {
-      "sourceHash": "f04b69ab20e98429c3c35aa2e411db60b0b63dcecd644fe43818d284cb0b90bb",
+      "sourceHash": "31cdc7c8d31ec1d7880a127ee9a890ebdbbc2555b1d746f7cbd250b9f338fc21",
       "outputs": []
     },
     {
-      "sourceHash": "fbc176df910ef7d34edebbff4b2c59c688479ce65304987ae7f33661207fa031",
+      "sourceHash": "b00f7ac210ec2631e8814d4c239bdd8673fc1d4695515881f89a19a253bc6ddb",
       "outputs": [
         {
           "output_type": "stream",
@@ -132,11 +132,11 @@
       ]
     },
     {
-      "sourceHash": "4d5908febc0b45dd9ca9eb79595ef59866156371d16e8d5e1a94eef04bdd17ad",
+      "sourceHash": "dd6c07827f1deda46a4ba983e57e7745b462eec8fa311cc3eb6097f8c8a52d5b",
       "outputs": []
     },
     {
-      "sourceHash": "d1f133724bd8a97f507d744267850dac3d6b0364d912e24eb7b50534683f749b",
+      "sourceHash": "95ad3f0bb725877e56ffb6318d4b132665a6508aa7c5bbffc70a98d0b0c1f67e",
       "outputs": [
         {
           "output_type": "stream",

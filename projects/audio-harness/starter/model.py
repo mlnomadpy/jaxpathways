@@ -185,7 +185,8 @@ def infer_release(manifest,artifacts,waveforms,sample_rate=8000,channels=1,
 
 def benchmark(manifest,artifacts,waveforms,policy="fp32",repeats=30):
     """Stage 4: record first/warm timings including validation, placement, exported STFT,
-    model completion and host outputs; exclude capture, buffering, decoding and network.
+    model completion and host outputs
+    exclude capture, buffering, decoding and network.
     """
     # Key APIs to use: `time.perf_counter`, `infer_release`, `samples.append`, `np.percentile`
     # Step 1: Record execution timing or profiler trace in `began`.

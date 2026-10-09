@@ -4,6 +4,32 @@
 
 Create a report and preserve data/tokenizer identity, reference implementation, checkpoints, trace files, serialized endpoints and actual outputs.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: causal attention masking & future-token invariance check
+import jax
+import jax.numpy as jnp
+
+def causal_attention(q: jnp.ndarray, k: jnp.ndarray, v: jnp.ndarray) -> jnp.ndarray:
+    # Apply lower-triangular causal mask before softmax normalization.
+    seq_len, d_k = q.shape
+    scores = (q @ k.T) / jnp.sqrt(jnp.float32(d_k))
+    mask = jnp.tril(jnp.ones((seq_len, seq_len), dtype=bool))
+    masked_scores = jnp.where(mask, scores, -1e9)
+    weights = jax.nn.softmax(masked_scores, axis=-1)
+    return weights @ v
+
+q = jnp.ones((4, 8), dtype=jnp.float32)
+k1 = jnp.arange(32, dtype=jnp.float32).reshape(4, 8) / 32.0
+k2 = k1.at[3].set(99.0)
+out1 = causal_attention(q, k1, k1)
+out2 = causal_attention(q, k2, k2)
+print("Prefix causal invariance max diff:", float(jnp.max(jnp.abs(out1[:3] - out2[:3]))))
+```
+
 ## Task 1: explain the objective and information boundary
 
 Use the text-harness byte tokenizer and a short document with a multibyte UTF-8 character. Show raw bytes, token IDs, BOS/EOS/PAD, shifted inputs/targets and the valid-target mask.

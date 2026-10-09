@@ -24,7 +24,8 @@ def pad_pair(x,y,block):
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
     # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
+    m,n=x.shape
+    bm,bn=block
     # Evaluate `padded` from the current inputs and state.
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
@@ -172,7 +173,9 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
     # Evaluate `(m, n)` from the current inputs and state.
     # Evaluate `pm` from the current inputs and state.
     # Evaluate `pn` from the current inputs and state.
-    m,n=x.shape;pm=(m+bm-1)//bm*bm;pn=(n+bn-1)//bn*bn
+    m,n=x.shape
+    pm=(m+bm-1)//bm*bm
+    pn=(n+bn-1)//bn*bn
     # Combine or mask array elements to form `px`.
     px=jnp.pad(x,((0,pm-m),(0,pn-n)))
     # Combine or mask array elements to form `pb`.

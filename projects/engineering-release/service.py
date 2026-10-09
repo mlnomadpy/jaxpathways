@@ -42,14 +42,22 @@ def main():
         from http.server import BaseHTTPRequestHandler, HTTPServer
         class Handler(BaseHTTPRequestHandler):
             def reply(self, status, body):
-                raw = json.dumps(body).encode(); self.send_response(status)
-                self.send_header('Content-Type', 'application/json'); self.send_header('Content-Length', str(len(raw)))
-                self.end_headers(); self.wfile.write(raw)
+                raw = json.dumps(body).encode()
+                self.send_response(status)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Content-Length', str(len(raw)))
+                self.end_headers()
+                self.wfile.write(raw)
             def do_GET(self):
-                if self.path != '/ready': self.reply(404, {'error': 'unknown route'}); return
-                predict(model, {'inputs': [0.]}); self.reply(200, {'ready': True})
+                if self.path != '/ready':
+                    self.reply(404, {'error': 'unknown route'})
+                    return
+                predict(model, {'inputs': [0.]})
+                self.reply(200, {'ready': True})
             def do_POST(self):
-                if self.path != '/predict': self.reply(404, {'error': 'unknown route'}); return
+                if self.path != '/predict':
+                    self.reply(404, {'error': 'unknown route'})
+                    return
                 try:
                     size = int(self.headers.get('Content-Length', '0'))
                     if not 0 < size <= 4096: raise ValueError('request size')

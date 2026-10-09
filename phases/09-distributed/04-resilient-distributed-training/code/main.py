@@ -27,7 +27,7 @@ from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 # Define the global fixture and placements
 # Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
 count = jax.device_count()
-# Verify contract: `count >= 2`.
+# Assert invariant `count >= 2` holds
 assert count >= 2, 'Use at least two devices for the placement exercise'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -37,11 +37,11 @@ rep = NamedSharding(mesh, P())
 row = NamedSharding(mesh, P('data', None))
 # Configure multi-device placement / sharding specification (`label`).
 label = NamedSharding(mesh, P('data'))
-# Evaluate `(batch_size, size, width)` from the current inputs and state.
+# Compute `batch_size, size, width` from `2 * count, 4 * count, 2 * count`
 batch_size, size, width = 2 * count, 4 * count, 2 * count
 # Identical tiny synthetic fixture on each controller; not distributed data ingestion.
 data = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)
-# Initialize array `truth` with explicit values and shape.
+# Compute `truth` from `np.linspace(-0.3, 0.4, width, dtype=np.float32)`
 truth = np.linspace(-0.3, 0.4, width, dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `targets`.
 targets = data @ truth
@@ -74,7 +74,7 @@ def initial():
 def update(w, velocity, x, y):
     # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
-    # Evaluate `v` from the current inputs and state.
+    # Compute `v` from `0.8 * velocity + grad`
     v = 0.8 * velocity + grad
     # Return `(w - 0.04 * v, v, loss)` to the caller.
     return w - 0.04 * v, v, loss
@@ -86,16 +86,16 @@ def transition(state):
     cursor = int(state['cursor'])
     # Convert `order` to a host NumPy array for inspection or verification.
     order = np.asarray(state['order'])
-    # Evaluate `key` from the current inputs and state.
+    # Compute `key` from `state['key']`
     key = state['key']
     # Branch on condition `cursor == size`:
     if cursor == size:
         key, shuffle_key = jax.random.split(key)
         order = np.asarray(jax.random.permutation(shuffle_key, size))
         cursor = 0
-    # Evaluate `ids` from the current inputs and state.
+    # Compute `ids` from `order[cursor:cursor + batch_size]`
     ids = order[cursor:cursor + batch_size]
-    # Evaluate `(x, y)` from the current inputs and state.
+    # Compute `x, y` from `placed(data[ids], row), placed(targets[ids], label)`
     x, y = placed(data[ids], row), placed(targets[ids], label)
     # Run `update` to compute `(w, v, loss)`.
     w, v, loss = update(state['weights'], state['momentum'], x, y)
@@ -126,7 +126,7 @@ if multi:
     root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve()
 else:
     root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve() if os.environ.get('COURSE_CHECKPOINT_DIR') else Path(tempfile.mkdtemp(prefix='jax-distributed-recovery-'))
-# Evaluate `checkpoint_path` from the current inputs and state.
+# Compute `checkpoint_path` from `root / 'step-one'`
 checkpoint_path = root / 'step-one'
 # Guard input contract (`resume and (not checkpoint_path.exists())`) and fail fast if violated.
 if resume and not checkpoint_path.exists():
@@ -146,9 +146,9 @@ with ocp.StandardCheckpointer() as checkpointer:
     for name in state:
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(restored[name]), np.asarray(state[name]))
-    # Evaluate `(baseline, resumed)` from the current inputs and state.
+    # Compute `baseline, resumed` from `state, restored`
     baseline, resumed = state, restored
-    # Evaluate `(baseline_losses, resumed_losses, replay_ids)` from the current inputs and state.
+    # Compute `baseline_losses, resumed_losses, replay_ids` from `[], [], []`
     baseline_losses, resumed_losses, replay_ids = [], [], []
     # Repeat the update loop over `range(3)` steps:
     for _ in range(3):
@@ -156,7 +156,7 @@ with ocp.StandardCheckpointer() as checkpointer:
         baseline, ids_a, loss_a = transition(baseline)
         # Run `transition` to compute `(resumed, ids_b, loss_b)`.
         resumed, ids_b, loss_b = transition(resumed)
-        # Verify that computed values match the expected reference within numerical tolerance.
+        # Execute `np.testing.assert_array_equal(ids_a, ids_b)`
         np.testing.assert_array_equal(ids_a, ids_b)
         # Loop over `name` in `baseline`:
         for name in baseline:
@@ -206,7 +206,7 @@ from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
 # Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
 count = jax.device_count()
-# Verify contract: `count >= 2`.
+# Assert invariant `count >= 2` holds
 assert count >= 2, 'Use at least two devices for the placement exercise'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -216,11 +216,11 @@ rep = NamedSharding(mesh, P())
 row = NamedSharding(mesh, P('data', None))
 # Configure multi-device placement / sharding specification (`label`).
 label = NamedSharding(mesh, P('data'))
-# Evaluate `(batch_size, size, width)` from the current inputs and state.
+# Compute `batch_size, size, width` from `2 * count, 4 * count, 2 * count`
 batch_size, size, width = 2 * count, 4 * count, 2 * count
 # Identical tiny synthetic fixture on each controller; not distributed data ingestion.
 data = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)
-# Initialize array `truth` with explicit values and shape.
+# Compute `truth` from `np.linspace(-0.3, 0.4, width, dtype=np.float32)`
 truth = np.linspace(-0.3, 0.4, width, dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `targets`.
 targets = data @ truth
@@ -250,7 +250,7 @@ def initial():
 def update(w, velocity, x, y):
     # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
-    # Evaluate `v` from the current inputs and state.
+    # Compute `v` from `0.8 * velocity + grad`
     v = 0.8 * velocity + grad
     # Return `(w - 0.04 * v, v, loss)` to the caller.
     return w - 0.04 * v, v, loss
@@ -261,16 +261,16 @@ def transition(state):
     cursor = int(state['cursor'])
     # Convert `order` to a host NumPy array for inspection or verification.
     order = np.asarray(state['order'])
-    # Evaluate `key` from the current inputs and state.
+    # Compute `key` from `state['key']`
     key = state['key']
     # Branch on condition `cursor == size`:
     if cursor == size:
         key, shuffle_key = jax.random.split(key)
         order = np.asarray(jax.random.permutation(shuffle_key, size))
         cursor = 0
-    # Evaluate `ids` from the current inputs and state.
+    # Compute `ids` from `order[cursor:cursor + batch_size]`
     ids = order[cursor:cursor + batch_size]
-    # Evaluate `(x, y)` from the current inputs and state.
+    # Compute `x, y` from `placed(data[ids], row), placed(targets[ids], label)`
     x, y = placed(data[ids], row), placed(targets[ids], label)
     # Run `update` to compute `(w, v, loss)`.
     w, v, loss = update(state['weights'], state['momentum'], x, y)
@@ -300,7 +300,7 @@ if multi:
     root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve()
 else:
     root = Path(os.environ['COURSE_CHECKPOINT_DIR']).resolve() if os.environ.get('COURSE_CHECKPOINT_DIR') else Path(tempfile.mkdtemp(prefix='jax-distributed-recovery-'))
-# Evaluate `checkpoint_path` from the current inputs and state.
+# Compute `checkpoint_path` from `root / 'step-one'`
 checkpoint_path = root / 'step-one'
 # Guard input contract (`resume and (not checkpoint_path.exists())`) and fail fast if violated.
 if resume and not checkpoint_path.exists():
@@ -320,9 +320,9 @@ with ocp.StandardCheckpointer() as checkpointer:
     for name in state:
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_array_equal(np.asarray(restored[name]), np.asarray(state[name]))
-    # Evaluate `(baseline, resumed)` from the current inputs and state.
+    # Compute `baseline, resumed` from `state, restored`
     baseline, resumed = state, restored
-    # Evaluate `(baseline_losses, resumed_losses, replay_ids)` from the current inputs and state.
+    # Compute `baseline_losses, resumed_losses, replay_ids` from `[], [], []`
     baseline_losses, resumed_losses, replay_ids = [], [], []
     # Repeat the update loop over `range(3)` steps:
     for _ in range(3):
@@ -330,7 +330,7 @@ with ocp.StandardCheckpointer() as checkpointer:
         baseline, ids_a, loss_a = transition(baseline)
         # Run `transition` to compute `(resumed, ids_b, loss_b)`.
         resumed, ids_b, loss_b = transition(resumed)
-        # Verify that computed values match the expected reference within numerical tolerance.
+        # Execute `np.testing.assert_array_equal(ids_a, ids_b)`
         np.testing.assert_array_equal(ids_a, ids_b)
         # Loop over `name` in `baseline`:
         for name in baseline:
@@ -357,7 +357,7 @@ print('Checkpoint:', checkpoint_path)
 
 # Figure data experiment
 # Compute figure data for: Restored updates reproduce the reference trajectory
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','x':[1,2,3],'xlabel':'update after ch...`
 visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabel':'batch mean squared loss','series':[{'label':'uninterrupted','y':baseline_losses},{'label':'restored','y':resumed_losses}]}
 
 # Experiment: Keep weights but discard momentum
@@ -367,11 +367,11 @@ incomplete = {**restored, 'momentum': placed(np.zeros(width, np.float32))}
 wrong_next, wrong_ids, _ = transition(incomplete)
 # Run `transition` to compute `(right_next, right_ids, _)`.
 right_next, right_ids, _ = transition(restored)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(wrong_ids, right_ids)`
 np.testing.assert_array_equal(wrong_ids, right_ids)
 # Aggregate array values to compute `weight_gap`.
 weight_gap = float(np.max(np.abs(np.asarray(wrong_next['weights']) - np.asarray(right_next['weights']))))
-# Verify contract: `weight_gap > 1e-05`.
+# Assert invariant `weight_gap > 1e-5` holds
 assert weight_gap > 1e-5
 # Print the observed values to compare against the expected result.
 print('Same next sample IDs, different weights after missing momentum:', weight_gap)
@@ -383,7 +383,7 @@ for _ in range(2):
     baseline, ids_a, _ = transition(baseline)
     # Run `transition` to compute `(resumed, ids_b, _)`.
     resumed, ids_b, _ = transition(resumed)
-    # Verify that computed values match the expected reference within numerical tolerance.
+    # Execute `np.testing.assert_array_equal(ids_a, ids_b)`
     np.testing.assert_array_equal(ids_a, ids_b)
     # Loop over `name` in `baseline`:
     for name in baseline:
@@ -393,20 +393,20 @@ for _ in range(2):
     for shard in resumed['weights'].addressable_shards:
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_allclose(np.asarray(shard.data), np.asarray(baseline['weights']), rtol=2e-5, atol=2e-6)
-# Verify contract: `int(resumed['step']) == 6`.
+# Assert invariant `int(resumed['step']) == 6` holds
 assert int(resumed['step']) == 6
 # Print the observed values to compare against the expected result.
 print('Five resumed transitions and all addressable parameter replicas agree.')
 
 # Reference practice: Find a delayed random-state failure
-# Find a delayed random-state failure (Transfer): A successful first resumed update does not establish future...
+# Find a delayed random-state failure (Transfer): A successful first resumed update is separate from future...
 # Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
 wrong_key_state = {**restored, 'key': placed(np.asarray(jax.random.PRNGKey(999)))}
 # Run `transition` to compute `(correct_a, ids_a, _)`.
 correct_a, ids_a, _ = transition(restored)
 # Run `transition` to compute `(wrong_a, ids_b, _)`.
 wrong_a, ids_b, _ = transition(wrong_key_state)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(ids_a, ids_b)`
 np.testing.assert_array_equal(ids_a, ids_b)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a['weights']), rtol=2e-5, atol=2e-6)
@@ -414,7 +414,7 @@ np.testing.assert_allclose(np.asarray(correct_a['weights']), np.asarray(wrong_a[
 correct_b, ids_c, _ = transition(correct_a)
 # Run `transition` to compute `(wrong_b, ids_d, _)`.
 wrong_b, ids_d, _ = transition(wrong_a)
-# Verify contract: `not np.array_equal(ids_c, ids_d)`.
+# Assert invariant `not np.array_equal(ids_c, ids_d)` holds
 assert not np.array_equal(ids_c, ids_d)
 # Print the observed values to compare against the expected result.
 print('Current-epoch batch matches; next-epoch batch exposes the wrong key.')

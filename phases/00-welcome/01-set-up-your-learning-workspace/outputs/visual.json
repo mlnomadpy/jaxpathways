@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "welcome-01",
-  "contentHash": "3e23e7950028ae270257e542c8edd4d6f16f598123d7c8a9a860f6b1fbf478e2",
+  "contentHash": "0cdd92d8c8b335b67a3ace087e106f0870905617ce969f8e770a77eb23e2b48e",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
-  "kind": "conceptual",
-  "generatedAt": "2026-10-06T15:41:22.113614+00:00",
+  "kind": "executed",
+  "generatedAt": "2026-10-09T12:23:05.840675+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,41 @@
   },
   "stdout": "Python: 3.14.3\nJAX: 0.9.2\nNumPy: 2.4.4\nBackend: cpu\nDevices: [CpuDevice(id=0)]\nSum: 6.0\n",
   "data": {
-    "kind": "flow",
-    "nodes": [
-      "Activate environment",
-      "Save first_experiment.py",
-      "Run with Python",
-      "JAX executes on CPU",
-      "Read sum and assertion"
+    "kind": "bar",
+    "x": [
+      0,
+      1,
+      2,
+      3
     ],
-    "layout": "sequence"
+    "labels": [
+      "x[0]",
+      "x[1]",
+      "x[2]",
+      "x[3]"
+    ],
+    "xlabel": "element index",
+    "ylabel": "array value",
+    "series": [
+      {
+        "label": "x",
+        "y": [
+          0.0,
+          1.0,
+          2.0,
+          3.0
+        ]
+      },
+      {
+        "label": "x ** 2",
+        "y": [
+          0.0,
+          1.0,
+          4.0,
+          9.0
+        ]
+      }
+    ]
   },
   "diagram": {
     "title": "Where the first result comes from",

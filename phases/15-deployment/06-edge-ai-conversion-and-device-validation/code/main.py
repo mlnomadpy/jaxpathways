@@ -8,9 +8,9 @@ import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `weights` with explicit values and shape.
+# Construct `weights` via `jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.flo...`
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)
-# Initialize array `bias` with explicit values and shape.
+# Construct `bias` via `jnp.array([.1, -.2], jnp.float32)`
 bias = jnp.array([.1, -.2], jnp.float32)
 # Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:
 @jax.jit
@@ -19,7 +19,7 @@ def infer(features):
     # Return `features @ weights + bias` to the caller.
     return features @ weights + bias
 
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `weights.shape == (3, 2) and bias.shape == (2,)`
 assert weights.shape == (3, 2) and bias.shape == (2,)
 
 # Build the raw-request boundary
@@ -32,7 +32,7 @@ def validate_sensor_payload(payload):
     # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
-    # Evaluate `rows` from the current inputs and state.
+    # Compute `rows` from `document['features']`
     rows = document['features']
     # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
@@ -46,14 +46,14 @@ def validate_sensor_payload(payload):
 def request(payload):
     # Run `validate_sensor_payload` to compute `decoded`.
     decoded = validate_sensor_payload(payload)
-    # Evaluate `features` from the current inputs and state.
+    # Compute `features` from `decoded / 255.`
     features = decoded / 255.
     # Synchronize host execution until asynchronous device computation completes.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
     # Return `json.dumps({'scores': output.tolist()})` to the caller.
     return json.dumps({"scores": output.tolist()})
 
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(validate_sensor_payload(payloa`
 np.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])
 
 # Measure cold and warm requests separately
@@ -63,7 +63,7 @@ start = time.perf_counter()
 first_response = request(payload)
 # Record execution timing or profiler trace in `first_ms`.
 first_ms = (time.perf_counter() - start) * 1000
-# Evaluate `samples` from the current inputs and state.
+# Compute `samples` from `[]`
 samples = []
 # Repeat the update loop over `range(30)` steps:
 for _ in range(30):
@@ -76,17 +76,17 @@ for _ in range(30):
 
 # Validate outputs and describe measurement scope
 # Step 4 — Validate outputs and describe measurement scope: The report records local CPU timings and explicitly leaves...
-# Initialize array `expected` with explicit values and shape.
+# Compute `expected` from `(np.array([[255., 128., 0.]], np.float32) / 255.) @ ...`
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
 # Read or serialize artifact data on disk (``).
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
-# Evaluate `report` from the current inputs and state.
+# Compute `report` from `{"runtime": "JAX CPU instructional proxy", "jax": ja...`
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
           "first_request_ms": first_ms, "warm_samples_ms": samples,
           "p50_ms": float(np.percentile(samples, 50)), "p95_ms": float(np.percentile(samples, 95)),
           "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
           "edge_device_validated": False}
-# Verify contract: `len(samples) == 30 and all((t >= 0 for t in samples))`.
+# Assert invariant `len(samples) == 30 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 30 and all(t >= 0 for t in samples)
 # Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
@@ -101,9 +101,9 @@ import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Initialize array `weights` with explicit values and shape.
+# Construct `weights` via `jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.flo...`
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)
-# Initialize array `bias` with explicit values and shape.
+# Construct `bias` via `jnp.array([.1, -.2], jnp.float32)`
 bias = jnp.array([.1, -.2], jnp.float32)
 # Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:
 @jax.jit
@@ -120,7 +120,7 @@ def validate_sensor_payload(payload):
     # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
-    # Evaluate `rows` from the current inputs and state.
+    # Compute `rows` from `document['features']`
     rows = document['features']
     # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
@@ -134,7 +134,7 @@ def validate_sensor_payload(payload):
 def request(payload):
     # Run `validate_sensor_payload` to compute `decoded`.
     decoded = validate_sensor_payload(payload)
-    # Evaluate `features` from the current inputs and state.
+    # Compute `features` from `decoded / 255.`
     features = decoded / 255.
     # Synchronize host execution until asynchronous device computation completes.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
@@ -146,7 +146,7 @@ start = time.perf_counter()
 first_response = request(payload)
 # Record execution timing or profiler trace in `first_ms`.
 first_ms = (time.perf_counter() - start) * 1000
-# Evaluate `samples` from the current inputs and state.
+# Compute `samples` from `[]`
 samples = []
 # Repeat the update loop over `range(30)` steps:
 for _ in range(30):
@@ -160,25 +160,25 @@ for _ in range(30):
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
 # Read or serialize artifact data on disk (``).
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
-# Evaluate `report` from the current inputs and state.
+# Compute `report` from `{"runtime": "JAX CPU instructional proxy", "jax": ja...`
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
           "first_request_ms": first_ms, "warm_samples_ms": samples,
           "p50_ms": float(np.percentile(samples, 50)), "p95_ms": float(np.percentile(samples, 95)),
           "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
           "edge_device_validated": False}
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `len(samples) == 30 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 30 and all(t >= 0 for t in samples)
 # Print diagnostic summary of the computed outputs.
 print(json.dumps(report, indent=2))
 
 # Figure data experiment
 # Compute figure data for: An end-to-end boundary includes more than inference
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'line', 'x': list(range(1, len(samples) + 1...`
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
 
 # Experiment: A normalization mismatch survives conversion
 # Experiment — A normalization mismatch survives conversion: Conversion checks must start at the raw input boundary when...
-# Initialize array `raw` with explicit values and shape.
+# Compute `raw` from `np.array([[255., 128., 0.]], np.float32)`
 raw = np.array([[255., 128., 0.]], np.float32)
 # Convert `wrong` to a host NumPy array for inspection or verification.
 wrong = np.asarray(infer(raw))
@@ -204,13 +204,13 @@ print('Seven malformed or out-of-domain requests rejected; zero input returns th
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
-# Initialize array `changed_raw` with explicit values and shape.
+# Compute `changed_raw` from `np.array([[0., 255., 128.]], np.float32)`
 changed_raw = np.array([[0., 255., 128.]], np.float32)
 # Read or serialize artifact data on disk (`changed_response`).
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
 # Convert `expected_changed` to a host NumPy array for inspection or verification.
 expected_changed = (changed_raw / 255.) @ np.asarray(weights) + np.asarray(bias)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed_response["scores"], expected_c...`
 np.testing.assert_allclose(changed_response["scores"], expected_changed, atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed end-to-end request verified")
@@ -220,23 +220,25 @@ print("Changed end-to-end request verified")
 device_report = {"device": None, "runtime_version": None, "delegate": None,
                  "quality_metric": None, "p95_ms": None, "peak_memory_bytes": None,
                  "cold_start_ms": None, "fallback_operators": None}
-# Evaluate `missing` from the current inputs and state.
+# Compute `missing` from `[key for key, value in device_report.items() if valu...`
 missing = [key for key, value in device_report.items() if value is None]
-# Verify contract: `missing and 'device' in missing`.
+# Assert invariant `missing and "device" in missing` holds
 assert missing and "device" in missing
 # Print the observed values to compare against the expected result.
 print("Not device-validated; missing:", ", ".join(missing))
 
 # Reference practice: Decide whether a model speedup meets the request budget
 # Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
-fixed_ms=12.+4.;model_ms=8.;deadline_ms=19.
-# Evaluate `before_ms` from the current inputs and state.
+fixed_ms=12.+4.
+model_ms=8.
+deadline_ms=19.
+# Compute `before_ms` from `fixed_ms+model_ms`
 before_ms=fixed_ms+model_ms
-# Evaluate `after_ms` from the current inputs and state.
+# Compute `after_ms` from `fixed_ms+model_ms/2`
 after_ms=fixed_ms+model_ms/2
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_allclose([before_ms,after_ms,before_ms/aft`
 np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
-# Verify contract: `after_ms > deadline_ms and fixed_ms == 16.0`.
+# Assert invariant `after_ms>deadline_ms and fixed_ms==16.` holds
 assert after_ms>deadline_ms and fixed_ms==16.
 # Print the observed values to compare against the expected result.
 print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)

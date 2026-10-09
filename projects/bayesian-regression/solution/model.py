@@ -46,7 +46,8 @@ def log_joint(weights, X, y, noise_scale=1., prior_scale=2.):
 def sample(key, mean, covariance, starts, step_size=.15, leapfrog_steps=9,
            warmup=300, draws=1800):
     """Return retained chains, acceptance flags and signed energy errors.
-    Fixed warmup discard; no adaptive step size, NUTS or mass-matrix adaptation.
+    Fixed warmup discard
+    no adaptive step size, NUTS or mass-matrix adaptation.
     """
     # Create device-backed JAX array `(mean, covariance, starts)`.
     mean, covariance, starts = map(jnp.asarray, (mean, covariance, starts))

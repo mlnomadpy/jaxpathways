@@ -56,7 +56,7 @@ Use foundation-toolkit stage 4. Save and reload state in a fresh process and ver
 
 ### Further work
 
-Local deterministic state does not establish concurrent-writer or multi-host recovery; the recovery and operations phases extend these boundaries.
+Local deterministic state is separate from concurrent-writer or multi-host recovery; the recovery and operations phases extend these boundaries.
 
 ## Lesson sequence
 

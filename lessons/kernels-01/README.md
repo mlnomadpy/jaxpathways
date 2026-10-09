@@ -99,9 +99,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -119,7 +120,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -142,17 +143,17 @@ Create main.py for the first block, then append each block in order in your cour
 # Step 2 — Check every logical element against NumPy: The last row and column belong to partial logical tiles.
 # Construct and reshape `x` into the target tensor dimensions.
 x=jnp.arange(55,dtype=jnp.float32).reshape(5,11)/10-2
-# Initialize array `y` with explicit values and shape.
+# Compute `y` from `jnp.full_like(x,0.25)`
 y=jnp.full_like(x,0.25)
 # Run `blocked_axpy` to compute `actual`.
 actual=blocked_axpy(x,y)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=2*np.asarray(x)+np.asarray(y)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
-# Verify contract: `float(actual[-1, -1]) == float(reference[-1, -1])`.
+# Assert invariant `float(actual[-1,-1])==float(reference[-1,-1])` holds
 assert float(actual[-1,-1])==float(reference[-1,-1])
 # Print the observed values to compare against the expected result.
 print("Shape and boundary:",actual.shape,float(actual[0,0]),float(actual[-1,-1]))
@@ -167,13 +168,14 @@ Create main.py for the first block, then append each block in order in your cour
 ```python
 # Step 3 — Derive the ownership map independently: Block coordinates are multiplied by the block shape by Pallas.
 rows,cols=np.indices((5,11))
-# Evaluate `owner` from the current inputs and state.
+# Compute `owner` from `(rows//2)*3+(cols//4)`
 owner=(rows//2)*3+(cols//4)
-# Verify contract: `owner[0, 0] == 0 and owner[4, 10] == 8`.
+# Assert invariant `owner[0,0]==0 and owner[4,10]==8` holds
 assert owner[0,0]==0 and owner[4,10]==8
 # Evaluate `logical` from the current inputs and state.
-# Evaluate `padded` from the current inputs and state.
-logical=5*11;padded=6*12
+# Compute `logical` from `5*11`
+logical=5*11
+padded=6*12
 # Print the observed values to compare against the expected result.
 print("Grid:",(3,3),"logical/padded elements:",logical,padded)
 # Print diagnostic summary of the computed outputs.
@@ -210,9 +212,10 @@ def pad_pair(x,y,block):
     # Run `validate_pair` to perform the next check or state transition.
     validate_pair(x,y,block)
     # Evaluate `(m, n)` from the current inputs and state.
-    # Evaluate `(bm, bn)` from the current inputs and state.
-    m,n=x.shape;bm,bn=block
-    # Evaluate `padded` from the current inputs and state.
+    # Compute `m,n` from `x.shape`
+    m,n=x.shape
+    bm,bn=block
+    # Compute `padded` from `((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)`
     padded=((m+bm-1)//bm*bm,(n+bn-1)//bn*bn)
     # Combine or mask array elements to form `pads`.
     pads=((0,padded[0]-m),(0,padded[1]-n))
@@ -230,7 +233,7 @@ def axpy_body(x_ref,y_ref,out_ref):
 def blocked_axpy(x,y,block=(2,4)):
     # Combine or mask array elements to form `(px, py, padded)`.
     px,py,padded=pad_pair(x,y,block)
-    # Evaluate `(bm, bn)` from the current inputs and state.
+    # Compute `bm,bn` from `block`
     bm,bn=block
     # Invoke custom Pallas kernel or tile specification (`spec`).
     spec=pl.BlockSpec(block,lambda i,j:(i,j))
@@ -245,30 +248,31 @@ def blocked_axpy(x,y,block=(2,4)):
 # Step 2 — Check every logical element against NumPy: The last row and column belong to partial logical tiles.
 # Construct and reshape `x` into the target tensor dimensions.
 x=jnp.arange(55,dtype=jnp.float32).reshape(5,11)/10-2
-# Initialize array `y` with explicit values and shape.
+# Compute `y` from `jnp.full_like(x,0.25)`
 y=jnp.full_like(x,0.25)
 # Run `blocked_axpy` to compute `actual`.
 actual=blocked_axpy(x,y)
 # Convert `reference` to a host NumPy array for inspection or verification.
 reference=2*np.asarray(x)+np.asarray(y)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `actual.shape==(5,11)`
 assert actual.shape==(5,11)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
-# Verify contract: `float(actual[-1, -1]) == float(reference[-1, -1])`.
+# Assert invariant `float(actual[-1,-1])==float(reference[-1,-1])` holds
 assert float(actual[-1,-1])==float(reference[-1,-1])
 # Print the observed values to compare against the expected result.
 print("Shape and boundary:",actual.shape,float(actual[0,0]),float(actual[-1,-1]))
 
 # Step 3 — Derive the ownership map independently: Block coordinates are multiplied by the block shape by Pallas.
 rows,cols=np.indices((5,11))
-# Evaluate `owner` from the current inputs and state.
+# Compute `owner` from `(rows//2)*3+(cols//4)`
 owner=(rows//2)*3+(cols//4)
-# Verify contract: `owner[0, 0] == 0 and owner[4, 10] == 8`.
+# Assert invariant `owner[0,0]==0 and owner[4,10]==8` holds
 assert owner[0,0]==0 and owner[4,10]==8
 # Evaluate `logical` from the current inputs and state.
-# Evaluate `padded` from the current inputs and state.
-logical=5*11;padded=6*12
+# Compute `logical` from `5*11`
+logical=5*11
+padded=6*12
 # Print the observed values to compare against the expected result.
 print("Grid:",(3,3),"logical/padded elements:",logical,padded)
 # Print diagnostic summary of the computed outputs.
@@ -299,7 +303,7 @@ Color differences do not imply parallel execution or different speeds. This CPU 
 
 ```python
 # Compute figure data for: Nine programs cover a matrix with partial boundary tiles
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'heatmap','values':owner.tolist(),'unit':'pr...`
 visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (categorical label)','rows':[str(i) for i in range(5)],'columns':[str(i) for i in range(11)],'xlabel':'logical column','ylabel':'logical row'}
 ```
 
@@ -331,7 +335,7 @@ PASS: kernels-01
 ```python
 # Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...
 changed=blocked_axpy(x,y,(3,5))
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)`
 np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)
 # Print the observed values to compare against the expected result.
 print("Changed grid:",(2,3),"same numerical result")
@@ -352,11 +356,11 @@ covered=np.zeros((5,11),dtype=bool)
 for i in range(5//2):
     # Loop over `j` in `range(11 // 4)`:
     for j in range(11//4):
-        # Evaluate `covered[i * 2:(i + 1) * 2, j * 4:(j + 1) * 4]` from the current inputs and state.
+        # Compute `covered[i*2:(i+1)*2,j*4:(j+1)*4]` from `True`
         covered[i*2:(i+1)*2,j*4:(j+1)*4]=True
-# Verify contract: `int(covered.sum()) == 32`.
+# Assert invariant `int(covered.sum())==32` holds
 assert int(covered.sum())==32
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `not covered[-1,-1]` holds
 assert not covered[-1,-1]
 # Print the observed values to compare against the expected result.
 print("Floor-grid missing logical cells:",int((~covered).sum()))
@@ -396,7 +400,7 @@ for shape in [(1,7),(7,9)]:
     for block in [(2,4),(3,5)]:
         # Run `blocked_axpy` to compute `result`.
         result = blocked_axpy(...)  # TODO: compute result
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `result.shape==shape`
         assert result.shape  # TODO: complete assertion check
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)
@@ -418,7 +422,7 @@ for shape in [(1,7),(7,9)]:
     for block in [(2,4),(3,5)]:
         # Run `blocked_axpy` to compute `result`.
         result=blocked_axpy(a,b,block)
-        # Verify that the output tensor shape matches our prediction.
+        # Check tensor shape invariant: `result.shape==shape`
         assert result.shape==shape
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)
@@ -447,7 +451,7 @@ Require identical matrix shapes, not merely broadcast-compatible shapes.
 
 **Step-by-step implementation plan:**
 1. Run the boundary check and catch the expected exception:
-2. Verify contract: `rejected`.
+2. Assert invariant `rejected` holds
 3. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -458,7 +462,7 @@ rejected = ...  # TODO: compute rejected
 # Run the boundary check and catch the expected exception:
 try:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))
 except ValueError:rejected=True
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("Mismatched global shape rejected")
@@ -472,7 +476,7 @@ rejected=False
 # Run the boundary check and catch the expected exception:
 try:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))
 except ValueError:rejected=True
-# Verify contract: `rejected`.
+# Assert invariant `rejected` holds
 assert rejected
 # Print the observed values to compare against the expected result.
 print("Mismatched global shape rejected")
@@ -503,10 +507,10 @@ Use integer ceiling division; do not time interpretation as accelerator performa
 
 **Step-by-step implementation plan:**
 1. Iterate over `shape` to step through the computation:
-2. Evaluate `counts` from the current inputs and state.
+2. Compute `counts` from `[]`
 3. Iterate over `(bm, bn)` to step through the computation:
 4. Evaluate `gm` from the current inputs and state.
-5. Evaluate `gn` from the current inputs and state.
+5. Compute `gm` from `(shape[0]+bm-1)//bm`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -514,16 +518,17 @@ Use integer ceiling division; do not time interpretation as accelerator performa
 # Measure padding overhead without claiming runtime (Challenge): Program count and padded work expose different costs.
 # Iterate over `shape` to step through the computation:
 for shape in [(5,11),(33,129)]:
-    # Evaluate `counts` from the current inputs and state.
+    # Compute `counts` from `[]`
     counts = ...  # TODO: compute counts
     # Iterate over `(bm, bn)` to step through the computation:
     for bm,bn in [(2,4),(8,128),(16,256)]:
         # Evaluate `gm` from the current inputs and state.
-        # Evaluate `gn` from the current inputs and state.
+        # Compute `gm` from `(shape[0]+bm-1)//bm`
         gm = ...  # TODO: compute gm
+        gn = ...  # TODO: compute gn
         # Append the current step result to `counts`.
         counts.append((bm,bn,gm*gn,gm*gn*bm*bn))
-    # Verify contract: `all((padded >= shape[0] * shape[1] for _, _, _, padded in counts))`.
+    # Assert invariant `all(padded>=shape[0]*shape[1] for _,_,_,padded in counts)` holds
     assert all(padded  # TODO: complete assertion check
     # Print the observed values to compare against the expected result.
     print("Shape, block/program/padded counts:",shape,counts)
@@ -535,16 +540,17 @@ for shape in [(5,11),(33,129)]:
 # Measure padding overhead without claiming runtime (Challenge): Program count and padded work expose different costs.
 # Iterate over `shape` to step through the computation:
 for shape in [(5,11),(33,129)]:
-    # Evaluate `counts` from the current inputs and state.
+    # Compute `counts` from `[]`
     counts=[]
     # Iterate over `(bm, bn)` to step through the computation:
     for bm,bn in [(2,4),(8,128),(16,256)]:
         # Evaluate `gm` from the current inputs and state.
-        # Evaluate `gn` from the current inputs and state.
-        gm=(shape[0]+bm-1)//bm;gn=(shape[1]+bn-1)//bn
+        # Compute `gm` from `(shape[0]+bm-1)//bm`
+        gm=(shape[0]+bm-1)//bm
+        gn=(shape[1]+bn-1)//bn
         # Append the current step result to `counts`.
         counts.append((bm,bn,gm*gn,gm*gn*bm*bn))
-    # Verify contract: `all((padded >= shape[0] * shape[1] for _, _, _, padded in counts))`.
+    # Assert invariant `all(padded>=shape[0]*shape[1] for _,_,_,padded in counts)` holds
     assert all(padded>=shape[0]*shape[1] for _,_,_,padded in counts)
     # Print the observed values to compare against the expected result.
     print("Shape, block/program/padded counts:",shape,counts)

@@ -89,11 +89,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -111,17 +111,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -156,7 +156,7 @@ def rollout(theta, key, batch_size=256, horizon=8):
     time_keys = jax.random.split(action_key, horizon)
     # Function `body(states, time_key)` implementing this stage's computation:
     def body(states, time_key):
-        # Evaluate `observations` from the current inputs and state.
+        # Compute `observations` from `states.position`
         observations = states.position
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
@@ -194,17 +194,17 @@ Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
 # Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
-# Initialize array `theta` with explicit values and shape.
+# Construct `theta` via `jnp.zeros(3)`
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `records['reward'].shape == (8`
 assert records['reward'].shape == (8, 64)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(final.done.all())` holds
 assert bool(final.done.all())
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.sum(records['terminated'] | records['truncated']` holds
 assert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.where(records['active']` holds
 assert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))
 # Reduce along axis=0 to compute `episode_returns`.
 episode_returns = records['reward'].sum(axis=0)
@@ -231,11 +231,11 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Evaluate `position` from the current inputs and state.
+    # Execute `position: jax.Array`
     position: jax.Array
-    # Evaluate `elapsed` from the current inputs and state.
+    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Evaluate `done` from the current inputs and state.
+    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -253,17 +253,17 @@ def step(state, action, horizon=8):
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Evaluate `elapsed` from the current inputs and state.
+    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Evaluate `terminated` from the current inputs and state.
+    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Evaluate `truncated` from the current inputs and state.
+    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
@@ -290,7 +290,7 @@ def rollout(theta, key, batch_size=256, horizon=8):
     time_keys = jax.random.split(action_key, horizon)
     # Function `body(states, time_key)` implementing this stage's computation:
     def body(states, time_key):
-        # Evaluate `observations` from the current inputs and state.
+        # Compute `observations` from `states.position`
         observations = states.position
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
@@ -320,17 +320,17 @@ def returns_to_go(rewards):
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
 # Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
-# Initialize array `theta` with explicit values and shape.
+# Construct `theta` via `jnp.zeros(3)`
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `records['reward'].shape == (8`
 assert records['reward'].shape == (8, 64)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(final.done.all())` holds
 assert bool(final.done.all())
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.sum(records['terminated'] | records['truncated']` holds
 assert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.where(records['active']` holds
 assert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))
 # Reduce along axis=0 to compute `episode_returns`.
 episode_returns = records['reward'].sum(axis=0)
@@ -388,11 +388,11 @@ PASS: rl-02
 again = rollout(theta, jax.random.key(5), 64, 8)[1]
 # Iterate over `name` to step through the computation:
 for name in records:
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `jnp.array_equal(records[name], again[name])` holds
     assert jnp.array_equal(records[name], again[name])
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = rollout(theta, jax.random.key(6), 64, 8)[1]
-# Verify contract: `not jnp.array_equal(records['action'], changed['action'])`.
+# Assert invariant `not jnp.array_equal(records['action']` holds
 assert not jnp.array_equal(records['action'], changed['action'])
 ```
 
@@ -406,7 +406,7 @@ The random stream is part of the experiment state. Replay in this environment is
 
 ```python
 # Experiment — Reward-to-go by hand: Zero padded rewards preserve the finite-episode sum, while the...
-# Initialize array `r` with explicit values and shape.
+# Construct `r` via `jnp.array([[-.01],[-.01],[1.],[0.]])`
 r = jnp.array([[-.01],[-.01],[1.],[0.]])
 # Run `returns_to_go` to compute `g`.
 g = returns_to_go(r)
@@ -433,10 +433,10 @@ Change the batch to $7$ environments and the horizon to $5$. Verify array shapes
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
-2. Verify that the output tensor shape matches our prediction.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
-5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+2. Check tensor shape invariant: `r7['reward'].shape == (5`
+3. Assert invariant `bool(final7.done.all())` holds
+4. Assert invariant `jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0)` holds
+5. Assert invariant `bool(jnp.all(jnp.where(r7['active']` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -444,13 +444,13 @@ Change the batch to $7$ environments and the horizon to $5$. Verify array shapes
 # Exercise solution: Change the batch to 7 environments and the horizon to 5.
 # Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
 final7, r7 = rollout(...)  # TODO: compute final7, r7
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `r7['reward'].shape == (5`
 assert r7['reward'].shape  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(final7.done.all())` holds
 assert bool(final7.done.all())  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0)` holds
 assert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.where(r7['active']` holds
 assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward'])  # TODO: complete assertion check
 ```
 
@@ -460,13 +460,13 @@ assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward'])  # TODO: complete as
 # Exercise solution: Change the batch to 7 environments and the horizon to 5.
 # Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
 final7, r7 = rollout(theta, jax.random.key(17), 7, 5)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `r7['reward'].shape == (5`
 assert r7['reward'].shape == (5,7)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(final7.done.all())` holds
 assert bool(final7.done.all())
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0)` holds
 assert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `bool(jnp.all(jnp.where(r7['active']` holds
 assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward']) == 0.))
 ```
 
@@ -492,9 +492,9 @@ Record the mask before calling step; the successful transition still belongs to 
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `(correct, broken)` from the current inputs and state.
+1. Compute `correct, broken` from `0., 0.`
 2. Iterate over `a` to step through the computation:
-3. Evaluate `active` from the current inputs and state.
+3. Compute `active` from `~s.done`
 4. Run `step` to compute `(s, reward, _, _)`.
 5. Accumulate the next contribution into `correct`.
 
@@ -503,11 +503,11 @@ Record the mask before calling step; the successful transition still belongs to 
 ```python
 # Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...
 s = State(...)  # TODO: compute s
-# Evaluate `(correct, broken)` from the current inputs and state.
+# Compute `correct, broken` from `0., 0.`
 correct, broken = ...  # TODO: compute correct, broken
 # Iterate over `a` to step through the computation:
 for a in [1,1]:
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~s.done`
     active = ...  # TODO: compute active
     # Run `step` to compute `(s, reward, _, _)`.
     s, reward, _, _ = step(...)  # TODO: compute s, reward, _, _
@@ -515,9 +515,9 @@ for a in [1,1]:
     correct += float(reward*active)
     # Accumulate the next contribution into `broken`.
     broken += float(reward*(~s.done))
-# Verify contract: `abs(correct - 0.99) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`
 assert abs(correct-.99)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`
 assert abs(broken+.01)  # TODO: complete assertion check
 ```
 
@@ -526,11 +526,11 @@ assert abs(broken+.01)  # TODO: complete assertion check
 ```python
 # Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...
 s = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))
-# Evaluate `(correct, broken)` from the current inputs and state.
+# Compute `correct, broken` from `0., 0.`
 correct, broken = 0., 0.
 # Iterate over `a` to step through the computation:
 for a in [1,1]:
-    # Evaluate `active` from the current inputs and state.
+    # Compute `active` from `~s.done`
     active = ~s.done
     # Run `step` to compute `(s, reward, _, _)`.
     s, reward, _, _ = step(s,jnp.int32(a))
@@ -538,9 +538,9 @@ for a in [1,1]:
     correct += float(reward*active)
     # Accumulate the next contribution into `broken`.
     broken += float(reward*(~s.done))
-# Verify contract: `abs(correct - 0.99) < 1e-06`.
+# Check numerical equivalence within tolerance: `abs(correct-.99) < 1e-6`
 assert abs(correct-.99) < 1e-6
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(broken+.01) < 1e-6`
 assert abs(broken+.01) < 1e-6
 ```
 
@@ -572,7 +572,7 @@ The two start states need different numbers of actions. Compare each return agai
 1. Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 2. Combine or mask array elements to form `expected`.
 3. Verify that the numerical values match the expected reference within tolerance.
-4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -584,7 +584,7 @@ _, easy = rollout(...)  # TODO: compute _, easy
 expected = jnp.where(...)  # TODO: compute expected
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: complete assertion check
 ```
 
@@ -598,7 +598,7 @@ _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `jnp.array_equal(easy['active'].sum(0)` holds
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])
 ```
 

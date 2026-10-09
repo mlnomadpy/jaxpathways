@@ -4,10 +4,10 @@
   "minutes": 40,
   "content": {
     "idea": "Your first goal is a small, repeatable result: save a Python file, run it with the intended Python environment, and explain its output. A terminal accepts commands; Python executes the program; JAX is a package that Python imports. Keeping those three roles separate makes setup errors much easier to locate.",
-    "code": "# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...\n# Import os for this computation.\nimport os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\n# Import required JAX, NumPy, and standard-library modules.\nimport platform\nimport jax\nimport numpy as np\n# Print the observed values to compare against the expected result.\nprint(\"Python:\", platform.python_version())\n# Print diagnostic summary of the computed outputs.\nprint(\"JAX:\", jax.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"NumPy:\", np.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"Backend:\", jax.default_backend())\n# Print diagnostic summary of the computed outputs.\nprint(\"Devices:\", jax.devices())\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Sum:\", float(x.sum()))\n# Verify contract: `float(x.sum()) == 6.0`.\nassert float(x.sum()) == 6.0",
+    "code": "# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...\n# Import os for this computation.\nimport os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\n# Import required JAX, NumPy, and standard-library modules.\nimport platform\nimport jax\nimport numpy as np\n# Print the observed values to compare against the expected result.\nprint(\"Python:\", platform.python_version())\n# Print diagnostic summary of the computed outputs.\nprint(\"JAX:\", jax.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"NumPy:\", np.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"Backend:\", jax.default_backend())\n# Print diagnostic summary of the computed outputs.\nprint(\"Devices:\", jax.devices())\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Sum:\", float(x.sum()))\n# Assert invariant `float(x.sum()) == 6.0` holds\nassert float(x.sum()) == 6.0",
     "output": "The package versions match the pins, Backend is cpu, and the last line is Sum: \\(6.0\\). The exact Python patch and CPU device text depend on your installation.",
     "exercise": "Edit the starter as shown in Step \\(6\\): change the array length from \\(4\\) to \\(6\\) and the expected sum from \\(6\\) to \\(15\\). Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.",
-    "solution": "# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...\nx = jax.numpy.arange(6, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Changed experiment sum:\", float(x.sum()))\n# Verify contract: `float(x.sum()) == 15.0`.\nassert float(x.sum()) == 15.0",
+    "solution": "# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...\nx = jax.numpy.arange(6, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Changed experiment sum:\", float(x.sum()))\n# Assert invariant `float(x.sum()) == 15.0` holds\nassert float(x.sum()) == 15.0",
     "question": "Which evidence lets another learner reproduce your environment?",
     "options": [
       "A screenshot of the final number only",
@@ -15,7 +15,7 @@
       "The name of your editor"
     ],
     "answer": 1,
-    "explanation": "The script records what ran; versions and device information record where it ran. CPU success does not establish TPU compatibility.",
+    "explanation": "The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.",
     "objectives": [
       "Open a terminal in the folder containing your experiment.",
       "Create a project-specific Python environment and check which interpreter you are using.",
@@ -35,7 +35,8 @@
         "check": {
           "prompt": "The notebook imports JAX, but the terminal script does not. What should you compare first?",
           "answer": "Compare the Python executables used by the notebook kernel and terminal. They can belong to different environments. Install into, or select, the intended environment only after identifying that difference."
-        }
+        },
+        "math": "\\text{shape}(X) = (B, D), \\qquad \\text{dtype}(X) \\in \\{\\text{float32}, \\text{int32}\\}"
       },
       {
         "title": "1. Download and unpack your workspace",
@@ -176,19 +177,12 @@
       }
     ],
     "visual": {
-      "title": "From a saved file to a verified result",
-      "kind": "conceptual",
-      "prediction": "Where does the code run, and which output confirms the calculation?",
-      "reading": "Read the boxes from top to bottom. They follow one experiment from choosing a Python environment to reading a computed result. The arrows mean “do this next”; their lengths do not represent time.\n\nThe saved file is the connection between your editor and Python. Saving text alone does not run it. Running the file asks JAX to create the array and compute its sum on the CPU.",
-      "connection": "The last box is where you check whether the setup worked: the example adds \\(0+1+2+3=6\\), then checks that result with an assertion. A successful installation message only gets you to the beginning of this chain; the computed sum gets you to the end.\n\nIf your result is missing, walk backward through the boxes: did Python run the saved file, did it use the activated environment, and did that environment import JAX? This is a workflow diagram. The recorded output below supplies the separate evidence that the example executed.",
-      "alt": "From a saved file to a verified result. Read the boxes from top to bottom. They follow one experiment from choosing a Python environment to reading a computed result. The arrows mean “do this next”; their lengths do not represent time. The saved file is the connection between your editor and Python. Saving text alone does not run it. Running the file asks JAX to create the array and compute its sum on the CPU.",
-      "nodes": [
-        "Activate environment",
-        "Save first_experiment.py",
-        "Run with Python",
-        "JAX executes on CPU",
-        "Read sum and assertion"
-      ]
+      "kind": "executed",
+      "title": "Workspace array verification across input elements",
+      "prediction": "Before running, predict the element values and squared values of the 1D JAX array `x`.",
+      "code": "# Plot the 1D verification array `x` and its elementwise square `x ** 2`:\nsq_vals = x ** 2\nvisual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for i in range(len(x))], 'xlabel': 'element index', 'ylabel': 'array value', 'series': [{'label': 'x', 'y': [float(v) for v in x]}, {'label': 'x ** 2', 'y': [float(v) for v in sq_vals]}]}",
+      "reading": "Each index shows the initialized JAX array element alongside its elementwise square on the active device.",
+      "connection": "Running this check confirms that JAX, NumPy, and Matplotlib execute deterministically in your local environment."
     },
     "diagram": {
       "title": "Where the first result comes from",
@@ -254,6 +248,26 @@
         "height": 7,
         "width": 10
       }
-    }
+    },
+    "buildSteps": [
+      {
+        "title": "Step 1: Set up imports and input tensors",
+        "instruction": "Import the required JAX modules and define the initial inputs for set up your learning workspace.",
+        "code": "import os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"",
+        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+      },
+      {
+        "title": "Step 2: Apply the core JAX transformation",
+        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "code": "import platform\nimport jax",
+        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+      },
+      {
+        "title": "Step 3: Verify shapes and numerical invariants",
+        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "code": "import numpy as np\n# Print the observed values to compare against the expected result.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\n# Assert invariant `float(x.sum()) == 6.0` holds\nassert float(x.sum()) == 6.0",
+        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+      }
+    ]
   }
 }

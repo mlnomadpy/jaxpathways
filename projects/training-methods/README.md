@@ -161,7 +161,7 @@ Before opening a reference solution, predict a changed condition: a new MLM mask
 
 After the objective checks, connect the appropriate mechanism to the [text harness](../text-harness/README.md), [image harness](../image-harness/README.md) or [cross-modal harness](../cross-modal-harness/README.md). Record the base model, tokenizer/preprocessing, dataset split, objective/reduction, masking or augmentation seed and optimizer state. Use [engineering-release](../engineering-release/README.md) to track that experiment and gate an artifact. **TODO (Cross-Harness Objective Integration):** Wire these objectives into `text-harness`, `image-harness`, and `cross-modal-harness` to compare end-to-end training runs.
 
-For actual human preference work, define the task/rubric, obtain appropriate data permissions, retain disagreements, split by prompt/source, and evaluate with held-out judgments. A synthetic ordering and rising reward cannot establish human alignment.
+For actual human preference work, define the task/rubric, obtain appropriate data permissions, retain disagreements, split by prompt/source, and evaluate with held-out judgments. A synthetic ordering and rising reward requires separate verification to establish human alignment.
 
 ## Review your evidence
 

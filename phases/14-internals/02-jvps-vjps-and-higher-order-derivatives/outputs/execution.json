@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "18a74ab06f1e1e35f922abb2ca3c360ffc7fdd8f47669822a3a65c550082b046",
+  "contentHash": "b2b1ffaa0cbb29538743502b5b0c3ca014d302b79bf281fccb38f842fddaaf25",
   "executedAt": "2026-10-08T14:05:45.571348+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,11 +14,11 @@
   "stdout": "Jacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nJacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nForward columns and reverse rows agree\nExact HVP: [ 1.74991568 -3.38303348] Gauss-Newton product: [ 2.07686964 -2.51938247]\nChanged-point adjoint verified\nDirection linearity holds; the Jacobian changes with the base point\nBilinear Hessian symmetry and finite-difference product verified\nPASS: internals-02\n",
   "notebookCells": [
     {
-      "sourceHash": "8545fe213e966fbce08bec504f5f8aafe0a0778e31bd5949240b002656f85c74",
+      "sourceHash": "c0825c2c2446dbc876d35b3d0e875ac095abb2381e42b4e9343870da79b87caf",
       "outputs": []
     },
     {
-      "sourceHash": "11988edcc36805235972372635edda97dcc4a6c942b339a36dcc75db9e34da9f",
+      "sourceHash": "a0f3645172918629a36b395f095d7eddce69b16a8e2e22c7d3a6b3e65eccb693",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "sourceHash": "787d4fbcec35f476494c694dc5989cc7408a2931441c44232344b19f13de4d6a",
+      "sourceHash": "f67b0919b6d0d3d0449a250545ee75b3f882bba8943fbb80227c64db7dfcdd55",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "6d3ad6e1031f840ffe2d496f2ac627d2a0688a8c6b25a435732121fbd5d21bc0",
+      "sourceHash": "2c2f7f001699e4a267e33d3032529365cacb5c1529814ab294c20309ed13e957",
       "outputs": [
         {
           "output_type": "stream",
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "e2ccd0c6b77ea914ec0874fb7d2fbf06f6a35bb10f82161a7efca3e80c332e7c",
+      "sourceHash": "c44b1331401dcdcc879458fbe9019ac8af65923aad1da9cc380a2ae794d2b111",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "7eafb56cc88e16e9477d230db2eba8b23df0f3e317aee634815d92bd76f39966",
+      "sourceHash": "6872977c6bdbd659b5809844d18f386ac4b413976f40a20f8d3cc2dcfc751b7e",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,11 +102,11 @@
       ]
     },
     {
-      "sourceHash": "f2557ce97fac8f6341f35f51c6988b17cf1104d1283844c9bff113ac70ce7b6c",
+      "sourceHash": "468a15ebb9ffec2af5ba18f59e48fad5f1f7aba9331f9c5ca091999e903d7708",
       "outputs": []
     },
     {
-      "sourceHash": "eb0c2f1d9a1b87442c1ca3bd860468cba8daccd07090bf3f0d83bb119966724a",
+      "sourceHash": "5a7275e519252430fe72bd3dad67e0fe98bd66c248a9020c6d251813ed0893cc",
       "outputs": [
         {
           "output_type": "stream",
@@ -118,11 +118,11 @@
       ]
     },
     {
-      "sourceHash": "a71c98fba70623d6548098ed57101f8085d39d8d30e08cefb6bfab26d8cc367f",
+      "sourceHash": "37839ad3e57f47ab9d37425892ffba8d6c17ea5e9ba20a90a169056093a4f0c0",
       "outputs": []
     },
     {
-      "sourceHash": "53e460f5598b15bea048b6889de4d968d6db402b8b0ed8bf35fe4a87da446b50",
+      "sourceHash": "b6ad4d67489ee88e91e5518db77be86c42fa5ba2e54afe0faca3c450c1e6fc29",
       "outputs": [
         {
           "output_type": "stream",
@@ -134,11 +134,11 @@
       ]
     },
     {
-      "sourceHash": "34eff9d2367f43aedeb98c3a29a3dfa138a881b939353e13e48f7a306033e8af",
+      "sourceHash": "bec7d0bd6589207822789ca1d9aa6256b7fd7665741f87254cac817a76ceb0d3",
       "outputs": []
     },
     {
-      "sourceHash": "41467a389502178203b573bd7243b504b5c5a4a73413217495feab12c3eba484",
+      "sourceHash": "5de5794abedea4bb868f233c3c58d80216f6a8bfd27e50e571028b0484dfae2c",
       "outputs": [
         {
           "output_type": "stream",

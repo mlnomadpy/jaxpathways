@@ -17,5 +17,14 @@
   "projects/optimizer-audit/project.json",
   "projects/engineering-release/project.json",
   "projects/training-methods/project.json",
-  "projects/weight-conversion/project.json"
+  "projects/weight-conversion/project.json",
+  "projects/welcome-audit/project.json",
+  "projects/arrays-audit/project.json",
+  "projects/transforms-audit/project.json",
+  "projects/recovery-audit/project.json",
+  "projects/performance-audit/project.json",
+  "projects/posttraining-audit/project.json",
+  "projects/tpu-runtime-audit/project.json",
+  "projects/tpu-workflow-audit/project.json",
+  "projects/tpu-systems-audit/project.json"
 ]

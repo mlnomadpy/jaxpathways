@@ -25,6 +25,10 @@ Warm up the intended specialization before measuring repeated execution, and ret
 
 The first-call and warm bars represent different intervals. Their ratio depends on the workload and environment. A short dispatch time is not evidence of device throughput, and a warm kernel timing does not describe an entire service request.
 
+$$
+T_{\text{warm}} = \operatorname{median}_{r=1 \dots R}\left(t_{\text{ready}}^{(r)} - t_{\text{start}}^{(r)}\right), \qquad T_{\text{first}} = T_{\text{compile}} + T_{\text{warm}}
+$$
+
 ### Time the completed result
 
 **Predict:** Where should synchronization occur in completed-result latency measurement?
@@ -121,7 +125,7 @@ def synchronized_samples(fn, args, repeats=7):
     # Guard input contract (`repeats < 1`) and fail fast if violated.
     if repeats < 1:
         raise ValueError("at least one repeat is required")
-    # Evaluate `samples` from the current inputs and state.
+    # Compute `samples` from `[]`
     samples = []
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
@@ -168,7 +172,7 @@ report = {
     "warm_samples_seconds": samples, "warm_median_seconds": statistics.median(samples),
     "max_abs_error": float(np.max(np.abs(np.asarray(result) - reference))),
 }
-# Verify contract: `len(samples) == 7 and all((t >= 0 for t in samples))`.
+# Assert invariant `len(samples) == 7 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 7 and all(t >= 0 for t in samples)
 # Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
@@ -213,7 +217,7 @@ def synchronized_samples(fn, args, repeats=7):
     # Guard input contract (`repeats < 1`) and fail fast if violated.
     if repeats < 1:
         raise ValueError("at least one repeat is required")
-    # Evaluate `samples` from the current inputs and state.
+    # Compute `samples` from `[]`
     samples = []
     # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
@@ -251,7 +255,7 @@ report = {
     "warm_samples_seconds": samples, "warm_median_seconds": statistics.median(samples),
     "max_abs_error": float(np.max(np.abs(np.asarray(result) - reference))),
 }
-# Verify contract: `len(samples) == 7 and all((t >= 0 for t in samples))`.
+# Assert invariant `len(samples) == 7 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 7 and all(t >= 0 for t in samples)
 # Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
@@ -277,11 +281,11 @@ The recorded first call is much longer than the warm calls. For orientation, $10
 
 The first measurement includes work needed to prepare this specialization, including tracing and compilation. Compatible warm calls reuse it. Each measurement waits for the result, so it includes completed computation rather than only the time needed to dispatch work. Inputs are already placed before this measured boundary.
 
-The warm line shows variation between individual samples. An isolated higher point is a slower sample, not proof of recompilation or a changing model. Read the recorded median alongside the full sample list, and rerun before comparing implementations. These measurements describe this small CPU workload; they do not establish accelerator speed or end-to-end request latency.
+The warm line shows variation between individual samples. An isolated higher point is a slower sample, not proof of recompilation or a changing model. Read the recorded median alongside the full sample list, and rerun before comparing implementations. These measurements describe this small CPU workload; they are separate from accelerator speed or end-to-end request latency.
 
 ```python
 # Compute figure data for: Separate the first call from warm measurements
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind': 'panels', 'panels': [{'kind': 'bar', 'title...`
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call', 'labels': ['first'], 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': [first_call_seconds]}]}, {'kind': 'line', 'title': 'Warm calls', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm sample', 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': samples}]}]}
 ```
 
@@ -487,7 +491,7 @@ Square before reducing the output-feature axis; the result has shape $(64,)$.
 2. Synchronize host execution until asynchronous device computation completes.
 3. Run `synchronized_samples` to compute `(energy_result, energy_times)`.
 4. Reduce along axis=1 to compute `energy_reference`.
-5. Verify that the output tensor shape matches our prediction.
+5. Check tensor shape invariant: `energy_result.shape == (64,)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -501,7 +505,7 @@ energy(x, w).block_until_ready()
 energy_result, energy_times = synchronized_samples(...)  # TODO: compute energy_result, energy_times
 # Reduce along axis=1 to compute `energy_reference`.
 energy_reference = np.sum(...)  # TODO: compute energy_reference
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `energy_result.shape == (64,)`
 assert energy_result.shape  # TODO: complete assertion check
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol
@@ -521,7 +525,7 @@ energy(x, w).block_until_ready()
 energy_result, energy_times = synchronized_samples(energy, (x, w), 5)
 # Reduce along axis=1 to compute `energy_reference`.
 energy_reference = np.sum((x_host @ w_host)**2, axis=1)
-# Verify that the output tensor shape matches our prediction.
+# Check tensor shape invariant: `energy_result.shape == (64,)`
 assert energy_result.shape == (64,)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol=2e-3, rtol=2e-5)
@@ -575,7 +579,7 @@ def repaired_benchmark(fn, args):
 fixed_report, fixed_result = repaired_benchmark(...)  # TODO: compute fixed_report, fixed_result
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(fixed_result), reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(fixed_result), reference, atol
-# Verify contract: `len(fixed_report['samples']) == 5`.
+# Assert invariant `len(fixed_report["samples"]) == 5` holds
 assert len(fixed_report["samples"])  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print(fixed_report)
@@ -598,7 +602,7 @@ def repaired_benchmark(fn, args):
 fixed_report, fixed_result = repaired_benchmark(compiled_predict, (x, w))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(fixed_result), reference, atol=2e-5, rtol=2e-5)
-# Verify contract: `len(fixed_report['samples']) == 5`.
+# Assert invariant `len(fixed_report["samples"]) == 5` holds
 assert len(fixed_report["samples"]) == 5
 # Print the observed values to compare against the expected result.
 print(fixed_report)

@@ -29,7 +29,7 @@
       "id": "internals",
       "projectId": "derivative-audit",
       "title": "Derivative synthesis",
-      "status": "review-draft",
+      "status": "active",
       "scope": "project-synthesis",
       "source": "assessments/internals.md",
       "url": "assessments/internals.html"

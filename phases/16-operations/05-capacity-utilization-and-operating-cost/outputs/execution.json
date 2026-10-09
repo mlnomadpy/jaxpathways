@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "d50c54756ce79b0784d92bf4790d06b778b7fe087b0dbcc62246f8041de5568c",
+  "contentHash": "6861c583ae9344e6257e9d3c4f24897ce29c3ef7010ffa80e325a06e8bdfa383",
   "executedAt": "2026-10-08T14:07:33.031647+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,23 +14,23 @@
   "stdout": "measured local job seconds: [0.6653099581599236, 0.6619620830751956, 0.6629581670276821]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.11088499302665393, 'load_fraction': 0.055442496513326965, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002772124825666348, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\nmeasured local job seconds: [0.6668672077357769, 0.6649332502856851, 0.7188250827603042]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.1198041804600507, 'load_fraction': 0.05990209023002535, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00029951045115012676, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\nnominal load at two demand scenarios: 0.05990209023002535 0.1198041804600507\nrequired workers under changed hypothetical reserve: 1\nPASS: operations-05\n",
   "notebookCells": [
     {
-      "sourceHash": "8a5c7ec676ab6b02e806e3443a24e5525053d4c3054f34bd2a766dad4f3fee87",
+      "sourceHash": "14079ee4a62b6b463c268eb1b3b3dea0d1350c42a84187facba332c03ef5d4f7",
       "outputs": []
     },
     {
-      "sourceHash": "174fb6432b366823870a5c6aa3493f25c23588dabc4fe4e209ef0b349e11cab0",
+      "sourceHash": "6eb86abf8bb037a0c00eff6d8d53d5b1f2a2612d3034be238dc49292abd4f84c",
       "outputs": []
     },
     {
-      "sourceHash": "4326544920de09f03d82e903fd05c65b309ffec09a0f1c859d65c9d62528264b",
+      "sourceHash": "59f3027b53e4e2d8e0999a203df3afc5161c94aed9851e63684cc4867aef7765",
       "outputs": []
     },
     {
-      "sourceHash": "4db6855534a76c38601a5db472a4c0cfa3b6d6400ece6dc975cdc7218c693830",
+      "sourceHash": "6cac974f40f7cc0135a9aefa27222843ffcff63344999318addf209d500cd493",
       "outputs": []
     },
     {
-      "sourceHash": "c702101c430ea2415460be3423b03aa8e78f187903d415e740182e51597965de",
+      "sourceHash": "3e6dfa009b51e1261a20e3b0b0d98aff60ee2148fa483ed1826521193a8bd946",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "11be7000c0431ba98f255690acfccc30c6c35dc4c5e6f79744fe7e1a91814a21",
+      "sourceHash": "a6686fef7eab08607a5eefb0cce5864be240444c8cd7e4398cf7b8d0c99686bf",
       "outputs": [
         {
           "output_type": "stream",
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "sourceHash": "ec85c0cf68600877b1833a8a148710b10b5f13ae5fb34cef27d75d6c74516a2e",
+      "sourceHash": "20b244dd4e82dcd20764d7d683a7b14e31a426e370d7ac387313db6ba0a01e5c",
       "outputs": []
     },
     {
@@ -77,11 +77,11 @@
       ]
     },
     {
-      "sourceHash": "cbb46abe9df10ba7885005f29e8786d9487d78796a329ef8dc0143b0f18ff337",
+      "sourceHash": "4b9a363ae1c0d5078345f39b7aa993719ba03ec668dfb050460484b4f1127550",
       "outputs": []
     },
     {
-      "sourceHash": "fb4924e8bbf6876a95d8c1def2f9f24f53721dacc04845a68dfa520d982bb4a9",
+      "sourceHash": "19820ca35100862abcca5de2d51094c6890ec7b0f33548ff1efdd32a1cfe7856",
       "outputs": [
         {
           "output_type": "stream",
@@ -93,11 +93,11 @@
       ]
     },
     {
-      "sourceHash": "9677dc3d612425c79da5554180b2cd871fbd3221c816f846db7e872f799e6ef8",
+      "sourceHash": "68e47609a09b0226fde9d7af5cf758f507d30d2a4b84bced80bc3a06181db520",
       "outputs": []
     },
     {
-      "sourceHash": "6e61c176436b76fac459ad2efa97397579476b7e5fef7cd4c649c55fddaf9e58",
+      "sourceHash": "16b88819ff686f4e39e72d501ece3794c96f5730f78d34489ccfc6708d334047",
       "outputs": [
         {
           "output_type": "stream",
@@ -109,19 +109,19 @@
       ]
     },
     {
-      "sourceHash": "830b0e7612693a0d891a5c3f09caef580a8e2eeddf34420b9032179fc80f25f2",
+      "sourceHash": "e444ab5a16d4558ef037f6ee83d222d8da2ae746dd87d55baad99df96cefadb2",
       "outputs": []
     },
     {
-      "sourceHash": "1260172cc682c9e3ad253b5b2d527c7180dfb8083a1714cb0d7560c972b904a9",
+      "sourceHash": "24aeb90148129a168ec20cf1f568a737812c0e4c526fca5f02a94657c4cbefbd",
       "outputs": []
     },
     {
-      "sourceHash": "a6e33356da80d4093c0d489a34430f3ef5531d71e3fe2f023c96845c28345055",
+      "sourceHash": "c297941f3f187742b8fd63d4ad2829ffb31526ac691eeecabe846c3b387a833a",
       "outputs": []
     },
     {
-      "sourceHash": "daebefa933cdd7567bf1f95539ee5167fc130631b9a89c5c246bafeac3b7b2b6",
+      "sourceHash": "ff83c243ade91c6bb71891fe67bf4ef23ac4e5d36a8bcc6616ff8e155568c826",
       "outputs": []
     }
   ],

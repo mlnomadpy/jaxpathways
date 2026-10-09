@@ -59,7 +59,7 @@
         {
           "id": "train",
           "title": "Make each update explainable",
-          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.",
           "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
           "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
           "lessonIds": [
@@ -218,7 +218,7 @@
         {
           "id": "train",
           "title": "Make each update explainable",
-          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.",
           "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
           "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
           "lessonIds": [
@@ -380,7 +380,7 @@
         {
           "id": "train",
           "title": "Make each update explainable",
-          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.",
           "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
           "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
           "lessonIds": [
@@ -498,7 +498,7 @@
         "weight-conversion"
       ],
       "status": "authored",
-      "available": "A connected CPU image–text retrieval harness is runnable: both encoders train, complete state restores in a fresh process, calibrated precision policies export and reload, and a measured release gate supports rollback. The synthetic four-concept fixture does not establish natural-language or real-image retrieval quality.",
+      "available": "A connected CPU image–text retrieval harness is runnable: both encoders train, complete state restores in a fresh process, calibrated precision policies export and reload, and a measured release gate supports rollback. The synthetic four-concept fixture is verified separately from natural-language or real-image retrieval quality.",
       "plot": "Read the actual training curve, paired image and clean similarity matrix, then inspect shifted-image confusion counts. Clean retrieval is 20/20 while one-pixel shifted retrieval is 5/20; explain the fixed pixel coordinates behind that failure.",
       "stages": [
         {
@@ -535,7 +535,7 @@
         {
           "id": "train",
           "title": "Make each update explainable",
-          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.",
+          "explanation": "Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.",
           "artifact": "Training and validation curves, a parameter-gradient check and a record of one failed run.",
           "check": "Overfit a tiny batch, compare one gradient with an independent finite difference and replay the same seed.",
           "lessonIds": [
@@ -670,7 +670,7 @@
       "title": "Cross-framework work begins with parity",
       "paragraphs": [
         "Use the existing Keras/JAX and TensorFlow conversion labs as preparation. A model definition, a saved checkpoint and an inference artifact have different contracts. Moving weights does not automatically move optimizer state, preprocessing or training behavior.",
-        "PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example does not establish that every model can round-trip between them."
+        "PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example is verified separately from that every model can round-trip between them."
       ],
       "items": [
         "Pin both environments and choose a conversion path supported by those versions.",

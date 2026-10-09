@@ -4,7 +4,7 @@ Runnable CPU harness: cross-modal-harness. Open project.html?id=cross-modal-harn
 
 Build a retrieval system that checks alignment between modalities before optimizing similarity search.
 
-A connected CPU image–text retrieval harness is runnable: both encoders train, complete state restores in a fresh process, calibrated precision policies export and reload, and a measured release gate supports rollback. The synthetic four-concept fixture does not establish natural-language or real-image retrieval quality.
+A connected CPU image–text retrieval harness is runnable: both encoders train, complete state restores in a fresh process, calibrated precision policies export and reload, and a measured release gate supports rollback. The synthetic four-concept fixture is verified separately from natural-language or real-image retrieval quality.
 
 ## Before you start
 
@@ -48,7 +48,7 @@ Start with two small encoders and a declared embedding normalization rule. Trace
 
 ## 3. Make each update explainable
 
-Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it does not establish usefulness on new examples.
+Record whether a reported loss belongs to the parameters before or after an update. Keep validation outside the training transition and save the configuration with the random seed. A falling loss shows fitting; it is verified separately from usefulness on new examples.
 
 Use a stable contrastive objective with an explicit temperature and positive-pair mask. Test aligned versus deliberately permuted pairs; duplicate positives must not silently become negatives. The training-methods project supplies separate objective labs for these methods; follow each phase prerequisite before attempting them. Integrating every objective into this modality harness remains an extension.
 
@@ -150,7 +150,7 @@ Use the existing Keras/JAX and TensorFlow conversion labs as preparation. A mode
 - Compare intermediate tensors and final outputs on fixed inputs, including boundary cases.
 - Compare task quality after export and again after quantization; measure the exported runtime itself.
 
-PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example does not establish that every model can round-trip between them.
+PyTorch, Keras, TensorFlow and JAX interoperability is tested per model and operation set. A successful tiny example is verified separately from that every model can round-trip between them.
 
 ## Grow the harness after the small version works
 

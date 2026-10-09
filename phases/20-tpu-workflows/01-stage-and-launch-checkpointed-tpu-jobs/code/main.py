@@ -49,9 +49,9 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     run_dir = Path(run_dir)
     # Run `run_dir.mkdir` to perform the next check or state transition.
     run_dir.mkdir(parents=True, exist_ok=True)
-    # Evaluate `events_path` from the current inputs and state.
+    # Compute `events_path` from `run_dir / "events.jsonl"`
     events_path = run_dir / "events.jsonl"
-    # Evaluate `ckpt_path` from the current inputs and state.
+    # Compute `ckpt_path` from `run_dir / "checkpoint-latest.json"`
     ckpt_path = run_dir / "checkpoint-latest.json"
 
     # Function `emit(event)` implementing this stage's computation:
@@ -67,7 +67,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
     # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
-    # Evaluate `target_y` from the current inputs and state.
+    # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
     # Branch on condition `resume and ckpt_path.exists()`:
@@ -96,7 +96,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         key, subkey = jax.random.split(key)
         # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
-        # Evaluate `(xb, yb)` from the current inputs and state.
+        # Compute `xb, yb` from `x[idx], target_y[idx]`
         xb, yb = x[idx], target_y[idx]
 
         # Function `loss_fn(w_in, b_in)` implementing this stage's computation:
@@ -108,13 +108,13 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
         # Evaluate both scalar loss and parameter gradients in one pass (`(loss, (gw, gb))`).
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
-        # Evaluate `m_w` from the current inputs and state.
+        # Compute `m_w` from `0.8 * m_w + gw`
         m_w = 0.8 * m_w + gw
-        # Evaluate `m_b` from the current inputs and state.
+        # Compute `m_b` from `0.8 * m_b + gb`
         m_b = 0.8 * m_b + gb
-        # Evaluate `w` from the current inputs and state.
+        # Compute `w` from `w - lr * m_w`
         w = w - lr * m_w
-        # Evaluate `b` from the current inputs and state.
+        # Compute `b` from `b - lr * m_b`
         b = b - lr * m_b
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
@@ -130,9 +130,9 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     # Run `emit` to perform the next check or state transition.
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
-    # Evaluate `step_losses` from the current inputs and state.
+    # Compute `step_losses` from `[]`
     step_losses = []
-    # Evaluate `step_times_ms` from the current inputs and state.
+    # Compute `step_times_ms` from `[]`
     step_times_ms = []
     while step < steps:
         t_step = time.perf_counter()
@@ -181,12 +181,12 @@ with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
     # Run `run_tpu_ready_job` to compute `control`.
     control = run_tpu_ready_job(root / "control", steps=6, save_every=3, resume=False)
-    # Evaluate `resumed_losses` from the current inputs and state.
+    # Compute `resumed_losses` from `part1["step_losses"] + part2["step_losses"]`
     resumed_losses = part1["step_losses"] + part2["step_losses"]
 
-# Verify contract: `part2['state_hash'] == control['state_hash']`.
+# Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.allclose(resumed_losses`
 assert np.allclose(resumed_losses, control["step_losses"])
 # Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
@@ -241,9 +241,9 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     run_dir = Path(run_dir)
     # Run `run_dir.mkdir` to perform the next check or state transition.
     run_dir.mkdir(parents=True, exist_ok=True)
-    # Evaluate `events_path` from the current inputs and state.
+    # Compute `events_path` from `run_dir / "events.jsonl"`
     events_path = run_dir / "events.jsonl"
-    # Evaluate `ckpt_path` from the current inputs and state.
+    # Compute `ckpt_path` from `run_dir / "checkpoint-latest.json"`
     ckpt_path = run_dir / "checkpoint-latest.json"
 
     # Function `emit(event)` implementing this stage's computation:
@@ -259,7 +259,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
     # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
-    # Evaluate `target_y` from the current inputs and state.
+    # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
     # Branch on condition `resume and ckpt_path.exists()`:
@@ -288,7 +288,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         key, subkey = jax.random.split(key)
         # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
-        # Evaluate `(xb, yb)` from the current inputs and state.
+        # Compute `xb, yb` from `x[idx], target_y[idx]`
         xb, yb = x[idx], target_y[idx]
 
         # Function `loss_fn(w_in, b_in)` implementing this stage's computation:
@@ -300,13 +300,13 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
         # Evaluate both scalar loss and parameter gradients in one pass (`(loss, (gw, gb))`).
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
-        # Evaluate `m_w` from the current inputs and state.
+        # Compute `m_w` from `0.8 * m_w + gw`
         m_w = 0.8 * m_w + gw
-        # Evaluate `m_b` from the current inputs and state.
+        # Compute `m_b` from `0.8 * m_b + gb`
         m_b = 0.8 * m_b + gb
-        # Evaluate `w` from the current inputs and state.
+        # Compute `w` from `w - lr * m_w`
         w = w - lr * m_w
-        # Evaluate `b` from the current inputs and state.
+        # Compute `b` from `b - lr * m_b`
         b = b - lr * m_b
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
@@ -322,9 +322,9 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     # Run `emit` to perform the next check or state transition.
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
-    # Evaluate `step_losses` from the current inputs and state.
+    # Compute `step_losses` from `[]`
     step_losses = []
-    # Evaluate `step_times_ms` from the current inputs and state.
+    # Compute `step_times_ms` from `[]`
     step_times_ms = []
     while step < steps:
         t_step = time.perf_counter()
@@ -373,12 +373,12 @@ with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
     # Run `run_tpu_ready_job` to compute `control`.
     control = run_tpu_ready_job(root / "control", steps=6, save_every=3, resume=False)
-    # Evaluate `resumed_losses` from the current inputs and state.
+    # Compute `resumed_losses` from `part1["step_losses"] + part2["step_losses"]`
     resumed_losses = part1["step_losses"] + part2["step_losses"]
 
-# Verify contract: `part2['state_hash'] == control['state_hash']`.
+# Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `np.allclose(resumed_losses`
 assert np.allclose(resumed_losses, control["step_losses"])
 # Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
@@ -387,7 +387,7 @@ print("Losses across 6 steps:", [round(v, 5) for v in control["step_losses"]])
 
 # Figure data experiment
 # Compute figure data for: Interrupted-and-resumed trajectory vs uninterrupted 6-step control run
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{`
 visual_data = {
     'kind': 'line',
     'x': [1, 2, 3, 4, 5, 6],
@@ -405,7 +405,7 @@ visual_data = {
 median_step_ms = float(np.median(control["step_times_ms"]))
 # Print the observed values to compare against the expected result.
 print("Warmup ms:", round(control["warmup_ms"], 3), "Median steady step ms:", round(median_step_ms, 4))
-# Verify contract: `control['warmup_ms'] > median_step_ms`.
+# Assert invariant `control["warmup_ms"] > median_step_ms` holds
 assert control["warmup_ms"] > median_step_ms
 
 # Experiment: Verify what breaks if momentum state is omitted on resume
@@ -418,9 +418,9 @@ with tempfile.TemporaryDirectory(prefix="tpu-bad-resume-") as tmp:
     run_tpu_ready_job(bad_dir, steps=3, save_every=3, resume=False)
     # Read or serialize artifact data on disk (`ckpt`).
     ckpt = json.loads((bad_dir / "checkpoint-latest.json").read_text(encoding="utf-8"))
-    # Evaluate `ckpt['m_w']` from the current inputs and state.
+    # Compute `ckpt["m_w"]` from `[[0.0]]`
     ckpt["m_w"] = [[0.0]]
-    # Evaluate `ckpt['m_b']` from the current inputs and state.
+    # Compute `ckpt["m_b"]` from `[0.0]`
     ckpt["m_b"] = [0.0]
     # Read or serialize artifact data on disk (``).
     (bad_dir / "checkpoint-latest.json").write_text(json.dumps(ckpt), encoding="utf-8")
@@ -428,7 +428,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-bad-resume-") as tmp:
     bad_part2 = run_tpu_ready_job(bad_dir, steps=6, save_every=3, resume=True)
 # Print the observed values to compare against the expected result.
 print("Drifted state_hash vs control:", bad_part2["state_hash"], control["state_hash"])
-# Verify contract: `bad_part2['state_hash'] != control['state_hash']`.
+# Assert invariant `bad_part2["state_hash"] != control["state_hash"]` holds
 assert bad_part2["state_hash"] != control["state_hash"]
 
 # Reference solution. Try the exercise before reading this.
@@ -445,7 +445,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
     ctrl8 = run_tpu_ready_job(ex_root / "control", steps=8, save_every=2, resume=False)
 # Print the observed values to compare against the expected result.
 print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-# Verify contract: `r2['state_hash'] == ctrl8['state_hash'] and len(r1['step_losses'] + ...`.
+# Assert invariant `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"]...` holds
 assert r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8
 
 # Reference practice: Inspect the JSONL event sequence from a resumed run
@@ -462,7 +462,7 @@ with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
     event_names = [json.loads(line)["event"] for line in (ev_dir / "events.jsonl").read_text().splitlines()]
 # Print the observed values to compare against the expected result.
 print("Recorded event sequence:", event_names)
-# Verify contract: `'started' in event_names and 'restored' in event_names and (event_na...`.
+# Assert invariant `"started" in event_names and "restored" in event_names and event_...` holds
 assert "started" in event_names and "restored" in event_names and event_names[-1] == "completed"
 
 # Reference practice: Verify atomic checkpoint file replacement
@@ -481,6 +481,6 @@ with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
     loaded = json.loads(target.read_text(encoding="utf-8"))
 # Print the observed values to compare against the expected result.
 print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
-# Verify contract: `loaded['step'] == 4 and leftovers == []`.
+# Assert invariant `loaded["step"] == 4 and leftovers == []` holds
 assert loaded["step"] == 4 and leftovers == []
 print("PASS: tpu-02")

@@ -24,7 +24,8 @@ def blocked_axpy(x,y,block=(2,4)):
 def fused_bias_relu(x,bias,block=(8,128),mode='interpret'):
     """Actual Pallas max(X+bias,0), matrix X and vector bias of matching dtype.
 
-    interpret is CPU semantics; tpu must refuse non-TPU backend/inputs and use
+    interpret is CPU semantics
+    tpu must refuse non-TPU backend/inputs and use
     interpret=False. Target blocks are multiples of (8,128). Cast arithmetic to
     float32 and output once to the input dtype. Preserve logical output shape.
     """
@@ -41,7 +42,8 @@ def fused_bias_relu(x,bias,block=(8,128),mode='interpret'):
 def pipelined_axpy(x,y,block=(8,128),buffers=2,no_pipelining=False,mode='simulate'):
     """Actual emit_pipeline for Z=2X+Y with explicit tails and dtype policy.
 
-    Two or three input buffers; two output buffers. Blocks multiple of (8,128).
+    Two or three input buffers
+    two output buffers. Blocks multiple of (8,128).
     simulate uses TPU InterpretParams and explicitly simulated layout metadata;
     tpu requires real TPU backend/inputs and interpret=False. Never substitute
     simulation for a target request. no_pipelining exposes synchronous debug

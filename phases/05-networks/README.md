@@ -60,7 +60,7 @@ Use mlp-classifier before the larger image harness. Retain independent forward/l
 
 ### Further work
 
-Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images do not establish real-photo generalization.
+Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images are separate from real-photo generalization.
 
 ## Lesson sequence
 

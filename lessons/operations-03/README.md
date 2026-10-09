@@ -92,7 +92,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -100,7 +101,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -128,17 +130,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -150,14 +155,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -168,15 +179,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -221,7 +236,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -230,27 +246,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -260,7 +280,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -289,7 +309,7 @@ with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     failed=launch(base/'resume',dict(fail_after=3))
     # Read or serialize artifact data on disk (`committed`).
     committed=json.loads((base/'resume'/'checkpoint.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `committed['step']==2` holds
     assert committed['step']==2
     # Run `launch` to compute `resumed`.
     resumed=launch(base/'resume',dict(resume=True))
@@ -297,17 +317,17 @@ with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     final_full=json.loads((base/'full'/'checkpoint.json').read_text())
     # Read or serialize artifact data on disk (`final_resumed`).
     final_resumed=json.loads((base/'resume'/'checkpoint.json').read_text())
-# Verify contract: `failed['status'] == 'failed' and resumed['status'] == 'completed'`.
+# Assert invariant `failed['status']=='failed' and resumed['status']=='completed'` holds
 assert failed['status']=='failed' and resumed['status']=='completed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `final_full==final_resumed` holds
 assert final_full==final_resumed
-# Evaluate `full_events` from the current inputs and state.
+# Compute `full_events` from `{e['step']:e for e in uninterrupted['events'] if e['...`
 full_events={e['step']:e for e in uninterrupted['events'] if e['event']=='progress'}
-# Evaluate `resume_events` from the current inputs and state.
+# Compute `resume_events` from `[e for e in resumed['events'] if e['event']=='progre...`
 resume_events=[e for e in resumed['events'] if e['event']=='progress']
-# Verify contract: `[e['step'] for e in resume_events] == [3, 4, 5, 6, 7, 8]`.
+# Assert invariant `[e['step'] for e in resume_events]==[3` holds
 assert [e['step'] for e in resume_events]==[3,4,5,6,7,8]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(e['state_hash']==full_events[e['step']]['state_hash'] for e i...` holds
 assert all(e['state_hash']==full_events[e['step']]['state_hash'] for e in resume_events)
 # Print the observed values to compare against the expected result.
 print('restored step:',committed['step'],'replayed updates:',[e['step'] for e in resume_events])
@@ -345,7 +365,8 @@ def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
     # Read or serialize artifact data on disk (`path`).
     # Execute the next step of the computation.
-    path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
     # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
@@ -353,7 +374,8 @@ def atomic_json(path, value):
         # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
-            stream.flush(); os.fsync(stream.fileno())
+            stream.flush()
+            os.fsync(stream.fileno())
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary): os.unlink(temporary)
@@ -373,17 +395,20 @@ def emit(event, **fields):
 def digest(value):
     return hashlib.sha256(json.dumps(value,sort_keys=True,separators=(',', ':'),allow_nan=False).encode()).hexdigest()
 def write_checkpoint(state):
-    target = root/'checkpoint.json'; temporary = root/'checkpoint.pending'
+    target = root/'checkpoint.json'
+    temporary = root/'checkpoint.pending'
     with temporary.open('w') as stream:
         json.dump(dict(state,checksum=digest(state)),stream,sort_keys=True,allow_nan=False)
-        stream.flush(); os.fsync(stream.fileno())
+        stream.flush()
+        os.fsync(stream.fileno())
     os.replace(temporary,target)
     emit('checkpoint',step=state['step'],state_hash=digest(state))
 try:
     emit('started',pid=os.getpid(),backend=jax.default_backend(),device_count=jax.device_count())
     if jax.default_backend() != cfg['backend'] or jax.device_count() < cfg['min_devices']:
         raise ValueError('runtime backend/device contract failed')
-    x = jnp.linspace(-1.,1.,64); y = 2*x+1
+    x = jnp.linspace(-1.,1.,64)
+    y = 2*x+1
     data_hash = digest(dict(x=np.asarray(x).tolist(),y=np.asarray(y).tolist()))
     training = {name:cfg[name] for name in ('seed','learning_rate','momentum','batch_size')}
     config_hash = digest(training)
@@ -395,14 +420,20 @@ try:
         if saved['schema_version'] != 1 or saved['config_hash'] != config_hash or saved['data_hash'] != data_hash:
             raise ValueError('checkpoint provenance mismatch')
         state = saved
-        step = saved['step']; params=jnp.array(saved['params']); velocity=jnp.array(saved['velocity']); key=jnp.array(saved['key'],dtype=jnp.uint32)
+        step = saved['step']
+        params=jnp.array(saved['params'])
+        velocity=jnp.array(saved['velocity'])
+        key=jnp.array(saved['key'],dtype=jnp.uint32)
         if not isinstance(step,int) or isinstance(step,bool) or step < 0 or step > cfg['steps'] or params.shape != (2,) or velocity.shape != (2,) or key.shape != (2,):
             raise ValueError('invalid checkpoint state shape or step')
         if not bool(jnp.all(jnp.isfinite(params))) or not bool(jnp.all(jnp.isfinite(velocity))):
             raise ValueError('nonfinite checkpoint state')
         emit('restored',step=step,state_hash=digest(saved))
     else:
-        step=0; params=jnp.zeros(2);velocity=jnp.zeros(2);key=jax.random.PRNGKey(cfg['seed'])
+        step=0
+        params=jnp.zeros(2)
+        velocity=jnp.zeros(2)
+        key=jax.random.PRNGKey(cfg['seed'])
     def update(params,velocity,key):
         key, sample = jax.random.split(key)
         indices=jax.random.choice(sample,64,(cfg['batch_size'],),replace=False)
@@ -413,15 +444,19 @@ try:
         return params,velocity,key,loss
     compiled=jax.jit(update)
     # Compile and synchronize once without consuming actual training state.
-    begin=time.perf_counter();warm=compiled(params,velocity,key);jax.block_until_ready(warm)
+    begin=time.perf_counter()
+    warm=compiled(params,velocity,key)
+    jax.block_until_ready(warm)
     emit('ready',compile_warmup_s=time.perf_counter()-begin,step=step)
     while step < cfg['steps']:
         if cfg.get('stall_at') == step:
             emit('stall_injected',step=step)
             time.sleep(cfg.get('stall_seconds',10.))
         begin=time.perf_counter()
-        params,velocity,key,loss=compiled(params,velocity,key);jax.block_until_ready((params,velocity,key,loss))
-        elapsed=time.perf_counter()-begin;step+=1
+        params,velocity,key,loss=compiled(params,velocity,key)
+        jax.block_until_ready((params,velocity,key,loss))
+        elapsed=time.perf_counter()-begin
+        step+=1
         state=dict(schema_version=1,worker_hash=worker_hash,step=step,params=np.asarray(params).tolist(),velocity=np.asarray(velocity).tolist(),key=np.asarray(key).tolist(),config_hash=config_hash,data_hash=data_hash)
         emit('progress',step=step,loss=float(loss),examples=cfg['batch_size'],update_s=elapsed,state_hash=digest(state))
         if step % cfg['checkpoint_every'] == 0 or step == cfg['steps']:
@@ -458,7 +493,8 @@ def default_config(**changes):
 def launch(root, config=None, timeout=10.):
     # Read or serialize artifact data on disk (`root`).
     # Execute the next step of the computation.
-    root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    root=Path(root)
+    root.mkdir(parents=True,exist_ok=True)
     # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
@@ -467,27 +503,31 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'config.json',cfg)
     # Evaluate `worker` from the current inputs and state.
     # Read or serialize artifact data on disk (``).
-    worker=root/'worker.py';worker.write_text(WORKER)
+    worker=root/'worker.py'
+    worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
     # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Evaluate `timed_out` from the current inputs and state.
+    # Compute `timed_out` from `False`
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
     except subprocess.TimeoutExpired:
-        timed_out=True;process.terminate()
+        timed_out=True
+        process.terminate()
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
-            process.kill();stdout,stderr=process.communicate(timeout=1.)
+            process.kill()
+            stdout,stderr=process.communicate(timeout=1.)
     # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
     # Evaluate `events` from the current inputs and state.
-    # Evaluate `malformed` from the current inputs and state.
-    events=[]; malformed=[]
+    # Compute `events` from `[]`
+    events=[]
+    malformed=[]
     # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
         # Branch on condition `not line.strip()`:
@@ -497,7 +537,7 @@ def launch(root, config=None, timeout=10.):
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
-    # Evaluate `status` from the current inputs and state.
+    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
@@ -518,7 +558,7 @@ with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     failed=launch(base/'resume',dict(fail_after=3))
     # Read or serialize artifact data on disk (`committed`).
     committed=json.loads((base/'resume'/'checkpoint.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `committed['step']==2` holds
     assert committed['step']==2
     # Run `launch` to compute `resumed`.
     resumed=launch(base/'resume',dict(resume=True))
@@ -526,17 +566,17 @@ with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     final_full=json.loads((base/'full'/'checkpoint.json').read_text())
     # Read or serialize artifact data on disk (`final_resumed`).
     final_resumed=json.loads((base/'resume'/'checkpoint.json').read_text())
-# Verify contract: `failed['status'] == 'failed' and resumed['status'] == 'completed'`.
+# Assert invariant `failed['status']=='failed' and resumed['status']=='completed'` holds
 assert failed['status']=='failed' and resumed['status']=='completed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `final_full==final_resumed` holds
 assert final_full==final_resumed
-# Evaluate `full_events` from the current inputs and state.
+# Compute `full_events` from `{e['step']:e for e in uninterrupted['events'] if e['...`
 full_events={e['step']:e for e in uninterrupted['events'] if e['event']=='progress'}
-# Evaluate `resume_events` from the current inputs and state.
+# Compute `resume_events` from `[e for e in resumed['events'] if e['event']=='progre...`
 resume_events=[e for e in resumed['events'] if e['event']=='progress']
-# Verify contract: `[e['step'] for e in resume_events] == [3, 4, 5, 6, 7, 8]`.
+# Assert invariant `[e['step'] for e in resume_events]==[3` holds
 assert [e['step'] for e in resume_events]==[3,4,5,6,7,8]
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(e['state_hash']==full_events[e['step']]['state_hash'] for e i...` holds
 assert all(e['state_hash']==full_events[e['step']]['state_hash'] for e in resume_events)
 # Print the observed values to compare against the expected result.
 print('restored step:',committed['step'],'replayed updates:',[e['step'] for e in resume_events])
@@ -564,7 +604,7 @@ The overlap is supported by equality checks of the complete state hashes, not in
 
 ```python
 # Compute figure data for: Resumed loss follows the same continuation
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{'kind':'line','x':list(range(3,9)),'xlabel':'comple...`
 visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training step','ylabel':'sampled minibatch mean squared error','series':[{'label':'uninterrupted continuation','y':[full_events[i]['loss'] for i in range(3,9)]},{'label':'restored continuation (overlaps)','y':[e['loss'] for e in resume_events]}]}
 ```
 
@@ -589,13 +629,13 @@ PASS: operations-03
 # Experiment — Compare state, not only loss: Loss is a scalar projection of a much larger state; equal loss...
 # Iterate over `event` to step through the computation:
 for event in resume_events:
-    # Evaluate `original` from the current inputs and state.
+    # Compute `original` from `full_events[event['step']]`
     original=full_events[event['step']]
-    # Verify contract: `event['state_hash'] == original['state_hash']`.
+    # Assert invariant `event['state_hash']==original['state_hash']` holds
     assert event['state_hash']==original['state_hash']
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `event['loss']==original['loss']` holds
     assert event['loss']==original['loss']
-# Verify contract: `all((name in committed for name in ['params', 'velocity', 'key', 'st...`.
+# Assert invariant `all(name in committed for name in ['params'` holds
 assert all(name in committed for name in ['params','velocity','key','step','data_hash','config_hash','worker_hash'])
 ```
 
@@ -615,9 +655,9 @@ with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
     # Run `launch` to compute `incompatible`.
     incompatible=launch(folder,dict(steps=8,resume=True,learning_rate=.05))
-# Verify contract: `incompatible['status'] == 'failed'`.
+# Assert invariant `incompatible['status']=='failed'` holds
 assert incompatible['status']=='failed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(e['event']=='failed' and 'provenance' in e['message'] for e i...` holds
 assert any(e['event']=='failed' and 'provenance' in e['message'] for e in incompatible['events'])
 ```
 
@@ -652,19 +692,20 @@ with tempfile.TemporaryDirectory() as folder:
     # Read or serialize artifact data on disk (`base`).
     # Evaluate `seed=9, checkpoint_every=3` and convert the result into Python scalar/collection `cfg`.
     base = Path(...)  # TODO: compute base
+    cfg = dict(...)  # TODO: compute cfg
     # Run `launch` to compute `ref`.
     ref = launch(...)  # TODO: compute ref
     # Run `launch` to compute `broken`.
     broken = launch(...)  # TODO: compute broken
     # Read or serialize artifact data on disk (`cp`).
     cp = json.loads(...)  # TODO: compute cp
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `cp['step']==3` holds
     assert cp['step']  # TODO: complete assertion check
     # Run `launch` to compute `fixed`.
     fixed = launch(...)  # TODO: compute fixed
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `fixed['status']=='completed'` holds
     assert fixed['status']  # TODO: complete assertion check
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `json.loads((base/'ref'/'checkpoint.json').read_text())==json.load...` holds
     assert json.loads((base/'ref'/'checkpoint.json').read_text())  # TODO: complete assertion check
 ```
 
@@ -676,20 +717,21 @@ with tempfile.TemporaryDirectory() as folder:
 with tempfile.TemporaryDirectory() as folder:
     # Read or serialize artifact data on disk (`base`).
     # Evaluate `seed=9, checkpoint_every=3` and convert the result into Python scalar/collection `cfg`.
-    base=Path(folder); cfg=dict(seed=9,checkpoint_every=3)
+    base=Path(folder)
+    cfg=dict(seed=9,checkpoint_every=3)
     # Run `launch` to compute `ref`.
     ref=launch(base/'ref',cfg)
     # Run `launch` to compute `broken`.
     broken=launch(base/'broken',dict(cfg,fail_after=5))
     # Read or serialize artifact data on disk (`cp`).
     cp=json.loads((base/'broken'/'checkpoint.json').read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `cp['step']==3` holds
     assert cp['step']==3
     # Run `launch` to compute `fixed`.
     fixed=launch(base/'broken',dict(cfg,resume=True))
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `fixed['status']=='completed'` holds
     assert fixed['status']=='completed'
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `json.loads((base/'ref'/'checkpoint.json').read_text())==json.load...` holds
     assert json.loads((base/'ref'/'checkpoint.json').read_text())==json.loads((base/'broken'/'checkpoint.json').read_text())
 ```
 
@@ -732,14 +774,16 @@ with tempfile.TemporaryDirectory() as folder:
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`state`).
     path = Path(...)  # TODO: compute path
+    state = json.loads(...)  # TODO: compute state
     # Accumulate the next contribution into `state['velocity'][0]`.
     # Read or serialize artifact data on disk (``).
-    state['velocity'][0]+=1.;path.write_text(json.dumps(state))
+    state['velocity'][0]+=1.
+    path.write_text(json.dumps(state))
     # Run `launch` to compute `bad`.
     bad = launch(...)  # TODO: compute bad
-# Verify contract: `bad['status'] == 'failed'`.
+# Assert invariant `bad['status']=='failed'` holds
 assert bad['status']  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(e['event']=='failed' and 'checksum' in e['message'] for e in ...` holds
 assert any(e['event']  # TODO: complete assertion check
 ```
 
@@ -753,15 +797,17 @@ with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
     # Read or serialize artifact data on disk (`path`).
     # Read or serialize artifact data on disk (`state`).
-    path=Path(folder)/'checkpoint.json'; state=json.loads(path.read_text())
+    path=Path(folder)/'checkpoint.json'
+    state=json.loads(path.read_text())
     # Accumulate the next contribution into `state['velocity'][0]`.
     # Read or serialize artifact data on disk (``).
-    state['velocity'][0]+=1.;path.write_text(json.dumps(state))
+    state['velocity'][0]+=1.
+    path.write_text(json.dumps(state))
     # Run `launch` to compute `bad`.
     bad=launch(folder,dict(resume=True))
-# Verify contract: `bad['status'] == 'failed'`.
+# Assert invariant `bad['status']=='failed'` holds
 assert bad['status']=='failed'
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `any(e['event']=='failed' and 'checksum' in e['message'] for e in ...` holds
 assert any(e['event']=='failed' and 'checksum' in e['message'] for e in bad['events'])
 ```
 
@@ -789,20 +835,20 @@ Apply the recurrence before multiplying by the learning rate.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `weights_only` from the current inputs and state.
-2. Verify contract: `abs(correct - 0.46) < 1e-12 and abs(weights_only - 0.3) < 1e-12`.
-3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+1. Compute `weights_only` from `.1*3`
+2. Check numerical equivalence within tolerance: `abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12`
+3. Check numerical equivalence within tolerance: `abs(correct-weights_only-.16)<1e-12`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Explain a weights-only mismatch by hand (Transfer / diagnosis): The next loss could initially look close, but the state...
 correct = ...  # TODO: compute correct
-# Evaluate `weights_only` from the current inputs and state.
+# Compute `weights_only` from `.1*3`
 weights_only = ...  # TODO: compute weights_only
-# Verify contract: `abs(correct - 0.46) < 1e-12 and abs(weights_only - 0.3) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12`
 assert abs(correct-.46)  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(correct-weights_only-.16)<1e-12`
 assert abs(correct-weights_only-.16)  # TODO: complete assertion check
 ```
 
@@ -811,11 +857,11 @@ assert abs(correct-weights_only-.16)  # TODO: complete assertion check
 ```python
 # Explain a weights-only mismatch by hand (Transfer / diagnosis): The next loss could initially look close, but the state...
 correct=.1*(.8*2+3)
-# Evaluate `weights_only` from the current inputs and state.
+# Compute `weights_only` from `.1*3`
 weights_only=.1*3
-# Verify contract: `abs(correct - 0.46) < 1e-12 and abs(weights_only - 0.3) < 1e-12`.
+# Check numerical equivalence within tolerance: `abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12`
 assert abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(correct-weights_only-.16)<1e-12`
 assert abs(correct-weights_only-.16)<1e-12
 ```
 

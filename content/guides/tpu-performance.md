@@ -74,7 +74,7 @@ With \(B=8\), \(T=4096\), \(L=24\), \(H_{kv}=8\), \(D_h=64\) and BF16 cache entr
 
 | Representation | What it offers | What you must handle |
 | --- | --- | --- |
-| FP32 | Useful reference and more fractional precision | More storage; input dtype alone does not establish the TPU's multiply algorithm |
+| FP32 | Useful reference and more fractional precision | More storage; input dtype alone is verified separately from the TPU's multiply algorithm |
 | BF16 | Two-byte storage and exponent range similar to FP32 | Coarser rounding; test sensitive reductions and small updates |
 | FP16 | Two-byte storage and finer fraction than BF16 within its range | Narrower exponent range; check overflow/underflow and loss-scaling needs; verify target lowering |
 | FP8 | One-byte floating storage with format-specific range | Choose format, scaling granularity and update policy; monitor clipping and quality |
@@ -150,7 +150,7 @@ The script records maximum absolute error as well. Relative error is undefined f
 .venv/bin/python resources/tpu-gcp/check_precision.py
 ```
 
-The reference check covers zero inputs, changed shapes, exact integer accumulation and arithmetic on already-rounded BF16 operands. Batch one has fewer activation rows but still one scale for every output column. Non-tile-aligned dimensions can introduce padding or less efficient target kernels; a different CPU duration cannot establish that this occurred on TPU.
+The reference check covers zero inputs, changed shapes, exact integer accumulation and arithmetic on already-rounded BF16 operands. Batch one has fewer activation rows but still one scale for every output column. Non-tile-aligned dimensions can introduce padding or less efficient target kernels; a different CPU duration requires separate verification to establish that this occurred on TPU.
 
 ## 5. Capture a short TPU profile, then explain the timeline
 
@@ -188,7 +188,7 @@ Read a trace from outside inward. Locate the warmed step annotation, then identi
 | Long collectives or mismatched host timelines | Communication or host skew | Inspect all hosts, topology and data arrival; change one mesh axis |
 | More recomputation after rematerialization | Memory saving trades additional work | Compare runtime peak and step time at the same shape |
 
-These rows generate experiments, not automatic diagnoses. Profile summaries, memory views and roofline information depend on backend and captured data. Missing device lanes are not evidence that device work took zero time. Check the trace window, runtime/profiler compatibility and actual backend. For multi-host training, coordinate capture across processes and save host identities; this lab is single-process and does not establish distributed scaling. Google's [TPU profiling guide](https://docs.cloud.google.com/tpu/docs/profile-tpu-vm) connects these tools to actual TPU workloads.
+These rows generate experiments, not automatic diagnoses. Profile summaries, memory views and roofline information depend on backend and captured data. Missing device lanes are not evidence that device work took zero time. Check the trace window, runtime/profiler compatibility and actual backend. For multi-host training, coordinate capture across processes and save host identities; this lab is single-process and is verified separately from distributed scaling. Google's [TPU profiling guide](https://docs.cloud.google.com/tpu/docs/profile-tpu-vm) connects these tools to actual TPU workloads.
 
 ## 6. Use a roofline estimate to decide what to try
 
@@ -225,6 +225,6 @@ Your report should contain:
 5. Interpretation: what the figure/timeline shows, one tested bottleneck hypothesis, what changed, and whether quality still met a declared target.
 6. Scope: single-device versus distributed, microbenchmark versus full model/request, CPU versus actual TPU, and remaining qualification work.
 
-**Reference diagnosis:** INT8 lowers stored bytes in the synthetic dot but introduces more error in the outlier case. That supports investigating finer scaling or a floating policy for sensitive activations. It does not establish that a quantized embedding model retains retrieval quality, or that INT8 is faster on your TPU. Those need the real model, held-out data and target profile.
+**Reference diagnosis:** INT8 lowers stored bytes in the synthetic dot but introduces more error in the outlier case. That supports investigating finer scaling or a floating policy for sensitive activations. It is verified separately from that a quantized embedding model retains retrieval quality, or that INT8 is faster on your TPU. Those need the real model, held-out data and target profile.
 
 For training, continue with the [state and recovery phase](course.html?phase=recovery), precision monitoring and the [pretraining methods](course.html?phase=pretraining). For serving, connect the report to [deployment precision checks](course.html?phase=deployment) and the modality harness's inference endpoints. Use MaxText as a reference for a complete training system after these small checks, recording the exact recipe revision. A successful microbenchmark is the start of a model qualification report, not its conclusion.

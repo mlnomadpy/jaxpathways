@@ -81,4 +81,4 @@ The reference implementation is available in `solution/model.py` after your atte
 python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/solution/model.py
 ```
 
-A CPU receipt establishes execution in one environment. It does not establish TPU behavior, generalization outside these perturbed corners, secure deployment, or independently reviewed competency.
+A CPU receipt establishes execution in one environment. It is verified separately from TPU behavior, generalization outside these perturbed corners, secure deployment, or independently reviewed competency.

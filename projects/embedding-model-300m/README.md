@@ -4,7 +4,7 @@
 
 The learner will make and defend a sequence of decisions: what the model should retrieve, which data it may learn from, how inputs become representations, which objective belongs at each stage, whether the representation improves, and whether someone else can load and operate the released model.
 
-“Production grade” is the intended outcome **for a declared use case and runtime**, earned through quality, reliability and release gates. A parameter count or an MTEB average alone does not establish it.
+“Production grade” is the intended outcome **for a declared use case and runtime**, earned through quality, reliability and release gates. A parameter count or an MTEB average alone is verified separately from it.
 
 ## Project guides
 

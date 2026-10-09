@@ -1,4 +1,4 @@
-"""Independent public CPU checks; passing does not establish real-data calibration."""
+"""Independent public CPU checks; passing is verified separately from real-data calibration."""
 import argparse
 import importlib.util
 from pathlib import Path
@@ -16,7 +16,8 @@ stage=3 if args.stage=="all" else int(args.stage)
 path=ROOT/args.implementation/"model.py" if args.implementation in ("starter","solution") else Path(args.implementation)
 if not path.is_file():parser.error("implementation must name an existing Python file")
 spec=importlib.util.spec_from_file_location("learner",path)
-model=importlib.util.module_from_spec(spec);spec.loader.exec_module(model)
+model=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(model)
 
 def rejects(call):
     try:call()
@@ -26,11 +27,13 @@ def rejects(call):
 # Several feature counts, non-centered inputs, scales and rank-deficient data.
 for seed,d,n,sigma,tau in [(5,2,7,.7,1.3),(21,3,9,1.2,.8),(41,2,4,.4,2.)]:
     rng=np.random.default_rng(seed)
-    X=rng.normal(size=(n,d)).astype(np.float32);X[:,0]=1.
+    X=rng.normal(size=(n,d)).astype(np.float32)
+    X[:,0]=1.
     if seed==41:X[:,1]=1.
     y=rng.normal(size=n).astype(np.float32)
     mean,cov=model.fit(X,y,sigma,tau)
-    hostX=X.astype(np.float64);hosty=y.astype(np.float64)
+    hostX=X.astype(np.float64)
+    hosty=y.astype(np.float64)
     precision=np.eye(d)/tau**2+hostX.T@hostX/sigma**2
     oracle_mean=np.linalg.solve(precision,hostX.T@hosty/sigma**2)
     oracle_cov=np.linalg.solve(precision,np.eye(d))
@@ -45,7 +48,8 @@ for seed,d,n,sigma,tau in [(5,2,7,.7,1.3),(21,3,9,1.2,.8),(41,2,4,.4,2.)]:
     oracle_gradient=hostX.T@(hosty-hostX@np.asarray(w))/sigma**2-np.asarray(w)/tau**2
     np.testing.assert_allclose(gradient,oracle_gradient,rtol=2e-5,atol=3e-5)
 empty_m,empty_c=model.fit(np.empty((0,3)),np.empty(0),.7,1.5)
-np.testing.assert_allclose(empty_m,0);np.testing.assert_allclose(empty_c,np.eye(3)*2.25)
+np.testing.assert_allclose(empty_m,0)
+np.testing.assert_allclose(empty_c,np.eye(3)*2.25)
 rejects(lambda:model.fit(np.ones((3,2)),np.ones((3,1))))
 rejects(lambda:model.fit(np.ones((3,2)),np.ones(3),0.))
 rejects(lambda:model.fit(np.array([[np.nan,1.]]),np.ones(1)))

@@ -46,7 +46,8 @@ def validate_rows(rows):
             raise ValueError('source group leaks between splits')
         # Run `ids.add` to perform the next check or state transition.
         # Evaluate `groups[row['group']]` from the current inputs and state.
-        ids.add(row['id']); groups[row['group']] = row['split']
+        ids.add(row['id'])
+        groups[row['group']] = row['split']
     # Return `digest(rows)` to the caller.
     return digest(rows)
 
@@ -143,7 +144,8 @@ def activate(store, version, bundle, approval, now, target):
     verify_release(bundle, approval, now, target)
     # Read or serialize artifact data on disk (`store`).
     # Execute the next step of the computation.
-    store = Path(store); store.mkdir(parents=True, exist_ok=True)
+    store = Path(store)
+    store.mkdir(parents=True, exist_ok=True)
     # Evaluate `pointer` from the current inputs and state.
     pointer = store / 'active.json'
     # Read or serialize artifact data on disk (`previous`).
@@ -154,6 +156,7 @@ def activate(store, version, bundle, approval, now, target):
     temporary = store / 'active.tmp'
     # Read or serialize artifact data on disk (``).
     # Run `temporary.write_text` to perform the next check or state transition.
-    temporary.write_text(json.dumps(selected)); temporary.replace(pointer)
+    temporary.write_text(json.dumps(selected))
+    temporary.replace(pointer)
     # Return `selected` to the caller.
     return selected

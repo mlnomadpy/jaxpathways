@@ -24,7 +24,7 @@ These commands execute the instructor reference. The second writes actual figure
 
 Implement `environment_report`. A two-by-three matrix contains the numbers zero through five. Predict both row sums before running: the first is three, the second twelve. Compile the reduction, wait for completion and record the actual output device, dtype, shapes and package versions.
 
-A package import does not establish that an operation ran on an accelerator. Record the array’s device after completion, not the device you hoped to use. This project runs on CPU; the TPU bridge supplies a separate target check.
+A package import is verified separately from that an operation ran on an accelerator. Record the array’s device after completion, not the device you hoped to use. This project runs on CPU; the TPU bridge supplies a separate target check.
 
 **Change it:** replace the row reduction with a column reduction in a separate experiment. Derive `[3, 5, 7]` and explain why its shape differs. Keep the project’s specified row-report contract unchanged for the public checker.
 

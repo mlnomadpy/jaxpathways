@@ -30,34 +30,34 @@ def euler_solve(rate, initial, steps, dt):
 
 # Compare the simulation with a physical reference
 # Step 2 — Compare the simulation with a physical reference: The geometric sequence verifies implementation correctness.
-# Initialize array `(rate, initial, dt, steps)` with explicit values and shape.
+# Construct `rate, initial, dt, steps` via `0.7, jnp.array(2.0), 0.5, 4`
 rate, initial, dt, steps = 0.7, jnp.array(2.0), 0.5, 4
 # Run `euler_solve` to compute `trajectory`.
 trajectory = euler_solve(rate, initial, steps, dt)
-# Initialize array `times` with explicit values and shape.
+# Compute `times` from `np.arange(steps+1)*dt`
 times = np.arange(steps+1)*dt
-# Evaluate `continuous` from the current inputs and state.
+# Compute `continuous` from `2.0*np.exp(-rate*times)`
 continuous = 2.0*np.exp(-rate*times)
-# Initialize array `discrete` with explicit values and shape.
+# Compute `discrete` from `2.0*(1-rate*dt)**np.arange(steps+1)`
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol...`
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
-# Verify contract: `np.all(np.diff(np.asarray(trajectory)) < 0)`.
+# Assert invariant `np.all(np.diff(np.asarray(trajectory)) < 0)` holds
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(trajectory[-1])-continuous[-1]) > 0.1`
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
 # Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
 
 # Refine the time grid without changing the experiment
 # Step 3 — Refine the time grid without changing the experiment: Every run stops at the same physical time.
-# Initialize array `grid_sizes` with explicit values and shape.
+# Compute `grid_sizes` from `np.array([4, 8, 16, 32])`
 grid_sizes = np.array([4, 8, 16, 32])
-# Initialize array `endpoint_errors` with explicit values and shape.
+# Compute `endpoint_errors` from `np.array([abs(float(euler_solve(rate, initial, int(n...`
 endpoint_errors = np.array([abs(float(euler_solve(rate, initial, int(n), 2.0/n)[-1])-continuous[-1]) for n in grid_sizes])
-# Verify contract: `np.all(np.diff(endpoint_errors) < 0)`.
+# Assert invariant `np.all(np.diff(endpoint_errors) < 0)` holds
 assert np.all(np.diff(endpoint_errors) < 0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3` holds
 assert 1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3
 # Print the observed values to compare against the expected result.
 print("Endpoint errors:", endpoint_errors)
@@ -92,33 +92,33 @@ def euler_solve(rate, initial, steps, dt):
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
 # Step 2 — Compare the simulation with a physical reference: The geometric sequence verifies implementation correctness.
-# Initialize array `(rate, initial, dt, steps)` with explicit values and shape.
+# Construct `rate, initial, dt, steps` via `0.7, jnp.array(2.0), 0.5, 4`
 rate, initial, dt, steps = 0.7, jnp.array(2.0), 0.5, 4
 # Run `euler_solve` to compute `trajectory`.
 trajectory = euler_solve(rate, initial, steps, dt)
-# Initialize array `times` with explicit values and shape.
+# Compute `times` from `np.arange(steps+1)*dt`
 times = np.arange(steps+1)*dt
-# Evaluate `continuous` from the current inputs and state.
+# Compute `continuous` from `2.0*np.exp(-rate*times)`
 continuous = 2.0*np.exp(-rate*times)
-# Initialize array `discrete` with explicit values and shape.
+# Compute `discrete` from `2.0*(1-rate*dt)**np.arange(steps+1)`
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol...`
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
-# Verify contract: `np.all(np.diff(np.asarray(trajectory)) < 0)`.
+# Assert invariant `np.all(np.diff(np.asarray(trajectory)) < 0)` holds
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(trajectory[-1])-continuous[-1]) > 0.1`
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
 # Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
 
 # Step 3 — Refine the time grid without changing the experiment: Every run stops at the same physical time.
-# Initialize array `grid_sizes` with explicit values and shape.
+# Compute `grid_sizes` from `np.array([4, 8, 16, 32])`
 grid_sizes = np.array([4, 8, 16, 32])
-# Initialize array `endpoint_errors` with explicit values and shape.
+# Compute `endpoint_errors` from `np.array([abs(float(euler_solve(rate, initial, int(n...`
 endpoint_errors = np.array([abs(float(euler_solve(rate, initial, int(n), 2.0/n)[-1])-continuous[-1]) for n in grid_sizes])
-# Verify contract: `np.all(np.diff(endpoint_errors) < 0)`.
+# Assert invariant `np.all(np.diff(endpoint_errors) < 0)` holds
 assert np.all(np.diff(endpoint_errors) < 0)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3` holds
 assert 1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3
 # Print the observed values to compare against the expected result.
 print("Endpoint errors:", endpoint_errors)
@@ -134,35 +134,35 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 # Experiment: Stable does not mean physically positive
 # Experiment — Stable does not mean physically positive: The magnitude decays because |1-kh|=0.4, but crossing below...
-# Initialize array `oscillatory` with explicit values and shape.
+# Construct `oscillatory` via `euler_solve(0.7, jnp.array(2.0), 4, 2.0)`
 oscillatory = euler_solve(0.7, jnp.array(2.0), 4, 2.0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128,...`
 np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128, 0.0512], atol=1e-12)
 # Print the observed values to compare against the expected result.
 print("Stable but sign-alternating:", np.asarray(oscillatory))
 
 # Experiment: Reproduce numerical instability
 # Experiment — Reproduce numerical instability: The multiplier is -1.1.
-# Initialize array `unstable` with explicit values and shape.
+# Construct `unstable` via `euler_solve(0.7, jnp.array(2.0), 6, 3.0)`
 unstable = euler_solve(0.7, jnp.array(2.0), 6, 3.0)
-# Verify contract: `abs(float(unstable[-1])) > 2.0`.
+# Check numerical equivalence within tolerance: `abs(float(unstable[-1])) > 2.0`
 assert abs(float(unstable[-1])) > 2.0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `2*np.exp(-0.7*18) < 1e-4` holds
 assert 2*np.exp(-0.7*18) < 1e-4
 # Print the observed values to compare against the expected result.
 print("Unstable numerical endpoint:", float(unstable[-1]))
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Change the rate to 0.3, the initial excess to 5, and use twenty steps...
-# Initialize array `changed` with explicit values and shape.
+# Construct `changed` via `euler_solve(0.3, jnp.array(5.0), 20, 0.1)`
 changed = euler_solve(0.3, jnp.array(5.0), 20, 0.1)
-# Initialize array `reference` with explicit values and shape.
+# Compute `reference` from `5.0*(1-0.3*0.1)**np.arange(21)`
 reference = 5.0*(1-0.3*0.1)**np.arange(21)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Check numerical equivalence within tolerance: `np.testing.assert_allclose(changed, reference, rtol=1e-12)`
 np.testing.assert_allclose(changed, reference, rtol=1e-12)
-# Verify contract: `float(changed[0]) == 5.0`.
+# Assert invariant `float(changed[0]) == 5.0` holds
 assert float(changed[0]) == 5.0
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Check numerical equivalence within tolerance: `abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03`
 assert abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03
 # Print the observed values to compare against the expected result.
 print("Changed rate, initial state and grid verified")
@@ -171,13 +171,13 @@ print("Changed rate, initial state and grid verified")
 # Energy does not check every invariant (Practice): A scalar diagnostic can establish decay without capturing...
 # Iterate over `h` to step through the computation:
 for h in (0.5, 2.0):
-    # Initialize array `u` with explicit values and shape.
+    # Construct `u` via `np.asarray(euler_solve(0.7, jnp.array(2.0), 6, h))`
     u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, h))
-    # Verify contract: `np.all(np.diff(u * u / 2) < 0)`.
+    # Assert invariant `np.all(np.diff(u*u/2) < 0)` holds
     assert np.all(np.diff(u*u/2) < 0)
-# Initialize array `u` with explicit values and shape.
+# Construct `u` via `np.asarray(euler_solve(0.7, jnp.array(2.0), 6, 3.0))`
 u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, 3.0))
-# Verify contract: `np.all(np.diff(u * u / 2) > 0)`.
+# Assert invariant `np.all(np.diff(u*u/2) > 0)` holds
 assert np.all(np.diff(u*u/2) > 0)
 # Print the observed values to compare against the expected result.
 print("Energy checks distinguish growth, but not sign preservation")
@@ -185,17 +185,17 @@ print("Energy checks distinguish growth, but not sign preservation")
 # Reference practice: Keep the physical horizon fixed
 # Keep the physical horizon fixed (Challenge): A refinement study must hold the modeled experiment fixed;...
 horizon = 2.0
-# Evaluate `errors` from the current inputs and state.
+# Compute `errors` from `[]`
 errors = []
 # Iterate over `n` to step through the computation:
 for n in (10, 20, 40):
-    # Evaluate `h` from the current inputs and state.
+    # Compute `h` from `horizon/n`
     h = horizon/n
-    # Initialize array `final` with explicit values and shape.
+    # Construct `final` via `euler_solve(0.7, jnp.array(2.0), n, h)[-1]`
     final = euler_solve(0.7, jnp.array(2.0), n, h)[-1]
     # Append the current step result to `errors`.
     errors.append(abs(float(final)-2*np.exp(-0.7*horizon)))
-# Verify contract: `errors[2] < errors[1] < errors[0]`.
+# Assert invariant `errors[2] < errors[1] < errors[0]` holds
 assert errors[2] < errors[1] < errors[0]
 # Print the observed values to compare against the expected result.
 print("Same-horizon errors:", errors)

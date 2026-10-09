@@ -18,29 +18,42 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 ROOT=Path(__file__).resolve().parent
-parser=argparse.ArgumentParser();parser.add_argument("--implementation",default="solution")
-parser.add_argument("--output",default=str(ROOT/"outputs"));args=parser.parse_args()
+parser=argparse.ArgumentParser()
+parser.add_argument("--implementation",default="solution")
+parser.add_argument("--output",default=str(ROOT/"outputs"))
+args=parser.parse_args()
 path=ROOT/args.implementation/"model.py" if args.implementation in ("starter","solution") else Path(args.implementation)
-spec=importlib.util.spec_from_file_location("text_model",path);m=importlib.util.module_from_spec(spec);spec.loader.exec_module(m)
-out=Path(args.output);out.mkdir(parents=True,exist_ok=True)
-train=m.make_corpus(31,96,"train");held=m.make_corpus(89,32,"held",exclude=train["texts"])
-state=m.initialize(train,seed=3);history=[]
+spec=importlib.util.spec_from_file_location("text_model",path)
+m=importlib.util.module_from_spec(spec)
+spec.loader.exec_module(m)
+out=Path(args.output)
+out.mkdir(parents=True,exist_ok=True)
+train=m.make_corpus(31,96,"train")
+held=m.make_corpus(89,32,"held",exclude=train["texts"])
+state=m.initialize(train,seed=3)
+history=[]
 for _ in range(120):
-    state,item=m.step(state,train);history.append(item)
+    state,item=m.step(state,train)
+    history.append(item)
 m.save_checkpoint(out/"checkpoint",state)
 resumed=m.load_checkpoint(out/"checkpoint",train,state["config"])
 for _ in range(120):
-    state,original=m.step(state,train);resumed,replay=m.step(resumed,train)
-    assert original==replay;history.append(replay)
+    state,original=m.step(state,train)
+    resumed,replay=m.step(resumed,train)
+    assert original==replay
+    history.append(replay)
 for group in ("params","m","v"):
     for name in state[group]:np.testing.assert_array_equal(state[group][name],resumed[group][name])
 state=resumed
 metrics=m.evaluate(state["params"],held)
-counts=np.bincount(train["tokens"][:,1:].ravel(),minlength=m.VOCAB).astype(float);counts[0]=0
+counts=np.bincount(train["tokens"][:,1:].ravel(),minlength=m.VOCAB).astype(float)
+counts[0]=0
 prob=(counts+1)/(counts.sum()+m.VOCAB)
-targets=held["tokens"][:,1:];valid=targets[targets!=0]
+targets=held["tokens"][:,1:]
+valid=targets[targets!=0]
 unigram_nll=float(-np.log(prob[valid]).mean())
-manifest=m.export_release(out/"release",state);loaded,artifacts=m.load_release(out/"release")
+manifest=m.export_release(out/"release",state)
+loaded,artifacts=m.load_release(out/"release")
 fixed_logits=np.asarray(m.forward(state["params"],jnp.asarray(held["tokens"][:,:-1]))[0])
 precision={}
 for name,(compute,cache) in m.RELEASE_POLICIES.items():
@@ -64,7 +77,8 @@ diagnostic.update(expected_completion="cba",held_document=None,scope="fixed diag
 generations.append(diagnostic)
 timings={name:m.benchmark(loaded,artifacts,"abc|",policy=name,repeats=30) for name in m.RELEASE_POLICIES}
 # Warm the exact regions before recording a real local profiler trace.
-shadow=state;shadow,_=m.step(shadow,train)
+shadow=state
+shadow,_=m.step(shadow,train)
 prefilled=m.exported_prefill(loaded,artifacts,m.encode("abc|"))
 m.exported_decode(loaded,artifacts,102,prefilled)
 profile_root=out/"profile"/("run-"+str(time.time_ns()))
@@ -87,7 +101,9 @@ for relative in profile_files:
             for name in ("text-training-update","text-prefill","text-cached-decode")}}
         break
 assert all(trace_summary.get("annotated_regions",{}).get(name,0)>=5 for name in ("text-training-update","text-prefill","text-cached-decode"))
-prompt=m.encode("abc|");padded=np.zeros((1,12),np.int32);padded[0,:len(prompt)]=prompt
+prompt=m.encode("abc|")
+padded=np.zeros((1,12),np.int32)
+padded[0,:len(prompt)]=prompt
 attention=np.asarray(m.forward(state["params"],jnp.asarray(padded))[1])[0,0,:len(prompt),:len(prompt)]
 plt.rcParams.update({"font.family":"DejaVu Sans","font.size":11,"svg.fonttype":"none"})
 fig,axes=plt.subplots(2,1,figsize=(8.5,9),layout="constrained")
@@ -103,7 +119,9 @@ axes[1].set(xticks=range(5),yticks=range(5),xticklabels=labels,yticklabels=label
 for (i,j),value in np.ndenumerate(attention):
     axes[1].text(j,i,f"{value:.2f}",ha="center",va="center",color="white" if value>.55 else "#241c31")
 fig.colorbar(im,ax=axes[1],label="attention weight")
-fig.savefig(out/"training-attention.png",dpi=150);fig.savefig(out/"training-attention.svg");plt.close(fig)
+fig.savefig(out/"training-attention.png",dpi=150)
+fig.savefig(out/"training-attention.svg")
+plt.close(fig)
 fig,axes=plt.subplots(2,1,figsize=(8.5,8),layout="constrained")
 names=list(cache_only)
 axes[0].bar(names,[cache_only[n]["cache_bytes_including_scales"] for n in names],color=["#6240ad","#087c83","#b05c32"])
@@ -111,7 +129,9 @@ axes[0].set(ylabel="bytes (K/V plus stored FP32 scales)",title="Actual allocated
 bars=axes[1].bar(names,[cache_only[n]["maximum_valid_logit_error"] for n in names],color=["#6240ad","#087c83","#b05c32"])
 axes[1].bar_label(bars,fmt="%.4f")
 axes[1].set(ylabel="maximum absolute logit difference",title="Cache-only precision change on fixed held-out targets")
-fig.savefig(out/"cache-precision.png",dpi=150);fig.savefig(out/"cache-precision.svg");plt.close(fig)
+fig.savefig(out/"cache-precision.png",dpi=150)
+fig.savefig(out/"cache-precision.svg")
+plt.close(fig)
 report={"schema_version":1,"source_sha256":hashlib.sha256(path.read_bytes()).hexdigest(),
         "runner_sha256":hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "environment":{"python":sys.version,"jax":jax.__version__,"numpy":np.__version__,"device":str(jax.devices()[0])},

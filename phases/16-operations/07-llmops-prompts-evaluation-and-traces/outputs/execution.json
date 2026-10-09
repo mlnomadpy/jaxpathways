@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-07",
-  "contentHash": "5682e77827b3bc9040c4895c2df6abf5cddb66570916c96fbcd28dd1985f7f95",
+  "contentHash": "a8ed651ba8eb68b7dc92b2bd478fc692d4ff77f97c2344ca4132c627426d9118",
   "executedAt": "2026-10-08T14:07:40.747038+00:00",
   "environment": {
     "backend": "cpu",
@@ -18,7 +18,15 @@
       "outputs": []
     },
     {
-      "sourceHash": "90d3cf421e3e6bb7a8ccb85f6507df093aff60745390c75e0bfbbd5b67f0d5ca",
+      "sourceHash": "f8a7474b577d511f070dd36b4216fcffcaae7a5c4e97c70954409503fe26db7a",
+      "outputs": []
+    },
+    {
+      "sourceHash": "ef19eb67ec0ddfa276e9d473b7b64bd41898dde83991f88c633d7c9a0c94854f",
+      "outputs": []
+    },
+    {
+      "sourceHash": "bcf5f4c8052a5db46f956e02a571a8a0c2e3cde9024286d3d431534136f443ab",
       "outputs": [
         {
           "output_type": "stream",
@@ -40,29 +48,7 @@
       ]
     },
     {
-      "sourceHash": "769679208d850e115e83fc859f75ae36828b6dd7ac38f82a22e0fa585a7af014",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\n",
-            "Two real MLflow traces; no LLM API was called and no general model quality was evaluated.\n"
-          ]
-        },
-        {
-          "output_type": "stream",
-          "name": "stderr",
-          "text": [
-            "2026/10/08 07:07:39 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/08 07:07:39 INFO mlflow.store.db.utils: Updating database tables\n",
-            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-3:38: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "637c1a752df27916939dbfc272daba37c5a3411b0dea3a684c208096acf80021",
+      "sourceHash": "c0ae1db3f6e105b98e781cbbc1670abdf3551697e8b1e0b3db462eb3e96d9a0b",
       "outputs": []
     },
     {
@@ -81,76 +67,36 @@
       ]
     },
     {
-      "sourceHash": "f1e53d08409ff2bee47a5c9757b66c71950459762a95dca1854e0af5a26bf9cd",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Release decisions: [False, True]\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "825defdcf7b2909c616f258337ef74b14f99f0c441fa5c96e60bd3a43f4a3417",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Complete inventory: {'count': 10, 'passed': 9, 'fraction': 0.9} ; missing, duplicate and unknown responses rejected.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "b106a8657bc764d9a0b74a2f1d438d838a02ccf0f6d58df7b997749bfa2cfdd6",
+      "sourceHash": "dff91545c3894cbade41c8ec48d2bf0869bba9319aa9731d75f25a81edb27c27",
       "outputs": []
     },
     {
-      "sourceHash": "46f9a781311913621303bc90ff5e7cfcb7be595d99251199979d2014befbda4b",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Unrecognized citations rejected.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "0275ff4ffe6f444dfa23b24bca66ac24abcde34b4aac15d1a3fc0e22822e34f7",
+      "sourceHash": "832079c4f50df1a0a9a8dbc4da789b13e305537a515745885e5df04d156f47df",
       "outputs": []
     },
     {
-      "sourceHash": "06d15d122dc7ddb11c6d22bffaf7ea082c4e3636089b328019d83945857312f3",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "An abstention flag alone does not satisfy the output contract.\n"
-          ]
-        }
-      ]
-    },
-    {
-      "sourceHash": "943155672aa77436b900e10a43f1d60bdecfe4188593acd0a5fb93e711792a4e",
+      "sourceHash": "6cdd2314dd3a31f8631f23248295a7cc9f2e363e3a1d5b46d6ea1c09075ee09f",
       "outputs": []
     },
     {
-      "sourceHash": "c085d2695f837f665b90b1f2112529b12259a76109dcac83542bf29f9770dbd5",
-      "outputs": [
-        {
-          "output_type": "stream",
-          "name": "stdout",
-          "text": [
-            "Failed answerable work remains in denominator: {'count': 10, 'passed': 9, 'fraction': 0.9}\n"
-          ]
-        }
-      ]
+      "sourceHash": "3c611264e825556eebe198b415bb13877e1970e625b19b90ca3d35ce924e74f3",
+      "outputs": []
+    },
+    {
+      "sourceHash": "deb28c95e8d3358d70d14b9112daea55274e3cfee6d4fa6c6458fbfb1cb98172",
+      "outputs": []
+    },
+    {
+      "sourceHash": "5855bd3552d8a1de2b39b3f580dd7d5c0312fa1b6dc50b716b64e29b6b2e7b57",
+      "outputs": []
+    },
+    {
+      "sourceHash": "1ea72641cff69f86bc2300d14b74d29c5150fa1847e509d970e507d625a29eac",
+      "outputs": []
+    },
+    {
+      "sourceHash": "f281d034cfe89e7b5cd34fce0f1b3e9b007c691bc057dd2c9a84493b76f25f9b",
+      "outputs": []
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

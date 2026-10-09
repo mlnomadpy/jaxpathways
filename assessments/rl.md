@@ -15,6 +15,25 @@ python3 projects/policy-evaluation/tests/check.py --implementation projects/poli
 
 Record the source revision, Python/JAX/NumPy versions, backend, dtype, configuration, training seeds and evaluation seed sets. Predict each changed-condition result before execution. The following tasks require new evidence beyond passing the public fixture.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: PPO clipped surrogate objective & zero-gradient behavior check
+import jax.numpy as jnp
+
+def ppo_clipped_surrogate(ratios: jnp.ndarray, advantages: jnp.ndarray, eps: float = 0.2) -> jnp.ndarray:
+    # Compute elementwise minimum between unclipped and clipped ratio objectives.
+    unclipped = ratios * advantages
+    clipped = jnp.clip(ratios, 1.0 - eps, 1.0 + eps) * advantages
+    return jnp.minimum(unclipped, clipped)
+
+ratios = jnp.array([0.6, 1.0, 1.4], dtype=jnp.float32)
+print("Positive adv terms:", ppo_clipped_surrogate(ratios, jnp.full((3,), 2.0)))
+print("Negative adv terms:", ppo_clipped_surrogate(ratios, jnp.full((3,), -2.0)))
+```
+
 ## Task 1: defend an episode boundary
 
 Use a horizon of \(2\), start at position \(1\), and take two right actions. Record the observation before and after each transition, reward, elapsed count, termination, truncation and done state. Call step twice more and show that reward does not repeat.

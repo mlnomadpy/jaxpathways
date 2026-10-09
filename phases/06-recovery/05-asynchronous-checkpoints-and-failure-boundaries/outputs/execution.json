@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-05",
-  "contentHash": "32d4dd8cf251459bcfa4a3774f27bd155661b81077c7ed996fcc4c3e6a8f92bf",
+  "contentHash": "c80a252d895af4b9b883ea6f9c3bd1838d5ec1495a6fb0a1ab6223723849ad1e",
   "executedAt": "2026-10-08T14:03:18.426772+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,15 +14,15 @@
   "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-uem4o66m\n{\n  \"save_call_seconds\": 0.004411875270307064,\n  \"remaining_work_and_wait_seconds\": 0.014456083066761494,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-351xanch\n{\n  \"save_call_seconds\": 0.0018216250464320183,\n  \"remaining_work_and_wait_seconds\": 0.009038458112627268,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
   "notebookCells": [
     {
-      "sourceHash": "ddfbbce1553bfc08a299c306a9144771c381b758cc62354ca50adae73519cf6e",
+      "sourceHash": "314251befd2dd17588096b6cc555bdfad171bf0a94178401ebb90a10eb4405fd",
       "outputs": []
     },
     {
-      "sourceHash": "5795e166fc75e306098816754bf109b0b790a16a52a0ee0edec58d91a2476eb8",
+      "sourceHash": "987ce80d5e56c756682fef0a0416ecd36d934b770659f22faea84845915aba34",
       "outputs": []
     },
     {
-      "sourceHash": "84a924c618f7d9b7105bf7687ad3e92c9fae80cdaf63b29b3a4802960024b914",
+      "sourceHash": "4930c5fbffba5d9af2cb643db567850140349a969ade8feab166c43bc123a0d1",
       "outputs": [
         {
           "output_type": "stream",
@@ -41,7 +41,7 @@
       ]
     },
     {
-      "sourceHash": "ad1d63d9326b5cc2c56947345b85238c264c3a03c2e2ff589dc0c32700ad03e9",
+      "sourceHash": "e69d479614cadcf6627be9ca161cf87d04bd1df1629a9f386e9bd653cd651af0",
       "outputs": [
         {
           "output_type": "stream",
@@ -60,7 +60,7 @@
       ]
     },
     {
-      "sourceHash": "8df07b00a0caee52d4c3e412d7842885e970c6db490232853160f7bb81355775",
+      "sourceHash": "ccee45ac69a43c4bd2afe61518ef53fd3b894b4647b36ec9cc1c50d9d6937812",
       "outputs": []
     },
     {
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "c8d89cb41fabb3bc452ebbdcce06ca3ed9f0e16b443344edd1f7b6f31fa78d7c",
+      "sourceHash": "181205784ea932c36d5af70723065dbfbf6aa55c6bf7739ce78c775a2b4aaedd",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "1893f3a4d1eb3434c61a0e007b12c8859af0ab068326b0fd0ea28e3292021641",
+      "sourceHash": "301324afd9b4fc153aee01e31613e2813ff3479ad04daff76051fd52c0abd2a8",
       "outputs": []
     },
     {
-      "sourceHash": "68a66ed84efbcfad3036facbcd6137d44da58d7b8247660edb26cd3875315f19",
+      "sourceHash": "076997234e214b8e4fdaaf8d5b39cc6c54c1661519aa2b384616d610156f903b",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "a7face9f3318d6a525f736aaa918f6a27d27d8a63bf008a0add635bb61a64835",
+      "sourceHash": "caada9cf84d107f366fcbfce3c744e3a2028fea8b55e73a2cc6b44c9f0cf575d",
       "outputs": []
     },
     {
-      "sourceHash": "5e06c78948fe2e1506d1339d8f6823d6de51bd7ec6ee6615e57be73c5f92a5e5",
+      "sourceHash": "8148fc7b51dc2734755254d2259de79d8eff694ead57258a13a7cd7978d9390d",
       "outputs": [
         {
           "output_type": "stream",

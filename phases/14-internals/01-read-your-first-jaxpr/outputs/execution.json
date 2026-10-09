@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-01",
-  "contentHash": "5c52c88eacd380f3290790e9317f9480e17643014f260453b9dfc78ae5a9dc3b",
+  "contentHash": "b65336cbee3ce2df2dbd8e10e72f31e7070e96a2c8fc5f8f0c8c0beffab2047a",
   "executedAt": "2026-10-08T14:05:42.881459+00:00",
   "environment": {
     "backend": "cpu",
@@ -14,15 +14,15 @@
   "stdout": "Forward program:\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nOperation: add output shapes: [(3,)]\nOperation: mul output shapes: [(3,)]\nOperation: reduce_sum output shapes: [()]\nValue / gradient: 29.0 [4. 6. 8.]\nForward program:\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nOperation: add output shapes: [(3,)]\nOperation: mul output shapes: [(3,)]\nOperation: reduce_sum output shapes: [()]\nValue / gradient: 29.0 [4. 6. 8.]\nDerivative program: { lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    _:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n    d:f32[3] = broadcast_in_dim 1.0:f32[]\n    e:f32[3] = mul b d\n    f:f32[3] = mul d b\n    g:f32[3] = add_any e f\n  in (g,) }\nCaptured: { lambda a:f32[3]; b:f32[3]. let\n    c:f32[3] = add b a\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nExplicit: { lambda ; a:f32[3] b:f32[3]. let\n    c:f32[3] = add a b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 2.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nUnrolled: { lambda ; a:f32[]. let\n    b:f32[] = mul 0.5:f32[] a\n    c:f32[] = add b 1.0:f32[]\n    d:f32[] = mul 0.5:f32[] c\n    e:f32[] = add d 1.0:f32[]\n    f:f32[] = mul 0.5:f32[] e\n    g:f32[] = add f 1.0:f32[]\n    h:f32[] = mul 0.5:f32[] g\n    i:f32[] = add h 1.0:f32[]\n  in (i,) }\nScanned: { lambda ; a:f32[]. let\n    b:f32[] _:f32[4] = scan[\n      _split_transpose=False\n      jaxpr={ lambda ; c:f32[]. let\n          d:f32[] = mul 0.5:f32[] c\n          e:f32[] = add d 1.0:f32[]\n        in (e, e) }\n      length=4\n      linear=(False,)\n      num_carry=1\n      num_consts=0\n      reverse=False\n      unroll=1\n    ] a\n  in (b,) }\nExpected failure: traced boolean used by Python if\nRepaired: { lambda ; a:f32[3]. let\n    b:f32[1] = slice[limit_indices=(1,) start_indices=(0,) strides=None] a\n    c:f32[] = squeeze[dimensions=(0,)] b\n    d:bool[] = gt c 0.0:f32[]\n    e:i32[] = convert_element_type[new_dtype=int32 weak_type=False] d\n    f:f32[] = cond[\n      branches=(\n        { lambda ; g:f32[3]. let\n            h:f32[] = reduce_sum[axes=(0,) out_sharding=None] g\n            i:f32[] = neg h\n          in (i,) }\n        { lambda ; j:f32[3]. let\n            k:f32[] = reduce_sum[axes=(0,) out_sharding=None] j\n          in (k,) }\n      )\n    ] e a\n  in (f,) }\nPASS: internals-01\n",
   "notebookCells": [
     {
-      "sourceHash": "38f88599942aa3ef104c27402c9ce0d44a45aa1fb8965b6243debdfa4d24482e",
+      "sourceHash": "1d7649603855f8ac255c047fa1caefa1790fdbecb54625324236b81059f29649",
       "outputs": []
     },
     {
-      "sourceHash": "9f1f124297e95885060df93a75c8134b85c24f3c0bf1e8edc6638a05971ac50a",
+      "sourceHash": "4f74b576e8c7597cecb2467aad311add4cbf6bb80aa48f3a5cd0377668962e81",
       "outputs": []
     },
     {
-      "sourceHash": "8eefa24831dbcdaaebe0447c7b36cb84ad80d2bd0806a611a8a08a6ac3254996",
+      "sourceHash": "a8833f85fef3715e2950beb49c05405f58feeffb718dce1fe44d17f8c690f7ff",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "48fd9f9f8ce4a9e73ce4c3976eb7a39f5b855318ad228e26d5aaa3f6a6668abe",
+      "sourceHash": "25eec8deac31bc7ac4642d0059522a2bca0c238160e47ae0dd45961313ff2991",
       "outputs": [
         {
           "output_type": "stream",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "96174265abe1da7c39ff792abe3d2342484241f51dc58232fe81056a3ba251f2",
+      "sourceHash": "e49e15c265585c0e2347151834a697de962b19ecb3d120778ff83ec640c1b3e4",
       "outputs": [
         {
           "output_type": "stream",
@@ -103,7 +103,7 @@
       ]
     },
     {
-      "sourceHash": "5bb557696ec39c9a25241931a35668a7184ab36671651ae61a5921e690e76d42",
+      "sourceHash": "91ed16d63a1a37319e61da80a8389655236dbb781f3beb0d046cd2edd1caf3bc",
       "outputs": [
         {
           "output_type": "stream",
@@ -122,11 +122,11 @@
       ]
     },
     {
-      "sourceHash": "3cb3cae6402527407b1b8e7d1a02ce1791be259906c367be87f3e4d04af1af14",
+      "sourceHash": "a94f8c704d19b4ac463cf9df9e852b62881bf38fb54bda86dcec4d58b365d380",
       "outputs": []
     },
     {
-      "sourceHash": "89621331f15d6c581f599c56f2f328ae43bc838f2f2dcb70be6ab72addf0f6e6",
+      "sourceHash": "49903c413261dba31ddd9850805121287323b52d5ace258fd91161066487f10c",
       "outputs": [
         {
           "output_type": "stream",
@@ -142,11 +142,11 @@
       ]
     },
     {
-      "sourceHash": "0a87877463d8a1f7d74d77fef45af333008c08b1d4c4c84fae8307da0babbe18",
+      "sourceHash": "67f8738d92301295c53c1b470b92c9518cea5f1d6cac71d6e8ab633747a24868",
       "outputs": []
     },
     {
-      "sourceHash": "6822ca85071da5f334373b492b6c3f68c93a1551020425a0c0b58f5a16059943",
+      "sourceHash": "264058b6f8a5482c2d100c9ebb5d67c8e9f0f61199201beafce01676b91b8cfc",
       "outputs": [
         {
           "output_type": "stream",
@@ -182,11 +182,11 @@
       ]
     },
     {
-      "sourceHash": "f09917896303af42676d53f0025e28e91c4e1f6467f7d79aa4593caafc1d15ef",
+      "sourceHash": "a2ee0b7152f665eb7c4fa35049e446c510005ef2741ac4d0651ca274985f79cb",
       "outputs": []
     },
     {
-      "sourceHash": "368c92da51dbac2149c9b575242beb2d8826b0e5db2560bf0527f091085ea991",
+      "sourceHash": "0af0cf0fad80abd5a01be6cc973bf93ca095fe2c683772012f209c09a2abd4d2",
       "outputs": [
         {
           "output_type": "stream",

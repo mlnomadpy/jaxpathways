@@ -4,6 +4,28 @@
 
 Create a release folder and a report. Keep original and adapted checkpoints, manifests, exact commands, independent checks, timing samples and plots. State which evidence was measured and which results came from simulation.
 
+### Worked verification scaffold
+
+Run the baseline verification suite with `python3 assessments/check_assessments.py`, and use the starter scaffold below to verify your numerical contracts:
+
+```python
+# Worked starter scaffold: symmetric INT8 weight-only quantization & INT32 accumulator check
+import jax.numpy as jnp
+
+def quantize_symmetric_int8(w: jnp.ndarray) -> tuple[jnp.ndarray, jnp.ndarray]:
+    # Compute per-channel scale and round weights into [-127, 127].
+    max_abs = jnp.maximum(jnp.max(jnp.abs(w), axis=0, keepdims=True), 1e-6)
+    scale = max_abs / 127.0
+    q = jnp.clip(jnp.round(w / scale), -127.0, 127.0).astype(jnp.int8)
+    return q, jnp.squeeze(scale, axis=0)
+
+w_fp32 = jnp.array([[0.42, -0.18], [-0.75, 0.60], [0.12, -0.33]], dtype=jnp.float32)
+x_fp32 = jnp.array([[1.0, -0.5, 0.25]], dtype=jnp.float32)
+q_w, scale_w = quantize_symmetric_int8(w_fp32)
+dequant_out = (x_fp32 @ q_w.astype(jnp.float32)) * scale_w
+print("Max quantization error:", float(jnp.max(jnp.abs(x_fp32 @ w_fp32 - dequant_out))))
+```
+
 ## Task 1: compare post-training objectives
 
 Actually train a base model, save it, hash it and reload it. A reproducibly pretrained small synthetic model is acceptable when clearly labeled. Random weights are not a pretrained artifact.

@@ -53,7 +53,7 @@ We start from zero, optimize the source objective for $300$ updates and check th
 
 ## Choose a fair comparison
 
-Both adaptation branches receive identical initial weights, adaptation inputs, update count and rate. Their training losses are not directly a competition because their targets differ. We evaluate both on one common target cross-entropy and probability squared error, using held-out generating probabilities unavailable to training. We also evaluate source loss to expose forgetting. Do not select a learning rate using this final report; add a separate validation split for model selection. One seeded synthetic result does not establish which objective will win on another task.
+Both adaptation branches receive identical initial weights, adaptation inputs, update count and rate. Their training losses are not directly a competition because their targets differ. We evaluate both on one common target cross-entropy and probability squared error, using held-out generating probabilities unavailable to training. We also evaluate source loss to expose forgetting. Do not select a learning rate using this final report; add a separate validation split for model selection. One seeded synthetic result is separate from which objective will win on another task.
 
 ## Locate preference and reinforcement objectives
 
@@ -106,13 +106,13 @@ def design(key,n):
     return jnp.concatenate([features,jnp.ones((n,1))],axis=1)
 # Create or split explicit PRNG key(s) (`source_X`) for reproducible randomness.
 source_X=design(jax.random.key(10),256)
-# Initialize array `source_targets` with explicit values and shape.
+# Construct `source_targets` via `jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))`
 source_targets=jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))
 # Create or split explicit PRNG key(s) (`adapt_X`) for reproducible randomness.
 adapt_X=design(jax.random.key(11),48)
 # Create or split explicit PRNG key(s) (`held_X`) for reproducible randomness.
 held_X=design(jax.random.key(12),512)
-# Initialize array `teacher` with explicit values and shape.
+# Construct `teacher` via `jnp.array([.6,1.4,-.3])`
 teacher=jnp.array([.6,1.4,-.3])
 # Perform matrix contraction / projection to compute `soft_targets`.
 soft_targets=jax.nn.sigmoid(adapt_X@teacher)
@@ -138,7 +138,7 @@ def train(initial,X,targets,steps=300,rate=.15):
     return jax.lax.scan(step,initial,None,length=steps)
 # Allocate initialized array `(base, pretrain_history)` with the specified shape and dtype.
 base,pretrain_history=train(jnp.zeros(3),source_X,source_targets)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `pretrain_history[-1]<pretrain_history[0]-.1` holds
 assert pretrain_history[-1]<pretrain_history[0]-.1
 # Convert `source_hash` to a host NumPy array for inspection or verification.
 source_hash=hashlib.sha256(np.asarray(source_X).tobytes()+np.asarray(source_targets).tobytes()).hexdigest()
@@ -171,21 +171,21 @@ with tempfile.TemporaryDirectory() as directory:
     manifest_path.write_text(json.dumps(manifest))
     # Read or serialize artifact data on disk (`recorded`).
     recorded=json.loads(manifest_path.read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['we...` holds
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     # Enter managed runtime/context scope for this block:
     with np.load(checkpoint,allow_pickle=False) as saved:
         # Create device-backed JAX array `restored`.
         restored=jnp.asarray(saved['weights'])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,base)`
 np.testing.assert_array_equal(restored,base)
-# Initialize array `frozen` with explicit values and shape.
+# Compute `frozen` from `np.array(restored,copy=True)`
 frozen=np.array(restored,copy=True)
 # Run `train` to compute `(sft, sft_history)`.
 sft,sft_history=train(restored,adapt_X,hard_targets,steps=200)
 # Run `train` to compute `(distilled, distill_history)`.
 distilled,distill_history=train(restored,adapt_X,soft_targets,steps=200)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,frozen)`
 np.testing.assert_array_equal(restored,frozen)
 ```
 
@@ -197,7 +197,7 @@ Append the independent derivative and final evaluation. Neither optimization bra
 
 ```python
 # Step 3 — 3. Compare on a held-out criterion shared by both objectives: The teacher is the known generating rule in this fixture, so...
-# Initialize array `w_check` with explicit values and shape.
+# Construct `w_check` via `jnp.array([.2,-.3,.1])`
 w_check=jnp.array([.2,-.3,.1])
 # Convert `host_X` to a host NumPy array for inspection or verification.
 host_X=np.asarray(adapt_X,dtype=np.float64)
@@ -211,7 +211,7 @@ for targets in (hard_targets,soft_targets):
     expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)
     # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)
-# Evaluate `metrics` from the current inputs and state.
+# Compute `metrics` from `{}`
 metrics={}
 # Iterate over `(name, weights)` to step through the computation:
 for name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:
@@ -219,9 +219,9 @@ for name,weights in [('pretrained',restored),('supervised',sft),('teacher',disti
     metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),
                    'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),
                    'source_cross_entropy':float(objective(weights,source_X,source_targets))}
-# Verify contract: `metrics['supervised']['held_cross_entropy'] < metrics['pretrained'][...`.
+# Assert invariant `metrics['supervised']['held_cross_entropy']<metrics['pretrained']...` holds
 assert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['h...` holds
 assert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
 # Print the observed values to compare against the expected result.
 print(json.dumps(metrics,indent=2))
@@ -252,13 +252,13 @@ def design(key,n):
     return jnp.concatenate([features,jnp.ones((n,1))],axis=1)
 # Create or split explicit PRNG key(s) (`source_X`) for reproducible randomness.
 source_X=design(jax.random.key(10),256)
-# Initialize array `source_targets` with explicit values and shape.
+# Construct `source_targets` via `jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))`
 source_targets=jax.nn.sigmoid(source_X@jnp.array([1.2,-.8,.2]))
 # Create or split explicit PRNG key(s) (`adapt_X`) for reproducible randomness.
 adapt_X=design(jax.random.key(11),48)
 # Create or split explicit PRNG key(s) (`held_X`) for reproducible randomness.
 held_X=design(jax.random.key(12),512)
-# Initialize array `teacher` with explicit values and shape.
+# Construct `teacher` via `jnp.array([.6,1.4,-.3])`
 teacher=jnp.array([.6,1.4,-.3])
 # Perform matrix contraction / projection to compute `soft_targets`.
 soft_targets=jax.nn.sigmoid(adapt_X@teacher)
@@ -284,7 +284,7 @@ def train(initial,X,targets,steps=300,rate=.15):
     return jax.lax.scan(step,initial,None,length=steps)
 # Allocate initialized array `(base, pretrain_history)` with the specified shape and dtype.
 base,pretrain_history=train(jnp.zeros(3),source_X,source_targets)
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `pretrain_history[-1]<pretrain_history[0]-.1` holds
 assert pretrain_history[-1]<pretrain_history[0]-.1
 # Convert `source_hash` to a host NumPy array for inspection or verification.
 source_hash=hashlib.sha256(np.asarray(source_X).tobytes()+np.asarray(source_targets).tobytes()).hexdigest()
@@ -309,25 +309,25 @@ with tempfile.TemporaryDirectory() as directory:
     manifest_path.write_text(json.dumps(manifest))
     # Read or serialize artifact data on disk (`recorded`).
     recorded=json.loads(manifest_path.read_text())
-    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    # Assert invariant `hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['we...` holds
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     # Enter managed runtime/context scope for this block:
     with np.load(checkpoint,allow_pickle=False) as saved:
         # Create device-backed JAX array `restored`.
         restored=jnp.asarray(saved['weights'])
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,base)`
 np.testing.assert_array_equal(restored,base)
-# Initialize array `frozen` with explicit values and shape.
+# Compute `frozen` from `np.array(restored,copy=True)`
 frozen=np.array(restored,copy=True)
 # Run `train` to compute `(sft, sft_history)`.
 sft,sft_history=train(restored,adapt_X,hard_targets,steps=200)
 # Run `train` to compute `(distilled, distill_history)`.
 distilled,distill_history=train(restored,adapt_X,soft_targets,steps=200)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,frozen)`
 np.testing.assert_array_equal(restored,frozen)
 
 # Step 3 — 3. Compare on a held-out criterion shared by both objectives: The teacher is the known generating rule in this fixture, so...
-# Initialize array `w_check` with explicit values and shape.
+# Construct `w_check` via `jnp.array([.2,-.3,.1])`
 w_check=jnp.array([.2,-.3,.1])
 # Convert `host_X` to a host NumPy array for inspection or verification.
 host_X=np.asarray(adapt_X,dtype=np.float64)
@@ -341,7 +341,7 @@ for targets in (hard_targets,soft_targets):
     expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)
     # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)
-# Evaluate `metrics` from the current inputs and state.
+# Compute `metrics` from `{}`
 metrics={}
 # Iterate over `(name, weights)` to step through the computation:
 for name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:
@@ -349,9 +349,9 @@ for name,weights in [('pretrained',restored),('supervised',sft),('teacher',disti
     metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),
                    'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),
                    'source_cross_entropy':float(objective(weights,source_X,source_targets))}
-# Verify contract: `metrics['supervised']['held_cross_entropy'] < metrics['pretrained'][...`.
+# Assert invariant `metrics['supervised']['held_cross_entropy']<metrics['pretrained']...` holds
 assert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `metrics['teacher']['held_cross_entropy']<metrics['pretrained']['h...` holds
 assert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']
 # Print the observed values to compare against the expected result.
 print(json.dumps(metrics,indent=2))
@@ -379,9 +379,9 @@ The teacher exactly matches the declared synthetic target generator, making this
 
 ```python
 # Compute figure data for: Two adaptation objectives evaluated on the same held-out target
-# Evaluate `names` from the current inputs and state.
+# Compute `names` from `["pretrained","supervised","teacher"]`
 names=["pretrained","supervised","teacher"]
-# Evaluate `visual_data` from the current inputs and state.
+# Compute `visual_data` from `{"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"m...`
 visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after training stage","ylabel":"mean cross-entropy (nats)","series":[{"label":"held-out target","y":[metrics[n]["held_cross_entropy"] for n in names]},{"label":"source retention","y":[metrics[n]["source_cross_entropy"] for n in names]}]}
 ```
 
@@ -441,7 +441,7 @@ PASS: deployment-02
 
 ```python
 # Experiment — Check a stable extreme logit: logaddexp evaluates softplus stably; a naive log(1+exp(z)) can...
-# Initialize array `extreme` with explicit values and shape.
+# Construct `extreme` via `objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zer...`
 extreme=objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zeros(1))
 # Verify that the numerical values match the expected reference within tolerance.
 assert jnp.isfinite(extreme) and jnp.allclose(extreme,1000.)
@@ -458,7 +458,7 @@ logaddexp evaluates softplus stably; a naive log(1+exp(z)) can overflow.
 ```python
 # Experiment — Reveal teacher error: Distillation optimizes fidelity to its teacher, which is not...
 wrong,_=train(restored,adapt_X,1-soft_targets,steps=200)
-# Verify contract: `objective(wrong, held_X, held_prob) > objective(distilled, held_X, h...`.
+# Assert invariant `objective(wrong,held_X,held_prob)>objective(distilled,held_X,held...` holds
 assert objective(wrong,held_X,held_prob)>objective(distilled,held_X,held_prob)
 # Print the observed values to compare against the expected result.
 print("wrong-teacher held loss:",float(objective(wrong,held_X,held_prob)))
@@ -480,23 +480,23 @@ Adapt for zero steps and verify that predictions exactly match the reloaded chec
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify that computed values match the expected reference within numerical tolerance.
+1. Execute `np.testing.assert_array_equal(unchanged,restored)`
 2. Run `train` to compute `(short, _)`.
-3. Verify contract: `not jnp.array_equal(short, restored)`.
-4. Verify that computed values match the expected reference within numerical tolerance.
+3. Assert invariant `not jnp.array_equal(short,restored)` holds
+4. Execute `np.testing.assert_array_equal(restored,frozen)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Adapt for zero steps and verify that predictions exactly match the...
 unchanged,_ = train(...)  # TODO: compute unchanged,_
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(unchanged,restored)`
 np.testing.assert_array_equal(unchanged,restored)
 # Run `train` to compute `(short, _)`.
 short,_ = train(...)  # TODO: compute short,_
-# Verify contract: `not jnp.array_equal(short, restored)`.
+# Assert invariant `not jnp.array_equal(short,restored)` holds
 assert not jnp.array_equal(short,restored)  # TODO: complete assertion check
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,frozen)`
 np.testing.assert_array_equal(restored,frozen)
 ```
 
@@ -505,13 +505,13 @@ np.testing.assert_array_equal(restored,frozen)
 ```python
 # Exercise solution: Adapt for zero steps and verify that predictions exactly match the...
 unchanged,_=train(restored,adapt_X,hard_targets,steps=0)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(unchanged,restored)`
 np.testing.assert_array_equal(unchanged,restored)
 # Run `train` to compute `(short, _)`.
 short,_=train(restored,adapt_X,hard_targets,steps=10)
-# Verify contract: `not jnp.array_equal(short, restored)`.
+# Assert invariant `not jnp.array_equal(short,restored)` holds
 assert not jnp.array_equal(short,restored)
-# Verify that computed values match the expected reference within numerical tolerance.
+# Execute `np.testing.assert_array_equal(restored,frozen)`
 np.testing.assert_array_equal(restored,frozen)
 ```
 
@@ -537,7 +537,7 @@ Report the actual values; target improvement is not a source-retention guarantee
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Verify contract: `retention[1] > retention[0] and retention[2] > retention[0]`.
+1. Assert invariant `retention[1]>retention[0] and retention[2]>retention[0]` holds
 2. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
@@ -545,7 +545,7 @@ Report the actual values; target improvement is not a source-retention guarantee
 ```python
 # Keep source-task evidence (Transfer / diagnosis): The two tasks prefer different parameters; the measurement...
 retention = ...  # TODO: compute retention
-# Verify contract: `retention[1] > retention[0] and retention[2] > retention[0]`.
+# Assert invariant `retention[1]>retention[0] and retention[2]>retention[0]` holds
 assert retention[1]  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print("source retention losses:",retention)
@@ -556,7 +556,7 @@ print("source retention losses:",retention)
 ```python
 # Keep source-task evidence (Transfer / diagnosis): The two tasks prefer different parameters; the measurement...
 retention=[float(objective(w,source_X,source_targets)) for w in (restored,sft,distilled)]
-# Verify contract: `retention[1] > retention[0] and retention[2] > retention[0]`.
+# Assert invariant `retention[1]>retention[0] and retention[2]>retention[0]` holds
 assert retention[1]>retention[0] and retention[2]>retention[0]
 # Print the observed values to compare against the expected result.
 print("source retention losses:",retention)
@@ -585,7 +585,7 @@ Use the same logits, reduction and targets; this check does not call the JAX los
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Initialize array `probe` with explicit values and shape.
+1. Compute `probe` from `np.array([-.4,.2,.3])`
 2. Perform matrix / vector contraction (`@`) to compute `z`.
 3. Aggregate array values to compute `expected`.
 4. Create device-backed JAX array ``.
@@ -594,7 +594,7 @@ Use the same logits, reduction and targets; this check does not call the JAX los
 
 ```python
 # Check the loss without autodiff (Transfer / diagnosis): Independent algebra checks normalization and reduction as...
-# Initialize array `probe` with explicit values and shape.
+# Compute `probe` from `np.array([-.4,.2,.3])`
 probe = np.array(...)  # TODO: compute probe
 # Perform matrix / vector contraction (`@`) to compute `z`.
 z = ...  # TODO: compute z
@@ -608,7 +608,7 @@ np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),ex
 
 ```python
 # Check the loss without autodiff (Transfer / diagnosis): Independent algebra checks normalization and reduction as...
-# Initialize array `probe` with explicit values and shape.
+# Compute `probe` from `np.array([-.4,.2,.3])`
 probe=np.array([-.4,.2,.3])
 # Perform matrix / vector contraction (`@`) to compute `z`.
 z=host_X@probe
@@ -642,26 +642,26 @@ Compare each source loss with the base source loss. Do not compare the two train
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Evaluate `eligible` from the current inputs and state.
+1. Compute `eligible` from `[]`
 2. Iterate over `name` to step through the computation:
-3. Evaluate `delta` from the current inputs and state.
-4. Evaluate `improved` from the current inputs and state.
-5. Evaluate `accepted_candidate` from the current inputs and state.
+3. Compute `delta` from `metrics[name]['source_cross_entropy'] - metrics['pre...`
+4. Compute `improved` from `metrics[name]['held_cross_entropy'] < metrics['pretr...`
+5. Compute `accepted_candidate` from `improved and delta <= retention_budget`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Choose under a declared retention constraint (Transfer / diagnosis): The gate separates optimization from acceptance.
 retention_budget = ...  # TODO: compute retention_budget
-# Evaluate `eligible` from the current inputs and state.
+# Compute `eligible` from `[]`
 eligible = ...  # TODO: compute eligible
 # Iterate over `name` to step through the computation:
 for name in ('supervised', 'teacher'):
-    # Evaluate `delta` from the current inputs and state.
+    # Compute `delta` from `metrics[name]['source_cross_entropy'] - metrics['pre...`
     delta = ...  # TODO: compute delta
-    # Evaluate `improved` from the current inputs and state.
+    # Compute `improved` from `metrics[name]['held_cross_entropy'] < metrics['pretr...`
     improved = ...  # TODO: compute improved
-    # Evaluate `accepted_candidate` from the current inputs and state.
+    # Compute `accepted_candidate` from `improved and delta <= retention_budget`
     accepted_candidate = ...  # TODO: compute accepted_candidate
     # Print diagnostic summary of the computed outputs.
     print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)
@@ -669,9 +669,9 @@ for name in ('supervised', 'teacher'):
     if accepted_candidate: eligible.append(name)
 # Run `min` to compute `selected`.
 selected = min(...)  # TODO: compute selected
-# Verify contract: `selected == 'pretrained' or selected in eligible`.
+# Assert invariant `selected == 'pretrained' or selected in eligible` holds
 assert selected  # TODO: complete assertion check
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['sou...` holds
 assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy']  # TODO: complete assertion check
 # Print the observed values to compare against the expected result.
 print('Candidate selected under the declared fixture budget:', selected)
@@ -682,15 +682,15 @@ print('Candidate selected under the declared fixture budget:', selected)
 ```python
 # Choose under a declared retention constraint (Transfer / diagnosis): The gate separates optimization from acceptance.
 retention_budget = .3
-# Evaluate `eligible` from the current inputs and state.
+# Compute `eligible` from `[]`
 eligible = []
 # Iterate over `name` to step through the computation:
 for name in ('supervised', 'teacher'):
-    # Evaluate `delta` from the current inputs and state.
+    # Compute `delta` from `metrics[name]['source_cross_entropy'] - metrics['pre...`
     delta = metrics[name]['source_cross_entropy'] - metrics['pretrained']['source_cross_entropy']
-    # Evaluate `improved` from the current inputs and state.
+    # Compute `improved` from `metrics[name]['held_cross_entropy'] < metrics['pretr...`
     improved = metrics[name]['held_cross_entropy'] < metrics['pretrained']['held_cross_entropy']
-    # Evaluate `accepted_candidate` from the current inputs and state.
+    # Compute `accepted_candidate` from `improved and delta <= retention_budget`
     accepted_candidate = improved and delta <= retention_budget
     # Print diagnostic summary of the computed outputs.
     print(name, 'source loss increase', delta, 'passes declared gate', accepted_candidate)
@@ -698,9 +698,9 @@ for name in ('supervised', 'teacher'):
     if accepted_candidate: eligible.append(name)
 # Run `min` to compute `selected`.
 selected = min(eligible, key=lambda n: metrics[n]['held_cross_entropy']) if eligible else 'pretrained'
-# Verify contract: `selected == 'pretrained' or selected in eligible`.
+# Assert invariant `selected == 'pretrained' or selected in eligible` holds
 assert selected == 'pretrained' or selected in eligible
-# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+# Assert invariant `all(metrics[n]['source_cross_entropy']-metrics['pretrained']['sou...` holds
 assert all(metrics[n]['source_cross_entropy']-metrics['pretrained']['source_cross_entropy'] <= retention_budget for n in eligible)
 # Print the observed values to compare against the expected result.
 print('Candidate selected under the declared fixture budget:', selected)
