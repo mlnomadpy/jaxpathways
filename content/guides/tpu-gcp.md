@@ -2,11 +2,11 @@
 
 Your training script works on your laptop. What has to change before you can run it on a TPU, recover its state, and show that the cloud resources are gone afterward?
 
-This guide connects those steps. You will produce a **run dossier**: configuration, environment, backend evidence, training events, a checkpoint, a recovery comparison, and resource cleanup evidence. Begin with basic Python and the [state and recovery lessons](course.html?phase=recovery). The [project organization guide](project-workflow.html) explains where to keep source, configuration, and run evidence.
+This guide connects those steps. Use it **in parallel with the course starting right after Phase 00** ([Move your experiment to a TPU](lesson-welcome-03.html)) rather than waiting until the late phases. You will produce a **run dossier**: configuration, environment, backend evidence, training events, a checkpoint, a recovery comparison, and resource cleanup evidence. Begin with [Phase 00 setup](lesson-welcome-01.html) and revisit this workflow as you reach the [state and recovery lessons](course.html?phase=recovery). The [project organization guide](project-workflow.html) explains where to keep source, configuration, and run evidence.
 
 The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested. The cloud commands are documentation-checked instructions, not a recorded TPU run. This small single-process workload does not shard work across all visible chips or establish production model quality.
 
-After recovery practice, continue with [TPU generations, precision and profiling](tpu-performance.html). That guide compares training and serving workloads, budgets model and cache memory, and measures real numerical error before interpreting a target trace.
+Alongside this launcher, use the same TPU VM to run each phase's lesson scripts (`exercises/<lesson-id>.py`) on TPU in parallel with your CPU baseline, and continue with [TPU generations, precision and profiling](tpu-performance.html) to compare training and serving workloads, budget model and cache memory, and measure real numerical error before interpreting a target trace.
 
 ## 1. Separate the resource from the job
 
@@ -48,6 +48,7 @@ jax-tpu-gcp/
 Create a separate environment on your laptop, then launch eight updates:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m venv .venv
 .venv/bin/python -m pip install 'jax==0.9.2' 'numpy==2.4.4'
 .venv/bin/python resources/tpu-gcp/launch.py \
@@ -65,6 +66,7 @@ Each run contains `config.json`, `environment.json`, `worker.py`, `events.jsonl`
 Predict whether four updates followed by a restart to step eight will equal an uninterrupted eight-update run. What state would you lose if you saved only the parameters?
 
 ```sh
+# Run command in terminal
 .venv/bin/python resources/tpu-gcp/launch.py \
   --platform cpu --run-dir runs/recovery --steps 4
 .venv/bin/python resources/tpu-gcp/launch.py \
@@ -83,6 +85,7 @@ A project groups your resources and permissions. A billing account pays for usag
 Install the [Google Cloud CLI](https://docs.cloud.google.com/sdk/docs/install). On your **laptop**, authenticate and identify the project approved for your experiment:
 
 ```sh
+# Run command in terminal
 gcloud auth login
 gcloud auth list
 export PROJECT_ID='REPLACE_WITH_YOUR_PROJECT'
@@ -94,15 +97,40 @@ gcloud version
 
 Save the selected project and CLI version in your dossier. A permission error means you need help from the project administrator, not a different random project ID. Before provisioning, confirm billing, applicable credits, quota, network/SSH access, and an approved VM service account. Your login identity creates resources; the VM service account is the identity available to code inside the VM. Ask for the permissions needed for that task rather than granting broad project ownership. See [project setup and required access](https://docs.cloud.google.com/tpu/docs/setup-gcp-account).
 
-Use **Compute Engine** for the walkthrough below. Google now recommends it or GKE for new TPU resource management. Older project or programme instructions may use the **Cloud TPU API** and queued resources instead. Those use `gcloud compute tpus ...`, different resource names and different cleanup commands. Follow the approved route for your allocation; do not substitute one command family into the other. The distinction is documented in [Cloud TPU API guidance](https://docs.cloud.google.com/tpu/docs/request-using-flex-start).
+We show **both provisioning command families** below so you can match your allocation:
+1. **Direct Cloud TPU VM / Queued Resources API (`gcloud compute tpus tpu-vm ...`)**: used by TPU Research Cloud (TRC), academic allocations, and direct single-host or multi-host TPU VM workflows.
+2. **Compute Engine Flex-start managed instance groups (`gcloud compute instance-templates` / `instance-groups managed`)**: recommended for bounded-duration Compute Engine provisioning.
+Follow the approved route for your allocation and use the matching deletion command family afterward. See [Cloud TPU API guidance](https://docs.cloud.google.com/tpu/docs/request-using-flex-start) and [Manage TPU VMs](https://docs.cloud.google.com/tpu/docs/managing-tpus-tpu-vm).
 
 ## 5. Request one host with a bounded lifetime
 
-This step can create billable infrastructure. First agree on a maximum resource lifetime and a separate deadline after which you will cancel an unfulfilled request. Keep this exercise to **one single-host TPU VM**. Multi-host slices need distributed initialization and coordinated launch, which belong in the [distributed phase](course.html?phase=distributed).
+This step can create billable infrastructure. First agree on a maximum resource lifetime and a separate deadline after which you will cancel an unfulfilled request. Keep this first exercise to **one single-host TPU VM** (for example `v5litepod-1`, `v5litepod-4`, or `v6e-1`). Multi-host slices need distributed initialization and coordinated launch across workers, which we practice in the [distributed phase](course.html?phase=distributed).
+
+**Route A — Direct Cloud TPU VM (`gcloud compute tpus tpu-vm`)**:
+
+```sh
+# Run command in terminal
+export ZONE='us-central1-a'
+export TPU_NAME='jax-practice-tpu-01'
+gcloud services enable tpu.googleapis.com --project "$PROJECT_ID"
+
+gcloud compute tpus tpu-vm create "$TPU_NAME" \
+  --project "$PROJECT_ID" --zone "$ZONE" \
+  --accelerator-type='v5litepod-4' \
+  --version='v2-alpha-tpuv5-lite'
+
+gcloud compute tpus tpu-vm describe "$TPU_NAME" \
+  --project "$PROJECT_ID" --zone "$ZONE"
+```
+
+Wait until `state` is `READY` before copying files or opening SSH. (If your zone requires queued capacity, use `gcloud compute tpus queued-resources create` and inspect `gcloud compute tpus queued-resources describe`.)
+
+**Route B — Compute Engine Flex-start with an automatic `max-run-duration`**:
 
 On your laptop, fill in values approved for your project and available in the [current TPU regions and zones](https://docs.cloud.google.com/tpu/docs/regions-zones). Choose a matching single-host machine type and OS image from the [Compute Engine Flex-start guide](https://docs.cloud.google.com/tpu/docs/create-flex-start-compute). Capacity is not guaranteed.
 
 ```sh
+# Run command in terminal
 export REGION='REPLACE_WITH_APPROVED_REGION'
 export ZONE='REPLACE_WITH_APPROVED_ZONE'
 export MACHINE_TYPE='REPLACE_WITH_SINGLE_HOST_TPU_MACHINE_TYPE'
@@ -134,6 +162,7 @@ The template records how to create a VM; the managed instance group requests it.
 Inspect the group and record the instance name once it is running:
 
 ```sh
+# Run command in terminal
 gcloud compute instance-groups managed describe "$GROUP" \
   --project "$PROJECT_ID" --zone "$ZONE" --format=json
 gcloud compute instance-groups managed list-instances "$GROUP" \
@@ -145,11 +174,23 @@ gcloud compute instances describe "$VM" \
 
 An accepted request is not a ready runtime. Inspect status and errors before trying SSH. If your waiting deadline expires, delete the group as shown below even if training never started. The [list-instances reference](https://docs.cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/list-instances) explains the resource inspection command. A managed group can maintain capacity independently of your Python process, so the end of a job is not your cleanup signal from the cloud.
 
-## 6. Launch inside the VM and verify the backend
+## 6. Launch inside the VM and run course experiments on TPU
 
-On your **laptop**, from the folder containing the downloaded ZIP, upload the same workspace you rehearsed:
+On your **laptop**, from the folder containing the downloaded ZIP, upload the workspace and connect via SSH.
+
+If you created a **Cloud TPU VM (Route A)**:
 
 ```sh
+# Run command in terminal
+gcloud compute tpus tpu-vm scp jax-tpu-gcp.zip "$TPU_NAME:~/jax-tpu-gcp.zip" \
+  --project "$PROJECT_ID" --zone "$ZONE"
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --project "$PROJECT_ID" --zone "$ZONE"
+```
+
+If you created a **Compute Engine instance (Route B)**:
+
+```sh
+# Run command in terminal
 gcloud compute scp jax-tpu-gcp.zip "$VM:~/jax-tpu-gcp.zip" \
   --project "$PROJECT_ID" --zone "$ZONE"
 gcloud compute ssh "$VM" --project "$PROJECT_ID" --zone "$ZONE"
@@ -160,6 +201,7 @@ Use your organization's approved SSH or IAP configuration if direct access is un
 The following commands run **inside the VM**, in a Bash-compatible shell:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m zipfile -e jax-tpu-gcp.zip .
 cd jax-tpu-gcp
 python3 -m venv .venv
@@ -175,6 +217,17 @@ Use a Python version supported by the selected JAX release and the [current JAX 
 
 The explicit platform sets `JAX_PLATFORMS=tpu` in the child. A missing TPU runtime must fail rather than produce a CPU result labelled as TPU. Check the `started` event in `events.jsonl` for `backend: tpu`, then check `completed` and the checkpoint. Device count reports visibility; this worker does not distribute its arrays across every visible device.
 
+**Run course lessons in parallel on the same TPU VM:** you can also upload any lesson script (`exercises/<lesson-id>.py`) or the full course workspace (`jax-course-workspace.zip`) and run the lesson on TPU right alongside your CPU study:
+
+```sh
+# Run command in terminal
+COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu .venv/bin/python exercises/welcome-03.py
+JAX_PLATFORMS=tpu .venv/bin/python exercises/arrays-01.py
+JAX_PLATFORMS=tpu .venv/bin/python exercises/optimization-01.py
+```
+
+For multi-chip sharding lessons (`welcome-cpu` and Phase 09 `distributed`), replace the four logical CPU lines (`jax.config.update("jax_platforms", "cpu")` and `jax.config.update("jax_num_cpu_devices", 4)`) with `devices = jax.devices("tpu")` on a 4-chip TPU VM (`v5litepod-4` or `v6e-4`). When you later move to a multi-host TPU slice, call `jax.distributed.initialize()` at process start and launch across every host simultaneously with `gcloud compute tpus tpu-vm ssh "$TPU_NAME" --worker=all --command="..."`.
+
 Read `compile_warmup_s` separately from update timing. `job_examples_per_s` includes process startup, compilation and checkpoint overhead. `update_examples_per_s` measures synchronized updates. Their difference is useful here, but neither measures TPU utilization. This tiny line fit is a runtime exercise, not evidence that TPUs accelerate your real model.
 
 Repeat the four-step recovery exercise on the same target backend in a new folder. Compare same-backend uninterrupted and resumed states. Do not demand bitwise equality between CPU and TPU arithmetic. For a cross-backend comparison, first define a numerical error budget and evaluate held-out outputs as taught in [numerical parity](lesson.html?lesson=deployment-08).
@@ -185,6 +238,14 @@ Before the VM deadline, return to your **laptop** with `exit`. Save results outs
 
 ```sh
 mkdir -p evidence/tpu-first
+# Route A (Cloud TPU VM):
+gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME:~/jax-tpu-gcp/runs/tpu-first" \
+  evidence/tpu-first/ --project "$PROJECT_ID" --zone "$ZONE"
+gcloud compute tpus tpu-vm scp "$TPU_NAME:~/jax-tpu-gcp/tpu-environment.txt" \
+  "$TPU_NAME:~/jax-tpu-gcp/tpu-launch.log" evidence/tpu-first/ \
+  --project "$PROJECT_ID" --zone "$ZONE"
+
+# Route B (Compute Engine instance):
 gcloud compute scp --recurse "$VM:~/jax-tpu-gcp/runs/tpu-first" \
   evidence/tpu-first/ --project "$PROJECT_ID" --zone "$ZONE"
 gcloud compute scp "$VM:~/jax-tpu-gcp/tpu-environment.txt" \
@@ -194,9 +255,15 @@ gcloud compute scp "$VM:~/jax-tpu-gcp/tpu-environment.txt" \
 
 Open the copied checkpoint and logs locally before deleting anything. Local VM files are not durable storage. Larger experiments need periodic checkpoints in a durable store, such as an authorized Cloud Storage bucket, plus a tested restore procedure. Copying files only at the end cannot protect against interruption. Continue with [checkpoint recovery](course.html?phase=recovery) and [workload operations](project.html?id=workload-operations) before expanding the run.
 
-Delete **the group and template you created for this exercise**, including when a job fails. Do not delete a shared group or template. Deleting only its VM can cause a managed group to replace it. See [managed group deletion](https://docs.cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/delete).
+Delete **the TPU VM or managed group and template you created for this exercise**, including when a job fails. Do not delete a shared group or template. Deleting only its VM can cause a managed group to replace it. See [managed group deletion](https://docs.cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/delete).
 
 ```sh
+# Route A (Cloud TPU VM):
+gcloud compute tpus tpu-vm delete "$TPU_NAME" \
+  --project "$PROJECT_ID" --zone "$ZONE" --quiet
+gcloud compute tpus tpu-vm list --project "$PROJECT_ID" --zone "$ZONE"
+
+# Route B (Compute Engine managed instance group + template):
 gcloud compute instance-groups managed delete "$GROUP" \
   --project "$PROJECT_ID" --zone "$ZONE"
 gcloud compute instance-templates delete "$TEMPLATE" \

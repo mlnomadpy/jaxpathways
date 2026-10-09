@@ -18,10 +18,22 @@ def digest(value):
 
 def text_features(captions):
     """Exactly one orientation and one thickness; reject missing/ambiguous concepts."""
+    # Key APIs to use: `contract`, `representation`, `caption.lower`, `split`, `sum`
+    # Step 1: Evaluate `result` from the current inputs and state.
+    # Step 2: Loop over `caption` in `captions`:
+    # Step 3: Inside block: Guard input contract (`not isinstance(caption, str)`) and fail fast if violated.
+    # Step 4: Inside block: Run `caption.lower` to compute `words`.
+    # Step 5: Guard input contract (`not result`) and fail fast if violated.
+    # Step 6: Return `np.asarray(result, np.float32)` to the caller.
     raise NotImplementedError('Implement text_features')
 
 def image_features(images):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `np.asarray`, `contract`, `or`, `float32`, `np.isfinite`
+    # Step 1: Convert `x` to a host NumPy array for inspection or verification.
+    # Step 2: Guard input contract (`x.dtype != np.float32 or x.ndim != 3 or x.shape[1:] != (8, 8) or (not len(x))`) and fail fast if violated.
+    # Step 3: Guard input contract (`not np.isfinite(x).all() or np.min(x) < 0 or np.max(x) > 1`) and fail fast if violated.
+    # Step 4: Return `x.reshape(len(x), 64)` to the caller.
     raise NotImplementedError('Implement image_features')
 
 def fixture(seed=0, per_class=12, shift=0):
@@ -75,6 +87,13 @@ def embeddings(params, x, t):
 
 def objective(params, x, t, labels):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `embeddings`, `special.logsumexp`, `jnp.where`, `likelihood`, `jnp.mean`
+    # Step 1: Run `embeddings` to compute `(zi, zt)`.
+    # Step 2: Perform matrix contraction / projection to compute `scores`.
+    # Step 3: Evaluate `positive` from the current inputs and state.
+    # Step 4: Evaluate numerically stable log-space cross-entropy/likelihood (`row`).
+    # Step 5: Evaluate numerically stable log-space cross-entropy/likelihood (`col`).
+    # Step 6: Return `(jnp.mean(row) + jnp.mean(col)) / 2` to the caller.
     raise NotImplementedError('Implement objective')
 
 @jax.jit
@@ -93,6 +112,13 @@ def initial_state(data, seed=0, batch_size=16):
 
 def transition(state, data):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `contract`, `dataset_hash`, `random.split`, `np.asarray`, `random.permutation`
+    # Step 1: Guard input contract (`state['data_hash'] != dataset_hash(data)`) and fail fast if violated.
+    # Step 2: Evaluate `(cursor, order, key)` from the current inputs and state.
+    # Step 3: Branch on condition `cursor == len(order)`:
+    # Step 4: Evaluate `chosen` from the current inputs and state.
+    # Step 5: Run `image_features` to compute `x`.
+    # Step 6: Run `text_features` to compute `t`.
     raise NotImplementedError('Implement transition')
 
 def train(data, seed=0, steps=80):
@@ -122,6 +148,13 @@ def save_checkpoint(folder, state):
 
 def load_checkpoint(folder, data, batch_size=16):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `disk`, `json.loads`, `Path`, `read_text`, `contract`
+    # Step 1: Read or serialize artifact data on disk (`record`).
+    # Step 2: Evaluate `p` from the current inputs and state.
+    # Step 3: Evaluate `s` from the current inputs and state.
+    # Step 4: Guard input contract (`digest(p) != record['sha256'] or p['contract'] != CONTRACT or p.get('training') != TRAINING or (p.get('implementation_hash') != implementation_hash()) or (s['data_hash'] != dataset_hash(data)) or (s['batch_size'] != batch_size)`) and fail fast if violated.
+    # Step 5: Guard input contract (`sorted(s['order']) != list(range(len(data['ids']))) or not 0 <= s['cursor'] <= len(s['order']) or s['step'] < 0`) and fail fast if violated.
+    # Step 6: Guard input contract (`len(s['key']) != 2`) and fail fast if violated.
     raise NotImplementedError('Implement load_checkpoint')
 
 def quantize_weights(w):
@@ -134,6 +167,13 @@ def calibrate(params, train_data):
 
 def encoder(params, branch, policy, calibration):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `contract`, `jnp.asarray`, `quantize_weights`, `normalize`, `np.isfinite`
+    # Step 1: Guard input contract (`branch not in ['image', 'text'] or policy not in ['fp32', 'w8a32', 'w8a8']`) and fail fast if violated.
+    # Step 2: Create device-backed JAX array `w`.
+    # Step 3: Run `quantize_weights` to compute `(qw, scale)`.
+    # Step 4: Branch on condition `policy == 'fp32'`:
+    # Step 5: Branch on condition `policy == 'w8a32'`:
+    # Step 6: Evaluate `activation_scale` from the current inputs and state.
     raise NotImplementedError('Implement encoder')
 
 def export_artifact(folder, params, calibration, policy='fp32'):
@@ -168,6 +208,13 @@ def load_artifact(folder):
 
 def infer(artifact, *, images=None, captions=None):
     """Implement the contract from the project guide."""
+    # Key APIs to use: `contract`, `if`, `image_features`, `text_features`, `call`
+    # Step 1: Guard input contract (`(images is None) == (captions is None)`) and fail fast if violated.
+    # Step 2: Evaluate `branch` from the current inputs and state.
+    # Step 3: Run `image_features` to compute `x`.
+    # Step 4: Evaluate `name` from the current inputs and state.
+    # Step 5: Guard input contract (`name not in artifact['models']`) and fail fast if violated.
+    # Step 6: Create device-backed JAX array `result`.
     raise NotImplementedError('Implement infer')
 
 def measure(artifact, images, repeats=30):
@@ -183,6 +230,13 @@ def measure(artifact, images, repeats=30):
 
 def activate(registry, candidate, evaluation_images, evaluation_labels, minimum_accuracy=0.75):
     """Measured fixture quality gate before an atomic local pointer change."""
+    # Key APIs to use: `contract`, `load_artifact`, `np.asarray`, `infer`, `np.arange`
+    # Step 1: Guard input contract (`not 0 <= minimum_accuracy <= 1`) and fail fast if violated.
+    # Step 2: Run `load_artifact` to compute `artifact`.
+    # Step 3: Guard input contract (`len(evaluation_images) != 8 or np.asarray(evaluation_labels).shape != (8,)`) and fail fast if violated.
+    # Step 4: Evaluate `bank` from the current inputs and state.
+    # Step 5: Run `infer` to compute `zi`.
+    # Step 6: Run `infer` to compute `zt`.
     raise NotImplementedError('Implement activate')
 
 def load_pairs(manifest_path, split):

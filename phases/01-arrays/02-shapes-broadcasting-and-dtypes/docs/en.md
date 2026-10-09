@@ -89,13 +89,22 @@ These checks belong at meaningful boundaries, rather than after every elementary
 ## Run the example
 
 ```python
+# Shapes, broadcasting, and dtypes: Before adding or subtracting arrays, name what each axis represents.
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
+# Initialize array `batch` with explicit values and shape.
 batch = jnp.array([[1., 2., 3.], [4., 5., 6.]], dtype=jnp.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = jnp.array([10., 20., 30.], dtype=jnp.float32)
+# Evaluate `y` from the current inputs and state.
 y = batch + bias
+# Print the observed values to compare against the expected result.
 print(y)
+# Print diagnostic summary of the computed outputs.
 print("Shape:", y.shape, "dtype:", y.dtype)
+# Verify that the output tensor shape matches our prediction.
 assert y.shape == (2, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(y[1], jnp.array([14., 25., 36.]))
 ```
 
@@ -122,12 +131,14 @@ The bias has shape $(3,)$, which aligns with the last axis of the $(2,3)$ batch.
 Identical rows in this picture mean identical additions, not identical predictions. If you intended a different offset for each observation, you would need a row-wise bias with a compatible shape, such as $(2,1)$; this figure would then have horizontal bands.
 
 ```python
+# Compute figure data for: Broadcasting repeats the bias across rows
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['observation 0', 'observation 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'added bias'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:22.149261+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:15.665682+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]
@@ -147,15 +158,26 @@ PASS: arrays-02
 **Predict before running:** Matching predictions and targets should have zero loss. Predict the matrix created by a column target and its mean-square value.
 
 ```python
+# Experiment — Make the pairwise bug visible: The final result is scalar in both cases.
+# Initialize array `predictions` with explicit values and shape.
 predictions = jnp.array([1., 3., 5.])
+# Initialize array `targets` with explicit values and shape.
 targets = jnp.array([1., 3., 5.])
+# Evaluate `correct_residuals` from the current inputs and state.
 correct_residuals = predictions - targets
+# Evaluate `pairwise_residuals` from the current inputs and state.
 pairwise_residuals = predictions - targets[:, None]
+# Print the observed values to compare against the expected result.
 print("aligned residuals:", correct_residuals)
+# Print diagnostic summary of the computed outputs.
 print("pairwise residuals:", pairwise_residuals)
+# Verify that the output tensor shape matches our prediction.
 assert correct_residuals.shape == (3,)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert pairwise_residuals.shape == (3, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.mean(correct_residuals ** 2), 0.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.mean(pairwise_residuals ** 2), 16. / 3.)
 ```
 
@@ -168,9 +190,14 @@ The final result is scalar in both cases. Checking only the final loss shape wou
 **Predict before running:** Does float32 preserve adding $1$ to $100$,$000$,$000$? Is the shape relevant to that result?
 
 ```python
+# Experiment — Observe a precision limit separately: This scalar example isolates precision from broadcasting.
+# Initialize array `large` with explicit values and shape.
 large = jnp.array(100_000_000., dtype=jnp.float32)
+# Print the observed values to compare against the expected result.
 print("float32 large + 1 − large:", float((large + 1.) - large))
+# Verify contract: `float(large + 1.0 - large) == 0.0`.
 assert float((large + 1.) - large) == 0.
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert large.shape == ()
 ```
 
@@ -182,12 +209,43 @@ This scalar example isolates precision from broadcasting. Autodiff and compilati
 
 Add a different scalar offset to each row using offsets $[100., 200.]$. Make its shape explicit.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `offsets` with explicit values and shape.
+2. Evaluate `z` from the current inputs and state.
+3. Verify that the output tensor shape matches our prediction.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Add a different scalar offset to each row using offsets [100., 200.].
+# Initialize array `offsets` with explicit values and shape.
+offsets = jnp.array(...)  # TODO: compute offsets
+# Evaluate `z` from the current inputs and state.
+z = ...  # TODO: compute z
+# Verify that the output tensor shape matches our prediction.
+assert offsets.shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Add a different scalar offset to each row using offsets [100., 200.].
+# Initialize array `offsets` with explicit values and shape.
 offsets = jnp.array([100., 200.])[:, None]
+# Evaluate `z` from the current inputs and state.
 z = batch + offsets
+# Verify that the output tensor shape matches our prediction.
 assert offsets.shape == (2, 1)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 ```
 
@@ -205,11 +263,38 @@ Use bias shape $(3,)$ and offsets shape $(2, 1)$. Do not swap their semantic rol
 
 </details>
 
+### How to write: Use both kinds of offsets together — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `combined` with explicit values and shape.
+2. Verify that the output tensor shape matches our prediction.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Use both kinds of offsets together (Practice): The first row receives 100 in every feature and the second...
+# Initialize array `combined` with explicit values and shape.
+combined = ...  # TODO: compute combined
+# Verify that the output tensor shape matches our prediction.
+assert combined.shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Use both kinds of offsets together (Practice): The first row receives 100 in every feature and the second...
+# Initialize array `combined` with explicit values and shape.
 combined = batch + bias + jnp.array([100., 200.])[:, None]
+# Verify that the output tensor shape matches our prediction.
 assert combined.shape == (2, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))
 ```
 
@@ -229,14 +314,52 @@ Raise a descriptive ValueError before subtracting. The check is based on shape m
 
 </details>
 
+### How to write: Reject an aligned-loss contract violation — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
+2. Return `jnp.mean((prediction - target) ** 2)` to the caller.
+3. Verify that the numerical values match the expected reference within tolerance.
+4. Run the boundary check and catch the expected exception:
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...
+def aligned_mse(prediction, target):
+    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
+    if prediction.shape != target.shape:
+        raise ValueError("aligned prediction and target shapes must match")
+    # Return `jnp.mean((prediction - target) ** 2)` to the caller.
+    return ...  # TODO: return computed result
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(aligned_mse(predictions, targets), 0.)  # TODO: complete assertion check
+# Run the boundary check and catch the expected exception:
+try:
+    aligned_mse(predictions, targets[:, None])
+except ValueError:
+    pass
+else:
+    raise AssertionError("Column targets must be rejected")
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...
 def aligned_mse(prediction, target):
+    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("aligned prediction and target shapes must match")
+    # Return `jnp.mean((prediction - target) ** 2)` to the caller.
     return jnp.mean((prediction - target) ** 2)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(aligned_mse(predictions, targets), 0.)
+# Run the boundary check and catch the expected exception:
 try:
     aligned_mse(predictions, targets[:, None])
 except ValueError:

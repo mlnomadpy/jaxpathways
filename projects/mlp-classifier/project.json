@@ -20,7 +20,10 @@
       "command": "python3 projects/mlp-classifier/tests/check.py --stage 1 --implementation projects/mlp-classifier/my_model.py",
       "evidence": "Shape diagram, independent forward calculation, parameter count",
       "expected": "PASS stage 1: shape, wiring, parameter count, seeded initialization",
-      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction."
+      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction.",
+      "codeGuide": "In `projects/mlp-classifier/my_model.py`, implement `make_model(...)` using `Classifier`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 1 verifier.",
+      "starterSnippet": "def make_model(seed=0, width=8):\n    \"\"\"Return an NNX module: Linear(2,width), tanh, Linear(width,1), (B,) logits.\"\"\"\n    # Key APIs to use: `Classifier`\n    # Step 1: Return `Classifier(seed, width)` to the caller.\n    raise NotImplementedError('Stage 1: construct and verify the model')",
+      "solutionSnippet": "# Function `make_model` reference implementation:\ndef make_model(seed=0, width=8):\n    # Return `Classifier(seed, width)` to the caller.\n    return Classifier(seed, width)"
     },
     {
       "id": "2",
@@ -28,7 +31,10 @@
       "command": "python3 projects/mlp-classifier/tests/check.py --stage 2 --implementation projects/mlp-classifier/my_model.py",
       "evidence": "Independent stable loss, two finite-difference checks, malformed-label diagnosis",
       "expected": "PASS stage 2: independent loss, two-seed finite differences, label contract",
-      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks."
+      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks.",
+      "codeGuide": "In `projects/mlp-classifier/my_model.py`, implement `objective(...)` using `model`, `contract`, `shape`, `jnp.mean`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 2 verifier.",
+      "starterSnippet": "def objective(model, x, labels):\n    \"\"\"Mean stable binary CE; reject logits/label shape mismatch.\"\"\"\n    # Key APIs to use: `model`, `contract`, `shape`, `jnp.mean`, `optax.sigmoid_binary_cross_entropy`\n    # Step 1: Run `model` to compute `scores`.\n    # Step 2: Guard input contract (`scores.shape != labels.shape`) and fail fast if violated.\n    # Step 3: Return `jnp.mean(optax.sigmoid_binary_cross_entropy(scores, labels))` to the caller.\n    raise NotImplementedError('Stage 2: scalar loss and independent gradient evidence')",
+      "solutionSnippet": "# Function `objective` reference implementation:\ndef objective(model, x, labels):\n    # Run `model` to compute `scores`.\n    scores = model(x)\n    # Guard input contract (`scores.shape != labels.shape`) and fail fast if violated.\n    if scores.shape != labels.shape:\n        raise ValueError('scores and labels must both have shape (batch,)')\n    # Return `jnp.mean(optax.sigmoid_binary_cross_entropy(scores, labels))` to the caller.\n    return jnp.mean(optax.sigmoid_binary_cross_entropy(scores, labels))"
     },
     {
       "id": "3",
@@ -36,7 +42,10 @@
       "command": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/my_model.py",
       "evidence": "Held-out metrics, full replay, evaluation isolation, count-weighted aggregation",
       "expected": "PASS stage 3: held-out metrics, unequal-batch aggregation, evaluation isolation, full replay, changed seed",
-      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state."
+      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state.",
+      "codeGuide": "In `projects/mlp-classifier/my_model.py`, implement `train(...)`, `evaluate(...)` using `contract`, `make_model`, `state`, `nnx.Optimizer`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 3 verifier.",
+      "starterSnippet": "def train(seed, x, labels, rate=.03, steps=200, width=8):\n    \"\"\"Return (trained_model, pre_update_losses); compile updates, not evaluation.\"\"\"\n    # Key APIs to use: `contract`, `make_model`, `state`, `nnx.Optimizer`, `optax.adam`\n    # Step 1: Guard input contract (`steps < 1 or rate <= 0`) and fail fast if violated.\n    # Step 2: Run `make_model` to compute `model`.\n    # Step 3: Initialize the optimizer transformation and state (`optimizer`).\n    # Step 4: Evaluate `losses` from the current inputs and state.\n    # Step 5: Repeat the update loop over `range(steps)` steps:\n    # Step 6: Inside block: Evaluate `_step(model, optimizer, x, labels)` and convert the result into Python scalar/collection `value`.\n    raise NotImplementedError('Stage 3: reproducible training with Optax Adam')\n\ndef evaluate(model, x, labels):\n    \"\"\"Return loss, accuracy, count without modifying any model state.\"\"\"\n    # Key APIs to use: `model`, `objective`, `jnp.mean`\n    # Step 1: Run `model` to compute `scores`.\n    # Step 2: Evaluate `objective(model, x, labels)` and convert the result into Python scalar/collection `mean_loss`.\n    # Step 3: Reduce across the target axis to summarize `accuracy`.\n    # Step 4: Return `{'loss': mean_loss, 'accuracy': accuracy, 'count': len(labels)}` to the caller.\n    raise NotImplementedError('Stage 3: isolated held-out metrics')",
+      "solutionSnippet": "# Function `train` reference implementation:\ndef train(seed, x, labels, rate=.03, steps=200, width=8):\n    # Guard input contract (`steps < 1 or rate <= 0`) and fail fast if violated.\n    if steps < 1 or rate <= 0:\n        raise ValueError('steps and rate must be positive')\n    # Run `make_model` to compute `model`.\n    model = make_model(seed, width)\n    # Configure or step the Optax optimizer state (`optimizer`).\n    optimizer = nnx.Optimizer(model, optax.adam(rate), wrt=nnx.Param)\n    # Evaluate `losses` from the current inputs and state.\n    losses = []\n    # Repeat the update loop over `range(steps)` steps:\n    for _ in range(steps):\n        # Evaluate `_step(model, optimizer, x, labels)` and convert the result into Python scalar/collection `value`.\n        value = float(_step(model, optimizer, x, labels))\n        # Guard input contract (`not np.isfinite(value)`) and fail fast if violated.\n        if not np.isfinite(value):\n            raise FloatingPointError('nonfinite pre-update training loss')\n        # Append the current step result to `losses`.\n        losses.append(value)\n    # Return `(model, np.asarray(losses))` to the caller.\n    return model, np.asarray(losses)\n\n# Function `evaluate` reference implementation:\ndef evaluate(model, x, labels):\n    # Run `model` to compute `scores`.\n    scores = model(x)\n    # Evaluate `objective(model, x, labels)` and convert the result into Python scalar/collection `mean_loss`.\n    mean_loss = float(objective(model, x, labels))\n    # Aggregate array values to compute `accuracy`.\n    accuracy = float(jnp.mean((scores > 0) == labels))\n    # Return `{'loss': mean_loss, 'accuracy': accuracy, 'count': len(labels)}` to the caller.\n    return {'loss': mean_loss, 'accuracy': accuracy, 'count': len(labels)}"
     }
   ],
   "rubric": [
@@ -61,6 +70,6 @@
     }
   ],
   "referenceCommand": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation solution",
-  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/mlp-classifier. Use the extracted top folder as your working directory; a full course checkout is optional for this project.",
+  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/mlp-classifier. Use the extracted top folder as your working directory; a full course checkout is optional for this project. Copy the starter scaffold `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py`, implement the stage functions in `projects/mlp-classifier/my_model.py`, and verify each stage with `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` (through `--stage 3`).",
   "assessmentId": "models"
 }

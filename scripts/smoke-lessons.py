@@ -1,4 +1,5 @@
 """Execute authored script and notebook companions on CPU; emit a bounded validation receipt."""
+import argparse
 import datetime
 import json
 import os
@@ -9,14 +10,31 @@ import sys
 import tempfile
 import importlib.metadata
 
+parser = argparse.ArgumentParser()
+parser.add_argument('--lesson', action='append', default=[], help='Optional lesson IDs to re-run')
+args = parser.parse_args()
+selected = set(args.lesson)
+
 ROOT = Path(__file__).resolve().parents[1]
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
+validation_path = ROOT / 'curriculum/validation.json'
+existing_records = {}
+if selected and validation_path.exists():
+    for entry in json.loads(validation_path.read_text()).get('lessons', []):
+        existing_records[entry['lessonId']] = entry
+
 env = {**os.environ, 'JAX_PLATFORMS': 'cpu'}
 records = []
+ran_count = 0
 for phase in course['phases']:
     for lesson in phase['lessons']:
         if lesson['status'] != 'authored':
             continue
+        if selected and lesson['id'] not in selected:
+            if lesson['id'] in existing_records:
+                records.append(existing_records[lesson['id']])
+            continue
+        ran_count += 1
         script = ROOT / lesson['artifacts']['scriptSource']
         notebook = json.loads((ROOT / lesson['artifacts']['notebookSource']).read_text())
         code = '\n\n'.join(''.join(cell['source']) for cell in notebook['cells'] if cell['cell_type'] == 'code')
@@ -58,5 +76,5 @@ import jax
 import numpy
 import importlib.metadata
 receipt = {'backend': 'cpu', 'python': platform.python_version(), 'jax': jax.__version__, 'numpy': numpy.__version__, 'packages': {name:importlib.metadata.version(name) for name in ['jax','numpy','optax','flax','grain','orbax-checkpoint','matplotlib']}, 'validatedAt': datetime.datetime.now(datetime.timezone.utc).isoformat(), 'scope': 'Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.', 'lessons': records}
-(ROOT / 'curriculum/validation.json').write_text(json.dumps(receipt, indent=2) + '\n')
-print(f"OK: {len(records)} CPU lessons; {len(records)*2} executions")
+validation_path.write_text(json.dumps(receipt, indent=2) + '\n')
+print(f"OK: {ran_count} executed ({len(records)} total CPU lessons); {ran_count*2} executions")

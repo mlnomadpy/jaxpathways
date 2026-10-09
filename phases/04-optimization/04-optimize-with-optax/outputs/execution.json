@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-04",
-  "contentHash": "09872bcfc943f339dd468551ebab3f3157c2f2e5b25c6e28c038e40418668856",
-  "executedAt": "2026-10-06T22:59:30.553881+00:00",
+  "contentHash": "b6dd5e2f16fbe2bbc71dcf22c95d4653748c4bdfa5aaabf56c929f4845392cc0",
+  "executedAt": "2026-10-08T14:02:21.347697+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}\nLoss: 5.126058404787345e-14\nParameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}\nLoss: 5.126058404787345e-14\nFirst parameters: {'bias': Array(0.4, dtype=float32), 'weight': Array(0.29333338, dtype=float32)}\nPASS: optimization-04\n",
   "notebookCells": [
     {
-      "sourceHash": "0fb8223e3df56c703181240c45bb57d874f27df963fe9c923859fa5b5ca6d79e",
+      "sourceHash": "4245a7d19efff3946fb3d10ac93acc4462e2a8d3f63df1785c3daa321e27e11e",
       "outputs": []
     },
     {
-      "sourceHash": "8df7fdd597cefcc8ebedafef6ac6ffa821ac92ab22f9d6779d2b59e8416aedb1",
+      "sourceHash": "9235d36345df705fb08dae81aaf8005cd8f588820ef3ba572d88ece080407c5c",
       "outputs": []
     },
     {
-      "sourceHash": "2e9cfe3b935b23676ac02fe34028d287cc60a6d133ca9e32e6f1bc9abd028e2f",
+      "sourceHash": "348715498fefa760322bf33a788f350a0c97f87c131f0e947a348c1cccb7e46d",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "f0e6b932f6cde0aa6fe7244abd8e52008780258e430ff2dc43faf1e0979daf35",
+      "sourceHash": "2df49108413d26a3be0c779a648dd71a145ca8e27a6a6b9a73cf2cd2d0845e71",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "6bd1fc4c996da157bd0733e5981d6c33737b3ccc4f716e50dc9767af34ddb2a5",
+      "sourceHash": "b7985e47380514e755a01c8d78e0f1e060794c0a0803bf32113c09c7e28acb78",
       "outputs": []
     },
     {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "sourceHash": "269a3765ff13878b2248a86b0415d93001f4a19da0ebc431a44525205ee388e1",
+      "sourceHash": "432283e9eee56c97a6b91d58731437cd8aa03f986408c3b28638c69d66f239d7",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,35 +79,35 @@
       ]
     },
     {
-      "sourceHash": "e0658ba96f93cc6dda15e2ae9bf7508b8c90f8f87a35d763a04573304cd7292e",
+      "sourceHash": "c4a566ea741fc4e9ea4bffadc0ff31354969841f01e1255a3913fa12790508b8",
       "outputs": []
     },
     {
-      "sourceHash": "a146a854b0b011de240d63f8b0fe8e9ce5661ee5778f77e6b0f81f2934a0bcb6",
+      "sourceHash": "5468957c82601d12e59760f390929f169b49e89b12e21df0d6d147f40a2321de",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "ede5b54ef1491b35c9aa0f8684cc8b030dc987a1e241939118de159dc031f922",
       "outputs": []
     },
     {
-      "sourceHash": "5506cfc1667a904b78457ab8021048709ff65a405c5e6478afaee86b9e6863fa",
+      "sourceHash": "3fb21914c9b88ba6894c574ce37549c58c491259d40424aaf0570516b173ea7b",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "488e37418f5acc3e0f856d186b9bc2a0dcd1cc5d901e8492b1fcd4102afbc646",
       "outputs": []
     },
     {
-      "sourceHash": "c06325f61119c5ba834298d66418dfdc28e6207ab6e2012d372a1606123bdf72",
+      "sourceHash": "a25331d311441a7dbdb329dafd67a3707fa97e734265d8f494e71648add79ad5",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "7effb37cb29d0090cc43424f77c4e17a8e273acb692c8f24f7009994f6898d21",
       "outputs": []
     },
     {
-      "sourceHash": "ffd30c50ca809315cfb4ad822d46e9e7d7aa24bdd8c1b1d78390d9f66ae9a1db",
+      "sourceHash": "6e65b9cc5c32255f14e59ff370beadf831236872adb4c5812f743cf4e58e38e2",
       "outputs": []
     }
   ],

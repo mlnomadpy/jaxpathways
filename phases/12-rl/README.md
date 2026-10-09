@@ -114,7 +114,7 @@ An evaluated policy in a functional environment.
 
 **Demonstrate:** Compare a trained policy to a baseline across several seeds and report variability.
 
-Project status: implemented staged practice · [Open source](../../projects/policy-evaluation/README.md).
+Project status: implemented staged practice · [Open source](../../projects/policy-evaluation/README.md). Copy `projects/policy-evaluation/starter/model.py` to `projects/policy-evaluation/my_model.py` and write your code in `projects/policy-evaluation/my_model.py`. Run `python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 1` from the top-level folder to verify all 4 stages.
 
 
 

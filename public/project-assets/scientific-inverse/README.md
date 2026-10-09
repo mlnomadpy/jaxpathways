@@ -7,6 +7,7 @@ Build a reusable cooling simulator, infer an unknown positive rate, and defend t
 Use the course CPU environment in `requirements-cpu.txt`. Run commands from the checkout or extracted bundle's top folder. The scaffold enables float64 before creating arrays.
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/scientific-inverse/starter/model.py projects/scientific-inverse/my_model.py
 python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 1
 ```
@@ -26,6 +27,7 @@ Save a shape diagram and a refinement table. Reproduce an overly large Euler ste
 Implement `loss(log_rate, initials, observations, dt=0.05)`. Convert the log parameter to a positive rate with `exp`, simulate the same observation times, and return mean squared error over all batch/time entries. Require exactly `(B, steps+1)` observations with at least two times; do not rely on broadcasting.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 2
 ```
 
@@ -36,6 +38,7 @@ Derive the log-rate chain rule before checking it. The checker uses an independe
 Implement `fit` using the explicit log-rate gradient update documented in the starter. Return the fitted rate and the complete loss history including the initial pre-update value. Implement `evaluate` without fitting or mutating inputs. Report MSE, RMSE, maximum absolute error, trajectory count and observation count.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage all
 ```
 
@@ -46,6 +49,7 @@ Save a report with data-generation rules and seeds, units, train/held-out split,
 ## Inspect the reference after your attempt
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/scientific-inverse/tests/check.py --implementation solution --stage all
 ```
 

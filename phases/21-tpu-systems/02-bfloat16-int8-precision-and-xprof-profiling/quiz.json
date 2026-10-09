@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-06",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why should you run and synchronize at least one warmup step before entering `with jax.profiler.trace(trace_dir):` on a TPU VM?",
+      "options": [
+        "Because `jax.profiler.trace` deletes all model weights if warmup is skipped",
+        "So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation",
+        "Because `bfloat16` only works inside a profiler context"
+      ],
+      "correct": 1,
+      "explanation": "Separating warmup from the traced steps ensures the XProf timeline reflects actual steady-state device execution, host input dispatch, and ICI collectives."
+    }
+  ]
+}

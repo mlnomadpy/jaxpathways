@@ -1,27 +1,47 @@
 ---
 import '../styles/features/lesson-list.css';
 import PhaseCard from '../components/course/PhaseCard.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
 import { course, inventory } from '../lib/course-data.js';
+import { courseTypeCue } from '../lib/runtime.js';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/catalog.css';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
-import { siteUrl } from '../lib/urls.js';
+import { lessonLink, siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
+
+const eraOrder = ['era-onboarding', 'era-foundations', 'era-training', 'era-scale', 'era-domains'];
+const orderedPhases = eraOrder.flatMap((eraId) =>
+  course.phases.filter((phase) => courseTypeCue(phase).eraId === eraId),
+);
+const eraSections = eraOrder.map((eraId) => {
+  const phases = orderedPhases.filter((phase) => courseTypeCue(phase).eraId === eraId);
+  const firstCue = courseTypeCue(phases[0]);
+  return {
+    eraId,
+    eraTitle: firstCue.eraTitle,
+    eraSubtitle: firstCue.eraSubtitle,
+    filterGroup: firstCue.filterGroup,
+    badge: firstCue.badge,
+    phases,
+  };
+});
 ---
 
 <SiteLayout {...pages.course}>
   <main id="main">
-    <div class="page-intro">
-      <a href={siteUrl('index.html')}>Home</a>
-      <h1>Your route through JAX.</h1>
-      <p class="intro">Open a lesson. Build something you can explain.</p>
+    <PageIntro
+      edition="Course catalog"
+      title="Your route through JAX."
+      intro="Open a lesson. Build something you can explain."
+    >
       <p id="counts" class="catalog-counts">
-        {course.phases.length} phases · {inventory.authored} lessons available · {inventory.planned}{' '}
-        planned
+        {course.phases.length} phases · {inventory.authored} lessons available
+        {inventory.planned ? ` · ${inventory.planned} planned` : ''}
       </p>
-    </div>
+    </PageIntro>
     <section id="curriculum">
       <div class="course-access">
         <div>
@@ -29,17 +49,53 @@ import pages from '../data/pages.json';
           <p>Open a step to see its lessons. You can start anywhere.</p>
         </div>
         <div class="actions">
-          <a
-            class="button primary"
-            id="course-start"
-            href={siteUrl('lesson.html?lesson=welcome-01')}
-          >
+          <a class="button primary" id="course-start" href={siteUrl(lessonLink('welcome-01'))}>
             Start learning
           </a>
           <a href={siteUrl('pathways.html')}>Explore paths</a>
           <a href={siteUrl('projects.html#modality-tracks')}>Connect lessons in a project guide</a>
         </div>
       </div>
+      <aside class="course-access tpu-track-banner" aria-labelledby="tpu-course-title">
+        <div>
+          <span class="course-type-pill" data-course-kind="tpu-core">
+            3-Step Cloud TPU Mini-Course · 6 bite-sized lessons
+          </span>
+          <h2 id="tpu-course-title">Required before any TPU-dependent course</h2>
+          <p>
+            Instead of one long block, the Cloud TPU track is split into three short 2-lesson
+            courses (~45 minutes each). Complete them right after{' '}
+            <strong>00: Setup &amp; first steps</strong> so you can provision a TPU VM, launch
+            checkpointed jobs over SSH, and inspect HBM &amp; XProf traces in parallel with the rest
+            of the curriculum.
+          </p>
+          <div class="tpu-mini-course-strip">
+            <a class="tpu-step-card" data-phase="tpu" href="#phase-tpu">
+              <span class="tpu-step-kicker">Step 1 of 3 · ~45m</span>
+              <strong>19: TPU Setup</strong>
+              <span>Slice selection, gcloud VM provisioning, .venv &amp; pmap receipt</span>
+            </a>
+            <a class="tpu-step-card" data-phase="tpu-workflows" href="#phase-tpu-workflows">
+              <span class="tpu-step-kicker">Step 2 of 3 · ~45m</span>
+              <strong>20: TPU Workflows</strong>
+              <span>Staging scripts, warmup vs step timing, checkpoints &amp; --worker=all</span>
+            </a>
+            <a class="tpu-step-card" data-phase="tpu-systems" href="#phase-tpu-systems">
+              <span class="tpu-step-kicker">Step 3 of 3 · ~50m</span>
+              <strong>21: TPU Systems</strong>
+              <span>v5e/v5p/v6e ridge points, HBM budgets, BF16/INT8 &amp; XProf</span>
+            </a>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="button primary" data-phase="tpu" href="#phase-tpu">
+            Start Step 1: TPU Setup
+          </a>
+          <a class="button" href={siteUrl('pathways.html?path=tpu')}>
+            TPU learning path
+          </a>
+        </div>
+      </aside>
       <aside class="course-access" aria-labelledby="workflow-title">
         <div>
           <h2 id="workflow-title">Before your first project</h2>
@@ -53,24 +109,105 @@ import pages from '../data/pages.json';
         </a>
       </aside>
       <div id="path-summary" class="path-summary" hidden></div>
+      <div
+        id="course-scroll-bar"
+        class="course-scroll-bar"
+        data-active-era="era-onboarding"
+        aria-label="Course section and type filter"
+      >
+        <div class="course-scroll-status">
+          <span class="scroll-kicker">Current section</span>
+          <strong id="active-era-indicator">Start Here · Setup &amp; Cloud TPU Track</strong>
+        </div>
+        <div class="course-type-filters" role="group" aria-label="Filter by course type">
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="all"
+            aria-pressed="true"
+          >
+            All ({course.phases.length})
+          </button>
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="onboarding-tpu"
+            aria-pressed="false"
+          >
+            Setup &amp; Cloud TPU (4)
+          </button>
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="foundation"
+            aria-pressed="false"
+          >
+            CPU Foundations (4)
+          </button>
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="training"
+            aria-pressed="false"
+          >
+            Training Systems (6)
+          </button>
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="tpu-scale"
+            aria-pressed="false"
+          >
+            TPU Scale &amp; Ops (4)
+          </button>
+          <button
+            type="button"
+            class="course-filter-btn"
+            data-course-filter="domain"
+            aria-pressed="false"
+          >
+            Research &amp; Domains (4)
+          </button>
+        </div>
+      </div>
       <p id="course-view-status" class="edition" aria-live="polite"></p>
       <div id="phases" class="phase-grid">
-        {course.phases.map((phase) => (
-          <PhaseCard phase={phase} />
+        {eraSections.map((era, eraIdx) => (
+          <Fragment>
+            <div
+              id={era.eraId}
+              class="course-era-banner"
+              data-era-banner={era.eraId}
+              data-era-title={era.eraTitle}
+              data-era-group={era.filterGroup}
+            >
+              <div class="era-banner-top">
+                <span class="era-step-badge">
+                  Section {eraIdx + 1} of {eraSections.length}
+                </span>
+                <span class="era-count-badge">{era.phases.length} courses</span>
+              </div>
+              <p class="era-heading">{era.eraTitle}</p>
+              <p class="era-subtitle">{era.eraSubtitle}</p>
+            </div>
+            {era.phases.map((phase) => (
+              <PhaseCard phase={phase} />
+            ))}
+          </Fragment>
         ))}
       </div>
       <details class="course-jump-disclosure">
         <summary>Jump to a course step</summary>
         <div class="course-jumps" id="course-jumps"></div>
       </details>
-      <div class="availability-controls">
+      <div class="availability-controls" hidden={!inventory.planned}>
         <label class="roadmap-toggle">
           <input type="checkbox" id="show-roadmap" /> Show planned topics
         </label>
       </div>
       <p id="content-status" class="soft">
-        {inventory.authored} lesson drafts with CPU companions; {inventory.planned} topics are
-        planned.
+        {inventory.authored} lesson drafts with CPU companions
+        {inventory.planned ? `; ${inventory.planned} topics are planned.` : '.'}
       </p>
       <p id="empty" hidden>
         No available lessons in this view.

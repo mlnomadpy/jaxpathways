@@ -78,6 +78,8 @@ $$
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
 
 ```python
+# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -90,9 +92,13 @@ These imports provide JAX array transformations and NumPy reference calculations
 Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.
 
 ```python
+# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
 def attend(q, k, v):
+    # Perform matrix contraction / projection to compute `scores`.
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
+    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
+    # Return `(weights @ v, weights)` to the caller.
     return weights @ v, weights
 ```
 
@@ -103,13 +109,22 @@ Multiplying $Q\in\mathbb{R}^{T_q\times D_k}$ by $K^\mathsf{T}\in\mathbb{R}^{D_k\
 Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.
 
 ```python
+# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].
+# Initialize array `q` with explicit values and shape.
 q = jnp.zeros((2, 2))
+# Initialize array `k` with explicit values and shape.
 k = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+# Initialize array `v` with explicit values and shape.
 v = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
+# Run `attend` to compute `(output, weights)`.
 output, weights = attend(q, k, v)
+# Print the observed values to compare against the expected result.
 print("Weights / output:", weights, output)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(weights, jnp.full((2, 3), 1/3))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 ```
 
@@ -118,22 +133,37 @@ Uniform weights $1/3$; both output rows $[2, 2]$.
 ## Run the example
 
 ```python
+# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
+# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
 def attend(q, k, v):
+    # Perform matrix contraction / projection to compute `scores`.
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
+    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
+    # Return `(weights @ v, weights)` to the caller.
     return weights @ v, weights
 
+# Step 3 — 3. Run and check: Uniform weights 1/3; both output rows [2, 2].
+# Initialize array `q` with explicit values and shape.
 q = jnp.zeros((2, 2))
+# Initialize array `k` with explicit values and shape.
 k = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+# Initialize array `v` with explicit values and shape.
 v = jnp.array([[2., 0.], [0., 4.], [4., 2.]])
+# Run `attend` to compute `(output, weights)`.
 output, weights = attend(q, k, v)
+# Print the observed values to compare against the expected result.
 print("Weights / output:", weights, output)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(weights, jnp.full((2, 3), 1/3))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 ```
 
@@ -160,14 +190,18 @@ The changed queries are $(3,0)$ and $(0,3)$; the keys are $(1,0)$, $(0,1)$, and 
 The weights mix the value vectors; they are not the output vectors themselves. In the uniform panel, averaging the values $(2,0)$, $(0,4)$, and $(4,2)$ produces $(2,2)$ for each query. To understand a changed output, first read its row of weights, then form that weighted sum.
 
 ```python
+# Compute figure data for: Each query distributes one unit of attention
+# Create device-backed JAX array `changed_q`.
 changed_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])
+# Run `attend` to compute `(_, focused)`.
 _, focused = attend(changed_q, k, v)
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:00:41.727050+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:03:27.687012+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]
@@ -185,12 +219,20 @@ PASS: transformers-01
 **Predict before running:** Which keys become more relevant for query $[2, 0]$?
 
 ```python
+# Experiment — Compare a nonzero query with NumPy: A separate NumPy calculation checks nonuniform weighting and the...
+# Initialize array `q_new` with explicit values and shape.
 q_new = jnp.array([[2., 0.]])
+# Run `attend` to compute `(actual, w_new)`.
 actual, w_new = attend(q_new, k, v)
+# Convert `scores_np` to a host NumPy array for inspection or verification.
 scores_np = np.asarray(q_new) @ np.asarray(k).T / np.sqrt(2)
+# Reduce along axis=-1 to compute `raw`.
 raw = np.exp(scores_np - scores_np.max(axis=-1, keepdims=True))
+# Reduce along axis=-1 to compute `reference_w`.
 reference_w = raw / raw.sum(axis=-1, keepdims=True)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(w_new, reference_w, rtol=1e-6, atol=1e-6)
+# Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(actual, reference_w @ np.asarray(v), rtol=1e-6, atol=1e-6)
 ```
 
@@ -203,8 +245,12 @@ A separate NumPy calculation checks nonuniform weighting and the output axis.
 **Predict before running:** If every $V$ row gains $[5, -2]$, what happens to each output?
 
 ```python
+# Experiment — Shift every value vector: Row-normalized attention preserves a shared value translation.
+# Initialize array `shift` with explicit values and shape.
 shift = jnp.array([5., -2.])
+# Run `attend` to compute `(shifted, _)`.
 shifted, _ = attend(q_new, k, v + shift)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted, actual + shift)
 ```
 
@@ -216,13 +262,48 @@ Row-normalized attention preserves a shared value translation.
 
 Permute the three key/value pairs together, then permute only values. Verify invariance for the paired permutation and a changed result for the mismatched pairing.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `order` with explicit values and shape.
+2. Run `attend` to compute `(paired, _)`.
+3. Run `attend` to compute `(mismatched, _)`.
+4. Verify that the numerical values match the expected reference within tolerance.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Permute the three key/value pairs together, then permute only values.
+# Initialize array `order` with explicit values and shape.
+order = jnp.array(...)  # TODO: compute order
+# Run `attend` to compute `(paired, _)`.
+paired, _ = attend(...)  # TODO: compute paired, _
+# Run `attend` to compute `(mismatched, _)`.
+mismatched, _ = attend(...)  # TODO: compute mismatched, _
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(paired, actual)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert not jnp.allclose(mismatched, actual)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Permute the three key/value pairs together, then permute only values.
+# Initialize array `order` with explicit values and shape.
 order = jnp.array([2, 0, 1])
+# Run `attend` to compute `(paired, _)`.
 paired, _ = attend(q_new, k[order], v[order])
+# Run `attend` to compute `(mismatched, _)`.
 mismatched, _ = attend(q_new, k, v[order])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(paired, actual)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not jnp.allclose(mismatched, actual)
 ```
 
@@ -240,12 +321,43 @@ The score matrix does not depend on Dv.
 
 </details>
 
+### How to write: Use a different value dimension — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `scalar_v` with explicit values and shape.
+2. Run `attend` to compute `(scalar_out, _)`.
+3. Verify that the output tensor shape matches our prediction.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...
+# Initialize array `scalar_v` with explicit values and shape.
+scalar_v = jnp.array(...)  # TODO: compute scalar_v
+# Run `attend` to compute `(scalar_out, _)`.
+scalar_out, _ = attend(...)  # TODO: compute scalar_out, _
+# Verify that the output tensor shape matches our prediction.
+assert scalar_out.shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(scalar_out, 6.)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...
+# Initialize array `scalar_v` with explicit values and shape.
 scalar_v = jnp.array([[3.], [6.], [9.]])
+# Run `attend` to compute `(scalar_out, _)`.
 scalar_out, _ = attend(q, k, scalar_v)
+# Verify that the output tensor shape matches our prediction.
 assert scalar_out.shape == (2, 1)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(scalar_out, 6.)
 ```
 
@@ -265,12 +377,44 @@ Two queries and three keys make the incorrect result visible.
 
 </details>
 
+### How to write: Expose a wrong softmax axis — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `wrong_w` with explicit values and shape.
+2. Verify that the numerical values match the expected reference within tolerance.
+3. Initialize array `right_w` with explicit values and shape.
+4. Verify that the numerical values match the expected reference within tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.
+# Initialize array `wrong_w` with explicit values and shape.
+wrong_w = jax.nn.softmax(...)  # TODO: compute wrong_w
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(wrong_w.sum(axis=-1), 1.5)  # TODO: complete assertion check
+# Initialize array `right_w` with explicit values and shape.
+right_w = jax.nn.softmax(...)  # TODO: compute right_w
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(right_w.sum(axis=-1), 1.)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.
+# Initialize array `wrong_w` with explicit values and shape.
 wrong_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=0)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(wrong_w.sum(axis=-1), 1.5)
+# Initialize array `right_w` with explicit values and shape.
 right_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(right_w.sum(axis=-1), 1.)
 ```
 

@@ -2,9 +2,9 @@
 
 Start here.
 
-Run a saved program and explain its environment, array output and device placement. Start on one CPU; logical devices are a later exercise in placement.
+Run a saved program and explain its environment, array output and device placement. Start on one CPU, practice sharding on four logical CPU devices, and learn how to get a TPU running, launch a TPU job, and run course experiments on TPU in parallel from Phase 00 onward.
 
-Keep a first-run log that another learner can reproduce.
+Keep a first-run log that another learner can reproduce, then pair each phase's CPU baseline with the parallel TPU launch and precision guides.
 
 **Prerequisites:** Basic Python; no previous JAX experience.
 
@@ -32,7 +32,7 @@ Review: [Set up your learning workspace](01-set-up-your-learning-workspace/docs/
 
    Lessons: [Set up your learning workspace](01-set-up-your-learning-workspace/docs/en.md) · [Meet your arrays and devices](02-meet-your-arrays-and-devices/docs/en.md).
 
-2. **Separate local practice from accelerator execution.** Start a fresh process for virtual CPU devices. Compare its device receipt with the ordinary process. Treat the TPU lesson as preparation until you have a receipt from an actual TPU.
+2. **Separate local practice from parallel TPU execution.** Start a fresh process for virtual CPU devices and compare its device receipt with the ordinary process. Then learn how to get a TPU running (hosted TPU or single-host Cloud TPU VM), launch your experiment over SSH with explicit backend checks, and run subsequent course phases on TPU in parallel.
 
    Lessons: [Practice with four virtual CPU devices](03-virtual-cpu-devices/docs/en.md) · [Move your experiment to a TPU](03-move-your-experiment-to-a-tpu/docs/en.md).
 
@@ -102,7 +102,7 @@ Status: authored lesson with CPU exercise.
 
 Status: authored lesson with CPU exercise.
 
-**Intended outcome:** Verify the device of a completed prediction and its independent numerical reference. Run an explicit TPU target path that fails when TPU is unavailable.
+**Intended outcome:** Provision a hosted TPU runtime or single-host Cloud TPU VM, launch an explicit TPU target path over SSH that fails when TPU is unavailable, verify the device of a completed prediction against NumPy, and set up parallel TPU execution for the rest of the course.
 
 **Evidence:** Keep separate CPU and TPU reports with requested/observed platform, package versions, completed predictions, NumPy error and changed-bias and row-permutation checks. Until the target command succeeds, TPU execution remains unverified.
 
@@ -114,7 +114,7 @@ A reproducible environment report.
 
 **Demonstrate:** Explain which device ran your code and reproduce the result in a fresh environment.
 
-Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 1 for this phase.
+Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 1 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` from the top-level folder to verify stage 1.
 
 
 

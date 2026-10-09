@@ -37,8 +37,12 @@ function project(value) {
     strings(value.rubric) &&
     Array.isArray(value.stages) &&
     value.stages.length > 0 &&
-    value.stages.every((stage) =>
-      textFields(stage, ['id', 'title', 'command', 'evidence', 'expected', 'diagnosis']),
+    value.stages.every(
+      (stage) =>
+        textFields(stage, ['id', 'title', 'command', 'evidence', 'expected', 'diagnosis']) &&
+        (stage.codeGuide === undefined || typeof stage.codeGuide === 'string') &&
+        (stage.starterSnippet === undefined || typeof stage.starterSnippet === 'string') &&
+        (stage.solutionSnippet === undefined || typeof stage.solutionSnippet === 'string'),
     ) &&
     (value.referenceCommand === undefined || typeof value.referenceCommand === 'string') &&
     (value.assessmentId === undefined || typeof value.assessmentId === 'string') &&

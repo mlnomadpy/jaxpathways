@@ -1,0 +1,109 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-03",
+  "contentHash": "6c0de718c914f07f4a2ca45dec670710bebb4afee1e43caa369b48023a90df2b",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "kind": "executed",
+  "generatedAt": "2026-10-08T10:31:59.255787+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "v5e",
+      "v5p",
+      "v6e"
+    ],
+    "xlabel": "Cloud TPU generation",
+    "ylabel": "GiB / (FLOP per byte)",
+    "series": [
+      {
+        "label": "HBM per chip (GiB)",
+        "y": [
+          16.0,
+          95.0,
+          32.0
+        ]
+      },
+      {
+        "label": "BF16 ridge point (FLOP/byte)",
+        "y": [
+          240.5,
+          166.0,
+          573.8
+        ]
+      }
+    ]
+  },
+  "diagram": {
+    "title": "TPU HBM-to-MXU dataflow and mixed-precision state budget",
+    "prediction": "Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?",
+    "reading": "Read top to bottom: HBM stores master `fp32` parameters and Adam moments (`m`, `v`) alongside `bf16` activations and KV cache; operands are cast to `bf16` (or `int8`) to stream across the HBM bandwidth bottleneck into the MXU, which accumulates dot products in `fp32` before writing updated state back.",
+    "alt": "Read top to bottom: HBM holds fp32 master weights and Adam moments plus bf16/int8 caches, streams bf16 operands into the MXU, accumulates dot products in fp32, and updates sharded HBM state.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "TPU HBM capacity: fp32 master weights + Adam (m, v) + bf16/int8 KV cache",
+          "tone": "data",
+          "w": 8.6,
+          "h": 1.05
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.7,
+          "label": "HBM bandwidth pipe (819-2765 GB/s): stream bf16 / int8 operands",
+          "tone": "state",
+          "w": 8.6,
+          "h": 1.05
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4.4,
+          "label": "TPU MXU systolic array: bf16/int8 multiply + fp32 accumulation",
+          "tone": "result",
+          "w": 8.6,
+          "h": 1.05
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 6.1,
+          "label": "XProf *.xplane.pb trace: verify MXU busy % vs HBM bandwidth stall",
+          "tone": "warning",
+          "w": 8.6,
+          "h": 1.05
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 7,
+      "width": 10
+    }
+  }
+}

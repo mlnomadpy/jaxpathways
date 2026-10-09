@@ -118,7 +118,7 @@
           "id": "welcome-03",
           "title": "Move your experiment to a TPU",
           "status": "authored",
-          "objective": "Verify the device of a completed prediction and its independent numerical reference. Run an explicit TPU target path that fails when TPU is unavailable.",
+          "objective": "Provision a hosted TPU runtime or single-host Cloud TPU VM, launch an explicit TPU target path over SSH that fails when TPU is unavailable, verify the device of a completed prediction against NumPy, and set up parallel TPU execution for the rest of the course.",
           "prerequisites": [
             "welcome-cpu"
           ],
@@ -129,7 +129,7 @@
           "runtime": {
             "kind": "cpu"
           },
-          "hardware": "CPU reference; optional existing TPU runtime",
+          "hardware": "CPU reference; hosted TPU notebook or single-host Google Cloud TPU VM",
           "artifacts": {
             "source": "phases/00-welcome/03-move-your-experiment-to-a-tpu/docs/en.md",
             "script": "exercises/welcome-03.py",
@@ -143,8 +143,8 @@
           }
         }
       ],
-      "description": "Run a saved program and explain its environment, array output and device placement. Start on one CPU; logical devices are a later exercise in placement.",
-      "learningAdvice": "Keep a first-run log that another learner can reproduce.",
+      "description": "Run a saved program and explain its environment, array output and device placement. Start on one CPU, practice sharding on four logical CPU devices, and learn how to get a TPU running, launch a TPU job, and run course experiments on TPU in parallel from Phase 00 onward.",
+      "learningAdvice": "Keep a first-run log that another learner can reproduce, then pair each phase's CPU baseline with the parallel TPU launch and precision guides.",
       "projectId": "foundation-toolkit",
       "projectStageIds": [
         "1"
@@ -171,8 +171,8 @@
               "welcome-cpu",
               "welcome-03"
             ],
-            "title": "Separate local practice from accelerator execution",
-            "task": "Start a fresh process for virtual CPU devices. Compare its device receipt with the ordinary process. Treat the TPU lesson as preparation until you have a receipt from an actual TPU."
+            "title": "Separate local practice from parallel TPU execution",
+            "task": "Start a fresh process for virtual CPU devices and compare its device receipt with the ordinary process. Then learn how to get a TPU running (hosted TPU or single-host Cloud TPU VM), launch your experiment over SSH with explicit backend checks, and run subsequent course phases on TPU in parallel."
           }
         ],
         "transfer": {
@@ -185,7 +185,8 @@
         },
         "completion": "Keep a saved script, its command and actual output, plus an explanation of one repaired setup error. Use foundation-toolkit stage 1. A screenshot without a rerunnable file is incomplete.",
         "furtherWork": "Fresh-machine Windows/Linux/macOS walkthroughs and novice usability sessions remain unverified; accelerator setup needs a separately observed device run."
-      }
+      },
+      "projectNote": "Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` from the top-level folder to verify stage 1."
     },
     {
       "id": "arrays",
@@ -353,7 +354,8 @@
         },
         "completion": "Retain unequal-shape, constant-column and masked-row cases, a NumPy or hand reference, and proof that inputs were unchanged. Explain every axis in the output.",
         "furtherWork": "Sparse and ragged inputs need additional contract-focused labs; this phase deliberately teaches fixed dense arrays first."
-      }
+      },
+      "projectNote": "Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 2` from the top-level folder to verify stage 2."
     },
     {
       "id": "transforms",
@@ -550,7 +552,8 @@
         },
         "completion": "Use foundation-toolkit stage 3. Keep independent derivatives, batched/compiled parity and one changed signature. Explain why a faster warm call does not measure first-call cost.",
         "furtherWork": "Transformation combinations involving nondifferentiable boundaries require further examples; passing smooth fixtures does not validate arbitrary gradients."
-      }
+      },
+      "projectNote": "Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 3` from the top-level folder to verify stage 3."
     },
     {
       "id": "state",
@@ -718,7 +721,8 @@
         },
         "completion": "Use foundation-toolkit stage 4. Save and reload state in a fresh process and verify the next transition and full remaining trajectory, not only the final mean.",
         "furtherWork": "Local deterministic state does not establish concurrent-writer or multi-host recovery; the recovery and operations phases extend these boundaries."
-      }
+      },
+      "projectNote": "Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 4` from the top-level folder to verify stage 4."
     },
     {
       "id": "optimization",
@@ -1085,7 +1089,7 @@
         "4",
         "5"
       ],
-      "projectNote": "Complete the regression audit after the four core lessons. This deeper project follows all twelve optimization lessons and connects curvature, conditioning, gradient noise, optimizer state and regularization.",
+      "projectNote": "Complete the regression audit after the four core lessons. This deeper project follows all twelve optimization lessons and connects curvature, conditioning, gradient noise, optimizer state and regularization. Copy `projects/optimizer-audit/starter/optimization.py` to `projects/optimizer-audit/my_optimization.py` and write your code in `projects/optimizer-audit/my_optimization.py`. Run `python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4, 5.",
       "studyGuide": {
         "question": "Can you explain an optimizer’s behavior from the objective and data?",
         "why": "Use a model small enough to solve independently. Connect residuals, gradients, curvature and update state before comparing optimizer names. A lower training loss is useful evidence, but it does not by itself establish better held-out predictions.",
@@ -1336,7 +1340,8 @@
         },
         "completion": "Use mlp-classifier before the larger image harness. Retain independent forward/loss checks, two runs with declared seeds, state-pure evaluation and class-specific failure analysis.",
         "furtherWork": "Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images do not establish real-photo generalization."
-      }
+      },
+      "projectNote": "Copy `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py` and write your code in `projects/mlp-classifier/my_model.py`. Run `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "recovery",
@@ -1526,7 +1531,7 @@
         "2",
         "3"
       ],
-      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence.",
+      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3.",
       "additionalProjectIds": [
         "engineering-release"
       ],
@@ -1582,7 +1587,10 @@
       "title": "Transformers & language models",
       "part": "Training systems",
       "prerequisitePhaseIds": [
-        "recovery"
+        "recovery",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "CPU for small blocks; TPU or GPU for training experiments",
       "project": "A checkpointed causal language model",
@@ -1709,7 +1717,7 @@
         "3",
         "4"
       ],
-      "projectNote": "Begin with token contracts and training. Complete the linked performance and deployment prerequisites before cache, export and profiling checks.",
+      "projectNote": "Begin with token contracts and training. Complete the linked performance and deployment prerequisites before cache, export and profiling checks. Copy `projects/text-harness/starter/model.py` to `projects/text-harness/my_model.py` and write your code in `projects/text-harness/my_model.py`. Run `python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.",
       "studyGuide": {
         "question": "Can you prove that a predicted token cannot see its future?",
         "why": "Attention is a weighted mixing operation whose axes and masks are testable. Build a causal model from these contracts before interpreting a generated sentence as evidence of learning.",
@@ -1754,7 +1762,10 @@
       "title": "Performance diagnosis",
       "part": "Training systems",
       "prerequisitePhaseIds": [
-        "networks"
+        "networks",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "CPU for timing concepts; TPU or GPU for profiling",
       "project": "A trace-backed before-and-after performance report",
@@ -1906,7 +1917,7 @@
       "projectStageIds": [
         "4"
       ],
-      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence.",
+      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4` from the top-level folder to verify stage 4.",
       "studyGuide": {
         "question": "What measured evidence identifies the bottleneck?",
         "why": "Optimize a verified computation and a named timing boundary. Trace events, compiler estimates and wall-clock samples answer different questions; connect them before proposing a change.",
@@ -1959,7 +1970,10 @@
       "part": "Specializations",
       "prerequisitePhaseIds": [
         "recovery",
-        "performance"
+        "performance",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "Logical CPU devices for sharding practice; multi-host work needs a real cluster",
       "project": "A resilient sharded training experiment",
@@ -2090,7 +2104,7 @@
         "3",
         "4"
       ],
-      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence.",
+      "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.",
       "studyGuide": {
         "question": "Is the distributed update still optimizing the same objective?",
         "why": "Start with the global mathematical operation, then specify ownership and communication. Logical CPU devices help expose placement and reduction mistakes before you spend accelerator time.",
@@ -2292,7 +2306,8 @@
         },
         "completion": "Use scientific-inverse. Keep discrete and continuous references, a refinement study, derivative checks, recovered parameters and a held-out/noise sensitivity report.",
         "furtherWork": "Adaptive solvers, event handling, stiff systems, PDEs and domain-specific physical validation remain outside the scalar ODE lab."
-      }
+      },
+      "projectNote": "Copy `projects/scientific-inverse/starter/model.py` to `projects/scientific-inverse/my_model.py` and write your code in `projects/scientific-inverse/my_model.py`. Run `python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "probability",
@@ -2457,7 +2472,8 @@
         },
         "completion": "Use bayesian-regression. Retain analytic posterior checks, sampler/approximation diagnostics and a predictive model-mismatch case, with uncertainty assumptions stated.",
         "furtherWork": "General hierarchical models and robust modern diagnostic workflows need further examples. The instructional sampler is not a replacement for validated inference libraries."
-      }
+      },
+      "projectNote": "Copy `projects/bayesian-regression/starter/model.py` to `projects/bayesian-regression/my_model.py` and write your code in `projects/bayesian-regression/my_model.py`. Run `python3 projects/bayesian-regression/tests/check.py --implementation projects/bayesian-regression/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "rl",
@@ -2622,7 +2638,8 @@
         },
         "completion": "Use policy-evaluation. Keep independent transition checks, behavior-policy identity, changed-horizon cases and paired evaluations across declared independent training seeds.",
         "furtherWork": "Continuous actions, value-function estimation and larger benchmark environments need new implementation and evaluation labs; this tabular task is deliberately bounded."
-      }
+      },
+      "projectNote": "Copy `projects/policy-evaluation/starter/model.py` to `projects/policy-evaluation/my_model.py` and write your code in `projects/policy-evaluation/my_model.py`. Run `python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 1` from the top-level folder to verify all 4 stages."
     },
     {
       "id": "kernels",
@@ -2630,7 +2647,10 @@
       "title": "Pallas kernels",
       "part": "Specializations",
       "prerequisitePhaseIds": [
-        "distributed"
+        "distributed",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "CPU interpretation/simulation reference; TPU target lab requires separately validated hardware",
       "project": "A checked Pallas kernel with an explicit target qualification plan",
@@ -2787,7 +2807,8 @@
         },
         "completion": "Use kernel-audit. Retain independent numerical checks, rejected unsupported contracts and a target measurement plan. Keep hardware timings unmeasured until actually executed.",
         "furtherWork": "Actual TPU/GPU compilation, race diagnosis and target tuning remain unqualified; CPU interpretation cannot close these gaps."
-      }
+      },
+      "projectNote": "Copy `projects/kernel-audit/starter/model.py` to `projects/kernel-audit/my_model.py` and write your code in `projects/kernel-audit/my_model.py`. Run `python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "internals",
@@ -2952,7 +2973,8 @@
         },
         "completion": "Use derivative-audit. Keep analytic/directional checks, the adjoint identity, supported higher-order behavior and explicit unsupported-program rejections.",
         "furtherWork": "The tiny interpreter is intentionally incomplete. Production extension APIs, effects and full compiler transformation coverage require further targeted work."
-      }
+      },
+      "projectNote": "Copy `projects/derivative-audit/starter/model.py` to `projects/derivative-audit/my_model.py` and write your code in `projects/derivative-audit/my_model.py`. Run `python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "deployment",
@@ -2961,7 +2983,10 @@
       "part": "Specializations",
       "prerequisitePhaseIds": [
         "recovery",
-        "performance"
+        "performance",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "CPU for core labs; optional framework environments and target devices for conversion and edge validation",
       "project": "Verify an inference artifact and capacity hypothesis",
@@ -3244,7 +3269,8 @@
         },
         "completion": "Use deployment-audit and engineering-release to assemble one release dossier: candidate selection and retention criteria; a named feature and parameter mapping; source/export and layerwise parity; full precision policy and calibration identity; raw-request validation; artifact and process receipts; measured request samples; and a queue/deadline analysis. Mark container and target-device evidence unmeasured unless you actually ran those environments. Another learner should be able to reproduce each claimed check from the recorded inputs and command.",
         "furtherWork": "Actual edge-device delegates, thermal/energy budgets, packed low-bit kernels and production serving loads remain unqualified. The revised sequence moves adaptation before export and containerization before service capacity planning."
-      }
+      },
+      "projectNote": "Copy `projects/deployment-audit/starter/model.py` to `projects/deployment-audit/my_model.py` and write your code in `projects/deployment-audit/my_model.py`. Run `python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
     },
     {
       "id": "operations",
@@ -3252,7 +3278,10 @@
       "title": "Workload operations",
       "part": "Specializations",
       "prerequisitePhaseIds": [
-        "distributed"
+        "distributed",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "Executed local CPU processes; accelerator and cluster transfer require separate validation",
       "project": "An observable, restartable local workload",
@@ -3534,7 +3563,8 @@
         },
         "completion": "Use workload-operations and engineering-release. Keep a real failure/recovery timeline, failed-gate invariance, a rollback drill, run/model identity and named review responsibilities.",
         "furtherWork": "Authenticated review, multi-writer promotion, staged cloud rollout, SLO alerting and live-model abuse evaluation still require separate infrastructure and application-specific labs."
-      }
+      },
+      "projectNote": "Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify all 5 stages."
     },
     {
       "id": "pretraining",
@@ -3542,7 +3572,10 @@
       "title": "Self-supervised pretraining: masked and contrastive learning",
       "part": "Training systems",
       "prerequisitePhaseIds": [
-        "transformers"
+        "transformers",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate",
       "project": "An audited pretraining and adaptation objective toolkit",
@@ -3681,7 +3714,8 @@
         },
         "completion": "Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits. Add the new lesson evidence: unequal-count gradient oracle, rectangular patch/intervention checks, irreducible ambiguity example and temperature/ranking comparison. Explain each saved figure without copying its caption.",
         "furtherWork": "Full BERT/ViT masked autoencoders, natural corpora, augmentation studies and downstream probe benchmarks remain extensions. The current labs execute small attention, linear reconstruction and embedding models."
-      }
+      },
+      "projectNote": "Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` from the top-level folder to verify stages 1, 2, 3."
     },
     {
       "id": "posttraining",
@@ -3690,7 +3724,10 @@
       "part": "Training systems",
       "prerequisitePhaseIds": [
         "pretraining",
-        "rl"
+        "rl",
+        "tpu",
+        "tpu-workflows",
+        "tpu-systems"
       ],
       "hardware": "Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate",
       "project": "An audited pretraining and adaptation objective toolkit",
@@ -3901,6 +3938,340 @@
         },
         "completion": "Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons. Add the new lesson evidence: ragged likelihood oracle, rank-capacity counterexample, conflicting preferences, exact bandit optimum and a DPO ratio improvement with lower chosen probability. State which model integrations remain absent.",
         "furtherWork": "The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work."
+      },
+      "projectNote": "Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4` from the top-level folder to verify stages 4, 5, 6, 7, 8."
+    },
+    {
+      "id": "tpu",
+      "number": "19",
+      "title": "TPU Setup: Provisioning & Runtime Verification",
+      "part": "Start here",
+      "prerequisitePhaseIds": [
+        "welcome"
+      ],
+      "hardware": "CPU topology/contract verifier; Cloud TPU VM (v5litepod-4 / v6e-4) or Colab TPU for target runs",
+      "project": "A provisioned Cloud TPU VM and a cryptographically hashed JAX runtime receipt",
+      "checkpoint": "Select a single-host TPU topology, provision a Cloud TPU VM (or Colab TPU), bootstrap jax[tpu] in an isolated .venv, verify pmap execution, and confirm clean VM deletion.",
+      "source": "https://cloud.google.com/tpu/docs/run-calculation-jax",
+      "lessons": [
+        {
+          "id": "tpu-01",
+          "title": "Select a TPU slice and provision your Cloud TPU VM",
+          "status": "authored",
+          "objective": "Choose a single-host TPU topology, create a Cloud TPU VM with gcloud (or connect to a Colab TPU), verify SSH access, and rehearse clean VM deletion.",
+          "prerequisites": [],
+          "exercise": "Compute the chip count and total HBM GiB for v5litepod-4 and v6e-4, verify both are single-host slices (hosts == 1), and list all single-host slices with at least 64 GiB of HBM.",
+          "evidence": "Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.",
+          "check": "Which command sequence proves that your Cloud TPU VM is READY when you start and no longer billing when you finish?",
+          "path": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU topology planner; Cloud TPU VM or Colab TPU for target provisioning",
+          "artifacts": {
+            "source": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/docs/en.md",
+            "script": "exercises/tpu-01.py",
+            "notebook": "exercises/tpu-01.ipynb",
+            "markdown": "exercises/tpu-01.md",
+            "scriptSource": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/code/main.py",
+            "notebookSource": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/notebooks/exercise.ipynb",
+            "quizSource": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/quiz.json",
+            "evidenceSource": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/outputs/evidence.md",
+            "evidence": "exercises/tpu-01-evidence.md"
+          }
+        },
+        {
+          "id": "tpu-04",
+          "title": "Bootstrap .venv and verify a TPU runtime receipt",
+          "status": "authored",
+          "objective": "Create ~/jax-tpu-lab/.venv on the TPU VM, install jax[tpu], run a synchronized pmap runtime contract check, and download the signed JSON receipt before deleting the VM.",
+          "prerequisites": [
+            "tpu-01"
+          ],
+          "exercise": "Call verify_runtime_contract for the active backend with min_devices=1, verify contract_ok is True, and compute expected_pmap_sum_of_squares(4, 8) for a 4-chip v5litepod-4 slice.",
+          "evidence": "Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squares, receipt_sha256) and the 1-chip vs 4-chip vs 8-chip pmap reference values.",
+          "check": "Why must verify_runtime_contract check both jax.default_backend() and a synchronized pmap reduction rather than only checking that import jax succeeds?",
+          "path": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU contract verifier; Cloud TPU VM or Colab TPU for target receipt",
+          "artifacts": {
+            "source": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/docs/en.md",
+            "script": "exercises/tpu-04.py",
+            "notebook": "exercises/tpu-04.ipynb",
+            "markdown": "exercises/tpu-04.md",
+            "scriptSource": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/code/main.py",
+            "notebookSource": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/notebooks/exercise.ipynb",
+            "quizSource": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/quiz.json",
+            "evidenceSource": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/outputs/evidence.md",
+            "evidence": "exercises/tpu-04-evidence.md"
+          }
+        }
+      ],
+      "description": "Step 1 of the 3-part Cloud TPU mini-course. Choose the right TPU slice, provision a Cloud TPU VM (or Colab TPU), bootstrap ~/jax-tpu-lab/.venv with jax[tpu], verify a synchronized pmap runtime receipt, and practice clean teardown.",
+      "learningAdvice": "Complete this short 2-lesson setup course right after 00: Setup & first steps, then continue directly to 20: TPU Workflows and 21: TPU Systems.",
+      "projectId": "workload-operations",
+      "projectStageIds": [
+        "1"
+      ],
+      "projectNote": "Verify the runtime receipt locally on CPU first, then run the exact same check on your Cloud TPU VM and copy back tpu-receipt.txt before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify stage 1.",
+      "studyGuide": {
+        "question": "Can you provision a Cloud TPU VM, verify that JAX actually executes on its chips, and prove clean teardown?",
+        "why": "Every accelerator experiment starts with knowing how many hosts and GiB of HBM your slice provides, verifying that libtpu is active inside an isolated .venv, and deleting billable VMs when finished.",
+        "readiness": {
+          "prompt": "You created a Cloud TPU VM and gcloud says READY. What still has to happen before you trust a JAX run on it?",
+          "answer": "Bootstrap ~/jax-tpu-lab/.venv with jax[tpu], verify inside Python that jax.default_backend() == 'tpu' and jax.device_count() matches your slice, and run a synchronized pmap reduction receipt.",
+          "lessonId": "tpu-01"
+        },
+        "milestones": [
+          {
+            "lessonIds": [
+              "tpu-01"
+            ],
+            "title": "Select a single-host TPU topology and provision the VM",
+            "task": "Compare v5litepod-1, v5litepod-4, v5litepod-8, and v6e-4 HBM totals, distinguish single-host VMs from multi-host Pod slices, and run gcloud create/describe/delete."
+          },
+          {
+            "lessonIds": [
+              "tpu-04"
+            ],
+            "title": "Bootstrap .venv and verify the runtime contract receipt",
+            "task": "Install jax[tpu] in ~/jax-tpu-lab/.venv, run verify_runtime_contract with a synchronized pmap sum of squares, and copy back the SHA-256 receipt."
+          }
+        ],
+        "transfer": {
+          "prompt": "A script runs on a Cloud TPU VM without raising an error, but throughput is identical to a laptop CPU. What should your receipt check first?",
+          "approach": "Inspect observed_backend and device_count in the JSON receipt; if libtpu was missing or JAX_PLATFORMS=tpu was not set, JAX silently fell back to CPU."
+        },
+        "pitfall": {
+          "symptom": "You closed your SSH terminal after finishing a run, assuming the Cloud TPU VM stopped billing.",
+          "check": "Run gcloud compute tpus tpu-vm delete and confirm gcloud compute tpus tpu-vm list returns 0 items."
+        },
+        "completion": "Retain the slice HBM table from tpu-01, the verified JSON runtime receipt from tpu-04, and the empty gcloud compute tpus tpu-vm list confirmation.",
+        "furtherWork": "Continue immediately to Phase 20 (TPU Workflows: Launching Jobs & Checkpointed Experiments) to stage code and run resumable training loops."
+      }
+    },
+    {
+      "id": "tpu-workflows",
+      "number": "20",
+      "title": "TPU Workflows: Launching Jobs & Checkpointed Experiments",
+      "part": "Start here",
+      "prerequisitePhaseIds": [
+        "tpu"
+      ],
+      "hardware": "CPU launcher rehearsal; Cloud TPU VM (single-host or --worker=all Pod slice) for target execution",
+      "project": "A checkpoint-resumable TPU job launcher and multi-host staging workflow",
+      "checkpoint": "Stage scripts with gcloud compute tpus tpu-vm scp, separate XLA warmup from timed step loops, verify zero-drift checkpoint resume, and build single-host and --worker=all Pod launch commands.",
+      "source": "https://cloud.google.com/tpu/docs/run-calculation-jax",
+      "lessons": [
+        {
+          "id": "tpu-02",
+          "title": "Stage and launch checkpointed TPU jobs",
+          "status": "authored",
+          "objective": "Stage launch.py to a TPU VM, separate first-step XLA compilation warmup from steady-state step timing, and verify that resuming from an atomic checkpoint matches an uninterrupted run.",
+          "prerequisites": [],
+          "exercise": "Run run_tpu_ready_job for 4 steps (save_every=2), resume to 8 steps, and verify that the final state_hash at step 8 equals an uninterrupted 8-step run.",
+          "evidence": "Keep events.jsonl (started, warmup, step, checkpoint, restored, completed), checkpoint-latest.json, and matching resumed vs control state hashes.",
+          "check": "Why does run_tpu_ready_job execute train_step once and discard its outputs before starting the timed while step < steps loop?",
+          "path": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU launcher rehearsal; Cloud TPU VM for target checkpointed runs",
+          "artifacts": {
+            "source": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/docs/en.md",
+            "script": "exercises/tpu-02.py",
+            "notebook": "exercises/tpu-02.ipynb",
+            "markdown": "exercises/tpu-02.md",
+            "scriptSource": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/code/main.py",
+            "notebookSource": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/notebooks/exercise.ipynb",
+            "quizSource": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/quiz.json",
+            "evidenceSource": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/outputs/evidence.md",
+            "evidence": "exercises/tpu-02-evidence.md"
+          }
+        },
+        {
+          "id": "tpu-05",
+          "title": "Run course scripts and multi-host TPU Pod slices",
+          "status": "authored",
+          "objective": "Stage any course script in public/exercises/ to a TPU VM, construct single-host and --worker=all multi-host SSH launch commands, and verify jax.distributed.initialize() requirements.",
+          "prerequisites": [
+            "tpu-02"
+          ],
+          "exercise": "Generate the workflow for distributed-02.py on a 4-host v5litepod-16 slice (hosts=4) and verify that --worker=all is present in the SSH command and requires_distributed_init is True.",
+          "evidence": "Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-host and multi-host slices plus the process-0 checkpoint writer check.",
+          "check": "What happens if you launch a JAX script on only worker 0 of a 4-host v5litepod-16 slice instead of passing --worker=all?",
+          "path": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU workflow planner; Cloud TPU VM or Pod slice for target runs",
+          "artifacts": {
+            "source": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/docs/en.md",
+            "script": "exercises/tpu-05.py",
+            "notebook": "exercises/tpu-05.ipynb",
+            "markdown": "exercises/tpu-05.md",
+            "scriptSource": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/code/main.py",
+            "notebookSource": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/notebooks/exercise.ipynb",
+            "quizSource": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/quiz.json",
+            "evidenceSource": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/outputs/evidence.md",
+            "evidence": "exercises/tpu-05-evidence.md"
+          }
+        }
+      ],
+      "description": "Step 2 of the 3-part Cloud TPU mini-course. Stage scripts with gcloud compute tpus tpu-vm scp, separate XLA compilation warmup from steady-state step timing, recover interrupted runs from atomic checkpoints, and launch single-host or --worker=all Pod slice experiments.",
+      "learningAdvice": "Use the staging pattern from this course to run any lesson script in public/exercises/ on your Cloud TPU VM alongside your local CPU checks.",
+      "projectId": "workload-operations",
+      "projectStageIds": [
+        "3"
+      ],
+      "projectNote": "Rehearse checkpoint resume and command generation locally first, then stage launch.py to your Cloud TPU VM and copy back the run directory before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 3` from the top-level folder to verify stage 3.",
+      "studyGuide": {
+        "question": "Can you launch a JAX job over SSH, separate XLA warmup from steady-state timing, and resume cleanly after interruption?",
+        "why": "Cloud TPU VMs can be preempted and multi-host Pod slices require lockstep execution across all workers. A reliable workflow saves atomic checkpoints, logs JSONL events, and copies artifacts back before teardown.",
+        "readiness": {
+          "prompt": "Step 1 of your TPU job takes 14 seconds while steps 2–50 take 11 milliseconds each. How should your launcher record timing?",
+          "answer": "Run and synchronize one warmup call before the timed loop and log it as a separate warmup event so XLA compilation does not pollute steady-state step latency.",
+          "lessonId": "tpu-02"
+        },
+        "milestones": [
+          {
+            "lessonIds": [
+              "tpu-02"
+            ],
+            "title": "Launch resumable TPU jobs with warmup separation",
+            "task": "Run run_tpu_ready_job, log warmup separately from timed steps, and verify that a checkpoint-resumed run matches an uninterrupted control run bit-for-bit."
+          },
+          {
+            "lessonIds": [
+              "tpu-05"
+            ],
+            "title": "Stage course scripts and launch multi-host Pod slices",
+            "task": "Build scp-in, ssh-run, and scp-out commands for any course script, use --worker=all on multi-host slices, and gate host artifact writes on jax.process_index() == 0."
+          }
+        ],
+        "transfer": {
+          "prompt": "You move a script from a single-host v5litepod-4 VM to a 4-host v5litepod-16 Pod slice, and it hangs at startup. What is the first thing to check?",
+          "approach": "Check that you launched the script across all hosts simultaneously using gcloud compute tpus tpu-vm ssh --worker=all and called jax.distributed.initialize() before querying jax.devices()."
+        },
+        "pitfall": {
+          "symptom": "A resumed run loads the saved model weights `w`, but its next loss diverges from the uninterrupted control run.",
+          "check": "Verify that the checkpoint also restored optimizer momentum `v` and step counter `step` so the deterministic batch schedule continues at the exact next step."
+        },
+        "completion": "Retain the resumed vs control events.jsonl and state hashes from tpu-02, plus the single-host and --worker=all command workflows from tpu-05.",
+        "furtherWork": "Continue to Phase 21 (TPU Systems: Generations, Memory, Precision & XProf) to budget HBM, test BF16/INT8 precision, and capture XProf traces."
+      }
+    },
+    {
+      "id": "tpu-systems",
+      "number": "21",
+      "title": "TPU Systems: Generations, Memory, Precision & XProf",
+      "part": "Start here",
+      "prerequisitePhaseIds": [
+        "tpu-workflows"
+      ],
+      "hardware": "CPU numerical & profiler harness; Cloud TPU VM for target XProf traces",
+      "project": "A TPU generation, HBM capacity, BF16/INT8 precision, and XProf profiling dossier",
+      "checkpoint": "Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.",
+      "source": "https://openxla.org/xprof",
+      "lessons": [
+        {
+          "id": "tpu-03",
+          "title": "TPU generations and HBM memory budgeting",
+          "status": "authored",
+          "objective": "Compare TPU v5e, v5p, and v6e specifications and roofline ridge points, budget FP32 vs mixed-BF16 training state and KV-cache HBM, and size the minimum chip count for a model.",
+          "prerequisites": [],
+          "exercise": "Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV tokens and verify that its mixed-precision training state fits comfortably inside a single-host v5litepod-4 (64 GiB total HBM).",
+          "evidence": "Keep the TPU ridge-point table, 7B and 1.5B training/KV-cache HBM budgets, and minimum chip count calculation at an 80% HBM ceiling.",
+          "check": "Why does mixed-precision Adam training still require ~12 bytes per parameter in HBM even when forward and backward matmuls use 2-byte bfloat16?",
+          "path": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU capacity & roofline planner; Cloud TPU VM for target HBM verification",
+          "artifacts": {
+            "source": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/docs/en.md",
+            "script": "exercises/tpu-03.py",
+            "notebook": "exercises/tpu-03.ipynb",
+            "markdown": "exercises/tpu-03.md",
+            "scriptSource": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/code/main.py",
+            "notebookSource": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/notebooks/exercise.ipynb",
+            "quizSource": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/quiz.json",
+            "evidenceSource": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/evidence.md",
+            "evidence": "exercises/tpu-03-evidence.md"
+          }
+        },
+        {
+          "id": "tpu-06",
+          "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+          "status": "authored",
+          "objective": "Measure bfloat16 and symmetric int8 matrix multiplication error against float32, verify float32 accumulator precision, and capture a warmed XProf (*.xplane.pb) trace.",
+          "prerequisites": [
+            "tpu-03"
+          ],
+          "exercise": "Run capture_warmed_xprof_trace for 4 steps of size 96 on the active backend, verify trace_file_count >= 1, and assert that bf16_max_abs_err is smaller than int8_max_abs_err.",
+          "evidence": "Keep the BF16 vs INT8 error summary, FP32-vs-BF16 accumulator drift comparison, and captured *.xplane.pb trace receipt.",
+          "check": "Why should you run and synchronize at least one warmup step before entering with jax.profiler.trace(trace_dir): on a TPU VM?",
+          "path": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling",
+          "runtime": {
+            "kind": "cpu"
+          },
+          "hardware": "CPU numerical & profiler harness; Cloud TPU VM for target XProf traces",
+          "artifacts": {
+            "source": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/docs/en.md",
+            "script": "exercises/tpu-06.py",
+            "notebook": "exercises/tpu-06.ipynb",
+            "markdown": "exercises/tpu-06.md",
+            "scriptSource": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/code/main.py",
+            "notebookSource": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/notebooks/exercise.ipynb",
+            "quizSource": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/quiz.json",
+            "evidenceSource": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/outputs/evidence.md",
+            "evidence": "exercises/tpu-06-evidence.md"
+          }
+        }
+      ],
+      "description": "Step 3 of the 3-part Cloud TPU mini-course. Compare TPU v5e, v5p, and v6e specifications and ridge points, budget training and KV-cache HBM before provisioning, measure BF16 and INT8 numerical error, and capture warmed XProf traces.",
+      "learningAdvice": "After completing this third TPU mini-course, you are ready to run any accelerator phase (Transformers, Performance, Distributed, Kernels, Deployment, Operations, Pretraining, Post-training) on a Cloud TPU VM.",
+      "projectId": "workload-operations",
+      "projectStageIds": [
+        "5"
+      ],
+      "projectNote": "Compute your HBM budget and test precision/profiling locally first, then capture a warmed XProf trace on your Cloud TPU VM and copy it back with gcloud compute tpus tpu-vm scp --recurse. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 5` from the top-level folder to verify stage 5.",
+      "studyGuide": {
+        "question": "How do you size TPU HBM capacity, bound BF16/INT8 precision error, and capture a clean XProf trace?",
+        "why": "Provisioning a TPU slice without budgeting HBM wastes time on out-of-memory crashes, and profiling without warming up measures compiler overhead instead of MXU execution.",
+        "readiness": {
+          "prompt": "A matrix multiplication has arithmetic intensity 170 FLOP/byte on TPU v5e (ridge point 240.5 FLOP/byte). Is it compute-bound or HBM bandwidth-bound?",
+          "answer": "HBM bandwidth-bound, because its arithmetic intensity (170 FLOP/byte) is below the TPU v5e ridge point (240.5 FLOP/byte). Increasing batch size or sequence length raises operational intensity toward the MXU ceiling.",
+          "lessonId": "tpu-03"
+        },
+        "milestones": [
+          {
+            "lessonIds": [
+              "tpu-03"
+            ],
+            "title": "Compare TPU generations and budget HBM capacity",
+            "task": "Compute TPU v5e, v5p, and v6e ridge points, calculate FP32 vs mixed-BF16 training state and KV-cache GiB, and determine the minimum chip count at an 80% HBM budget."
+          },
+          {
+            "lessonIds": [
+              "tpu-06"
+            ],
+            "title": "Audit BF16/INT8 precision and capture a warmed XProf trace",
+            "task": "Compare BF16 and symmetric INT8 matmul errors against FP32, verify FP32 accumulation inside jax.lax.dot_general, and capture a warmed *.xplane.pb trace."
+          }
+        ],
+        "transfer": {
+          "prompt": "An XProf trace on your TPU VM shows a 12-second host compile block followed by five 9-millisecond step blocks. How do you get a clean steady-state profile?",
+          "approach": "Run at least one warmup call and call jax.block_until_ready() before entering with jax.profiler.trace(trace_dir): so only steady-state execution is recorded."
+        },
+        "pitfall": {
+          "symptom": "Accumulating a long bfloat16 dot product directly in bfloat16 produces much larger drift than expected.",
+          "check": "Pass preferred_element_type=jnp.float32 to jax.lax.dot_general so the TPU MXU accumulates products in FP32 before any output cast."
+        },
+        "completion": "Retain the TPU ridge-point and HBM budget tables from tpu-03, plus the BF16/INT8 error summary and *.xplane.pb trace receipt from tpu-06.",
+        "furtherWork": "Apply the 3-part Cloud TPU mini-course across Phases 07, 08, 09, 13, 15, 16, 17, and 18 by staging each lesson script in exercises/ to your TPU VM."
       }
     }
   ],
@@ -3950,16 +4321,20 @@
       "background": "Use foundations to become comfortable with shapes, scalar losses, gradients and explicit state. Then practice train/evaluation separation in the classifier before adding recovery and sequence models.",
       "milestones": [
         {
-          "title": "Build the shared foundation",
+          "title": "Build the shared foundation and TPU workflow",
           "phaseIds": [
             "welcome",
+            "tpu",
+            "tpu-workflows",
+            "tpu-systems",
             "arrays",
             "transforms",
             "state",
             "optimization"
           ],
-          "deliverable": "A reproducible regression fit with checked gradients and explicit random state.",
+          "deliverable": "A reproducible regression fit with checked gradients, explicit random state, and a verified TPU launch workflow.",
           "criteria": [
+            "Provision or verify a TPU runtime and launch resumable jobs",
             "Explain array shapes and pure functions",
             "Compose grad, vmap, and jit",
             "Verify a loss and parameter update"
@@ -4002,20 +4377,20 @@
           "question": "I can set up JAX and identify the device running my code."
         },
         {
+          "phaseId": "tpu",
+          "question": "I can select a TPU slice, provision a Cloud TPU VM, and verify a runtime receipt."
+        },
+        {
+          "phaseId": "tpu-workflows",
+          "question": "I can stage scripts over SSH, separate warmup from step timing, and resume a checkpointed TPU job."
+        },
+        {
+          "phaseId": "tpu-systems",
+          "question": "I can budget TPU HBM capacity, test BF16/INT8 precision, and capture a warmed XProf trace."
+        },
+        {
           "phaseId": "arrays",
           "question": "I can predict array shapes and write a pure function."
-        },
-        {
-          "phaseId": "transforms",
-          "question": "I can compose grad, vmap, and jit and explain recompilation."
-        },
-        {
-          "phaseId": "state",
-          "question": "I can pass random keys and state through a compiled loop."
-        },
-        {
-          "phaseId": "optimization",
-          "question": "I can check a gradient and implement a loss and optimizer update."
         }
       ],
       "workExample": "Compare two training runs whose validation losses disagree. Trace the difference through data IDs, initialization, optimizer state and precision.",
@@ -4326,13 +4701,16 @@
       "background": "Start with a correct training loop and understand its data and state. Profiling requires a reproducible workload; distributed execution adds placement and communication contracts.",
       "milestones": [
         {
-          "title": "Build the shared foundation",
+          "title": "Build the shared foundation and TPU workflow",
           "phaseIds": [
             "welcome",
             "arrays",
             "transforms",
             "state",
-            "optimization"
+            "optimization",
+            "tpu",
+            "tpu-workflows",
+            "tpu-systems"
           ],
           "deliverable": "A reproducible regression fit with checked gradients and explicit random state.",
           "criteria": [
@@ -4455,13 +4833,16 @@
       "background": "Begin with a trained model and a reproducible prediction. You will need array shapes, saved state and a baseline measurement before reasoning about conversion, quantization or capacity.",
       "milestones": [
         {
-          "title": "Build the shared foundation",
+          "title": "Build the shared foundation and TPU workflow",
           "phaseIds": [
             "welcome",
             "arrays",
             "transforms",
             "state",
-            "optimization"
+            "optimization",
+            "tpu",
+            "tpu-workflows",
+            "tpu-systems"
           ],
           "deliverable": "A reproducible regression fit with checked gradients and explicit random state.",
           "criteria": [
@@ -4576,13 +4957,16 @@
       "background": "Understand the values that make a training update reproducible. Basic process lifecycle and filesystem knowledge help when rehearsing worker failure, checkpoint acceptance and rollback.",
       "milestones": [
         {
-          "title": "Build the shared foundation",
+          "title": "Build the shared foundation and TPU workflow",
           "phaseIds": [
             "welcome",
             "arrays",
             "transforms",
             "state",
-            "optimization"
+            "optimization",
+            "tpu",
+            "tpu-workflows",
+            "tpu-systems"
           ],
           "deliverable": "A reproducible regression fit with checked gradients and explicit random state.",
           "criteria": [

@@ -7,8 +7,8 @@
       "question": "Does LoRA require updating the base weights during adapter training?",
       "options": [
         "No. The base is frozen; the selected adapter parameters receive updates.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "Yes, because initializing factor \\(B=0\\) blocks all gradients until the base matrix moves.",
+        "No, and freezing the base weights guarantees that adapted outputs cannot forget the source task."
       ],
       "correct": 0,
       "explanation": "Freeze ownership should be checked in code, not inferred from an adapter-shaped parameter name."

@@ -4,10 +4,10 @@
   "minutes": 40,
   "content": {
     "idea": "Your first goal is a small, repeatable result: save a Python file, run it with the intended Python environment, and explain its output. A terminal accepts commands; Python executes the program; JAX is a package that Python imports. Keeping those three roles separate makes setup errors much easier to locate.",
-    "code": "import os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\nimport platform\nimport jax\nimport numpy as np\nprint(\"Python:\", platform.python_version())\nprint(\"JAX:\", jax.__version__)\nprint(\"NumPy:\", np.__version__)\nprint(\"Backend:\", jax.default_backend())\nprint(\"Devices:\", jax.devices())\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\nprint(\"Sum:\", float(x.sum()))\nassert float(x.sum()) == 6.0",
+    "code": "# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...\n# Import os for this computation.\nimport os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\n# Import required JAX, NumPy, and standard-library modules.\nimport platform\nimport jax\nimport numpy as np\n# Print the observed values to compare against the expected result.\nprint(\"Python:\", platform.python_version())\n# Print diagnostic summary of the computed outputs.\nprint(\"JAX:\", jax.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"NumPy:\", np.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"Backend:\", jax.default_backend())\n# Print diagnostic summary of the computed outputs.\nprint(\"Devices:\", jax.devices())\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Sum:\", float(x.sum()))\n# Verify contract: `float(x.sum()) == 6.0`.\nassert float(x.sum()) == 6.0",
     "output": "The package versions match the pins, Backend is cpu, and the last line is Sum: \\(6.0\\). The exact Python patch and CPU device text depend on your installation.",
     "exercise": "Edit the starter as shown in Step \\(6\\): change the array length from \\(4\\) to \\(6\\) and the expected sum from \\(6\\) to \\(15\\). Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.",
-    "solution": "x = jax.numpy.arange(6, dtype=jax.numpy.float32)\nprint(\"Changed experiment sum:\", float(x.sum()))\nassert float(x.sum()) == 15.0",
+    "solution": "# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...\nx = jax.numpy.arange(6, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Changed experiment sum:\", float(x.sum()))\n# Verify contract: `float(x.sum()) == 15.0`.\nassert float(x.sum()) == 15.0",
     "question": "Which evidence lets another learner reproduce your environment?",
     "options": [
       "A screenshot of the final number only",
@@ -48,13 +48,13 @@
           {
             "label": "macOS / Linux — terminal",
             "shell": "sh",
-            "code": "python3.14 --version",
+            "code": "# Run macos / linux — terminal using the course Python environment\npython3.14 --version",
             "expected": "A line beginning Python 3.14. The last patch number may differ from the tested 3.14.3."
           },
           {
             "label": "Windows — PowerShell",
             "shell": "powershell",
-            "code": "py -3.14 --version",
+            "code": "# Windows — PowerShell\npy -3.14 --version",
             "expected": "A line beginning Python 3.14. If py exists but cannot find 3.14, install that Python version first."
           }
         ]
@@ -66,13 +66,13 @@
           {
             "label": "macOS / Linux — check folder and files",
             "shell": "sh",
-            "code": "pwd\nls",
+            "code": "# macOS / Linux — check folder and files\npwd\nls",
             "expected": "The path ends with your extracted workspace folder, and the file list includes first_experiment.py and requirements-cpu.txt."
           },
           {
             "label": "Windows — check folder and files",
             "shell": "powershell",
-            "code": "Get-Location\nGet-ChildItem",
+            "code": "# Windows — check folder and files\nGet-Location\nGet-ChildItem",
             "expected": "The displayed folder contains first_experiment.py and requirements-cpu.txt."
           }
         ]
@@ -84,13 +84,13 @@
           {
             "label": "macOS / Linux — run one line at a time",
             "shell": "sh",
-            "code": "python3.14 -m venv .venv\nsource .venv/bin/activate\npython -c \"import sys; print(sys.executable)\"\npython -m pip install -r requirements-cpu.txt\npython -c \"import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)\"",
+            "code": "# Run macos / linux — run one line at a time using the course Python environment\npython3.14 -m venv .venv\nsource .venv/bin/activate\npython -c \"import sys; print(sys.executable)\"\npython -m pip install -r requirements-cpu.txt\npython -c \"import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)\"",
             "expected": "The interpreter path includes .venv/bin/python. The final line is 0.9.2 2.4.4 0.2.8."
           },
           {
             "label": "Windows — run one line at a time",
             "shell": "powershell",
-            "code": "py -3.14 -m venv .venv\n.\\.venv\\Scripts\\python.exe -c \"import sys; print(sys.executable)\"\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-cpu.txt\n.\\.venv\\Scripts\\python.exe -c \"import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)\"",
+            "code": "# Windows — run one line at a time\npy -3.14 -m venv .venv\n.\\.venv\\Scripts\\python.exe -c \"import sys; print(sys.executable)\"\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-cpu.txt\n.\\.venv\\Scripts\\python.exe -c \"import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)\"",
             "expected": "The interpreter path includes .venv\\Scripts\\python.exe. The final line is 0.9.2 2.4.4 0.2.8. These PowerShell instructions have not been executed on Windows in this project."
           }
         ]
@@ -102,13 +102,13 @@
           {
             "label": "macOS / Linux — activated terminal",
             "shell": "sh",
-            "code": "python first_experiment.py",
+            "code": "# Run macos / linux — activated terminal using the course Python environment\npython first_experiment.py",
             "expected": "Python: 3.14.x\nJAX: 0.9.2\nNumPy: 2.4.4\nBackend: cpu\nDevices: a CPU device description\nSum: 6.0"
           },
           {
             "label": "Windows — PowerShell",
             "shell": "powershell",
-            "code": ".\\.venv\\Scripts\\python.exe first_experiment.py",
+            "code": "# Run windows — powershell using the course Python environment\n.\\.venv\\Scripts\\python.exe first_experiment.py",
             "expected": "The same version/backend/result lines. CPU device wording may differ."
           }
         ]
@@ -120,13 +120,13 @@
           {
             "label": "macOS / Linux — save output",
             "shell": "sh",
-            "code": "python first_experiment.py > my-first-run.txt",
+            "code": "# Run macos / linux — save output using the course Python environment\npython first_experiment.py > my-first-run.txt",
             "expected": "my-first-run.txt appears in the workspace and ends with Sum: 15.0 after your saved edit."
           },
           {
             "label": "Windows — save output",
             "shell": "powershell",
-            "code": ".\\.venv\\Scripts\\python.exe first_experiment.py > my-first-run.txt",
+            "code": "# Run windows — save output using the course Python environment\n.\\.venv\\Scripts\\python.exe first_experiment.py > my-first-run.txt",
             "expected": "my-first-run.txt contains the program output after your saved edit."
           }
         ]
@@ -138,13 +138,13 @@
           {
             "label": "macOS / Linux — new terminal, same folder",
             "shell": "sh",
-            "code": "source .venv/bin/activate\npython first_experiment.py",
+            "code": "# macOS / Linux — new terminal, same folder\nsource .venv/bin/activate\npython first_experiment.py",
             "expected": "The same saved program runs using the existing environment."
           },
           {
             "label": "Windows — new PowerShell, same folder",
             "shell": "powershell",
-            "code": ".\\.venv\\Scripts\\python.exe first_experiment.py",
+            "code": "# Run windows — new powershell, same folder using the course Python environment\n.\\.venv\\Scripts\\python.exe first_experiment.py",
             "expected": "The explicit environment interpreter runs the saved program without activation."
           }
         ]

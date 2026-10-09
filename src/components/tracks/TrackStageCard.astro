@@ -1,0 +1,60 @@
+---
+import { allLessons } from '../../lib/course-data.js';
+import { inlineMath } from '../../lib/math.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
+
+interface Stage {
+  id: string;
+  title: string;
+  explanation: string;
+  application: string;
+  artifact: string;
+  check: string;
+  lessonIds: string[];
+  projectStageIds?: string[];
+}
+
+interface Props {
+  stage: Stage;
+  index: number;
+  totalStages: number;
+  harnessProjectId?: string | null;
+}
+
+const { stage, index, totalStages, harnessProjectId } = Astro.props;
+---
+
+<section id={stage.id} class="track-stage" aria-labelledby={`${stage.id}-heading`}>
+  <p class="edition">
+    Stage {index + 1} / {totalStages}
+  </p>
+  <h2 id={`${stage.id}-heading`} set:html={inlineMath(stage.title)} />
+  <p set:html={inlineMath(stage.explanation)} />
+  <p class="track-application" set:html={inlineMath(stage.application)} />
+  <div class="track-contract">
+    <div>
+      <h3>Keep as evidence</h3>
+      <p set:html={inlineMath(stage.artifact)} />
+    </div>
+    <div>
+      <h3>A check worth passing</h3>
+      <p set:html={inlineMath(stage.check)} />
+    </div>
+  </div>
+  {harnessProjectId && stage.projectStageIds && (
+    <p>
+      <a href={siteUrl(`project.html?id=${harnessProjectId}`)}>
+        Practice in project {stage.projectStageIds.length === 1 ? 'stage' : 'stages'}{' '}
+        {stage.projectStageIds.join(', ')}
+      </a>
+    </p>
+  )}
+  <h3>Available preparation</h3>
+  <ul class="track-lessons">
+    {stage.lessonIds.map((id) => (
+      <li>
+        <a href={siteUrl(lessonLink(id))}>{allLessons.find((lesson) => lesson.id === id)?.title}</a>
+      </li>
+    ))}
+  </ul>
+</section>

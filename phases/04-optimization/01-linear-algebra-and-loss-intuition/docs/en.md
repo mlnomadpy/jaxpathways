@@ -86,6 +86,8 @@ $$
 Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.
 
 ```python
+# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -97,14 +99,24 @@ This block establishes the values used by the following steps; run the completed
 Append this block below the inputs. Before proceeding, trace which values are inputs, predictions, and state.
 
 ```python
+# Step 2 — 2. Define the computation: predict contracts the feature axis through Xw.
+# Initialize array `X` with explicit values and shape.
 X = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+# Initialize array `w` with explicit values and shape.
 w = jnp.array([2., -1.])
+# Initialize array `targets` with explicit values and shape.
 targets = jnp.array([3., 0., 2.])
+# Function `predict(w, bias, X)` implementing this stage's computation:
 def predict(w, bias, X):
+    # Return `X @ w + bias` to the caller.
     return X @ w + bias
+# Function `mse(w, bias)` implementing this stage's computation:
 def mse(w, bias):
+    # Run `predict` to compute `prediction`.
     prediction = predict(w, bias, X)
+    # Verify that the output tensor shape matches our prediction.
     assert prediction.shape == targets.shape
+    # Return `jnp.mean((prediction - targets) ** 2)` to the caller.
     return jnp.mean((prediction - targets) ** 2)
 ```
 
@@ -115,9 +127,14 @@ predict contracts the feature axis through $Xw$. mse checks row alignment before
 Append the remaining block, then run python main.py in the terminal. Compare the printed result with the expected output below. Assertions stop execution if the contract fails.
 
 ```python
+# Step 3 — 3. Measure and verify: Predictions: [3., 0., 2.]; Loss: 0.0.
+# Print the observed values to compare against the expected result.
 print("Predictions:", predict(w, 1., X))
+# Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(predict(w, 1., X), targets)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(mse(w, 1.), 0.)
 ```
 
@@ -126,20 +143,37 @@ Predictions: $[3., 0., 2.]$; Loss: $0.0$.
 ## Run the example
 
 ```python
+# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
+# Step 2 — 2. Define the computation: predict contracts the feature axis through Xw.
+# Initialize array `X` with explicit values and shape.
 X = jnp.array([[1., 0.], [0., 1.], [1., 1.]])
+# Initialize array `w` with explicit values and shape.
 w = jnp.array([2., -1.])
+# Initialize array `targets` with explicit values and shape.
 targets = jnp.array([3., 0., 2.])
+# Function `predict(w, bias, X)` implementing this stage's computation:
 def predict(w, bias, X):
+    # Return `X @ w + bias` to the caller.
     return X @ w + bias
+# Function `mse(w, bias)` implementing this stage's computation:
 def mse(w, bias):
+    # Run `predict` to compute `prediction`.
     prediction = predict(w, bias, X)
+    # Verify that the output tensor shape matches our prediction.
     assert prediction.shape == targets.shape
+    # Return `jnp.mean((prediction - targets) ** 2)` to the caller.
     return jnp.mean((prediction - targets) ** 2)
+# Step 3 — 3. Measure and verify: Predictions: [3., 0., 2.]; Loss: 0.0.
+# Print the observed values to compare against the expected result.
 print("Predictions:", predict(w, 1., X))
+# Print diagnostic summary of the computed outputs.
 print("Loss:", float(mse(w, 1.)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(predict(w, 1., X), targets)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(mse(w, 1.), 0.)
 ```
 
@@ -166,12 +200,14 @@ The matrix-vector product produces one value per observation, and the scalar bia
 For bias $0$, the prediction-minus-target residual is $-1$ on every row. Squaring and averaging gives $(1+1+1)/3=1$. With bias $1$, all residuals are zero and the mean squared loss is zero. Read the gaps between bars to understand the loss; do not average the bar heights themselves.
 
 ```python
+# Compute figure data for: A scalar bias shifts every prediction
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:55.918075+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:48.862072+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]
@@ -189,9 +225,14 @@ PASS: optimization-01
 **Predict before running:** At bias zero, what are the weight and bias derivatives?
 
 ```python
+# Experiment — Verify the gradient by hand: The matrix formula and autodiff agree for the same row-matched...
+# Differentiate the objective to obtain `(gw, gb)` via automatic differentiation.
 gw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(gw, jnp.array([-4/3, -4/3]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(gb, -2.)
+# Print the observed values to compare against the expected result.
 print("Analytic gradients:", gw, gb)
 ```
 
@@ -204,10 +245,15 @@ The matrix formula and autodiff agree for the same row-matched scalar objective.
 **Predict before running:** Does an exact model still have zero loss against column targets?
 
 ```python
+# Experiment — Make the silent shape error visible: A valid broadcast can define an unintended objective without...
 column_targets = targets[:, None]
+# Run `predict` to compute `pairwise`.
 pairwise = predict(w, 1., X) - column_targets
+# Verify that the output tensor shape matches our prediction.
 assert pairwise.shape == (3, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.mean(pairwise**2), 28/9)
+# Print the observed values to compare against the expected result.
 print("Wrong residual shape:", pairwise.shape)
 ```
 
@@ -220,14 +266,23 @@ A valid broadcast can define an unintended objective without raising an exceptio
 **Predict before running:** For the same three residuals, how much larger is the gradient of a sum loss than a mean loss?
 
 ```python
+# Experiment — Change the reduction, predict the update: Loss reduction is part of the optimization specification.
 def mean_objective(weights):
+    # Return `jnp.mean((X @ weights - targets) ** 2)` to the caller.
     return jnp.mean((X @ weights - targets)**2)
+# Function `sum_objective(weights)` implementing this stage's computation:
 def sum_objective(weights):
+    # Return `jnp.sum((X @ weights - targets) ** 2)` to the caller.
     return jnp.sum((X @ weights - targets)**2)
+# Initialize array `point` with explicit values and shape.
 point = jnp.array([0.2, -0.4])
+# Perform matrix contraction / projection to compute `residual`.
 residual = X @ point - targets
+# Perform matrix contraction / projection to compute `analytic_mean`.
 analytic_mean = 2 * X.T @ residual / X.shape[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, atol=1e-6)
 ```
 
@@ -239,11 +294,35 @@ Loss reduction is part of the optimization specification. Match it when comparin
 
 Set the bias to zero. Predict each residual and calculate the loss by hand, then compare it with JAX.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Verify that the numerical values match the expected reference within tolerance.
+2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Set the bias to zero.
+residual = predict(...)  # TODO: compute residual
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(residual, -jnp.ones(3))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(mse(w, 0.), 1.)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Set the bias to zero.
 residual = predict(w, 0., X) - targets
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(residual, -jnp.ones(3))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(mse(w, 0.), 1.)
 ```
 
@@ -261,11 +340,38 @@ The new target is the dot product plus bias.
 
 </details>
 
+### How to write: Add an unseen observation — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `X_new` with explicit values and shape.
+2. Initialize array `y_new` with explicit values and shape.
+3. Verify that the numerical values match the expected reference within tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Add an unseen observation (Transfer / diagnosis): The fourth row checks a combination absent from the original...
+# Initialize array `X_new` with explicit values and shape.
+X_new = jnp.concatenate(...)  # TODO: compute X_new
+# Initialize array `y_new` with explicit values and shape.
+y_new = jnp.concatenate(...)  # TODO: compute y_new
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(predict(w, 1., X_new), y_new)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Add an unseen observation (Transfer / diagnosis): The fourth row checks a combination absent from the original...
+# Initialize array `X_new` with explicit values and shape.
 X_new = jnp.concatenate([X, jnp.array([[2., -1.]])])
+# Initialize array `y_new` with explicit values and shape.
 y_new = jnp.concatenate([targets, jnp.array([6.])])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(predict(w, 1., X_new), y_new)
 ```
 
@@ -285,19 +391,56 @@ Compare shapes before subtraction; reshape only this known scalar-target dataset
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Reject and repair a column target — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+
+**Step-by-step implementation plan:**
+1. Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
+2. Return `jnp.mean((prediction - target) ** 2)` to the caller.
+3. Run the boundary check and catch the expected exception:
+4. Verify contract: `checked_loss(predict(w, 1.0, X), column_targets[:, 0]) == 0`.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
 def checked_loss(prediction, target):
+    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")
-    return jnp.mean((prediction-target)**2)
+    # Return `jnp.mean((prediction - target) ** 2)` to the caller.
+    return ...  # TODO: return computed result
+# Run the boundary check and catch the expected exception:
 try:
     checked_loss(predict(w, 1., X), column_targets)
 except ValueError:
     pass
 else:
     raise AssertionError("bad shape accepted")
+# Verify contract: `checked_loss(predict(w, 1.0, X), column_targets[:, 0]) == 0`.
+assert checked_loss(predict(w, 1., X), column_targets[:, 0])  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
+def checked_loss(prediction, target):
+    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
+    if prediction.shape != target.shape:
+        raise ValueError("one target required per prediction")
+    # Return `jnp.mean((prediction - target) ** 2)` to the caller.
+    return jnp.mean((prediction-target)**2)
+# Run the boundary check and catch the expected exception:
+try:
+    checked_loss(predict(w, 1., X), column_targets)
+except ValueError:
+    pass
+else:
+    raise AssertionError("bad shape accepted")
+# Verify contract: `checked_loss(predict(w, 1.0, X), column_targets[:, 0]) == 0`.
 assert checked_loss(predict(w, 1., X), column_targets[:, 0]) == 0
 ```
 

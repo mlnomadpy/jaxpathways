@@ -9,6 +9,7 @@
 Run the cumulative project checks from the workspace root:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 4
 ```
 

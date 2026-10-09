@@ -1,7 +1,7 @@
 ---
 import '../../styles/home/offline.css';
 import { offline } from '../../data/home.json';
-import { siteUrl } from '../../lib/urls.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
 ---
 
 <section id="other-ways" class="offline-section" aria-labelledby="offline-title">
@@ -44,7 +44,7 @@ import { siteUrl } from '../../lib/urls.js';
     </div>
     <p class="small">
       The printable reader can be saved as a PDF from your browser.{' '}
-      <a href={siteUrl('lesson.html?lesson=welcome-01')}>Read the first lesson online ↗</a>
+      <a href={siteUrl(lessonLink('welcome-01'))}>Read the first lesson online ↗</a>
     </p>
   </div>
 </section>

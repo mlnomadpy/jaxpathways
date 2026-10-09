@@ -23,9 +23,6 @@ main > :where(section[id]) {
   font-size: 16px;
   color: var(--muted);
 }
-.section-head .edition {
-  margin-bottom: 12px;
-}
 .badge {
   font: 12px/1.5 var(--ui);
   color: var(--muted);

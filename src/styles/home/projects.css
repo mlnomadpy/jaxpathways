@@ -1,5 +1,5 @@
 .project-section {
-  background: #faf9fe;
+  background: var(--section-alt);
   padding: 54px 0;
 }
 .project-section > .page-width {
@@ -12,15 +12,15 @@
 }
 .project-tile {
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: var(--learning-radius);
   overflow: hidden;
-  background: white;
+  background: var(--panel);
   display: flex;
   flex-direction: column;
 }
 .project-drawing {
   min-height: 170px;
-  background: #e8e1f5;
+  background: var(--nav-surface);
   display: flex;
   align-items: center;
   justify-content: center;

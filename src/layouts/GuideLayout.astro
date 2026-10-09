@@ -1,0 +1,45 @@
+---
+import 'katex/dist/katex.min.css';
+import '../styles/tokens.css';
+import '../styles/base.css';
+import '../styles/features/assessment.css';
+import '../styles/features/math.css';
+import SiteFooter from '../components/shared/SiteFooter.astro';
+import SiteLayout from './SiteLayout.astro';
+
+interface Props {
+  title: string;
+  description: string;
+  active?: string;
+  skipTarget?: string;
+  skipLabel?: string;
+  mainId?: string;
+  mainClass?: string;
+}
+
+const {
+  title,
+  description,
+  active = 'course',
+  mainId = 'assessment',
+  skipTarget = `#${mainId}`,
+  skipLabel = 'Skip to content',
+  mainClass,
+} = Astro.props;
+---
+
+<SiteLayout
+  title={title}
+  description={description}
+  active={active}
+  skipTarget={skipTarget}
+  skipLabel={skipLabel}
+>
+  <main id={mainId} class={mainClass}>
+    <slot />
+    <SiteFooter />
+  </main>
+  <script>
+    import '../scripts/entries/assessment.js';
+  </script>
+</SiteLayout>

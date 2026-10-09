@@ -58,8 +58,8 @@
   overflow-wrap: anywhere;
 }
 .choice-options > label:has(input:checked) {
-  background: var(--atlas);
-  color: #fff;
+  background: var(--primary-bg);
+  color: var(--primary-ink);
   box-shadow: 0 2px 4px rgb(48 33 107 / 15%);
 }
 .choice-options > label:has(:focus-visible),
@@ -155,9 +155,9 @@
   box-shadow: inset 3px 0 var(--accent);
 }
 .ui-radio-group[data-variant='answers'] > label:has(input:checked)::before {
-  color: #fff;
-  background: var(--atlas);
-  border-color: var(--atlas);
+  color: var(--primary-ink);
+  background: var(--primary-bg);
+  border-color: var(--primary-bg);
 }
 @media (hover: hover) {
   .choice-options > label:hover:not(:has(input:checked, input:disabled)) {

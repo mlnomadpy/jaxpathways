@@ -114,7 +114,7 @@ Audit derivatives and a tiny transformation.
 
 **Demonstrate:** Explain tracing and verify the derivative rule numerically.
 
-Project status: implemented staged practice · [Open source](../../projects/derivative-audit/README.md).
+Project status: implemented staged practice · [Open source](../../projects/derivative-audit/README.md). Copy `projects/derivative-audit/starter/model.py` to `projects/derivative-audit/my_model.py` and write your code in `projects/derivative-audit/my_model.py`. Run `python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 
 

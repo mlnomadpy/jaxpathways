@@ -7,8 +7,8 @@
       "question": "Why must the encoder input be inspected separately from reconstruction loss?",
       "options": [
         "A leaked target can produce a perfect loss without learning to infer missing content.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "Averaging squared error over only hidden patches automatically prevents hidden pixels from entering the encoder.",
+        "Flattening an image without transposing grid and patch axes changes the shape of the patch tensor."
       ],
       "correct": 0,
       "explanation": "Correct reduction does not prevent input leakage. Audit the visible-only boundary and validate patch order."

@@ -67,7 +67,9 @@ The compiled transition assumes a binary integer action, positive horizon, and s
 Create main.py with this block. Run python3 main.py in the course CPU environment.
 
 ```python
+# Step 1: Define state and the transition
 """Finite-horizon tabular policy training. CPU teaching environment, not a benchmark."""
+# Import functools (partial) for this computation.
 from functools import partial
 from typing import NamedTuple
 import jax
@@ -75,30 +77,45 @@ import jax.numpy as jnp
 import numpy as np
 
 
+# Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
+    # Evaluate `position` from the current inputs and state.
     position: jax.Array
+    # Evaluate `elapsed` from the current inputs and state.
     elapsed: jax.Array
+    # Evaluate `done` from the current inputs and state.
     done: jax.Array
 
 
+# Function `reset(key)` implementing this stage's computation:
 def reset(key):
     """Start uniformly at position 0 or 1; goal is position 3."""
+    # Return `State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))` to the caller.
     return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))
 
 
+# Function `step(state, action, horizon)` implementing this stage's computation:
 def step(state, action, horizon=8):
     """Action 0: left, 1: right. Caller supplies binary action and positive horizon.
 
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
+    # Evaluate `active` from the current inputs and state.
     active = ~state.done
+    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
+    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
+    # Evaluate `elapsed` from the current inputs and state.
     elapsed = state.elapsed + active.astype(jnp.int32)
+    # Evaluate `terminated` from the current inputs and state.
     terminated = active & (position == 3)
+    # Evaluate `truncated` from the current inputs and state.
     truncated = active & ~terminated & (elapsed >= horizon)
+    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
+    # Return `(State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated)` to the caller.
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 ```
 
@@ -109,16 +126,25 @@ The function returns all information needed by the next call. No hidden counter 
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
+# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
+# Evaluate `(positions, rewards)` from the current inputs and state.
 positions, rewards = [int(s.position)], []
+# Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
+    # Run `step` to compute `(s, reward, terminated, truncated)`.
     s, reward, terminated, truncated = step(s, jnp.int32(action))
+    # Append the current step result to `positions`.
+    # Append the current step result to `positions`.
     positions.append(int(s.position)); rewards.append(float(reward))
+# Verify contract: `positions == [1, 2, 3, 3, 3]`.
 assert positions == [1, 2, 3, 3, 3]
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert int(s.elapsed) == 2
+# Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
-
 ```
 
 The known two-action path produces one terminal reward and then zero padding.
@@ -126,7 +152,9 @@ The known two-action path produces one terminal reward and then zero padding.
 ## Run the example
 
 ```python
+# Complete runnable example (rl-01)
 """Finite-horizon tabular policy training. CPU teaching environment, not a benchmark."""
+# Import functools (partial) for this computation.
 from functools import partial
 from typing import NamedTuple
 import jax
@@ -134,42 +162,66 @@ import jax.numpy as jnp
 import numpy as np
 
 
+# Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
+    # Evaluate `position` from the current inputs and state.
     position: jax.Array
+    # Evaluate `elapsed` from the current inputs and state.
     elapsed: jax.Array
+    # Evaluate `done` from the current inputs and state.
     done: jax.Array
 
 
+# Function `reset(key)` implementing this stage's computation:
 def reset(key):
     """Start uniformly at position 0 or 1; goal is position 3."""
+    # Return `State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))` to the caller.
     return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))
 
 
+# Function `step(state, action, horizon)` implementing this stage's computation:
 def step(state, action, horizon=8):
     """Action 0: left, 1: right. Caller supplies binary action and positive horizon.
 
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
+    # Evaluate `active` from the current inputs and state.
     active = ~state.done
+    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
+    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
+    # Evaluate `elapsed` from the current inputs and state.
     elapsed = state.elapsed + active.astype(jnp.int32)
+    # Evaluate `terminated` from the current inputs and state.
     terminated = active & (position == 3)
+    # Evaluate `truncated` from the current inputs and state.
     truncated = active & ~terminated & (elapsed >= horizon)
+    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
+    # Return `(State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated)` to the caller.
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
+# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
+# Evaluate `(positions, rewards)` from the current inputs and state.
 positions, rewards = [int(s.position)], []
+# Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
+    # Run `step` to compute `(s, reward, terminated, truncated)`.
     s, reward, terminated, truncated = step(s, jnp.int32(action))
+    # Append the current step result to `positions`.
+    # Append the current step result to `positions`.
     positions.append(int(s.position)); rewards.append(float(reward))
+# Verify contract: `positions == [1, 2, 3, 3, 3]`.
 assert positions == [1, 2, 3, 3, 3]
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert int(s.elapsed) == 2
+# Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
-
 ```
 
 Expected: Positions are $(1,2,3,3,3)$. Rewards are $(-0.01,1,0,0)$; elapsed time stops at $2$.
@@ -191,12 +243,14 @@ The horizontal axis counts transitions, starting with the first action. The vert
 The positions printed by the program are $(1,2,3,3,3)$. The sharp reward peak occurs only when entering the goal. Summing the four plotted rewards gives $0.99$, exactly the two-action return. A flat tail at $1$ would expose repeated terminal rewards; this zero tail demonstrates the absorbing-state contract, not learning.
 
 ```python
+# Compute figure data for: One goal reward, then absorbing padding
+# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':'reward per transition','series':[{'label':'right, right, padded, padded','y':rewards}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:02:28.838371+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:04:59.644712+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]
@@ -212,9 +266,13 @@ PASS: rl-01
 **Predict before running:** Which event wins if the final permitted action reaches the goal?
 
 ```python
+# Experiment — A goal at the deadline: The goal transition defines a completed task, so the two flags...
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
+# Run `step` to compute `(s, r, term, trunc)`.
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
+# Verify contract: `bool(term) and (not bool(trunc)) and (float(r) == 1.0)`.
 assert bool(term) and not bool(trunc) and float(r) == 1.
+# Print the observed values to compare against the expected result.
 print('deadline goal:', bool(term), bool(trunc))
 ```
 
@@ -227,11 +285,18 @@ The goal transition defines a completed task, so the two flags remain mutually e
 **Predict before running:** Will resetting twice with one key produce two independent trials?
 
 ```python
+# Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
+# Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
+# Evaluate `(a, b)` from the current inputs and state.
 a, b = reset(key), reset(key)
+# Verify contract: `int(a.position) == int(b.position)`.
 assert int(a.position) == int(b.position)
+# Create or split explicit PRNG key(s) (`starts`) for reproducible randomness.
 starts = jax.vmap(reset)(jax.random.split(key, 1000)).position
+# Verify contract: `0.4 < float(starts.mean()) < 0.6`.
 assert 0.4 < float(starts.mean()) < 0.6
+# Print the observed values to compare against the expected result.
 print('fraction starting at one:', float(starts.mean()))
 ```
 
@@ -243,17 +308,63 @@ This verifies the randomness contract, not a guarantee that every tiny batch is 
 
 Begin at position $0$, choose left for three actions with horizon $3$, and then attempt one more action. Verify the event flags, total reward and absorbing state.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `State(...)` — Call `State` with your updated parameters or inputs from this lesson's workspace.
+- `jnp.int32(...)` — Call `jnp.int32` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Evaluate `total` from the current inputs and state.
+2. Iterate over `i` to step through the computation:
+3. Run `step` to compute `(s, r, term, trunc)`.
+4. Accumulate the next contribution into `total`.
+5. Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+s = State(...)  # TODO: compute s
+# Evaluate `total` from the current inputs and state.
+total = ...  # TODO: compute total
+# Iterate over `i` to step through the computation:
+for i in range(3):
+    # Run `step` to compute `(s, r, term, trunc)`.
+    s, r, term, trunc = step(...)  # TODO: compute s, r, term, trunc
+    # Accumulate the next contribution into `total`.
+    total += float(r)
+    # Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
+    assert not bool(term)  # TODO: complete assertion check
+# Verify contract: `abs(total + 0.03) < 1e-06`.
+assert abs(total + .03)  # TODO: complete assertion check
+# Run `step` to compute `(s2, r, term, trunc)`.
+s2, r, term, trunc = step(...)  # TODO: compute s2, r, term, trunc
+# Verify contract: `int(s2.position) == 0 and int(s2.elapsed) == 3 and (float(r) == 0.0)`.
+assert int(s2.position)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
+# Evaluate `total` from the current inputs and state.
 total = 0.
+# Iterate over `i` to step through the computation:
 for i in range(3):
+    # Run `step` to compute `(s, r, term, trunc)`.
     s, r, term, trunc = step(s, jnp.int32(0), 3)
+    # Accumulate the next contribution into `total`.
     total += float(r)
+    # Verify contract: `not bool(term) and bool(trunc) == (i == 2)`.
     assert not bool(term) and bool(trunc) == (i == 2)
+# Verify contract: `abs(total + 0.03) < 1e-06`.
 assert abs(total + .03) < 1e-6
+# Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(s, jnp.int32(1), 3)
+# Verify contract: `int(s2.position) == 0 and int(s2.elapsed) == 3 and (float(r) == 0.0)`.
 assert int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.
 ```
 
@@ -271,14 +382,51 @@ Use the termination flag for the continuing task. The finite-horizon task assign
 
 </details>
 
+### How to write: Separate the two target meanings — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `meanings(...)` — Call `meanings` with your updated parameters or inputs from this lesson's workspace.
+- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Evaluate `continuing_timeout` from the current inputs and state.
+2. Evaluate `terminal` from the current inputs and state.
+3. Evaluate `finite_horizon_timeout` from the current inputs and state.
+4. Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
+r, gamma, value = ...  # TODO: compute r, gamma, value
+# Evaluate `continuing_timeout` from the current inputs and state.
+continuing_timeout = ...  # TODO: compute continuing_timeout
+# Evaluate `terminal` from the current inputs and state.
+terminal = ...  # TODO: compute terminal
+# Evaluate `finite_horizon_timeout` from the current inputs and state.
+finite_horizon_timeout = ...  # TODO: compute finite_horizon_timeout
+# Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
+assert abs(continuing_timeout - 1.79)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert terminal  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
 r, gamma, value = -.01, .9, 2.
+# Evaluate `continuing_timeout` from the current inputs and state.
 continuing_timeout = r + gamma * value
+# Evaluate `terminal` from the current inputs and state.
 terminal = r
+# Evaluate `finite_horizon_timeout` from the current inputs and state.
 finite_horizon_timeout = r
+# Verify contract: `abs(continuing_timeout - 1.79) < 1e-07`.
 assert abs(continuing_timeout - 1.79) < 1e-7
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert terminal == finite_horizon_timeout == -.01
 ```
 
@@ -298,17 +446,63 @@ Use ordinary min and max for the independent reference.
 
 </details>
 
+### How to write: Enumerate all one-step moves — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+
+**Step-by-step implementation plan:**
+1. Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
+2. Iterate over `position` to step through the computation:
+3. Loop over `action` in `[0, 1]`:
+4. Run `State` to compute `s`.
+5. Run `compiled` to compute `(nxt, reward, term, trunc)`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
+compiled = jax.jit(...)  # TODO: compute compiled
+# Iterate over `position` to step through the computation:
+for position in range(3):
+    # Loop over `action` in `[0, 1]`:
+    for action in [0, 1]:
+        # Run `State` to compute `s`.
+        s = State(...)  # TODO: compute s
+        # Run `compiled` to compute `(nxt, reward, term, trunc)`.
+        nxt, reward, term, trunc = compiled(...)  # TODO: compute nxt, reward, term, trunc
+        # Run `min` to compute `expected`.
+        expected = min(...)  # TODO: compute expected
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        assert int(nxt.position)  # TODO: complete assertion check
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        assert bool(term)  # TODO: complete assertion check
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        assert abs(float(reward) - (1. if expected  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(step)
+# Iterate over `position` to step through the computation:
 for position in range(3):
+    # Loop over `action` in `[0, 1]`:
     for action in [0, 1]:
+        # Run `State` to compute `s`.
         s = State(jnp.int32(position), jnp.int32(0), jnp.bool_(False))
+        # Run `compiled` to compute `(nxt, reward, term, trunc)`.
         nxt, reward, term, trunc = compiled(s, jnp.int32(action))
+        # Run `min` to compute `expected`.
         expected = min(3, max(0, position + (1 if action else -1)))
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert int(nxt.position) == expected
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert bool(term) == (expected == 3)
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6
 ```
 

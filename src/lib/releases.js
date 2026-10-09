@@ -10,12 +10,24 @@ export const feedbackAccess =
     ? ''
     : 'The repository is currently private; GitHub issue access is limited to collaborators.';
 
+/**
+ * @param {'lessons' | 'phases'} kind
+ * @param {string} id
+ */
 export function revisionMarkup(kind, id) {
-  const revision = currentRelease[kind]?.[id];
+  const collection =
+    /** @type {Record<string, { hash: string; version: string; date: string }>} */ (
+      currentRelease[kind]
+    );
+  const revision = collection?.[id];
   if (!revision) return '';
   return `<p class="revision-stamp" data-revision-key="${escapeHtml(kind + ':' + id)}" data-revision-hash="${revision.hash}"><a href="${siteUrl('updates.html')}#v${revision.version}">Revision v${revision.version} · <time datetime="${revision.date}">${revision.date}</time></a><span data-revision-notice hidden>Updated since your last visit. Review the changes; your progress is saved.</span></p>`;
 }
 
+/**
+ * @param {string} [title]
+ * @param {string} [page]
+ */
 export function feedbackUrl(title = 'Course feedback', page = '') {
   const query = new URLSearchParams({
     template: 'course-feedback.yml',

@@ -10,7 +10,13 @@ const katexCss = readFileSync(katexPath, 'utf8').replace(
   (_, font) =>
     `src:url(data:font/woff2;base64,${readFileSync(join(dirname(katexPath), font)).toString('base64')}) format("woff2")`,
 );
-const styles = ['features/lesson-visuals.css', 'features/math.css', 'shared/code.css', 'print.css'];
+const styles = [
+  'tokens.css',
+  'features/lesson-visuals.css',
+  'features/math.css',
+  'shared/code.css',
+  'print.css',
+];
 export const readerStyles = [
   katexCss,
   ...styles.map((file) => readFileSync(join(process.cwd(), 'src/styles', file), 'utf8')),

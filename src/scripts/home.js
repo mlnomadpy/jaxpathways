@@ -3,7 +3,7 @@ import { bindClipboard } from './browser-actions.js';
 export function initHomeCopy() {
   bindClipboard({
     selector: '[data-home-copy]',
-    source: (button) => document.getElementById(button.dataset.homeCopy),
+    source: (button) => document.getElementById(button.dataset.homeCopy || ''),
     feedback: (button) => document.getElementById(`${button.dataset.homeCopy}-status`),
     success: (button) =>
       button.dataset.homeCopy === 'tutor-install'

@@ -11,33 +11,54 @@
   justify-content: space-between;
   gap: 20px;
   width: 100%;
+  min-height: 52px;
+  padding: 16px 0;
   border: 0;
+  border-radius: 0;
+  background: none;
+  font-size: 16px;
   text-align: left;
-}
-.lesson-link .sample {
-  color: var(--mint);
+  text-decoration: none;
 }
 .lesson-link .authored {
   color: var(--mint);
 }
-.lesson-link {
-  border-radius: 0;
-  font-size: 14px;
-  min-height: 52px;
-  padding: 14px 0;
-  background: none;
+.lesson-link .badge {
+  font: 13px/1.5 var(--ui);
+}
+.lesson-link .lesson-label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 4px 12px;
+  min-width: 0;
 }
 .lesson-number {
+  margin: 0;
   font-size: 12px;
   color: var(--muted);
-  margin-right: 12px;
+  white-space: nowrap;
+  align-self: baseline;
 }
-.lesson-link .badge.authored {
-  color: var(--mint);
+.lesson-runtime {
+  grid-column: 2;
+  display: block;
+  margin-top: 0;
+  color: var(--muted);
+  font: 13px/1.5 var(--ui);
+}
+.lesson-link:hover .lesson-title,
+.lesson-link:focus-visible .lesson-title {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 @media (max-width: 760px) {
+  .lesson-link {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
   .lesson-link > span:first-child {
     min-width: 0;
+    flex-basis: 100%;
   }
   .lesson-number {
     display: block;
@@ -45,33 +66,6 @@
   }
   .lesson-link .badge {
     font-size: 11px;
-    margin-left: 10px;
+    margin: 0;
   }
-}
-.lesson-runtime {
-  display: block;
-  color: var(--muted);
-  font: 12px/1.5 var(--ui);
-  margin-top: 4px;
-}
-
-.lesson-link .lesson-label {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 4px 12px;
-  min-width: 0;
-}
-.lesson-label .lesson-number {
-  margin: 0;
-  white-space: nowrap;
-  align-self: baseline;
-}
-.lesson-label .lesson-runtime {
-  grid-column: 2;
-  margin-top: 0;
-}
-.lesson-link:hover .lesson-title,
-.lesson-link:focus-visible .lesson-title {
-  text-decoration: underline;
-  text-underline-offset: 3px;
 }

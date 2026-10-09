@@ -2,6 +2,7 @@
 import ModalityTracks from '../components/paths/ModalityTracks.astro';
 import PathCards from '../components/paths/PathCards.astro';
 import RoleCards from '../components/paths/RoleCards.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/paths.css';
@@ -13,15 +14,13 @@ import pages from '../data/pages.json';
 
 <SiteLayout {...pages.pathways}>
   <main id="main" class="paths-page">
-    <div class="page-intro">
-      <a href={siteUrl('index.html')}>Home</a>
-      <h1>
+    <PageIntro edition="Learning paths" intro="One shared foundation. Several ways to use it.">
+      <h1 slot="title">
         What would you
         <br />
         like to build?
       </h1>
-      <p class="intro">One shared foundation. Several ways to use it.</p>
-    </div>
+    </PageIntro>
     <section class="path-foundation">
       <div>
         <h2>Start with JAX.</h2>

@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-01",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Which command sequence proves that your Cloud TPU VM is both usable by JAX and no longer billing when you finish?",
+      "options": [
+        "Running `gcloud compute tpus tpu-vm create` and closing your laptop lid when done",
+        "Running a Python check on the TPU VM that verifies `jax.default_backend() == 'tpu'` and a synchronized computation, copying receipts back, running `gcloud compute tpus tpu-vm delete`, and confirming `list` is empty",
+        "Checking `pip list` on your local laptop"
+      ],
+      "correct": 1,
+      "explanation": "Only an in-process JAX check on the TPU VM confirms TPU device discovery and execution, and only `tpu-vm delete` verified by `tpu-vm list` stops Cloud TPU VM billing."
+    }
+  ]
+}

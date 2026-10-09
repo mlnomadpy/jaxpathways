@@ -6,7 +6,7 @@ Train small masked-token, hidden-patch and paired-view models. Audit information
 
 Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
 
-**Prerequisites:** 07: Transformers & language models.
+**Prerequisites:** 07: Transformers & language models; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate.
 
@@ -106,7 +106,7 @@ An audited pretraining and adaptation objective toolkit.
 
 **Demonstrate:** Complete stages 1–3 of training-methods with independent loss references, real training curves, changed masks or pairs and explicit synthetic-data limits.
 
-Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 1, 2, 3 for this phase.
+Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 1, 2, 3 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` from the top-level folder to verify stages 1, 2, 3.
 
 
 

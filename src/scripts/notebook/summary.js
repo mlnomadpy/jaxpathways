@@ -2,6 +2,7 @@ import { $ } from '../../lib/dom.js';
 import { courseState, phaseById } from '../../lib/course-state.js';
 import { validateReadingState } from '../../lib/learner-records.js';
 import { escapeHtml } from '../../lib/html.js';
+import { lessonLink } from '../../lib/urls.js';
 
 export function renderNotebookSummary({ routes, projects, allLessons, context, state, backup }) {
   const route = routes.find((r) => r.id === state.route);
@@ -17,13 +18,13 @@ export function renderNotebookSummary({ routes, projects, allLessons, context, s
   const next = available.find((l) => !courseState.lessonProgress.lessons[l.id]?.evidenceSaved);
   const hasPractice = Object.keys(courseState.lessonProgress.lessons).length > 0;
   const resume = last
-    ? `<p class="edition">Resume your reading</p><h3>${escapeHtml(last.title)}</h3><a class="button primary" href="lesson.html?lesson=${encodeURIComponent(last.id)}&path=${encodeURIComponent(reading.path)}${reading.sectionId ? '#' + encodeURIComponent(reading.sectionId) : ''}">Continue from your saved section</a><p class="soft">Reading position is separate from completing an exercise.</p>`
+    ? `<p class="edition">Resume your reading</p><h3>${escapeHtml(last.title)}</h3><a class="button primary" href="${lessonLink(last.id, reading.path)}${reading.sectionId ? '#' + encodeURIComponent(reading.sectionId) : ''}">Continue from your saved section</a><p class="soft">Reading position is separate from completing an exercise.</p>`
     : next
-      ? `<p class="edition">${hasPractice ? 'Your next experiment' : 'Your learning starts here'}</p><h3>${escapeHtml(next.title)}</h3><a class="button primary" href="lesson.html?path=${route.id}&lesson=${next.id}">Start this lesson</a>`
+      ? `<p class="edition">${hasPractice ? 'Your next experiment' : 'Your learning starts here'}</p><h3>${escapeHtml(next.title)}</h3><a class="button primary" href="${lessonLink(next.id, route.id)}">Start this lesson</a>`
       : '<p>All available exercises are self-reported complete. Review your artifacts; remaining course topics may still be unwritten.</p>';
   $('#lesson-progress-summary').innerHTML =
     resume +
-    `<p>${exercised.length} / ${available.length} exercises reported · ${available.filter((l) => courseState.lessonProgress.lessons[l.id]?.checkpointPassed).length} checkpoints passed</p>${last && next ? `<a href="lesson.html?path=${route.id}&lesson=${next.id}">Next unmarked exercise on ${escapeHtml(route.title)}: ${escapeHtml(next.title)}</a>` : ''}`;
+    `<p>${exercised.length} / ${available.length} exercises reported · ${available.filter((l) => courseState.lessonProgress.lessons[l.id]?.checkpointPassed).length} checkpoints passed</p>${last && next ? `<a href="${lessonLink(next.id, route.id)}">Next unmarked exercise on ${escapeHtml(route.title)}: ${escapeHtml(next.title)}</a>` : ''}`;
   const reportedProjects = projects.filter((p) => (backup().projects[p.id] || []).length);
   $('#project-progress-summary').innerHTML = reportedProjects.length
     ? `<h3>Your project practice</h3>${reportedProjects
@@ -40,5 +41,5 @@ export function renderNotebookSummary({ routes, projects, allLessons, context, s
   $('#saved-career').hidden = !role || !phase;
   if (role && phase)
     $('#saved-career').innerHTML =
-      `<p class="edition">Saved career plan</p><h3>${escapeHtml(role.title)}</h3><p>Suggested starting phase: ${escapeHtml(phase.title)}. This is based on your self-check.</p><a href="pathways.html?role=${encodeURIComponent(role.id)}#careers">Review my career plan</a>`;
+      `<p class="edition">Saved career plan</p><h3>${escapeHtml(role.title)}</h3><p>Suggested starting phase: ${escapeHtml(phase.title)}. This is based on your self-check.</p><a href="careers.html?role=${encodeURIComponent(role.id)}#roles">Review my career plan</a>`;
 }

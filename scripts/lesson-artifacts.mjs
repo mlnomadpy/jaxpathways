@@ -1,4 +1,5 @@
 import {figureNotebookCode} from './figure-artifacts.mjs';
+import {buildStarterScaffold,extractCodeApis,extractCodingSteps} from '../src/lib/code-teaching.js';
 // Convert only prose fields for Markdown engines; executable code stays byte-for-byte intact.
 export function markdownText(text) {
   return String(text).replace(/(`+)([^\n]*?)\1|\\\(([\s\S]*?)\\\)|\\\[([\s\S]*?)\\\]/g,
@@ -13,6 +14,23 @@ function markdownContent(value, key = '') {
 }
 // All lesson companions include the same teaching sections and runnable experiments.
 const fence = code => `\`\`\`python\n${code}\n\`\`\``;
+function exerciseGuideMarkdown(solutionCode, title = 'How to write this code') {
+  const apis = extractCodeApis(solutionCode);
+  const steps = extractCodingSteps(solutionCode);
+  const scaffold = buildStarterScaffold(solutionCode);
+  let guide = `### ${title} — Step-by-step recipe & starter scaffold\n\n`;
+  if (apis.length) {
+    guide += `**Key functions & syntax to use:**\n` + apis.map(a => `- \`${a.token}\` — ${a.summary}`).join('\n') + '\n\n';
+  }
+  guide += `**Step-by-step implementation plan:**\n` + steps.map((s, i) => `${i + 1}. ${s}`).join('\n') + '\n\n';
+  guide += `**Starter code scaffold (fill in the TODOs):**\n\n${fence(scaffold)}`;
+  return guide;
+}
+function notebookAttemptScaffold(solutionCode) {
+  const scaffold = buildStarterScaffold(solutionCode);
+  const commented = scaffold.split('\n').map(l => l.trim().startsWith('#') || !l.trim() ? l : `# ${l}`).join('\n');
+  return `# Write your attempt here (uncomment and fill in the TODOs below):\n${commented}`;
+}
 const terminalMarkdown = s => (s.commands||[]).map(c=>`\n\n**${c.label}**\n\n\`\`\`${c.shell}\n${c.code}\n\`\`\`\n\n**Expected:** ${c.expected}`).join('');
 const paragraphs = (heading, body) => `## ${heading}\n\n${body}\n\n`;
 function mechanismMarkdown(lesson, notebook=false) {
@@ -39,8 +57,8 @@ export function lessonMarkdown(lesson, phase) {
   if(c.visual){ const v=c.visual; out+=paragraphs(v.title,`**Predict:** ${v.prediction}\n\n${lesson.visualArtifact ? `![${v.title}](../figures/${lesson.id}.svg)\n\n` : ''}**${v.kind==='executed'?'Recorded CPU computation':'Conceptual diagram'}**\n\n### Read the figure\n\n${v.reading}\n\n### Connect it to the computation\n\n${v.connection}${v.code?'\n\n'+fence(v.code):''}`); }
   if(lesson.execution)out+=paragraphs('Recorded reference execution',`CPU run: ${lesson.execution.executedAt}. JAX ${lesson.execution.environment.jax}.\n\n`+'```text\n'+lesson.execution.stdout+'\n```');
   for(const e of c.experiments||[])out+=paragraphs(e.title,`**Predict before running:** ${e.prediction}\n\n${fence(e.code)}\n\n**Expected:** ${e.output}\n\n${e.explanation}`);
-  out+=paragraphs('Make it yours',`${c.exercise}\n\n<details><summary>Reference solution</summary>\n\n${fence(c.solution)}\n\n</details>`);
-  for(const p of c.practice||[])out+=paragraphs(p.title,`**${p.difficulty}**\n\n${p.prompt}\n\n<details><summary>Hint</summary>\n\n${p.hint}\n\n</details>\n\n<details><summary>Reference solution and reasoning</summary>\n\n${fence(p.solution)}\n\n${p.explanation}\n\n</details>`);
+  out+=paragraphs('Make it yours',`${c.exercise}\n\n${exerciseGuideMarkdown(c.solution, 'How to write this exercise')}\n\n<details><summary>Reference solution</summary>\n\n${fence(c.solution)}\n\n</details>`);
+  for(const p of c.practice||[])out+=paragraphs(p.title,`**${p.difficulty}**\n\n${p.prompt}\n\n<details><summary>Hint</summary>\n\n${p.hint}\n\n</details>\n\n${exerciseGuideMarkdown(p.solution, 'How to write: ' + p.title)}\n\n<details><summary>Reference solution and reasoning</summary>\n\n${fence(p.solution)}\n\n${p.explanation}\n\n</details>`);
   out+=paragraphs('Check your understanding',`${c.question}\n\n${c.options.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n\n<details><summary>Answer and explanation</summary>\n\n${c.options[c.answer]}\n\n${c.explanation}\n\n</details>`);
   if(c.diagnosis)out+=paragraphs('Diagnose the result',c.diagnosis);
   if(c.takeaways)out+=paragraphs('Carry forward',c.takeaways.map(t=>`- ${t}`).join('\n'));
@@ -61,8 +79,8 @@ export function lessonCells(lesson){
   cells.push(['markdown','## Run the example'],['code',c.code],['markdown','Expected: '+c.output]);
   if(c.visual){ const v=c.visual; cells.push(['markdown',`## ${v.title}\n\nPredict: ${v.prediction}\n\n${v.kind==='executed'?'CPU computation; rerun to recompute the data.':'Conceptual diagram; the arrows are an instructional map.'}\n\nRun the cells below to produce the figure, then follow the walkthrough beneath it.`]); if(v.code)cells.push(['code',v.code]); cells.push(['code',figureNotebookCode(lesson)],['markdown',`### Read the figure\n\n${v.reading}\n\n### Connect it to the computation\n\n${v.connection}`]); }
   for(const e of c.experiments||[])cells.push(['markdown',`## ${e.title}\n\nPredict: ${e.prediction}`],['code',e.code],['markdown',`Expected: ${e.output}\n\n${e.explanation}`]);
-  cells.push(['markdown','## Your exercise\n\n'+c.exercise],['code','# Write your attempt here.'],['markdown','## Reference solution\n\nTry your own implementation first.'],['code',c.solution]);
-  for(const p of c.practice||[])cells.push(['markdown',`## ${p.title} · ${p.difficulty}\n\n${p.prompt}\n\nHint: ${p.hint}`],['code','# Write your attempt here.'],['markdown','## Reference reasoning\n\n'+p.explanation],['code',p.solution]);
+  cells.push(['markdown','## Your exercise\n\n'+c.exercise+'\n\n'+exerciseGuideMarkdown(c.solution,'How to write this exercise')],['code',notebookAttemptScaffold(c.solution)],['markdown','## Reference solution\n\nTry your own implementation first.'],['code',c.solution]);
+  for(const p of c.practice||[])cells.push(['markdown',`## ${p.title} · ${p.difficulty}\n\n${p.prompt}\n\nHint: ${p.hint}\n\n${exerciseGuideMarkdown(p.solution,'How to write: '+p.title)}`],['code',notebookAttemptScaffold(p.solution)],['markdown','## Reference reasoning\n\n'+p.explanation],['code',p.solution]);
   cells.push(['markdown',`## Checkpoint\n\n${c.question}\n\n${c.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}\n\n## Diagnose\n\n${c.diagnosis||''}\n\n## Evidence\n\n${lesson.evidence}`]);
   if(c.takeaways)cells.push(['markdown','## Carry forward\n\n'+c.takeaways.map(t=>'- '+t).join('\n')]);
   if(c.references)cells.push(['markdown','## Primary references\n\n'+c.references.map(r=>`- [${r.title}](${r.url})`).join('\n')]);

@@ -17,8 +17,9 @@ Tested locally on CPU: Python 3.14.3, JAX 0.9.2, NumPy 2.4.4, Flax 0.12.6, Optax
 3. Copy the starter into your own file, so the original scaffold stays available:
 
    ```sh
-   cp projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py
-   ```
+# Copy the starter template into your editable workspace file
+cp projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py
+```
 
 4. Open `projects/mlp-classifier/my_model.py` in your editor. Fill in one stage at a time. Run the corresponding command below from the repository root. A traceback beginning with `NotImplementedError` is expected until you implement the required functions.
 
@@ -29,6 +30,7 @@ The public tests default to the untouched starter. Always supply your file with 
 Implement `make_model(seed, width)`. Return an NNX module with attributes `hidden` and `out`: `nnx.Linear(2, width)`, tanh, then `nnx.Linear(width, 1)`. The call must return logits with shape `(B,)`. Keep the batch dimension at `B=1`; use `squeeze(-1)` rather than indiscriminate squeezing.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/mlp-classifier/tests/check.py --stage 1 --implementation projects/mlp-classifier/my_model.py
 ```
 
@@ -39,6 +41,7 @@ The check compares your forward pass with NumPy on several batches, checks width
 Implement `objective(model, x, labels)`. Use mean stable binary cross-entropy on logits, and raise `ValueError` if score and label shapes differ. Labels must have shape `(B,)`; `(B,1)` would create accidental pairwise broadcasting.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/mlp-classifier/tests/check.py --stage 2 --implementation projects/mlp-classifier/my_model.py
 ```
 
@@ -51,6 +54,7 @@ Implement `train(seed, x, labels, rate=.03, steps=200, width=8)`. Construct the 
 Implement `evaluate(model, x, labels)` returning a dictionary with Python values `loss`, `accuracy`, and `count`. Evaluation must not update any state. Threshold logits at zero for binary decisions. Reject malformed shapes through the objective before reducing metrics.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/my_model.py
 ```
 
@@ -73,6 +77,7 @@ Use the instability lesson to distinguish corrupted inputs, an objective shape b
 The reference implementation is available in `solution/model.py` after your attempt. To check it:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/solution/model.py
 ```
 

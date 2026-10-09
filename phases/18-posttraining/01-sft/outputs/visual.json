@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-01",
-  "contentHash": "c268001e9ed7c34229f8d451d81ffa6c64fd2bed6a0d55cadd3db7d721f2dc4f",
+  "contentHash": "fb3ee085edddbfd610a09c44ca04cb877dc0c6ed47eca4e9c17b5505f72f673e",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:36:51.511659+00:00",
+  "generatedAt": "2026-10-07T11:16:24.680050+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

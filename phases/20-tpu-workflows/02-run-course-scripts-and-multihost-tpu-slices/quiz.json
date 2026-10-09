@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` slice without `--worker=all`?",
+      "options": [
+        "Google Cloud automatically merges the 4 Linux hosts into 1 host",
+        "Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)",
+        "The script runs four times faster"
+      ],
+      "correct": 1,
+      "explanation": "Every host in a multi-host TPU Pod slice runs its own OS and Python process; `--worker=all` is required so all hosts join the collective mesh."
+    }
+  ]
+}

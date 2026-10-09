@@ -8,12 +8,12 @@
 .course-book {
   width: 200px;
   min-height: 265px;
-  background: var(--atlas);
+  background: var(--banner-bg);
   color: #fff;
   border-radius: 3px 12px 12px 3px;
   padding: 28px 24px 24px 30px;
   position: relative;
-  box-shadow: 8px 8px 0 #d1c8e7;
+  box-shadow: 8px 8px 0 var(--book-shadow);
   border-left: 7px solid #49318d;
 }
 .course-book:after {
@@ -75,7 +75,7 @@
     min-height: 164px;
     padding: 16px 12px;
     border-left-width: 4px;
-    box-shadow: 5px 5px 0 #d1c8e7;
+    box-shadow: 5px 5px 0 var(--book-shadow);
   }
   .book-title {
     font-size: 20px;

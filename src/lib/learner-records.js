@@ -1,5 +1,59 @@
+/**
+ * @typedef {{ checkpointPassed: boolean; evidenceSaved: boolean }} LessonProgressEntry
+ * @typedef {{ version: number; lessons: Record<string, LessonProgressEntry> }} LessonProgressState
+ * @typedef {{
+ *   id: string;
+ *   route: string;
+ *   title: string;
+ *   note: string;
+ *   url: string;
+ *   date: string;
+ *   updatedAt?: string;
+ *   lessonId?: string;
+ *   projectId?: string;
+ *   stageId?: string;
+ * }} EvidenceEntry
+ * @typedef {{ version: number; route: string; evidence: EvidenceEntry[] }} LearnerNotebook
+ * @typedef {{ sectionId: string; updatedAt: string }} ReadingPosition
+ * @typedef {{
+ *   version: number;
+ *   lastLessonId: string;
+ *   path: string;
+ *   sectionId: string;
+ *   updatedAt: string;
+ *   lessons: Record<string, ReadingPosition>;
+ * }} ReadingState
+ * @typedef {{
+ *   version: number;
+ *   roleId: string;
+ *   pathwayId: string;
+ *   startPhaseId: string;
+ *   knownPhaseIds: string[];
+ * }} CareerPlan
+ * @typedef {{
+ *   lessonIds: string[];
+ *   routeIds: string[];
+ *   roleIds: string[];
+ *   phaseIds: string[];
+ * }} ValidationContext
+ * @typedef {{
+ *   version: number;
+ *   notebook: LearnerNotebook;
+ *   sampleCompleted: boolean;
+ *   lessonProgress: LessonProgressState;
+ *   projects: Record<string, string[]>;
+ *   careerPlan: CareerPlan | null;
+ *   reading: ReadingState | null;
+ * }} LearnerBackup
+ */
+
+/**
+ * @param {any} value
+ * @param {string[]} lessonIds
+ * @returns {value is LessonProgressState}
+ */
 function validateLessonProgress(value, lessonIds) {
-  return (
+  return Boolean(
     value &&
     value.version === 1 &&
     value.lessons &&
@@ -9,17 +63,24 @@ function validateLessonProgress(value, lessonIds) {
       ([id, entry]) =>
         lessonIds.includes(id) &&
         entry &&
-        typeof entry.checkpointPassed === 'boolean' &&
-        typeof entry.evidenceSaved === 'boolean',
-    )
+        typeof (/** @type {any} */ (entry).checkpointPassed) === 'boolean' &&
+        typeof (/** @type {any} */ (entry).evidenceSaved) === 'boolean',
+    ),
   );
 }
 
+/**
+ * @param {LessonProgressState} current
+ * @param {any} incoming
+ * @param {string[]} lessonIds
+ * @returns {LessonProgressState}
+ */
 function mergeLessonProgress(current, incoming, lessonIds) {
   if (!validateLessonProgress(incoming, lessonIds)) throw Error('Unsupported lesson progress');
+  /** @type {LessonProgressState} */
   const merged = { version: 1, lessons: { ...current.lessons } };
   for (const [id, entry] of Object.entries(incoming.lessons)) {
-    const previous = merged.lessons[id] || {};
+    const previous = merged.lessons[id] || { checkpointPassed: false, evidenceSaved: false };
     merged.lessons[id] = {
       checkpointPassed: Boolean(previous.checkpointPassed || entry.checkpointPassed),
       evidenceSaved: Boolean(previous.evidenceSaved || entry.evidenceSaved),
@@ -36,22 +97,40 @@ const learnerStorageKeys = {
   reading: 'jaxpathways-reading-v1',
 };
 
-const learnerRecord = (value) => value && typeof value === 'object' && !Array.isArray(value);
+/**
+ * @param {unknown} value
+ * @returns {value is Record<string, any>}
+ */
+const learnerRecord = (value) =>
+  Boolean(value && typeof value === 'object' && !Array.isArray(value));
 
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
 const learnerId = (value) => typeof value === 'string' && /^[a-z0-9][a-z0-9-]{0,99}$/.test(value);
 
+/**
+ * @param {unknown} value
+ * @returns {value is string}
+ */
 const learnerDate = (value) =>
   typeof value === 'string' && value.length < 60 && Number.isFinite(Date.parse(value));
 
+/**
+ * @param {any} value
+ * @param {{ routeIds: string[]; lessonIds: string[] }} context
+ * @returns {value is LearnerNotebook}
+ */
 function validateLearnerNotebook(value, context) {
-  return (
+  return Boolean(
     value &&
     value.version === 1 &&
     context.routeIds.includes(value.route) &&
     Array.isArray(value.evidence) &&
     value.evidence.length <= 500 &&
     value.evidence.every(
-      (e) =>
+      (/** @type {any} */ e) =>
         learnerRecord(e) &&
         typeof e.id === 'string' &&
         e.id.length > 0 &&
@@ -70,30 +149,41 @@ function validateLearnerNotebook(value, context) {
         (!e.lessonId || context.lessonIds.includes(e.lessonId)) &&
         (!e.projectId || learnerId(e.projectId)) &&
         (!e.stageId || (e.projectId && typeof e.stageId === 'string' && e.stageId.length <= 100)),
-    )
+    ),
   );
 }
 
+/**
+ * @param {any} value
+ * @param {{ lessonIds: string[]; routeIds: string[] }} context
+ * @returns {boolean}
+ */
 function validateReadingState(value, context) {
   if (value === null || value === undefined) return true;
+  /** @param {any} v */
   const position = (v) =>
     learnerRecord(v) &&
     typeof v.sectionId === 'string' &&
     /^[\w-]{0,120}$/.test(v.sectionId) &&
     learnerDate(v.updatedAt);
-  return (
+  return Boolean(
     value.version === 1 &&
     context.lessonIds.includes(value.lastLessonId) &&
     (value.path === 'all' || context.routeIds.includes(value.path)) &&
     position(value) &&
     learnerRecord(value.lessons) &&
     Object.entries(value.lessons).length <= 1000 &&
-    Object.entries(value.lessons).every(([id, v]) => context.lessonIds.includes(id) && position(v))
+    Object.entries(value.lessons).every(([id, v]) => context.lessonIds.includes(id) && position(v)),
   );
 }
 
+/**
+ * @param {any} value
+ * @param {ValidationContext} context
+ * @returns {boolean}
+ */
 function validateCareerPlan(value, context) {
-  return (
+  return Boolean(
     value === null ||
     value === undefined ||
     (value.version === 1 &&
@@ -101,10 +191,15 @@ function validateCareerPlan(value, context) {
       context.routeIds.includes(value.pathwayId) &&
       context.phaseIds.includes(value.startPhaseId) &&
       Array.isArray(value.knownPhaseIds) &&
-      value.knownPhaseIds.every((id) => context.phaseIds.includes(id)))
+      value.knownPhaseIds.every((/** @type {string} */ id) => context.phaseIds.includes(id))),
   );
 }
 
+/**
+ * @param {any} value
+ * @param {ValidationContext} context
+ * @returns {LearnerBackup}
+ */
 function normalizeLearnerBackup(value, context) {
   // Version 1 is the original notebook export, not a different lesson-progress schema.
   const result =
@@ -143,6 +238,11 @@ function normalizeLearnerBackup(value, context) {
   return result;
 }
 
+/**
+ * @param {ReadingState | null | undefined} current
+ * @param {ReadingState | null | undefined} incoming
+ * @returns {ReadingState | null}
+ */
 function mergeReadingState(current, incoming) {
   if (!incoming) return current || null;
   if (!current) return incoming;
@@ -155,6 +255,12 @@ function mergeReadingState(current, incoming) {
   return { ...latest, lessons };
 }
 
+/**
+ * @param {LearnerBackup} current
+ * @param {any} rawIncoming
+ * @param {ValidationContext} context
+ * @returns {LearnerBackup}
+ */
 function mergeLearnerBackup(current, rawIncoming, context) {
   const incoming = normalizeLearnerBackup(rawIncoming, context);
   const evidence = new Map(current.notebook.evidence.map((e) => [e.id, e]));
@@ -182,6 +288,10 @@ function mergeLearnerBackup(current, rawIncoming, context) {
   };
 }
 
+/**
+ * @param {Storage} storage
+ * @param {Record<string, any>} backup
+ */
 function persistLearnerBackup(storage, backup) {
   const writes = Object.entries(learnerStorageKeys)
     .filter(([field]) => backup[field] !== null)
@@ -189,7 +299,7 @@ function persistLearnerBackup(storage, backup) {
       key,
       field === 'sampleCompleted' ? String(backup[field]) : JSON.stringify(backup[field]),
     ]);
-  for (const [id, stages] of Object.entries(backup.projects))
+  for (const [id, stages] of Object.entries(backup.projects || {}))
     writes.push(['jaxpathways-project-' + id, JSON.stringify(stages)]);
   const before = new Map();
   try {

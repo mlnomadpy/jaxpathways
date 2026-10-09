@@ -6,7 +6,7 @@ Build attention and causal masking from small arrays, then connect tokenization,
 
 Inspect what each token can attend to and count only valid targets in the loss.
 
-**Prerequisites:** 06: Data & checkpoint recovery.
+**Prerequisites:** 06: Data & checkpoint recovery; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** CPU for small blocks; TPU or GPU for training experiments.
 
@@ -114,7 +114,7 @@ A checkpointed causal language model.
 
 **Demonstrate:** Verify masking, sequence handling, restoration, and generation before comparing speed.
 
-Project status: implemented staged practice · [Open source](../../projects/text-harness/README.md). Use stages 1, 2, 3, 4 for this phase. Begin with token contracts and training. Complete the linked performance and deployment prerequisites before cache, export and profiling checks.
+Project status: implemented staged practice · [Open source](../../projects/text-harness/README.md). Use stages 1, 2, 3, 4 for this phase. Begin with token contracts and training. Complete the linked performance and deployment prerequisites before cache, export and profiling checks. Copy `projects/text-harness/starter/model.py` to `projects/text-harness/my_model.py` and write your code in `projects/text-harness/my_model.py`. Run `python3 projects/text-harness/tests/check.py --implementation projects/text-harness/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.
 
 
 

@@ -9,6 +9,7 @@
 From the course or extracted project workspace:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 5
 ```
 

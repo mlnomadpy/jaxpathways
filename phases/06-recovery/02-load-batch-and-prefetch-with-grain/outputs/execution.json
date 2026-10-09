@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-02",
-  "contentHash": "99a5fcffeec81a4e79705b6608b772220366a4b51ecf76b2d38a048bb93a79e8",
-  "executedAt": "2026-10-06T23:00:14.285717+00:00",
+  "contentHash": "7786f82362990b0f5355266bc71ea6d164fa7b9bdc3607dcfccea18cef257398",
+  "executedAt": "2026-10-08T14:03:02.232040+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "First IDs: [8, 6, 7, 9]\nNext IDs: [0, 5, 1, 2]\nIterator state bytes: 329\nRestored next batch matches\nFirst IDs: [8, 6, 7, 9]\nNext IDs: [0, 5, 1, 2]\nIterator state bytes: 329\nRestored next batch matches\nSame seed restarts; it does not resume\nEach epoch covers all twelve IDs\nNext-epoch IDs replayed: [[2, 0, 11, 1], [5, 7, 6, 8]]\nExpected sampler compatibility rejection\nPASS: recovery-02\n",
   "notebookCells": [
     {
-      "sourceHash": "0df0d41db87f14ca6819c5b32ee62b0b9d6f03d6e348b83bbc7080bd5edf6f16",
+      "sourceHash": "bf7d2de657b85fafa9cb59c3bdbdc64b8346550b405c6b8854a2f763f4a60222",
       "outputs": []
     },
     {
-      "sourceHash": "a5f6f380cf5a87687fbbb11377c293b070a0244f8361a0fbc6b1ef6fe133a260",
+      "sourceHash": "1c0ec31eb08bc22c4fca87cd5d4b61dcbe855a80878f793debf3ac4b5f148a46",
       "outputs": []
     },
     {
-      "sourceHash": "1e15e120425e00a6a269179219df6726d7aa325c23d64e22e22739c04c02f54a",
+      "sourceHash": "1b0edaf9004d9705c50d87b8eb744d1ccc0cdc4a699f5839c544974b3c38e72e",
       "outputs": [
         {
           "output_type": "stream",
@@ -37,7 +37,7 @@
       ]
     },
     {
-      "sourceHash": "0163231c6ab260b2869a77fcf4d51611b94eb895df0685e592c18a48ec20e398",
+      "sourceHash": "51ddcdabb8ec87c024035200328368c8ca90a33069669396cc04fc129d743f08",
       "outputs": [
         {
           "output_type": "stream",
@@ -52,7 +52,7 @@
       ]
     },
     {
-      "sourceHash": "fe5a5a5014a8f0195c0c8cedec802c3dd64525ed49b3f27927b0159695aaadbd",
+      "sourceHash": "a61b2745a256780e0d7e37d5169e985e1083ca0ed2954cf6b2c21f13c5397ca6",
       "outputs": []
     },
     {
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "sourceHash": "d3c01bb80c911e761510f9d53dae6b011e4eef0d78f46b03b2e0a94daba05dd7",
+      "sourceHash": "a10afcf8779469cca4313c7df187e23ca2b756e6e58f10fb6b7eed967a766ed1",
       "outputs": [
         {
           "output_type": "stream",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "30f10e888faa53c2922c73d1480356c3f5fa269029ec84eb7f35638156ed378a",
+      "sourceHash": "a1c508cdac874a916233533201f5e482b89f299d0fba065ea04a9c3ecc1d062c",
       "outputs": [
         {
           "output_type": "stream",
@@ -95,19 +95,19 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "6d9a1c7c54149aa7b42dcbbb4bc507e1f5b767545b430a65ca9ec41622e37aaf",
       "outputs": []
     },
     {
-      "sourceHash": "5908d2376eb4eed77b28da186462ce68e041c71f2ceb794d2b2a6854d87a5bb0",
+      "sourceHash": "6fd60e996a4fa76fa9981e0cb3fba9273182d751ed99e900962ba156fd944f37",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "e54e3fc1e4d9369961fa17de4ae2f183ce442fdedd72329bea6d8226998f3968",
       "outputs": []
     },
     {
-      "sourceHash": "bb327cf4d260a8fde601d6198eefc534ebd77e0b7e3b155fdf235ecee07ca173",
+      "sourceHash": "4d4eb8e07ad7777fafe3703ebd68ce4d045c695c4ea44a4c7be8c1b4345834e6",
       "outputs": [
         {
           "output_type": "stream",
@@ -119,11 +119,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "f52cddebd9b033f99b89b4d283cf5ec5938ae9ceb9a5919b8dcef334327a78d7",
       "outputs": []
     },
     {
-      "sourceHash": "985879bd09efe24408f5891f9dc326fa055b6ce49d7da64045776edb2d46fa85",
+      "sourceHash": "eb0767fb71ffb5db275ddf9fc5665c2b60db4442bdeed8ddfc648f8e874b77a1",
       "outputs": [
         {
           "output_type": "stream",

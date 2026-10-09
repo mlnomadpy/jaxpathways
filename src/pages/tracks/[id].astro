@@ -1,39 +1,66 @@
 ---
+import PageIntro from '../../components/shared/PageIntro.astro';
+import TrackStageCard from '../../components/tracks/TrackStageCard.astro';
 import manifest from '../../../curriculum/modality-tracks.json';
 import projectPlans from '../../../curriculum/project-plans.json';
+import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
-import { siteUrl } from '../../lib/urls.js';
+import { inlineMath } from '../../lib/math.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
+import { projectFileLayout } from '../../lib/views/project.js';
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import SiteFooter from '../../components/shared/SiteFooter.astro';
 import '../../styles/tokens.css';
 import '../../styles/base.css';
 import '../../styles/features/tracks.css';
+
 export function getStaticPaths() {
   return manifest.tracks.map((track) => ({ params: { id: track.id }, props: { track } }));
 }
 const { track } = Astro.props;
-const lessons = course.phases.flatMap((phase) => phase.lessons);
+const harnessProject = track.harnessProjectId
+  ? registry.projects.find((project) => project.id === track.harnessProjectId)
+  : null;
+const harnessLayout = harnessProject ? projectFileLayout(harnessProject) : null;
 const nextProjects = projectPlans.filter((project) => project.trackIds.includes(track.id));
 ---
 
 <SiteLayout title={`${track.title} — JAX Pathways`} description={track.summary} active="projects">
   <main id="main" class="track-page">
-    <div class="page-intro">
-      <a href={siteUrl('projects.html#modality-tracks')}>All project guides</a>
-      <p class="edition">
-        {track.status === 'authored' ? 'Runnable project' : 'Guided project plan'} · 8 lifecycle
-        stages
-      </p>
-      <h1>{track.title}</h1>
-      <p class="intro">{track.summary}</p>
-      <p class="track-status">{track.available}</p>
+    <PageIntro
+      backHref="projects.html#modality-tracks"
+      backLabel="All project guides"
+      edition={`${track.status === 'authored' ? 'Runnable project' : 'Guided project plan'} · 8 lifecycle stages`}
+      title={track.title}
+      intro={track.summary}
+    >
+      <p class="track-status" set:html={inlineMath(track.available)} />
+      {harnessLayout && (
+        <div class="project-guide-brief">
+          <p class="edition">Where to put your code</p>
+          <p>
+            <strong>Write your code in:</strong> <code>{harnessLayout.workspaceFile}</code> (copy{' '}
+            <code>{harnessLayout.starterFile}</code> first:{' '}
+            <code>
+              cp {harnessLayout.starterFile} {harnessLayout.workspaceFile}
+            </code>
+            ).
+          </p>
+          <p>
+            <strong>Verify stages:</strong>{' '}
+            <code>
+              python3 {harnessLayout.checkerFile} --stage all --impl {harnessLayout.workspaceFile}
+            </code>
+          </p>
+        </div>
+      )}
       <div class="actions">
         {track.harnessProjectId && (
           <a class="button primary" href={siteUrl(`project.html?id=${track.harnessProjectId}`)}>
             Open the runnable harness
           </a>
         )}
-        <a class="button" href={siteUrl(`lesson.html?lesson=${track.firstLessonId}`)}>
+        <a class="button" href={siteUrl(lessonLink(track.firstLessonId))}>
           Start with the preparation lesson
         </a>
         <a class="button" href={siteUrl(`guides/${track.id}.md`)} download>
@@ -43,13 +70,13 @@ const nextProjects = projectPlans.filter((project) => project.trackIds.includes(
           Add tracking, containers and release checks
         </a>
       </div>
-    </div>
+    </PageIntro>
     <section class="track-contract" aria-labelledby="target-heading">
       <div>
         <h2 id="target-heading">What you’re working toward</h2>
-        <p>{track.task}</p>
+        <p set:html={inlineMath(track.task)} />
         <h3>Before you start</h3>
-        <p>{track.prerequisites}</p>
+        <p set:html={inlineMath(track.prerequisites)} />
       </div>
       <div>
         <h2>How to use this guide</h2>
@@ -69,14 +96,14 @@ const nextProjects = projectPlans.filter((project) => project.trackIds.includes(
       <ol>
         {track.stages.map((stage) => (
           <li>
-            <a href={`#${stage.id}`}>{stage.title}</a>
+            <a href={`#${stage.id}`} set:html={inlineMath(stage.title)} />
           </li>
         ))}
       </ol>
     </nav>
     <section class="track-figure" aria-labelledby="figure-heading">
       <h2 id="figure-heading">Make the figures explain the model</h2>
-      <p>{track.plot}</p>
+      <p set:html={inlineMath(track.plot)} />
       <p>
         For every figure, name the axes, units, dataset and configuration. Explain one visible
         pattern with actual values, connect it to the mechanism, and state a conclusion the figure
@@ -84,55 +111,25 @@ const nextProjects = projectPlans.filter((project) => project.trackIds.includes(
       </p>
     </section>
     {track.stages.map((stage, index) => (
-      <section id={stage.id} class="track-stage" aria-labelledby={`${stage.id}-heading`}>
-        <p class="edition">
-          Stage {index + 1} / {track.stages.length}
-        </p>
-        <h2 id={`${stage.id}-heading`}>{stage.title}</h2>
-        <p>{stage.explanation}</p>
-        <p class="track-application">{stage.application}</p>
-        <div class="track-contract">
-          <div>
-            <h3>Keep as evidence</h3>
-            <p>{stage.artifact}</p>
-          </div>
-          <div>
-            <h3>A check worth passing</h3>
-            <p>{stage.check}</p>
-          </div>
-        </div>
-        {track.harnessProjectId && 'projectStageIds' in stage && stage.projectStageIds && (
-          <p>
-            <a href={siteUrl(`project.html?id=${track.harnessProjectId}`)}>
-              Practice in project {stage.projectStageIds.length === 1 ? 'stage' : 'stages'}{' '}
-              {stage.projectStageIds.join(', ')}
-            </a>
-          </p>
-        )}
-        <h3>Available preparation</h3>
-        <ul class="track-lessons">
-          {stage.lessonIds.map((id) => (
-            <li>
-              <a href={siteUrl(`lesson.html?lesson=${id}`)}>
-                {lessons.find((lesson) => lesson.id === id)?.title}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </section>
+      <TrackStageCard
+        stage={stage}
+        index={index}
+        totalStages={track.stages.length}
+        harnessProjectId={track.harnessProjectId}
+      />
     ))}
     {manifest.sharedSections.map((section, index) => (
       <section class="track-stage" aria-labelledby={`shared-${index}`}>
         <h2 id={`shared-${index}`}>{section.title}</h2>
-        <p>{section.paragraphs[0]}</p>
+        <p set:html={inlineMath(section.paragraphs[0])} />
         {section.items.length > 0 && (
           <ul>
             {section.items.map((item) => (
-              <li>{item}</li>
+              <li set:html={inlineMath(item)} />
             ))}
           </ul>
         )}
-        <p>{section.paragraphs[1]}</p>
+        <p set:html={inlineMath(section.paragraphs[1])} />
       </section>
     ))}
     <section class="track-stage" aria-labelledby="reference-heading">

@@ -5,6 +5,9 @@ export interface ProjectStage {
   evidence: string;
   expected: string;
   diagnosis: string;
+  codeGuide?: string;
+  starterSnippet?: string;
+  solutionSnippet?: string;
 }
 
 export interface ProjectManifest {

@@ -7,6 +7,7 @@ Build a small objective toolkit, then use it in eight real CPU training experime
 Use the top folder of the extracted course or project workspace as your working directory. Activate a Python environment and install `requirements-cpu.txt`. The pinned environment includes JAX, Flax, NumPy and, for actual framework comparison, PyTorch. No GPU is required.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m pip install -r requirements-cpu.txt
 cp projects/training-methods/starter/methods.py projects/training-methods/my_methods.py
 ```
@@ -35,6 +36,7 @@ Implement `masked_ce, corrupt_tokens, mlm_logits` in `my_methods.py`.
 **Demonstrate:** Masked-target reduction, input corruption, uniform baseline and changed mask.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1
 ```
 
@@ -47,6 +49,7 @@ Implement `patchify, masked_mse` in `my_methods.py`.
 **Demonstrate:** Rectangular multichannel patch order, visible-only features and hidden-patch reduction.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 2
 ```
 
@@ -59,6 +62,7 @@ Implement `paired_contrastive` in `my_methods.py`.
 **Demonstrate:** Independent symmetric loss, collapsed baseline and broken pair mapping.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 3
 ```
 
@@ -71,6 +75,7 @@ Implement `response_logps` in `my_methods.py`.
 **Demonstrate:** Shifted target masks, independent sequence sums and actual table training.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4
 ```
 
@@ -83,6 +88,7 @@ Implement `lora_forward` in `my_methods.py`.
 **Demonstrate:** Two ranks and nonunit alpha, frozen base, trained adapter and merged outputs.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 5
 ```
 
@@ -95,6 +101,7 @@ Implement `preference_loss` in `my_methods.py`.
 **Demonstrate:** Stable pairwise likelihood, independent finite-difference gradient and learned ordering.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 6
 ```
 
@@ -107,6 +114,7 @@ Implement `ppo_loss` in `my_methods.py`.
 **Demonstrate:** Signed clipped ratios, exact KL, actual sampled rollouts and frozen reference.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 7
 ```
 
@@ -119,6 +127,7 @@ Implement `dpo_loss` in `my_methods.py`.
 **Demonstrate:** Reference correction, independent stable loss and trained positive margins.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 8
 ```
 
@@ -161,5 +170,6 @@ Keep your source file, environment versions, exact commands, actual results, one
 To inspect the provided implementation after your attempt:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/training-methods/tests/check.py --implementation solution --stage all
 ```

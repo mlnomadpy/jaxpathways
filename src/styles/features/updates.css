@@ -1,0 +1,35 @@
+.updates-page {
+  padding-bottom: 40px;
+}
+.updates-page p,
+.updates-page li {
+  line-height: 1.8;
+}
+.updates-page article {
+  border-top: 1px solid var(--line);
+  margin-top: 40px;
+  padding-top: 24px;
+}
+.updates-page .updated-phases {
+  columns: 2;
+  column-gap: 40px;
+}
+.updates-page li {
+  break-inside: avoid;
+}
+.updates-page a:not(.button) {
+  color: var(--blue);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.updates-page summary {
+  cursor: pointer;
+  min-height: 44px;
+  padding-block: 12px;
+  color: var(--blue);
+}
+@media (max-width: 760px) {
+  .updates-page .updated-phases {
+    columns: 1;
+  }
+}

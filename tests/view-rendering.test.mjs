@@ -21,7 +21,25 @@ test('project views preserve exact code and truly empty feedback regions', async
     window.document.body.innerHTML = renderProject(project);
     assert.equal(window.document.querySelector('h1').textContent, project.title);
     assert.equal(window.document.querySelector('img'), null);
+    assert(window.document.querySelector('.project-blueprint'));
+    assert(
+      window.document
+        .querySelector('.code-target-callout')
+        .textContent.includes(project.workspaceFile),
+    );
+    assert(
+      window.document.querySelector('.project-tree').textContent.includes('PUT YOUR CODE HERE'),
+    );
+    assert.equal(window.document.querySelectorAll('.project-workflow-strip > li').length, 4);
     assert.equal(window.document.querySelectorAll('[data-stage]').length, project.stages.length);
+    assert.equal(
+      window.document.querySelectorAll('.stage-code-walkthrough').length,
+      project.stages.length,
+    );
+    assert.equal(
+      window.document.querySelectorAll('.stage-starter-code').length,
+      project.stages.length,
+    );
   } finally {
     await window.happyDOM.abort();
   }

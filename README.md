@@ -17,7 +17,7 @@ Learn JAX through a shared course, then follow the work you want to do.
 
 Then build **models → data and recovery → Transformers → performance**, or branch into scientific computing, probabilistic modeling, RL, distributed systems, kernels, internals, inference, or operations. Each route maps its prerequisites, implemented final project and synthesis assessment review draft. Nineteen staged projects connect every phase, including four complete CPU modality harnesses.
 
-Read the [curriculum](CURRICULUM.md): **19 phases, 97 lesson entries, 10 pathways, four domains and seven career routes**. All 97 entries now have authored teaching, runnable CPU reference companions, exercises and explained figures. The [whole-content audit](docs/content-audit.md) and source-bound execution receipts distinguish authored material, numerical checks and review status.
+Read the [curriculum](CURRICULUM.md): **20 phases, 97 lesson entries, 10 pathways, four domains and seven career routes**. All 97 entries now have authored teaching, runnable CPU reference companions, exercises and explained figures. The [whole-content audit](docs/content-audit.md) and source-bound execution receipts distinguish authored material, numerical checks and review status.
 
 Two connected phases now cover [masked and contrastive pretraining](phases/17-pretraining/README.md) and [SFT, LoRA, reward models, RLHF mechanics and DPO](phases/18-posttraining/README.md). The [weight-conversion project](projects/weight-conversion/README.md) executes actual PyTorch-to-Flax mapping with layerwise errors, gradient checks and fresh-process artifact inference. See [scope and validation](docs/pretraining-posttraining-expansion.md).
 
@@ -67,9 +67,9 @@ See [the architecture and authoring guide](docs/astro-migration.md) for content 
 
 ## Where notebooks fit
 
-The earlier training, Grain/Orbax recovery, and XProf notebooks belong in phases 05, 06, and 08. They become lesson companions and phase integration labs, with the course providing prerequisites, explanation, exercises, and assessments around them.
+Every authored lesson includes a generated notebook companion (`phases/<phase>/<lesson>/notebooks/exercise.ipynb`) alongside its runnable script (`code/main.py`), including the neural-network training, Grain/Orbax recovery, and XProf profiling phases (05, 06, and 08).
 
-Their source files and the previously reported 56-lesson Astro collection have not been imported. No TPU validation has been performed in this repository. Learner evidence is self-reported; the site does not issue credentials.
+No TPU hardware validation has been performed in this repository. Learner evidence is self-reported; the site does not issue credentials.
 
 ## Author and verify
 

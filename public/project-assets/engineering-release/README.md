@@ -9,6 +9,7 @@ Start after experiment tracking, containerization and the three MLOps/LLMOps/Mod
 From the repository root or extracted workspace, install `requirements-cpu.txt` in your course environment. MLflow 3.16.1 is included. The reference was executed with Python 3.14.3 and JAX 0.9.2. A shared MLflow server, cloud account and Docker engine are not required for the four CPU stages.
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/engineering-release/starter/engineering.py projects/engineering-release/my_engineering.py
 python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 1
 ```
@@ -16,6 +17,7 @@ python3 projects/engineering-release/tests/check.py --implementation projects/en
 On PowerShell replace `cp` with `Copy-Item`. The untouched starter fails at the first missing function. Complete `validate_rows`, `gate_metrics`, `llm_case` and `verify_release`, advancing through stages 1–3. Stage 4 integrates these policies with a real tracked model and the provided serving adapter; it is a guided integration lab, not another hidden learner implementation. Later stages rerun earlier checks.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/engineering-release/tests/check.py --implementation solution --stage all
 ```
 
@@ -60,6 +62,7 @@ The format-valid image digest in the CPU policy fixtures is explicitly synthetic
 The included `mlflow_lab.py` performs the connected experiment in a new output directory:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/engineering-release/mlflow_lab.py --output ./engineering-run
 ```
 
@@ -82,6 +85,7 @@ The database and serialized pyfunc objects stay in your generated output directo
 Docker is a separate local dependency. The container uses a pinned Python base digest and only the stdlib inference service; it does not copy the training environment. `.dockerignore` allows only the Dockerfile and service source into the context. The model is mounted read-only and checked against its SHA-256 digest at startup. The service rejects malformed, nonfinite and oversized batches.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/engineering-release/container_check.py --model ./engineering-run/model.json --output ./container-report.json
 ```
 

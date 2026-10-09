@@ -14,11 +14,11 @@ def assert_narrative(source, text, chapter):
     annotations = {node.text for node in chapter.iter('{http://www.w3.org/1998/Math/MathML}annotation')}
     cursor = 0
     for match in pattern.finditer(source):
-        assert source[cursor:match.start()] in text, 'missing surrounding math prose'
+        assert source[cursor:match.start()].replace('**', '') in text, 'missing surrounding math prose'
         if match.group(1): assert match.group(2) in text, 'missing inline code'
         else: assert next(group for group in match.groups()[2:] if group is not None) in annotations, 'missing MathML expression'
         cursor = match.end()
-    assert source[cursor:] in text, 'missing narrative text'
+    assert source[cursor:].replace('**', '') in text, 'missing narrative text'
 
 with ZipFile(OUT/'jax-foundations.epub') as book:
     assert book.infolist()[0].filename=='mimetype'

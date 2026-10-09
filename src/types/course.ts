@@ -28,6 +28,8 @@ export interface LessonContent {
     nodes?: string[];
     layout?: 'merge' | 'sequence';
   };
+  setupBundle?: { title: string; url: string };
+  figure?: string;
   objectives?: string[];
   problem?: string;
   idea: string;
@@ -73,6 +75,22 @@ export interface LessonContent {
 export interface Lesson {
   prerequisites: string[];
   contentHash?: string;
+  hardware?: string;
+  source?: string;
+  path?: string;
+  check?: string;
+  runtime?: { kind: string; deviceCount?: number };
+  artifacts?: {
+    source: string;
+    script: string;
+    notebook: string;
+    markdown: string;
+    scriptSource: string;
+    notebookSource: string;
+    quizSource: string;
+    evidenceSource: string;
+    evidence: string;
+  };
   visualArtifact?: {
     mechanismImage?: string;
     mechanismPng?: string;
@@ -118,6 +136,7 @@ export interface Phase {
   hardware: string;
   project: string;
   checkpoint: string;
+  source?: string;
   id: string;
   number: string;
   title: string;
@@ -130,21 +149,104 @@ export interface Phase {
 export interface Pathway {
   practicalGuide?: { title: string; url: string; scope: string };
   additionalGuides?: { title: string; url: string; scope: string }[];
+  assessmentExtensions?: { id: string; title: string; url: string; status: string }[];
+  engineeringLessonIds?: string[];
+  prerequisites: string;
+  outcome: string;
+  libraries?: string;
+  source?: string;
   audience: string;
   firstArtifact: string;
   focusPhaseIds: string[];
   modalityTrackIds: string[];
   studyAdvice: string;
   description: string;
-  capstone: { title: string; projectId?: string };
+  capstone: {
+    title: string;
+    status?: string;
+    assessment: string;
+    evidence: string[];
+    projectId?: string;
+    assessmentDraft?: { id: string; status: string; source: string; url: string };
+  };
   id: string;
   title: string;
   phaseIds: string[];
+}
+export interface Role {
+  id: string;
+  title: string;
+  headline: string;
+  description: string;
+  defaultPathwayId: string;
+  pathwayIds: string[];
+  responsibilities: string[];
+  skills: string[];
+  portfolio: string;
+  readiness: string;
+  background: string;
+  workExample: string;
+  modalityTrackIds: string[];
+  reviewQuestions: string[];
+  scopeNote: string;
+  milestones: {
+    title: string;
+    phaseIds: string[];
+    deliverable: string;
+    criteria: string[];
+  }[];
+  startingPointChecks: { phaseId: string; question: string }[];
+}
+export interface Domain {
+  id: string;
+  title: string;
+  headline: string;
+  description: string;
+  skills: string[];
+  pathwayIds: string[];
+  defaultPathwayId: string;
+  roleIds: string[];
+  artifact: string;
+}
+export interface ModalityTrack {
+  id: string;
+  title: string;
+  summary: string;
+  task: string;
+  prerequisites: string;
+  firstLessonId: string;
+  pathwayIds: string[];
+  projectIds: string[];
+  harnessProjectId?: string;
+  status: string;
+  available: string;
+  plot: string;
+  stages: {
+    id: string;
+    title: string;
+    explanation: string;
+    artifact: string;
+    check: string;
+    lessonIds: string[];
+    application: string;
+    projectStageIds?: string[];
+  }[];
 }
 export interface Course {
   title: string;
   phases: Phase[];
   pathways: Pathway[];
   projectIds: string[];
-  roles: { id: string; title: string; headline: string; responsibilities: string[] }[];
+  roles: Role[];
+  domains: Domain[];
+  modalityTracks?: ModalityTrack[];
+}
+
+declare global {
+  interface ImportMetaEnv {
+    BASE_URL: string;
+  }
+  interface ImportMeta {
+    readonly env: ImportMetaEnv;
+  }
 }

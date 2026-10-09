@@ -57,6 +57,16 @@ const jsonLd =
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <script is:inline>
+      (() => {
+        try {
+          const saved = localStorage.getItem('jaxpathways-theme');
+          if (saved === 'dark' || saved === 'light') {
+            document.documentElement.dataset.theme = saved;
+          }
+        } catch {}
+      })();
+    </script>
     <meta name="description" content={description} />
     <title>{title}</title>
     <link rel="canonical" href={canonical.href} />

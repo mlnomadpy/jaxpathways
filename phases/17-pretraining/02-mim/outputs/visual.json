@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "afc074272a925dce433ea4a80d9961facd7b0159dc1d37c564d16072637042f6",
+  "contentHash": "5eb10959d1b29a0b89be1bbbb39af9bfbf4f3c59a6a9f100e66dabcab659d4d1",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:41:35.597507+00:00",
+  "generatedAt": "2026-10-07T11:16:21.620625+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

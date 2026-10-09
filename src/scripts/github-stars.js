@@ -13,8 +13,9 @@ export async function refreshGitHubStars(root = document, fetcher = fetch) {
     if (!response.ok) return;
     const { stargazers_count: count } = await response.json();
     if (!Number.isSafeInteger(count) || count < 0) return;
-    for (const link of links) {
-      link.querySelector('[data-github-stars]').textContent = count.toLocaleString('en-US');
+    for (const link of /** @type {NodeListOf<HTMLElement>} */ (links)) {
+      const stars = link.querySelector('[data-github-stars]');
+      if (stars) stars.textContent = count.toLocaleString('en-US');
       link.title = `GitHub repository · ${count.toLocaleString('en-US')} stars, checked just now`;
     }
   } catch {

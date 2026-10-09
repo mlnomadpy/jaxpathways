@@ -92,14 +92,27 @@ except Exception as error:
 
 def digest(value):
     """SHA-256 of sorted compact JSON with nonfinite values rejected."""
+    # Key APIs to use: `hashlib.sha256`, `json.dumps`, `encode`, `hexdigest`
+    # Step 1: Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     raise NotImplementedError('Canonical content identity')
 
 def atomic_json(path, value):
     """Write/flush/fsync a sibling temporary file; replace the selected path."""
+    # Key APIs to use: `disk`, `Path`, `parent.mkdir`, `tempfile.mkstemp`, `os.fdopen`
+    # Step 1: Read or serialize artifact data on disk (`path`).
+    # Step 2: Execute the next step of the computation.
+    # Step 3: Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     raise NotImplementedError('Atomic local selection')
 
 def default_config(**changes):
     """Return validated defaults plus changes. See README for default values."""
+    # Key APIs to use: `cfg.update`, `in`, `contract`, `or`
+    # Step 1: Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
+    # Step 2: Update state in place with the new values.
+    # Step 3: Loop over `name` in `('steps', 'checkpoint_every', 'batch_size', 'min_devices')`:
+    # Step 4: Inside block: Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
+    # Step 5: Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
+    # Step 6: Return `cfg` to the caller.
     raise NotImplementedError('Validate the workload contract')
 
 def launch(root, config=None, timeout=10.):
@@ -108,6 +121,13 @@ def launch(root, config=None, timeout=10.):
     Return status, returncode, wall_s, events, stderr, worker_hash, config and
     malformed_stdout; atomically retain the same record in root/run.json.
     """
+    # Key APIs to use: `disk`, `Path`, `root.mkdir`, `default_config`, `contract`
+    # Step 1: Read or serialize artifact data on disk (`root`).
+    # Step 2: Execute the next step of the computation.
+    # Step 3: Run `default_config` to compute `cfg`.
+    # Step 4: Guard input contract (`timeout <= 0`) and fail fast if violated.
+    # Step 5: Run `atomic_json` to perform the next check or state transition.
+    # Step 6: Evaluate `worker` from the current inputs and state.
     raise NotImplementedError('Supervise the process, not an invented status')
 
 def summarize(result):
@@ -115,28 +135,62 @@ def summarize(result):
     update_s, update_examples_per_s, job_examples_per_s, update_duty_fraction
     and status. Derive every value from actual events and wall_s.
     """
+    # Key APIs to use: `sum`, `max`
+    # Step 1: Evaluate `updates` from the current inputs and state.
+    # Step 2: Evaluate `checkpoints` from the current inputs and state.
+    # Step 3: Run `sum` to compute `count`.
+    # Step 4: Run `sum` to compute `update_s`.
+    # Step 5: Run `max` to compute `latest`.
+    # Step 6: Run `max` to compute `checkpoint`.
     raise NotImplementedError('Work and timing boundaries')
 
 def publish(store, artifact):
     """Write artifacts/<digest>.json without changing active.json; return digest."""
+    # Key APIs to use: `disk`, `Path`, `digest`, `atomic_json`
+    # Step 1: Read or serialize artifact data on disk (`store`).
+    # Step 2: Run `digest` to compute `identifier`.
+    # Step 3: Run `atomic_json` to perform the next check or state transition.
+    # Step 4: Return `identifier` to the caller.
     raise NotImplementedError('Publish independently of activation')
 
 def read_artifact(store, identifier):
     """Require a 64-character lowercase hex ID and verify payload digest."""
+    # Key APIs to use: `contract`, `any`, `disk`, `json.loads`, `Path`
+    # Step 1: Guard input contract (`len(identifier) != 64 or any((c not in '0123456789abcdef' for c in identifier))`) and fail fast if violated.
+    # Step 2: Read or serialize artifact data on disk (`artifact`).
+    # Step 3: Guard input contract (`digest(artifact) != identifier`) and fail fast if violated.
+    # Step 4: Return `artifact` to the caller.
     raise NotImplementedError('Read with integrity checks')
 
 def artifact_metrics(artifact):
     """Evaluate params on x=(-1.5,-.37,.22,1.5), y=2*x+1; MSE limit 1."""
+    # Key APIs to use: `artifact.get`, `get`, `contract`, `any`, `math.isfinite`
+    # Step 1: Run `artifact.get` to compute `params`.
+    # Step 2: Guard input contract (`len(params) != 2 or any((not math.isfinite(float(v)) for v in params))`) and fail fast if violated.
+    # Step 3: Evaluate `inputs` from the current inputs and state.
+    # Step 4: Run `sum` to compute `mse`.
+    # Step 5: Return `dict(held_out_mse=mse, acceptance_limit=1.0, passed=mse <= 1.0)` to the caller.
     raise NotImplementedError('Compute the actual release quality gate')
 
 def activate(store, identifier):
     """Verify digest, provenance, declared validation and actual held-out MSE, then select.
     active.json contains current and previous content IDs.
     """
+    # Key APIs to use: `read_artifact`, `contract`, `artifact.get`, `get`, `any`
+    # Step 1: Run `read_artifact` to compute `artifact`.
+    # Step 2: Guard input contract (`artifact.get('validation', {}).get('passed') is not True`) and fail fast if violated.
+    # Step 3: Evaluate `required` from the current inputs and state.
+    # Step 4: Guard input contract (`any((name not in artifact for name in required))`) and fail fast if violated.
+    # Step 5: Guard input contract (`not artifact_metrics(artifact)['passed']`) and fail fast if violated.
+    # Step 6: Evaluate `previous` from the current inputs and state.
     raise NotImplementedError('Gate before pointer mutation')
 
 def rollback(store):
     """Select previous through the same checked activation path."""
+    # Key APIs to use: `disk`, `json.loads`, `Path`, `read_text`, `contract`
+    # Step 1: Read or serialize artifact data on disk (`pointer`).
+    # Step 2: Guard input contract (`not pointer.get('previous')`) and fail fast if violated.
+    # Step 3: Return `activate(store, pointer['previous'])` to the caller.
     raise NotImplementedError('Checked rollback')
 
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
@@ -144,4 +198,11 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     minimum_workers_with_reserve, hourly_budget, hypothetical_cost_per_job,
     within_reserve. Validate finite input and document assumptions.
     """
+    # Key APIs to use: `contract`, `any`, `math.isfinite`, `or`, `max`
+    # Step 1: Evaluate `values` from the current inputs and state.
+    # Step 2: Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
+    # Step 3: Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
+    # Step 4: Evaluate `offered` from the current inputs and state.
+    # Step 5: Evaluate `load` from the current inputs and state.
+    # Step 6: Run `max` to compute `required`.
     raise NotImplementedError('Dimensional capacity arithmetic')

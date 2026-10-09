@@ -1,5 +1,42 @@
 [
   {
+    "version": "0.5.3",
+    "date": "2026-10-08",
+    "title": "3-step Cloud TPU mini-course, scroll stage transitions & project code blueprints",
+    "summary": "Splits Phase 19 into three 2-lesson Cloud TPU courses (Phases 19, 20, 21), adds visual stage and era transitions while scrolling, and adds full project explanations with explicit code placement blueprints.",
+    "changes": [
+      "Split the Cloud TPU onboarding track into three focused 2-lesson courses (~45 minutes each): 19 TPU Setup: Provisioning & Runtime Verification (tpu-01, tpu-04), 20 TPU Workflows: Launching Jobs & Checkpointed Experiments (tpu-02, tpu-05), and 21 TPU Systems: Generations, Memory, Precision & XProf (tpu-03, tpu-06).",
+      "Added course-type UI/UX cues (courseTypeCue), a sticky course section scroll bar, and five curriculum era transition banners across the catalog, phase guides, and pathways.",
+      "Grouped lesson reader sections into five color-coded learning stages (1 Understand, 2 Build & Run, 3 Experiment, 4 Exercise & Check, 5 Evidence) with a sticky scroll-aware stage bar and dedicated exercise workbench.",
+      "Added a full Project Blueprint at the start of every project workspace, guide, and catalog card explaining what to build, the exact workspaceFile where learners write code, the directory tree, and the stage verification workflow."
+    ]
+  },
+  {
+    "version": "0.5.2",
+    "date": "2026-10-07",
+    "title": "Canonical TPUs & Google Cloud course and prerequisite enforcement",
+    "summary": "Promotes TPU provisioning, job launching, and hardware/precision/XProf profiling into a standalone 3-lesson course phase required before all TPU-dependent courses and pathways.",
+    "changes": [
+      "Added Phase 19 (TPUs & Google Cloud: provisioning, launching & running experiments) with three authored lessons (tpu-01, tpu-02, tpu-03) covering Colab/Cloud TPU VM creation, Flex-start, .venv + jax[tpu] setup, gcloud compute tpus tpu-vm scp/ssh/--worker=all job launching, atomic checkpoint resume, HBM budgeting, BF16/INT8 precision checks, XProf trace capture, and verified VM teardown.",
+      "Required the TPU course (tpu) as an explicit prerequisite before all TPU-dependent phases (transformers, performance, distributed, kernels, deployment, operations, pretraining, and posttraining) and across the tpu, models, scale, ops, and ship learning paths.",
+      "Removed TPU links from Learner resources (developer.astro) and placed the TPU course immediately after 00: Setup & first steps on the course catalog.",
+      "Added concrete Cloud TPU VM launch, sharding, multi-host --worker=all, and XProf commands across welcome-03, performance-03, distributed-01..04, operations-01, and the per-lesson Run on TPU practice drawer."
+    ]
+  },
+  {
+    "version": "0.5.1",
+    "date": "2026-10-07",
+    "title": "Pretraining and post-training code clarity, checkpoint diagnostics and in-place reader hydration",
+    "summary": "Readable PEP 8 code examples, synthesized takeaways and topic-specific checkpoint distractors across phases 17 and 18, plus in-place static lesson hydration and guide contrast fixes.",
+    "changes": [
+      "Reformatted staged builds, canonical examples, experiments and reference solutions across all eight pretraining and post-training lessons (Phases 17 and 18) for readable multi-line layout.",
+      "Replaced duplicated section paragraphs in Carry Forward takeaways with concise synthesis points and replaced generic checkpoint distractors with topic-specific diagnostic options.",
+      "Updated permanent lesson pages to hydrate pre-rendered HTML in place instead of re-parsing the full lesson DOM on initial load.",
+      "Fixed dark-theme code block contrast and interactive assessment scripts across guide, project-plan and phase-guide pages.",
+      "Aligned repository documentation, portable Python setup commands and zero-planned status copy with the 19-phase, 97-lesson curriculum."
+    ]
+  },
+  {
     "version": "0.5.0",
     "date": "2026-10-06",
     "title": "TPU generations, precision and profiling",

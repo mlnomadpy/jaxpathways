@@ -31,8 +31,8 @@ export async function initProject() {
       const windows = document.querySelector('#project-os').value === 'windows';
       const py = windows ? '.\\.venv\\Scripts\\python.exe' : 'python';
       const setup = windows
-        ? 'py -3.14 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-cpu.txt'
-        : 'python3.14 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-cpu.txt';
+        ? 'py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-cpu.txt'
+        : 'python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-cpu.txt';
       const reference = target.querySelector('.project-reference code');
       if (reference)
         reference.textContent = (
@@ -44,7 +44,7 @@ export async function initProject() {
           setup,
           windows ? 'PowerShell · extracted top folder' : 'Terminal · extracted top folder',
         ) +
-        '<p>Use the environment interpreter for every check. The CPU examples were tested with Python 3.14.3. PowerShell instructions have not been execution-validated on Windows.</p>';
+        '<p>Use the environment interpreter for every check. The CPU examples were tested with Python 3.14.3 (Python 3.11+ supported). PowerShell instructions have not been execution-validated on Windows.</p>';
       target.querySelectorAll('.project-stages .project-command').forEach((panel, i) => {
         panel.querySelector('code').textContent = p.stages[i].command.replace(/^python3/, py);
         panel.querySelector('span').textContent =

@@ -1,0 +1,56 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import GuideContents from '../shared/GuideContents.astro';
+import PageIntro from '../shared/PageIntro.astro';
+import { assessmentContent } from '../../lib/server/assessment-content.js';
+import { siteUrl } from '../../lib/urls.js';
+
+interface Props {
+  title: string;
+  description: string;
+  source: string;
+  edition: string;
+  workspaceHref: string;
+  guideHref: string;
+  contentsLabel: string;
+  active?: string;
+  backHref?: string;
+  backLabel?: string;
+}
+
+const {
+  title,
+  description,
+  source,
+  edition,
+  workspaceHref,
+  guideHref,
+  contentsLabel,
+  active = 'course',
+  backHref = 'course.html',
+  backLabel = 'Back to the course',
+} = Astro.props;
+const content = assessmentContent(source, siteUrl);
+---
+
+<GuideLayout
+  title={title}
+  description={description}
+  active={active}
+  skipLabel="Skip to guide"
+  mainClass="workflow-guide"
+>
+  <PageIntro backHref={backHref} backLabel={backLabel} edition={edition}>
+    <Fragment slot="title" set:html={content.heading} />
+    <div class="assessment-actions">
+      <a class="button primary" href={siteUrl(workspaceHref)} download>
+        Download the practice workspace
+      </a>
+      <a class="button" href={siteUrl(guideHref)} download>
+        Save the guide
+      </a>
+    </div>
+  </PageIntro>
+  <GuideContents sections={content.sections} label={contentsLabel} />
+  <article set:html={content.body} />
+</GuideLayout>

@@ -7,8 +7,8 @@
       "question": "Does this DPO loop require a separately trained reward model and fresh policy rollouts?",
       "options": [
         "No. It optimizes reference-corrected preferences from the supplied pairs.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "No, and a positive reference-corrected margin guarantees that the absolute chosen probability increased.",
+        "Yes, because the reference log-probability difference must be re-estimated from on-policy rollouts each step."
       ],
       "correct": 0,
       "explanation": "Its data and objective differ from the learned-reward PPO loop; evaluation quality remains a separate question."

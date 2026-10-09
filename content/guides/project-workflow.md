@@ -52,6 +52,7 @@ A future training CLI should have explicit `train`, `evaluate`, and `resume` act
 Open a terminal in the extracted workspace. On macOS/Linux use the commands below; on Windows PowerShell replace `python3` with `py`. Python 3.10 or later is required. This exercise uses only the standard library, so it needs no package installation, account or accelerator.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 --version
 python3 run.py --help
 python3 run.py prepare --config configs/baseline.json --run-id baseline-01
@@ -71,6 +72,7 @@ The starter records Python and operating-system information, not a complete ML e
 Copy `configs/baseline.json` to `configs/lower-rate.json` in your editor. Change only `learning_rate` from `0.01` to `0.005`. Leave the seed, steps and dataset unchanged.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 run.py prepare --config configs/lower-rate.json --run-id lower-rate-01
 ```
 
@@ -119,6 +121,7 @@ Use the gcloud example only with your configured account and replace both placeh
 For a **new, separate ML repository** with uv already installed, this is an optional environment workflow. Do not run it inside the course checkout to replace its tested environment:
 
 ```sh
+# Run command in terminal
 uv init --lib my-jax-project
 cd my-jax-project
 uv add jax flax optax
@@ -134,6 +137,7 @@ MLflow and W&B require instrumentation in your training program. Installing a CL
 To navigate the course itself, use its CLI from the **full course workspace or checkout**, not from the small project-organizing download above:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 scripts/course.py list --available
 python3 scripts/course.py show recovery-06
 python3 scripts/course.py plan training-engineer

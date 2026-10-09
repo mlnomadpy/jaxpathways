@@ -50,6 +50,7 @@ The companion creates a temporary SQLite database and local artifact directory. 
 **From the course workspace, install the tested CPU dependencies**
 
 ```bash
+# Run from the course workspace, install the tested cpu dependencies using the course Python environment
 python -m pip install -r requirements-cpu.txt
 ```
 
@@ -74,6 +75,7 @@ Run the connected project lab to log two pyfunc models, register immutable versi
 **Keep the local database and artifacts in a new output folder**
 
 ```bash
+# Run keep the local database and artifacts in a new output folder using the course Python environment
 python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 ```
 
@@ -82,9 +84,14 @@ python projects/engineering-release/mlflow_lab.py --output ./engineering-run
 ## Run the example
 
 ```python
+# Track experiments and lineage with MLflow: A tracker is useful when a plotted point leads back to the data,...
+# Import os for this computation.
 import os
+# Configure environment variable before initializing the runtime.
 os.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'
+# Configure environment variable before initializing the runtime.
 os.environ['MLFLOW_ENABLE_TELEMETRY'] = 'false'
+# Import required JAX, NumPy, and standard-library modules.
 import hashlib, json, tempfile
 from pathlib import Path
 import numpy as np
@@ -92,46 +99,85 @@ import jax
 import jax.numpy as jnp
 import mlflow
 from mlflow import MlflowClient
+# Initialize array `x` with explicit values and shape.
 x = jnp.array([-2., -1., 0., 1., 2.]); y = 2 * x + 1
+# Initialize array `vx` with explicit values and shape.
 vx = jnp.array([-1.5, -.5, .5, 1.5]); vy = 2 * vx + 1
+# Aggregate array values to compute `objective`.
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
+# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
+# Convert `data_hash` to a host NumPy array for inspection or verification.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
+# Evaluate `(curves, validation, run_ids)` from the current inputs and state.
 curves, validation, run_ids = [], [], []
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
+    # Read or serialize artifact data on disk (`root`).
     root = Path(folder)
+    # Run `mlflow.set_tracking_uri` to perform the next check or state transition.
     mlflow.set_tracking_uri('sqlite:///' + str(root / 'tracking.db'))
+    # Run `MlflowClient` to compute `client`.
     client = MlflowClient()
+    # Run `client.create_experiment` to compute `experiment`.
     experiment = client.create_experiment('two-rates', artifact_location=(root / 'artifacts').as_uri())
+    # Loop over `rate` in `[0.02, 0.15]`:
     for rate in [.02, .15]:
+        # Allocate initialized array `p` with the specified shape and dtype.
+        # Evaluate `history` from the current inputs and state.
         p = jnp.zeros(2); history = []
+        # Enter managed runtime/context scope for this block:
         with mlflow.start_run(experiment_id=experiment) as run:
+            # Run `mlflow.log_params` to perform the next check or state transition.
             mlflow.log_params({'rate': rate, 'updates': 30})
+            # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for ``.
             mlflow.set_tags({'data_sha256': data_hash, 'jax': jax.__version__, 'backend': jax.default_backend(), 'metric_boundary': 'after update'})
+            # Loop over `step` in `range(1, 31)`:
             for step in range(1, 31):
+                # Run `update` to compute `p`.
                 p = update(p, rate)
+                # Evaluate `objective(p)` and convert the result into Python scalar/collection `metric`.
+                # Execute the next step of the computation.
                 metric = float(objective(p)); history.append(metric)
+                # Run `mlflow.log_metric` to perform the next check or state transition.
                 mlflow.log_metric('train_mse', metric, step=step)
+            # Reduce across the target axis to summarize `held`.
             held = float(jnp.mean((p[0] * vx + p[1] - vy) ** 2))
             # Independent host arithmetic checks what the reported validation metric means.
             oracle = sum((float(p[0]) * t + float(p[1]) - (2 * t + 1)) ** 2 for t in [-1.5, -.5, .5, 1.5]) / 4
+            # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
             assert abs(held - oracle) < 1e-6
+            # Run `mlflow.log_metric` to perform the next check or state transition.
             mlflow.log_metric('validation_mse', held, step=30)
+            # Run `mlflow.log_dict` to perform the next check or state transition.
             mlflow.log_dict({'weight': float(p[0]), 'bias': float(p[1]), 'preprocessing': 'one unscaled scalar feature'}, 'model.json')
+            # Append the current step result to `run_ids`.
             run_ids.append(run.info.run_id)
+        # Append the current step result to `curves`.
+        # Append the current step result to `curves`.
         curves.append(history); validation.append(held)
+        # Run `client.get_metric_history` to compute `saved`.
         saved = client.get_metric_history(run_ids[-1], 'train_mse')
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert [m.step for m in saved] == list(range(1, 31))
+        # Verify that computed values match the expected reference within numerical tolerance.
         np.testing.assert_allclose([m.value for m in saved], history)
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert client.get_run(run_ids[-1]).data.tags['data_sha256'] == data_hash
+    # Run `client.search_runs` to compute `selected`.
     selected = client.search_runs([experiment], order_by=['metrics.validation_mse ASC'])[0]
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert selected.info.run_id == run_ids[int(np.argmin(validation))]
+    # Run `client.download_artifacts` to compute `artifact`.
     artifact = client.download_artifacts(selected.info.run_id, 'model.json')
+    # Read or serialize artifact data on disk (`restored`).
     restored = json.loads(Path(artifact).read_text())
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001
+# Print the observed values to compare against the expected result.
 print('Validation MSE by learning rate:', dict(zip([.02, .15], validation)))
+# Print diagnostic summary of the computed outputs.
 print('Verified 30 logged steps per run; selected and reloaded the better validation candidate.')
-
 ```
 
 Expected: Validation MSE by learning rate: {0.02: 0.1199446..., 0.15: 5.04947...e-10}
@@ -154,12 +200,14 @@ The horizontal axis counts completed updates, from $1$ to $30$. The vertical axi
 The comparison is controlled by shared data, initialization and update budget. It illustrates tracking and retrieval of evidence, not a general optimizer ranking. A separately held-out test and release checks still belong after validation selection.
 
 ```python
+# Compute figure data for: Compare the runs that MLflow actually recorded
+# Evaluate `visual_data` from the current inputs and state.
 visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','ylabel':'post-update training MSE (log scale)','yscale':'log','series':[{'label':'rate 0.02','y':curves[0]},{'label':'rate 0.15','y':curves[1]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:00:38.848743+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:03:25.127410+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
@@ -176,7 +224,10 @@ PASS: recovery-06
 **Predict before running:** Which learning rate should give the smaller error after the same update budget?
 
 ```python
+# Experiment — Check the stored comparison: Both runs share initialization, data and update count.
+# Verify contract: `validation[1] < validation[0]`.
 assert validation[1] < validation[0]
+# Print the observed values to compare against the expected result.
 print('Validation difference:',validation[0]-validation[1])
 ```
 
@@ -188,11 +239,36 @@ Both runs share initialization, data and update count. This isolates a configura
 
 Add a third, deliberately wrong model artifact and show why the smallest training loss alone is insufficient to select a release.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
+- `min(...)` — Call `min` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Verify contract: `bad_validation > min(validation)`.
+2. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+bad_validation = sum(...)  # TODO: compute bad_validation
+# Verify contract: `bad_validation > min(validation)`.
+assert bad_validation  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('Wrong zero model validation MSE:',bad_validation)
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
 bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
+# Verify contract: `bad_validation > min(validation)`.
 assert bad_validation > min(validation)
+# Print the observed values to compare against the expected result.
 print('Wrong zero model validation MSE:',bad_validation)
 ```
 
@@ -210,12 +286,42 @@ Hash the same input bytes plus changed target bytes.
 
 </details>
 
+### How to write: Change a data value — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `value(...)` — Call `value` with your updated parameters or inputs from this lesson's workspace.
+- `np.asarray(...)` — Call `np.asarray` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Change a data value (transfer): Identical filenames or shapes do not imply identical data.
+2. Convert `changed_hash` to a host NumPy array for inspection or verification.
+3. Verify contract: `changed_hash != data_hash`.
+4. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Change a data value (transfer): Identical filenames or shapes do not imply identical data.
+changed_y = np.asarray(...)  # TODO: compute changed_y
+# Convert `changed_hash` to a host NumPy array for inspection or verification.
+changed_hash = hashlib.sha256(...)  # TODO: compute changed_hash
+# Verify contract: `changed_hash != data_hash`.
+assert changed_hash  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('Changed target changes dataset identity.')
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Change a data value (transfer): Identical filenames or shapes do not imply identical data.
 changed_y=np.asarray(y).copy();changed_y[0]+=.1
+# Convert `changed_hash` to a host NumPy array for inspection or verification.
 changed_hash=hashlib.sha256(np.asarray(x).tobytes()+changed_y.tobytes()).hexdigest()
+# Verify contract: `changed_hash != data_hash`.
 assert changed_hash != data_hash
+# Print the observed values to compare against the expected result.
 print('Changed target changes dataset identity.')
 ```
 

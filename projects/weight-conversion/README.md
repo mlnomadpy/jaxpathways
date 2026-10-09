@@ -7,6 +7,7 @@ Convert an actual PyTorch state dictionary into a Flax NNX model and explain whe
 Use the top folder of the extracted course or project workspace as your working directory. Activate a Python environment and install `requirements-cpu.txt`. The pinned environment includes JAX, Flax, NumPy and, for actual framework comparison, PyTorch. No GPU is required.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m pip install -r requirements-cpu.txt
 cp projects/weight-conversion/starter/bridge.py projects/weight-conversion/my_bridge.py
 ```
@@ -29,6 +30,7 @@ Implement `convert` in `my_bridge.py`.
 **Demonstrate:** Multiple seeds, asymmetric layers, input gradients and rejected malformed tensors.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 1
 ```
 
@@ -41,6 +43,7 @@ Implement `error_report` in `my_bridge.py`.
 **Demonstrate:** Independent absolute/relative errors, near-zero tolerances and injected epsilon failure.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 2
 ```
 
@@ -53,6 +56,7 @@ Implement `save_flax, load_flax` in `my_bridge.py`.
 **Demonstrate:** Fresh-process inference from the converted artifact and incomplete-archive rejection.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 3
 ```
 
@@ -91,5 +95,6 @@ Keep your source file, environment versions, exact commands, actual results, one
 To inspect the provided implementation after your attempt:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/weight-conversion/tests/check.py --implementation solution --stage all
 ```

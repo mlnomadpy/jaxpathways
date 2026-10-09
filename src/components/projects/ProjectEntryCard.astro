@@ -1,0 +1,82 @@
+---
+import { course } from '../../lib/course-data.js';
+import { inlineMath } from '../../lib/math.js';
+import { siteUrl } from '../../lib/urls.js';
+import { projectFileLayout } from '../../lib/views/project.js';
+import type { ProjectManifest } from '../../types/manifests';
+
+interface Props {
+  project: ProjectManifest;
+}
+
+const { project } = Astro.props;
+const layout = projectFileLayout(project);
+const pathwayTitle = course.pathways.find((path) => path.id === project.pathwayId)?.title;
+const prerequisitePhases = course.phases.filter((phase) =>
+  phase.lessons.some((lesson) => project.requiredLessonIds.includes(lesson.id)),
+);
+---
+
+<article class="project-entry" data-project-id={project.id}>
+  <div class="project-overview">
+    <p class="project-context">
+      {pathwayTitle} / {project.hardware} · {project.stages.length} stages
+    </p>
+    <h3>{project.title}</h3>
+    <p set:html={inlineMath(project.setupNote)} />
+    <p set:html={inlineMath(project.rubric.slice(0, 2).join('. ') + '.')} />
+    <div class="project-code-target">
+      <p>
+        <strong>Where to put your code:</strong>{' '}
+        {layout.copiesStarter ? (
+          <Fragment>
+            Copy <code>{layout.starterFile}</code> to <code>{layout.workspaceFile}</code> and edit{' '}
+            <code>{layout.workspaceFile}</code>.
+          </Fragment>
+        ) : (
+          <Fragment>
+            Edit <code>{layout.workspaceFile}</code> directly.
+          </Fragment>
+        )}
+      </p>
+      <p>
+        <strong>Verify each stage:</strong> <code>{layout.checkerFile}</code>
+      </p>
+    </div>
+    <div class="actions">
+      <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
+        Open project
+      </a>
+      <a class="button" href={siteUrl(`project-guides/${project.id}.html`)}>
+        Read guide and figures
+      </a>
+      <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>
+        Download ZIP
+      </a>
+    </div>
+  </div>
+  <div class="project-stages">
+    <h4>Your stages</h4>
+    <ol>
+      {project.stages.map((stage) => (
+        <li set:html={inlineMath(stage.title)} />
+      ))}
+    </ol>
+  </div>
+  <div class="project-prerequisites">
+    <h4>Before you start</h4>
+    <ul>
+      {prerequisitePhases.map((phase) => (
+        <li>
+          <a
+            href={siteUrl(
+              `course.html?path=${project.pathwayId}&phase=${phase.id}#phase-${phase.id}`,
+            )}
+          >
+            {phase.title}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</article>

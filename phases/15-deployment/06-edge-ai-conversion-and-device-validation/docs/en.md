@@ -56,6 +56,7 @@ The optional labs/tensorflow_litert.py companion builds the known dense model in
 **Optional TensorFlow environment — macOS/Linux, from the workspace root**
 
 ```sh
+# Run optional tensorflow environment — macos/linux, from the workspace root using the course Python environment
 python3.12 -m venv .venv-tensorflow
 .venv-tensorflow/bin/python -m pip install -r phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/requirements-tensorflow.txt
 .venv-tensorflow/bin/python phases/15-deployment/06-edge-ai-conversion-and-device-validation/labs/tensorflow_litert.py --output edge-artifacts
@@ -101,19 +102,26 @@ $$
 Create main.py in your lesson workspace and run it with the active course Python environment. Define the fixed dense model and check the parameter shapes without invoking the compiled function.
 
 ```python
+# Step 1 — Keep a known inference function: A row has three sensor features and the result has two scores.
+# Import json for this computation.
 import json
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
+# Initialize array `weights` with explicit values and shape.
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = jnp.array([.1, -.2], jnp.float32)
+# Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `infer(features)` implementing this stage's computation:
 def infer(features):
+    # Return `features @ weights + bias` to the caller.
     return features @ weights + bias
 
+# Verify that the output tensor shape matches our prediction.
 assert weights.shape == (3, 2) and bias.shape == (2,)
-
 ```
 
 A row has three sensor features and the result has two scores. Leave the compiled function uncalled so the later first-request measurement can include initialization.
@@ -123,25 +131,38 @@ A row has three sensor features and the result has two scores. Leave the compile
 Append this block to the same main.py and rerun the whole file. Validate the raw JSON protocol, normalize once, wait for inference, and encode the result.
 
 ```python
+# Step 2 — Build the raw-request boundary: This probe checks decoding and raw values without running inference.
 payload = json.dumps({"features": [[255., 128., 0.]]})
+# Function `validate_sensor_payload(payload)` implementing this stage's computation:
 def validate_sensor_payload(payload):
+    # Read or serialize artifact data on disk (`document`).
     document = json.loads(payload)
+    # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
+    # Evaluate `rows` from the current inputs and state.
     rows = document['features']
+    # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
         raise ValueError('expected one row of three sensor values')
+    # Guard input contract (`any((type(value) not in (int, float) or not 0 <= value <= 255 or (not np.isfinite(value)) for value in rows[0]))`) and fail fast if violated.
     if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
         raise ValueError('expected numeric sensor values in the range 0 through 255')
+    # Return `np.asarray(rows, dtype=np.float32)` to the caller.
     return np.asarray(rows, dtype=np.float32)
+# Function `request(payload)` implementing this stage's computation:
 def request(payload):
+    # Run `validate_sensor_payload` to compute `decoded`.
     decoded = validate_sensor_payload(payload)
+    # Evaluate `features` from the current inputs and state.
     features = decoded / 255.
+    # Synchronize host execution until asynchronous device computation completes.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
+    # Return `json.dumps({'scores': output.tolist()})` to the caller.
     return json.dumps({"scores": output.tolist()})
 
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])
-
 ```
 
 This probe checks decoding and raw values without running inference. Keep normalization inside request so it happens exactly once.
@@ -151,15 +172,22 @@ This probe checks decoding and raw values without running inference. Keep normal
 Append this block to the same main.py and rerun the whole file. Time the first request, then retain every warm observation.
 
 ```python
+# Step 3 — Measure cold and warm requests separately: The first request can include compilation and initialization.
 start = time.perf_counter()
+# Run `request` to compute `first_response`.
 first_response = request(payload)
+# Record execution timing or profiler trace in `first_ms`.
 first_ms = (time.perf_counter() - start) * 1000
+# Evaluate `samples` from the current inputs and state.
 samples = []
+# Repeat the update loop over `range(30)` steps:
 for _ in range(30):
+    # Record execution timing or profiler trace in `start`.
     start = time.perf_counter()
+    # Run `request` to compute `response`.
     response = request(payload)
+    # Record execution timing or profiler trace in ``.
     samples.append((time.perf_counter() - start) * 1000)
-
 ```
 
 The first request can include compilation and initialization. The line plot contains only the subsequent warm requests; do not describe its first point as the cold request.
@@ -169,18 +197,24 @@ The first request can include compilation and initialization. The line plot cont
 Append this block to the same main.py and rerun the whole file. Compare the response with independent NumPy arithmetic and write an honest measurement report.
 
 ```python
+# Step 4 — Validate outputs and describe measurement scope: The report records local CPU timings and explicitly leaves...
+# Initialize array `expected` with explicit values and shape.
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
+# Read or serialize artifact data on disk (``).
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
+# Evaluate `report` from the current inputs and state.
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
           "first_request_ms": first_ms, "warm_samples_ms": samples,
           "p50_ms": float(np.percentile(samples, 50)), "p95_ms": float(np.percentile(samples, 95)),
           "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
           "edge_device_validated": False}
+# Verify contract: `len(samples) == 30 and all((t >= 0 for t in samples))`.
 assert len(samples) == 30 and all(t >= 0 for t in samples)
+# Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
 
+# Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)
-
 ```
 
 The report records local CPU timings and explicitly leaves edge-device qualification false. Carry the same protocol to a named device before replacing that field.
@@ -188,50 +222,82 @@ The report records local CPU timings and explicitly leaves edge-device qualifica
 ## Run the example
 
 ```python
+# Deploy at the edge: conversion, budgets and device checks: An edge deployment includes input decoding, preprocessing,...
+# Import json for this computation.
 import json
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
+# Initialize array `weights` with explicit values and shape.
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], jnp.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = jnp.array([.1, -.2], jnp.float32)
+# Define and JIT-compile `infer(features)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `infer(features)` implementing this stage's computation:
 def infer(features):
+    # Return `features @ weights + bias` to the caller.
     return features @ weights + bias
+# Read or serialize artifact data on disk (`payload`).
 payload = json.dumps({"features": [[255., 128., 0.]]})
+# Function `validate_sensor_payload(payload)` implementing this stage's computation:
 def validate_sensor_payload(payload):
+    # Read or serialize artifact data on disk (`document`).
     document = json.loads(payload)
+    # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
+    # Evaluate `rows` from the current inputs and state.
     rows = document['features']
+    # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
         raise ValueError('expected one row of three sensor values')
+    # Guard input contract (`any((type(value) not in (int, float) or not 0 <= value <= 255 or (not np.isfinite(value)) for value in rows[0]))`) and fail fast if violated.
     if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
         raise ValueError('expected numeric sensor values in the range 0 through 255')
+    # Return `np.asarray(rows, dtype=np.float32)` to the caller.
     return np.asarray(rows, dtype=np.float32)
+# Function `request(payload)` implementing this stage's computation:
 def request(payload):
+    # Run `validate_sensor_payload` to compute `decoded`.
     decoded = validate_sensor_payload(payload)
+    # Evaluate `features` from the current inputs and state.
     features = decoded / 255.
+    # Synchronize host execution until asynchronous device computation completes.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
+    # Return `json.dumps({'scores': output.tolist()})` to the caller.
     return json.dumps({"scores": output.tolist()})
+# Record execution timing or profiler trace in `start`.
 start = time.perf_counter()
+# Run `request` to compute `first_response`.
 first_response = request(payload)
+# Record execution timing or profiler trace in `first_ms`.
 first_ms = (time.perf_counter() - start) * 1000
+# Evaluate `samples` from the current inputs and state.
 samples = []
+# Repeat the update loop over `range(30)` steps:
 for _ in range(30):
+    # Record execution timing or profiler trace in `start`.
     start = time.perf_counter()
+    # Run `request` to compute `response`.
     response = request(payload)
+    # Record execution timing or profiler trace in ``.
     samples.append((time.perf_counter() - start) * 1000)
+# Convert `expected` to a host NumPy array for inspection or verification.
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
+# Read or serialize artifact data on disk (``).
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
+# Evaluate `report` from the current inputs and state.
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
           "first_request_ms": first_ms, "warm_samples_ms": samples,
           "p50_ms": float(np.percentile(samples, 50)), "p95_ms": float(np.percentile(samples, 95)),
           "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
           "edge_device_validated": False}
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert len(samples) == 30 and all(t >= 0 for t in samples)
+# Print diagnostic summary of the computed outputs.
 print(json.dumps(report, indent=2))
-
 ```
 
 Expected: A JSON report with $30$ measured warm requests, first-request time, p50/p95 and `edge_device_validated=false`. Timings depend on this CPU; no device speedup is asserted.
@@ -257,93 +323,95 @@ Each duration includes JSON decoding, normalization, transfer, inference, waitin
 The percentile is computed from a small sample, with interpolation between ordered values. It does not guarantee that future requests will meet the threshold. Compare the sample distribution, median, and tail across repeated runs on the target device. These are local CPU proxy measurements, not evidence of mobile or edge-device latency.
 
 ```python
+# Compute figure data for: An end-to-end boundary includes more than inference
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:04:12.393373+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:06:19.415261+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 16.838500276207924,
+  "first_request_ms": 16.428582835942507,
   "warm_samples_ms": [
-    0.1843748614192009,
-    0.08154194802045822,
-    0.06408290937542915,
-    0.05729077383875847,
-    0.053625088185071945,
-    0.049791764467954636,
-    0.04654191434383392,
-    0.044957734644412994,
-    0.04374980926513672,
-    0.045625027269124985,
-    0.04454189911484718,
-    0.04233280196785927,
-    0.04124967381358147,
-    0.04095910117030144,
-    0.04079192876815796,
-    0.043082982301712036,
-    0.04120822995901108,
-    0.04249997437000275,
-    0.0405837781727314,
-    0.03983406350016594,
-    0.044040847569704056,
-    0.04062522202730179,
-    0.0405418686568737,
-    0.041041988879442215,
+    0.19670836627483368,
+    0.08245836943387985,
+    0.061042141169309616,
+    0.054915901273489,
+    0.05250005051493645,
+    0.04837522283196449,
+    0.04566693678498268,
+    0.04462478682398796,
+    0.044582877308130264,
+    0.042750034481287,
+    0.04204222932457924,
+    0.04208320751786232,
+    0.043625012040138245,
+    0.04095863550901413,
+    0.041291117668151855,
+    0.040499959141016006,
+    0.040333718061447144,
+    0.040667131543159485,
     0.04016607999801636,
+    0.03870902583003044,
+    0.03933301195502281,
+    0.038875266909599304,
+    0.039041973650455475,
+    0.040333252400159836,
+    0.03920821473002434,
     0.04075001925230026,
-    0.03920774906873703,
-    0.041457824409008026,
-    0.0389590859413147,
-    0.03866618499159813
+    0.03970786929130554,
+    0.04329206421971321,
+    0.042667146772146225,
+    0.03958307206630707
   ],
-  "p50_ms": 0.04189531318843365,
-  "p95_ms": 0.07368538063019509,
+  "p50_ms": 0.04166667349636555,
+  "p95_ms": 0.07282106671482319,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 14.834875240921974,
+  "first_request_ms": 12.682375032454729,
   "warm_samples_ms": [
-    0.3188746050000191,
-    0.3804592415690422,
-    0.1544170081615448,
-    0.08033309131860733,
-    0.06245821714401245,
-    0.05516689270734787,
-    0.05229096859693527,
-    0.06070826202630997,
-    0.04737498238682747,
-    0.04516728222370148,
-    0.04300009459257126,
-    0.042791012674570084,
-    0.04150019958615303,
-    0.04179216921329498,
-    0.040875282138586044,
-    0.041041988879442215,
-    0.04158308729529381,
-    0.04300009459257126,
-    0.041791703552007675,
-    0.04045804962515831,
-    0.041624996811151505,
-    0.04045804962515831,
-    0.04191696643829346,
+    0.17187464982271194,
+    0.07224967703223228,
+    0.05766702815890312,
+    0.052374787628650665,
+    0.050582922995090485,
+    0.04545878618955612,
+    0.043958891183137894,
+    0.04316680133342743,
+    0.041665975004434586,
+    0.041750259697437286,
+    0.04054093733429909,
+    0.040207989513874054,
+    0.0427919439971447,
     0.039833132177591324,
-    0.04220893606543541,
-    0.0416669063270092,
-    0.03991695120930672,
-    0.0400422140955925,
-    0.04004174843430519,
-    0.039791688323020935
+    0.042667146772146225,
+    0.04041707143187523,
+    0.040040817111730576,
+    0.0399160198867321,
+    0.03979215398430824,
+    0.03929203376173973,
+    0.040374696254730225,
+    0.03933301195502281,
+    0.04020892083644867,
+    0.03937492147088051,
+    0.04054233431816101,
+    0.0387909822165966,
+    0.03916677087545395,
+    0.03916723653674126,
+    0.038499943912029266,
+    0.038499943912029266
   ],
-  "p50_ms": 0.04185456782579422,
-  "p95_ms": 0.24486868642270518,
+  "p50_ms": 0.04039588384330273,
+  "p95_ms": 0.06568748503923412,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
@@ -361,12 +429,17 @@ PASS: deployment-06
 **Predict before running:** Will raw sensor values and normalized values produce the same scores?
 
 ```python
+# Experiment — A normalization mismatch survives conversion: Conversion checks must start at the raw input boundary when...
+# Initialize array `raw` with explicit values and shape.
 raw = np.array([[255., 128., 0.]], np.float32)
+# Convert `wrong` to a host NumPy array for inspection or verification.
 wrong = np.asarray(infer(raw))
+# Convert `right` to a host NumPy array for inspection or verification.
 right = np.asarray(infer(raw / 255.))
+# Verify that the numerical values match the expected reference within tolerance.
 assert not np.allclose(wrong, right)
+# Print the observed values to compare against the expected result.
 print("Preprocessing mismatch max error", float(np.max(np.abs(wrong-right))))
-
 ```
 
 **Expected:** The mismatch is large despite identical weights.
@@ -378,14 +451,17 @@ Conversion checks must start at the raw input boundary when preprocessing is par
 **Predict before running:** Would an array cast distinguish a numeric string, a boolean and a legitimate sensor reading?
 
 ```python
+# Experiment — Reject raw inputs before normalization hides their meaning: The zero-input oracle checks that preprocessing does not add a...
 invalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]
+# Iterate over `invalid` to step through the computation:
 for invalid in invalid_payloads:
     try: request(json.dumps(invalid))
     except ValueError: pass
     else: raise AssertionError('invalid sensor payload accepted')
+# Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)
+# Print the observed values to compare against the expected result.
 print('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')
-
 ```
 
 **Expected:** All seven invalid payloads fail. A valid zero-valued row produces the two bias scores.
@@ -396,13 +472,47 @@ The zero-input oracle checks that preprocessing does not add a hidden offset. Re
 
 Send a second raw input $[0, 255, 128]$ through the full request, and verify its independent normalized NumPy result.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `changed_raw` with explicit values and shape.
+2. Read or serialize artifact data on disk (`changed_response`).
+3. Convert `expected_changed` to a host NumPy array for inspection or verification.
+4. Verify that computed values match the expected reference within numerical tolerance.
+5. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
+# Initialize array `changed_raw` with explicit values and shape.
+changed_raw = np.array(...)  # TODO: compute changed_raw
+# Read or serialize artifact data on disk (`changed_response`).
+changed_response = json.loads(...)  # TODO: compute changed_response
+# Convert `expected_changed` to a host NumPy array for inspection or verification.
+expected_changed = ...  # TODO: compute expected_changed
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(changed_response["scores"], expected_changed, atol = ...  # TODO: compute np.testing.assert_allclose(changed_response["scores"], expected_changed, atol
+# Print the observed values to compare against the expected result.
+print("Changed end-to-end request verified")
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
+# Initialize array `changed_raw` with explicit values and shape.
 changed_raw = np.array([[0., 255., 128.]], np.float32)
+# Read or serialize artifact data on disk (`changed_response`).
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
+# Convert `expected_changed` to a host NumPy array for inspection or verification.
 expected_changed = (changed_raw / 255.) @ np.asarray(weights) + np.asarray(bias)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(changed_response["scores"], expected_changed, atol=1e-6)
+# Print the observed values to compare against the expected result.
 print("Changed end-to-end request verified")
 ```
 
@@ -420,16 +530,46 @@ List the hardware, runtime, delegate and measurement fields before testing compl
 
 </details>
 
+### How to write: Make incomplete deployment evidence explicit — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `explicit(...)` — Call `explicit` with your updated parameters or inputs from this lesson's workspace.
+- `device_report.items(...)` — Call `device_report.items` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Evaluate `missing` from the current inputs and state.
+2. Verify contract: `missing and 'device' in missing`.
+3. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.
+device_report = ...  # TODO: compute device_report
+                 "quality_metric": None, "p95_ms": None, "peak_memory_bytes": None,
+                 "cold_start_ms": None, "fallback_operators": None}
+# Evaluate `missing` from the current inputs and state.
+missing = ...  # TODO: compute missing
+# Verify contract: `missing and 'device' in missing`.
+assert missing  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print("Not device-validated; missing:", ", ".join(missing))
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.
 device_report = {"device": None, "runtime_version": None, "delegate": None,
                  "quality_metric": None, "p95_ms": None, "peak_memory_bytes": None,
                  "cold_start_ms": None, "fallback_operators": None}
+# Evaluate `missing` from the current inputs and state.
 missing = [key for key, value in device_report.items() if value is None]
+# Verify contract: `missing and 'device' in missing`.
 assert missing and "device" in missing
+# Print the observed values to compare against the expected result.
 print("Not device-validated; missing:", ", ".join(missing))
-
 ```
 
 Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used.
@@ -448,16 +588,50 @@ Keep the fixed work unchanged. Compare the total request with the deadline, not 
 
 </details>
 
+### How to write: Decide whether a model speedup meets the request budget — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Evaluate `before_ms` from the current inputs and state.
+2. Evaluate `after_ms` from the current inputs and state.
+3. Verify that computed values match the expected reference within numerical tolerance.
+4. Verify contract: `after_ms > deadline_ms and fixed_ms == 16.0`.
+5. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
+fixed_ms = ...  # TODO: compute fixed_ms
+# Evaluate `before_ms` from the current inputs and state.
+before_ms = ...  # TODO: compute before_ms
+# Evaluate `after_ms` from the current inputs and state.
+after_ms = ...  # TODO: compute after_ms
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
+# Verify contract: `after_ms > deadline_ms and fixed_ms == 16.0`.
+assert after_ms  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
 fixed_ms=12.+4.;model_ms=8.;deadline_ms=19.
+# Evaluate `before_ms` from the current inputs and state.
 before_ms=fixed_ms+model_ms
+# Evaluate `after_ms` from the current inputs and state.
 after_ms=fixed_ms+model_ms/2
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
+# Verify contract: `after_ms > deadline_ms and fixed_ms == 16.0`.
 assert after_ms>deadline_ms and fixed_ms==16.
+# Print the observed values to compare against the expected result.
 print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)
-
 ```
 
 Halving model time leaves a $20$-millisecond request, so it misses the stated deadline. The serial fixed work gives a $16$-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision.

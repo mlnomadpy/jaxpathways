@@ -1,7 +1,8 @@
 import { pathwayCoverage } from '../lib/careers.js';
 import { $ } from '../lib/dom.js';
 import { authoredIds, courseState, phaseById, lessonById } from '../lib/course-state.js';
-import { practiceKind } from '../lib/runtime.js';
+import { inlineMath } from '../lib/math.js';
+import { practiceKind, courseTypeCue } from '../lib/runtime.js';
 import { searchLesson } from '../lib/search.js';
 import { escapeHtml } from '../lib/html.js';
 import { lessonLink } from '../lib/urls.js';
@@ -15,6 +16,27 @@ function progress() {
     `${entries.filter((e) => e.checkpointPassed).length}/${ids.length} checkpoints · ${entries.filter((e) => e.evidenceSaved).length}/${ids.length} exercises self-reported`;
 }
 
+function syncCourseFilterButtons(activeGroup = 'all') {
+  document.querySelectorAll('[data-course-filter]').forEach((btn) => {
+    btn.setAttribute('aria-pressed', String(btn.dataset.courseFilter === activeGroup));
+  });
+}
+
+function updateCatalogScrollEra() {
+  const scrollBar = $('#course-scroll-bar');
+  const indicator = $('#active-era-indicator');
+  if (!scrollBar || !indicator) return;
+  const visibleCards = Array.from(document.querySelectorAll('.phase-card:not([hidden])'));
+  if (!visibleCards.length) return;
+  const currentCard =
+    visibleCards.filter((card) => card.getBoundingClientRect().top <= 220).at(-1) ||
+    visibleCards[0];
+  const eraId = currentCard.dataset.courseEra || 'era-onboarding';
+  const eraTitle = currentCard.dataset.eraTitle || 'Start Here · Setup & Cloud TPU Track';
+  scrollBar.setAttribute('data-active-era', eraId);
+  indicator.textContent = `${eraTitle} · ${currentCard.querySelector('.phase-title')?.textContent || ''}`;
+}
+
 function openPhase(id) {
   if (!$('#curriculum')) {
     location.href = `course.html?phase=${encodeURIComponent(id)}#curriculum`;
@@ -26,6 +48,8 @@ function openPhase(id) {
   if (route && !route.phaseIds.includes(id)) courseState.activePath = 'all';
   courseState.courseQuery = '';
   courseState.courseHardware = 'all';
+  courseState.courseTypeFilter = 'all';
+  syncCourseFilterButtons('all');
   if (!phase.lessons.some((l) => l.status === 'authored')) $('#show-roadmap').checked = true;
   filter('', false);
   const card = document.getElementById('phase-' + id);
@@ -51,26 +75,33 @@ function openRoute(id) {
   courseState.activePath = id;
   courseState.courseQuery = '';
   courseState.courseHardware = 'all';
+  courseState.courseTypeFilter = 'all';
+  syncCourseFilterButtons('all');
   filter('');
 }
 
 function filter(query = '', updateUrl = true) {
   if (!$('#phases')) return;
   courseState.courseQuery = query;
+  const activeTypeFilter = courseState.courseTypeFilter || 'all';
   const route = courseState.curriculum.find((r) => r.id === courseState.activePath);
   const showRoadmap = $('#show-roadmap').checked;
   let visible = 0,
     visibleLessons = 0;
+  const visibleByEra = new Map();
   for (const phase of courseState.course.phases) {
     const card = document.getElementById('phase-' + phase.id);
+    const cue = courseTypeCue(phase);
     const routeMatch = !route || route.phaseIds.includes(phase.id);
-    const phaseMatch = `${phase.title} ${phase.project} ${phase.part}`
+    const typeMatch = activeTypeFilter === 'all' || cue.filterGroup === activeTypeFilter;
+    const phaseMatch = `${phase.title} ${phase.project} ${phase.part} ${cue.badge}`
       .toLowerCase()
       .includes(query);
     let matches = 0;
     for (const lesson of phase.lessons) {
       const match =
         routeMatch &&
+        typeMatch &&
         (showRoadmap || lesson.status === 'authored') &&
         (courseState.courseHardware === 'all' ||
           (lesson.status === 'authored' && practiceKind(lesson) === courseState.courseHardware)) &&
@@ -82,16 +113,24 @@ function filter(query = '', updateUrl = true) {
         const text = query && match ? searchLesson(lesson, query).excerpt : '';
         const link = excerpt.querySelector('a');
         link.textContent = text;
-        link.href = `lesson.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}&find=${encodeURIComponent(query)}`;
+        const baseHref = lessonLink(lesson.id, courseState.activePath);
+        link.href = `${baseHref}${baseHref.includes('?') ? '&' : '?'}find=${encodeURIComponent(query)}`;
         excerpt.hidden = !text;
       }
       matches += Number(match);
       visibleLessons += Number(match);
     }
     card.hidden = matches === 0;
+    if (matches > 0) {
+      visibleByEra.set(cue.eraId, (visibleByEra.get(cue.eraId) || 0) + 1);
+    }
     if (query && matches) card.open = true;
     visible += Number(matches > 0);
   }
+  document.querySelectorAll('[data-era-banner]').forEach((banner) => {
+    const eraId = banner.getAttribute('data-era-banner');
+    banner.hidden = !visibleByEra.get(eraId);
+  });
   $('#empty').hidden = visible !== 0;
   $('#empty').innerHTML =
     'No available lessons in this view. <a href="course.html">Browse all available lessons</a> or show planned topics to inspect this path’s roadmap.';
@@ -99,7 +138,7 @@ function filter(query = '', updateUrl = true) {
   summary.hidden = !route;
   if (route) {
     const coverage = pathwayCoverage(route, courseState.course);
-    summary.innerHTML = `<p class="edition">Your selected view</p><h2>${escapeHtml(route.title)}</h2><p>${escapeHtml(route.description)}</p><p>Focus phases: ${coverage.focus.available} available · ${coverage.focus.planned} planned. Preparation: ${coverage.preparation.available} available · ${coverage.preparation.planned} planned.</p><div class="actions"><a class="button" href="course.html">All course steps</a><a href="pathways.html?path=${encodeURIComponent(route.id)}">View path details</a></div>`;
+    summary.innerHTML = `<p class="edition">Your selected view</p><h2>${escapeHtml(route.title)}</h2><p>${inlineMath(route.description)}</p><p>Focus phases: ${coverage.focus.available} available${coverage.focus.planned ? ` · ${coverage.focus.planned} planned` : ''}. Preparation: ${coverage.preparation.available} available${coverage.preparation.planned ? ` · ${coverage.preparation.planned} planned` : ''}.</p><div class="actions"><a class="button" href="course.html">All course steps</a><a href="pathways.html?path=${encodeURIComponent(route.id)}">View path details</a></div>`;
   }
   const visiblePhases = courseState.course.phases.filter(
     (p) => !document.getElementById('phase-' + p.id).hidden,
@@ -118,6 +157,7 @@ function filter(query = '', updateUrl = true) {
       'beforeend',
       ' Legacy linked view. <a href="course.html">See the full course</a>',
     );
+  updateCatalogScrollEra();
 }
 
 function serializeCourseView() {
@@ -145,6 +185,8 @@ function restoreCourseView() {
   courseState.courseHardware = ['cpu', 'virtual-cpu'].includes(params.get('hardware'))
     ? params.get('hardware')
     : 'all';
+  courseState.courseTypeFilter = 'all';
+  syncCourseFilterButtons('all');
   const requestedPhase = phaseById(params.get('phase'));
   $('#show-roadmap').checked =
     params.get('roadmap') === '1' ||
@@ -158,13 +200,22 @@ function restoreCourseView() {
 function initCatalog() {
   if ($('#phases')) {
     const total = courseState.course.phases.reduce((n, p) => n + p.lessons.length, 0);
+    const plannedCount = total - authoredIds().length;
     $('#counts').textContent =
-      `${courseState.course.phases.length} phases · ${authoredIds().length} lessons available · ${total - authoredIds().length} planned`;
+      `${courseState.course.phases.length} phases · ${authoredIds().length} lessons available${plannedCount ? ` · ${plannedCount} planned` : ''}`;
     document.querySelectorAll('[data-phase]').forEach(
       (b) =>
         (b.onclick = (event) => {
           event.preventDefault();
           openPhase(b.dataset.phase);
+        }),
+    );
+    document.querySelectorAll('[data-course-filter]').forEach(
+      (btn) =>
+        (btn.onclick = () => {
+          courseState.courseTypeFilter = btn.dataset.courseFilter || 'all';
+          syncCourseFilterButtons(courseState.courseTypeFilter);
+          filter(courseState.courseQuery, false);
         }),
     );
     document.querySelectorAll('[data-lesson]').forEach(
@@ -183,6 +234,13 @@ function initCatalog() {
         url.searchParams.set('phase', card.id.slice(6));
         history.replaceState(null, '', url);
       }),
+    );
+    window.addEventListener(
+      'scroll',
+      () => {
+        requestAnimationFrame(updateCatalogScrollEra);
+      },
+      { passive: true },
     );
     const params = new URLSearchParams(location.search);
     if (courseState.curriculum.some((r) => r.id === params.get('path'))) {
@@ -206,10 +264,8 @@ function initCatalog() {
       $('#course-start').textContent = 'Resume lesson';
       $('#course-start').setAttribute('aria-label', 'Resume ' + last.lesson.title);
       $('#course-start').href =
-        `lesson.html?lesson=${encodeURIComponent(last.lesson.id)}${path === 'all' ? '' : '&path=' + encodeURIComponent(path)}${/^section-\d+$/.test(section) ? '#' + section : ''}`;
-    } else if (first)
-      $('#course-start').href =
-        `lesson.html?lesson=${encodeURIComponent(first.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}`;
+        `${lessonLink(last.lesson.id, path)}${/^section-\d+$/.test(section) ? '#' + section : ''}`;
+    } else if (first) $('#course-start').href = lessonLink(first.id, courseState.activePath);
     else $('#course-start').hidden = true;
     const initialPhase = params.get('phase')
       ? document.getElementById('phase-' + params.get('phase'))
@@ -226,7 +282,7 @@ function initCatalog() {
     }
     if ($('#content-status'))
       $('#content-status').textContent =
-        `${authoredIds().length} lesson drafts with CPU companions; ${total - authoredIds().length} topics have no lesson material. ${courseState.course.projectIds?.length || 1} staged projects are available. Project synthesis and math assessment review drafts are linked from their phases; remaining route assessments are planned.`;
+        `${authoredIds().length} lesson drafts with CPU companions${plannedCount ? `; ${plannedCount} topics have no lesson material` : ''}. ${courseState.course.projectIds?.length || 1} staged projects are available. Project synthesis and math assessment review drafts are linked from their phases; remaining route assessments are planned.`;
   }
 }
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-04",
-  "contentHash": "c2365b5e4b377d98739f13b9c29a70eae5f68bce33daefe028ffb3063fc4266e",
-  "executedAt": "2026-10-06T23:01:13.798671+00:00",
+  "contentHash": "132276e8e0629893513729dbcdc88eee2d3f5547de8b7d12ea6b9a16d97221cd",
+  "executedAt": "2026-10-08T14:03:54.941256+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,37 +11,37 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'transcendentals': 256.0, 'flops': 8192.0, 'utilization1{}': 1.0, 'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'bytes accessedout{}': 2048.0}\nLocal CPU samples seconds: [1.929188147187233e-05, 1.4041084796190262e-05, 1.5125144273042679e-05, 1.2667383998632431e-05, 1.1208001524209976e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nStableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0, 'utilization0{}': 2.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0}\nLocal CPU samples seconds: [3.5291071981191635e-05, 1.9999686628580093e-05, 1.4374963939189911e-05, 1.2165866792201996e-05, 1.1708121746778488e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nCeilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]\nChanged contract: 27648 8064 3.4285714285714284 bandwidth-limited in the hypothetical model\nArithmetic unchanged; modeled traffic halved and intensity doubled.\nPASS: performance-04\n",
+  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0}\nLocal CPU samples seconds: [1.750001683831215e-05, 8.999835699796677e-06, 8.958857506513596e-06, 8.916947990655899e-06, 6.6659413278102875e-06]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nStableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'flops': 8192.0, 'bytes accessedout{}': 2048.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0}\nLocal CPU samples seconds: [1.8459279090166092e-05, 8.875038474798203e-06, 9.040813893079758e-06, 6.58305361866951e-06, 7.2498805820941925e-06]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nCeilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]\nChanged contract: 27648 8064 3.4285714285714284 bandwidth-limited in the hypothetical model\nArithmetic unchanged; modeled traffic halved and intensity doubled.\nPASS: performance-04\n",
   "notebookCells": [
     {
-      "sourceHash": "aeb9dc9d1a22aff627dfb37d85b281db01b3cff05cde9b2d3cac8d5e1f485e84",
+      "sourceHash": "4730e1dd975a5aedfab467a165d6d46d77882a0a4a702c3ff9fe81fcd85682a6",
       "outputs": []
     },
     {
-      "sourceHash": "6a4678a1fa49ef6de7c6a9ad6c79dba06de3a7f0791efabd2c3d1eef22a28d3c",
+      "sourceHash": "349a0072554d56f38c4e249821cfdd89c1f94e4eb9cfdbac21af0be533cf9128",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
             "StableHLO operations present: dot_general and tanh\n",
-            "Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0}\n"
+            "Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'bytes accessed': 5632.0}\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "5a93ae47ecedce27df5fa3d348c26ac4d7f33c01f7e25e0b001919427a582a97",
+      "sourceHash": "eaec8f93084b611bc39887aca65e55bbceac29f34890b5590f1516d4bbe6eef6",
       "outputs": []
     },
     {
-      "sourceHash": "3dd67ef5dc078486eba6a6adf1773e93f8bab5a4020c52daa995b9dfe53217fd",
+      "sourceHash": "acb25850abee9a7642f47d1e1a41dd545147f04e1b8a2b3315b3d5c46e332388",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Local CPU samples seconds: [1.866742968559265e-05, 1.6583595424890518e-05, 1.5290919691324234e-05, 1.3541895896196365e-05, 1.2042000889778137e-05]\n",
+            "Local CPU samples seconds: [3.8874801248311996e-05, 3.841705620288849e-05, 1.1125113815069199e-05, 9.458977729082108e-06, 8.666887879371643e-06]\n",
             "Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\n",
             "Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n"
           ]
@@ -49,15 +49,15 @@
       ]
     },
     {
-      "sourceHash": "9dd1c229276311c0237987218f3ae83b9762bc9d253422e0f145095bcb83181f",
+      "sourceHash": "f8fd519d09e6a2ad8a3401e0798f31ef5df0fa692e55991b15e177f2bc539380",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
             "StableHLO operations present: dot_general and tanh\n",
-            "Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0, 'flops': 8192.0}\n",
-            "Local CPU samples seconds: [2.5250017642974854e-05, 2.437504008412361e-05, 1.5917234122753143e-05, 1.1416617780923843e-05, 1.1957716196775436e-05]\n",
+            "Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0}\n",
+            "Local CPU samples seconds: [2.4499837309122086e-05, 1.4749821275472641e-05, 7.833819836378098e-06, 6.332993507385254e-06, 1.0292045772075653e-05]\n",
             "Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\n",
             "Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n"
           ]
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "55ec724bbe4089e2a9a2c275eb89158486dccf86161f00b0ed671afe07b2c789",
+      "sourceHash": "2e4b6198e7495459a677511890d3c1ab45a1b69483a2859d7b55fbe04fab979b",
       "outputs": []
     },
     {
@@ -84,7 +84,7 @@
       ]
     },
     {
-      "sourceHash": "63bdb903f86f741670cbb0eabf73de519706efbf58dcebad1c0d6d48f152bbf6",
+      "sourceHash": "de38d455bd3ca0deffac1e19a6760d872e8fc14526aa50c41d21320e108827ce",
       "outputs": [
         {
           "output_type": "stream",
@@ -96,11 +96,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "70a661f62b02d4ccaf686ff9e3043f2af43f8f8444894baa3a4e477c7c533348",
       "outputs": []
     },
     {
-      "sourceHash": "44bc64f44690ffb58b88ec4ed069bfb92916ae57dee596e92df1f7da2c4cc2b5",
+      "sourceHash": "ecb89c1e5ab2de328d8f67355e4a029db853bf94d9370e85c094dad2802bcd66",
       "outputs": [
         {
           "output_type": "stream",
@@ -112,11 +112,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "a427190853cec6de0e889bccb7a59d29b38fef6b6a6598544865b3dcc246fd3a",
       "outputs": []
     },
     {
-      "sourceHash": "be0c6204db89514c10f6423912dc669b0c891a2f334ce742aff24dd170d1281a",
+      "sourceHash": "376c14fd9b3ac4a0244f57167e4cce4e6211ddb6c0ce49a3594ef778b8f7083d",
       "outputs": [
         {
           "output_type": "stream",

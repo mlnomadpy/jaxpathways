@@ -20,8 +20,8 @@
   padding: 28px;
   border: 1px solid var(--line);
   border-top: 3px solid var(--atlas);
-  border-radius: 12px;
-  background: var(--paper);
+  border-radius: var(--learning-radius);
+  background: var(--panel);
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -37,16 +37,7 @@
   margin-top: auto;
 }
 .track-page {
-  max-width: 1000px;
   padding-bottom: 40px;
-}
-.track-page .page-intro {
-  padding: 48px 0 28px;
-}
-.track-page h1 {
-  max-width: 22ch;
-  font: 650 clamp(36px, 6vw, 64px)/1.1 var(--ui);
-  letter-spacing: -0.035em;
 }
 .track-page h2 {
   font: 650 28px/1.25 var(--ui);
@@ -60,11 +51,6 @@
 }
 .track-page p {
   max-width: 76ch;
-}
-.track-page .actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
 }
 .track-status {
   border-left: 3px solid var(--atlas);
@@ -80,7 +66,7 @@
   margin: 28px 0;
   padding: 18px 24px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--learning-radius);
 }
 .track-stage-nav ol {
   display: grid;
@@ -90,8 +76,8 @@
 }
 .track-figure {
   padding: 24px;
-  background: var(--paper);
-  border-radius: 12px;
+  background: var(--panel);
+  border-radius: var(--learning-radius);
 }
 .track-stage {
   padding: 36px 0;
@@ -110,12 +96,15 @@
 }
 .track-page a:not(.button),
 .track-stage-nav a {
+  color: var(--blue);
+  text-decoration: underline;
   text-underline-offset: 4px;
 }
-body.path-open .modality-section {
+body.path-open .modality-section,
+body.career-open .modality-section {
   display: none;
 }
-@media (max-width: 680px) {
+@media (max-width: 760px) {
   .modality-grid,
   .track-contract,
   .track-stage-nav ol {

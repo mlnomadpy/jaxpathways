@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-02",
+  "contentHash": "462130b988a0c5eb31b878b6f2e39819dfe16d97fe13ac458085e15115d6f743",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "kind": "executed",
+  "generatedAt": "2026-10-08T10:31:57.544856+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\n",
+  "data": {
+    "kind": "line",
+    "x": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "xlabel": "training step",
+    "ylabel": "minibatch mean-squared loss",
+    "boundaries": [
+      3
+    ],
+    "series": [
+      {
+        "label": "uninterrupted 6-step control",
+        "y": [
+          3.6712021827697754,
+          3.789125442504883,
+          1.9137234687805176,
+          2.0955333709716797,
+          1.811739206314087,
+          1.1663587093353271
+        ]
+      },
+      {
+        "label": "stopped at step 3 + resumed (steps 4-6)",
+        "y": [
+          3.6712021827697754,
+          3.789125442504883,
+          1.9137234687805176,
+          2.0955333709716797,
+          1.811739206314087,
+          1.1663587093353271
+        ]
+      }
+    ]
+  },
+  "diagram": {
+    "title": "Checkpointed TPU job launcher lifecycle from warmup to zero-drift resume",
+    "prediction": "Why must the warmup compilation step run before the timed step loop without overwriting the restored checkpoint state?",
+    "reading": "Read top to bottom: the launcher loads either the initial state or `checkpoint-latest.json`, runs one synchronized `@jax.jit` warmup call to compile XLA HLO without mutating state, executes timed steady-state steps while appending to `events.jsonl`, and writes `checkpoint-latest.json` atomically via `.tmp` + `fsync` + `os.replace`.",
+    "alt": "Read top to bottom: initialize or restore checkpoint state, run synchronized warmup compilation without mutating state, execute timed steps logging events.jsonl, and atomically replace checkpoint-latest.json.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "Init or --resume: load (step, w, b, m_w, m_b, key) + state_hash",
+          "tone": "data",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.7,
+          "label": "Warmup: compile @jax.jit train_step + block_until_ready (no state mutation)",
+          "tone": "state",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4.4,
+          "label": "Steady loop: timed step + block_until_ready -> append events.jsonl",
+          "tone": "result",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 6.1,
+          "label": "Atomic checkpoint: write .tmp -> os.fsync -> os.replace",
+          "tone": "warning",
+          "w": 8.4,
+          "h": 1.05
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 7,
+      "width": 10
+    }
+  }
+}

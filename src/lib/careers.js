@@ -1,5 +1,16 @@
+/**
+ * @typedef {{ id: string, number?: string, title?: string, projectId?: string, additionalProjectIds?: string[], lessons: { status: string }[] }} CoveragePhase
+ * @typedef {{ phases: CoveragePhase[], pathways?: import('../types/course').Pathway[], modalityTracks?: import('../types/course').ModalityTrack[] }} CoverageCourse
+ */
+
+/**
+ * @param {string[]} phaseIds
+ * @param {CoverageCourse} courseData
+ */
 function careerCoverage(phaseIds, courseData) {
-  const phases = phaseIds.map((id) => courseData.phases.find((p) => p.id === id)).filter(Boolean);
+  const phases = phaseIds
+    .map((id) => courseData.phases.find((p) => p.id === id))
+    .filter(/** @returns {p is CoveragePhase} */ (p) => Boolean(p));
   const lessons = phases.flatMap((p) => p.lessons),
     applied = phases.filter((p) => Number(p.number) >= 5).flatMap((p) => p.lessons);
   return {
@@ -9,12 +20,18 @@ function careerCoverage(phaseIds, courseData) {
     appliedPlanned: applied.filter((l) => l.status !== 'authored').length,
     projects: [
       ...new Set(
-        phases.flatMap((p) => [p.projectId, ...(p.additionalProjectIds || [])]).filter(Boolean),
+        phases
+          .flatMap((p) => [p.projectId, ...(p.additionalProjectIds || [])])
+          .filter(/** @returns {id is string} */ (id) => Boolean(id)),
       ),
     ],
   };
 }
 
+/**
+ * @param {{ phaseIds: string[], focusPhaseIds?: string[] }} route
+ * @param {CoverageCourse} courseData
+ */
 function pathwayCoverage(route, courseData) {
   const focusIds =
     route.focusPhaseIds ||
@@ -30,24 +47,37 @@ function pathwayCoverage(route, courseData) {
   };
 }
 
+/**
+ * @param {import('../types/course').Role} role
+ * @param {string[]} knownPhaseIds
+ * @param {import('../types/course').Course} courseData
+ */
 function careerStartingPhase(role, knownPhaseIds, courseData) {
-  const route = courseData.pathways.find((r) => r.id === role.defaultPathwayId);
+  const route =
+    courseData.pathways.find((r) => r.id === role.defaultPathwayId) || courseData.pathways[0];
   const known = new Set(knownPhaseIds);
   return route.phaseIds.find((id) => !known.has(id)) || route.phaseIds[0];
 }
 
+/**
+ * @param {import('../types/course').Role} role
+ * @param {import('../types/course').Course} courseData
+ * @param {string} startPhaseId
+ */
 function careerPlanMarkdown(role, courseData, startPhaseId) {
-  const route = courseData.pathways.find((r) => r.id === role.defaultPathwayId);
+  const route =
+    courseData.pathways.find((r) => r.id === role.defaultPathwayId) || courseData.pathways[0];
   const coverage = pathwayCoverage(route, courseData);
-  const phase = (id) => courseData.phases.find((p) => p.id === id);
+  const phase = (/** @type {string} */ id) =>
+    courseData.phases.find((p) => p.id === id) || courseData.phases[0];
   const guides = (role.modalityTrackIds || []).map((id) => {
-    const track = courseData.modalityTracks.find((track) => track.id === id);
+    const track = (courseData.modalityTracks || []).find((track) => track.id === id);
     return (
       id +
       ' — python scripts/course.py guide ' +
       id +
       ' (' +
-      (track.harnessProjectId
+      (track?.harnessProjectId
         ? 'runnable harness: ' + track.harnessProjectId
         : 'connected harness planned') +
       ')'

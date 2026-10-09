@@ -1,5 +1,5 @@
 {
-  "scope": "All 97 canonical entries across 19 phases and all 10 routes. Existing authored sources, generated outputs and artifact provenance were inspected. This is a visual teaching and delivery audit, not independent expert or learner validation.",
+  "scope": "All 103 canonical entries across 22 phases and all 10 routes. Existing authored sources, generated outputs and artifact provenance were inspected. This is a visual teaching and delivery audit, not independent expert or learner validation.",
   "findings": [
     "The follow-up interpretation audit rewrites every authored walkthrough against its source computation and saved plot data; see docs/plot-interpretation-audit.md for corrected misconceptions and review limits.",
     "The original reader exposed expected output and pass receipts but not captured executions.",
@@ -9,11 +9,11 @@
     "Planned entries have no lesson or execution to visualize and must remain clearly planned."
   ],
   "counts": {
-    "entries": 97,
-    "authored": 97,
+    "entries": 103,
+    "authored": 103,
     "planned": 0,
     "previousFigureCoverage": 9,
-    "executedPlots": 92,
+    "executedPlots": 98,
     "conceptualDiagrams": 5
   },
   "lessons": [
@@ -1469,6 +1469,96 @@
       "kind": "executed",
       "explanation": "Positive final corrected margins mean the policy favors each chosen action more strongly relative to the reference. The independent host softplus calculation and reference-gradient check establish objective behavior; separate generation and human review would be needed for a language application.",
       "figureData": "phases/18-posttraining/05-dpo/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-01",
+      "phase": "tpu",
+      "title": "Select a TPU slice and provision your Cloud TPU VM",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Single-host Cloud TPU slice chip counts and total HBM capacity",
+      "kind": "executed",
+      "explanation": "Moving from `v5litepod-1` (`16` GiB) to `v5litepod-4` (`64` GiB) or `v6e-4` (`128` GiB) multiplies HBM capacity while keeping a single VM host, so you can test `jax.pmap` and `NamedSharding` across `4` or `8` chips from one SSH command.",
+      "figureData": "phases/19-tpu/01-get-a-tpu-running-and-verify-the-runtime/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-04",
+      "phase": "tpu",
+      "title": "Bootstrap .venv and verify a TPU runtime receipt",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Per-chip contribution to the 4-device synchronized pmap verification receipt",
+      "kind": "executed",
+      "explanation": "Because `x` is reshaped to `(4, 8)`, every chip executes the same `pmap` program on its own slice of 8 numbers; matching the final cumulative sum of `10416.0` proves all 4 chips participated.",
+      "figureData": "phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-02",
+      "phase": "tpu-workflows",
+      "title": "Stage and launch checkpointed TPU jobs",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Interrupted-and-resumed trajectory vs uninterrupted 6-step control run",
+      "kind": "executed",
+      "explanation": "Because the checkpoint at step 3 saved `(w, b, m_w, m_b, key)` atomically and the warmup call did not consume the restored state, the two loss trajectories lie directly on top of each other (`max_abs_diff == 0`).",
+      "figureData": "phases/20-tpu-workflows/01-stage-and-launch-checkpointed-tpu-jobs/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-05",
+      "phase": "tpu-workflows",
+      "title": "Run course scripts and multi-host TPU Pod slices",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Host count, per-host local chips, and global TPU chips across single-host and Pod slices",
+      "kind": "executed",
+      "explanation": "`v5litepod-4` and `v5litepod-8` keep `hosts = 1`, whereas `v5litepod-16` and `v6e-16` use `4` hosts with `4` local chips each (`16` global chips), visually showing why `--worker=all` becomes mandatory at 16 chips.",
+      "figureData": "phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-03",
+      "phase": "tpu-systems",
+      "title": "TPU generations and HBM memory budgeting",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations",
+      "kind": "executed",
+      "explanation": "`v5p` maximizes HBM capacity per chip (`95` GiB) and lowers the ridge point (`166` FLOP/byte), while `v6e` doubles `v5e`'s HBM (`32` GiB vs `16` GiB) and reaches `918` BF16 TFLOP/s (`573.8` FLOP/byte ridge point), rewarding fused kernels and batch sizes that keep the MXU fed.",
+      "figureData": "phases/21-tpu-systems/01-tpu-generations-and-hbm-memory-budgeting/outputs/visual.json",
+      "executedNotebook": true,
+      "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
+    },
+    {
+      "id": "tpu-06",
+      "phase": "tpu-systems",
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+      "status": "authored",
+      "previousVisual": false,
+      "baselinePresent": false,
+      "previousShapeSketches": null,
+      "visual": "Maximum and mean absolute matmul error across BF16 and INT8 precision policies",
+      "kind": "executed",
+      "explanation": "Accumulating `bfloat16` inputs in `float32` cuts both mean and maximum error compared to `bfloat16` accumulation, while per-channel `int8` with `float32` accumulation keeps mean error small (`~0.01`) at one-quarter the weight bytes of `fp32`.",
+      "figureData": "phases/21-tpu-systems/02-bfloat16-int8-precision-and-xprof-profiling/outputs/visual.json",
       "executedNotebook": true,
       "review": "CPU executed; figure/lesson relationship inspected; learner review pending"
     }

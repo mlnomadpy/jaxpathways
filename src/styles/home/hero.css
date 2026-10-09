@@ -32,7 +32,7 @@
 .hero .intro {
   font: 20px/1.6 var(--reading);
   max-width: 44ch;
-  margin-bottom: 18px;
+  margin: 0 0 18px;
 }
 .hero-byline {
   font-size: 15px;
@@ -86,9 +86,7 @@
   min-height: 44px;
   align-items: center;
   color: var(--atlas);
-  font:
-    14px ui-monospace,
-    monospace;
+  font: 14px var(--mono);
   text-decoration: underline;
   text-underline-offset: 5px;
 }

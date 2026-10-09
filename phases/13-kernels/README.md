@@ -6,7 +6,7 @@ Write actual Pallas grids and buffered pipelines, verify boundaries and precisio
 
 Begin with a profiled operation and independent oracle. Complete CPU semantics first; actual TPU compilation, correctness and performance require the separate target runner on supported hardware.
 
-**Prerequisites:** 09: Distributed training.
+**Prerequisites:** 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** CPU interpretation/simulation reference; TPU target lab requires separately validated hardware.
 
@@ -114,7 +114,7 @@ A checked Pallas kernel with an explicit target qualification plan.
 
 **Demonstrate:** Compare against a reference across shapes and justify each optimization with evidence.
 
-Project status: implemented staged practice · [Open source](../../projects/kernel-audit/README.md).
+Project status: implemented staged practice · [Open source](../../projects/kernel-audit/README.md). Copy `projects/kernel-audit/starter/model.py` to `projects/kernel-audit/my_model.py` and write your code in `projects/kernel-audit/my_model.py`. Run `python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 
 

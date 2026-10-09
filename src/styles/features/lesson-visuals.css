@@ -1,7 +1,7 @@
 .lesson-visual {
   margin-block: 2.5rem;
   padding-block: 1.5rem;
-  border-block: 1px solid var(--line, #d8d1e3);
+  border-block: 1px solid var(--line);
 }
 .lesson-mechanism {
   margin: 1.5rem 0;
@@ -9,9 +9,9 @@
 .reasoning-check {
   margin-block: 1.5rem;
   padding: 1rem 1.25rem;
-  border-left: 3px solid #17735c;
-  background: #edf6f1;
-  color: #172334;
+  border-left: 3px solid var(--mint);
+  background: var(--mint-surface);
+  color: var(--ink);
 }
 .reasoning-check h3 {
   margin-top: 0;
@@ -30,9 +30,9 @@
 .figure-scroll {
   max-width: 100%;
   overflow-x: auto;
-  border: 1px solid #dfd8e8;
-  border-radius: 0.75rem;
-  background: white;
+  border: 1px solid var(--line);
+  border-radius: var(--learning-radius);
+  background: var(--panel);
 }
 .figure-scroll img {
   display: block;
@@ -42,7 +42,7 @@
 }
 .figure-scroll:focus-visible,
 .lesson-execution pre:focus-visible {
-  outline: 3px solid #6240ad;
+  outline: 3px solid var(--focus);
   outline-offset: 3px;
 }
 .lesson-visual figcaption,
@@ -50,14 +50,14 @@
   margin-top: 0.7rem;
   font-size: 0.82rem;
   line-height: 1.6;
-  color: var(--muted, #61586e);
+  color: var(--muted);
   overflow-wrap: anywhere;
 }
 .visual-prediction {
   padding: 0.9rem 1rem;
-  background: #f3eefb;
-  border-left: 3px solid #6240ad;
-  color: #30273e;
+  background: var(--paper);
+  border-left: 3px solid var(--atlas);
+  color: var(--ink);
 }
 .figure-links {
   display: flex;
@@ -70,10 +70,10 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
   padding: 1rem;
-  background: #f4f1f8;
-  color: #30273e;
-  border: 1px solid #dfd8e8;
-  border-radius: 0.5rem;
+  background: var(--panel);
+  color: var(--ink);
+  border: 1px solid var(--line);
+  border-radius: var(--learning-radius);
 }
 @media print {
   .figure-scroll {

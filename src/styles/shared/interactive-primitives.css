@@ -23,14 +23,15 @@ button:hover,
 }
 .primary,
 .button.primary {
-  background: var(--atlas);
-  color: #fff;
-  border-color: var(--atlas);
+  background: var(--primary-bg);
+  color: var(--primary-ink);
+  border-color: var(--primary-bg);
 }
 .primary:hover,
 .button.primary:hover {
-  background: var(--blue);
-  color: #fff;
+  background: var(--primary-hover);
+  border-color: var(--primary-hover);
+  color: var(--primary-ink);
 }
 button:disabled {
   opacity: 0.6;
@@ -46,10 +47,6 @@ button:disabled {
   gap: 12px;
   margin: 28px 0 20px;
 }
-.hero {
-  display: grid;
-}
-
 .back-link {
   display: inline-flex;
   align-items: center;

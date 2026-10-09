@@ -2,7 +2,6 @@
 import '../../styles/features/lesson-visuals.css';
 import 'katex/dist/katex.min.css';
 import '../../styles/features/math.css';
-import '../../styles/features/lesson-list.css';
 import '../../styles/tokens.css';
 import '../../styles/base.css';
 import '../../styles/features/reader.css';
@@ -24,12 +23,23 @@ const revision = lesson
   ? snapshots[0].lessons[lesson.id as keyof (typeof snapshots)[0]['lessons']]
   : null;
 const prerequisiteLinks =
-  lesson?.prerequisites
-    .map((id) => {
-      const item = authoredLessons.find((l) => l.id === id);
-      return `<a href="lesson-${encodeURIComponent(id)}.html">${escapeHtml(item?.title || id)}</a>`;
-    })
-    .join('; ') || 'Basic Python; begin with the setup phase.';
+  lesson?.id === 'welcome-01'
+    ? 'No terminal or Git experience required'
+    : lesson?.prerequisites.length
+      ? lesson.prerequisites
+          .map((id) => {
+            const item = authoredLessons.find((l) => l.id === id);
+            return `<a href="lesson-${encodeURIComponent(id)}.html">${escapeHtml(item?.title || id)}</a>`;
+          })
+          .join('; ')
+      : phase?.prerequisitePhaseIds.length
+        ? phase.prerequisitePhaseIds
+            .map((id) => {
+              const item = course.phases.find((p) => p.id === id);
+              return `<a href="course.html?phase=${encodeURIComponent(id)}">${escapeHtml(item?.title || id)}</a>`;
+            })
+            .join('; ')
+        : 'Basic Python; begin with the setup phase';
 const html =
   lesson && phase
     ? renderLesson({
@@ -93,7 +103,11 @@ const schema = lesson
       </p>
       <button class="close">Back to course</button>
     </aside>
-    <article id="lesson-body" data-lesson={lessonId}>
+    <article
+      id="lesson-body"
+      data-lesson={lessonId}
+      data-static-rendered={lesson ? lesson.id : undefined}
+    >
       {lesson ? (
         <Fragment set:html={html} />
       ) : (

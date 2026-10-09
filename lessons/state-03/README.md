@@ -83,6 +83,8 @@ Before benchmarking, compare numerical results on the same inputs and synchroniz
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
+# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -94,9 +96,13 @@ These explicit inputs define the case that the later checks will verify.
 Append this block below the inputs in the same file.
 
 ```python
+# Step 2 — Build the computation: step returns the next scalar carry and one recorded scalar.
 def step(carry, increment):
+    # Evaluate `next_value` from the current inputs and state.
     next_value = 0.5 * carry + increment
+    # Return `(next_value, next_value)` to the caller.
     return next_value, next_value
+# Initialize array `increments` with explicit values and shape.
 increments = jnp.array([1., 1., 1., 1.])
 ```
 
@@ -107,10 +113,16 @@ step returns the next scalar carry and one recorded scalar. scan feeds that carr
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
+# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Run compiled structured control flow via `jax.lax` (`(final, history)`).
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
+# Print the observed values to compare against the expected result.
 print("History:", history)
+# Print diagnostic summary of the computed outputs.
 print("Final:", float(final))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(final, history[-1])
 ```
 
@@ -119,16 +131,28 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
+# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
+# Step 2 — Build the computation: step returns the next scalar carry and one recorded scalar.
 def step(carry, increment):
+    # Evaluate `next_value` from the current inputs and state.
     next_value = 0.5 * carry + increment
+    # Return `(next_value, next_value)` to the caller.
     return next_value, next_value
+# Initialize array `increments` with explicit values and shape.
 increments = jnp.array([1., 1., 1., 1.])
+# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Run compiled structured control flow via `jax.lax` (`(final, history)`).
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
+# Print the observed values to compare against the expected result.
 print("History:", history)
+# Print diagnostic summary of the computed outputs.
 print("Final:", float(final))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(final, history[-1])
 ```
 
@@ -155,12 +179,14 @@ The update is $c_{t+1}=0.5c_t+1$. Subtracting it from the fixed point gives $2-c
 The shrinking gaps are $1$, $0.5$, $0.25$, and $0.125$. `scan` carries the evolving value forward while collecting this history. One more step would produce $1.9375$; it would not add another full unit or restart from the initial carry.
 
 ```python
+# Compute figure data for: The carry approaches a fixed point
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:48.503758+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:41.526895+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]
@@ -177,15 +203,26 @@ PASS: state-03
 **Predict before running:** Predict every output for inputs $[1,-1,2,0]$ and decay $0.5$.
 
 ```python
+# Experiment — Compare scan to the Python recurrence: The loop is an independent control-flow reference and the fixed...
+# Initialize array `inputs` with explicit values and shape.
 inputs=jnp.array([1.,-1.,2.,0.])
+# Evaluate `state` from the current inputs and state.
 state=0.
+# Evaluate `reference` from the current inputs and state.
 reference=[]
+# Iterate over `inc` to step through the computation:
 for inc in [1.,-1.,2.,0.]:
+    # Evaluate `state` from the current inputs and state.
     state=0.5*state+inc
+    # Append the current step result to `reference`.
     reference.append(state)
+# Run compiled structured control flow via `jax.lax` (`(last, observed)`).
 last,observed=jax.lax.scan(step,jnp.array(0.),inputs)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(observed,jnp.array([1.,-0.5,1.75,0.875]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(observed,jnp.array(reference))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(last,state)
 ```
 
@@ -198,11 +235,18 @@ The loop is an independent control-flow reference and the fixed numbers verify t
 **Predict before running:** How do the state and derivative recurrences differ?
 
 ```python
+# Experiment — Verify state and sensitivity together: The scalar objective is the final state.
+# Define `terminal(d)` to carry state across steps with `jax.lax.scan`:
 def terminal(d):
+    # Return `jax.lax.scan(lambda c, u: (d * c + u, d * c + u), jnp.array(0.0), increments)[0]` to the caller.
     return jax.lax.scan(lambda c,u:(d*c+u,d*c+u),jnp.array(0.),increments)[0]
+# Differentiate the objective to obtain `(value, sensitivity)` via automatic differentiation.
 value,sensitivity=jax.value_and_grad(terminal)(0.5)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(value,1.875)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(sensitivity,2.75)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.jit(terminal)(0.5),value)
 ```
 
@@ -214,14 +258,54 @@ The scalar objective is the final state. Returning the whole history to ordinary
 
 Make the decay an explicit scalar argument. Differentiate the final value with respect to decay and compare at $0.5$ with the analytic derivative $2.75$.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+
+**Step-by-step implementation plan:**
+1. Define `simulate(decay)` to carry state across steps with `jax.lax.scan`:
+2. Function `transition(carry, increment)` implementing this stage's computation:
+3. Evaluate `value` from the current inputs and state.
+4. Return `(value, value)` to the caller.
+5. Return `jax.lax.scan(transition, jnp.array(0.0), increments)[0]` to the caller.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Make the decay an explicit scalar argument.
+# Define `simulate(decay)` to carry state across steps with `jax.lax.scan`:
+def simulate(decay):
+    # Function `transition(carry, increment)` implementing this stage's computation:
+    def transition(carry, increment):
+        # Evaluate `value` from the current inputs and state.
+        value = ...  # TODO: compute value
+        # Return `(value, value)` to the caller.
+        return ...  # TODO: return computed result
+    # Return `jax.lax.scan(transition, jnp.array(0.0), increments)[0]` to the caller.
+    return ...  # TODO: return computed result
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(jax.grad(simulate)(0.5), 2.75)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Make the decay an explicit scalar argument.
+# Define `simulate(decay)` to carry state across steps with `jax.lax.scan`:
 def simulate(decay):
+    # Function `transition(carry, increment)` implementing this stage's computation:
     def transition(carry, increment):
+        # Evaluate `value` from the current inputs and state.
         value = decay * carry + increment
+        # Return `(value, value)` to the caller.
         return value, value
+    # Return `jax.lax.scan(transition, jnp.array(0.0), increments)[0]` to the caller.
     return jax.lax.scan(transition, jnp.array(0.), increments)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(simulate)(0.5), 2.75)
 ```
 
@@ -239,11 +323,39 @@ The second returned value is only the recorded output.
 
 </details>
 
+### How to write: Record a different output — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+
+**Step-by-step implementation plan:**
+1. Run compiled structured control flow via `jax.lax` (`(last, energy)`).
+2. Verify that the numerical values match the expected reference within tolerance.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Record a different output (Practice): Carry and history need not have the same interpretation.
+# Run compiled structured control flow via `jax.lax` (`(last, energy)`).
+last,energy = jax.lax.scan(...)  # TODO: compute last,energy
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(last,1.875)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Record a different output (Practice): Carry and history need not have the same interpretation.
+# Run compiled structured control flow via `jax.lax` (`(last, energy)`).
 last,energy=jax.lax.scan(lambda c,u:(0.5*c+u,(0.5*c+u)**2),jnp.array(0.),increments)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(last,1.875)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))
 ```
 
@@ -263,18 +375,56 @@ The carry shape is part of the loop type.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Diagnose a growing carry — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+
+**Step-by-step implementation plan:**
+1. Return `(jnp.concatenate([c, u[None]]), u)` to the caller.
+2. Run the boundary check and catch the expected exception:
+3. Run compiled structured control flow via `jax.lax` (`(_, saved)`).
+4. Verify contract: `jnp.array_equal(saved, increments)`.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.
 def growing(c,u):
-    return jnp.concatenate([c,u[None]]),u
+    # Return `(jnp.concatenate([c, u[None]]), u)` to the caller.
+    return ...  # TODO: return computed result
+# Run the boundary check and catch the expected exception:
 try:
     jax.lax.scan(growing,jnp.zeros((0,)),increments)
 except TypeError:
     print("Expected carry-shape mismatch")
 else:
     raise AssertionError("Expected scan type failure")
+# Run compiled structured control flow via `jax.lax` (`(_, saved)`).
+_,saved = jax.lax.scan(...)  # TODO: compute _,saved
+# Verify contract: `jnp.array_equal(saved, increments)`.
+assert jnp.array_equal(saved,increments)  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.
+def growing(c,u):
+    # Return `(jnp.concatenate([c, u[None]]), u)` to the caller.
+    return jnp.concatenate([c,u[None]]),u
+# Run the boundary check and catch the expected exception:
+try:
+    jax.lax.scan(growing,jnp.zeros((0,)),increments)
+except TypeError:
+    print("Expected carry-shape mismatch")
+else:
+    raise AssertionError("Expected scan type failure")
+# Run compiled structured control flow via `jax.lax` (`(_, saved)`).
 _,saved=jax.lax.scan(lambda c,u:(c,u),jnp.array(0.),increments)
+# Verify contract: `jnp.array_equal(saved, increments)`.
 assert jnp.array_equal(saved,increments)
 ```
 

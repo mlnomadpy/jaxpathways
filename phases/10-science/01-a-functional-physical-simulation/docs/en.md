@@ -67,19 +67,31 @@ Fix the physical horizon at two seconds, halve the time step and double the numb
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
+# Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
+# Import jax for this computation.
 import jax
+# Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
+# Function `euler_step(rate, value, dt)` implementing this stage's computation:
 def euler_step(rate, value, dt):
+    # Return `value - dt * rate * value` to the caller.
     return value - dt*rate*value
 
+# Define `euler_solve(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def euler_solve(rate, initial, steps, dt):
+    # Function `advance(value, unused)` implementing this stage's computation:
     def advance(value, unused):
+        # Run `euler_step` to compute `updated`.
         updated = euler_step(rate, value, dt)
+        # Return `(updated, updated)` to the caller.
         return updated, updated
+    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
+    # Return `jnp.concatenate((jnp.atleast_1d(initial), tail))` to the caller.
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 ```
 
@@ -90,14 +102,24 @@ A scalar state enters and a new scalar leaves. The initial value is saved explic
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
+# Step 2 — Compare the simulation with a physical reference: The geometric sequence verifies implementation correctness.
+# Initialize array `(rate, initial, dt, steps)` with explicit values and shape.
 rate, initial, dt, steps = 0.7, jnp.array(2.0), 0.5, 4
+# Run `euler_solve` to compute `trajectory`.
 trajectory = euler_solve(rate, initial, steps, dt)
+# Initialize array `times` with explicit values and shape.
 times = np.arange(steps+1)*dt
+# Evaluate `continuous` from the current inputs and state.
 continuous = 2.0*np.exp(-rate*times)
+# Initialize array `discrete` with explicit values and shape.
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
+# Verify contract: `np.all(np.diff(np.asarray(trajectory)) < 0)`.
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
+# Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
 ```
 
@@ -108,11 +130,18 @@ The geometric sequence verifies implementation correctness. The exponential chec
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
+# Step 3 — Refine the time grid without changing the experiment: Every run stops at the same physical time.
+# Initialize array `grid_sizes` with explicit values and shape.
 grid_sizes = np.array([4, 8, 16, 32])
+# Initialize array `endpoint_errors` with explicit values and shape.
 endpoint_errors = np.array([abs(float(euler_solve(rate, initial, int(n), 2.0/n)[-1])-continuous[-1]) for n in grid_sizes])
+# Verify contract: `np.all(np.diff(endpoint_errors) < 0)`.
 assert np.all(np.diff(endpoint_errors) < 0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert 1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3
+# Print the observed values to compare against the expected result.
 print("Endpoint errors:", endpoint_errors)
+# Print diagnostic summary of the computed outputs.
 print("Last refinement ratio:", endpoint_errors[-2]/endpoint_errors[-1])
 ```
 
@@ -121,36 +150,65 @@ Every run stops at the same physical time. Halving the step approximately halves
 ## Run the example
 
 ```python
+# Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
+# Import jax for this computation.
 import jax
+# Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
+# Function `euler_step(rate, value, dt)` implementing this stage's computation:
 def euler_step(rate, value, dt):
+    # Return `value - dt * rate * value` to the caller.
     return value - dt*rate*value
 
+# Define `euler_solve(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def euler_solve(rate, initial, steps, dt):
+    # Function `advance(value, unused)` implementing this stage's computation:
     def advance(value, unused):
+        # Run `euler_step` to compute `updated`.
         updated = euler_step(rate, value, dt)
+        # Return `(updated, updated)` to the caller.
         return updated, updated
+    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
+    # Return `jnp.concatenate((jnp.atleast_1d(initial), tail))` to the caller.
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
+# Step 2 — Compare the simulation with a physical reference: The geometric sequence verifies implementation correctness.
+# Initialize array `(rate, initial, dt, steps)` with explicit values and shape.
 rate, initial, dt, steps = 0.7, jnp.array(2.0), 0.5, 4
+# Run `euler_solve` to compute `trajectory`.
 trajectory = euler_solve(rate, initial, steps, dt)
+# Initialize array `times` with explicit values and shape.
 times = np.arange(steps+1)*dt
+# Evaluate `continuous` from the current inputs and state.
 continuous = 2.0*np.exp(-rate*times)
+# Initialize array `discrete` with explicit values and shape.
 discrete = 2.0*(1-rate*dt)**np.arange(steps+1)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(trajectory, discrete, rtol=1e-12, atol=1e-12)
+# Verify contract: `np.all(np.diff(np.asarray(trajectory)) < 0)`.
 assert np.all(np.diff(np.asarray(trajectory)) < 0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert abs(float(trajectory[-1])-continuous[-1]) > 0.1
+# Print the observed values to compare against the expected result.
 print("Euler final:", float(trajectory[-1]), "analytic final:", continuous[-1])
 
+# Step 3 — Refine the time grid without changing the experiment: Every run stops at the same physical time.
+# Initialize array `grid_sizes` with explicit values and shape.
 grid_sizes = np.array([4, 8, 16, 32])
+# Initialize array `endpoint_errors` with explicit values and shape.
 endpoint_errors = np.array([abs(float(euler_solve(rate, initial, int(n), 2.0/n)[-1])-continuous[-1]) for n in grid_sizes])
+# Verify contract: `np.all(np.diff(endpoint_errors) < 0)`.
 assert np.all(np.diff(endpoint_errors) < 0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert 1.7 < endpoint_errors[-2]/endpoint_errors[-1] < 2.3
+# Print the observed values to compare against the expected result.
 print("Endpoint errors:", endpoint_errors)
+# Print diagnostic summary of the computed outputs.
 print("Last refinement ratio:", endpoint_errors[-2]/endpoint_errors[-1])
 ```
 
@@ -177,13 +235,16 @@ The code checks the coarse curve against the exact geometric sequence for Euler.
 These curves describe a stable, positive parameter choice. They do not establish accuracy for every time step or equation. The instability experiment changes the multiplier until the numerical behavior no longer resembles cooling.
 
 ```python
+# Compute figure data for: A correct Euler program still has time-step error
+# Create device-backed JAX array `fine`.
 fine = np.asarray(euler_solve(0.7, jnp.array(2.0), 8, 0.25))[::2]
+# Convert `visual_data` to a host NumPy array for inspection or verification.
 visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':'Euler h=0.5','y':np.asarray(trajectory).tolist()},{'label':'Euler h=0.25 (sampled)','y':fine.tolist()},{'label':'analytic exponential','y':continuous.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:01:28.625689+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:04:09.728594+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213
@@ -206,8 +267,12 @@ PASS: science-01
 **Predict before running:** For $k=0.7$ and $h=2$, predict the signs of the first four states.
 
 ```python
+# Experiment — Stable does not mean physically positive: The magnitude decays because |1-kh|=0.4, but crossing below...
+# Initialize array `oscillatory` with explicit values and shape.
 oscillatory = euler_solve(0.7, jnp.array(2.0), 4, 2.0)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128, 0.0512], atol=1e-12)
+# Print the observed values to compare against the expected result.
 print("Stable but sign-alternating:", np.asarray(oscillatory))
 ```
 
@@ -220,9 +285,14 @@ The magnitude decays because $|1-kh|=0.4$, but crossing below ambient repeatedly
 **Predict before running:** At $h=3$, is the exact model unstable, or only our update?
 
 ```python
+# Experiment — Reproduce numerical instability: The multiplier is -1.1.
+# Initialize array `unstable` with explicit values and shape.
 unstable = euler_solve(0.7, jnp.array(2.0), 6, 3.0)
+# Verify contract: `abs(float(unstable[-1])) > 2.0`.
 assert abs(float(unstable[-1])) > 2.0
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert 2*np.exp(-0.7*18) < 1e-4
+# Print the observed values to compare against the expected result.
 print("Unstable numerical endpoint:", float(unstable[-1]))
 ```
 
@@ -234,14 +304,52 @@ The multiplier is $-1.1$. Reducing the time step repairs this discretization; cl
 
 Change the rate to $0.3$, the initial excess to $5$, and use twenty steps of $0.1$ seconds. Verify the full discrete trajectory and bound the endpoint error against the exponential.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `changed` with explicit values and shape.
+2. Initialize array `reference` with explicit values and shape.
+3. Verify that computed values match the expected reference within numerical tolerance.
+4. Verify contract: `float(changed[0]) == 5.0`.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Change the rate to 0.3, the initial excess to 5, and use twenty steps...
+# Initialize array `changed` with explicit values and shape.
+changed = euler_solve(...)  # TODO: compute changed
+# Initialize array `reference` with explicit values and shape.
+reference = ...  # TODO: compute reference
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(changed, reference, rtol = ...  # TODO: compute np.testing.assert_allclose(changed, reference, rtol
+# Verify contract: `float(changed[0]) == 5.0`.
+assert float(changed[0])  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert abs(float(changed[-1])-5*np.exp(-0.6))  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print("Changed rate, initial state and grid verified")
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Change the rate to 0.3, the initial excess to 5, and use twenty steps...
+# Initialize array `changed` with explicit values and shape.
 changed = euler_solve(0.3, jnp.array(5.0), 20, 0.1)
+# Initialize array `reference` with explicit values and shape.
 reference = 5.0*(1-0.3*0.1)**np.arange(21)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(changed, reference, rtol=1e-12)
+# Verify contract: `float(changed[0]) == 5.0`.
 assert float(changed[0]) == 5.0
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert abs(float(changed[-1])-5*np.exp(-0.6)) < 0.03
+# Print the observed values to compare against the expected result.
 print("Changed rate, initial state and grid verified")
 ```
 
@@ -259,14 +367,51 @@ Compare successive squared magnitudes. The sign-alternating case from the experi
 
 </details>
 
+### How to write: Energy does not check every invariant — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+
+**Step-by-step implementation plan:**
+1. Iterate over `h` to step through the computation:
+2. Initialize array `u` with explicit values and shape.
+3. Verify contract: `np.all(np.diff(u * u / 2) < 0)`.
+4. Initialize array `u` with explicit values and shape.
+5. Verify contract: `np.all(np.diff(u * u / 2) > 0)`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Energy does not check every invariant (Practice): A scalar diagnostic can establish decay without capturing...
+# Iterate over `h` to step through the computation:
+for h in (0.5, 2.0):
+    # Initialize array `u` with explicit values and shape.
+    u = np.asarray(...)  # TODO: compute u
+    # Verify contract: `np.all(np.diff(u * u / 2) < 0)`.
+    assert np.all(np.diff(u*u/2)  # TODO: complete assertion check
+# Initialize array `u` with explicit values and shape.
+u = np.asarray(...)  # TODO: compute u
+# Verify contract: `np.all(np.diff(u * u / 2) > 0)`.
+assert np.all(np.diff(u*u/2)  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print("Energy checks distinguish growth, but not sign preservation")
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Energy does not check every invariant (Practice): A scalar diagnostic can establish decay without capturing...
+# Iterate over `h` to step through the computation:
 for h in (0.5, 2.0):
+    # Initialize array `u` with explicit values and shape.
     u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, h))
+    # Verify contract: `np.all(np.diff(u * u / 2) < 0)`.
     assert np.all(np.diff(u*u/2) < 0)
+# Initialize array `u` with explicit values and shape.
 u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, 3.0))
+# Verify contract: `np.all(np.diff(u * u / 2) > 0)`.
 assert np.all(np.diff(u*u/2) > 0)
+# Print the observed values to compare against the expected result.
 print("Energy checks distinguish growth, but not sign preservation")
 ```
 
@@ -286,16 +431,57 @@ The horizon is number of updates multiplied by step length.
 
 </details>
 
+### How to write: Keep the physical horizon fixed — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+
+**Step-by-step implementation plan:**
+1. Evaluate `errors` from the current inputs and state.
+2. Iterate over `n` to step through the computation:
+3. Evaluate `h` from the current inputs and state.
+4. Initialize array `final` with explicit values and shape.
+5. Append the current step result to `errors`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Keep the physical horizon fixed (Challenge): A refinement study must hold the modeled experiment fixed;...
+horizon = ...  # TODO: compute horizon
+# Evaluate `errors` from the current inputs and state.
+errors = ...  # TODO: compute errors
+# Iterate over `n` to step through the computation:
+for n in (10, 20, 40):
+    # Evaluate `h` from the current inputs and state.
+    h = ...  # TODO: compute h
+    # Initialize array `final` with explicit values and shape.
+    final = euler_solve(...)  # TODO: compute final
+    # Append the current step result to `errors`.
+    errors.append(abs(float(final)-2*np.exp(-0.7*horizon)))
+# Verify contract: `errors[2] < errors[1] < errors[0]`.
+assert errors[2]  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print("Same-horizon errors:", errors)
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Keep the physical horizon fixed (Challenge): A refinement study must hold the modeled experiment fixed;...
 horizon = 2.0
+# Evaluate `errors` from the current inputs and state.
 errors = []
+# Iterate over `n` to step through the computation:
 for n in (10, 20, 40):
+    # Evaluate `h` from the current inputs and state.
     h = horizon/n
+    # Initialize array `final` with explicit values and shape.
     final = euler_solve(0.7, jnp.array(2.0), n, h)[-1]
+    # Append the current step result to `errors`.
     errors.append(abs(float(final)-2*np.exp(-0.7*horizon)))
+# Verify contract: `errors[2] < errors[1] < errors[0]`.
 assert errors[2] < errors[1] < errors[0]
+# Print the observed values to compare against the expected result.
 print("Same-horizon errors:", errors)
 ```
 

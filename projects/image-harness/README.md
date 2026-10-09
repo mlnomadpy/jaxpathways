@@ -9,6 +9,7 @@ The project joins eight stages. Each stage produces evidence consumed by the nex
 Use the pinned `requirements-cpu.txt` from the extracted project or course workspace. Pillow, used for local image decoding, is installed with the pinned plotting stack; record its version when exercising external files.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m pip install -r requirements-cpu.txt
 cp projects/image-harness/starter/model.py projects/image-harness/my_model.py
 python3 projects/image-harness/tests/check.py --stage 1 --implementation projects/image-harness/my_model.py
@@ -17,6 +18,7 @@ python3 projects/image-harness/tests/check.py --stage 1 --implementation project
 PowerShell preparation:
 
 ```powershell
+# Copy the starter template into your editable workspace file
 Copy-Item projects/image-harness/starter/model.py projects/image-harness/my_model.py
 ```
 
@@ -25,6 +27,7 @@ The deterministic dataset and configuration helpers are supplied. Implement one 
 To inspect all instructor executions and regenerate the figures:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 8 --implementation solution --figures --report projects/image-harness/validation.json
 ```
 
@@ -37,6 +40,7 @@ Resize to eight by eight with the documented floor-index nearest-neighbor rule. 
 Before execution, predict the normalized value of a solid red RGB image: `2*0.2126-1 = -0.5748`. Compare layout conversion, grayscale/RGB equivalence and uint8/unit-float paths using an independent NumPy calculation. Reject empty batches, unsupported channels and incompatible dtype/range declarations.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 1 --implementation projects/image-harness/my_model.py
 ```
 
@@ -75,6 +79,7 @@ The convolution has 54 weights and six biases; the head has 18 weights and three
 The objective is mean multiclass cross-entropy from stable log-softmax logits. Labels must be a single integer vector, not a column silently broadcast against predictions. The independent checker compares forward outputs for singleton and changed batches at two initializations, and checks a head derivative with host float64 central differences.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 2 --implementation projects/image-harness/my_model.py
 ```
 
@@ -89,6 +94,7 @@ The sampler drops an incomplete tail when the next full batch would cross the ep
 Each update record contains its pre-update augmented minibatch loss, selected image IDs and an augmented-input hash. Learning curves in the figure use a different, clearly stated boundary: both training-set and held-out-set losses are evaluated without augmentation **after** each group of ten updates. This makes the two curves comparable. Never relabel the minibatch pre-update loss as a full-set post-update measurement.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 3 --implementation projects/image-harness/my_model.py
 ```
 
@@ -101,6 +107,7 @@ A checkpoint contains parameters, momentum, PRNG key, image permutation, next po
 The checker stops at update 13, saves state, then imports your implementation in a new Python interpreter. The restored run performs eleven more updates. Its next image IDs, augmented-input hashes, losses, parameters, momentum, key and data cursor must match uninterrupted continuation. Changing one image byte or optimizer learning rate must reject the restore.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 4 --implementation projects/image-harness/my_model.py
 ```
 
@@ -113,6 +120,7 @@ Evaluate 60 fixed clean held-out images in one batch and in unequal batches of s
 The declared shifted set begins from the same clean images and masks the central four columns before adding a separate noise stream. Original generating labels are retained. This corruption is deliberately destructive, so poor results may reflect information removal and a distribution shift rather than a simple implementation bug. Keep failures instead of repeatedly changing the corruption until a chosen score appears.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 5 --implementation projects/image-harness/my_model.py
 ```
 
@@ -135,6 +143,7 @@ The integer path calibrates on training images, never on final held-out examples
 The two affine stages perform **actual integer products with int32 accumulation**. Convolution uses explicit image patches; its nine-term bound is `9*127*127 = 145161`, already beyond signed int16. The six-term head bound is 96774. Dequantization, bias, ReLU and spatial pooling use float32 between those integer stages. This is an inspectable mixed integer/float reference pipeline, not a claim that every operation is int8 or that a native mobile kernel ran.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 6 --implementation projects/image-harness/my_model.py
 ```
 
@@ -147,6 +156,7 @@ Keep per-layer scales, calibration data identity, activation clipping counts, ma
 `load_model` verifies every required payload before deserializing. `infer` validates raw images, preprocesses, then chunks requests into supported groups of four or one. A request of two images therefore runs two singleton calls; it does not pretend that the exported graph accepts an untested signature. The test reloads and runs seven images in a completely new interpreter.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 7 --implementation projects/image-harness/my_model.py
 ```
 
@@ -157,6 +167,7 @@ Keep a last verified runtime reference while validating a candidate with `select
 ## 8. Measure the completed inference path
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/image-harness/tests/check.py --stage 8 --implementation projects/image-harness/my_model.py
 ```
 

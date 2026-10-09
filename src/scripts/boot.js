@@ -1,7 +1,11 @@
 import { loadCourse } from '../lib/course-state.js';
 import { initExperience } from './experience.js';
 
-/** Page-local startup: a failed catalog request leaves a useful recovery message. */
+/**
+ * Page-local startup: a failed catalog request leaves a useful recovery message.
+ * @param {() => unknown} initialize
+ * @param {string} errorTarget
+ */
 export async function bootCourse(initialize, errorTarget) {
   initExperience();
   try {

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "4bcb6f222e85e32dd9ec3b416d193db9578d5517aad07a32638a48f6b7cbb896",
-  "executedAt": "2026-10-06T23:02:52.019651+00:00",
+  "contentHash": "b7f445f48b84d37370e2774ca4e00dee91d28081e6605a2adaf130fd056b3cd2",
+  "executedAt": "2026-10-08T14:05:18.403150+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Shape and boundary: (5, 11) -3.75 7.050000190734863\nGrid: (3, 3) logical/padded elements: 55 72\nPadding fraction: 0.2361111111111111\nShape and boundary: (5, 11) -3.75 7.050000190734863\nGrid: (3, 3) logical/padded elements: 55 72\nPadding fraction: 0.2361111111111111\nChanged grid: (2, 3) same numerical result\nFloor-grid missing logical cells: 23\nSingleton and changed tails verified\nMismatched global shape rejected\nShape, block/program/padded counts: (5, 11) [(2, 4, 9, 72), (8, 128, 1, 1024), (16, 256, 1, 4096)]\nShape, block/program/padded counts: (33, 129) [(2, 4, 561, 4488), (8, 128, 10, 10240), (16, 256, 3, 12288)]\nPASS: kernels-01\n",
   "notebookCells": [
     {
-      "sourceHash": "68fbed9a951fe8993e1021fa9c66c416a3c91fb3cc0e3aadbf096ea5a568df0c",
+      "sourceHash": "addd0982d664ad2cc44d37ce9f836f74290f2711a0eeb4fd09f60e5dd1689b21",
       "outputs": []
     },
     {
-      "sourceHash": "cc9a339bbc2280dd3155805762ae6691d7ba7f153ab7594abbaea8433a936487",
+      "sourceHash": "0656e2acc37e535ca309419f58e4f2e8190d4b1e491c023474c94afb2193eb27",
       "outputs": [
         {
           "output_type": "stream",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "sourceHash": "ce0ef23fda2f9554ecc7882f14b152a5ef787f190cd364aee73f83328d1b4b6a",
+      "sourceHash": "6cd1a799522ed469abeddf7092df0c62845546887bb3bfc732d452e512e557fb",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "7f8524ddd3b81a4014fea255f3746e94ad797fda502487a92d3643972fb7b97d",
+      "sourceHash": "a90a4039e824d89c0a8ab1368faaf91e1085c7b6845ad65de7edd8364ddd69c8",
       "outputs": [
         {
           "output_type": "stream",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "sourceHash": "678c9adee8ee45a66a8b480b745ce8ae4fcd3912834cf8068c53ce8a27c08a18",
+      "sourceHash": "3985c3ba352b113f5c7b81128c895e62c4cc527d6425d937ae8b74633f91db52",
       "outputs": []
     },
     {
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "7d261615d8c9a1f698ce1c51cde6b28f5f5ba0b70c6e5252d53706b33e7ca970",
+      "sourceHash": "5a89889046cdb6cb4ee1b6379eb5aac487ddd831939ac2ff45c7004a6a95a46a",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "cc0b5399853ca9602eea257cc211b40058b3444bbda7e29d93e6685ba482451a",
+      "sourceHash": "51d62514a2e0c5b4e42b70fab50d4e425189040f8f2cc84725e78da5cf633663",
       "outputs": [
         {
           "output_type": "stream",
@@ -100,11 +100,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "e653b099d20543a183c288015fe274ce5a2ffa3a94ee459e1e8b4341e0280676",
       "outputs": []
     },
     {
-      "sourceHash": "58e0f673241c2beb48f0af64c9ce9ebf4b3639e9ed56d98bc777acee09563f79",
+      "sourceHash": "bfd232811e482c003092b1baaff0a9ad6e5023f8522f4a28078f0de874a83d2f",
       "outputs": [
         {
           "output_type": "stream",
@@ -116,11 +116,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "00f5d14da2095096a36ba604965f9cf19e2a88c7328c94effd0f68e091362530",
       "outputs": []
     },
     {
-      "sourceHash": "bcf144b73bd8c511e23b2308cdaea2cb9ca2678cc90876d3d11908c0a2209ec7",
+      "sourceHash": "2684f1e955ae952cce52db4a4c15a84d6702c801a8e3e55dc03b9492dcdb1b4b",
       "outputs": [
         {
           "output_type": "stream",
@@ -132,11 +132,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "06ecf1a1e36262b53dff43010ae3a92899a8596cc101c38d9b361bfb910a8f46",
       "outputs": []
     },
     {
-      "sourceHash": "147ff00b9aeee721a291b2118ea05612b4c47ca85eb2783290f0aa818a89baeb",
+      "sourceHash": "78e610c0e54eca7efbc7b8e0459cb9584e0f5f1940a205ae91c82c8722ac653d",
       "outputs": [
         {
           "output_type": "stream",

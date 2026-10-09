@@ -7,6 +7,7 @@ This is one connected project for the recovery, performance and distributed phas
 ## Start with the learner scaffold
 
 ```bash
+# Copy the starter template into your editable workspace file
 cp projects/sharded-training/starter/model.py projects/sharded-training/my_model.py
 python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1
 ```
@@ -16,6 +17,7 @@ On Windows use `Copy-Item` instead of `cp`. Run the checker in a fresh interpret
 Run the complete reference separately:
 
 ```bash
+# Run run command in terminal using the course Python environment
 python3 projects/sharded-training/tests/check.py --implementation solution --stage all --output projects/sharded-training/my-evidence
 ```
 

@@ -9,6 +9,7 @@ This is a CPU teaching project with an enumerable corridor, not a control benchm
 Use Python and the pinned `requirements-cpu.txt` from the course workspace or project download. From the extracted top-level folder:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m pip install -r requirements-cpu.txt
 cp projects/policy-evaluation/starter/model.py projects/policy-evaluation/my_model.py
 python3 projects/policy-evaluation/tests/check.py --stage 1 --implementation projects/policy-evaluation/my_model.py
@@ -17,6 +18,7 @@ python3 projects/policy-evaluation/tests/check.py --stage 1 --implementation pro
 PowerShell preparation:
 
 ```powershell
+# Copy the starter template into your editable workspace file
 Copy-Item projects/policy-evaluation/starter/model.py projects/policy-evaluation/my_model.py
 ```
 
@@ -39,6 +41,7 @@ Edit `my_model.py`. Checks are cumulative: choose stages 1 through 4. The refere
 Implement `reset` and `step`. Enumerate moves at both boundaries, a timeout, success at the deadline and repeated calls after finishing. Check the final observation survives; do not replace it with a reset observation. Save a hand-worked transition trace.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/policy-evaluation/tests/check.py --stage 1 --implementation projects/policy-evaluation/my_model.py
 ```
 
@@ -47,6 +50,7 @@ python3 projects/policy-evaluation/tests/check.py --stage 1 --implementation pro
 Implement stable `log_probability`, `rollout` and `returns_to_go`. Split keys across reset, time and environments. Use vmap within scan; preserve fixed carry shapes. Record observation, action, reward, active, terminated, truncated and old_logp. The checker reconstructs trajectories with independent Python rules and changes batch sizes, horizons and seeds.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/policy-evaluation/tests/check.py --stage 2 --implementation projects/policy-evaluation/my_model.py
 ```
 
@@ -57,6 +61,7 @@ Keep an active-count plot and explain why a fixed array can contain fewer live e
 Implement `policy_loss` and `exact_return`. REINFORCE weights log probabilities by frozen reward-to-go. The clipped objective uses the minimum of unclipped and clipped ratio-weighted targets, with frozen behavior log probabilities. Normalize the action sum by episode count. Work through both positive and negative targets.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/policy-evaluation/tests/check.py --stage 3 --implementation projects/policy-evaluation/my_model.py
 ```
 
@@ -67,6 +72,7 @@ The checks compare dynamic programming to a separate recursive enumeration, comp
 Implement `train` and `evaluate`. Every update collects fresh episodes with a new key. REINFORCE takes one gradient step per fresh batch; the clipped method takes three steps while preserving its behavior probabilities. Return the complete exact-return history including the initial policy.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/policy-evaluation/tests/check.py --stage 4 --implementation projects/policy-evaluation/my_model.py
 ```
 

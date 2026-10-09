@@ -1,4 +1,5 @@
 import { $ } from '../lib/dom.js';
+import { lessonLink } from '../lib/urls.js';
 import { planLessonSchedule, scheduleMetrics } from '../lib/schedule.js';
 import { downloadText, setStatus } from './browser-actions.js';
 
@@ -66,7 +67,7 @@ export function setupClubPlanner(routes) {
         for (const lesson of lessons) {
           const li = document.createElement('li');
           const a = document.createElement('a');
-          a.href = `lesson.html?path=${route.id}&lesson=${lesson.id}`;
+          a.href = lessonLink(lesson.id, route.id);
           a.textContent = `${lesson.title} · ${lesson.minutes || 60} min`;
           li.append(a);
           list.append(li);

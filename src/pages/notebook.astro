@@ -1,4 +1,7 @@
 ---
+import PageIntro from '../components/shared/PageIntro.astro';
+import EvidenceForm from '../components/workspace/EvidenceForm.astro';
+import WorkspaceUtilities from '../components/workspace/WorkspaceUtilities.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/workspace.css';
@@ -11,12 +14,11 @@ import ChoiceField from '../components/ui/ChoiceField.astro';
 
 <SiteLayout {...pages.notebook}>
   <main id="main" class="learner-workspace">
-    <div class="page-intro">
-      <a href={siteUrl('index.html')}>JAX Pathways / Home</a>
-      <p class="edition">Your local workspace</p>
-      <h1>My learning</h1>
-      <p>Resume where you left off. Your progress stays on this browser.</p>
-    </div>
+    <PageIntro
+      edition="Your local workspace"
+      title="My learning"
+      intro="Resume where you left off. Your progress stays on this browser."
+    />
     <section id="learner" aria-label="Your next action">
       <div class="learner-home-grid">
         <div id="lesson-progress-summary" class="path-summary" aria-live="polite">
@@ -45,72 +47,7 @@ import ChoiceField from '../components/ui/ChoiceField.astro';
         </div>
         <p>Keep a link or explanation when it helps you learn. This is optional.</p>
       </div>
-      <details id="save-work">
-        <summary>Save a note or evidence link</summary>
-        <form id="evidence-form" class="evidence-form">
-          <p id="work-context" class="artifact-context"></p>
-          <details class="artifact-context-picker">
-            <summary>Change the lesson or project association</summary>
-            <div class="artifact-context-fields">
-              <ChoiceField id="evidence-route" label="Pathway" variant="list" />
-              <ChoiceField id="evidence-lesson" label="Lesson" variant="list">
-                <span slot="label">
-                  Related lesson <span class="soft">(optional)</span>
-                </span>
-              </ChoiceField>
-              <ChoiceField id="evidence-project" label="Project" variant="list">
-                <span slot="label">
-                  Related project <span class="soft">(optional)</span>
-                </span>
-              </ChoiceField>
-              <ChoiceField id="evidence-stage" label="Stage" variant="list">
-                <span slot="label">
-                  Project stage <span class="soft">(optional)</span>
-                </span>
-              </ChoiceField>
-            </div>
-          </details>
-          <label for="evidence-title">
-            <span class="field-caption">Artifact title</span>
-            <input
-              id="evidence-title"
-              required
-              maxlength="120"
-              placeholder="Optimizer state restored after an interruption"
-            />
-          </label>
-          <label for="evidence-url">
-            <span class="field-caption">
-              Artifact link <span class="soft">(optional)</span>
-            </span>
-            <input
-              id="evidence-url"
-              type="url"
-              maxlength="2000"
-              placeholder="https://github.com/you/project"
-            />
-          </label>
-          <label for="evidence-note">
-            <span class="field-caption">What did you verify?</span>
-            <textarea
-              id="evidence-note"
-              required
-              maxlength="4000"
-              rows="4"
-              placeholder="Command and environment → predicted result → observed output → one changed condition or diagnosed failure."
-            ></textarea>
-          </label>
-          <div class="artifact-actions">
-            <button id="evidence-submit" class="primary" type="submit">
-              Save artifact
-            </button>
-            <button id="cancel-edit" type="button" hidden>
-              Cancel edit
-            </button>
-          </div>
-          <p role="status" id="evidence-status"></p>
-        </form>
-      </details>
+      <EvidenceForm />
       <div class="portfolio-heading">
         <div>
           <h3>Your artifacts</h3>
@@ -135,56 +72,7 @@ import ChoiceField from '../components/ui/ChoiceField.astro';
       <p id="evidence-results" role="status"></p>
       <div id="evidence-list"></div>
     </section>
-    <details class="workspace-utility">
-      <summary>Prepare a review packet</summary>
-      <section id="review-handoff" class="review-handoff" aria-labelledby="review-heading">
-        <p class="edition">Prepare for human feedback</p>
-        <h2 id="review-heading">Make a review packet</h2>
-        <p>
-          Download the artifacts currently shown above as a Markdown document. It includes your
-          reported observations, associated lesson/project criteria, expected stage output, and
-          blank fields for someone who independently inspects the work.
-        </p>
-        <p id="review-count">Loading artifact selection…</p>
-        <button id="review-export" aria-describedby="review-count">
-          Download review packet
-        </button>
-        <p id="review-status" role="status"></p>
-        <p class="soft">
-          You choose whether and where to share this file. Preparing it does not send a review
-          request, verify your code, or change progress. Attach the actual code and output files
-          separately.
-        </p>
-      </section>
-    </details>
-    <details class="workspace-utility" id="backup-panel">
-      <summary>Data & backup</summary>
-      <section id="backups" class="backup-area" aria-labelledby="backup-heading">
-        <p class="edition">Take your work with you</p>
-        <h2 id="backup-heading">Back up this workspace</h2>
-        <p>
-          This browser stores your records locally. A version-2 JSON backup includes artifacts,
-          lesson checkpoints and exercise ticks, project stage reports, your career plan, and saved
-          reading positions. Import merges existing records and accepts the earlier notebook format.
-        </p>
-        <div class="backup-actions">
-          <button id="export">Download backup</button>
-          <button id="import-button">Import JSON backup</button>
-          <input type="file" id="import" accept="application/json,.json" hidden />
-        </div>
-        <div id="restore-preview" hidden></div>
-        <p id="backup-status" role="status"></p>
-        <p class="soft">
-          Links in a backup do not copy the linked code or notebooks. Keep those files separately.
-          Clearing browser data can erase local records.
-        </p>
-      </section>
-    </details>
-    <aside class="organizer-link">
-      <h3>Learning with a group?</h3>
-      <p>Use actual lesson estimates and see work that does not fit the schedule.</p>
-      <a href={siteUrl('organizer.html')}>Open the learning club planner →</a>
-    </aside>
+    <WorkspaceUtilities />
     <SiteFooter />
   </main>
   <script>

@@ -48,6 +48,9 @@ test('home retains saved reading position, copies exact tutor text and controls 
     assert.match(p.$('#tutor-prompt-status').textContent,/manually/);
     const menu=p.$('.navigation-toggle');menu.click();assert.equal(menu.getAttribute('aria-expanded'),'true');
     menu.dispatchEvent(new KeyboardEvent('keydown',{key:'Escape',bubbles:true}));assert.equal(menu.getAttribute('aria-expanded'),'false');
+    const themeToggle=p.$('[data-theme-toggle]');assert.equal(themeToggle.getAttribute('aria-pressed'),'false');
+    themeToggle.click();assert.equal(p.window.document.documentElement.dataset.theme,'dark');assert.equal(themeToggle.getAttribute('aria-pressed'),'true');assert.equal(localStorage.getItem('jaxpathways-theme'),'dark');
+    themeToggle.click();assert.equal(p.window.document.documentElement.dataset.theme,'light');assert.equal(themeToggle.getAttribute('aria-pressed'),'false');assert.equal(localStorage.getItem('jaxpathways-theme'),'light');
     assert.equal(localStorage.getItem('jaxpathways-reading-v1'),JSON.stringify(reading));
   } finally {await p.close();}
 });
@@ -133,9 +136,11 @@ test('notebook saves evidence through the real form and planner uses canonical d
 test('permanent lesson pages retain pathway, section and existing learner evidence when enhanced', async()=>{
   const p=await page('lesson-welcome-01','?path=foundations#section-2',{'jaxpathways-lessons-v1':{version:1,lessons:{'welcome-01':{checkpointPassed:true,evidenceSaved:true}}}});
   try {
-    assert.equal(p.$('#lesson-title').textContent,'Set up your learning workspace');
+    const staticTitle=p.$('#lesson-title');
+    assert.equal(staticTitle.textContent,'Set up your learning workspace');
     await loadCourse();courseState.activePath='foundations';initReaderEvents();
     const found=courseState.course.phases[0];showLesson(found,found.lessons[0]);
+    assert.equal(p.$('#lesson-title'),staticTitle);
     assert.equal(location.pathname,'/jaxpathways/lesson-welcome-01.html');
     assert.equal(location.search,'?path=foundations');assert.equal(location.hash,'#section-2');
     assert.match(p.$('#exercise-complete').textContent,/unfinished/);

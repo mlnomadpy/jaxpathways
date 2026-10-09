@@ -130,7 +130,7 @@ Build and audit a neural classifier.
 
 **Demonstrate:** Keep train and evaluation behavior separate and reproduce metrics from a saved configuration.
 
-Project status: implemented staged practice · [Open source](../../projects/mlp-classifier/README.md).
+Project status: implemented staged practice · [Open source](../../projects/mlp-classifier/README.md). Copy `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py` and write your code in `projects/mlp-classifier/my_model.py`. Run `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 
 

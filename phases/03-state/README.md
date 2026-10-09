@@ -114,7 +114,7 @@ A deterministic batched simulation.
 
 **Demonstrate:** Replay the same experiment with saved state and keys; explain the update order.
 
-Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 4 for this phase.
+Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 4 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 4` from the top-level folder to verify stage 4.
 
 
 

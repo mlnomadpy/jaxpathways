@@ -6,7 +6,7 @@ Measure completed work, inspect a real profiler trace and relate compiler output
 
 Keep workload shapes, warm-up policy and synchronized timings with your device report.
 
-**Prerequisites:** 05: Neural network training.
+**Prerequisites:** 05: Neural network training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** CPU for timing concepts; TPU or GPU for profiling.
 
@@ -130,7 +130,7 @@ A trace-backed before-and-after performance report.
 
 **Demonstrate:** Separate compilation, execution, input stalls, and synchronization before claiming a speedup.
 
-Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence.
+Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4` from the top-level folder to verify stage 4.
 
 
 

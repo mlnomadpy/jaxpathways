@@ -1,24 +1,46 @@
+/**
+ * @param {import('./learner-records.js').EvidenceEntry[]} entries
+ * @param {{
+ *   routes: { id: string; title: string }[];
+ *   lessons: import('../types/course').Lesson[];
+ *   projects: import('../types/manifests').ProjectManifest[];
+ *   lessonProgress?: import('./learner-records.js').LessonProgressState;
+ *   projectProgress?: Record<string, string[]>;
+ *   baseUrl: string;
+ *   generatedAt: string;
+ * }} context
+ */
 function evidenceReviewPacket(
   entries,
   { routes, lessons, projects, lessonProgress, projectProgress, baseUrl, generatedAt },
 ) {
   if (!Array.isArray(entries) || !entries.length) throw Error('Choose at least one artifact');
+  /** @param {unknown} value */
   const plain = (value) =>
     String(value ?? '')
       .replace(/\r?\n/g, ' ')
       .replace(/[\\`*{}\[\]()<>#!|~]/g, '\\$&');
+  /** @param {unknown} value */
   const literal = (value) => {
     const text = String(value ?? '');
     const longest = Math.max(2, ...(text.match(/`+/g) || []).map((run) => run.length));
     const fence = '`'.repeat(longest + 1);
     return `${fence}text\n${text}\n${fence}`;
   };
+  /**
+   * @param {string} page
+   * @param {Record<string, string>} params
+   */
   const courseUrl = (page, params) => {
     const url = new URL(page, baseUrl);
     if (!/^https?:$/.test(url.protocol)) throw Error('Unsupported course link');
     url.search = new URLSearchParams(params).toString();
     return url.href;
   };
+  /**
+   * @param {string} label
+   * @param {string} url
+   */
   const link = (label, url) => {
     if (!/^https?:\/\//i.test(url)) throw Error('Unsupported artifact link');
     return `[${plain(label)}](<${String(url)

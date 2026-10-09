@@ -77,6 +77,8 @@ Keep the corpus, vocabulary, context, model seed, optimizer settings, package ve
 Create main.py in the CPU environment. Add these imports and the vocabulary/context contract. Integer IDs must stay consistent with the output head.
 
 ```python
+# Step 1 — 1. Prepare packages and the vocabulary: Vocabulary size is three, model width is eight, and the context...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -85,7 +87,9 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+# Evaluate `VOCAB` from the current inputs and state.
 VOCAB = {"a":0, "b":1, "c":2}
+# Evaluate `CONTEXT` from the current inputs and state.
 CONTEXT = 4
 ```
 
@@ -96,24 +100,40 @@ Vocabulary size is three, model width is eight, and the context limit is four.
 Append the normalization, projection initialization and causal block from the previous lesson. Identify where the attention mask prevents future reads.
 
 ```python
+# Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
 def layer_norm(x):
+    # Reduce along axis=-1 to compute `mean`.
     mean = jnp.mean(x, axis=-1, keepdims=True)
+    # Reduce along axis=-1 to compute `variance`.
     variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)
+    # Return `(x - mean) / jnp.sqrt(variance + 1e-05)` to the caller.
     return (x-mean) / jnp.sqrt(variance + 1e-5)
 
+# Function `init_block(key, width)` implementing this stage's computation:
 def init_block(key, width=8):
+    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(key, 6)
+    # Evaluate `shapes` from the current inputs and state.
     shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]
+    # Return `{name: jax.random.normal(k, s) * 0.1 for name, k, s in zip(['q', 'k', 'v', 'o', 'up', 'down'], keys, shapes)}` to the caller.
     return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(
         ["q","k","v","o","up","down"], keys, shapes)}
 
+# Function `block_forward(p, x)` implementing this stage's computation:
 def block_forward(p, x):
+    # Run `layer_norm` to compute `h`.
     h = layer_norm(x)
+    # Perform matrix contraction / projection to compute `(q, k, v)`.
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
+    # Perform matrix contraction / projection to compute `scores`.
     scores = q@k.T / jnp.sqrt(x.shape[-1])
+    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
+    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
+    # Perform matrix contraction / projection to compute `residual`.
     residual = x + (weights@v)@p["o"]
+    # Return `residual + jax.nn.gelu(layer_norm(residual) @ p['up']) @ p['down']` to the caller.
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
 ```
 
@@ -124,20 +144,30 @@ The block returns one model-width vector per token; it has no dropout or running
 Append model initialization, token-to-logit mapping and example construction. Write the input and target IDs for the first abcab window before proceeding.
 
 ```python
+# Step 3 — 3. Add embeddings and the vocabulary head: The head has three columns; make_examples shifts each window by...
 def init_lm(key):
+    # Create or split explicit PRNG key(s) (`(embed_key, block_key, head_key)`) for reproducible randomness.
     embed_key, block_key, head_key = jax.random.split(key, 3)
+    # Return `{'embed': jax.random.normal(embed_key, (3, 8)) * 0.1, 'position': jnp.arange(CONTEXT * 8, dtype=jnp.float32).reshape(CONTEXT, 8) * 0.001, 'block': init_block(block_key), 'head': jax.random.normal(head_key, (8, 3)) * 0.1}` to the caller.
     return {"embed":jax.random.normal(embed_key,(3,8))*0.1,
             "position":jnp.arange(CONTEXT*8,dtype=jnp.float32).reshape(CONTEXT,8)*0.001,
             "block":init_block(block_key),
             "head":jax.random.normal(head_key,(8,3))*0.1}
 
+# Function `logits(p, tokens)` implementing this stage's computation:
 def logits(p, tokens):
+    # Evaluate `h` from the current inputs and state.
     h = p["embed"][tokens] + p["position"][:tokens.shape[0]]
+    # Return `layer_norm(block_forward(p['block'], h)) @ p['head']` to the caller.
     return layer_norm(block_forward(p["block"],h))@p["head"]
 
+# Function `make_examples(text)` implementing this stage's computation:
 def make_examples(text):
+    # Initialize array `ids` with explicit values and shape.
     ids = np.array([VOCAB[c] for c in text],dtype=np.int32)
+    # Combine or mask array elements to form `rows`.
     rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])
+    # Return `(jnp.array(rows[:, :-1]), jnp.array(rows[:, 1:]))` to the caller.
     return jnp.array(rows[:,:-1]), jnp.array(rows[:,1:])
 ```
 
@@ -148,16 +178,27 @@ The head has three columns; make_examples shifts each window by one token for it
 Append the dataset calls, cross-entropy reduction, Adam transformation and compiled step. Which values are returned for the next update?
 
 ```python
+# Step 4 — 4. Define the loss and compiled state transition: train_step returns new parameters, optimizer state and the...
 train_x, train_y = make_examples("abc"*12)
+# Run `make_examples` to compute `(held_x, held_y)`.
 held_x, held_y = make_examples("bca"*6)
+# Function `lm_loss(p, x, y)` implementing this stage's computation:
 def lm_loss(p, x, y):
+    # Vectorize across the batch dimension with `jax.vmap` (`predictions`).
     predictions = jax.vmap(logits,in_axes=(None,0))(p,x)
+    # Return `jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions, y))` to the caller.
     return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))
+# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.adam(0.03)
+# Define and JIT-compile `train_step(p, state, x, y)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `train_step(p, state, x, y)` implementing this stage's computation:
 def train_step(p, state, x, y):
+    # Differentiate the objective to obtain `(value, gradients)` via automatic differentiation.
     value, gradients = jax.value_and_grad(lm_loss)(p,x,y)
+    # Apply the computed gradient updates to update the model parameters.
     updates, next_state = optimizer.update(gradients,state,p)
+    # Return `(optax.apply_updates(p, updates), next_state, value)` to the caller.
     return optax.apply_updates(p,updates), next_state, value
 ```
 
@@ -168,10 +209,16 @@ train_step returns new parameters, optimizer state and the pre-update scalar los
 Append this training block. You will save this state after twenty steps; keep the optimizer state alongside parameters.
 
 ```python
+# Step 5 — 5. Run the first twenty updates: Adam count should now equal twenty; initialization is the only...
+# Create or split explicit PRNG key(s) (`params`) for reproducible randomness.
 params = init_lm(jax.random.key(3))
+# Run `optimizer.init` to compute `state`.
 state = optimizer.init(params)
+# Evaluate `lm_loss(params, train_x, train_y)` and convert the result into Python scalar/collection `initial`.
 initial = float(lm_loss(params,train_x,train_y))
+# Repeat the update loop over `range(20)` steps:
 for _ in range(20):
+    # Run `train_step` to compute `(params, state, _)`.
     params, state, _ = train_step(params,state,train_x,train_y)
 # Save numeric leaves only, with a schema checked against this program's template.
 ```
@@ -183,34 +230,55 @@ Adam count should now equal twenty; initialization is the only random operation 
 Append the save/load helpers. Read each rejection check. Rebuilding a tree template supplies structure, not the saved numeric state.
 
 ```python
+# Step 6 — 6. Write and validate the snapshot format: The loader checks architecture, vocabulary, numeric leaf...
 def save_snapshot(folder, p, state, step):
+    # Run `jax.tree.flatten` to compute `(leaves, _)`.
     leaves, _ = jax.tree.flatten((p,state))
+    # Convert `` to a host NumPy array for inspection or verification.
     np.savez(folder/"state.npz", **{f"leaf_{i}":np.asarray(x) for i,x in enumerate(leaves)})
+    # Evaluate `manifest` from the current inputs and state.
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
+    # Read or serialize artifact data on disk (``).
     (folder/"manifest.json").write_text(json.dumps(manifest))
 
+# Function `load_snapshot(folder)` implementing this stage's computation:
 def load_snapshot(folder):
+    # Read or serialize artifact data on disk (`meta`).
     meta = json.loads((folder/"manifest.json").read_text())
+    # Guard input contract (`meta['schema'] != 1 or meta['vocabulary'] != VOCAB or meta['context'] != CONTEXT`) and fail fast if violated.
     if meta["schema"] != 1 or meta["vocabulary"] != VOCAB or meta["context"] != CONTEXT:
         raise ValueError("checkpoint architecture/vocabulary mismatch")
+    # Guard input contract (`type(meta['step']) is not int or meta['step'] < 0`) and fail fast if violated.
     if type(meta["step"]) is not int or meta["step"] < 0:
         raise ValueError("invalid checkpoint step")
+    # Create or split explicit PRNG key(s) (`template`) for reproducible randomness.
     template = init_lm(jax.random.key(0))
+    # Run `jax.tree.flatten` to compute `(template_leaves, structure)`.
     template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))
+    # Evaluate `arrays` from the current inputs and state.
     arrays = []
+    # Enter managed runtime/context scope for this block:
     with np.load(folder/"state.npz",allow_pickle=False) as data:
+        # Guard input contract (`set(data.files) != {f'leaf_{i}' for i in range(len(template_leaves))}`) and fail fast if violated.
         if set(data.files) != {f"leaf_{i}" for i in range(len(template_leaves))}:
             raise ValueError("checkpoint leaf count mismatch")
+        # Loop over `(i, leaf)` in `enumerate(template_leaves)`:
         for i, leaf in enumerate(template_leaves):
+            # Evaluate `saved` from the current inputs and state.
             saved = data[f"leaf_{i}"]
+            # Guard input contract (`saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype`) and fail fast if violated.
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
                 raise ValueError("checkpoint leaf contract mismatch")
+            # Create device-backed JAX array ``.
             arrays.append(jnp.array(saved))
+    # Run `jax.tree.unflatten` to compute `(restored_p, restored_state)`.
     restored_p, restored_state = jax.tree.unflatten(structure,arrays)
+    # Guard input contract (`int(restored_state[0].count) != meta['step']`) and fail fast if violated.
     if int(restored_state[0].count) != meta["step"]:
         raise ValueError("checkpoint step and Adam count disagree")
+    # Return `(restored_p, restored_state, meta['step'])` to the caller.
     return restored_p, restored_state, meta["step"]
 ```
 
@@ -221,22 +289,39 @@ The loader checks architecture, vocabulary, numeric leaf contracts, step type an
 Append the disk round trip and next-step comparison, then the remaining eighty updates and held-out evaluation. The temporary folder is cleaned up.
 
 ```python
+# Step 7 — 7. Verify resume and evaluate the final fit: Uninterrupted and restored next transitions agree; the held-out...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with TemporaryDirectory() as directory:
+    # Read or serialize artifact data on disk (`folder`).
     folder = Path(directory)
+    # Run `save_snapshot` to perform the next check or state transition.
     save_snapshot(folder,params,state,20)
+    # Run `load_snapshot` to compute `(restored, restored_state, step)`.
     restored, restored_state, step = load_snapshot(folder)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert step == 20
+    # Run `train_step` to compute `(next_a, state_a, _)`.
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
+    # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
+# Repeat the update loop over `range(80)` steps:
 for _ in range(80):
+    # Run `train_step` to compute `(params, state, _)`.
     params, state, _ = train_step(params,state,train_x,train_y)
+# Vectorize across the batch dimension with `jax.vmap` (`held_logits`).
 held_logits = jax.vmap(logits,in_axes=(None,0))(params,held_x)
+# Reduce along axis=-1 to compute `accuracy`.
 accuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)
+# Run `lm_loss` to compute `final_loss`.
 final_loss = lm_loss(params,held_x,held_y)
+# Print the observed values to compare against the expected result.
 print("Initial / held loss / held accuracy:",initial,float(final_loss),float(accuracy))
+# Verify contract: `final_loss < 0.05`.
 assert final_loss < 0.05
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert accuracy > 0.99
 ```
 
@@ -247,15 +332,24 @@ Uninterrupted and restored next transitions agree; the held-out periodic corpus 
 Append the prompt encoder and generation loop. Locate the context truncation and the deterministic argmax policy.
 
 ```python
+# Step 8 — 8. Define greedy decoding: The generator recomputes a short window each step.
 def generate(p, prompt, count):
+    # Evaluate `tokens` from the current inputs and state.
     tokens = [VOCAB[c] for c in prompt]
+    # Guard input contract (`not tokens`) and fail fast if violated.
     if not tokens:
         raise ValueError("generation needs a nonempty prompt")
+    # Evaluate `inverse` from the current inputs and state.
     inverse = {i:c for c,i in VOCAB.items()}
+    # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
+        # Initialize array `window` with explicit values and shape.
         window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)
+        # Evaluate `jnp.argmax(logits(p, window)[-1])` and convert the result into Python scalar/collection `new`.
         new = int(jnp.argmax(logits(p,window)[-1]))
+        # Append the current step result to `tokens`.
         tokens.append(new)
+    # Return `''.join((inverse[i] for i in tokens))` to the caller.
     return "".join(inverse[i] for i in tokens)
 ```
 
@@ -266,8 +360,11 @@ The generator recomputes a short window each step. It has no sampling, key/value
 Append the final call and run python main.py. Compare the continuation to the abc cycle you derived before training.
 
 ```python
+# Step 9 — 9. Check the expected continuation: The expected continuation is abcabcabcabc, with held-out loss...
 continuation = generate(params,"abca",8)
+# Print the observed values to compare against the expected result.
 print("Greedy continuation:",continuation)
+# Verify contract: `continuation == 'abcabcabcabc'`.
 assert continuation == "abcabcabcabc"
 ```
 
@@ -276,6 +373,8 @@ The expected continuation is abcabcabcabc, with held-out loss below $0.05$ and a
 ## Run the example
 
 ```python
+# Step 1 — 1. Prepare packages and the vocabulary: Vocabulary size is three, model width is eight, and the context...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -284,123 +383,218 @@ import json
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
+# Evaluate `VOCAB` from the current inputs and state.
 VOCAB = {"a":0, "b":1, "c":2}
+# Evaluate `CONTEXT` from the current inputs and state.
 CONTEXT = 4
+# Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
 def layer_norm(x):
+    # Reduce along axis=-1 to compute `mean`.
     mean = jnp.mean(x, axis=-1, keepdims=True)
+    # Reduce along axis=-1 to compute `variance`.
     variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)
+    # Return `(x - mean) / jnp.sqrt(variance + 1e-05)` to the caller.
     return (x-mean) / jnp.sqrt(variance + 1e-5)
 
+# Function `init_block(key, width)` implementing this stage's computation:
 def init_block(key, width=8):
+    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(key, 6)
+    # Evaluate `shapes` from the current inputs and state.
     shapes = [(width,width)]*4 + [(width,2*width),(2*width,width)]
+    # Return `{name: jax.random.normal(k, s) * 0.1 for name, k, s in zip(['q', 'k', 'v', 'o', 'up', 'down'], keys, shapes)}` to the caller.
     return {name: jax.random.normal(k,s)*0.1 for name,k,s in zip(
         ["q","k","v","o","up","down"], keys, shapes)}
 
+# Function `block_forward(p, x)` implementing this stage's computation:
 def block_forward(p, x):
+    # Run `layer_norm` to compute `h`.
     h = layer_norm(x)
+    # Perform matrix contraction / projection to compute `(q, k, v)`.
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
+    # Perform matrix contraction / projection to compute `scores`.
     scores = q@k.T / jnp.sqrt(x.shape[-1])
+    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
+    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
+    # Perform matrix contraction / projection to compute `residual`.
     residual = x + (weights@v)@p["o"]
+    # Return `residual + jax.nn.gelu(layer_norm(residual) @ p['up']) @ p['down']` to the caller.
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
 
+# Step 3 — 3. Add embeddings and the vocabulary head: The head has three columns; make_examples shifts each window by...
 def init_lm(key):
+    # Create or split explicit PRNG key(s) (`(embed_key, block_key, head_key)`) for reproducible randomness.
     embed_key, block_key, head_key = jax.random.split(key, 3)
+    # Return `{'embed': jax.random.normal(embed_key, (3, 8)) * 0.1, 'position': jnp.arange(CONTEXT * 8, dtype=jnp.float32).reshape(CONTEXT, 8) * 0.001, 'block': init_block(block_key), 'head': jax.random.normal(head_key, (8, 3)) * 0.1}` to the caller.
     return {"embed":jax.random.normal(embed_key,(3,8))*0.1,
             "position":jnp.arange(CONTEXT*8,dtype=jnp.float32).reshape(CONTEXT,8)*0.001,
             "block":init_block(block_key),
             "head":jax.random.normal(head_key,(8,3))*0.1}
 
+# Function `logits(p, tokens)` implementing this stage's computation:
 def logits(p, tokens):
+    # Evaluate `h` from the current inputs and state.
     h = p["embed"][tokens] + p["position"][:tokens.shape[0]]
+    # Return `layer_norm(block_forward(p['block'], h)) @ p['head']` to the caller.
     return layer_norm(block_forward(p["block"],h))@p["head"]
 
+# Function `make_examples(text)` implementing this stage's computation:
 def make_examples(text):
+    # Initialize array `ids` with explicit values and shape.
     ids = np.array([VOCAB[c] for c in text],dtype=np.int32)
+    # Combine or mask array elements to form `rows`.
     rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])
+    # Return `(jnp.array(rows[:, :-1]), jnp.array(rows[:, 1:]))` to the caller.
     return jnp.array(rows[:,:-1]), jnp.array(rows[:,1:])
 
+# Step 4 — 4. Define the loss and compiled state transition: train_step returns new parameters, optimizer state and the...
 train_x, train_y = make_examples("abc"*12)
+# Run `make_examples` to compute `(held_x, held_y)`.
 held_x, held_y = make_examples("bca"*6)
+# Function `lm_loss(p, x, y)` implementing this stage's computation:
 def lm_loss(p, x, y):
+    # Vectorize across the batch dimension with `jax.vmap` (`predictions`).
     predictions = jax.vmap(logits,in_axes=(None,0))(p,x)
+    # Return `jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions, y))` to the caller.
     return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))
+# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.adam(0.03)
+# Define and JIT-compile `train_step(p, state, x, y)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `train_step(p, state, x, y)` implementing this stage's computation:
 def train_step(p, state, x, y):
+    # Differentiate the objective to obtain `(value, gradients)` via automatic differentiation.
     value, gradients = jax.value_and_grad(lm_loss)(p,x,y)
+    # Apply the computed gradient updates to update the model parameters.
     updates, next_state = optimizer.update(gradients,state,p)
+    # Return `(optax.apply_updates(p, updates), next_state, value)` to the caller.
     return optax.apply_updates(p,updates), next_state, value
 
+# Step 5 — 5. Run the first twenty updates: Adam count should now equal twenty; initialization is the only...
+# Create or split explicit PRNG key(s) (`params`) for reproducible randomness.
 params = init_lm(jax.random.key(3))
+# Run `optimizer.init` to compute `state`.
 state = optimizer.init(params)
+# Evaluate `lm_loss(params, train_x, train_y)` and convert the result into Python scalar/collection `initial`.
 initial = float(lm_loss(params,train_x,train_y))
+# Repeat the update loop over `range(20)` steps:
 for _ in range(20):
+    # Run `train_step` to compute `(params, state, _)`.
     params, state, _ = train_step(params,state,train_x,train_y)
 # Save numeric leaves only, with a schema checked against this program's template.
+# Step 6 — 6. Write and validate the snapshot format: The loader checks architecture, vocabulary, numeric leaf...
 def save_snapshot(folder, p, state, step):
+    # Run `jax.tree.flatten` to compute `(leaves, _)`.
     leaves, _ = jax.tree.flatten((p,state))
+    # Convert `` to a host NumPy array for inspection or verification.
     np.savez(folder/"state.npz", **{f"leaf_{i}":np.asarray(x) for i,x in enumerate(leaves)})
+    # Evaluate `manifest` from the current inputs and state.
     manifest = {"schema":1,"step":step,"vocabulary":VOCAB,"context":CONTEXT,
                 "shapes":[list(x.shape) for x in leaves],
                 "dtypes":[str(x.dtype) for x in leaves]}
+    # Read or serialize artifact data on disk (``).
     (folder/"manifest.json").write_text(json.dumps(manifest))
 
+# Function `load_snapshot(folder)` implementing this stage's computation:
 def load_snapshot(folder):
+    # Read or serialize artifact data on disk (`meta`).
     meta = json.loads((folder/"manifest.json").read_text())
+    # Guard input contract (`meta['schema'] != 1 or meta['vocabulary'] != VOCAB or meta['context'] != CONTEXT`) and fail fast if violated.
     if meta["schema"] != 1 or meta["vocabulary"] != VOCAB or meta["context"] != CONTEXT:
         raise ValueError("checkpoint architecture/vocabulary mismatch")
+    # Guard input contract (`type(meta['step']) is not int or meta['step'] < 0`) and fail fast if violated.
     if type(meta["step"]) is not int or meta["step"] < 0:
         raise ValueError("invalid checkpoint step")
+    # Create or split explicit PRNG key(s) (`template`) for reproducible randomness.
     template = init_lm(jax.random.key(0))
+    # Run `jax.tree.flatten` to compute `(template_leaves, structure)`.
     template_leaves, structure = jax.tree.flatten((template,optimizer.init(template)))
+    # Evaluate `arrays` from the current inputs and state.
     arrays = []
+    # Enter managed runtime/context scope for this block:
     with np.load(folder/"state.npz",allow_pickle=False) as data:
+        # Guard input contract (`set(data.files) != {f'leaf_{i}' for i in range(len(template_leaves))}`) and fail fast if violated.
         if set(data.files) != {f"leaf_{i}" for i in range(len(template_leaves))}:
             raise ValueError("checkpoint leaf count mismatch")
+        # Loop over `(i, leaf)` in `enumerate(template_leaves)`:
         for i, leaf in enumerate(template_leaves):
+            # Evaluate `saved` from the current inputs and state.
             saved = data[f"leaf_{i}"]
+            # Guard input contract (`saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype`) and fail fast if violated.
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
                 raise ValueError("checkpoint leaf contract mismatch")
+            # Create device-backed JAX array ``.
             arrays.append(jnp.array(saved))
+    # Run `jax.tree.unflatten` to compute `(restored_p, restored_state)`.
     restored_p, restored_state = jax.tree.unflatten(structure,arrays)
+    # Guard input contract (`int(restored_state[0].count) != meta['step']`) and fail fast if violated.
     if int(restored_state[0].count) != meta["step"]:
         raise ValueError("checkpoint step and Adam count disagree")
+    # Return `(restored_p, restored_state, meta['step'])` to the caller.
     return restored_p, restored_state, meta["step"]
 
+# Step 7 — 7. Verify resume and evaluate the final fit: Uninterrupted and restored next transitions agree; the held-out...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with TemporaryDirectory() as directory:
+    # Read or serialize artifact data on disk (`folder`).
     folder = Path(directory)
+    # Run `save_snapshot` to perform the next check or state transition.
     save_snapshot(folder,params,state,20)
+    # Run `load_snapshot` to compute `(restored, restored_state, step)`.
     restored, restored_state, step = load_snapshot(folder)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert step == 20
+    # Run `train_step` to compute `(next_a, state_a, _)`.
     next_a, state_a, _ = train_step(params,state,train_x,train_y)
+    # Run `train_step` to compute `(next_b, state_b, _)`.
     next_b, state_b, _ = train_step(restored,restored_state,train_x,train_y)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert all(jnp.allclose(a,b,atol=1e-7) for a,b in zip(
         jax.tree.leaves((next_a,state_a)),jax.tree.leaves((next_b,state_b))))
+# Repeat the update loop over `range(80)` steps:
 for _ in range(80):
+    # Run `train_step` to compute `(params, state, _)`.
     params, state, _ = train_step(params,state,train_x,train_y)
+# Vectorize across the batch dimension with `jax.vmap` (`held_logits`).
 held_logits = jax.vmap(logits,in_axes=(None,0))(params,held_x)
+# Reduce along axis=-1 to compute `accuracy`.
 accuracy = jnp.mean(jnp.argmax(held_logits,axis=-1)==held_y)
+# Run `lm_loss` to compute `final_loss`.
 final_loss = lm_loss(params,held_x,held_y)
+# Print the observed values to compare against the expected result.
 print("Initial / held loss / held accuracy:",initial,float(final_loss),float(accuracy))
+# Verify contract: `final_loss < 0.05`.
 assert final_loss < 0.05
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert accuracy > 0.99
 
+# Step 8 — 8. Define greedy decoding: The generator recomputes a short window each step.
 def generate(p, prompt, count):
+    # Evaluate `tokens` from the current inputs and state.
     tokens = [VOCAB[c] for c in prompt]
+    # Guard input contract (`not tokens`) and fail fast if violated.
     if not tokens:
         raise ValueError("generation needs a nonempty prompt")
+    # Evaluate `inverse` from the current inputs and state.
     inverse = {i:c for c,i in VOCAB.items()}
+    # Repeat the update loop over `range(count)` steps:
     for _ in range(count):
+        # Initialize array `window` with explicit values and shape.
         window = jnp.array(tokens[-CONTEXT:],dtype=jnp.int32)
+        # Evaluate `jnp.argmax(logits(p, window)[-1])` and convert the result into Python scalar/collection `new`.
         new = int(jnp.argmax(logits(p,window)[-1]))
+        # Append the current step result to `tokens`.
         tokens.append(new)
+    # Return `''.join((inverse[i] for i in tokens))` to the caller.
     return "".join(inverse[i] for i in tokens)
 
+# Step 9 — 9. Check the expected continuation: The expected continuation is abcabcabcabc, with held-out loss...
 continuation = generate(params,"abca",8)
+# Print the observed values to compare against the expected result.
 print("Greedy continuation:",continuation)
+# Verify contract: `continuation == 'abcabcabcabc'`.
 assert continuation == "abcabcabcabc"
 ```
 
@@ -427,13 +621,16 @@ Greedy decoding takes the largest-probability token from the relevant row. The f
 These probabilities describe the trained model’s output on this tiny task. High probability and success on a repeating pattern do not establish general language ability or calibrated confidence. Check the row labels and the context before interpreting a bright cell as a correct prediction.
 
 ```python
+# Compute figure data for: Inspect next-token probabilities before greedy decoding
+# Apply nonlinear activation or probability normalization to compute `probs`.
 probs = jax.nn.softmax(held_logits[0], axis=-1)
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position ' + str(i) for i in range(CONTEXT)], 'columns': list(VOCAB.keys()), 'unit': 'next-token probability'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:01:07.311711+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:03:48.996472+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0
@@ -449,7 +646,10 @@ PASS: transformers-04
 **Predict before running:** With a zero output head, what is the cross entropy for any of the three targets?
 
 ```python
+# Experiment — Verify uniform-logit cross entropy: A known probability distribution independently checks target...
+# Initialize array `zero_head` with explicit values and shape.
 zero_head = {**params,"head":jnp.zeros_like(params["head"])}
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)
 ```
 
@@ -462,9 +662,14 @@ A known probability distribution independently checks target handling and reduct
 **Predict before running:** Changing only the last input token can affect which logits?
 
 ```python
+# Experiment — Test causality at the final model output: Causal independence should hold for the full model, not only the...
+# Initialize array `example` with explicit values and shape.
 example = jnp.array([0,1,2,0])
+# Run `logits` to compute `original`.
 original = logits(params,example)
+# Run `logits` to compute `modified`.
 modified = logits(params,example.at[-1].set(1))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(original[:3],modified[:3],atol=1e-5)
 ```
 
@@ -476,9 +681,28 @@ Causal independence should hold for the full model, not only the standalone atte
 
 Generate twelve new tokens from prompt bcab. Derive the expected cycle first; verify the string. Explain why success on this periodic example does not establish natural-language performance.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `generate(...)` — Call `generate` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Generate twelve new tokens from prompt bcab.
+# Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
+assert generate(params,"bcab",12)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Generate twelve new tokens from prompt bcab.
+# Verify contract: `generate(params, 'bcab', 12) == 'bcabcabcabcabcab'`.
 assert generate(params,"bcab",12) == "bcabcabcabcabcab"
 ```
 
@@ -496,16 +720,38 @@ Change one vocabulary mapping rather than numeric leaves.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Reject an incompatible checkpoint — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Create an isolated temporary directory to run and inspect artifacts safely:
+2. Read or serialize artifact data on disk (`folder`).
+3. Run `save_snapshot` to perform the next check or state transition.
+4. Evaluate `metadata_path` from the current inputs and state.
+5. Read or serialize artifact data on disk (`correct`).
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Reject an incompatible checkpoint (Transfer / diagnosis): The metadata is part of the model contract even when...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with TemporaryDirectory() as directory:
-    folder = Path(directory)
+    # Read or serialize artifact data on disk (`folder`).
+    folder = Path(...)  # TODO: compute folder
+    # Run `save_snapshot` to perform the next check or state transition.
     save_snapshot(folder,params,state,100)
-    metadata_path = folder/"manifest.json"
-    correct = metadata_path.read_text()
-    metadata = json.loads(correct)
-    metadata["vocabulary"] = {"a":1,"b":0,"c":2}
+    # Evaluate `metadata_path` from the current inputs and state.
+    metadata_path = ...  # TODO: compute metadata_path
+    # Read or serialize artifact data on disk (`correct`).
+    correct = metadata_path.read_text(...)  # TODO: compute correct
+    # Read or serialize artifact data on disk (`metadata`).
+    metadata = json.loads(...)  # TODO: compute metadata
+    # Evaluate `metadata['vocabulary']` from the current inputs and state.
+    metadata["vocabulary"] = ...  # TODO: compute metadata["vocabulary"]
+    # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(metadata))
     try:
         load_snapshot(folder)
@@ -513,8 +759,11 @@ with TemporaryDirectory() as directory:
         pass
     else:
         raise AssertionError("wrong vocabulary accepted")
-    forged_step = json.loads(correct)
-    forged_step["step"] = 101
+    # Read or serialize artifact data on disk (`forged_step`).
+    forged_step = json.loads(...)  # TODO: compute forged_step
+    # Evaluate `forged_step['step']` from the current inputs and state.
+    forged_step["step"] = ...  # TODO: compute forged_step["step"]
+    # Read or serialize artifact data on disk (``).
     metadata_path.write_text(json.dumps(forged_step))
     try:
         load_snapshot(folder)
@@ -522,9 +771,61 @@ with TemporaryDirectory() as directory:
         pass
     else:
         raise AssertionError("wrong step accepted")
+    # Read or serialize artifact data on disk (``).
     metadata_path.write_text(correct)
+    # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
+    recovered, _, recovered_step = load_snapshot(...)  # TODO: compute recovered, _, recovered_step
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    assert recovered_step  # TODO: complete assertion check
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Reject an incompatible checkpoint (Transfer / diagnosis): The metadata is part of the model contract even when...
+# Create an isolated temporary directory to run and inspect artifacts safely:
+with TemporaryDirectory() as directory:
+    # Read or serialize artifact data on disk (`folder`).
+    folder = Path(directory)
+    # Run `save_snapshot` to perform the next check or state transition.
+    save_snapshot(folder,params,state,100)
+    # Evaluate `metadata_path` from the current inputs and state.
+    metadata_path = folder/"manifest.json"
+    # Read or serialize artifact data on disk (`correct`).
+    correct = metadata_path.read_text()
+    # Read or serialize artifact data on disk (`metadata`).
+    metadata = json.loads(correct)
+    # Evaluate `metadata['vocabulary']` from the current inputs and state.
+    metadata["vocabulary"] = {"a":1,"b":0,"c":2}
+    # Read or serialize artifact data on disk (``).
+    metadata_path.write_text(json.dumps(metadata))
+    try:
+        load_snapshot(folder)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("wrong vocabulary accepted")
+    # Read or serialize artifact data on disk (`forged_step`).
+    forged_step = json.loads(correct)
+    # Evaluate `forged_step['step']` from the current inputs and state.
+    forged_step["step"] = 101
+    # Read or serialize artifact data on disk (``).
+    metadata_path.write_text(json.dumps(forged_step))
+    try:
+        load_snapshot(folder)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("wrong step accepted")
+    # Read or serialize artifact data on disk (``).
+    metadata_path.write_text(correct)
+    # Run `load_snapshot` to compute `(recovered, _, recovered_step)`.
     recovered, _, recovered_step = load_snapshot(folder)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert recovered_step == 100
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert jnp.allclose(logits(recovered,jnp.array([0,1,2,0])),logits(params,jnp.array([0,1,2,0])))
 ```
 
@@ -544,21 +845,59 @@ The vocabulary mapping intentionally accepts only a, b and c.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Make prompt failures explicit — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `explicit(...)` — Call `explicit` with your updated parameters or inputs from this lesson's workspace.
+- `generate(...)` — Call `generate` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Run the boundary check and catch the expected exception:
+2. Run the boundary check and catch the expected exception:
+3. Verify contract: `generate(params, 'abca', 0) == 'abca'`.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Make prompt failures explicit (Transfer / diagnosis): A decoding interface needs a defined input contract; neither...
+# Run the boundary check and catch the expected exception:
 try:
     generate(params,"",1)
 except ValueError:
     pass
 else:
     raise AssertionError("empty prompt accepted")
+# Run the boundary check and catch the expected exception:
 try:
     generate(params,"x",1)
 except KeyError:
     pass
 else:
     raise AssertionError("unknown token accepted")
+# Verify contract: `generate(params, 'abca', 0) == 'abca'`.
+assert generate(params,"abca",0)  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Make prompt failures explicit (Transfer / diagnosis): A decoding interface needs a defined input contract; neither...
+# Run the boundary check and catch the expected exception:
+try:
+    generate(params,"",1)
+except ValueError:
+    pass
+else:
+    raise AssertionError("empty prompt accepted")
+# Run the boundary check and catch the expected exception:
+try:
+    generate(params,"x",1)
+except KeyError:
+    pass
+else:
+    raise AssertionError("unknown token accepted")
+# Verify contract: `generate(params, 'abca', 0) == 'abca'`.
 assert generate(params,"abca",0) == "abca"
 ```
 

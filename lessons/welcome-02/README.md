@@ -75,6 +75,8 @@ Creating a NumPy copy brings values into host memory for inspection. Converting 
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
+# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -86,6 +88,8 @@ These explicit inputs define the case that the later checks will verify.
 Append this block below the inputs in the same file.
 
 ```python
+# Step 2 — Build the computation: x has two observations and three features.
+# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)
 ```
 
@@ -96,11 +100,18 @@ $x$ has two observations and three features. `axis=0` removes the observation di
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
+# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Print the observed values to compare against the expected result.
 print("Shape:", x.shape)
+# Print diagnostic summary of the computed outputs.
 print("Dtype:", x.dtype)
+# Print diagnostic summary of the computed outputs.
 print("Devices:", x.devices())
+# Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
+# Verify that the output tensor shape matches our prediction.
 assert x.shape == (2, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -109,14 +120,25 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
+# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
+# Step 2 — Build the computation: x has two observations and three features.
+# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)
+# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Print the observed values to compare against the expected result.
 print("Shape:", x.shape)
+# Print diagnostic summary of the computed outputs.
 print("Dtype:", x.dtype)
+# Print diagnostic summary of the computed outputs.
 print("Devices:", x.devices())
+# Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
+# Verify that the output tensor shape matches our prediction.
 assert x.shape == (2, 3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -143,12 +165,14 @@ Now connect the picture to a reduction. Summing the feature columns within each 
 The row labels are positions, not times or class labels. The darker lower row tells us its stored values are larger; it does not imply that the observation is more important.
 
 ```python
+# Compute figure data for: Rows are groups of observations
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:13.639806+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:08.742597+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -173,11 +197,18 @@ PASS: welcome-02
 **Predict before running:** Predict the three column means and every centered value. Which mean is shared by the two observations?
 
 ```python
+# Experiment — Center each measurement: The calculation reuses one mean per column.
+# Reduce along axis=0 to compute `means`.
 means=x.mean(axis=0,keepdims=True)
+# Evaluate `centered` from the current inputs and state.
 centered=x-means
+# Print the observed values to compare against the expected result.
 print("Means:",means)
+# Print diagnostic summary of the computed outputs.
 print("Centered:",centered)
+# Verify that the output tensor shape matches our prediction.
 assert means.shape==(1,3)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 ```
 
@@ -190,10 +221,16 @@ The calculation reuses one mean per column. An explicit hand calculation verifie
 **Predict before running:** Will copying to NumPy preserve values and shape? Does that copy describe device-resident computation?
 
 ```python
+# Experiment — Keep a host reference: The host reference is an inspection copy.
+# Import numpy for this computation.
 import numpy as np
+# Convert `host` to a host NumPy array for inspection or verification.
 host=np.asarray(x)
+# Verify that the output tensor shape matches our prediction.
 assert host.shape==(2,3)
+# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(host,np.arange(6).reshape(2,3))
+# Print the observed values to compare against the expected result.
 print("Host dtype:",host.dtype)
 ```
 
@@ -205,11 +242,39 @@ The host reference is an inspection copy. Its existence says nothing about accel
 
 Compute column sums instead. State the resulting shape before running the code.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Reduce along axis=0 to compute `column_sums`.
+2. Verify that the output tensor shape matches our prediction.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Compute column sums instead.
+# Reduce along axis=0 to compute `column_sums`.
+column_sums = x.sum(...)  # TODO: compute column_sums
+# Verify that the output tensor shape matches our prediction.
+assert column_sums.shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Compute column sums instead.
+# Reduce along axis=0 to compute `column_sums`.
 column_sums = x.sum(axis=0)
+# Verify that the output tensor shape matches our prediction.
 assert column_sums.shape == (3,)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 ```
 
@@ -227,11 +292,40 @@ Keep observation rows and measurement columns.
 
 </details>
 
+### How to write: Add a new observation — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+
+**Step-by-step implementation plan:**
+1. Construct and reshape `table` into the target tensor dimensions.
+2. Verify that the numerical values match the expected reference within tolerance.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Add a new observation (Practice): Changing the observation count changes axis 0, while the...
+# Construct and reshape `table` into the target tensor dimensions.
+table = jnp.arange(...)  # TODO: compute table
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Add a new observation (Practice): Changing the observation count changes axis 0, while the...
+# Construct and reshape `table` into the target tensor dimensions.
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
 ```
 
@@ -251,15 +345,42 @@ Count required elements before changing the code.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Diagnose an impossible reshape — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+
+**Step-by-step implementation plan:**
+1. Run the boundary check and catch the expected exception:
+2. Verify contract: `x.reshape(2, 3).size == 6`.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
+# Run the boundary check and catch the expected exception:
 try:
     x.reshape(2,4)
 except TypeError:
     print("Expected element-count mismatch")
 else:
     raise AssertionError("Expected reshape to fail")
+# Verify contract: `x.reshape(2, 3).size == 6`.
+assert x.reshape(2,3).size  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
+# Run the boundary check and catch the expected exception:
+try:
+    x.reshape(2,4)
+except TypeError:
+    print("Expected element-count mismatch")
+else:
+    raise AssertionError("Expected reshape to fail")
+# Verify contract: `x.reshape(2, 3).size == 6`.
 assert x.reshape(2,3).size==6
 ```
 

@@ -114,7 +114,7 @@ A Bayesian model with diagnostic evidence.
 
 **Demonstrate:** Report sampler diagnostics and distinguish uncertainty from predictive error.
 
-Project status: implemented staged practice · [Open source](../../projects/bayesian-regression/README.md).
+Project status: implemented staged practice · [Open source](../../projects/bayesian-regression/README.md). Copy `projects/bayesian-regression/starter/model.py` to `projects/bayesian-regression/my_model.py` and write your code in `projects/bayesian-regression/my_model.py`. Run `python3 projects/bayesian-regression/tests/check.py --implementation projects/bayesian-regression/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 
 

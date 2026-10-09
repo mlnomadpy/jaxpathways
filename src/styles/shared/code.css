@@ -5,84 +5,85 @@
   overflow-x: auto;
   background: var(--code-bg);
   color: var(--code-ink);
-  border: 1px solid #4b405f;
+  border: 1px solid var(--code-border);
   border-radius: 8px;
   font: 14px/1.8 var(--mono);
 }
-.code-panel {
+:is(.code-panel, .resource-code, .project-command) {
   min-width: 0;
+  max-width: 100%;
   margin-block: 20px;
-  border: 1px solid #4b405f;
+  border: 1px solid var(--code-border);
   border-radius: 8px;
   overflow: hidden;
   background: var(--code-bg);
   color: var(--code-ink);
 }
-.code-panel pre {
+:is(.code-panel, .resource-code, .project-command) pre {
   margin: 0;
   border: 0;
   border-radius: 0;
 }
-.code-panel-heading {
+:is(.code-panel-heading, .project-command > div) {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 8px 14px;
-  border-bottom: 1px solid #50445f;
-  background: #352b4f;
-  color: #d9ccec;
+  border-bottom: 1px solid var(--code-header-border);
+  background: var(--code-header-bg);
+  color: var(--code-header-ink);
   font: 13px/1.5 var(--ui);
 }
-.code-panel-heading > span {
+:is(.code-panel-heading, .project-command > div) > span {
   min-width: 0;
   overflow-wrap: anywhere;
 }
-.code-panel-heading button {
+:is(.code-panel-heading, .project-command > div) button {
   flex-shrink: 0;
   min-height: 44px;
   padding: 8px 12px;
-  border: 1px solid #68597f;
+  border: 1px solid var(--code-button-border);
   border-radius: 6px;
-  background: #49385f;
-  color: #f7f2ff;
+  background: var(--code-button-bg);
+  color: var(--code-button-ink);
   font: 600 12px/1.5 var(--ui);
 }
-.code-panel-heading button:hover {
-  background: #5b4676;
+:is(.code-panel-heading, .project-command > div) button:hover {
+  background: var(--code-button-hover);
 }
-.code-panel .copy-feedback {
+:is(.code-panel, .resource-code, .project-command) :is(.copy-feedback, .copy-status) {
   margin: 0;
   padding-inline: 14px;
-  color: #a8dec6;
+  color: var(--syntax-string);
   font: 13px/1.6 var(--ui);
 }
-.code-panel .copy-feedback:not(:empty) {
+:is(.code-panel, .resource-code, .project-command) :is(.copy-feedback, .copy-status):not(:empty) {
   padding-block: 10px;
 }
 pre code .syntax-keyword,
 pre code .syntax-option {
-  color: #deb7ff;
+  color: var(--syntax-keyword);
 }
 pre code .syntax-keyword {
   font-weight: 600;
 }
 pre code .syntax-string {
-  color: #a8dec6;
+  color: var(--syntax-string);
 }
 pre code .syntax-number,
 pre code .syntax-variable {
-  color: #ffc09c;
+  color: var(--syntax-number);
 }
 pre code .syntax-comment {
-  color: #b6aec9;
+  color: var(--syntax-comment);
 }
 pre code .syntax-function,
 pre code .syntax-builtin {
-  color: #a0d8ef;
+  color: var(--syntax-function);
 }
 @media (max-width: 760px) {
-  .code-panel-heading {
+  :is(.code-panel-heading, .project-command > div) {
     flex-wrap: wrap;
     padding: 10px 12px;
   }

@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="432pt" viewBox="0 0 576 432" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Read top to bottom: initialize or restore checkpoint state, run synchronized warmup compilation without mutating state, execute timed steps logging events.jsonl, and atomically replace checkpoint-latest.json.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 432 
+L 576 432 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 288 97.811208 
+Q 288 115.586161 288 131.460455 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 126.260455 
+L 288 131.460455 
+L 285.4 126.260455 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 288 201.268235 
+Q 288 219.043187 288 234.917482 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 229.717482 
+L 288 234.917482 
+L 285.4 229.717482 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 288 304.725261 
+Q 288 322.500213 288 338.374508 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 333.174508 
+L 288 338.374508 
+L 285.4 333.174508 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 51.450199 30.690209 
+L 524.549801 30.690209 
+Q 528.539797 30.690209 528.539797 34.950204 
+L 528.539797 92.764425 
+Q 528.539797 97.02442 524.549801 97.02442 
+L 51.450199 97.02442 
+Q 47.460203 97.02442 47.460203 92.764425 
+L 47.460203 34.950204 
+Q 47.460203 30.690209 51.450199 30.690209 
+z
+" clip-path="url(#p7f0d737741)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 51.450199 134.147235 
+L 524.549801 134.147235 
+Q 528.539797 134.147235 528.539797 138.40723 
+L 528.539797 196.221451 
+Q 528.539797 200.481446 524.549801 200.481446 
+L 51.450199 200.481446 
+Q 47.460203 200.481446 47.460203 196.221451 
+L 47.460203 138.40723 
+Q 47.460203 134.147235 51.450199 134.147235 
+z
+" clip-path="url(#p7f0d737741)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 51.450199 237.604261 
+L 524.549801 237.604261 
+Q 528.539797 237.604261 528.539797 241.864257 
+L 528.539797 299.678477 
+Q 528.539797 303.938472 524.549801 303.938472 
+L 51.450199 303.938472 
+Q 47.460203 303.938472 47.460203 299.678477 
+L 47.460203 241.864257 
+Q 47.460203 237.604261 51.450199 237.604261 
+z
+" clip-path="url(#p7f0d737741)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 51.450199 341.061288 
+L 524.549801 341.061288 
+Q 528.539797 341.061288 528.539797 345.321283 
+L 528.539797 403.135503 
+Q 528.539797 407.395499 524.549801 407.395499 
+L 51.450199 407.395499 
+Q 47.460203 407.395499 47.460203 403.135503 
+L 47.460203 345.321283 
+Q 47.460203 341.061288 51.450199 341.061288 
+z
+" clip-path="url(#p7f0d737741)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="67.001689" transform="rotate(-0 288 67.001689)">Init or --resume: load (step, w, b, m_w, m_b, key) + state_hash</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="170.458716" transform="rotate(-0 288 170.458716)">Warmup: compile @jax.jit train_step + block_until_ready (no state mutation)</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="273.915742" transform="rotate(-0 288 273.915742)">Steady loop: timed step + block_until_ready -&gt; append events.jsonl</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="377.539643" transform="rotate(-0 288 377.539643)">Atomic checkpoint: write .tmp -&gt; os.fsync -&gt; os.replace</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p7f0d737741">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="425.99952"/>
+  </clipPath>
+ </defs>
+</svg>

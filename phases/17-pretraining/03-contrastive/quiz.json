@@ -7,8 +7,8 @@
       "question": "What does successful retrieval on the training pairs establish?",
       "options": [
         "The encoder solves those pairs under that pairing and augmentation contract.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "Lowering the temperature parameter \\(\\tau\\) improves the nearest-neighbor ranking order of the cosine matrix.",
+        "Diagonal-only supervision automatically merges duplicate semantic examples into a single positive target."
       ],
       "correct": 0,
       "explanation": "It does not establish downstream task quality or robustness to a new data distribution."

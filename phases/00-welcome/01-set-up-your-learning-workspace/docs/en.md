@@ -66,6 +66,7 @@ The course CPU examples were checked with Python 3.14.3. These commands select P
 **macOS / Linux — terminal**
 
 ```sh
+# Run macos / linux — terminal using the course Python environment
 python3.14 --version
 ```
 
@@ -74,6 +75,7 @@ python3.14 --version
 **Windows — PowerShell**
 
 ```powershell
+# Windows — PowerShell
 py -3.14 --version
 ```
 
@@ -90,6 +92,7 @@ Run the appropriate check below. If requirements-cpu.txt is missing, move into t
 **macOS / Linux — check folder and files**
 
 ```sh
+# macOS / Linux — check folder and files
 pwd
 ls
 ```
@@ -99,6 +102,7 @@ ls
 **Windows — check folder and files**
 
 ```powershell
+# Windows — check folder and files
 Get-Location
 Get-ChildItem
 ```
@@ -116,6 +120,7 @@ The pip command is the package installer. -$r$ means “read the package list fr
 **macOS / Linux — run one line at a time**
 
 ```sh
+# Run macos / linux — run one line at a time using the course Python environment
 python3.14 -m venv .venv
 source .venv/bin/activate
 python -c "import sys; print(sys.executable)"
@@ -128,6 +133,7 @@ python -c "import jax, numpy, optax; print(jax.__version__, numpy.__version__, o
 **Windows — run one line at a time**
 
 ```powershell
+# Windows — run one line at a time
 py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -c "import sys; print(sys.executable)"
 .\.venv\Scripts\python.exe -m pip install -r requirements-cpu.txt
@@ -147,6 +153,7 @@ If you see a traceback, read the final line and compare it with the troubleshoot
 **macOS / Linux — activated terminal**
 
 ```sh
+# Run macos / linux — activated terminal using the course Python environment
 python first_experiment.py
 ```
 
@@ -160,6 +167,7 @@ Sum: 6.0
 **Windows — PowerShell**
 
 ```powershell
+# Run windows — powershell using the course Python environment
 .\.venv\Scripts\python.exe first_experiment.py
 ```
 
@@ -176,6 +184,7 @@ After that successful run, the commands below run it once more and save its prin
 **macOS / Linux — save output**
 
 ```sh
+# Run macos / linux — save output using the course Python environment
 python first_experiment.py > my-first-run.txt
 ```
 
@@ -184,6 +193,7 @@ python first_experiment.py > my-first-run.txt
 **Windows — save output**
 
 ```powershell
+# Run windows — save output using the course Python environment
 .\.venv\Scripts\python.exe first_experiment.py > my-first-run.txt
 ```
 
@@ -198,6 +208,7 @@ On Windows, move into the workspace and use the environment’s full Python path
 **macOS / Linux — new terminal, same folder**
 
 ```sh
+# macOS / Linux — new terminal, same folder
 source .venv/bin/activate
 python first_experiment.py
 ```
@@ -207,6 +218,7 @@ python first_experiment.py
 **Windows — new PowerShell, same folder**
 
 ```powershell
+# Run windows — new powershell, same folder using the course Python environment
 .\.venv\Scripts\python.exe first_experiment.py
 ```
 
@@ -229,19 +241,30 @@ Sum: $15.0$ followed by AssertionError: you changed the array length but left th
 ## Run the example
 
 ```python
+# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...
+# Import os for this computation.
 import os
 # Choose CPU before importing JAX for this first experiment.
 os.environ["JAX_PLATFORMS"] = "cpu"
+# Import required JAX, NumPy, and standard-library modules.
 import platform
 import jax
 import numpy as np
+# Print the observed values to compare against the expected result.
 print("Python:", platform.python_version())
+# Print diagnostic summary of the computed outputs.
 print("JAX:", jax.__version__)
+# Print diagnostic summary of the computed outputs.
 print("NumPy:", np.__version__)
+# Print diagnostic summary of the computed outputs.
 print("Backend:", jax.default_backend())
+# Print diagnostic summary of the computed outputs.
 print("Devices:", jax.devices())
+# Run `jax.numpy.arange` to compute `x`.
 x = jax.numpy.arange(4, dtype=jax.numpy.float32)
+# Print the observed values to compare against the expected result.
 print("Sum:", float(x.sum()))
+# Verify contract: `float(x.sum()) == 6.0`.
 assert float(x.sum()) == 6.0
 ```
 
@@ -269,7 +292,7 @@ If your result is missing, walk backward through the boxes: did Python run the s
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:11.745686+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:07.065447+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -287,11 +310,34 @@ PASS: welcome-01
 
 Edit the starter as shown in Step $6$: change the array length from $4$ to $6$ and the expected sum from $6$ to $15$. Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+
+**Step-by-step implementation plan:**
+1. Print the observed values to compare against the expected result.
+2. Verify contract: `float(x.sum()) == 15.0`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
+x = jax.numpy.arange(...)  # TODO: compute x
+# Print the observed values to compare against the expected result.
+print("Changed experiment sum:", float(x.sum()))
+# Verify contract: `float(x.sum()) == 15.0`.
+assert float(x.sum())  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
 x = jax.numpy.arange(6, dtype=jax.numpy.float32)
+# Print the observed values to compare against the expected result.
 print("Changed experiment sum:", float(x.sum()))
+# Verify contract: `float(x.sum()) == 15.0`.
 assert float(x.sum()) == 15.0
 ```
 

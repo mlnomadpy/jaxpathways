@@ -2,6 +2,7 @@ import { courseState, phaseById } from '../lib/course-state.js';
 import { careerStartingPhase, careerPlanMarkdown } from '../lib/careers.js';
 import { $ } from '../lib/dom.js';
 import { escapeHtml } from '../lib/html.js';
+import { lessonLink } from '../lib/urls.js';
 import { renderCareer } from '../lib/views/career.js';
 import { downloadText } from './browser-actions.js';
 import { navigateToCourse } from './course-navigation.js';
@@ -83,7 +84,7 @@ export function initCareers() {
       const phase = phaseById(selectedPhase());
       const lesson = phase.lessons.find((l) => l.status === 'authored');
       if (lesson) {
-        location.href = `lesson.html?path=${encodeURIComponent(role.defaultPathwayId)}&lesson=${encodeURIComponent(lesson.id)}`;
+        location.href = lessonLink(lesson.id, role.defaultPathwayId);
       } else {
         location.href = `course.html?path=${encodeURIComponent(role.defaultPathwayId)}&phase=${encodeURIComponent(phase.id)}&roadmap=1#curriculum`;
       }

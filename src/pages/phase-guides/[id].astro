@@ -1,36 +1,48 @@
 ---
-import 'katex/dist/katex.min.css';
-import '../../styles/tokens.css';
-import '../../styles/base.css';
-import '../../styles/features/assessment.css';
-import '../../styles/features/math.css';
+import GuideContents from '../../components/shared/GuideContents.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
 import RevisionStamp from '../../components/shared/RevisionStamp.astro';
-import SiteLayout from '../../layouts/SiteLayout.astro';
+import GuideLayout from '../../layouts/GuideLayout.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
 import { inlineMath } from '../../lib/math.js';
+import { courseTypeCue } from '../../lib/runtime.js';
 import { siteUrl } from '../../lib/urls.js';
+import { projectFileLayout } from '../../lib/views/project.js';
+
 export function getStaticPaths() {
   return course.phases.map((phase) => ({ params: { id: phase.id }, props: { phase } }));
 }
 const { phase } = Astro.props;
 const guide = phase.studyGuide;
+const cue = courseTypeCue(phase);
+const primaryProject = registry.projects.find((project) => project.id === phase.projectId);
+const projectLayout = primaryProject ? projectFileLayout(primaryProject) : null;
 const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
 ---
 
-<SiteLayout
+<GuideLayout
   title={`${phase.title}: study guide — JAX Pathways`}
   description={guide.why}
   active="course"
   skipTarget="#assessment"
   skipLabel="Skip to phase guide"
 >
-  <main id="assessment">
-    <a href={siteUrl(`course.html#phase-${phase.id}`)}>Course · {phase.title}</a>
-    <p class="edition">Phase {phase.number} · Study guide</p>
-    <h1>{guide.question}</h1>
+  <PageIntro
+    backHref={`course.html#phase-${phase.id}`}
+    backLabel={`Course · ${phase.title}`}
+    edition={`Phase ${phase.number} · Study guide`}
+    title={guide.question}
+  >
+    <div class="course-cue-row">
+      <span class="course-type-pill" data-course-kind={cue.kind}>
+        {cue.badge}
+      </span>
+      <span class="course-meta-pill">{cue.hardwareBadge}</span>
+      <span class="course-meta-pill">{cue.paceLabel}</span>
+    </div>
     <RevisionStamp kind="phases" id={phase.id} />
-    <p set:html={inlineMath(guide.why)} />
+    <p class="intro" set:html={inlineMath(guide.why)} />
     <p>
       <strong>Preparation:</strong>{' '}
       {phase.prerequisitePhaseIds.length
@@ -46,7 +58,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
         : 'Basic Python; no previous JAX experience.'}
     </p>
     <p>
-      <strong>Runtime:</strong> {phase.hardware}
+      <strong>Runtime:</strong> <Fragment set:html={inlineMath(phase.hardware)} />
     </p>
     <div class="assessment-actions">
       <a class="button primary" href={siteUrl(`lesson.html?lesson=${phase.lessons[0].id}`)}>
@@ -56,83 +68,107 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
         See the project
       </a>
     </div>
-    {['welcome', 'networks', 'recovery', 'operations'].includes(phase.id) && (
-      <p>
-        <a href={siteUrl('project-workflow.html')}>
-          Tools, project folders and experiment organization
-        </a>
-        : prepare a run directory and keep its configuration and evidence together.
-      </p>
-    )}
-    <nav class="assessment-contents" aria-label="Phase guide sections">
-      <a href="#readiness">Check your starting point</a> · <a href="#milestones">Build in stages</a>{' '}
-      · <a href="#transfer">Try a changed condition</a> ·{' '}
-      <a href="#completion">Decide what is ready</a>
-    </nav>
-    <article>
-      <h2 id="readiness">Check your starting point</h2>
-      <p set:html={inlineMath(guide.readiness.prompt)} />
-      <details>
-        <summary>Compare your reasoning</summary>
-        <p set:html={inlineMath(guide.readiness.answer)} />
-      </details>
-      <p>
-        If this is unfamiliar, work through{' '}
-        <a href={siteUrl(`lesson.html?lesson=${guide.readiness.lessonId}`)}>
-          {lesson(guide.readiness.lessonId).title}
-        </a>{' '}
-        before attempting the project.
-      </p>
-      <h2 id="milestones">Build in stages</h2>
-      {guide.milestones.map((stage, index) => (
-        <section aria-labelledby={`milestone-${index + 1}`}>
-          <h3 id={`milestone-${index + 1}`}>
-            {index + 1}. {stage.title}
-          </h3>
-          <p set:html={inlineMath(stage.task)} />
-          <ul>
-            {stage.lessonIds.map((id) => (
-              <li>
-                <a href={siteUrl(`lesson.html?lesson=${id}`)}>{lesson(id).title}</a>
-              </li>
-            ))}
-          </ul>
-        </section>
-      ))}
-      <h2 id="transfer">Try a changed condition</h2>
-      <p>
-        Make a prediction before opening the reasoning. Keep your answer and the evidence you would
-        collect.
-      </p>
-      <p set:html={inlineMath(guide.transfer.prompt)} />
-      <details>
-        <summary>Compare an approach</summary>
-        <p set:html={inlineMath(guide.transfer.approach)} />
-      </details>
-      <h3>Diagnose a likely failure</h3>
-      <p>
-        <strong>Symptom:</strong> <span set:html={inlineMath(guide.pitfall.symptom)} />
-      </p>
-      <p>
-        <strong>Check next:</strong> <span set:html={inlineMath(guide.pitfall.check)} />
-      </p>
-      <h2 id="completion">Decide what is ready</h2>
-      <p set:html={inlineMath(guide.completion)} />
-      <p>
-        Use the project's staged checks on your own implementation. Passing the reference checks and
-        explaining this scenario are different kinds of evidence; neither is independent review of
-        your work.
-      </p>
-      <a href={siteUrl(`project-guides/${phase.projectId}.html`)}>Open {phase.project}</a>
-      {phase.additionalProjectIds?.map((id) => (
+  </PageIntro>
+  {['welcome', 'networks', 'recovery', 'operations'].includes(phase.id) && (
+    <p>
+      <a href={siteUrl('project-workflow.html')}>
+        Tools, project folders and experiment organization
+      </a>
+      : prepare a run directory and keep its configuration and evidence together.
+    </p>
+  )}
+  <GuideContents
+    label="Phase guide sections"
+    title="In this study guide"
+    sections={[
+      { id: 'readiness', label: 'Check your starting point' },
+      { id: 'milestones', label: 'Build in stages' },
+      { id: 'transfer', label: 'Try a changed condition' },
+      { id: 'completion', label: 'Decide what is ready' },
+    ]}
+  />
+  <article>
+    <h2 id="readiness">Check your starting point</h2>
+    <p set:html={inlineMath(guide.readiness.prompt)} />
+    <details>
+      <summary>Compare your reasoning</summary>
+      <p set:html={inlineMath(guide.readiness.answer)} />
+    </details>
+    <p>
+      If this is unfamiliar, work through{' '}
+      <a href={siteUrl(`lesson.html?lesson=${guide.readiness.lessonId}`)}>
+        {lesson(guide.readiness.lessonId).title}
+      </a>{' '}
+      before attempting the project.
+    </p>
+    <h2 id="milestones">Build in stages</h2>
+    {guide.milestones.map((stage, index) => (
+      <section aria-labelledby={`milestone-${index + 1}`}>
+        <h3 id={`milestone-${index + 1}`}>
+          {index + 1}. <Fragment set:html={inlineMath(stage.title)} />
+        </h3>
+        <p set:html={inlineMath(stage.task)} />
+        <ul>
+          {stage.lessonIds.map((id) => (
+            <li>
+              <a href={siteUrl(`lesson.html?lesson=${id}`)}>{lesson(id).title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))}
+    <h2 id="transfer">Try a changed condition</h2>
+    <p>
+      Make a prediction before opening the reasoning. Keep your answer and the evidence you would
+      collect.
+    </p>
+    <p set:html={inlineMath(guide.transfer.prompt)} />
+    <details>
+      <summary>Compare an approach</summary>
+      <p set:html={inlineMath(guide.transfer.approach)} />
+    </details>
+    <h3>Diagnose a likely failure</h3>
+    <p>
+      <strong>Symptom:</strong> <span set:html={inlineMath(guide.pitfall.symptom)} />
+    </p>
+    <p>
+      <strong>Check next:</strong> <span set:html={inlineMath(guide.pitfall.check)} />
+    </p>
+    <h2 id="completion">Decide what is ready</h2>
+    <p set:html={inlineMath(guide.completion)} />
+    {projectLayout && (
+      <div class="project-guide-brief">
+        <p class="edition">Where to put your project code</p>
         <p>
-          <a href={siteUrl(`project-guides/${id}.html`)}>
-            Open {registry.projects.find((project) => project.id === id)?.title}
-          </a>
+          <strong>Write your code in:</strong> <code>{projectLayout.workspaceFile}</code> (copy{' '}
+          <code>{projectLayout.starterFile}</code> first:{' '}
+          <code>
+            cp {projectLayout.starterFile} {projectLayout.workspaceFile}
+          </code>
+          ).
         </p>
-      ))}
-      <h3>What still needs further work</h3>
-      <p set:html={inlineMath(guide.furtherWork)} />
-    </article>
-  </main>
-</SiteLayout>
+        <p>
+          <strong>Verify your implementation:</strong>{' '}
+          <code>
+            python3 {projectLayout.checkerFile} --stage all --impl {projectLayout.workspaceFile}
+          </code>
+        </p>
+      </div>
+    )}
+    <p>
+      Use the project's staged checks on your own implementation. Passing the reference checks and
+      explaining this scenario are different kinds of evidence; neither is independent review of
+      your work.
+    </p>
+    <a href={siteUrl(`project-guides/${phase.projectId}.html`)}>Open {phase.project}</a>
+    {phase.additionalProjectIds?.map((id) => (
+      <p>
+        <a href={siteUrl(`project-guides/${id}.html`)}>
+          Open {registry.projects.find((project) => project.id === id)?.title}
+        </a>
+      </p>
+    ))}
+    <h3>What still needs further work</h3>
+    <p set:html={inlineMath(guide.furtherWork)} />
+  </article>
+</GuideLayout>

@@ -75,20 +75,27 @@ This example captures a particular set of weights and bias in the exported compu
 Create main.py in your lesson workspace and run it with the active course Python environment. Keep training out of the function and compute the known probe before exporting.
 
 ```python
+# Step 1 — Define an inference-only computation: The probe returns [3.1,-0.45].
+# Import tempfile for this computation.
 import tempfile
 from pathlib import Path
 import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import export
+# Initialize array `weights` with explicit values and shape.
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = jnp.array([.1, -.2], dtype=jnp.float32)
+# Define and JIT-compile `inference(x)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `inference(x)` implementing this stage's computation:
 def inference(x):
+    # Return `x @ weights + bias` to the caller.
     return x @ weights + bias
 
+# Create device-backed JAX array ``.
 np.testing.assert_allclose(inference(jnp.array([[1.,2.,-1.]], jnp.float32)), [[3.1,-.45]], atol=1e-6)
-
 ```
 
 The probe returns $[3.1,-0.45]$. Preserve that independent expected value as you cross the serialization boundary.
@@ -98,11 +105,13 @@ The probe returns $[3.1,-0.45]$. Preserve that independent expected value as you
 Append this block to the same main.py and rerun the whole file. Stage the computation for a batch of one with three float32 features.
 
 ```python
+# Step 2 — Declare the fixed input signature: The export has one input of shape (1,3).
 signature = jax.ShapeDtypeStruct((1, 3), jnp.float32)
+# Run `export.export` to compute `artifact`.
 artifact = export.export(inference)(signature)
 
+# Verify that the output tensor shape matches our prediction.
 assert artifact.in_avals[0].shape == (1,3)
-
 ```
 
 The export has one input of shape $(1,3)$. A batch of two is a different contract; the failure experiment tests that rejection.
@@ -112,15 +121,23 @@ The export has one input of shape $(1,3)$. A batch of two is a different contrac
 Append this block to the same main.py and rerun the whole file. Serialize to disk and call the restored artifact on the same probe.
 
 ```python
+# Step 3 — Write bytes, reload and compare: The output agrees with hand arithmetic.
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
+    # Read or serialize artifact data on disk (`path`).
     path = Path(folder) / "dense.jaxexport"
+    # Run `path.write_bytes` to perform the next check or state transition.
     path.write_bytes(artifact.serialize())
+    # Run `export.deserialize` to compute `restored`.
     restored = export.deserialize(path.read_bytes())
+    # Convert `sample` to a host NumPy array for inspection or verification.
     sample = np.array([[1., 2., -1.]], np.float32)
+    # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
+    # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
-
 ```
 
 The output agrees with hand arithmetic. File size is recorded rather than hard-coded because the representation can change with the JAX version. Next, run the fresh-interpreter experiment.
@@ -128,28 +145,44 @@ The output agrees with hand arithmetic. File size is recorded rather than hard-c
 ## Run the example
 
 ```python
+# Export a computation and verify its serving contract: Export packages a computation for a supported runtime.
+# Import tempfile for this computation.
 import tempfile
 from pathlib import Path
 import numpy as np
 import jax
 import jax.numpy as jnp
 from jax import export
+# Initialize array `weights` with explicit values and shape.
 weights = jnp.array([[1., -2.], [.5, 1.], [-1., .25]], dtype=jnp.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = jnp.array([.1, -.2], dtype=jnp.float32)
+# Define and JIT-compile `inference(x)` so XLA traces and fuses the operations:
 @jax.jit
+# Function `inference(x)` implementing this stage's computation:
 def inference(x):
+    # Return `x @ weights + bias` to the caller.
     return x @ weights + bias
+# Cast or evaluate `signature` in explicit floating-point precision.
 signature = jax.ShapeDtypeStruct((1, 3), jnp.float32)
+# Run `export.export` to compute `artifact`.
 artifact = export.export(inference)(signature)
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
+    # Read or serialize artifact data on disk (`path`).
     path = Path(folder) / "dense.jaxexport"
+    # Run `path.write_bytes` to perform the next check or state transition.
     path.write_bytes(artifact.serialize())
+    # Run `export.deserialize` to compute `restored`.
     restored = export.deserialize(path.read_bytes())
+    # Convert `sample` to a host NumPy array for inspection or verification.
     sample = np.array([[1., 2., -1.]], np.float32)
+    # Convert `actual` to a host NumPy array for inspection or verification.
     actual = np.asarray(restored.call(sample))
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_allclose(actual, [[3.1, -.45]], atol=1e-6)
+    # Print diagnostic summary of the computed outputs.
     print("Verified serialized bytes:", path.stat().st_size)
-
 ```
 
 Expected: The serialized artifact reloads and returns $[3.1, -0.45]$. File size depends on the JAX version.
@@ -175,13 +208,16 @@ This is the first behavior to check after serialization: does the restored compu
 The example exports a specific float32 input signature with shape $(1,3)$. Agreement for this case does not establish acceptance of arbitrary shapes or support in every serving runtime. Keep the signature and input preprocessing with the artifact, then expand parity checks to the cases your application actually needs.
 
 ```python
+# Compute figure data for: Serialization preserves the declared computation
+# Convert `direct` to a host NumPy array for inspection or verification.
 direct = np.asarray(inference(sample))
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'output score', 'series': [{'label': 'direct', 'y': direct[0].tolist()}, {'label': 'restored artifact', 'y': actual[0].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:04:05.184941+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:06:12.719376+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172
@@ -199,13 +235,14 @@ PASS: deployment-03
 **Predict before running:** Does the exported signature accept two rows?
 
 ```python
+# Experiment — Reject the wrong batch: A Python function being shape-generic does not make its fixed...
+# Run the boundary check and catch the expected exception:
 try:
     restored.call(np.ones((2, 3), np.float32))
 except (ValueError, TypeError) as error:
     print("Rejected incompatible shape:", type(error).__name__)
 else:
     raise AssertionError("Fixed batch-one contract was not enforced")
-
 ```
 
 **Expected:** The incompatible shape is rejected.
@@ -217,10 +254,13 @@ A Python function being shape-generic does not make its fixed exported interface
 **Predict before running:** Will the computation still work when the new process has no inference function or live parameter objects?
 
 ```python
+# Experiment — Load only the exported bytes in a fresh interpreter: The checked boundary is artifact bytes → installed JAX CPU...
+# Import json for this computation.
 import json
 import os
 import subprocess
 import sys
+# Convert `worker` to a host NumPy array for inspection or verification.
 worker = """import json,sys
 from pathlib import Path
 import numpy as np
@@ -229,14 +269,20 @@ loaded = export.deserialize(Path(sys.argv[1]).read_bytes())
 request = np.asarray(json.load(sys.stdin)['features'], dtype=np.float32)
 print(json.dumps({'scores': np.asarray(loaded.call(request)).tolist()}, allow_nan=False))
 """
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as directory:
+    # Read or serialize artifact data on disk (`exported_path`).
     exported_path = Path(directory) / 'dense.jaxexport'
+    # Run `exported_path.write_bytes` to perform the next check or state transition.
     exported_path.write_bytes(artifact.serialize())
+    # Configure environment variable before initializing the runtime.
     completed = subprocess.run([sys.executable, '-c', worker, str(exported_path)], input=json.dumps({'features': [[1.,2.,-1.]]}), text=True, capture_output=True, check=True, env=dict(os.environ, JAX_PLATFORMS='cpu'), timeout=60)
+    # Read or serialize artifact data on disk (`worker_scores`).
     worker_scores = json.loads(completed.stdout)['scores']
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(worker_scores, [[3.1, -.45]], atol=1e-6)
+# Print the observed values to compare against the expected result.
 print('Fresh interpreter loaded bytes and matched the known scores.')
-
 ```
 
 **Expected:** The child process returns $[3.1,-0.45]$ using only the exported artifact and request.
@@ -247,12 +293,42 @@ The checked boundary is artifact bytes → installed JAX CPU runtime → scores.
 
 Verify a new input $[-2, 0, 3]$ against an independent NumPy expression.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `changed` with explicit values and shape.
+2. Convert `expected` to a host NumPy array for inspection or verification.
+3. Verify that computed values match the expected reference within numerical tolerance.
+4. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Verify a new input [-2, 0, 3] against an independent NumPy expression.
+# Initialize array `changed` with explicit values and shape.
+changed = np.array(...)  # TODO: compute changed
+# Convert `expected` to a host NumPy array for inspection or verification.
+expected = ...  # TODO: compute expected
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(restored.call(changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(restored.call(changed), expected, atol
+# Print the observed values to compare against the expected result.
+print("Changed exported request verified")
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Verify a new input [-2, 0, 3] against an independent NumPy expression.
+# Initialize array `changed` with explicit values and shape.
 changed = np.array([[-2., 0., 3.]], np.float32)
+# Convert `expected` to a host NumPy array for inspection or verification.
 expected = changed @ np.asarray(weights) + np.asarray(bias)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(restored.call(changed), expected, atol=1e-6)
+# Print the observed values to compare against the expected result.
 print("Changed exported request verified")
 ```
 
@@ -270,14 +346,32 @@ Validate shape and finiteness on the host before calling inference. Include a si
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Validate a request before inference — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+
+**Step-by-step implementation plan:**
+1. Convert `array` to a host NumPy array for inspection or verification.
+2. Guard input contract (`array.shape != (1, 3) or not np.isfinite(array).all()`) and fail fast if violated.
+3. Return `array` to the caller.
+4. Iterate over `invalid` to step through the computation:
+5. Verify that computed values match the expected reference within numerical tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Validate a request before inference (Transfer): Validation belongs before the runtime call.
 def validate_request(values):
-    array = np.asarray(values, dtype=np.float32)
+    # Convert `array` to a host NumPy array for inspection or verification.
+    array = np.asarray(...)  # TODO: compute array
+    # Guard input contract (`array.shape != (1, 3) or not np.isfinite(array).all()`) and fail fast if violated.
     if array.shape != (1, 3) or not np.isfinite(array).all():
         raise ValueError("expected finite float32 [1, 3]")
-    return array
+    # Return `array` to the caller.
+    return ...  # TODO: return computed result
+# Iterate over `invalid` to step through the computation:
 for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
     try:
         validate_request(invalid)
@@ -285,8 +379,32 @@ for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
         pass
     else:
         raise AssertionError("invalid input accepted")
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
+```
 
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Validate a request before inference (Transfer): Validation belongs before the runtime call.
+def validate_request(values):
+    # Convert `array` to a host NumPy array for inspection or verification.
+    array = np.asarray(values, dtype=np.float32)
+    # Guard input contract (`array.shape != (1, 3) or not np.isfinite(array).all()`) and fail fast if violated.
+    if array.shape != (1, 3) or not np.isfinite(array).all():
+        raise ValueError("expected finite float32 [1, 3]")
+    # Return `array` to the caller.
+    return array
+# Iterate over `invalid` to step through the computation:
+for invalid in ([[1., 2.]], [[1., float("nan"), 3.]]):
+    try:
+        validate_request(invalid)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("invalid input accepted")
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(restored.call(validate_request([[1.,2.,-1.]])), [[3.1,-.45]], atol=1e-6)
 ```
 
 Validation belongs before the runtime call. A dtype cast alone neither verifies input shape nor rejects NaNs.
@@ -305,23 +423,72 @@ Increment the counter only after validation succeeds. An error message alone doe
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Prove that request validation precedes exported inference — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Function `checked_prediction(values)` implementing this stage's computation:
+2. Run `validate_request` to compute `array`.
+3. Accumulate the next contribution into `inference_calls[0]`.
+4. Return `np.asarray(restored.call(array))` to the caller.
+5. Iterate over `invalid` to step through the computation:
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
-inference_calls = [0]
+# Prove that request validation precedes exported inference (Transfer / diagnosis): The wrapper tests ordering as well as acceptance.
+inference_calls = ...  # TODO: compute inference_calls
+# Function `checked_prediction(values)` implementing this stage's computation:
 def checked_prediction(values):
-    array = validate_request(values)
+    # Run `validate_request` to compute `array`.
+    array = validate_request(...)  # TODO: compute array
+    # Accumulate the next contribution into `inference_calls[0]`.
     inference_calls[0] += 1
-    return np.asarray(restored.call(array))
+    # Return `np.asarray(restored.call(array))` to the caller.
+    return ...  # TODO: return computed result
+# Iterate over `invalid` to step through the computation:
 for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
     try: checked_prediction(invalid)
     except ValueError: pass
     else: raise AssertionError('invalid request reached inference')
-assert inference_calls[0] == 0
+# Verify contract: `inference_calls[0] == 0`.
+assert inference_calls[0]  # TODO: complete assertion check
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
-assert inference_calls[0] == 1
+# Verify contract: `inference_calls[0] == 1`.
+assert inference_calls[0]  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
 print('Invalid requests rejected before the one valid inference call.')
+```
 
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Prove that request validation precedes exported inference (Transfer / diagnosis): The wrapper tests ordering as well as acceptance.
+inference_calls = [0]
+# Function `checked_prediction(values)` implementing this stage's computation:
+def checked_prediction(values):
+    # Run `validate_request` to compute `array`.
+    array = validate_request(values)
+    # Accumulate the next contribution into `inference_calls[0]`.
+    inference_calls[0] += 1
+    # Return `np.asarray(restored.call(array))` to the caller.
+    return np.asarray(restored.call(array))
+# Iterate over `invalid` to step through the computation:
+for invalid in ([[1., 2.]], [[1., float('inf'), 3.]]):
+    try: checked_prediction(invalid)
+    except ValueError: pass
+    else: raise AssertionError('invalid request reached inference')
+# Verify contract: `inference_calls[0] == 0`.
+assert inference_calls[0] == 0
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(checked_prediction([[1.,2.,-1.]]), [[3.1,-.45]], atol=1e-6)
+# Verify contract: `inference_calls[0] == 1`.
+assert inference_calls[0] == 1
+# Print the observed values to compare against the expected result.
+print('Invalid requests rejected before the one valid inference call.')
 ```
 
 The wrapper tests ordering as well as acceptance. A service can satisfy an output check on valid inputs and still waste runtime work or fail unclearly on malformed requests.

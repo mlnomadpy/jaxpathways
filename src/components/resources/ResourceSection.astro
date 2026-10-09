@@ -1,0 +1,19 @@
+---
+interface Props {
+  id: string;
+  edition: string;
+  title: string;
+  split?: boolean;
+}
+
+const { id, edition, title, split = false } = Astro.props;
+---
+
+<section id={id} class:list={['resource-section', { 'resource-split': split }]}>
+  <div class="resource-heading">
+    <p class="edition">{edition}</p>
+    <h2>{title}</h2>
+    <slot name="intro" />
+  </div>
+  <slot />
+</section>

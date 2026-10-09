@@ -2,33 +2,55 @@
 import RevisionStamp from '../shared/RevisionStamp.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
-import { runtimeLabel } from '../../lib/runtime.js';
+import { inlineMath } from '../../lib/math.js';
+import { runtimeLabel, courseTypeCue } from '../../lib/runtime.js';
 import { siteUrl } from '../../lib/urls.js';
 import type { Phase } from '../../types/course';
 interface Props {
   phase: Phase;
 }
 const { phase: p } = Astro.props;
+const cue = courseTypeCue(p);
+const linkedProject = p.projectId
+  ? registry.projects.find((project) => project.id === p.projectId)
+  : undefined;
 ---
 
-<details id={`phase-${p.id}`} class="phase-card">
+<details
+  id={`phase-${p.id}`}
+  class="phase-card"
+  data-course-kind={cue.kind}
+  data-course-group={cue.filterGroup}
+  data-course-era={cue.eraId}
+  data-era-title={cue.eraTitle}
+>
   <summary>
     <span class="num">{p.number}</span>
     <span>
+      <span class="course-cue-row">
+        <span class="course-type-pill" data-course-kind={cue.kind}>
+          {cue.badge}
+        </span>
+        <span class="course-meta-pill">{cue.hardwareBadge}</span>
+        <span class="course-meta-pill">{cue.paceLabel}</span>
+      </span>
       <h2 class="phase-title">{p.title}</h2>
       <small>{p.part}</small>
     </span>
     <span class="badge">
-      {p.lessons.filter((l) => l.status === 'authored').length} available ·{' '}
-      {p.lessons.filter((l) => l.status !== 'authored').length} unwritten
+      {p.lessons.filter((l) => l.status === 'authored').length} available
+      {p.lessons.some((l) => l.status !== 'authored') &&
+        ` · ${p.lessons.filter((l) => l.status !== 'authored').length} unwritten`}
     </span>
   </summary>
   <div class="route-details">
     <RevisionStamp kind="phases" id={p.id} />
-    <p>{p.description}</p>
-    <p class="soft">{p.learningAdvice}</p>
+    <p set:html={inlineMath(p.description)} />
+    <p class="soft" set:html={inlineMath(p.learningAdvice)} />
     <p>
-      <a href={siteUrl(`phase-guides/${p.id}.html`)}>Phase study guide: {p.studyGuide.question}</a>
+      <a href={siteUrl(`phase-guides/${p.id}.html`)}>
+        Phase study guide: <Fragment set:html={inlineMath(p.studyGuide.question)} />
+      </a>
     </p>
     {p.coreLessonIds && (
       <p>
@@ -55,7 +77,7 @@ const { phase: p } = Astro.props;
     </p>
     <details class="phase-hardware">
       <summary>Hardware and future work</summary>
-      <p>{p.hardware}</p>
+      <p set:html={inlineMath(p.hardware)} />
     </details>
     <ul class="lessons">
       {p.lessons.map((lesson, index) => (
@@ -67,7 +89,10 @@ const { phase: p } = Astro.props;
               </span>
               <span class="lesson-title">{lesson.title}</span>
               {lesson.status === 'authored' && (
-                <small class="lesson-runtime">{runtimeLabel(lesson)}</small>
+                <small class="lesson-runtime">
+                  {runtimeLabel(lesson)}
+                  {lesson.minutes ? ` · ${lesson.minutes} min` : ''}
+                </small>
               )}
             </span>
             <span class:list={['badge', lesson.status]}>
@@ -81,11 +106,20 @@ const { phase: p } = Astro.props;
       ))}
     </ul>
     <div class="phase-project">
-      <p class="edition">Bring the phase together</p>
-      <h3>{p.project}</h3>
+      <p class="edition">Bring the phase together · Integration Project</p>
+      <h3 set:html={inlineMath(p.project)} />
       <p>
-        <strong>Checkpoint:</strong> {p.checkpoint}
+        <strong>Checkpoint:</strong> <Fragment set:html={inlineMath(p.checkpoint)} />
       </p>
+      {linkedProject && (
+        <p class="soft">
+          <strong>What to do &amp; where to put your code:</strong> Write your implementation in{' '}
+          <code>{linkedProject.workspaceFile}</code> (copied from the starter scaffold in{' '}
+          <code>projects/{linkedProject.id}/starter/</code>) and run{' '}
+          <code>projects/{linkedProject.id}/tests/check.py</code> from the top-level folder to
+          verify each stage.
+        </p>
+      )}
       {p.id === 'optimization' && (
         <p>
           <a href={siteUrl('assessments/math.html')}>Math synthesis assessment · review draft</a>
@@ -101,7 +135,7 @@ const { phase: p } = Astro.props;
           'Project brief · planned'
         )}
       </p>
-      {p.projectNote && <p class="soft">{p.projectNote}</p>}
+      {p.projectNote && <p class="soft" set:html={inlineMath(p.projectNote)} />}
       {p.additionalProjectIds?.map((id) => (
         <p>
           <a href={siteUrl(`project-guides/${id}.html`)}>

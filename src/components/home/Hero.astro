@@ -1,7 +1,7 @@
 ---
 import '../../styles/home/hero.css';
 import copy from '../../data/home.json';
-import { siteUrl } from '../../lib/urls.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
 import GitHubLink from '../shared/GitHubLink.astro';
 import TutorStart from './TutorStart.astro';
 import { course, inventory } from '../../lib/course-data.js';
@@ -54,9 +54,9 @@ import { course, inventory } from '../../lib/course-data.js';
     <figcaption>
       <span>One function. Three ways to transform it.</span>
       <span class="map-links">
-        <a href={siteUrl('lesson.html?lesson=first-gradient')}>grad</a>
-        <a href={siteUrl('lesson.html?lesson=transforms-03')}>vmap</a>
-        <a href={siteUrl('lesson.html?lesson=transforms-04')}>jit</a>
+        <a href={siteUrl(lessonLink('first-gradient'))}>grad</a>
+        <a href={siteUrl(lessonLink('transforms-03'))}>vmap</a>
+        <a href={siteUrl(lessonLink('transforms-04'))}>jit</a>
       </span>
     </figcaption>
   </figure>

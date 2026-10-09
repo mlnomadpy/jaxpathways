@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "rl-03",
-  "contentHash": "c3271f8f03522ce92ea42be129862446c5863b07f1867efb3ad731715fc80d20",
-  "executedAt": "2026-10-06T23:02:44.319878+00:00",
+  "contentHash": "258bbc06afb8cb459e4e3365cc7147cda6c185af4707b0c1cafbbc7282f8e649",
+  "executedAt": "2026-10-08T14:05:11.711219+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "REINFORCE initial/final exact return: 0.46687505 0.9521624\nPPO initial/final exact return: 0.46687505 0.97578394\nREINFORCE initial/final exact return: 0.46687505 0.9521624\nPPO initial/final exact return: 0.46687505 0.97578394\npositive / negative targets: [0.6 1.  1.2] [-0.8 -1.  -1.4]\nsampled / exact gradient: [0.12067959 0.21948992 0.13326262] [0.12001554 0.21822323 0.13327113]\nchanged seed final exact return: 0.9501661\nPASS: rl-03\n",
   "notebookCells": [
     {
-      "sourceHash": "1ec7e63f1648dcb0bbe2ae2b2c03ee2dde82d6df99ef229ccf17fd275bb4c397",
+      "sourceHash": "0dc953793bc9e2d36d5cb9f349d80f0f3bab9ca886385d37b971a8a044a2199f",
       "outputs": []
     },
     {
-      "sourceHash": "e021e53eb540db70d62b86e5e7081af901f4b9e6b82d67e1ef2b85e81ffb5b64",
+      "sourceHash": "ccd2d93c2101551af0e44169f958bc48a392477bf25ea95dc2f69d199fc9ddef",
       "outputs": []
     },
     {
-      "sourceHash": "bd8133cb13d26b99e5ffae121c5218dc8223dfd9bfee127d106e378af0d6c3b6",
+      "sourceHash": "6cdd549613e8b070f21e6fe1aa084cfa982415f53f5bd800e56909ca66590d25",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "c5bfafa536e2b99fb9517effce592546763d3735a0853ba7e87175261e4f355c",
+      "sourceHash": "ea7b7fc7fb5321c93e7ba5999805ff6bc95fd8fbf6cafe206378e68d2e78af72",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "516d482be536a47c8e6838800143bcd5b9c921c012ac8d9449c47d55670c537a",
+      "sourceHash": "2a50320947e414e08c274df72a65a2b29984850f9acb045d890ae5703ae3149d",
       "outputs": []
     },
     {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "sourceHash": "754f0467a4e4eff667cd8615a89e9003eb47ae9ef31fa64dc20da882fb950645",
+      "sourceHash": "1674034538f696436dff42b26fe27f38d7fe9516facd3560681a864f8de78b47",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "5dcf677cb68c63ef61f5768e86e3af5571e1613e8a8866c876d1b90001d2caf2",
+      "sourceHash": "0456f6ec2a1f6bc04fbde2d2d79f6ffc25434bd6a6bbf228b690fd730124d2bf",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "363220d574dffa1cb832c16d166af7046faff18640b74525961863c6f16cca95",
       "outputs": []
     },
     {
-      "sourceHash": "1c14852131dad61b037e0d00fdf85ed769295225acd94c9c2c4e6043176b1b21",
+      "sourceHash": "7bca855b2e0b119d2fc0cfa7b266b2677543e2e5c9a78a6a6a22e08f8070e262",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,19 +107,19 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "af47424af655b272502133e7aefb873e47b28558c051ab4469e16948c3ac5376",
       "outputs": []
     },
     {
-      "sourceHash": "28c281cdb20c58274da73d0dd3234c771efd9d2b85d29c6938b74a6d52f04d06",
+      "sourceHash": "1758b3ff1a2bb3754dc3b18714adea6f2f9cff6a03e066af8879a1487bb10a4a",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "aa1e2a69ca1785850b9e35d1eb3aa35792d3f5ad1f45d5bfe82ba0ec5adee0e2",
       "outputs": []
     },
     {
-      "sourceHash": "96a47c4d762cc25b63017eea4a65720e95f067a4829f02a6dcc5f9d091881938",
+      "sourceHash": "2cb311b9d8984bf98f778533e07ba0bd3ced254415f773280cc44843be1568c2",
       "outputs": []
     }
   ],

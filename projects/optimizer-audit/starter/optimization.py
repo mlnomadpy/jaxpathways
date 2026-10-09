@@ -36,6 +36,8 @@ def fixture(seed=1, n=96, correlation=0.65, feature_ratio=25., noise=0.15):
 
 def objective(w, x, y, penalty=0.):
     """TODO — Stage 1: implement half mean squared error plus half the declared L2 penalty."""
+    # Key APIs to use: `jnp.mean`, `jnp.sum`
+    # Step 1: Return `0.5 * jnp.mean((x @ w - y) ** 2) + 0.5 * penalty * jnp.sum(w * w)` to the caller.
     raise NotImplementedError('Stage 1: implement half mean squared error plus half the declared L2 penalty.')
 
 
@@ -56,6 +58,11 @@ def geometry(w, x, y, penalty=0.):
 
 def fit_scales(x):
     """TODO — Stage 2: fit column RMS on training inputs; protect a completely zero column."""
+    # Key APIs to use: `np.asarray`, `check_xy`, `np.zeros`, `np.sqrt`, `np.mean`
+    # Step 1: Convert `x` to a host NumPy array for inspection or verification.
+    # Step 2: Allocate initialized array `` with the specified shape and dtype.
+    # Step 3: Reduce across the target axis to summarize `rms`.
+    # Step 4: Return `np.where(rms > 0, rms, 1).astype(np.float32)` to the caller.
     raise NotImplementedError('Stage 2: fit column RMS on training inputs; protect a completely zero column.')
 
 
@@ -69,6 +76,13 @@ def apply_scales(x, scales):
 
 def noise_audit(w, x, y, batch_size=2, penalty=0.):
     """TODO — Stage 3: enumerate ordered batches with replacement and return exact gradient moments."""
+    # Key APIs to use: `check_xy`, `check_weights`, `contract`, `type`, `or`
+    # Step 1: Run `check_xy` to compute `(x, y)`.
+    # Step 2: Run `check_weights` to compute `w`.
+    # Step 3: Guard input contract (`type(batch_size) != int or batch_size < 1 or len(x) ** batch_size > 65536 or (not np.isfinite(penalty)) or (penalty < 0)`) and fail fast if violated.
+    # Step 4: Differentiate the objective to obtain gradients `per`.
+    # Step 5: Convert `draws` to a host NumPy array for inspection or verification.
+    # Step 6: Convert `gradients` to a host NumPy array for inspection or verification.
     raise NotImplementedError('Stage 3: enumerate ordered batches with replacement and return exact gradient moments.')
 
 
@@ -91,6 +105,13 @@ def rates(initial, steps, decay_at=None, factor=0.1):
 
 def optimizer_step(state, gradient, rate, method='gd', clip_norm=jnp.inf):
     """TODO — Stage 4: clip the raw gradient, then update the selected optimizer state and return diagnostics."""
+    # Key APIs to use: `linalg.norm`, `jnp.minimum`, `jnp.maximum`, `jnp.sqrt`
+    # Step 1: Run `jnp.linalg.norm` to compute `norm`.
+    # Step 2: Reduce across the target axis to summarize `clipped`.
+    # Step 3: Evaluate `count` from the current inputs and state.
+    # Step 4: Branch on condition `method == 'gd'`:
+    # Step 5: Evaluate `new` from the current inputs and state.
+    # Step 6: Return `(new, {'raw_norm': norm, 'clipped_norm': jnp.linalg.norm(clipped), 'update_norm': jnp.linalg.norm(rate * direction)})` to the caller.
     raise NotImplementedError('Stage 4: clip the raw gradient, then update the selected optimizer state and return diagnostics.')
 
 
@@ -126,4 +147,10 @@ def run(w, x, y, held_x, held_y, indices, learning_rates, method='gd', penalty=0
 
 def ridge_solution(x,y,penalty=0.):
     """TODO — Stage 5: solve the augmented least-squares problem, including rank-deficient zero penalty."""
+    # Key APIs to use: `check_xy`, `contract`, `np.isfinite`, `np.vstack`, `x.astype`
+    # Step 1: Run `check_xy` to compute `(x, y)`.
+    # Step 2: Guard input contract (`not np.isfinite(penalty) or penalty < 0`) and fail fast if violated.
+    # Step 3: Construct an identity matrix `a`.
+    # Step 4: Allocate initialized array `b` with the specified shape and dtype.
+    # Step 5: Return `np.linalg.lstsq(a, b, rcond=None)[0]` to the caller.
     raise NotImplementedError('Stage 5: solve the augmented least-squares problem, including rank-deficient zero penalty.')

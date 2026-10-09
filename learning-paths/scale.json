@@ -14,6 +14,9 @@
     "optimization",
     "networks",
     "recovery",
+    "tpu",
+    "tpu-workflows",
+    "tpu-systems",
     "performance",
     "distributed",
     "kernels"
@@ -42,6 +45,9 @@
   "audience": "Engineers comfortable with training loops who want to reason about memory, communication and throughput.",
   "firstArtifact": "A synchronized timing report and a checked array placement on logical CPU devices.",
   "focusPhaseIds": [
+    "tpu",
+    "tpu-workflows",
+    "tpu-systems",
     "performance",
     "distributed",
     "kernels"

@@ -7,7 +7,7 @@
       "links": [
         {
           "label": "Open setup lesson →",
-          "href": "lesson.html?lesson=welcome-01",
+          "href": "lesson-welcome-01.html",
           "download": false
         },
         {
@@ -25,7 +25,7 @@
       "links": [
         {
           "label": "Open virtual-device lesson →",
-          "href": "lesson.html?lesson=welcome-cpu",
+          "href": "lesson-welcome-cpu.html",
           "download": false
         },
         {

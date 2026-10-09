@@ -1,6 +1,9 @@
 import { siteUrl } from '../lib/urls.js';
 
-/** Navigate from other features without importing the catalog's DOM controller. */
+/**
+ * Navigate from other features without importing the catalog's DOM controller.
+ * @param {{ path?: string; phase?: string; roadmap?: boolean }} [options]
+ */
 export function navigateToCourse({ path, phase, roadmap = false } = {}) {
   const params = new URLSearchParams();
   if (path) params.set('path', path);

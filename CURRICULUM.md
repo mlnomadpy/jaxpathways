@@ -117,7 +117,7 @@ Training systems. Start after: 05: Neural network training.
 
 ### [07: Transformers & language models](phases/07-transformers/README.md)
 
-Training systems. Start after: 06: Data & checkpoint recovery.
+Training systems. Start after: 06: Data & checkpoint recovery; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Attention from small pieces (lesson and exercise available)
 - Masking, tokenization, and sequence packing (lesson and exercise available)
@@ -130,7 +130,7 @@ Training systems. Start after: 06: Data & checkpoint recovery.
 
 ### [08: Performance diagnosis](phases/08-performance/README.md)
 
-Training systems. Start after: 05: Neural network training.
+Training systems. Start after: 05: Neural network training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Benchmark asynchronous work correctly (lesson and exercise available)
 - Diagnose recompilation and host synchronization (lesson and exercise available)
@@ -144,7 +144,7 @@ Training systems. Start after: 05: Neural network training.
 
 ### [09: Distributed training](phases/09-distributed/README.md)
 
-Specializations. Start after: 06: Data & checkpoint recovery; 08: Performance diagnosis.
+Specializations. Start after: 06: Data & checkpoint recovery; 08: Performance diagnosis; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Arrays, meshes, and sharding (lesson and exercise available)
 - A sharded training step (lesson and exercise available)
@@ -196,7 +196,7 @@ Specializations. Start after: 05: Neural network training.
 
 ### [13: Pallas kernels](phases/13-kernels/README.md)
 
-Specializations. Start after: 09: Distributed training.
+Specializations. Start after: 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Pallas grids and BlockSpecs (lesson and exercise available)
 - A first TPU kernel (lesson and exercise available)
@@ -222,7 +222,7 @@ Specializations. Start after: 04: Math & optimization.
 
 ### [15: Deployment, interoperability & edge AI](phases/15-deployment/README.md)
 
-Specializations. Start after: 06: Data & checkpoint recovery; 08: Performance diagnosis.
+Specializations. Start after: 06: Data & checkpoint recovery; 08: Performance diagnosis; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Adapt a pretrained model and choose a post-training objective (lesson and exercise available)
 - Move models between JAX, Keras, TensorFlow and PyTorch (lesson and exercise available)
@@ -239,7 +239,7 @@ Specializations. Start after: 06: Data & checkpoint recovery; 08: Performance di
 
 ### [16: Workload operations](phases/16-operations/README.md)
 
-Specializations. Start after: 09: Distributed training.
+Specializations. Start after: 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Accelerator jobs and runtime lifecycle (lesson and exercise available)
 - Health, logs, and workload observability (lesson and exercise available)
@@ -256,7 +256,7 @@ Specializations. Start after: 09: Distributed training.
 
 ### [17: Self-supervised pretraining: masked and contrastive learning](phases/17-pretraining/README.md)
 
-Training systems. Start after: 07: Transformers & language models.
+Training systems. Start after: 07: Transformers & language models; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Masked language modeling: predict hidden tokens (lesson and exercise available)
 - Masked image modeling: reconstruct missing patches (lesson and exercise available)
@@ -268,7 +268,7 @@ Training systems. Start after: 07: Transformers & language models.
 
 ### [18: Post-training: SFT, LoRA, reward models and RLHF](phases/18-posttraining/README.md)
 
-Training systems. Start after: 17: Self-supervised pretraining: masked and contrastive learning; 12: Reinforcement learning.
+Training systems. Start after: 17: Self-supervised pretraining: masked and contrastive learning; 12: Reinforcement learning; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 - Supervised fine-tuning with response-only token loss (lesson and exercise available)
 - LoRA: adapt, save and merge low-rank updates (lesson and exercise available)
@@ -279,6 +279,39 @@ Training systems. Start after: 17: Self-supervised pretraining: masked and contr
 **Build:** An audited pretraining and adaptation objective toolkit.
 
 **Checkpoint:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
+
+### [19: TPU Setup: Provisioning & Runtime Verification](phases/19-tpu/README.md)
+
+Start here. Start after: 00: Setup & first steps.
+
+- Select a TPU slice and provision your Cloud TPU VM (lesson and exercise available)
+- Bootstrap .venv and verify a TPU runtime receipt (lesson and exercise available)
+
+**Build:** A provisioned Cloud TPU VM and a cryptographically hashed JAX runtime receipt.
+
+**Checkpoint:** Select a single-host TPU topology, provision a Cloud TPU VM (or Colab TPU), bootstrap jax[tpu] in an isolated .venv, verify pmap execution, and confirm clean VM deletion.
+
+### [20: TPU Workflows: Launching Jobs & Checkpointed Experiments](phases/20-tpu-workflows/README.md)
+
+Start here. Start after: 19: TPU Setup: Provisioning & Runtime Verification.
+
+- Stage and launch checkpointed TPU jobs (lesson and exercise available)
+- Run course scripts and multi-host TPU Pod slices (lesson and exercise available)
+
+**Build:** A checkpoint-resumable TPU job launcher and multi-host staging workflow.
+
+**Checkpoint:** Stage scripts with gcloud compute tpus tpu-vm scp, separate XLA warmup from timed step loops, verify zero-drift checkpoint resume, and build single-host and --worker=all Pod launch commands.
+
+### [21: TPU Systems: Generations, Memory, Precision & XProf](phases/21-tpu-systems/README.md)
+
+Start here. Start after: 20: TPU Workflows: Launching Jobs & Checkpointed Experiments.
+
+- TPU generations and HBM memory budgeting (lesson and exercise available)
+- bfloat16, int8 precision, and XProf profiling on TPU (lesson and exercise available)
+
+**Build:** A TPU generation, HBM capacity, BF16/INT8 precision, and XProf profiling dossier.
+
+**Checkpoint:** Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.
 
 ## Choose the work you want to do
 
@@ -345,7 +378,7 @@ Turn a dataset and model idea into a reproducible experiment. You define the obj
 **Demonstrate:** Demonstrate that your model trains, evaluates, resumes correctly, and produces reproducible results.
 
 **Milestones:**
-1. Build the shared foundation: A reproducible regression fit with checked gradients and explicit random state.
+1. Build the shared foundation and TPU workflow: A reproducible regression fit with checked gradients, explicit random state, and a verified TPU launch workflow.
 2. Train and evaluate a small model: A reproducible classifier
 3. Prove full-state recovery: An interrupted run restored with its full state
 4. Diagnose and improve training speed: A trace-backed before-and-after performance report
@@ -412,7 +445,7 @@ Measure where a workload spends time and memory, then improve the limiting opera
 **Demonstrate:** Preserve correctness, separate compile time from execution, and justify the improvement using workload measurements.
 
 **Milestones:**
-1. Build the shared foundation: A reproducible regression fit with checked gradients and explicit random state.
+1. Build the shared foundation and TPU workflow: A reproducible regression fit with checked gradients and explicit random state.
 2. Build a reference workload: A reproducible classifier
 3. Make it recoverable: An interrupted run restored with its full state
 4. Find its measured bottleneck: A trace-backed before-and-after performance report
@@ -432,7 +465,7 @@ Package a trained model so another process or device can use it reliably. Own pr
 **Demonstrate:** Reproduce exported predictions and defend the serving plan under a clearly stated workload.
 
 **Milestones:**
-1. Build the shared foundation: A reproducible regression fit with checked gradients and explicit random state.
+1. Build the shared foundation and TPU workflow: A reproducible regression fit with checked gradients and explicit random state.
 2. Produce a trained artifact: A reproducible classifier
 3. Reproduce its saved state: An interrupted run restored with its full state
 4. Measure a reference workload: A trace-backed before-and-after performance report
@@ -451,7 +484,7 @@ Make model workloads observable and recoverable. Track progress and resource use
 **Demonstrate:** Detect and diagnose a controlled failure, restore full workload state, and explain operational tradeoffs.
 
 **Milestones:**
-1. Build the shared foundation: A reproducible regression fit with checked gradients and explicit random state.
+1. Build the shared foundation and TPU workflow: A reproducible regression fit with checked gradients and explicit random state.
 2. Run a reference job: A reproducible classifier
 3. Verify a recovery point: An interrupted run restored with its full state
 4. Observe and diagnose workload behavior: A trace-backed before-and-after performance report
@@ -497,7 +530,7 @@ Build a classifier, preserve the complete training run through interruption, and
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 15: Deployment, interoperability & edge AI.
+**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 19: TPU Setup: Provisioning & Runtime Verification → 20: TPU Workflows: Launching Jobs & Checkpointed Experiments → 21: TPU Systems: Generations, Memory, Precision & XProf → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 15: Deployment, interoperability & edge AI.
 
 **Final project:** A recoverable image classifier with verified exported inference.
 
@@ -589,7 +622,7 @@ Profile a correct workload, preserve its global objective while partitioning arr
 
 **Engineering extensions (follow each lesson prerequisite):** deployment-07, operations-06. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 08: Performance diagnosis → 09: Distributed training → 13: Pallas kernels.
+**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 19: TPU Setup: Provisioning & Runtime Verification → 20: TPU Workflows: Launching Jobs & Checkpointed Experiments → 21: TPU Systems: Generations, Memory, Precision & XProf → 08: Performance diagnosis → 09: Distributed training → 13: Pallas kernels.
 
 **Final project:** A checked kernel and a measurement-backed optimization argument.
 
@@ -627,15 +660,15 @@ Trace a function into jaxpr, verify forward and reverse sensitivities, write exa
 
 Build and recover an experiment on CPU, then learn GCP provisioning, TPU generations, training and inference memory, precision policies and XProf profiling. Connect measured error and real target traces to model engineering.
 
-**For:** Model builders who understand minibatches and want to connect sequence models to accelerator engineering.
+**For:** Model builders who want to provision TPUs, launch single-host and multi-host experiments, and connect sequence models to accelerator engineering.
 
-**First artifact:** A CPU run dossier with configuration, environment, events and a checkpoint that reproduces an uninterrupted run.
+**First artifact:** A verified TPU runtime receipt, a checkpoint-resumed TPU experiment log, and a memory/precision/XProf decision dossier.
 
-**Study advice:** Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Continue with the TPU performance guide: compare generations, estimate training and cache memory, measure BF16/INT8 error and diagnose a warmed profile. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.
+**Study advice:** Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course.
 
-**Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-07, performance-03, performance-04. See [the engineering release project](projects/engineering-release/README.md).
+**Engineering extensions (follow each lesson prerequisite):** tpu-01, tpu-04, tpu-02, tpu-05, tpu-03, tpu-06, recovery-06, deployment-07, operations-07, performance-03, performance-04. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI → 16: Workload operations.
+**Follow:** 00: Setup & first steps → 19: TPU Setup: Provisioning & Runtime Verification → 20: TPU Workflows: Launching Jobs & Checkpointed Experiments → 21: TPU Systems: Generations, Memory, Precision & XProf → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 07: Transformers & language models → 17: Self-supervised pretraining: masked and contrastive learning → 12: Reinforcement learning → 18: Post-training: SFT, LoRA, reward models and RLHF → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI → 16: Workload operations.
 
 **Final project:** Causal Transformer training-system capstone.
 
@@ -662,7 +695,7 @@ Move trained computations into a measured inference service. Check framework/pre
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06, operations-07, operations-08. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 08: Performance diagnosis → 15: Deployment, interoperability & edge AI.
+**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 19: TPU Setup: Provisioning & Runtime Verification → 20: TPU Workflows: Launching Jobs & Checkpointed Experiments → 21: TPU Systems: Generations, Memory, Precision & XProf → 08: Performance diagnosis → 15: Deployment, interoperability & edge AI.
 
 **Final project:** Verify an inference artifact and capacity hypothesis.
 
@@ -685,7 +718,7 @@ Operate reproducible model workloads from tracked experiments to containerized i
 
 **Engineering extensions (follow each lesson prerequisite):** recovery-06, deployment-07, operations-06, operations-07, operations-08. See [the engineering release project](projects/engineering-release/README.md).
 
-**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI → 16: Workload operations.
+**Follow:** 00: Setup & first steps → 01: Arrays & pure functions → 02: JAX transformations → 03: State, randomness & control flow → 04: Math & optimization → 05: Neural network training → 06: Data & checkpoint recovery → 19: TPU Setup: Provisioning & Runtime Verification → 20: TPU Workflows: Launching Jobs & Checkpointed Experiments → 21: TPU Systems: Generations, Memory, Precision & XProf → 08: Performance diagnosis → 09: Distributed training → 15: Deployment, interoperability & edge AI → 16: Workload operations.
 
 **Final project:** An observable, restartable local workload.
 

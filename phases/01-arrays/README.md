@@ -114,7 +114,7 @@ A tested array-processing function.
 
 **Demonstrate:** Predict output shapes and explain why a pure function is easier to transform.
 
-Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 2 for this phase.
+Project status: implemented staged practice · [Open source](../../projects/foundation-toolkit/README.md). Use stages 2 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 2` from the top-level folder to verify stage 2.
 
 
 

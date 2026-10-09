@@ -11,6 +11,7 @@ Install the course CPU environment from `requirements-cpu.txt`. Open a terminal 
 macOS or Linux:
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/optimizer-audit/starter/optimization.py projects/optimizer-audit/my_optimization.py
 python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1
 ```
@@ -18,6 +19,7 @@ python3 projects/optimizer-audit/tests/check.py --implementation projects/optimi
 Windows PowerShell:
 
 ```powershell
+# Copy the starter template into your editable workspace file
 Copy-Item projects/optimizer-audit/starter/optimization.py projects/optimizer-audit/my_optimization.py
 python projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1
 ```
@@ -27,6 +29,7 @@ The first run stops at the marked `NotImplementedError`. Implement only the curr
 The completed reference and its figure execution are separate commands:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/optimizer-audit/tests/check.py --implementation solution --stage all
 python3 projects/optimizer-audit/examples/figures.py
 ```

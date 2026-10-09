@@ -1,24 +1,23 @@
 ---
+import PageIntro from '../components/shared/PageIntro.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/workspace.css';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
-import { siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
 import ChoiceField from '../components/ui/ChoiceField.astro';
 ---
 
 <SiteLayout {...pages.organizer}>
   <main id="main" class="learner-workspace">
-    <div class="page-intro">
-      <a href={siteUrl('notebook.html')}>My learning / Organizer</a>
-      <h1>Plan a learning club</h1>
-      <p>
-        Choose a pathway and a weekly time budget. Assign available lessons in order; see the
-        unfinished work and extra sessions explicitly.
-      </p>
-    </div>
+    <PageIntro
+      backHref="notebook.html"
+      backLabel="My learning"
+      edition="Organizer"
+      title="Plan a learning club"
+      intro="Choose a pathway and a weekly time budget. Assign available lessons in order; see the unfinished work and extra sessions explicitly."
+    />
     <section id="club">
       <div class="club-controls">
         <ChoiceField id="club-route" label="Pathway" variant="list" />

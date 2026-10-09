@@ -5,10 +5,10 @@
   "content": {
     "problem": "You now have a loss and a gradient. Let’s use them to move a weight toward a better value. We’ll calculate the first two updates ourselves, turn the update into a loop, and try a step size that is too large. Watching the whole path will tell us more than looking only at the final loss.",
     "idea": "Gradient descent subtracts a scaled gradient from the current parameters. The gradient points toward local increase; its negative gives a local descent direction. A sufficiently large step can cross the useful local region and increase the loss instead.",
-    "code": "import jax\nimport jax.numpy as jnp\ndef loss(w):\n    return (w - 2.) ** 2\ndef train(initial, rate, steps):\n    def step(w, _):\n        next_w = w - rate * jax.grad(loss)(w)\n        return next_w, loss(next_w)\n    return jax.lax.scan(step, jnp.array(initial), None, length=steps)\nfinal, history = train(0., 0.1, 60)\nprint(\"Final weight:\", float(final))\nprint(\"Final loss:\", float(history[-1]))\nassert jnp.allclose(final, 2., atol=1e-4)\nassert history[-1] < 1e-8\nassert jnp.all(jnp.diff(history) <= 1e-7)",
+    "code": "# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp\n# Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.\ndef loss(w):\n    # Return `(w - 2.0) ** 2` to the caller.\n    return (w - 2.) ** 2\n# Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:\ndef train(initial, rate, steps):\n    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:\n    def step(w, _):\n        # Differentiate the objective to obtain `next_w` via automatic differentiation.\n        next_w = w - rate * jax.grad(loss)(w)\n        # Return `(next_w, loss(next_w))` to the caller.\n        return next_w, loss(next_w)\n    # Return `jax.lax.scan(step, jnp.array(initial), None, length=steps)` to the caller.\n    return jax.lax.scan(step, jnp.array(initial), None, length=steps)\n# Step 3 — 3. Measure and verify: The weight approaches 2.0 and the final loss is below 10^{-8}.\nfinal, history = train(0., 0.1, 60)\n# Print the observed values to compare against the expected result.\nprint(\"Final weight:\", float(final))\n# Print diagnostic summary of the computed outputs.\nprint(\"Final loss:\", float(history[-1]))\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(final, 2., atol=1e-4)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert history[-1] < 1e-8\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.all(jnp.diff(history) <= 1e-7)",
     "output": "The weight approaches \\(2.0\\) and the final loss is below \\(10^{-8}\\).",
     "exercise": "Run ten steps with learning rate \\(1.1\\). Predict whether the error contracts before executing; show evidence of divergence.",
-    "solution": "unstable, unstable_history = train(0., 1.1, 10)\nassert unstable_history[-1] > loss(0.)\nassert abs(1 - 2 * 1.1) > 1",
+    "solution": "# Exercise solution: Run ten steps with learning rate 1.1.\nunstable, unstable_history = train(0., 1.1, 10)\n# Verify contract: `unstable_history[-1] > loss(0.0)`.\nassert unstable_history[-1] > loss(0.)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert abs(1 - 2 * 1.1) > 1",
     "question": "What makes rate \\(1.1\\) unstable for this particular quadratic?",
     "options": [
       "The error multiplier has magnitude greater than one",
@@ -54,21 +54,21 @@
       {
         "title": "Check the first two steps",
         "prediction": "Does history contain the initial loss or the post-update loss?",
-        "code": "two_w, two_losses = train(0., 0.1, 2)\nassert jnp.allclose(two_w, 0.72)\nassert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))\nprint(\"First two post-update losses:\", two_losses)",
+        "code": "# Experiment — Check the first two steps: A hand-derived trajectory checks update sign and the recording...\ntwo_w, two_losses = train(0., 0.1, 2)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(two_w, 0.72)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))\n# Print the observed values to compare against the expected result.\nprint(\"First two post-update losses:\", two_losses)",
         "output": "\\([2.56, 1.6384]\\), with final weight \\(0.72\\).",
         "explanation": "A hand-derived trajectory checks update sign and the recording convention."
       },
       {
         "title": "Test the edge of stability",
         "prediction": "What does rate \\(1\\) do after five steps from zero?",
-        "code": "edge_w, edge_losses = train(0., 1., 5)\nassert jnp.allclose(edge_w, 4.)\nassert jnp.allclose(edge_losses, jnp.full(5, 4.))",
+        "code": "# Experiment — Test the edge of stability: Magnitude-one error multipliers do not contract even though the...\nedge_w, edge_losses = train(0., 1., 5)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(edge_w, 4.)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(edge_losses, jnp.full(5, 4.))",
         "output": "The weight alternates \\(0\\) and \\(4\\); loss remains \\(4\\).",
         "explanation": "Magnitude-one error multipliers do not contract even though the loop remains finite."
       },
       {
         "title": "A tiny update far from the solution",
         "prediction": "Can a parameter-change threshold of \\(10^{-6}\\) declare success while the gradient magnitude is \\(4\\)?",
-        "code": "far = jnp.array(0.)\nquadratic = lambda value: (value-2.)**2\ngrad_far = jax.grad(quadratic)(far)\nnext_far = far - 1e-8*grad_far\nassert jnp.abs(next_far-far)<1e-6\nassert jnp.abs(grad_far)>3.\nassert quadratic(next_far)>3.9",
+        "code": "# Experiment — A tiny update far from the solution: A stopping rule must distinguish lack of progress from reaching...\n# Initialize array `far` with explicit values and shape.\nfar = jnp.array(0.)\n# Evaluate `quadratic` from the current inputs and state.\nquadratic = lambda value: (value-2.)**2\n# Differentiate the objective to obtain `grad_far` via automatic differentiation.\ngrad_far = jax.grad(quadratic)(far)\n# Evaluate `next_far` from the current inputs and state.\nnext_far = far - 1e-8*grad_far\n# Verify contract: `jnp.abs(next_far - far) < 1e-06`.\nassert jnp.abs(next_far-far)<1e-6\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.abs(grad_far)>3.\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert quadratic(next_far)>3.9",
         "output": "The update is below the threshold, but the objective is still near \\(4\\).",
         "explanation": "A stopping rule must distinguish lack of progress from reaching a useful solution."
       }
@@ -79,7 +79,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "For \\(4(w-3)^2\\), derive a stable rate and verify convergence from zero.",
         "hint": "The error multiplier is \\(1-8\\eta\\); use \\(\\eta=0.1\\).",
-        "solution": "def scaled_loss(w):\n    return 4*(w-3.)**2\ndef scaled_step(w, _):\n    new = w-0.1*jax.grad(scaled_loss)(w)\n    return new, scaled_loss(new)\nscaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)\nassert jnp.allclose(scaled_w, 3., atol=1e-5)\nassert jnp.all(jnp.diff(scaled_history) <= 1e-6)",
+        "solution": "# Transfer the stability analysis (Transfer / diagnosis): Changing curvature changes the stability interval to...\ndef scaled_loss(w):\n    # Return `4 * (w - 3.0) ** 2` to the caller.\n    return 4*(w-3.)**2\n# Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:\ndef scaled_step(w, _):\n    # Differentiate the objective to obtain `new` via automatic differentiation.\n    new = w-0.1*jax.grad(scaled_loss)(w)\n    # Return `(new, scaled_loss(new))` to the caller.\n    return new, scaled_loss(new)\n# Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).\nscaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(scaled_w, 3., atol=1e-5)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.all(jnp.diff(scaled_history) <= 1e-6)",
         "explanation": "Changing curvature changes the stability interval to \\(0<\\eta<0.25\\)."
       },
       {
@@ -87,7 +87,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Show how adding the gradient increases loss, then verify subtraction at the same starting point.",
         "hint": "The derivative at zero is \\(-4\\).",
-        "solution": "uphill = 0. + 0.1*jax.grad(loss)(0.)\ndownhill = 0. - 0.1*jax.grad(loss)(0.)\nassert loss(uphill) > loss(0.)\nassert loss(downhill) < loss(0.)\nassert jnp.allclose(downhill, 0.4)",
+        "solution": "# Reproduce an uphill update and repair it (Transfer / diagnosis): The sign error is isolated using the same input and rate;...\n# Differentiate the objective to obtain `uphill` via automatic differentiation.\nuphill = 0. + 0.1*jax.grad(loss)(0.)\n# Differentiate the objective to obtain `downhill` via automatic differentiation.\ndownhill = 0. - 0.1*jax.grad(loss)(0.)\n# Verify contract: `loss(uphill) > loss(0.0)`.\nassert loss(uphill) > loss(0.)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert loss(downhill) < loss(0.)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(downhill, 0.4)",
         "explanation": "The sign error is isolated using the same input and rate; the repaired first step matches the analytic result."
       }
     ],
@@ -116,19 +116,19 @@
       {
         "title": "1. Prepare the inputs",
         "instruction": "Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.",
-        "code": "import jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp",
         "explanation": "This block establishes the values used by the following steps; run the completed file after step \\(3\\)."
       },
       {
         "title": "2. Define the computation",
         "instruction": "Append this block below the inputs. Before proceeding, trace which values are inputs, predictions, and state.",
-        "code": "def loss(w):\n    return (w - 2.) ** 2\ndef train(initial, rate, steps):\n    def step(w, _):\n        next_w = w - rate * jax.grad(loss)(w)\n        return next_w, loss(next_w)\n    return jax.lax.scan(step, jnp.array(initial), None, length=steps)",
+        "code": "# Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.\ndef loss(w):\n    # Return `(w - 2.0) ** 2` to the caller.\n    return (w - 2.) ** 2\n# Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:\ndef train(initial, rate, steps):\n    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:\n    def step(w, _):\n        # Differentiate the objective to obtain `next_w` via automatic differentiation.\n        next_w = w - rate * jax.grad(loss)(w)\n        # Return `(next_w, loss(next_w))` to the caller.\n        return next_w, loss(next_w)\n    # Return `jax.lax.scan(step, jnp.array(initial), None, length=steps)` to the caller.\n    return jax.lax.scan(step, jnp.array(initial), None, length=steps)",
         "explanation": "train defines a state transition that subtracts the derivative. scan retains the new parameter and records its post-update loss for exactly steps iterations."
       },
       {
         "title": "3. Measure and verify",
         "instruction": "Append the remaining block, then run python main.py in the terminal. Compare the printed result with the expected output below. Assertions stop execution if the contract fails.",
-        "code": "final, history = train(0., 0.1, 60)\nprint(\"Final weight:\", float(final))\nprint(\"Final loss:\", float(history[-1]))\nassert jnp.allclose(final, 2., atol=1e-4)\nassert history[-1] < 1e-8\nassert jnp.all(jnp.diff(history) <= 1e-7)",
+        "code": "# Step 3 — 3. Measure and verify: The weight approaches 2.0 and the final loss is below 10^{-8}.\nfinal, history = train(0., 0.1, 60)\n# Print the observed values to compare against the expected result.\nprint(\"Final weight:\", float(final))\n# Print diagnostic summary of the computed outputs.\nprint(\"Final loss:\", float(history[-1]))\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(final, 2., atol=1e-4)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert history[-1] < 1e-8\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.all(jnp.diff(history) <= 1e-7)",
         "explanation": "The weight approaches \\(2.0\\) and the final loss is below \\(10^{-8}\\)."
       }
     ],
@@ -139,7 +139,7 @@
       "reading": "The horizontal axis counts completed updates, including the initial state at \\(0\\). The vertical axis is squared error. It uses a symmetric-log scale: values near zero are on a linear region, while large values are compressed logarithmically. That lets the zero-loss trajectory remain visible.\n\nAll three curves begin at loss \\(4\\). Learning rate \\(0.1\\) decreases it gradually; rate \\(0.5\\) reaches zero after one update and stays there. Rate \\(1.1\\) increases it from \\(4\\) to \\(5.76\\), then beyond \\(200\\) by the last plotted update.",
       "connection": "Here the loss is \\((w-2)^2\\). One update multiplies the weight error \\(w-2\\) by \\(1-2\\eta\\). The three rates therefore multiply that error by \\(0.8\\), \\(0\\), and \\(-1.2\\), respectively. Squaring gives loss multipliers \\(0.64\\), \\(0\\), and \\(1.44\\).\n\nThe large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate \\(0.5\\) depends on this simple quadratic’s curvature and is not a universal best learning rate.",
       "alt": "Gradient descent trades step size for stability. The horizontal axis counts completed updates, including the initial state at \\(0\\). The vertical axis is squared error. It uses a symmetric-log scale: values near zero are on a linear region, while large values are compressed logarithmically. That lets the zero-loss trajectory remain visible. All three curves begin at loss \\(4\\). Learning rate \\(0.1\\) decreases it gradually; rate \\(0.5\\) reaches zero after one update and stays there. Rate \\(1.1\\) increases it from \\(4\\) to \\(5.76\\), then beyond \\(200\\) by the last plotted update.",
-      "code": "rates = [0.1, 0.5, 1.1]\nseries = []\nfor rate_plot in rates:\n    position_plot = jnp.array(0.0)\n    losses = []\n    for _ in range(12):\n        losses.append(float((position_plot - 2) ** 2))\n        position_plot = position_plot - rate_plot * 2 * (position_plot - 2)\n    series.append({'label': 'rate ' + str(rate_plot), 'y': losses})\nvisual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}"
+      "code": "# Compute figure data for: Gradient descent trades step size for stability\n# Evaluate `rates` from the current inputs and state.\nrates = [0.1, 0.5, 1.1]\n# Evaluate `series` from the current inputs and state.\nseries = []\n# Loop over `rate_plot` in `rates`:\nfor rate_plot in rates:\n    # Create device-backed JAX array `position_plot`.\n    position_plot = jnp.array(0.0)\n    # Evaluate `losses` from the current inputs and state.\n    losses = []\n    # Repeat the update loop over `range(12)` steps:\n    for _ in range(12):\n        # Append the current step result to `losses`.\n        losses.append(float((position_plot - 2) ** 2))\n        # Evaluate `position_plot` from the current inputs and state.\n        position_plot = position_plot - rate_plot * 2 * (position_plot - 2)\n    # Append the current step result to `series`.\n    series.append({'label': 'rate ' + str(rate_plot), 'y': losses})\n# Evaluate `visual_data` from the current inputs and state.\nvisual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}"
     }
   }
 }

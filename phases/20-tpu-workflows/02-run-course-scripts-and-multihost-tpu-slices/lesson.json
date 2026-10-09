@@ -1,0 +1,143 @@
+{
+  "schemaVersion": 1,
+  "id": "tpu-05",
+  "minutes": 20,
+  "content": {
+    "problem": "As you progress through Transformers, Sharding, Pallas Kernels, Pretraining, and Operations, you want a fast, repeatable command pattern to run any lesson script on a single-host TPU VM or a multi-host TPU Pod slice (`--worker=all`) and pull the execution receipts back to your laptop.",
+    "idea": "Every lesson in this course generates a self-contained script in `public/exercises/<lesson-id>.py`. On a single-host TPU slice (`v5litepod-4`, `v6e-4`), one `scp` + `ssh --command` runs the script across all local chips; on a multi-host Pod slice (`v5litepod-16`, `v6e-16`), passing `--worker=all` and calling `jax.distributed.initialize()` coordinates all hosts into one global TPU mesh.",
+    "objectives": [
+      "Stage and run any course lesson script (`public/exercises/<lesson-id>.py`) on a Cloud TPU VM over SSH.",
+      "Distinguish single-host TPU slices (`1` host, `1–8` chips) from multi-host TPU Pod slices (`2+` hosts, `--worker=all`).",
+      "Generate exact `gcloud compute tpus tpu-vm scp` and `ssh` command pipelines for single-host and multi-host runs.",
+      "Retrieve `events.jsonl`, stdout logs, and checkpoints via `scp --recurse` before deleting the TPU VM."
+    ],
+    "sections": [
+      {
+        "id": "guided-reasoning",
+        "title": "Why multi-host TPU Pod slices require `--worker=all` and `jax.distributed.initialize()`",
+        "body": "A single-host Cloud TPU VM such as `v5litepod-4` (`4` chips) or `v5litepod-8` (`8` chips) attaches every TPU chip to one Linux VM (`hosts = 1`). When you run Python on that VM, `jax.local_device_count()` and `jax.device_count()` are both equal to the slice's total chip count.\n\nLarger TPU Pod slices span multiple Linux VMs connected over the Inter-Chip Interconnect (ICI). For example, `v5litepod-16` consists of \\(4\\) Linux hosts with \\(4\\) TPU v5e chips each (\\(16\\) global chips). Because each host is a separate Linux machine, a multi-host TPU job requires two things:\n\n1. You must pass `--worker=all` to `gcloud compute tpus tpu-vm scp` and `gcloud compute tpus tpu-vm ssh` so every host receives the script and starts Python at the same time.\n2. Your Python script must call `jax.distributed.initialize()` before querying `jax.devices()` so the hosts discover each other and form a unified \\(16\\)-chip mesh.",
+        "check": {
+          "prompt": "If a TPU slice has `hosts = 4` and `chips_per_host = 4` (`v5litepod-16`), what are `jax.local_device_count()` and `jax.device_count()` on each host after `jax.distributed.initialize()`?",
+          "answer": "`jax.local_device_count()` is `4` (the chips attached to that host VM), while `jax.device_count()` is `16` (all chips across all 4 hosts in the Pod slice)."
+        }
+      },
+      {
+        "title": "1. Run any course lesson script on your Cloud TPU VM",
+        "body": "Use the pattern below to run any lesson script (`distributed-02`, `transformers-01`, `kernels-02`, `operations-06`, etc.) on your Cloud TPU VM and copy the output receipt back to your local workspace.",
+        "commands": [
+          {
+            "label": "Stage, execute, and retrieve any course lesson script on a single-host TPU VM",
+            "shell": "bash",
+            "code": "# Stage, execute, and retrieve any course lesson script on a single-host TPU VM\nLESSON_ID=\"distributed-02\"\ngcloud compute tpus tpu-vm scp \"public/exercises/${LESSON_ID}.py\" \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\"\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" \\\n  --command=\"JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/${LESSON_ID}.py | tee ~/jax-tpu-lab/${LESSON_ID}-tpu.txt\"\ngcloud compute tpus tpu-vm scp \"$TPU_NAME\":~/jax-tpu-lab/${LESSON_ID}-tpu.txt ./ --zone=\"$ZONE\"",
+            "expected": "Copies the lesson script to the TPU VM, runs it on the TPU backend, saves stdout to a receipt file, and downloads the receipt locally."
+          }
+        ]
+      },
+      {
+        "title": "2. Launch a multi-host TPU Pod slice job with `--worker=all`",
+        "body": "When running on a multi-host TPU slice (`v5litepod-16` or larger), add `--worker=all` to both `scp` and `ssh` so all workers execute lockstep.",
+        "commands": [
+          {
+            "label": "Stage and launch across all hosts of a multi-host TPU slice",
+            "shell": "bash",
+            "code": "# Stage and launch across all hosts of a multi-host TPU slice\ngcloud compute tpus tpu-vm scp resources/tpu-gcp/launch.py \"$TPU_NAME\":~/jax-tpu-lab/ --zone=\"$ZONE\" --worker=all\ngcloud compute tpus tpu-vm ssh \"$TPU_NAME\" --zone=\"$ZONE\" --worker=all \\\n  --command=\"JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python -c 'import jax; jax.distributed.initialize(); print(\\\"process:\\\", jax.process_index(), \\\"of\\\", jax.process_count(), \\\"global_devices:\\\", jax.device_count(), \\\"local_devices:\\\", jax.local_device_count())'\"",
+            "expected": "Every host prints its process_index, process_count, global_devices (e.g. 16), and local_devices (4)."
+          },
+          {
+            "label": "Copy run directories back to your workstation before deleting the TPU VM",
+            "shell": "bash",
+            "code": "# Copy run directories back to your workstation before deleting the TPU VM\nmkdir -p ./tpu-runs\ngcloud compute tpus tpu-vm scp --recurse \"$TPU_NAME\":~/jax-tpu-lab/run-resumed ./tpu-runs/ --zone=\"$ZONE\"",
+            "expected": "Downloads the complete run directory (events.jsonl, environment.json, and checkpoints) to ./tpu-runs/."
+          }
+        ]
+      }
+    ],
+    "code": "# Run course scripts and multi-host TPU Pod slices: Every lesson in this course generates a self-contained script in...\n# Import json for this computation.\nimport json\nimport jax\nimport numpy as np\n\n# Evaluate `SLICE_CATALOG` from the current inputs and state.\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\n# Iterate over `entry` to step through the computation:\nfor entry in SLICE_CATALOG:\n    # Evaluate `entry['global_chips']` from the current inputs and state.\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    # Evaluate `entry['total_hbm_gib']` from the current inputs and state.\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    # Evaluate `entry['multi_host']` from the current inputs and state.\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1\n\n\n# Function `build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts)` implementing this stage's computation:\ndef build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):\n    # Evaluate `worker_flag` from the current inputs and state.\n    worker_flag = \" --worker=all\" if hosts > 1 else \"\"\n    # Evaluate `dist_init` from the current inputs and state.\n    dist_init = \"import jax; jax.distributed.initialize(); \" if hosts > 1 else \"\"\n    # Evaluate `scp_stage` from the current inputs and state.\n    scp_stage = f\"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}\"\n    # Read or serialize artifact data on disk (`ssh_run`).\n    ssh_run = (\n        f\"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} \"\n        f\"--command=\\\"JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python -c '{dist_init}exec(open(\\\\\\\"PosixPath\\\\\\\"))'\\\"\"\n        if False\n        else f\"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'\"\n    )\n    # Evaluate `scp_fetch` from the current inputs and state.\n    scp_fetch = f\"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}\"\n    # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.\n    return {\"scp_stage\": scp_stage, \"ssh_run\": ssh_run, \"scp_fetch\": scp_fetch, \"multi_host\": hosts > 1}\n\n\n# Run `build_tpu_experiment_commands` to compute `single_cmds`.\nsingle_cmds = build_tpu_experiment_commands(\"jax-tpu-course\", \"us-west1-c\", \"distributed-02\", hosts=1)\n# Run `build_tpu_experiment_commands` to compute `pod_cmds`.\npod_cmds = build_tpu_experiment_commands(\"jax-tpu-pod\", \"us-west1-c\", \"distributed-02\", hosts=4)\n# Verify contract: `'--worker=all' not in single_cmds['ssh_run']`.\nassert \"--worker=all\" not in single_cmds[\"ssh_run\"]\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert \"--worker=all\" in pod_cmds[\"scp_stage\"] and \"--worker=all\" in pod_cmds[\"ssh_run\"]\n# Print the observed values to compare against the expected result.\nprint(\"Slice catalog global chips:\", {s[\"slice\"]: s[\"global_chips\"] for s in SLICE_CATALOG})\n# Print diagnostic summary of the computed outputs.\nprint(\"Pod SSH command:\", pod_cmds[\"ssh_run\"])",
+    "buildSteps": [
+      {
+        "title": "Tabulate single-host and multi-host TPU slice topologies",
+        "instruction": "Create main.py with SLICE_CATALOG and compute global_chips, total_hbm_gib, and multi_host.",
+        "code": "# Step 1 — Tabulate single-host and multi-host TPU slice topologies: Separating hosts from chips_per_host shows immediately when a...\n# Import json for this computation.\nimport json\nimport jax\nimport numpy as np\n\n# Evaluate `SLICE_CATALOG` from the current inputs and state.\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\n# Iterate over `entry` to step through the computation:\nfor entry in SLICE_CATALOG:\n    # Evaluate `entry['global_chips']` from the current inputs and state.\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    # Evaluate `entry['total_hbm_gib']` from the current inputs and state.\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    # Evaluate `entry['multi_host']` from the current inputs and state.\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1",
+        "explanation": "Separating hosts from chips_per_host shows immediately when a slice crosses the single-host boundary into multi-host execution."
+      },
+      {
+        "title": "Generate single-host and multi-host gcloud command pipelines",
+        "instruction": "Append build_tpu_experiment_commands and verify the single-host vs Pod commands.",
+        "code": "# Step 2 — Generate single-host and multi-host gcloud command pipelines: Generating the stage, run, and fetch commands from the host count...\ndef build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):\n    # Evaluate `worker_flag` from the current inputs and state.\n    worker_flag = \" --worker=all\" if hosts > 1 else \"\"\n    # Evaluate `scp_stage` from the current inputs and state.\n    scp_stage = f\"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}\"\n    # Evaluate `ssh_run` from the current inputs and state.\n    ssh_run = f\"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'\"\n    # Evaluate `scp_fetch` from the current inputs and state.\n    scp_fetch = f\"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}\"\n    # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.\n    return {\"scp_stage\": scp_stage, \"ssh_run\": ssh_run, \"scp_fetch\": scp_fetch, \"multi_host\": hosts > 1}\n\n\n# Run `build_tpu_experiment_commands` to compute `single_cmds`.\nsingle_cmds = build_tpu_experiment_commands(\"jax-tpu-course\", \"us-west1-c\", \"distributed-02\", hosts=1)\n# Run `build_tpu_experiment_commands` to compute `pod_cmds`.\npod_cmds = build_tpu_experiment_commands(\"jax-tpu-pod\", \"us-west1-c\", \"distributed-02\", hosts=4)\n# Verify contract: `'--worker=all' not in single_cmds['ssh_run']`.\nassert \"--worker=all\" not in single_cmds[\"ssh_run\"]\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert \"--worker=all\" in pod_cmds[\"scp_stage\"] and \"--worker=all\" in pod_cmds[\"ssh_run\"]\n# Print the observed values to compare against the expected result.\nprint(\"Slice catalog global chips:\", {s[\"slice\"]: s[\"global_chips\"] for s in SLICE_CATALOG})\n# Print diagnostic summary of the computed outputs.\nprint(\"Pod SSH command:\", pod_cmds[\"ssh_run\"])",
+        "explanation": "Generating the stage, run, and fetch commands from the host count prevents forgetting `--worker=all` when scaling from `v5litepod-4` to `v5litepod-16`."
+      }
+    ],
+    "output": "Prints the global chip counts across v5litepod-4 (4), v5litepod-8 (8), v5litepod-16 (16), and v6e-16 (16) and the verified multi-host Pod SSH command.",
+    "experiments": [
+      {
+        "title": "Compare local vs global device counts across slices",
+        "prediction": "How many global chips are left idle if you launch a script without `--worker=all` on `v5litepod-16`?",
+        "code": "# Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...\nv5e16 = next(s for s in SLICE_CATALOG if s[\"slice\"] == \"v5litepod-16\")\n# Evaluate `idle_without_worker_all` from the current inputs and state.\nidle_without_worker_all = v5e16[\"global_chips\"] - v5e16[\"chips_per_host\"]\n# Print the observed values to compare against the expected result.\nprint(\"v5litepod-16 global chips:\", v5e16[\"global_chips\"], \"Idle chips without --worker=all:\", idle_without_worker_all)\n# Verify contract: `idle_without_worker_all == 12`.\nassert idle_without_worker_all == 12",
+        "output": "Without `--worker=all`, 12 of the 16 TPU chips on `v5litepod-16` never receive a process.",
+        "explanation": "Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` chips) require `--worker=all`."
+      },
+      {
+        "title": "Verify total HBM scaling from v5litepod-16 to v6e-16",
+        "prediction": "How much total HBM is available across a 16-chip `v6e-16` Pod slice compared to `v5litepod-16`?",
+        "code": "# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16: Doubling per-chip HBM on Trillium (v6e) doubles the total...\nhbm_by_slice = {s[\"slice\"]: s[\"total_hbm_gib\"] for s in SLICE_CATALOG}\n# Print the observed values to compare against the expected result.\nprint(\"Total HBM GiB by slice:\", hbm_by_slice)\n# Verify contract: `hbm_by_slice['v6e-16'] == 512 and hbm_by_slice['v5litepod-16'] == 25...`.\nassert hbm_by_slice[\"v6e-16\"] == 512 and hbm_by_slice[\"v5litepod-16\"] == 256",
+        "output": "v6e-16 provides 512 GiB of total HBM across 4 hosts (32 GiB/chip), double v5litepod-16's 256 GiB (16 GiB/chip).",
+        "explanation": "Doubling per-chip HBM on Trillium (`v6e`) doubles the total sharded model state capacity for the same 4-host Pod topology."
+      }
+    ],
+    "exercise": "Call `build_tpu_experiment_commands('jax-tpu-pod', 'us-east5-a', 'transformers-04', hosts=4)` and assert that both `scp_stage` and `ssh_run` contain `'--worker=all'` and `'transformers-04.py'`.",
+    "solution": "# Exercise solution: Call build_tpu_experiment_commands('jax-tpu-pod', 'us-east5-a',...\ntx_cmds = build_tpu_experiment_commands(\"jax-tpu-pod\", \"us-east5-a\", \"transformers-04\", hosts=4)\n# Print the observed values to compare against the expected result.\nprint(\"Stage:\", tx_cmds[\"scp_stage\"])\n# Print diagnostic summary of the computed outputs.\nprint(\"Run:\", tx_cmds[\"ssh_run\"])\n# Verify contract: `'--worker=all' in tx_cmds['scp_stage'] and '--worker=all' in tx_cmds...`.\nassert \"--worker=all\" in tx_cmds[\"scp_stage\"] and \"--worker=all\" in tx_cmds[\"ssh_run\"] and \"transformers-04.py\" in tx_cmds[\"ssh_run\"]",
+    "practice": [
+      {
+        "title": "Filter multi-host slices from the catalog",
+        "difficulty": "Foundations",
+        "prompt": "List the slice names in `SLICE_CATALOG` that require `--worker=all` (`multi_host == True`).",
+        "hint": "Filter by `s['multi_host']`.",
+        "solution": "# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...\npod_slices = [s[\"slice\"] for s in SLICE_CATALOG if s[\"multi_host\"]]\n# Print the observed values to compare against the expected result.\nprint(\"Multi-host Pod slices:\", pod_slices)\n# Verify contract: `pod_slices == ['v5litepod-16', 'v6e-16']`.\nassert pod_slices == [\"v5litepod-16\", \"v6e-16\"]",
+        "explanation": "Both 16-chip slices span 4 hosts (`4` chips per host) and therefore require multi-host coordination."
+      },
+      {
+        "title": "Compute per-host vs global batch size on a 4-host Pod slice",
+        "difficulty": "Transfer / diagnosis",
+        "prompt": "If each TPU chip processes a microbatch of \\(8\\) sequences on `v5litepod-16` (`4` hosts, `4` chips/host), compute the per-host batch size and the global batch size per step.",
+        "hint": "Multiply `8 * chips_per_host` and `8 * global_chips`.",
+        "solution": "# Compute per-host vs global batch size on a 4-host Pod slice (Transfer / diagnosis): Each host feeds its 4 local chips (32 sequences per host),...\nmicrobatch_per_chip = 8\n# Evaluate `per_host_batch` from the current inputs and state.\nper_host_batch = microbatch_per_chip * 4\n# Evaluate `global_batch` from the current inputs and state.\nglobal_batch = microbatch_per_chip * 16\n# Print the observed values to compare against the expected result.\nprint(\"Per-host batch:\", per_host_batch, \"Global batch:\", global_batch)\n# Verify contract: `per_host_batch == 32 and global_batch == 128`.\nassert per_host_batch == 32 and global_batch == 128",
+        "explanation": "Each host feeds its 4 local chips (`32` sequences per host), yielding a synchronized global batch of `128` sequences across the 16-chip mesh."
+      }
+    ],
+    "question": "What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` slice without `--worker=all`?",
+    "options": [
+      "Google Cloud automatically merges the 4 Linux hosts into 1 host",
+      "Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)",
+      "The script runs four times faster"
+    ],
+    "answer": 1,
+    "explanation": "Every host in a multi-host TPU Pod slice runs its own OS and Python process; `--worker=all` is required so all hosts join the collective mesh.",
+    "diagnosis": "If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.venv` is missing, run your `.venv` bootstrap command with `--worker=all` as well so every host has `~/jax-tpu-lab/.venv` installed.",
+    "takeaways": [
+      "Stage any `public/exercises/<lesson-id>.py` script with `gcloud compute tpus tpu-vm scp` to run course experiments on TPU in parallel.",
+      "Use single-host commands for `1–8` chip slices (`v5litepod-4`, `v5litepod-8`, `v6e-4`) and add `--worker=all` + `jax.distributed.initialize()` for multi-host slices (`v5litepod-16`, `v6e-16`)."
+    ],
+    "references": [
+      {
+        "title": "Multi-host and distributed JAX on TPU Pods",
+        "url": "https://docs.jax.dev/en/latest/multi_process.html"
+      },
+      {
+        "title": "Run JAX code on Cloud TPU Pod slices",
+        "url": "https://cloud.google.com/tpu/docs/run-calculation-jax"
+      }
+    ],
+    "visual": {
+      "title": "Host count, per-host local chips, and global TPU chips across single-host and Pod slices",
+      "kind": "executed",
+      "prediction": "How do `hosts`, `chips_per_host`, and `global_chips` change when moving from `v5litepod-4` and `v5litepod-8` to `v5litepod-16` and `v6e-16`?",
+      "reading": "The horizontal axis compares four Cloud TPU slices (`v5litepod-4`, `v5litepod-8`, `v5litepod-16`, `v6e-16`). For each slice, the three bars show the number of Linux VM hosts, the number of local TPU chips per host, and the total global TPU chips.",
+      "connection": "`v5litepod-4` and `v5litepod-8` keep `hosts = 1`, whereas `v5litepod-16` and `v6e-16` use `4` hosts with `4` local chips each (`16` global chips), visually showing why `--worker=all` becomes mandatory at 16 chips.",
+      "alt": "Host count, per-host local chips, and global TPU chips across single-host and Pod slices. Bar chart comparing hosts, chips per host, and global chips for v5litepod-4, v5litepod-8, v5litepod-16, and v6e-16.",
+      "code": "# Compute figure data for: Host count, per-host local chips, and global TPU chips across single-host and Pod slices\n# Evaluate `visual_data` from the current inputs and state.\nvisual_data = {\n    'kind': 'bar',\n    'labels': [s['slice'] for s in SLICE_CATALOG],\n    'xlabel': 'Cloud TPU slice topology',\n    'ylabel': 'host / chip count',\n    'series': [\n        {'label': 'Linux VM hosts', 'y': [float(s['hosts']) for s in SLICE_CATALOG]},\n        {'label': 'local chips per host', 'y': [float(s['chips_per_host']) for s in SLICE_CATALOG]},\n        {'label': 'global TPU chips', 'y': [float(s['global_chips']) for s in SLICE_CATALOG]},\n    ],\n}"
+    },
+    "runtime": {
+      "kind": "cpu"
+    }
+  }
+}

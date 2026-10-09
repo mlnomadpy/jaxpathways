@@ -99,9 +99,12 @@ Inspect both representations for a four-step recurrence and verify they return t
 Create main.py in the activated setup environment and add the imports and float32 vector below. Calculate $[2, 3, 4]$ → $[4, 9, 16]$ → $29$ on paper.
 
 ```python
+# Step 1 — 1. Establish the input signature: The vector has shape (3,) and dtype float32; these determine the...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 
+# Initialize array `x` with explicit values and shape.
 x = jnp.array([1., 2., 3.], dtype=jnp.float32)
 ```
 
@@ -112,9 +115,13 @@ The vector has shape $(3,)$ and dtype float32; these determine the abstract inpu
 Append this function. It reads its argument and returns one scalar; no global mutation or Python branch is involved.
 
 ```python
+# Step 2 — 2. Write the pure function: Each assignment names a new value.
 def shifted_square_sum(x):
+    # Evaluate `shifted` from the current inputs and state.
     shifted = x + 1.
+    # Evaluate `squared` from the current inputs and state.
     squared = shifted * shifted
+    # Return `jnp.sum(squared)` to the caller.
     return jnp.sum(squared)
 ```
 
@@ -125,16 +132,27 @@ Each assignment names a new value. sum reduces the three squared values to a sca
 Append this block and run python main.py. Match each printed operation to the flow above, then compare the assertions with your paper calculation.
 
 ```python
+# Step 3 — 3. Inspect and independently verify: Forward operations include add, mul and reduce_sum, with output...
+# Trace or lower the function to inspect its compiler representation (`closed`).
 closed = jax.make_jaxpr(shifted_square_sum)(x)
+# Print the observed values to compare against the expected result.
 print("Forward program:")
+# Print diagnostic summary of the computed outputs.
 print(closed)
+# Iterate over `equation` to step through the computation:
 for equation in closed.jaxpr.eqns:
+    # Print diagnostic summary of the computed outputs.
     print("Operation:", equation.primitive.name,
           "output shapes:", [v.aval.shape for v in equation.outvars])
+# Run `shifted_square_sum` to compute `value`.
 value = shifted_square_sum(x)
+# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient = jax.grad(shifted_square_sum)(x)
+# Print the observed values to compare against the expected result.
 print("Value / gradient:", value, gradient)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(value, 29.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -143,25 +161,43 @@ Forward operations include add, mul and reduce_sum, with output shapes $(3,)$, $
 ## Run the example
 
 ```python
+# Step 1 — 1. Establish the input signature: The vector has shape (3,) and dtype float32; these determine the...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 
+# Initialize array `x` with explicit values and shape.
 x = jnp.array([1., 2., 3.], dtype=jnp.float32)
+# Step 2 — 2. Write the pure function: Each assignment names a new value.
 def shifted_square_sum(x):
+    # Evaluate `shifted` from the current inputs and state.
     shifted = x + 1.
+    # Evaluate `squared` from the current inputs and state.
     squared = shifted * shifted
+    # Return `jnp.sum(squared)` to the caller.
     return jnp.sum(squared)
 
+# Step 3 — 3. Inspect and independently verify: Forward operations include add, mul and reduce_sum, with output...
+# Trace or lower the function to inspect its compiler representation (`closed`).
 closed = jax.make_jaxpr(shifted_square_sum)(x)
+# Print the observed values to compare against the expected result.
 print("Forward program:")
+# Print diagnostic summary of the computed outputs.
 print(closed)
+# Iterate over `equation` to step through the computation:
 for equation in closed.jaxpr.eqns:
+    # Print diagnostic summary of the computed outputs.
     print("Operation:", equation.primitive.name,
           "output shapes:", [v.aval.shape for v in equation.outvars])
+# Run `shifted_square_sum` to compute `value`.
 value = shifted_square_sum(x)
+# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient = jax.grad(shifted_square_sum)(x)
+# Print the observed values to compare against the expected result.
 print("Value / gradient:", value, gradient)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(value, 29.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 ```
 
@@ -188,12 +224,14 @@ The final reduction adds the bottom row to obtain $4+9+16=29$. That scalar is no
 A jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.
 
 ```python
+# Compute figure data for: Follow values through the jaxpr operations
+# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:03:30.076898+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:05:42.881459+00:00. JAX 0.9.2.
 
 ```text
 Forward program:
@@ -290,11 +328,18 @@ PASS: internals-01
 **Predict before running:** Which intermediate values and shapes will the derivative need? Write the analytic gradient for $[-1, 0, 2]$ before running.
 
 ```python
+# Experiment — Trace and verify the derivative: The new input checks the derivative independently of the...
+# Differentiate the objective to obtain `derivative_program` via automatic differentiation.
 derivative_program = jax.make_jaxpr(jax.grad(shifted_square_sum))(x)
+# Print the observed values to compare against the expected result.
 print("Derivative program:", derivative_program)
+# Initialize array `other` with explicit values and shape.
 other = jnp.array([-1., 0., 2.])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted_square_sum(other), 10.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), jnp.array([0., 2., 6.]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.grad(shifted_square_sum)(other), 2*(other+1))
 ```
 
@@ -307,17 +352,30 @@ The new input checks the derivative independently of the original sample; trace 
 **Predict before running:** Will the offset vector appear as a second ordinary input in the captured version?
 
 ```python
+# Experiment — Inspect a captured array: The function signature determines ordinary inputs; closed...
+# Initialize array `offset` with explicit values and shape.
 offset = jnp.array([1., 2., 3.])
+# Function `captured(z)` implementing this stage's computation:
 def captured(z):
+    # Return `jnp.sum(z + offset)` to the caller.
     return jnp.sum(z + offset)
+# Function `explicit(z, offset)` implementing this stage's computation:
 def explicit(z, offset):
+    # Return `jnp.sum(z + offset)` to the caller.
     return jnp.sum(z + offset)
+# Trace or lower the function to inspect its compiler representation (`captured_program`).
 captured_program = jax.make_jaxpr(captured)(x)
+# Trace or lower the function to inspect its compiler representation (`explicit_program`).
 explicit_program = jax.make_jaxpr(explicit)(x, offset)
+# Print the observed values to compare against the expected result.
 print("Captured:", captured_program)
+# Print diagnostic summary of the computed outputs.
 print("Explicit:", explicit_program)
+# Verify contract: `len(captured_program.jaxpr.invars) == 1`.
 assert len(captured_program.jaxpr.invars) == 1
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert len(explicit_program.jaxpr.invars) == 2
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(captured(x), explicit(x, offset))
 ```
 
@@ -329,14 +387,52 @@ The function signature determines ordinary inputs; closed constants are represen
 
 Change the scalar offset from $1$ to $2$. Draw the new value flow for $[1, 2, 3]$, calculate the sum and gradient by hand, then inspect both jaxprs. Explain which structural features remain and which values change.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+
+**Step-by-step implementation plan:**
+1. Evaluate `shifted` from the current inputs and state.
+2. Return `jnp.sum(shifted * shifted)` to the caller.
+3. Print the observed values to compare against the expected result.
+4. Verify that the numerical values match the expected reference within tolerance.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Change the scalar offset from 1 to 2.
+def shifted_two(z):
+    # Evaluate `shifted` from the current inputs and state.
+    shifted = ...  # TODO: compute shifted
+    # Return `jnp.sum(shifted * shifted)` to the caller.
+    return ...  # TODO: return computed result
+# Print the observed values to compare against the expected result.
+print(jax.make_jaxpr(shifted_two)(x))
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(shifted_two(x), 50.)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Change the scalar offset from 1 to 2.
 def shifted_two(z):
+    # Evaluate `shifted` from the current inputs and state.
     shifted = z + 2.
+    # Return `jnp.sum(shifted * shifted)` to the caller.
     return jnp.sum(shifted * shifted)
+# Print the observed values to compare against the expected result.
 print(jax.make_jaxpr(shifted_two)(x))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(shifted_two(x), 50.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.grad(shifted_two)(x), jnp.array([6., 8., 10.]))
 ```
 
@@ -354,21 +450,79 @@ The exact four-step result is $1.875$; scan carries a scalar.
 
 </details>
 
+### How to write: Compare unrolled and scanned recurrences — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+
+**Step-by-step implementation plan:**
+1. Repeat the update loop over `range(4)` steps:
+2. Evaluate `z` from the current inputs and state.
+3. Return `z` to the caller.
+4. Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
+5. Function `step(carry, _)` implementing this stage's computation:
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Compare unrolled and scanned recurrences (Transfer / diagnosis): The outer scan equation has a nested body.
+def unrolled(z):
+    # Repeat the update loop over `range(4)` steps:
+    for _ in range(4):
+        # Evaluate `z` from the current inputs and state.
+        z = ...  # TODO: compute z
+    # Return `z` to the caller.
+    return ...  # TODO: return computed result
+# Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
+def scanned(z):
+    # Function `step(carry, _)` implementing this stage's computation:
+    def step(carry, _):
+        # Evaluate `new` from the current inputs and state.
+        new = ...  # TODO: compute new
+        # Return `(new, new)` to the caller.
+        return ...  # TODO: return computed result
+    # Return `jax.lax.scan(step, z, None, length=4)[0]` to the caller.
+    return jax.lax.scan(step, z, None, length = ...  # TODO: compute return jax.lax.scan(step, z, None, length
+# Print the observed values to compare against the expected result.
+print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
+# Print diagnostic summary of the computed outputs.
+print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(scanned(jnp.array(0.)), 1.875)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Compare unrolled and scanned recurrences (Transfer / diagnosis): The outer scan equation has a nested body.
 def unrolled(z):
+    # Repeat the update loop over `range(4)` steps:
     for _ in range(4):
+        # Evaluate `z` from the current inputs and state.
         z = 0.5*z + 1.
+    # Return `z` to the caller.
     return z
+# Define `scanned(z)` to carry state across steps with `jax.lax.scan`:
 def scanned(z):
+    # Function `step(carry, _)` implementing this stage's computation:
     def step(carry, _):
+        # Evaluate `new` from the current inputs and state.
         new = 0.5*carry + 1.
+        # Return `(new, new)` to the caller.
         return new, new
+    # Return `jax.lax.scan(step, z, None, length=4)[0]` to the caller.
     return jax.lax.scan(step, z, None, length=4)[0]
+# Print the observed values to compare against the expected result.
 print("Unrolled:", jax.make_jaxpr(unrolled)(jnp.array(0.)))
+# Print diagnostic summary of the computed outputs.
 print("Scanned:", jax.make_jaxpr(scanned)(jnp.array(0.)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(unrolled(jnp.array(0.)), 1.875)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(scanned(jnp.array(0.)), 1.875)
 ```
 
@@ -388,23 +542,75 @@ Both cond branches must return matching scalar types.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Reproduce and repair a traced boolean failure — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+
+**Step-by-step implementation plan:**
+1. Branch on condition `z[0] > 0`:
+2. Return `-jnp.sum(z)` to the caller.
+3. Run the boundary check and catch the expected exception:
+4. Function `repaired(z)` implementing this stage's computation:
+5. Return `jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)` to the caller.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
+# Reproduce and repair a traced boolean failure (Transfer / diagnosis): The repair makes runtime control flow explicit and verifies...
 def bad_branch(z):
+    # Branch on condition `z[0] > 0`:
     if z[0] > 0:
-        return jnp.sum(z)
-    return -jnp.sum(z)
+        return ...  # TODO: return computed result
+    # Return `-jnp.sum(z)` to the caller.
+    return ...  # TODO: return computed result
+# Run the boundary check and catch the expected exception:
 try:
     jax.make_jaxpr(bad_branch)(x)
 except jax.errors.TracerBoolConversionError:
     print("Expected failure: traced boolean used by Python if")
 else:
     raise AssertionError("expected tracing failure")
+# Function `repaired(z)` implementing this stage's computation:
 def repaired(z):
-    return jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)
+    # Return `jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)` to the caller.
+    return ...  # TODO: return computed result
+# Print the observed values to compare against the expected result.
 print("Repaired:", jax.make_jaxpr(repaired)(x))
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(jax.jit(repaired)(x), 6.)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jax.jit(repaired)(-x), 6.)  # TODO: complete assertion check
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Reproduce and repair a traced boolean failure (Transfer / diagnosis): The repair makes runtime control flow explicit and verifies...
+def bad_branch(z):
+    # Branch on condition `z[0] > 0`:
+    if z[0] > 0:
+        return jnp.sum(z)
+    # Return `-jnp.sum(z)` to the caller.
+    return -jnp.sum(z)
+# Run the boundary check and catch the expected exception:
+try:
+    jax.make_jaxpr(bad_branch)(x)
+except jax.errors.TracerBoolConversionError:
+    print("Expected failure: traced boolean used by Python if")
+else:
+    raise AssertionError("expected tracing failure")
+# Function `repaired(z)` implementing this stage's computation:
+def repaired(z):
+    # Return `jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)` to the caller.
+    return jax.lax.cond(z[0] > 0, lambda v: jnp.sum(v), lambda v: -jnp.sum(v), z)
+# Print the observed values to compare against the expected result.
+print("Repaired:", jax.make_jaxpr(repaired)(x))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.jit(repaired)(x), 6.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jax.jit(repaired)(-x), 6.)
 ```
 

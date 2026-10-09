@@ -1,5 +1,8 @@
 ---
 import ResourceCard from '../components/resources/ResourceCard.astro';
+import ResourceCodeBlock from '../components/resources/ResourceCodeBlock.astro';
+import ResourceSection from '../components/resources/ResourceSection.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
 import resources from '../data/resources.json';
 import { tutor } from '../data/home.json';
 import '../styles/tokens.css';
@@ -9,52 +12,51 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
 import { siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
+
+const terminalExamples = `python3 scripts/course.py list --available
+python3 scripts/course.py list --pathway ship
+python3 scripts/course.py show first-gradient
+python3 scripts/course.py run first-gradient
+python3 scripts/course.py quiz first-gradient
+python3 scripts/course.py plan inference-engineer`;
 ---
 
 <SiteLayout {...pages.developer}>
   <main id="main">
-    <section class="resources-intro">
-      <p class="edition">Take the course with you</p>
-      <h1>Learner resources</h1>
-      <p class="intro">
-        Practice on your CPU, keep your own evidence, and learn in the browser, a notebook or your
-        agent.
-      </p>
+    <PageIntro
+      edition="Take the course with you"
+      title="Learner resources"
+      intro="Practice on your CPU, keep your own evidence, and learn in the browser, a notebook or your agent."
+    >
       <nav class="resource-jumps" aria-label="Resource sections">
         <a href="#practice">Practice</a>
         <a href="#offline">Read offline</a>
         <a href="#tutors">Agent tutors</a>
         <a href={siteUrl('project-workflow.html')}>Project structure &amp; tools</a>
-        <a href={siteUrl('tpu-gcp.html')}>TPUs &amp; Google Cloud</a>
-        <a href={siteUrl('tpu-performance.html')}>TPU precision &amp; profiling</a>
         <a href="#terminal">Terminal</a>
         <a href="#contributors">Authors & APIs</a>
       </nav>
-    </section>
-    <section id="practice" class="resource-section">
-      <div class="resource-heading">
-        <p class="edition">Run something real</p>
-        <h2>Start small. Verify the result.</h2>
-        <p>
-          Each download includes the work to try and the checks to explain. Reference execution and
-          your own exercise evidence stay separate.
-        </p>
-      </div>
+    </PageIntro>
+    <ResourceSection
+      id="practice"
+      edition="Run something real"
+      title="Start small. Verify the result."
+    >
+      <p slot="intro">
+        Each download includes the work to try and the checks to explain. Reference execution and
+        your own exercise evidence stay separate.
+      </p>
       <div class="resource-grid">
         {resources.cards.map((card) => (
           <ResourceCard card={card} />
         ))}
       </div>
-    </section>
-    <section id="offline" class="resource-section resource-split">
-      <div class="resource-heading">
-        <p class="edition">Away from the browser</p>
-        <h2>Read offline.</h2>
-        <p>
-          The book includes available lesson drafts, their worked code, experiments, practice and
-          references. Unwritten roadmap topics are excluded.
-        </p>
-      </div>
+    </ResourceSection>
+    <ResourceSection id="offline" edition="Away from the browser" title="Read offline." split>
+      <p slot="intro">
+        The book includes available lesson drafts, their worked code, experiments, practice and
+        references. Unwritten roadmap topics are excluded.
+      </p>
       <div class="resource-downloads">
         <a class="download-row" href={siteUrl('downloads/jax-foundations.html')}>
           <strong>Printable course reader</strong>
@@ -71,21 +73,17 @@ import pages from '../data/pages.json';
           the current build.
         </p>
       </div>
-    </section>
-    <section id="tutors" class="resource-section">
-      <div class="resource-heading">
-        <p class="edition">Your agent host</p>
-        <h2>A tutor that uses this course.</h2>
-        <p>
-          Ask for a starting point, work through an exercise and keep a study plan in{' '}
-          <code>LEARNING.md</code>. Skills need local course files; they do not install the course
-          or its Python environment.{' '}
-          <a href={siteUrl('downloads/jax-course-workspace.zip')} download>
-            Download the course workspace
-          </a>{' '}
-          for the current lessons and tutors together.
-        </p>
-      </div>
+    </ResourceSection>
+    <ResourceSection id="tutors" edition="Your agent host" title="A tutor that uses this course.">
+      <p slot="intro">
+        Ask for a starting point, work through an exercise and keep a study plan in{' '}
+        <code>LEARNING.md</code>. Skills need local course files; they do not install the course or
+        its Python environment.{' '}
+        <a href={siteUrl('downloads/jax-course-workspace.zip')} download>
+          Download the course workspace
+        </a>{' '}
+        for the current lessons and tutors together.
+      </p>
       <ol class="install-steps">
         <li>
           <h3>Choose the tools you need</h3>
@@ -114,16 +112,11 @@ import pages from '../data/pages.json';
             Read the skill files first. With Node.js/npm available, run this in the extracted course
             folder or repository root and choose your agent when prompted:
           </p>
-          <div class="resource-code">
-            <div class="code-panel-heading">
-              <span>Terminal · course checkout</span>
-              <button type="button" data-copy="local-skill-command">
-                Copy command
-              </button>
-            </div>
-            <pre><code id="local-skill-command">{tutor.command}</code></pre>
-            <p class="copy-status" role="status"></p>
-          </div>
+          <ResourceCodeBlock
+            label="Terminal · course checkout"
+            code={tutor.command}
+            copyId="local-skill-command"
+          />
           <p class="resource-note">
             Project installation is the default. To select Codex explicitly, add{' '}
             <code>--agent codex</code>. No global installation is required.
@@ -134,16 +127,11 @@ import pages from '../data/pages.json';
               The current tutors are not yet published on GitHub. After a revision containing these
               skills is published:
             </p>
-            <div class="resource-code">
-              <div class="code-panel-heading">
-                <span>Terminal · course checkout</span>
-                <button type="button" data-copy="remote-skill-command">
-                  Copy command
-                </button>
-              </div>
-              <pre><code id="remote-skill-command">npx skills add mlnomadpy/jaxpathways --skill start-learning learn-jax jax-course-guide check-jax</code></pre>
-              <p class="copy-status" role="status"></p>
-            </div>
+            <ResourceCodeBlock
+              label="Terminal · course checkout"
+              code="npx skills add mlnomadpy/jaxpathways --skill start-learning learn-jax jax-course-guide check-jax"
+              copyId="remote-skill-command"
+            />
             <p>
               A private repository requires configured Git/GitHub access. Use the local command
               above for the current working source. The remote command becomes available once these
@@ -184,11 +172,14 @@ import pages from '../data/pages.json';
         </li>
       </ol>
       <p id="resource-copy-status" class="resource-note" role="status" aria-live="polite"></p>
-    </section>
-    <section id="terminal" class="resource-section resource-split">
-      <div class="resource-heading">
-        <p class="edition">From your course checkout</p>
-        <h2>Use the terminal.</h2>
+    </ResourceSection>
+    <ResourceSection
+      id="terminal"
+      edition="From your course checkout"
+      title="Use the terminal."
+      split
+    >
+      <Fragment slot="intro">
         <p>
           Browse availability, read a lesson or run its reference companion. Execution needs the
           tested packages in <code>requirements-cpu.txt</code>.
@@ -197,28 +188,19 @@ import pages from '../data/pages.json';
           The reference runner includes solutions. Passing it does not mean you completed the
           exercise.
         </p>
-      </div>
-      <div class="resource-code">
-        <div class="code-panel-heading">
-          <span>Terminal · command examples</span>
-        </div>
-        <pre><code>python3 scripts/course.py list --available
-python3 scripts/course.py list --pathway ship
-python3 scripts/course.py show first-gradient
-python3 scripts/course.py run first-gradient
-python3 scripts/course.py quiz first-gradient
-python3 scripts/course.py plan inference-engineer</code></pre>
+      </Fragment>
+      <ResourceCodeBlock label="Terminal · command examples" code={terminalExamples}>
         <p class="resource-note terminal-note">
           The final command prints a proposed route. Keep the selected next lesson and your own
           evidence in your learning plan.
         </p>
-      </div>
-    </section>
-    <section id="contributors" class="resource-section">
-      <div class="resource-heading">
-        <p class="edition">For course authors and integrations</p>
-        <h2>One source, several ways to read it.</h2>
-      </div>
+      </ResourceCodeBlock>
+    </ResourceSection>
+    <ResourceSection
+      id="contributors"
+      edition="For course authors and integrations"
+      title="One source, several ways to read it."
+    >
       <details class="resource-disclosure">
         <summary>Author a lesson</summary>
         <p>
@@ -266,9 +248,9 @@ npm run smoke:cpu</code></pre>
           </li>
         </ul>
       </details>
-    </section>
+    </ResourceSection>
+    <SiteFooter />
   </main>
-  <SiteFooter />
   <script>
     import '../scripts/entries/developer.js';
   </script>

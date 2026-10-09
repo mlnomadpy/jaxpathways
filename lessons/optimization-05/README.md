@@ -65,10 +65,16 @@ The zero vector has no direction. Projecting onto it would divide by $0$, and co
 Create main.py in your activated CPU course environment. Add the vectors and verify their lengths before adding a projection.
 
 ```python
+# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
+# Initialize array `u` with explicit values and shape.
 u = jnp.array([3.0, 4.0])
+# Initialize array `a` with explicit values and shape.
 a = jnp.array([1.0, 0.0])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 ```
 
@@ -79,12 +85,18 @@ The length is $5$; the component along the horizontal unit direction is $3$.
 Append this eager helper. Keep the input check outside any jitted function in this exercise.
 
 ```python
+# Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
+    # Run `jnp.dot` to compute `denominator`.
     denominator = jnp.dot(a, a)
+    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
+    # Return `jnp.dot(a, u) / denominator * a` to the caller.
     return jnp.dot(a, u) / denominator * a
+# Run `project` to compute `p`.
 p = project(u, a)
+# Evaluate `r` from the current inputs and state.
 r = u - p
 ```
 
@@ -95,9 +107,14 @@ The leftover $r$ contains what the chosen direction cannot explain.
 Append these assertions and run python main.py. Compare with your drawing before reading the experiment.
 
 ```python
+# Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
+# Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
 ```
 
@@ -106,23 +123,40 @@ You should see $[3,0]$ and $[0,4]$; the squared lengths sum to $25$.
 ## Run the example
 
 ```python
+# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
+# Initialize array `u` with explicit values and shape.
 u = jnp.array([3.0, 4.0])
+# Initialize array `a` with explicit values and shape.
 a = jnp.array([1.0, 0.0])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 
+# Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
+    # Run `jnp.dot` to compute `denominator`.
     denominator = jnp.dot(a, a)
+    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
+    # Return `jnp.dot(a, u) / denominator * a` to the caller.
     return jnp.dot(a, u) / denominator * a
+# Run `project` to compute `p`.
 p = project(u, a)
+# Evaluate `r` from the current inputs and state.
 r = u - p
 
+# Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
+# Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
 ```
 
@@ -149,12 +183,14 @@ We projected onto the horizontal direction. The residual is perpendicular to tha
 The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $\lVert u\rVert=5$, with $3^2+4^2=5^2$. Projection separates the part represented by the chosen direction from the part that direction cannot represent.
 
 ```python
+# Compute figure data for: Projection and leftover form a right triangle
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:53.141543+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:46.335968+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -168,8 +204,12 @@ PASS: optimization-05
 **Predict before running:** If the direction becomes $2a$, does the projected point double?
 
 ```python
+# Experiment — Rescale the direction: A line does not change when its nonzero direction is rescaled.
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(project(u, 2 * a), p)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(project(u, -a), p)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))
 ```
 
@@ -182,9 +222,14 @@ A line does not change when its nonzero direction is rescaled. A dot product alo
 **Predict before running:** For $a=(1,1)$, predict the projection coefficient and leftover.
 
 ```python
+# Experiment — Rotate the line: Changing direction changes what can be explained; merely...
+# Initialize array `diagonal` with explicit values and shape.
 diagonal = jnp.array([1.0, 1.0])
+# Run `project` to compute `p2`.
 p2 = project(u, diagonal)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p2, jnp.array([3.5, 3.5]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)
 ```
 
@@ -196,13 +241,48 @@ Changing direction changes what can be explained; merely changing its length doe
 
 Project $u=(2,-1,2)$ onto $a=(1,0,1)$. Check the residual by hand first.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `u3` with explicit values and shape.
+2. Initialize array `a3` with explicit values and shape.
+3. Run `project` to compute `p3`.
+4. Verify that the numerical values match the expected reference within tolerance.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
+# Initialize array `u3` with explicit values and shape.
+u3 = jnp.array(...)  # TODO: compute u3
+# Initialize array `a3` with explicit values and shape.
+a3 = jnp.array(...)  # TODO: compute a3
+# Run `project` to compute `p3`.
+p3 = project(...)  # TODO: compute p3
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
+# Initialize array `u3` with explicit values and shape.
 u3 = jnp.array([2.0, -1.0, 2.0])
+# Initialize array `a3` with explicit values and shape.
 a3 = jnp.array([1.0, 0.0, 1.0])
+# Run `project` to compute `p3`.
 p3 = project(u3, a3)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)
 ```
 
@@ -220,9 +300,34 @@ Use a try/except block; a silent successful result should fail the check.
 
 </details>
 
+### How to write: Handle an undefined direction — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `direction(...)` — Call `direction` with your updated parameters or inputs from this lesson's workspace.
+- `project(...)` — Call `project` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Run the boundary check and catch the expected exception:
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
+# Run the boundary check and catch the expected exception:
+try:
+    project(u, jnp.zeros_like(a))
+except ValueError as exc:
+    assert 'nonzero'  # TODO: complete assertion check
+else:
+    raise AssertionError('Zero direction was accepted')
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
+# Run the boundary check and catch the expected exception:
 try:
     project(u, jnp.zeros_like(a))
 except ValueError as exc:
@@ -247,12 +352,43 @@ Check the directions have zero dot product. Nonorthogonal directions can count t
 
 </details>
 
+### How to write: Use two perpendicular directions — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `a1` with explicit values and shape.
+2. Initialize array `a2` with explicit values and shape.
+3. Verify that the numerical values match the expected reference within tolerance.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
+# Initialize array `a1` with explicit values and shape.
+a1 = jnp.array(...)  # TODO: compute a1
+# Initialize array `a2` with explicit values and shape.
+a2 = jnp.array(...)  # TODO: compute a2
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(project(u, a1) + project(u, a2), u)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
+# Initialize array `a1` with explicit values and shape.
 a1 = jnp.array([1.0, 1.0])
+# Initialize array `a2` with explicit values and shape.
 a2 = jnp.array([1.0, -1.0])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(project(u, a1) + project(u, a2), u)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not jnp.allclose(project(u, a) + project(u, a1), u)
 ```
 

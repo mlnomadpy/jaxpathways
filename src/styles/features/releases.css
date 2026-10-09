@@ -1,10 +1,11 @@
 .release-notice {
+  width: 90%;
   max-width: 1188px;
   margin: 16px auto;
   padding: 14px 20px;
   background: var(--nav-surface);
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--learning-radius);
   display: flex;
   align-items: center;
   gap: 16px;
@@ -19,13 +20,8 @@
   flex: 1;
 }
 .release-notice button {
-  min-height: 44px;
-  background: var(--panel);
   color: var(--ink);
-  border: 1px solid var(--line);
   padding: 8px 14px;
-  border-radius: 6px;
-  cursor: pointer;
   font: inherit;
 }
 .release-notice a,
@@ -54,7 +50,8 @@
 }
 @media (max-width: 760px) {
   .release-notice {
-    margin: 12px 6%;
+    width: 88%;
+    margin: 12px auto;
     flex-direction: column;
     align-items: start;
   }

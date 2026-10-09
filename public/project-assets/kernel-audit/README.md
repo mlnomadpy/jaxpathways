@@ -7,6 +7,7 @@ Implement real Pallas grid and pipeline operations, defend their numerical contr
 Install the course `requirements-cpu.txt` in your environment. The tested core uses JAX 0.9.2; Pallas is experimental, so inspect and retest APIs when changing versions. Run from the checkout or extracted bundle's top folder:
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/kernel-audit/starter/model.py projects/kernel-audit/my_model.py
 python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 1
 ```
@@ -24,6 +25,7 @@ The checker uses singleton rows, divisible shapes, nondivisible tails and two bl
 Implement `fused_bias_relu`, with matrix activations and a vector bias that follows the column axis. The matrix and bias need different BlockSpecs. Test cancellations at the ReLU boundary, distinct column biases, logical tails and both precisions.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage 2
 ```
 
@@ -36,6 +38,7 @@ Implement `pipelined_axpy` using actual `pltpu.emit_pipeline`. The outer call ho
 Compare synchronous copies, two input slots and three input slots while keeping two output slots. Installed JAX 0.9.2 does not support more than two output slots. Preserve representative tails and both dtypes. Reject invalid block/buffer/mode requests.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/kernel-audit/tests/check.py --implementation projects/kernel-audit/my_model.py --stage all
 ```
 
@@ -46,6 +49,7 @@ Implement `target_benchmark` with actual TPU guards, separate compilation, five 
 Use a fresh configured TPU environment with a compatible pinned JAX/libtpu stack. The CPU dependency file is not a TPU installation recipe. Do not use a process forced to `JAX_PLATFORMS=cpu` for the target lab. This project does not provision hardware or spend cloud credits.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/kernel-audit/target_tpu.py --implementation projects/kernel-audit/my_model.py --kernel fused --shape 257 513 --block 8 128 --dtype float32
 python3 projects/kernel-audit/target_tpu.py --implementation projects/kernel-audit/my_model.py --kernel pipeline --shape 257 513 --block 8 128 --buffers 2
 python3 projects/kernel-audit/target_tpu.py --implementation projects/kernel-audit/my_model.py --kernel pipeline --shape 257 513 --block 16 256 --buffers 3 --synchronous
@@ -60,6 +64,7 @@ The measurement boundary starts with already-placed logical inputs and ends with
 Save code, environment, commands, numerical references, ownership maps, frozen data seeds, precision policy, a failure/repair, padding counts, modeled buffer costs and any actual target receipts. Distinguish configuration-derived estimates from device counters and timing observations. Connect the local result to a profile and partitioning decision before claiming an end-to-end improvement.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/kernel-audit/tests/check.py --implementation solution --stage all
 ```
 

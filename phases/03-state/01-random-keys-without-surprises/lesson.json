@@ -4,10 +4,10 @@
   "minutes": 60,
   "content": {
     "idea": "A random sampler in JAX receives an explicit key. Reusing the same key with the same sampler repeats the same computation. Splitting gives us separately owned keys, so the program can show which operation receives which randomness.",
-    "code": "import jax\nimport jax.numpy as jnp\nkey = jax.random.key(42)\nkey, sample_key = jax.random.split(key)\na = jax.random.normal(sample_key, (3,))\nrepeated = jax.random.normal(sample_key, (3,))\nkey, next_key = jax.random.split(key)\nb = jax.random.normal(next_key, (3,))\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
+    "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: random.split returns two new keys.\n# Create or split explicit PRNG key(s) (`key`) for reproducible randomness.\nkey = jax.random.key(42)\n# Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.\nkey, sample_key = jax.random.split(key)\n# Sample deterministic random values into `a` using an explicit PRNG key.\na = jax.random.normal(sample_key, (3,))\n# Sample deterministic random values into `repeated` using an explicit PRNG key.\nrepeated = jax.random.normal(sample_key, (3,))\n# Create or split explicit PRNG key(s) (`(key, next_key)`) for reproducible randomness.\nkey, next_key = jax.random.split(key)\n# Sample deterministic random values into `b` using an explicit PRNG key.\nb = jax.random.normal(next_key, (3,))\n# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\n# Print the observed values to compare against the expected result.\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\n# Print diagnostic summary of the computed outputs.\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\n# Verify contract: `jnp.array_equal(a, repeated)`.\nassert jnp.array_equal(a, repeated)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert not jnp.array_equal(a, b)",
     "output": "Replay equal: True; Fresh draw equal: False.",
     "exercise": "Split a fresh seed into four keys, then use vmap to draw two normal values from each. Replay from the seed and compare.",
-    "solution": "def draw(seed):\n    keys = jax.random.split(jax.random.key(seed), 4)\n    return jax.vmap(lambda k: jax.random.normal(k, (2,)))(keys)\nassert draw(7).shape == (4, 2)\nassert jnp.array_equal(draw(7), draw(7))",
+    "solution": "# Exercise solution: Split a fresh seed into four keys, then use vmap to draw two normal...\ndef draw(seed):\n    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.\n    keys = jax.random.split(jax.random.key(seed), 4)\n    # Return `jax.vmap(lambda k: jax.random.normal(k, (2,)))(keys)` to the caller.\n    return jax.vmap(lambda k: jax.random.normal(k, (2,)))(keys)\n# Verify that the output tensor shape matches our prediction.\nassert draw(7).shape == (4, 2)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.array_equal(draw(7), draw(7))",
     "question": "What happens if the same key is used twice for the same random operation?",
     "options": [
       "The generator automatically advances",
@@ -49,14 +49,14 @@
       {
         "title": "Implement one random state transition",
         "prediction": "Predict which part of the return value must be reused for the next draw.",
-        "code": "def noise_step(key):\n    next_key,draw_key=jax.random.split(key)\n    return next_key,jax.random.normal(draw_key,(2,))\nroot=jax.random.key(9)\nk1,n1=noise_step(root)\nk2,n2=noise_step(k1)\nr1,replay1=noise_step(jax.random.key(9))\nr2,replay2=noise_step(r1)\nassert jnp.array_equal(n1,replay1) and jnp.array_equal(n2,replay2)\nassert jnp.array_equal(jax.random.key_data(k2),jax.random.key_data(r2))",
+        "code": "# Experiment — Implement one random state transition: Replay compares complete state transitions.\ndef noise_step(key):\n    # Create or split explicit PRNG key(s) (`(next_key, draw_key)`) for reproducible randomness.\n    next_key,draw_key=jax.random.split(key)\n    # Return `(next_key, jax.random.normal(draw_key, (2,)))` to the caller.\n    return next_key,jax.random.normal(draw_key,(2,))\n# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.\nroot=jax.random.key(9)\n# Run `noise_step` to compute `(k1, n1)`.\nk1,n1=noise_step(root)\n# Run `noise_step` to compute `(k2, n2)`.\nk2,n2=noise_step(k1)\n# Create or split explicit PRNG key(s) (`(r1, replay1)`) for reproducible randomness.\nr1,replay1=noise_step(jax.random.key(9))\n# Run `noise_step` to compute `(r2, replay2)`.\nr2,replay2=noise_step(r1)\n# Verify contract: `jnp.array_equal(n1, replay1) and jnp.array_equal(n2, replay2)`.\nassert jnp.array_equal(n1,replay1) and jnp.array_equal(n2,replay2)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.array_equal(jax.random.key_data(k2),jax.random.key_data(r2))",
         "output": "Reconstructing the two steps reproduces both samples and the continuation key.",
         "explanation": "Replay compares complete state transitions. It catches lost continuation state, not only a repeated final number."
       },
       {
         "title": "Keep identity under reordering",
         "prediction": "If examples \\(3\\) and \\(8\\) swap order, should their identity-derived noise swap too?",
-        "code": "base=jax.random.key(11)\ndef by_id(ids):\n    return jax.vmap(lambda i:jax.random.normal(jax.random.fold_in(base,i),()))(ids)\nforward=by_id(jnp.array([3,8]))\nreverse=by_id(jnp.array([8,3]))\nassert jnp.array_equal(forward,reverse[::-1])",
+        "code": "# Experiment — Keep identity under reordering: fold_in makes the assignment explicit.\n# Create or split explicit PRNG key(s) (`base`) for reproducible randomness.\nbase=jax.random.key(11)\n# Function `by_id(ids)` implementing this stage's computation:\ndef by_id(ids):\n    # Return `jax.vmap(lambda i: jax.random.normal(jax.random.fold_in(base, i), ()))(ids)` to the caller.\n    return jax.vmap(lambda i:jax.random.normal(jax.random.fold_in(base,i),()))(ids)\n# Initialize array `forward` with explicit values and shape.\nforward=by_id(jnp.array([3,8]))\n# Initialize array `reverse` with explicit values and shape.\nreverse=by_id(jnp.array([8,3]))\n# Verify contract: `jnp.array_equal(forward, reverse[::-1])`.\nassert jnp.array_equal(forward,reverse[::-1])",
         "output": "Noise follows the identifiers, not their batch positions.",
         "explanation": "fold_in makes the assignment explicit. Repeated IDs would deliberately reproduce a draw."
       }
@@ -66,7 +66,7 @@
         "title": "Replay a noisy prediction",
         "prompt": "Draw one noise value per example for prediction \\(2x+1\\). Reconstruct the same batch from the seed, then change only \\(x\\).",
         "hint": "Reuse the random construction for a controlled comparison, not accidentally across independent training steps.",
-        "solution": "def noisy_prediction(seed,x):\n    eps=jax.random.normal(jax.random.key(seed),x.shape)\n    return 2*x+1+eps\ninputs=jnp.array([0.,1.,2.])\nassert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))\nassert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)",
+        "solution": "# Replay a noisy prediction (Practice): Holding noise fixed isolates the changed numerical input.\ndef noisy_prediction(seed,x):\n    # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.\n    eps=jax.random.normal(jax.random.key(seed),x.shape)\n    # Return `2 * x + 1 + eps` to the caller.\n    return 2*x+1+eps\n# Initialize array `inputs` with explicit values and shape.\ninputs=jnp.array([0.,1.,2.])\n# Verify contract: `jnp.array_equal(noisy_prediction(4, inputs), noisy_prediction(4, inp...`.\nassert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)",
         "explanation": "Holding noise fixed isolates the changed numerical input. That is a deliberately coupled experiment.",
         "difficulty": "Practice"
       },
@@ -74,7 +74,7 @@
         "title": "Diagnose key reuse in a loop",
         "prompt": "Write the broken loop that draws with one key three times, demonstrate repeated rows, then repair it by threading the continuation.",
         "hint": "The draw function does not mutate the key.",
-        "solution": "root=jax.random.key(5)\nbroken=jnp.stack([jax.random.normal(root,(2,)) for _ in range(3)])\nassert jnp.array_equal(broken[0],broken[1])\ncurrent=root\nrows=[]\nfor _ in range(3):\n    current,noise=noise_step(current)\n    rows.append(noise)\nfixed=jnp.stack(rows)\nassert fixed.shape==(3,2)\nassert not jnp.array_equal(fixed[0],fixed[1])",
+        "solution": "# Diagnose key reuse in a loop (Challenge): The repeated-row symptom comes from key allocation.\n# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.\nroot=jax.random.key(5)\n# Sample deterministic random values into `broken` using an explicit PRNG key.\nbroken=jnp.stack([jax.random.normal(root,(2,)) for _ in range(3)])\n# Verify contract: `jnp.array_equal(broken[0], broken[1])`.\nassert jnp.array_equal(broken[0],broken[1])\n# Evaluate `current` from the current inputs and state.\ncurrent=root\n# Evaluate `rows` from the current inputs and state.\nrows=[]\n# Repeat the update loop over `range(3)` steps:\nfor _ in range(3):\n    # Run `noise_step` to compute `(current, noise)`.\n    current,noise=noise_step(current)\n    # Append the current step result to `rows`.\n    rows.append(noise)\n# Combine or mask array elements to form `fixed`.\nfixed=jnp.stack(rows)\n# Verify that the output tensor shape matches our prediction.\nassert fixed.shape==(3,2)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert not jnp.array_equal(fixed[0],fixed[1])",
         "explanation": "The repeated-row symptom comes from key allocation. The last inequality checks this fixed demonstration, not every possible random stream.",
         "difficulty": "Challenge"
       }
@@ -100,19 +100,19 @@
       {
         "title": "Prepare the inputs",
         "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
-        "code": "import jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp",
         "explanation": "These explicit inputs define the case that the later checks will verify."
       },
       {
         "title": "Build the computation",
         "instruction": "Append this block below the inputs in the same file.",
-        "code": "key = jax.random.key(42)\nkey, sample_key = jax.random.split(key)\na = jax.random.normal(sample_key, (3,))\nrepeated = jax.random.normal(sample_key, (3,))\nkey, next_key = jax.random.split(key)\nb = jax.random.normal(next_key, (3,))",
+        "code": "# Step 2 — Build the computation: random.split returns two new keys.\n# Create or split explicit PRNG key(s) (`key`) for reproducible randomness.\nkey = jax.random.key(42)\n# Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.\nkey, sample_key = jax.random.split(key)\n# Sample deterministic random values into `a` using an explicit PRNG key.\na = jax.random.normal(sample_key, (3,))\n# Sample deterministic random values into `repeated` using an explicit PRNG key.\nrepeated = jax.random.normal(sample_key, (3,))\n# Create or split explicit PRNG key(s) (`(key, next_key)`) for reproducible randomness.\nkey, next_key = jax.random.split(key)\n# Sample deterministic random values into `b` using an explicit PRNG key.\nb = jax.random.normal(next_key, (3,))",
         "explanation": "random.split returns two new keys. noise_step returns the continuation key as part of its result so the caller can use fresh noise on the next transition."
       },
       {
         "title": "Run and check the result",
         "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
-        "code": "print(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
+        "code": "# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\n# Print the observed values to compare against the expected result.\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\n# Print diagnostic summary of the computed outputs.\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\n# Verify contract: `jnp.array_equal(a, repeated)`.\nassert jnp.array_equal(a, repeated)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert not jnp.array_equal(a, b)",
         "explanation": "Compare the output to the expected result below before making the exercise change."
       }
     ],
@@ -123,7 +123,7 @@
       "reading": "The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key.\n\nThe replay repeats approximately \\((0.606,0.799,-0.909)\\), while the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). Two curves are hard to distinguish precisely because their coordinates are equal.",
       "connection": "A JAX random function is deterministic given the same key and arguments. Calling it again with that key replays the result; it does not silently advance a hidden random state. Splitting produces a new key for a new draw.\n\nThe lines only connect coordinates to make equality visible. This is not a time series or a probability density, and three different values cannot establish statistical independence. The practical check is reproducibility: reuse for deliberate replay, split for the next stochastic operation.",
       "alt": "Reused keys replay the same sample. The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key. The replay repeats approximately \\((0.606,0.799,-0.909)\\), while the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). Two curves are hard to distinguish precisely because their coordinates are equal.",
-      "code": "visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}"
+      "code": "# Compute figure data for: Reused keys replay the same sample\n# Evaluate `visual_data` from the current inputs and state.\nvisual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}"
     }
   }
 }

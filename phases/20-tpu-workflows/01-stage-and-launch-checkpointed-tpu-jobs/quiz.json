@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-02",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "Why does `run_tpu_ready_job` execute `train_step` once and discard its outputs before starting the timed `while step < steps` loop?",
+      "options": [
+        "To mutate the parameters one extra time before step 1",
+        "To trigger XLA compilation and synchronize the warmup result without altering the initial or restored training state, keeping compilation latency out of steady-state step measurements",
+        "Because JAX cannot save checkpoints without a warmup call"
+      ],
+      "correct": 1,
+      "explanation": "JAX compiles `@jax.jit` functions on their first call for a given input shape and dtype; warming up on the initial state without overwriting `(w, b, m_w, m_b, key)` isolates compile time from step time while preserving exact state trajectories."
+    }
+  ]
+}

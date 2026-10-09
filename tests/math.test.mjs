@@ -73,3 +73,35 @@ test('authored lesson prose does not leave mathematical shapes or operators as p
     inspect(source.content,'content',lesson.id);
   }
 });
+
+test('inlineMath and mathProse render Markdown bold, italic, links, lists, and code in headings', async () => {
+  const window = new Window();
+  try {
+    const html = mathProse(
+      'Choose a route:\n\n' +
+        '- **Route 1 (`gcloud`)**: Run *warmed* steps on [TPU course](course.html#phase-tpu).\n' +
+        '- **Route 2**: Verify \\(x^2\\) and keep `2 * N^3` intact.\n\n' +
+        '1. First step\n\n' +
+        '2. Second step',
+    );
+    window.document.body.innerHTML = html;
+    assert.equal(window.document.querySelectorAll('ul > li').length, 2);
+    assert.equal(window.document.querySelectorAll('ol > li').length, 2);
+    assert.equal(window.document.querySelector('strong code')?.textContent, 'gcloud');
+    assert.equal(window.document.querySelector('em')?.textContent, 'warmed');
+    assert.equal(
+      window.document.querySelector('a')?.getAttribute('href'),
+      'course.html#phase-tpu',
+    );
+    assert(
+      !inlineMath('[bad](javascript:alert(1))').includes('<a'),
+      'unsafe URL schemes must remain escaped text',
+    );
+    const sectionHtml = deepConcepts({
+      sections: [{ title: '2. Authenticate `gcloud` and `.venv`', body: 'Ready.' }],
+    });
+    assert.match(sectionHtml, /<h2>2\. Authenticate <code>gcloud<\/code> and <code>\.venv<\/code><\/h2>/);
+  } finally {
+    await window.happyDOM.abort();
+  }
+});

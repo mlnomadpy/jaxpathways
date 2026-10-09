@@ -7,8 +7,8 @@
       "question": "What do pairwise preferences identify directly?",
       "options": [
         "Reward differences under the chosen comparison model, not an absolute universal utility.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "A unique zero point for individual response rewards across unrelated prompts.",
+        "A scale-invariant objective whose positive rescaling leaves downstream KL regularization unchanged."
       ],
       "correct": 0,
       "explanation": "A shared additive offset cancels from every pairwise probability."

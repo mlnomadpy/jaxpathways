@@ -7,8 +7,8 @@
       "question": "Should prompt inputs disappear when using response-only loss?",
       "options": [
         "No. They remain context; only their target eligibility changes.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "Yes. Masking a prompt token out of the loss also removes it from causal attention.",
+        "No, but the logit produced at the final prompt position must be excluded because its input role is prompt."
       ],
       "correct": 0,
       "explanation": "Attention visibility and supervised output positions are separate contracts."

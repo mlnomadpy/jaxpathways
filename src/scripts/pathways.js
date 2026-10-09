@@ -1,5 +1,6 @@
 import { courseState, phaseById } from '../lib/course-state.js';
 import { $ } from '../lib/dom.js';
+import { lessonLink } from '../lib/urls.js';
 import { renderPathway } from '../lib/views/pathway.js';
 
 const initializedDocuments = new WeakSet();
@@ -33,10 +34,10 @@ export function initPathways() {
           const state = raw ? JSON.parse(raw) : { version: 1, evidence: [] };
           state.route = id;
           localStorage.setItem('jaxpathways-notebook-v1', JSON.stringify(state));
-          location.href = `lesson.html?path=${encodeURIComponent(id)}&lesson=${encodeURIComponent(next.id)}`;
+          location.href = lessonLink(next.id, id);
         } catch {
           $('#path-save-status').innerHTML =
-            `This path could not be saved on this browser. <a href="lesson.html?path=${encodeURIComponent(id)}&lesson=${encodeURIComponent(next.id)}">Continue without saving</a>`;
+            `This path could not be saved on this browser. <a href="${lessonLink(next.id, id)}">Continue without saving</a>`;
         }
       };
     detail.querySelector('h1').focus({ preventScroll: true });

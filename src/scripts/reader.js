@@ -18,6 +18,7 @@ import {
 } from '../lib/course-state.js';
 import { $ } from '../lib/dom.js';
 import { escapeHtml } from '../lib/html.js';
+import { lessonLink } from '../lib/urls.js';
 
 import { bindGradientFigure, bindAttentionMaskFigure } from './lesson-diagrams.js';
 
@@ -100,7 +101,7 @@ function showLesson(phase, lesson, options = {}) {
         ? lesson.prerequisites
             .map((id) => {
               const l = lessonById(id).lesson;
-              return `<a href="lesson.html?lesson=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(l.title)}</a>`;
+              return `<a href="${lessonLink(id, courseState.activePath)}">${escapeHtml(l.title)}</a>`;
             })
             .join('; ')
         : phase.prerequisitePhaseIds.length
@@ -111,14 +112,35 @@ function showLesson(phase, lesson, options = {}) {
               )
               .join('; ')
           : escapeHtml(prerequisite);
-  $('#lesson-body').innerHTML = renderLesson({
-    phase,
-    lesson,
-    prerequisiteLinks,
-    allLessons,
-    index,
-    activePath: courseState.activePath,
-  });
+  const body = $('#lesson-body');
+  const hydrated = body?.dataset.staticRendered === lesson.id;
+  if (hydrated) {
+    delete body.dataset.staticRendered;
+    const before = body.querySelector('.before-start p.soft');
+    if (before) {
+      before.innerHTML = `<strong>Before this:</strong> ${prerequisiteLinks}<br><strong>Hardware:</strong> ${inlineMath(lesson.hardware || phase.hardware)}`;
+    }
+    const portfolioLink = body.querySelector('a[href^="notebook.html?lesson="]');
+    if (portfolioLink) {
+      portfolioLink.setAttribute(
+        'href',
+        `notebook.html?lesson=${encodeURIComponent(lesson.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}#portfolio`,
+      );
+    }
+    const nav = body.querySelector('.lesson-nav');
+    if (nav) {
+      nav.innerHTML = `${index > 0 ? `<button id="previous">Previous: ${escapeHtml(allLessons[index - 1].title)}</button>` : '<span>First lesson in this route</span>'}${index >= 0 && index < allLessons.length - 1 ? `<button id="next">Next: ${escapeHtml(allLessons[index + 1].title)}</button>` : '<button id="phase-project">View the phase project</button>'}`;
+    }
+  } else {
+    body.innerHTML = renderLesson({
+      phase,
+      lesson,
+      prerequisiteLinks,
+      allLessons,
+      index,
+      activePath: courseState.activePath,
+    });
+  }
   if (authored) {
     bindCodeCopy();
     bindPracticeDrawer();
@@ -199,8 +221,7 @@ function showLesson(phase, lesson, options = {}) {
       showLesson(found.phase, found.lesson);
     };
   if ($('#next'))
-    $('#next').dataset.href =
-      `lesson.html?lesson=${encodeURIComponent(allLessons[index + 1].id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}`;
+    $('#next').dataset.href = lessonLink(allLessons[index + 1].id, courseState.activePath);
   if ($('#next'))
     $('#next').onclick = () => {
       const found = lessonById(allLessons[index + 1].id);
@@ -258,8 +279,7 @@ function renderReaderNavigation(phase, lesson) {
         `<a href="course.html?phase=${encodeURIComponent(id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}">${escapeHtml(phaseById(id).title)}</a>`,
     )
     .join('');
-  const href = (l) =>
-    `lesson.html?lesson=${encodeURIComponent(l.id)}${courseState.activePath === 'all' ? '' : '&path=' + encodeURIComponent(courseState.activePath)}`;
+  const href = (l) => lessonLink(l.id, courseState.activePath);
   $('#reader-lessons').innerHTML = phase.lessons
     .filter((l) => l.status === 'authored' || l.id === lesson.id)
     .map(
@@ -274,23 +294,39 @@ function renderReaderNavigation(phase, lesson) {
   $('#activity-bar')?.remove();
   const headings = Array.from($('#lesson-body').querySelectorAll('h2'));
   const groups = { Understand: [], Build: [], Experiment: [], Practice: [], Evidence: [] };
+  const firstHeadingByGroup = {};
   headings.forEach((h, i) => {
     h.id = `section-${i}`;
     const title = h.textContent.trim();
-    const group =
-      h.closest('.build-step') || /^\d+[.)] |Run the example|Build a numerical/.test(title)
+    const stageEl = h.closest('[data-lesson-stage]');
+    const group = stageEl?.dataset.lessonStage
+      ? stageEl.dataset.lessonStage
+      : h.closest('.build-step') || /^\d+[.)] |Run the example|Build a numerical/.test(title)
         ? 'Build'
         : h.closest('.worked-experiment')
           ? 'Experiment'
-          : h.closest('.lesson-practice,.lesson-checkpoint') ||
+          : h.closest('.lesson-practice,.lesson-checkpoint,.exercise-workbench') ||
               /Make it yours|Diagnose the result|Check your/.test(title)
             ? 'Practice'
             : /Keep your evidence|Primary references|Carry forward/.test(title)
               ? 'Evidence'
               : 'Understand';
     h.dataset.activityGroup = group;
+    if (!firstHeadingByGroup[group]) firstHeadingByGroup[group] = h.id;
     groups[group].push(`<a href="#${h.id}">${escapeHtml(title)}</a>`);
   });
+  $('#lesson-stage-bar')
+    ?.querySelectorAll('[data-stage-pill]')
+    .forEach((pill) => {
+      const stageName = pill.dataset.stagePill;
+      const targetId = firstHeadingByGroup[stageName];
+      if (targetId) {
+        pill.setAttribute('href', '#' + targetId);
+        pill.hidden = false;
+      } else {
+        pill.hidden = true;
+      }
+    });
   if (headings.length) {
     const bar = document.createElement('nav');
     bar.id = 'activity-bar';
@@ -314,6 +350,14 @@ function scrollToLessonSection(hash) {
   updateReadingPosition();
 }
 
+const stageDisplayNames = {
+  Understand: 'Understand the Mechanism',
+  Build: 'Build & Run Reference',
+  Experiment: 'Controlled Experiments',
+  Practice: 'Hands-On Exercise & Check',
+  Evidence: 'Keep Your Evidence',
+};
+
 function updateReadingPosition() {
   if (!courseState.standalone) return;
   const headings = Array.from($('#lesson-body').querySelectorAll('h2[id]'));
@@ -330,14 +374,40 @@ function updateReadingPosition() {
     steps = [...new Set(headings.map((h) => h.dataset.activityGroup))],
     index = steps.indexOf(group),
     previous = $('#previous-activity'),
-    next = $('#next-activity');
+    next = $('#next-activity'),
+    stageLabel = `Stage ${index + 1} of ${steps.length} · ${stageDisplayNames[group] || group}`;
+  $('#lesson-body')?.setAttribute('data-active-stage', group);
+  const stageBar = $('#lesson-stage-bar');
+  if (stageBar) {
+    stageBar.setAttribute('data-active-stage', group);
+    const activeLabel = $('#stage-bar-active-label');
+    if (activeLabel) activeLabel.textContent = stageLabel;
+    stageBar.querySelectorAll('[data-stage-pill]').forEach((pill) => {
+      const pillIndex = steps.indexOf(pill.dataset.stagePill);
+      if (pill.dataset.stagePill === group) {
+        pill.setAttribute('aria-current', 'step');
+        pill.removeAttribute('data-stage-passed');
+      } else {
+        pill.removeAttribute('aria-current');
+        if (pillIndex >= 0 && pillIndex < index) pill.setAttribute('data-stage-passed', 'true');
+        else pill.removeAttribute('data-stage-passed');
+      }
+    });
+  }
+  $('#lesson-body')
+    ?.querySelectorAll('.lesson-stage')
+    .forEach((stageEl) => {
+      if (stageEl.dataset.lessonStage === group) stageEl.setAttribute('data-stage-active', 'true');
+      else stageEl.removeAttribute('data-stage-active');
+    });
   if (previous) {
+    $('#activity-bar')?.setAttribute('data-active-stage', group);
     previous.hidden = index === 0;
     previous.textContent = index ? 'Previous: ' + steps[index - 1] : 'Previous';
     previous.href = index
       ? '#' + headings.find((h) => h.dataset.activityGroup === steps[index - 1]).id
       : '#lesson-title';
-    $('#activity-position').textContent = group;
+    $('#activity-position').textContent = stageLabel;
     const nextLesson = $('#next');
     next.textContent =
       index < steps.length - 1
@@ -376,13 +446,15 @@ function findLessonSection(query) {
   if (!term) return '';
   const section = Array.from(
     $('#lesson-body').querySelectorAll(
-      '.concept-section,.worked-experiment,.build-step,.lesson-practice',
+      '.concept-section,.worked-experiment,.build-step,.lesson-practice,.exercise-workbench',
     ),
   ).find((node) => node.textContent.toLowerCase().includes(term));
   if (section) return section.querySelector('h2')?.id || '';
-  const paragraph = Array.from($('#lesson-body').querySelectorAll(':scope > p')).find((node) =>
-    node.textContent.toLowerCase().includes(term),
-  );
+  const paragraph = Array.from(
+    $('#lesson-body').querySelectorAll(
+      '.lesson-stage > p, .lesson-stage > ul, .lesson-stage > ol, :scope > p, :scope > ul, :scope > ol',
+    ),
+  ).find((node) => node.textContent.toLowerCase().includes(term));
   if (paragraph) {
     let previous = paragraph.previousElementSibling;
     while (previous && previous.tagName !== 'H2') previous = previous.previousElementSibling;

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "942b85a506208db46b4e406de3dab918967423e403f0c4e0e36af43cb9219243",
-  "executedAt": "2026-10-06T23:00:28.640507+00:00",
+  "contentHash": "334a0e059f7b55bccda1f42448d517c92156ccd502f54604a9c708f185ec3f8e",
+  "executedAt": "2026-10-08T14:03:15.851376+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nRestored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nMissing iterator restore repeats earlier IDs and changes the next loss\nCorrect IDs alone do not restore the training transition\nRejected incompatible seed\nRejected incompatible sha256\nOriginal run contract remains valid.\nExpected batch-configuration mismatch\nPASS: recovery-04\n",
   "notebookCells": [
     {
-      "sourceHash": "811485d09365bf78a1eef1837228f610b83f7fdfd00ca56ee77018ac3f07e665",
+      "sourceHash": "34160003d633b908939c58ac6df0f2c781466de2eea5915870632a505872a1b1",
       "outputs": []
     },
     {
-      "sourceHash": "a7f162b20819430410dd08c47f8ee5ff104d182a4d6383b6acc0aa98be30e40e",
+      "sourceHash": "ec8d4d454090a36c8b05ee232c3947e769c956a1e95cfc0be4d78bb3a0c4345b",
       "outputs": []
     },
     {
-      "sourceHash": "d9655f7ab0c6314f111309d482988516a8b7d59ea1a68e4be0406d270b195c8a",
+      "sourceHash": "7d6c5aa244356c32f1d8b2ffb1bc6b1d1be85e91f438888fa9284e7b74b2a527",
       "outputs": [
         {
           "output_type": "stream",
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "sourceHash": "2522b836cec71ffdd0959b465c3b1d0b50aca2b29a87952f2a504bc84782ab6e",
+      "sourceHash": "3c77684df10551ce99d5ed92f5ecd36ad9f72cf14d2474bb6043035e41077e0c",
       "outputs": [
         {
           "output_type": "stream",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "6bc6c5c4b998a05cc1bc3407e89ccbbf9db24614bf5c4698b5aee2c68032fafc",
+      "sourceHash": "2ef0398acdfbbab8c23fe02ab6ea181a155f42b894543f84f806303a1b5c83ff",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "1ee926d0e6e135590661440872babb9a989b3e9ae1992d9841778a058491b61a",
+      "sourceHash": "d5cf9d13002d9550548c92e4f2f9b38d0284c0d1372789ab4d5f5dde2fe726a7",
       "outputs": [
         {
           "output_type": "stream",
@@ -89,19 +89,19 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "8cc5579e591626ffd1cf642b7b014ebea4e4eaa1458338bdc3d0a93d75bb7911",
       "outputs": []
     },
     {
-      "sourceHash": "844585ea431ac58ead21bec8240793f7a742341bf900fb8dd5628559acd157c0",
+      "sourceHash": "d167d53a18fd4761ad4e689b2d50b9a21a67d57c6ab01dac393a62265483d2de",
       "outputs": []
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "efa0a55ca8d1f2a688a4ebbba022e8de3a5885f8168729b476d6cbceb3e8092b",
       "outputs": []
     },
     {
-      "sourceHash": "35a868523a075c5284032cbcff2fef77a0a2a5450776810128b184a031435144",
+      "sourceHash": "d28f7b93e5a530102799dcd1f2bb7e2b59d6a63d5689a239eaa1e74225f38de3",
       "outputs": [
         {
           "output_type": "stream",
@@ -115,11 +115,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "de4d230685f1e2de3ce26b526bc59854f2ba70d2353ad2c787c883b8735b576e",
       "outputs": []
     },
     {
-      "sourceHash": "51b122cd809bd68648f7b18575dee42820bcc439f154088199c84b158b8ee9f2",
+      "sourceHash": "93ff7c48260b7ec690e6b823c1da37244af154f9277eb3c7ad1be4088fe6493e",
       "outputs": [
         {
           "output_type": "stream",

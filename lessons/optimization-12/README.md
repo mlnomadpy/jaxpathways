@@ -80,14 +80,22 @@ For the regression audit project, first document feature and target shapes, loss
 Create main.py. Use an explicit two-gradient sequence to inspect the optimizer independently of a training loop.
 
 ```python
+# Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import optax
+# Initialize array `params` with explicit values and shape.
 params = jnp.zeros(2)
+# Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
+# Run `adam.init` to compute `state`.
 state = adam.init(params)
+# Initialize array `m` with explicit values and shape.
 m = jnp.zeros(2)
+# Initialize array `v` with explicit values and shape.
 v = jnp.zeros(2)
+# Initialize array `gradients` with explicit values and shape.
 gradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]
 ```
 
@@ -98,13 +106,22 @@ The supplied gradients isolate optimizer arithmetic; they are not presented as a
 Append the manual recurrences and compare each update with Optax.
 
 ```python
+# Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
+# Iterate over `(t, g)` to step through the computation:
 for t, g in enumerate(gradients, start=1):
+    # Evaluate `m` from the current inputs and state.
     m = 0.9 * m + 0.1 * g
+    # Evaluate `v` from the current inputs and state.
     v = 0.99 * v + 0.01 * g * g
+    # Evaluate `expected` from the current inputs and state.
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
+    # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
+    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
+    # Print diagnostic summary of the computed outputs.
     print('step / update:', t, update)
 ```
 
@@ -115,12 +132,20 @@ The first update is near $(-0.1,0.1)$; the next depends on both gradients.
 Append a global clipping plus SGD chain and run python main.py.
 
 ```python
+# Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
+# Initialize array `g` with explicit values and shape.
 g = jnp.array([3.0, 4.0])
+# Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
+# Initialize array `(clipped, _)` with explicit values and shape.
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
+# Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
+# Initialize array `(update, _)` with explicit values and shape.
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 ```
 
@@ -129,31 +154,56 @@ For this SGD chain, the update norm is $0.1$. That bound does not automatically 
 ## Run the example
 
 ```python
+# Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import optax
+# Initialize array `params` with explicit values and shape.
 params = jnp.zeros(2)
+# Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
+# Run `adam.init` to compute `state`.
 state = adam.init(params)
+# Initialize array `m` with explicit values and shape.
 m = jnp.zeros(2)
+# Initialize array `v` with explicit values and shape.
 v = jnp.zeros(2)
+# Initialize array `gradients` with explicit values and shape.
 gradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]
 
+# Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
+# Iterate over `(t, g)` to step through the computation:
 for t, g in enumerate(gradients, start=1):
+    # Evaluate `m` from the current inputs and state.
     m = 0.9 * m + 0.1 * g
+    # Evaluate `v` from the current inputs and state.
     v = 0.99 * v + 0.01 * g * g
+    # Evaluate `expected` from the current inputs and state.
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
+    # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
+    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
+    # Print diagnostic summary of the computed outputs.
     print('step / update:', t, update)
 
+# Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
+# Initialize array `g` with explicit values and shape.
 g = jnp.array([3.0, 4.0])
+# Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
+# Initialize array `(clipped, _)` with explicit values and shape.
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
+# Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
+# Initialize array `(update, _)` with explicit values and shape.
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 ```
 
@@ -182,24 +232,38 @@ The dash-dot Adam curve makes the same caution especially clear. It reaches abou
 At update $50$, the losses are approximately $1.28\times10^{-4}$ for Adam, $2.96\times10^{-3}$ for SGD, and $2.49\times10^{-2}$ for momentum. Adam finishes lowest under these settings, although it was not lowest at every earlier update. Compare the same update budget, read the endpoint as well as the dips, and remember that equal update counts do not imply equal runtime. This figure uses fixed rates without clipping or a schedule; the later experiments examine those separate choices.
 
 ```python
+# Compute figure data for: Compare optimizer paths under a fixed update budget
+# Function `plot_bowl(z)` implementing this stage's computation:
 def plot_bowl(z):
+    # Return `0.5 * (z[0] ** 2 + 10 * z[1] ** 2)` to the caller.
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
+# Evaluate `series` from the current inputs and state.
 series = []
+# Loop over `(name, tx)` in `[('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]`:
 for name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]:
+    # Create device-backed JAX array `p_plot`.
     p_plot = jnp.array([1.0, 1.0])
+    # Run `tx.init` to compute `s_plot`.
     s_plot = tx.init(p_plot)
+    # Evaluate `vals` from the current inputs and state.
     vals = [float(plot_bowl(p_plot))]
+    # Repeat the update loop over `range(50)` steps:
     for _ in range(50):
+        # Differentiate the objective to obtain gradients `(delta, s_plot)`.
         delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)
+        # Apply the computed gradient updates to update the model parameters.
         p_plot = optax.apply_updates(p_plot, delta)
+        # Append the current step result to `vals`.
         vals.append(float(plot_bowl(p_plot)))
+    # Append the current step result to `series`.
     series.append({'label': name, 'y': vals})
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update', 'ylabel': 'objective', 'yscale': 'log', 'series': series}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:59:35.478915+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:02:26.411763+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -219,16 +283,28 @@ PASS: optimization-12
 **Predict before running:** List the rates used by the first five updates. Is the fifth rate already the final value?
 
 ```python
+# Experiment — Inspect the schedule boundary: A schedule is indexed by optimizer updates.
+# Configure or step the Optax optimizer state (`schedule`).
 schedule = optax.linear_schedule(init_value=0.1, end_value=0.01, transition_steps=4)
+# Initialize array `rates` with explicit values and shape.
 rates = jnp.array([schedule(i) for i in range(6)])
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)
+# Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
+# Initialize array `p` with explicit values and shape.
 p = jnp.array(0.0)
+# Run `tx.init` to compute `s`.
 s = tx.init(p)
+# Repeat the update loop over `range(5)` steps:
 for _ in range(5):
+    # Initialize array `(delta, s)` with explicit values and shape.
     delta, s = tx.update(jnp.array(1.0), s, p)
+    # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(p, -0.275, atol=1e-06)
+# Print the observed values to compare against the expected result.
 print('schedule rates:', rates)
 ```
 
@@ -241,23 +317,40 @@ A schedule is indexed by optimizer updates. Recording only the number of epochs 
 **Predict before running:** Will every optimizer produce the same path on a bowl with unequal curvature?
 
 ```python
+# Experiment — Compare a fixed update budget: This is a controlled demonstration at stated rates and update...
 def bowl(w):
+    # Return `0.5 * (w[0] ** 2 + 10 * w[1] ** 2)` to the caller.
     return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)
+# Initialize array `start` with explicit values and shape.
 start = jnp.array([1.0, 1.0])
+# Configure or step the Optax optimizer state (`optimizers`).
 optimizers = {'sgd': optax.sgd(0.05), 'momentum': optax.sgd(0.05, momentum=0.9), 'adam': optax.adam(0.1)}
+# Evaluate `traces` from the current inputs and state.
 traces = {}
+# Iterate over `(name, tx)` to step through the computation:
 for name, tx in optimizers.items():
 
+    # Define `step(carry, _)` to evaluate the objective and its automatic derivatives:
     def step(carry, _):
+        # Evaluate `(p, s)` from the current inputs and state.
         p, s = carry
+        # Differentiate the objective to obtain `(delta, s)` via automatic differentiation.
         delta, s = tx.update(jax.grad(bowl)(p), s, p)
+        # Configure or step the Optax optimizer state (`p`).
         p = optax.apply_updates(p, delta)
+        # Return `((p, s), bowl(p))` to the caller.
         return ((p, s), bowl(p))
+    # Run compiled structured control flow via `jax.lax` (`((_, _), history)`).
     (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)
+    # Confirm that all computed values remain finite (no NaN or Inf).
     assert jnp.all(jnp.isfinite(history))
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert history[-1] < bowl(start)
+    # Evaluate `traces[name]` from the current inputs and state.
     traces[name] = history
+    # Print diagnostic summary of the computed outputs.
     print(name, 'initial / final loss:', bowl(start), history[-1])
+# Verify that the numerical values match the expected reference within tolerance.
 assert not jnp.allclose(traces['sgd'], traces['adam'])
 ```
 
@@ -269,12 +362,40 @@ This is a controlled demonstration at stated rates and update counts, not eviden
 
 Compare global norm clipping with coordinate-wise clipping on $(3,4)$. Check which preserves the ratio of the coordinates.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Verify that the numerical values match the expected reference within tolerance.
+2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
+coordinate = jnp.clip(...)  # TODO: compute coordinate
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
 coordinate = jnp.clip(g, -1.0, 1.0)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])
 ```
 
@@ -292,18 +413,69 @@ The retained count has reached the final rate; a reset count starts at $0$.
 
 </details>
 
+### How to write: Catch schedule restart — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+
+**Step-by-step implementation plan:**
+1. Configure or step the Optax optimizer state (`tx`).
+2. Initialize array `p` with explicit values and shape.
+3. Run `tx.init` to compute `s`.
+4. Repeat the update loop over `range(5)` steps:
+5. Initialize array `(delta, s)` with explicit values and shape.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
+# Configure or step the Optax optimizer state (`tx`).
+tx = optax.sgd(...)  # TODO: compute tx
+# Initialize array `p` with explicit values and shape.
+p = jnp.array(...)  # TODO: compute p
+# Run `tx.init` to compute `s`.
+s = tx.init(...)  # TODO: compute s
+# Repeat the update loop over `range(5)` steps:
+for _ in range(5):
+    # Initialize array `(delta, s)` with explicit values and shape.
+    delta, s = tx.update(...)  # TODO: compute delta, s
+    # Configure or step the Optax optimizer state (`p`).
+    p = optax.apply_updates(...)  # TODO: compute p
+# Initialize array `(continued, _)` with explicit values and shape.
+continued, _ = tx.update(...)  # TODO: compute continued, _
+# Initialize array `(restarted, _)` with explicit values and shape.
+restarted, _ = tx.update(...)  # TODO: compute restarted, _
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(continued, -0.01, atol=1e-06)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
+# Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
+# Initialize array `p` with explicit values and shape.
 p = jnp.array(0.0)
+# Run `tx.init` to compute `s`.
 s = tx.init(p)
+# Repeat the update loop over `range(5)` steps:
 for _ in range(5):
+    # Initialize array `(delta, s)` with explicit values and shape.
     delta, s = tx.update(jnp.array(1.0), s, p)
+    # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
+# Initialize array `(continued, _)` with explicit values and shape.
 continued, _ = tx.update(jnp.array(1.0), s, p)
+# Initialize array `(restarted, _)` with explicit values and shape.
 restarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(continued, -0.01, atol=1e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(restarted, -0.1, atol=1e-06)
 ```
 
@@ -323,14 +495,53 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 
 </details>
 
+### How to write: Check transformation order — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
+
+**Step-by-step implementation plan:**
+1. Configure or step the Optax optimizer state (`before`).
+2. Configure or step the Optax optimizer state (`after`).
+3. Initialize array `(u_before, _)` with explicit values and shape.
+4. Initialize array `(u_after, _)` with explicit values and shape.
+5. Verify that the numerical values match the expected reference within tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
+# Configure or step the Optax optimizer state (`before`).
+before = optax.chain(...)  # TODO: compute before
+# Configure or step the Optax optimizer state (`after`).
+after = optax.chain(...)  # TODO: compute after
+# Initialize array `(u_before, _)` with explicit values and shape.
+u_before, _ = before.update(...)  # TODO: compute u_before, _
+# Initialize array `(u_after, _)` with explicit values and shape.
+u_after, _ = after.update(...)  # TODO: compute u_after, _
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
+# Configure or step the Optax optimizer state (`before`).
 before = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
+# Configure or step the Optax optimizer state (`after`).
 after = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))
+# Initialize array `(u_before, _)` with explicit values and shape.
 u_before, _ = before.update(g, before.init(jnp.zeros(2)))
+# Initialize array `(u_after, _)` with explicit values and shape.
 u_after, _ = after.update(g, after.init(jnp.zeros(2)))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)
 ```
 

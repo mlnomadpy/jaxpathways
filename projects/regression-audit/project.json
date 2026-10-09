@@ -34,7 +34,10 @@
       "command": "python3 projects/regression-audit/tests/check.py --stage 1",
       "evidence": "Shape contracts and independently checked scalar loss",
       "expected": "PASS stage 1: prediction, objective, and shape contract",
-      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction."
+      "diagnosis": "If shapes differ, inspect the model output and target axes before changing the loss reduction.",
+      "codeGuide": "In `projects/regression-audit/starter/model.py`, implement `predict(...)`, `loss(...)` using `contract`, `jnp.mean`, `predict`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 1 verifier.",
+      "starterSnippet": "def predict(params, x):\n    # Step 1: Return `params['weight'] * x + params['bias']` to the caller.\n    raise NotImplementedError('Stage 1: implement a linear prediction')\n\ndef loss(params, x, y):\n    # Key APIs to use: `contract`, `jnp.mean`, `predict`\n    # Step 1: Guard input contract (`x.shape != y.shape`) and fail fast if violated.\n    # Step 2: Return `jnp.mean((predict(params, x) - y) ** 2)` to the caller.\n    raise NotImplementedError('Stage 1: implement scalar MSE with shape checks')",
+      "solutionSnippet": "# Function `predict` reference implementation:\ndef predict(params, x):\n    # Return `params['weight'] * x + params['bias']` to the caller.\n    return params['weight'] * x + params['bias']\n\n# Function `loss` reference implementation:\ndef loss(params, x, y):\n    # Guard input contract (`x.shape != y.shape`) and fail fast if violated.\n    if x.shape != y.shape:\n        raise ValueError('Inputs and scalar targets must have matching shapes')\n    # Return `jnp.mean((predict(params, x) - y) ** 2)` to the caller.\n    return jnp.mean((predict(params, x) - y) ** 2)"
     },
     {
       "id": "2",
@@ -42,7 +45,10 @@
       "command": "python3 projects/regression-audit/tests/check.py --stage 2",
       "evidence": "Autodiff and finite differences at two settings",
       "expected": "PASS stage 2: independent gradients at two parameter settings",
-      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks."
+      "diagnosis": "If the derivative check fails, compare the stable independent loss and finite-difference tolerance. Preserve the same initialized parameters for both checks.",
+      "codeGuide": "In `projects/regression-audit/starter/model.py`, implement `gradient_check(...)` using `jax.grad`, `loss`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 2 verifier.",
+      "starterSnippet": "def gradient_check(params, x, y, h=1e-2):\n    # Key APIs to use: `jax.grad`, `loss`\n    # Step 1: Differentiate the objective to obtain gradients `automatic`.\n    # Step 2: Evaluate `finite` from the current inputs and state.\n    # Step 3: Loop over `key` in `params`:\n    # Step 4: Inside block: Evaluate `plus` from the current inputs and state.\n    # Step 5: Inside block: Evaluate `minus` from the current inputs and state.\n    # Step 6: Return `(automatic, finite)` to the caller.\n    raise NotImplementedError('Stage 2: compare autodiff with independent differences')",
+      "solutionSnippet": "# Function `gradient_check` reference implementation:\ndef gradient_check(params, x, y, h=1e-2):\n    # Differentiate the objective to obtain `automatic` via automatic differentiation.\n    automatic = jax.grad(loss)(params, x, y)\n    # Evaluate `finite` from the current inputs and state.\n    finite = {}\n    # Iterate over `key` to step through the computation:\n    for key in params:\n        # Evaluate `plus` from the current inputs and state.\n        plus = {**params, key: params[key] + h}\n        # Evaluate `minus` from the current inputs and state.\n        minus = {**params, key: params[key] - h}\n        # Evaluate `finite[key]` from the current inputs and state.\n        finite[key] = (loss(plus, x, y) - loss(minus, x, y)) / (2*h)\n    # Return `(automatic, finite)` to the caller.\n    return automatic, finite"
     },
     {
       "id": "3",
@@ -50,7 +56,10 @@
       "command": "python3 projects/regression-audit/tests/check.py --stage 3",
       "evidence": "Recovered parameters and complete loss history",
       "expected": "PASS stage 3: compiled training and parameter recovery",
-      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state."
+      "diagnosis": "If training fails, inspect the complete loss history and explicit state transition. Keep the failure output and compare held-out evaluation without mutating model state.",
+      "codeGuide": "In `projects/regression-audit/starter/model.py`, implement `train(...)` using `contract`, `step`, `jax.value_and_grad`, `PyTree`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 3 verifier.",
+      "starterSnippet": "def train(params, x, y, rate=0.15, steps=200):\n    # Key APIs to use: `contract`, `step`, `jax.value_and_grad`, `PyTree`, `tree.map`\n    # Step 1: Guard input contract (`steps < 1`) and fail fast if violated.\n    # Step 2: Function `step(p, _)` implementing this stage's computation:\n    # Step 3: Return `jax.lax.scan(step, params, None, length=steps)` to the caller.\n    raise NotImplementedError('Stage 3: carry parameters through a compiled loop')",
+      "solutionSnippet": "# Function `train` reference implementation:\ndef train(params, x, y, rate=0.15, steps=200):\n    # Guard input contract (`steps < 1`) and fail fast if violated.\n    if steps < 1:\n        raise ValueError('steps must be positive')\n    # Define `step(p, _)` to evaluate the objective and its automatic derivatives:\n    def step(p, _):\n        # Differentiate the objective to obtain `(value, gradients)` via automatic differentiation.\n        value, gradients = jax.value_and_grad(loss)(p, x, y)\n        # Transform every leaf of the parameter PyTree (`updated`).\n        updated = jax.tree.map(lambda v, g: v - rate * g, p, gradients)\n        # Return `(updated, value)` to the caller.\n        return updated, value\n    # Return `jax.lax.scan(step, params, None, length=steps)` to the caller.\n    return jax.lax.scan(step, params, None, length=steps)"
     },
     {
       "id": "4",
@@ -58,7 +67,10 @@
       "command": "python3 projects/regression-audit/tests/check.py --stage 4",
       "evidence": "Held-out performance, replay, and an unstable run",
       "expected": "PASS stage 4: held-out checks, replay, and failure diagnosis",
-      "diagnosis": "If the audit fails, separate replay, held-out checks and deliberately unstable training; a low training loss alone cannot satisfy all three."
+      "diagnosis": "If the audit fails, separate replay, held-out checks and deliberately unstable training; a low training loss alone cannot satisfy all three.",
+      "codeGuide": "In `projects/regression-audit/starter/model.py`, implement `report(...)` using `train`, `jnp.array`, `fitted.items`, `loss`. Follow the numbered `# Step 1..N` comments in the starter scaffold below before running the Stage 4 verifier.",
+      "starterSnippet": "def report(params, x, y, rate=0.15, steps=200):\n    # Key APIs to use: `train`, `jnp.array`, `fitted.items`, `loss`, `jnp.all`\n    # Step 1: Run `train` to compute `(fitted, history)`.\n    # Step 2: Create device-backed JAX array `heldout_x`.\n    # Step 3: Evaluate `heldout_y` from the current inputs and state.\n    # Step 4: Return `{'parameters': {k: float(v) for k, v in fitted.items()}, 'initial_loss': float(history[0]), 'training_loss': float(loss(fitted, x, y)), 'heldout_loss': float(loss(fitted, heldout_x, heldout_y)), 'finite': bool(jnp.all(jnp.isfinite(history))), 'steps': steps, 'learning_rate': rate, 'backend': jax.default_backend()}` to the caller.\n    raise NotImplementedError('Stage 4: report fit, held-out error, and numerical health')",
+      "solutionSnippet": "# Function `report` reference implementation:\ndef report(params, x, y, rate=0.15, steps=200):\n    # Run `train` to compute `(fitted, history)`.\n    fitted, history = train(params, x, y, rate, steps)\n    # Initialize array `heldout_x` with explicit values and shape.\n    heldout_x = jnp.array([-0.8, 0.2, 0.8])\n    # Evaluate `heldout_y` from the current inputs and state.\n    heldout_y = 2 * heldout_x + 1\n    # Return `{'parameters': {k: float(v) for k, v in fitted.items()}, 'initial_loss': float(history[0]), 'training_loss': float(loss(fitted, x, y)), 'heldout_loss': float(loss(fitted, heldout_x, heldout_y)), 'finite': bool(jnp.all(jnp.isfinite(history))), 'steps': steps, 'learning_rate': rate, 'backend': jax.default_backend()}` to the caller.\n    return {'parameters': {k: float(v) for k,v in fitted.items()},\n            'initial_loss': float(history[0]), 'training_loss': float(loss(fitted,x,y)),\n            'heldout_loss': float(loss(fitted,heldout_x,heldout_y)),\n            'finite': bool(jnp.all(jnp.isfinite(history))), 'steps': steps,\n            'learning_rate': rate, 'backend': jax.default_backend()}"
     }
   ],
   "rubric": [
@@ -68,7 +80,7 @@
     "Distinguish training fit from held-out checks",
     "Diagnose an unstable learning rate with recorded evidence"
   ],
-  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/regression-audit. Use the extracted top folder as your working directory; a full course checkout is optional for this project.",
+  "setupNote": "Extract the ZIP into a fresh folder. That folder contains requirements-cpu.txt and projects/regression-audit. Use the extracted top folder as your working directory; a full course checkout is optional for this project. Open `projects/regression-audit/starter/model.py` in your editor, implement the stage functions directly inside that file, and verify each stage with `python3 projects/regression-audit/tests/check.py --stage 1` (through `--stage 4`).",
   "workspaceFile": "projects/regression-audit/starter/model.py",
   "referenceCommand": "python3 projects/regression-audit/tests/check.py --implementation solution --stage all",
   "assessmentId": "foundations"

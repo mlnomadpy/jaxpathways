@@ -6,7 +6,7 @@ Launch and observe real local jobs, detect failures and stalls, restore complete
 
 Use a bounded failure drill and retain its raw event log. Check state and data identity before resuming; separate measured execution from hypothetical demand and pricing.
 
-**Prerequisites:** 09: Distributed training.
+**Prerequisites:** 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** Executed local CPU processes; accelerator and cluster transfer require separate validation.
 
@@ -166,7 +166,7 @@ An observable, restartable local workload.
 
 **Demonstrate:** Diagnose a failed or stalled job, restore it correctly, and justify its resource plan from recorded measurements.
 
-Project status: implemented staged practice · [Open source](../../projects/workload-operations/README.md).
+Project status: implemented staged practice · [Open source](../../projects/workload-operations/README.md). Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify all 5 stages.
 
 Additional project: [Ship a tracked and containerized model release](../../projects/engineering-release/README.md).
 

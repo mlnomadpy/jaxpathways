@@ -11,6 +11,7 @@ Complete the regression-audit project first. Its four public stage checks are us
 Use the CPU environment from the setup lesson. Record Python, JAX and NumPy versions, backend, device count and precision. Read `projects/regression-audit/README.md` and its checker. Run the public stages from the course checkout and retain the output:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python projects/regression-audit/tests/check.py --stage all --implementation starter
 ```
 

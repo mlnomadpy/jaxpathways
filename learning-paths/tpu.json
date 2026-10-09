@@ -8,6 +8,9 @@
   "source": "https://docs.jax.dev/en/latest/",
   "phaseIds": [
     "welcome",
+    "tpu",
+    "tpu-workflows",
+    "tpu-systems",
     "arrays",
     "transforms",
     "state",
@@ -50,9 +53,12 @@
       "phaseId": "transformers"
     }
   },
-  "audience": "Model builders who understand minibatches and want to connect sequence models to accelerator engineering.",
-  "firstArtifact": "A CPU run dossier with configuration, environment, events and a checkpoint that reproduces an uninterrupted run.",
+  "audience": "Model builders who want to provision TPUs, launch single-host and multi-host experiments, and connect sequence models to accelerator engineering.",
+  "firstArtifact": "A verified TPU runtime receipt, a checkpoint-resumed TPU experiment log, and a memory/precision/XProf decision dossier.",
   "focusPhaseIds": [
+    "tpu",
+    "tpu-workflows",
+    "tpu-systems",
     "transformers",
     "performance",
     "distributed",
@@ -64,8 +70,14 @@
     "text",
     "cross-modal"
   ],
-  "studyAdvice": "Start with the TPU and Google Cloud practical guide: rehearse recovery locally, understand project access and resource lifetimes, then collect actual TPU evidence when you have approved access. Continue with the TPU performance guide: compare generations, estimate training and cache memory, measure BF16/INT8 error and diagnose a warmed profile. Then build the tiny CPU Transformer and verify causal masking and held-out token loss. Restore the complete state in a fresh process, then compare real cache policies and exported prefill/decode. Follow the distributed and deployment bridge lessons before completing the harness. Use the executable TPU and multi-controller labs for later target qualification; CPU results cannot establish accelerator performance. Follow the LLMOps extension for prompt, retrieval and tool versions, evaluation cases and traces; cache throughput and application quality answer different questions. After the causal Transformer, study masked/contrastive pretraining, the RL/PPO prerequisite and post-training methods. Use training-methods for objective evidence and weight-conversion for actual PyTorch/Flax parity.",
+  "studyAdvice": "Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course.",
   "engineeringLessonIds": [
+    "tpu-01",
+    "tpu-04",
+    "tpu-02",
+    "tpu-05",
+    "tpu-03",
+    "tpu-06",
     "recovery-06",
     "deployment-07",
     "operations-07",

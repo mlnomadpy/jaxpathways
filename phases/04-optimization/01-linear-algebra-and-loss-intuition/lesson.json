@@ -5,10 +5,10 @@
   "content": {
     "problem": "Let’s build a regression prediction one row at a time. Each feature gets a weight, and a bias shifts the result. Once we can calculate three predictions ourselves, we’ll write the matrix version and its loss. This small check will help us catch a transposed array or an accidental broadcast before training begins.",
     "idea": "Represent observations as rows and features as columns. The matrix \\(X\\in\\mathbb{R}^{n\\times d}\\) contains \\(n\\) observations with \\(d\\) features each, and \\(w\\in\\mathbb{R}^{d}\\) assigns a weight to each feature. Multiplying gives one weighted sum per observation; in Python, this is `X @ w`.\n\nA scalar bias shifts every prediction, giving \\(\\hat y=Xw+b\\mathbf{1}\\), where \\(\\mathbf{1}\\) is the vector of ones. Predictions and targets should both have shape \\((n,)\\). Subtract them element by element, square the residuals and average to obtain one scalar mean squared loss. A mistaken \\((n,n)\\) residual matrix compares every prediction with every target, changing the problem even though its mean is still a scalar.",
-    "code": "import jax\nimport jax.numpy as jnp\nX = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nw = jnp.array([2., -1.])\ntargets = jnp.array([3., 0., 2.])\ndef predict(w, bias, X):\n    return X @ w + bias\ndef mse(w, bias):\n    prediction = predict(w, bias, X)\n    assert prediction.shape == targets.shape\n    return jnp.mean((prediction - targets) ** 2)\nprint(\"Predictions:\", predict(w, 1., X))\nprint(\"Loss:\", float(mse(w, 1.)))\nassert jnp.allclose(predict(w, 1., X), targets)\nassert jnp.allclose(mse(w, 1.), 0.)",
+    "code": "# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp\n# Step 2 — 2. Define the computation: predict contracts the feature axis through Xw.\n# Initialize array `X` with explicit values and shape.\nX = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\n# Initialize array `w` with explicit values and shape.\nw = jnp.array([2., -1.])\n# Initialize array `targets` with explicit values and shape.\ntargets = jnp.array([3., 0., 2.])\n# Function `predict(w, bias, X)` implementing this stage's computation:\ndef predict(w, bias, X):\n    # Return `X @ w + bias` to the caller.\n    return X @ w + bias\n# Function `mse(w, bias)` implementing this stage's computation:\ndef mse(w, bias):\n    # Run `predict` to compute `prediction`.\n    prediction = predict(w, bias, X)\n    # Verify that the output tensor shape matches our prediction.\n    assert prediction.shape == targets.shape\n    # Return `jnp.mean((prediction - targets) ** 2)` to the caller.\n    return jnp.mean((prediction - targets) ** 2)\n# Step 3 — 3. Measure and verify: Predictions: [3., 0., 2.]; Loss: 0.0.\n# Print the observed values to compare against the expected result.\nprint(\"Predictions:\", predict(w, 1., X))\n# Print diagnostic summary of the computed outputs.\nprint(\"Loss:\", float(mse(w, 1.)))\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(predict(w, 1., X), targets)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(mse(w, 1.), 0.)",
     "output": "Predictions: \\([3., 0., 2.]\\); Loss: \\(0.0\\).",
     "exercise": "Set the bias to zero. Predict each residual and calculate the loss by hand, then compare it with JAX.",
-    "solution": "residual = predict(w, 0., X) - targets\nassert jnp.allclose(residual, -jnp.ones(3))\nassert jnp.allclose(mse(w, 0.), 1.)",
+    "solution": "# Exercise solution: Set the bias to zero.\nresidual = predict(w, 0., X) - targets\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(residual, -jnp.ones(3))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(mse(w, 0.), 1.)",
     "question": "What shape should one scalar target per observation have for predictions of shape \\((n,)\\)?",
     "options": [
       "\\((n, 1)\\)",
@@ -56,21 +56,21 @@
       {
         "title": "Verify the gradient by hand",
         "prediction": "At bias zero, what are the weight and bias derivatives?",
-        "code": "gw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)\nassert jnp.allclose(gw, jnp.array([-4/3, -4/3]))\nassert jnp.allclose(gb, -2.)\nprint(\"Analytic gradients:\", gw, gb)",
+        "code": "# Experiment — Verify the gradient by hand: The matrix formula and autodiff agree for the same row-matched...\n# Differentiate the objective to obtain `(gw, gb)` via automatic differentiation.\ngw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(gw, jnp.array([-4/3, -4/3]))\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(gb, -2.)\n# Print the observed values to compare against the expected result.\nprint(\"Analytic gradients:\", gw, gb)",
         "output": "Weight gradient ≈ \\([-1.333333, -1.333333]\\); bias gradient \\(-2\\).",
         "explanation": "The matrix formula and autodiff agree for the same row-matched scalar objective."
       },
       {
         "title": "Make the silent shape error visible",
         "prediction": "Does an exact model still have zero loss against column targets?",
-        "code": "column_targets = targets[:, None]\npairwise = predict(w, 1., X) - column_targets\nassert pairwise.shape == (3, 3)\nassert jnp.allclose(jnp.mean(pairwise**2), 28/9)\nprint(\"Wrong residual shape:\", pairwise.shape)",
+        "code": "# Experiment — Make the silent shape error visible: A valid broadcast can define an unintended objective without...\ncolumn_targets = targets[:, None]\n# Run `predict` to compute `pairwise`.\npairwise = predict(w, 1., X) - column_targets\n# Verify that the output tensor shape matches our prediction.\nassert pairwise.shape == (3, 3)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(jnp.mean(pairwise**2), 28/9)\n# Print the observed values to compare against the expected result.\nprint(\"Wrong residual shape:\", pairwise.shape)",
         "output": "\\((3, 3)\\), with loss \\(28/9\\).",
         "explanation": "A valid broadcast can define an unintended objective without raising an exception."
       },
       {
         "title": "Change the reduction, predict the update",
         "prediction": "For the same three residuals, how much larger is the gradient of a sum loss than a mean loss?",
-        "code": "def mean_objective(weights):\n    return jnp.mean((X @ weights - targets)**2)\ndef sum_objective(weights):\n    return jnp.sum((X @ weights - targets)**2)\npoint = jnp.array([0.2, -0.4])\nresidual = X @ point - targets\nanalytic_mean = 2 * X.T @ residual / X.shape[0]\nassert jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)\nassert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, atol=1e-6)",
+        "code": "# Experiment — Change the reduction, predict the update: Loss reduction is part of the optimization specification.\ndef mean_objective(weights):\n    # Return `jnp.mean((X @ weights - targets) ** 2)` to the caller.\n    return jnp.mean((X @ weights - targets)**2)\n# Function `sum_objective(weights)` implementing this stage's computation:\ndef sum_objective(weights):\n    # Return `jnp.sum((X @ weights - targets) ** 2)` to the caller.\n    return jnp.sum((X @ weights - targets)**2)\n# Initialize array `point` with explicit values and shape.\npoint = jnp.array([0.2, -0.4])\n# Perform matrix contraction / projection to compute `residual`.\nresidual = X @ point - targets\n# Perform matrix contraction / projection to compute `analytic_mean`.\nanalytic_mean = 2 * X.T @ residual / X.shape[0]\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(jax.grad(mean_objective)(point), analytic_mean, atol=1e-6)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(jax.grad(sum_objective)(point), X.shape[0]*analytic_mean, atol=1e-6)",
         "output": "The sum gradient is \\(3\\) times the mean gradient.",
         "explanation": "Loss reduction is part of the optimization specification. Match it when comparing hand calculations, libraries and learning rates."
       }
@@ -81,7 +81,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Extend \\(X\\) with \\([2, -1]\\), supply its target, and check predictions using ordinary arithmetic.",
         "hint": "The new target is the dot product plus bias.",
-        "solution": "X_new = jnp.concatenate([X, jnp.array([[2., -1.]])])\ny_new = jnp.concatenate([targets, jnp.array([6.])])\nassert jnp.allclose(predict(w, 1., X_new), y_new)",
+        "solution": "# Add an unseen observation (Transfer / diagnosis): The fourth row checks a combination absent from the original...\n# Initialize array `X_new` with explicit values and shape.\nX_new = jnp.concatenate([X, jnp.array([[2., -1.]])])\n# Initialize array `y_new` with explicit values and shape.\ny_new = jnp.concatenate([targets, jnp.array([6.])])\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(predict(w, 1., X_new), y_new)",
         "explanation": "The fourth row checks a combination absent from the original three observations."
       },
       {
@@ -89,7 +89,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Write a loss that rejects mismatched prediction/target shapes. Demonstrate rejection and then restore the intended one-target-per-row format.",
         "hint": "Compare shapes before subtraction; reshape only this known scalar-target dataset.",
-        "solution": "def checked_loss(prediction, target):\n    if prediction.shape != target.shape:\n        raise ValueError(\"one target required per prediction\")\n    return jnp.mean((prediction-target)**2)\ntry:\n    checked_loss(predict(w, 1., X), column_targets)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"bad shape accepted\")\nassert checked_loss(predict(w, 1., X), column_targets[:, 0]) == 0",
+        "solution": "# Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...\ndef checked_loss(prediction, target):\n    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.\n    if prediction.shape != target.shape:\n        raise ValueError(\"one target required per prediction\")\n    # Return `jnp.mean((prediction - target) ** 2)` to the caller.\n    return jnp.mean((prediction-target)**2)\n# Run the boundary check and catch the expected exception:\ntry:\n    checked_loss(predict(w, 1., X), column_targets)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"bad shape accepted\")\n# Verify contract: `checked_loss(predict(w, 1.0, X), column_targets[:, 0]) == 0`.\nassert checked_loss(predict(w, 1., X), column_targets[:, 0]) == 0",
         "explanation": "The failure is reproduced at the boundary and the repair is verified against zero residuals."
       }
     ],
@@ -118,19 +118,19 @@
       {
         "title": "1. Prepare the inputs",
         "instruction": "Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.",
-        "code": "import jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...\n# Import jax for this computation.\nimport jax\nimport jax.numpy as jnp",
         "explanation": "This block establishes the values used by the following steps; run the completed file after step \\(3\\)."
       },
       {
         "title": "2. Define the computation",
         "instruction": "Append this block below the inputs. Before proceeding, trace which values are inputs, predictions, and state.",
-        "code": "X = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\nw = jnp.array([2., -1.])\ntargets = jnp.array([3., 0., 2.])\ndef predict(w, bias, X):\n    return X @ w + bias\ndef mse(w, bias):\n    prediction = predict(w, bias, X)\n    assert prediction.shape == targets.shape\n    return jnp.mean((prediction - targets) ** 2)",
+        "code": "# Step 2 — 2. Define the computation: predict contracts the feature axis through Xw.\n# Initialize array `X` with explicit values and shape.\nX = jnp.array([[1., 0.], [0., 1.], [1., 1.]])\n# Initialize array `w` with explicit values and shape.\nw = jnp.array([2., -1.])\n# Initialize array `targets` with explicit values and shape.\ntargets = jnp.array([3., 0., 2.])\n# Function `predict(w, bias, X)` implementing this stage's computation:\ndef predict(w, bias, X):\n    # Return `X @ w + bias` to the caller.\n    return X @ w + bias\n# Function `mse(w, bias)` implementing this stage's computation:\ndef mse(w, bias):\n    # Run `predict` to compute `prediction`.\n    prediction = predict(w, bias, X)\n    # Verify that the output tensor shape matches our prediction.\n    assert prediction.shape == targets.shape\n    # Return `jnp.mean((prediction - targets) ** 2)` to the caller.\n    return jnp.mean((prediction - targets) ** 2)",
         "explanation": "predict contracts the feature axis through \\(Xw\\). mse checks row alignment before subtraction, squares each residual, and reduces to one scalar."
       },
       {
         "title": "3. Measure and verify",
         "instruction": "Append the remaining block, then run python main.py in the terminal. Compare the printed result with the expected output below. Assertions stop execution if the contract fails.",
-        "code": "print(\"Predictions:\", predict(w, 1., X))\nprint(\"Loss:\", float(mse(w, 1.)))\nassert jnp.allclose(predict(w, 1., X), targets)\nassert jnp.allclose(mse(w, 1.), 0.)",
+        "code": "# Step 3 — 3. Measure and verify: Predictions: [3., 0., 2.]; Loss: 0.0.\n# Print the observed values to compare against the expected result.\nprint(\"Predictions:\", predict(w, 1., X))\n# Print diagnostic summary of the computed outputs.\nprint(\"Loss:\", float(mse(w, 1.)))\n# Verify that the numerical values match the expected reference within tolerance.\nassert jnp.allclose(predict(w, 1., X), targets)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert jnp.allclose(mse(w, 1.), 0.)",
         "explanation": "Predictions: \\([3., 0., 2.]\\); Loss: \\(0.0\\)."
       }
     ],
@@ -141,7 +141,7 @@
       "reading": "Each group of bars corresponds to one observation. The vertical axis contains targets and predictions, not losses. Within each group, compare the target with predictions using bias \\(1\\) and bias \\(0\\).\n\nWith bias \\(1\\), the predictions \\((3,0,2)\\) have the same heights as the targets. With bias \\(0\\), they become \\((2,-1,1)\\): every prediction is exactly one unit lower. The negative bar in the middle group is a negative prediction, not a negative squared error.",
       "connection": "The matrix-vector product produces one value per observation, and the scalar bias is added to each value. Holding the weights fixed while removing the bias therefore shifts all predictions by the same amount.\n\nFor bias \\(0\\), the prediction-minus-target residual is \\(-1\\) on every row. Squaring and averaging gives \\((1+1+1)/3=1\\). With bias \\(1\\), all residuals are zero and the mean squared loss is zero. Read the gaps between bars to understand the loss; do not average the bar heights themselves.",
       "alt": "A scalar bias shifts every prediction. Each group of bars corresponds to one observation. The vertical axis contains targets and predictions, not losses. Within each group, compare the target with predictions using bias \\(1\\) and bias \\(0\\). With bias \\(1\\), the predictions \\((3,0,2)\\) have the same heights as the targets. With bias \\(0\\), they become \\((2,-1,1)\\): every prediction is exactly one unit lower. The negative bar in the middle group is a negative prediction, not a negative squared error.",
-      "code": "visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}"
+      "code": "# Compute figure data for: A scalar bias shifts every prediction\n# Evaluate `visual_data` from the current inputs and state.\nvisual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}"
     }
   }
 }

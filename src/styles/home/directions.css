@@ -5,8 +5,9 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 0;
-  background: #fff;
-  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: var(--learning-radius);
   padding: 30px 12px;
 }
 .work-route {

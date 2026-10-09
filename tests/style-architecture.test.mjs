@@ -46,3 +46,57 @@ test('CSS imports resolve and feature rules cannot restyle the document globally
     });
   }
 });
+
+test('stylesheets have no duplicate rules, no feature !important overrides, and no dead selectors', () => {
+  const codeFiles = [...filesIn('src'), ...filesIn('scripts')].filter(
+    (file) =>
+      (/\.(astro|js|ts|py|mjs)$/.test(file) || file.endsWith('pages.json')) &&
+      !file.endsWith('.css'),
+  );
+  const allCode = codeFiles.map((file) => fs.readFileSync(file, 'utf8')).join('\n');
+  const dynamicClasses = new Set([
+    'katex-display',
+    'katex-mathml',
+    'syntax-keyword',
+    'syntax-option',
+    'syntax-string',
+    'syntax-number',
+    'syntax-variable',
+    'syntax-comment',
+    'syntax-function',
+    'syntax-builtin',
+  ]);
+  for (const file of filesIn(styles).filter((name) => name.endsWith('.css'))) {
+    const tree = postcss.parse(fs.readFileSync(file, 'utf8'), { from: file });
+    const seen = new Set();
+    const seenMedia = new Set();
+    tree.walkAtRules('media', (atRule) => {
+      const mediaKey = atRule.params.replace(/\s+/g, ' ').trim();
+      assert.ok(!seenMedia.has(mediaKey), `Duplicate @media (${mediaKey}) block in ${file}`);
+      seenMedia.add(mediaKey);
+    });
+    tree.walkRules((rule) => {
+      const scope =
+        rule.parent?.type === 'atrule' ? `@${rule.parent.name} ${rule.parent.params}` : 'root';
+      const key = `${scope} :: ${rule.selector.replace(/\s+/g, ' ')}`;
+      assert.ok(!seen.has(key), `Duplicate CSS rule in ${file}: ${key}`);
+      seen.add(key);
+      for (const [, cls] of rule.selector.matchAll(/\.([a-zA-Z0-9_-]+)/g)) {
+        if (!dynamicClasses.has(cls)) {
+          assert.ok(allCode.includes(cls), `Unused CSS class .${cls} in ${file}`);
+        }
+      }
+      for (const [, id] of rule.selector.matchAll(/#([a-zA-Z0-9_-]+)/g)) {
+        assert.ok(allCode.includes(id), `Unused CSS id #${id} in ${file}`);
+      }
+    });
+    if (!file.endsWith('accessibility.css') && !file.endsWith('reset.css')) {
+      tree.walkDecls((decl) => {
+        assert.ok(
+          !decl.important,
+          `Unexpected !important in ${file}: ${decl.prop}: ${decl.value}`,
+        );
+      });
+    }
+  }
+});

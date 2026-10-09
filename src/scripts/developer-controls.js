@@ -3,7 +3,7 @@ import { bindClipboard } from './browser-actions.js';
 export function initResourceCopy() {
   bindClipboard({
     selector: '[data-copy]',
-    source: (button) => document.getElementById(button.dataset.copy),
+    source: (button) => document.getElementById(button.dataset.copy || ''),
     feedback: (button) =>
       button.closest('.resource-code')?.querySelector('.copy-status') ||
       document.getElementById('resource-copy-status'),

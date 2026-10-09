@@ -1,5 +1,7 @@
 ---
 import ModalityTracks from '../components/paths/ModalityTracks.astro';
+import ProjectEntryCard from '../components/projects/ProjectEntryCard.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/projects.css';
@@ -15,13 +17,12 @@ const planned = course.phases.filter((phase) => !phase.projectId);
 
 <SiteLayout {...pages.projects}>
   <main id="main" class="projects-catalog">
-    <section class="projects-intro" aria-labelledby="projects-heading">
-      <h1 id="projects-heading">Projects</h1>
-      <p>Build something you can explain.</p>
-      <p class="projects-lede">
-        Choose a project, work through its stages, and keep the evidence. Every available project
-        includes starter code, a reference solution, and checks you can run on CPU.
-      </p>
+    <PageIntro
+      headingId="projects-heading"
+      edition="Hands-on verification"
+      title="Projects"
+      intro="Choose a project, work through its stages, and keep the evidence. Every available project includes starter code, a reference solution, and checks you can run on CPU."
+    >
       <p>
         Starting a new repository?{' '}
         <a href={siteUrl('project-workflow.html')}>
@@ -41,59 +42,11 @@ const planned = course.phases.filter((phase) => !phase.projectId);
           </a>
         )}
       </div>
-    </section>
+    </PageIntro>
     <section id="available" aria-labelledby="available-heading">
       <h2 id="available-heading">Ready to build</h2>
       {registry.projects.map((project) => (
-        <article class="project-entry" data-project-id={project.id}>
-          <div class="project-overview">
-            <p class="project-context">
-              {course.pathways.find((path) => path.id === project.pathwayId)?.title} /{' '}
-              {project.hardware}
-            </p>
-            <h3>{project.title}</h3>
-            <p>{project.rubric.slice(0, 2).join('. ')}.</p>
-            <div class="actions">
-              <a class="button primary" href={siteUrl(`project.html?id=${project.id}`)}>
-                Open project
-              </a>
-              <a class="button" href={siteUrl(`project-guides/${project.id}.html`)}>
-                Read guide and figures
-              </a>
-              <a class="button" href={siteUrl(`downloads/${project.id}.zip`)} download>
-                Download ZIP
-              </a>
-            </div>
-          </div>
-          <div class="project-stages">
-            <h4>Your stages</h4>
-            <ol>
-              {project.stages.map((stage) => (
-                <li>{stage.title}</li>
-              ))}
-            </ol>
-          </div>
-          <div class="project-prerequisites">
-            <h4>Before you start</h4>
-            <ul>
-              {course.phases
-                .filter((phase) =>
-                  phase.lessons.some((lesson) => project.requiredLessonIds.includes(lesson.id)),
-                )
-                .map((phase) => (
-                  <li>
-                    <a
-                      href={siteUrl(
-                        `course.html?path=${project.pathwayId}&phase=${phase.id}#phase-${phase.id}`,
-                      )}
-                    >
-                      {phase.title}
-                    </a>
-                  </li>
-                ))}
-            </ul>
-          </div>
-        </article>
+        <ProjectEntryCard project={project} />
       ))}
       <p class="projects-note">
         Passing the public checks is practice evidence. It is not an independently reviewed
@@ -115,7 +68,9 @@ const planned = course.phases.filter((phase) => !phase.projectId);
               <h3>{project.title}</h3>
               <p>{project.summary}</p>
             </div>
-            <a href={siteUrl(`project-plans/${project.id}.html`)}>Read project plan</a>
+            <a class="button" href={siteUrl(`project-plans/${project.id}.html`)}>
+              Read project plan
+            </a>
           </li>
         ))}
       </ul>
@@ -133,7 +88,10 @@ const planned = course.phases.filter((phase) => !phase.projectId);
                 <h3>{phase.project}</h3>
                 <p>{phase.title}</p>
               </div>
-              <a href={siteUrl(`course.html?phase=${phase.id}&roadmap=1#phase-${phase.id}`)}>
+              <a
+                class="button"
+                href={siteUrl(`course.html?phase=${phase.id}&roadmap=1#phase-${phase.id}`)}
+              >
                 Explore course step
               </a>
             </li>

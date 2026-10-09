@@ -70,24 +70,39 @@ Use rows for true classes and columns for predicted classes. The diagonal counts
 Create main.py. Print a training image as an $8\times8$ array if you want to inspect the task before fitting.
 
 ```python
+# Step 1 — 1. Generate two disjoint synthetic splits: Two seeds produce separate examples.
+# Import flax (nnx) for this computation.
 from flax import nnx
 import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+# Function `bars(seed, n, noise)` implementing this stage's computation:
 def bars(seed,n,noise=.08):
+    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
+    # Allocate initialized array `images` with the specified shape and dtype.
     images=np.zeros((n,8,8,1),np.float32)
+    # Initialize array `labels` with explicit values and shape.
     labels=np.arange(n,dtype=np.int32)%2
+    # Loop over `(i, label)` in `enumerate(labels)`:
     for i,label in enumerate(labels):
+        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
+        # Branch on condition `label == 0`:
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
+    # Accumulate the next contribution into `images`.
     images+=rng.normal(0,noise,images.shape).astype(np.float32)
+    # Return `(jnp.array(images), jnp.array(labels))` to the caller.
     return jnp.array(images),jnp.array(labels)
+# Run `bars` to compute `(train_x, train_y)`.
 train_x,train_y=bars(20,48)
+# Run `bars` to compute `(test_x, test_y)`.
 test_x,test_y=bars(21,24)
+# Verify that the output tensor shape matches our prediction.
 assert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))
 ```
 
@@ -98,27 +113,50 @@ Two seeds produce separate examples. Both labels are balanced by construction; n
 Append the small CNN and the patch dot-product check before defining an optimizer.
 
 ```python
+# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
+    # Function `__init__(self)` implementing this stage's computation:
     def __init__(self):
+        # Run `nnx.Rngs` to compute `rngs`.
         rngs=nnx.Rngs(0)
+        # Combine or mask array elements to form `self.conv`.
         self.conv=nnx.Conv(1,4,(3,3),padding='VALID',rngs=rngs)
+        # Run `nnx.Linear` to compute `self.head`.
         self.head=nnx.Linear(4,2,rngs=rngs)
+    # Function `__call__(self, x)` implementing this stage's computation:
     def __call__(self,x):
+        # Apply nonlinear activation or probability normalization to compute `features`.
         features=jnp.mean(nnx.relu(self.conv(x)),axis=(1,2))
+        # Return `self.head(features)` to the caller.
         return self.head(features)
+# Run `BarCNN` to compute `model`.
 model=BarCNN()
+# Run `model.conv` to compute `raw`.
 raw=model.conv(train_x[:1])
+# Verify that the output tensor shape matches our prediction.
 assert raw.shape==(1,6,6,4)
+# Convert `patch` to a host NumPy array for inspection or verification.
 patch=np.asarray(train_x[0,:3,:3,:])
+# Convert `kernel` to a host NumPy array for inspection or verification.
 kernel=np.asarray(model.conv.kernel[...])
+# Aggregate array values to compute `expected`.
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
+# Function `loss(m, x, y)` implementing this stage's computation:
+# Return `jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x), y))` to the caller.
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
+# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
+# Function `train_step(m, o, x, y)` implementing this stage's computation:
 def train_step(m,o,x,y):
+    # Evaluate both scalar loss and parameter gradients in one pass (`(value, grads)`).
     value,grads=nnx.value_and_grad(loss)(m,x,y)
+    # Update state in place with the new values.
     o.update(m,grads)
+    # Return `value` to the caller.
     return value
 ```
 
@@ -129,18 +167,33 @@ The first output at $(0,0)$ consumes exactly the top-left $3\times3$ patch. The 
 Append $80$ full-batch updates, stable NumPy loss, and confusion accounting. Every update uses only train_x/train_y.
 
 ```python
+# Step 3 — 3. Fit, then measure the held-out split once: The output is a measured CPU result for synthetic bars.
 initial=float(loss(model,train_x,train_y))
+# Repeat the update loop over `range(80)` steps:
+# Execute the next step of the computation.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
+# Convert `scores` to a host NumPy array for inspection or verification.
+# Convert `labels` to a host NumPy array for inspection or verification.
 scores=np.asarray(model(test_x));labels=np.asarray(test_y)
+# Run `scores.argmax` to compute `predictions`.
 predictions=scores.argmax(axis=-1)
+# Reduce along axis=-1 to compute `shifted`.
 shifted=scores-scores.max(axis=-1,keepdims=True)
+# Reduce along axis=-1 to compute `reference_loss`.
 reference_loss=np.mean(np.log(np.exp(shifted).sum(axis=-1))-shifted[np.arange(len(labels)),labels])
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(loss(model,test_x,test_y),reference_loss,rtol=1e-5,atol=1e-6)
+# Allocate initialized array `confusion` with the specified shape and dtype.
 confusion=np.zeros((2,2),dtype=int)
+# Run `np.add.at` to perform the next check or state transition.
 np.add.at(confusion,(labels,predictions),1)
+# Aggregate array values to compute `accuracy`.
 accuracy=np.mean(predictions==labels)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert confusion.sum()==24 and np.isclose(np.trace(confusion)/24,accuracy)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert accuracy>=.9 and float(loss(model,train_x,train_y))<initial*.3
+# Print diagnostic summary of the computed outputs.
 print('Held-out loss:',reference_loss,'accuracy:',accuracy,'confusion:\n',confusion)
 ```
 
@@ -149,61 +202,114 @@ The output is a measured CPU result for synthetic bars. No MNIST, TPU, or throug
 ## Run the example
 
 ```python
+# Step 1 — 1. Generate two disjoint synthetic splits: Two seeds produce separate examples.
+# Import flax (nnx) for this computation.
 from flax import nnx
 import jax
 import jax.numpy as jnp
 import numpy as np
 import optax
+# Function `bars(seed, n, noise)` implementing this stage's computation:
 def bars(seed,n,noise=.08):
+    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
+    # Allocate initialized array `images` with the specified shape and dtype.
     images=np.zeros((n,8,8,1),np.float32)
+    # Initialize array `labels` with explicit values and shape.
     labels=np.arange(n,dtype=np.int32)%2
+    # Loop over `(i, label)` in `enumerate(labels)`:
     for i,label in enumerate(labels):
+        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
+        # Branch on condition `label == 0`:
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
+    # Accumulate the next contribution into `images`.
     images+=rng.normal(0,noise,images.shape).astype(np.float32)
+    # Return `(jnp.array(images), jnp.array(labels))` to the caller.
     return jnp.array(images),jnp.array(labels)
+# Run `bars` to compute `(train_x, train_y)`.
 train_x,train_y=bars(20,48)
+# Run `bars` to compute `(test_x, test_y)`.
 test_x,test_y=bars(21,24)
+# Verify that the output tensor shape matches our prediction.
 assert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))
 
+# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
+    # Function `__init__(self)` implementing this stage's computation:
     def __init__(self):
+        # Run `nnx.Rngs` to compute `rngs`.
         rngs=nnx.Rngs(0)
+        # Combine or mask array elements to form `self.conv`.
         self.conv=nnx.Conv(1,4,(3,3),padding='VALID',rngs=rngs)
+        # Run `nnx.Linear` to compute `self.head`.
         self.head=nnx.Linear(4,2,rngs=rngs)
+    # Function `__call__(self, x)` implementing this stage's computation:
     def __call__(self,x):
+        # Apply nonlinear activation or probability normalization to compute `features`.
         features=jnp.mean(nnx.relu(self.conv(x)),axis=(1,2))
+        # Return `self.head(features)` to the caller.
         return self.head(features)
+# Run `BarCNN` to compute `model`.
 model=BarCNN()
+# Run `model.conv` to compute `raw`.
 raw=model.conv(train_x[:1])
+# Verify that the output tensor shape matches our prediction.
 assert raw.shape==(1,6,6,4)
+# Convert `patch` to a host NumPy array for inspection or verification.
 patch=np.asarray(train_x[0,:3,:3,:])
+# Convert `kernel` to a host NumPy array for inspection or verification.
 kernel=np.asarray(model.conv.kernel[...])
+# Aggregate array values to compute `expected`.
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
+# Function `loss(m, x, y)` implementing this stage's computation:
+# Return `jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x), y))` to the caller.
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
+# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
+# Function `train_step(m, o, x, y)` implementing this stage's computation:
 def train_step(m,o,x,y):
+    # Evaluate both scalar loss and parameter gradients in one pass (`(value, grads)`).
     value,grads=nnx.value_and_grad(loss)(m,x,y)
+    # Update state in place with the new values.
     o.update(m,grads)
+    # Return `value` to the caller.
     return value
 
+# Step 3 — 3. Fit, then measure the held-out split once: The output is a measured CPU result for synthetic bars.
 initial=float(loss(model,train_x,train_y))
+# Repeat the update loop over `range(80)` steps:
+# Execute the next step of the computation.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
+# Convert `scores` to a host NumPy array for inspection or verification.
+# Convert `labels` to a host NumPy array for inspection or verification.
 scores=np.asarray(model(test_x));labels=np.asarray(test_y)
+# Run `scores.argmax` to compute `predictions`.
 predictions=scores.argmax(axis=-1)
+# Reduce along axis=-1 to compute `shifted`.
 shifted=scores-scores.max(axis=-1,keepdims=True)
+# Reduce along axis=-1 to compute `reference_loss`.
 reference_loss=np.mean(np.log(np.exp(shifted).sum(axis=-1))-shifted[np.arange(len(labels)),labels])
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(loss(model,test_x,test_y),reference_loss,rtol=1e-5,atol=1e-6)
+# Allocate initialized array `confusion` with the specified shape and dtype.
 confusion=np.zeros((2,2),dtype=int)
+# Run `np.add.at` to perform the next check or state transition.
 np.add.at(confusion,(labels,predictions),1)
+# Aggregate array values to compute `accuracy`.
 accuracy=np.mean(predictions==labels)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert confusion.sum()==24 and np.isclose(np.trace(confusion)/24,accuracy)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert accuracy>=.9 and float(loss(model,train_x,train_y))<initial*.3
+# Print diagnostic summary of the computed outputs.
 print('Held-out loss:',reference_loss,'accuracy:',accuracy,'confusion:\n',confusion)
 ```
 
@@ -230,12 +336,14 @@ The upper-left confusion cell counts horizontal images classified as horizontal;
 Use the sample image to understand the task and the confusion matrix to understand the observed errors. The single image cannot establish accuracy, and a zero in the matrix means no observed mistakes of that kind in this set, not that such a mistake is impossible. This is a small synthetic stripe task, not evidence of general image recognition.
 
 ```python
+# Compute figure data for: See the image task and its classification errors
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-out image 0', 'values': test_x[0, :, :, 0].tolist(), 'unit': 'pixel value'}, {'kind': 'heatmap', 'title': 'Held-out confusion', 'values': confusion.tolist(), 'rows': ['actual horizontal', 'actual vertical'], 'columns': ['pred. horizontal', 'pred. vertical'], 'unit': 'example count'}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:00:00.984456+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:02:48.989253+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:
@@ -256,9 +364,13 @@ PASS: networks-04
 **Predict before running:** If the spatial location changes to $(2,3)$, which input patch produces that output?
 
 ```python
+# Experiment — Trace a second patch and a second filter: The same learned filter is reused at each valid location;...
 patch=np.asarray(test_x[0,2:5,3:6,:])
+# Convert `weights` to a host NumPy array for inspection or verification.
 weights=np.asarray(model.conv.kernel[...])[:,:,:,2]
+# Aggregate array values to compute `expected`.
 expected=np.sum(patch*weights)+np.asarray(model.conv.bias[...])[2]
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(model.conv(test_x[:1])[0,2,3,2],expected,rtol=1e-5,atol=1e-6)
 ```
 
@@ -271,11 +383,17 @@ The same learned filter is reused at each valid location; changing the output co
 **Predict before running:** On a balanced held-out split, what is the accuracy of always predicting class zero?
 
 ```python
+# Experiment — Predict the chance classifier: A majority or constant-label baseline is part of evaluation.
 always_zero=np.zeros_like(labels)
+# Aggregate array values to compute `baseline`.
 baseline=np.mean(always_zero==labels)
+# Verify contract: `baseline == 0.5`.
 assert baseline==.5
+# Allocate initialized array `baseline_confusion` with the specified shape and dtype.
 baseline_confusion=np.zeros((2,2),dtype=int)
+# Run `np.add.at` to perform the next check or state transition.
 np.add.at(baseline_confusion,(labels,always_zero),1)
+# Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(baseline_confusion,np.array([[12,0],[12,0]]))
 ```
 
@@ -287,12 +405,43 @@ A majority or constant-label baseline is part of evaluation. A good-looking clas
 
 Apply the trained model to one $10\times10$ image. Predict intermediate shape and parameter count before executing. Do not claim accuracy from an unlabeled input.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+
+**Step-by-step implementation plan:**
+1. Initialize array `larger` with explicit values and shape.
+2. Verify that the output tensor shape matches our prediction.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Apply the trained model to one 10\times10 image.
+# Initialize array `larger` with explicit values and shape.
+larger = jnp.zeros(...)  # TODO: compute larger
+# Verify that the output tensor shape matches our prediction.
+assert model.conv(larger).shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert model(larger).shape  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert sum(a.size for a  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Apply the trained model to one 10\times10 image.
+# Initialize array `larger` with explicit values and shape.
 larger=jnp.zeros((1,10,10,1));larger=larger.at[0,4,:,0].set(1.)
+# Verify that the output tensor shape matches our prediction.
 assert model.conv(larger).shape==(1,8,8,4)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert model(larger).shape==(1,2)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert sum(a.size for a in jax.tree.leaves(nnx.state(model,nnx.Param)))==50
 ```
 
@@ -310,18 +459,68 @@ Keep the integer counts; a normalized row without a count hides how much evidenc
 
 </details>
 
+### How to write: Read a confusion matrix as conditional rates — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Reduce along axis=1 to compute `counts`.
+2. Combine or mask array elements to form `rates`.
+3. Allocate initialized array `` with the specified shape and dtype.
+4. Reduce across the target axis to summarize ``.
+5. Initialize array `missing` with explicit values and shape.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Read a confusion matrix as conditional rates (Transfer): Each row asks where examples of one true class went.
+# Reduce along axis=1 to compute `counts`.
+counts = confusion.sum(...)  # TODO: compute counts
+# Combine or mask array elements to form `rates`.
+rates = np.divide(...)  # TODO: compute rates
+# Allocate initialized array `` with the specified shape and dtype.
+np.testing.assert_allclose(rates.sum(axis = ...  # TODO: compute np.testing.assert_allclose(rates.sum(axis
+# Reduce across the target axis to summarize ``.
+np.testing.assert_allclose((np.diag(rates)*counts).sum()/counts.sum(),accuracy)
+# Initialize array `missing` with explicit values and shape.
+missing = np.array(...)  # TODO: compute missing
+# Reduce along axis=1 to compute `n`.
+n = missing.sum(...)  # TODO: compute n
+# Combine or mask array elements to form `missing_rates`.
+missing_rates = np.divide(...)  # TODO: compute missing_rates
+# Verify contract: `np.isnan(missing_rates[1]).all()`.
+assert np.isnan(missing_rates[1]).all()  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('True-class counts:',counts,'row-normalized confusion:',rates)
+# Print diagnostic summary of the computed outputs.
+print('Absent class recall: undefined, not zero.')
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Read a confusion matrix as conditional rates (Transfer): Each row asks where examples of one true class went.
+# Reduce along axis=1 to compute `counts`.
 counts=confusion.sum(axis=1)
+# Combine or mask array elements to form `rates`.
 rates=np.divide(confusion,counts[:,None],out=np.full(confusion.shape,np.nan),where=counts[:,None]!=0)
+# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_allclose(rates.sum(axis=1),np.ones(2))
+# Reduce across the target axis to summarize ``.
 np.testing.assert_allclose((np.diag(rates)*counts).sum()/counts.sum(),accuracy)
+# Initialize array `missing` with explicit values and shape.
 missing=np.array([[3,1],[0,0]])
+# Reduce along axis=1 to compute `n`.
 n=missing.sum(axis=1)
+# Combine or mask array elements to form `missing_rates`.
 missing_rates=np.divide(missing,n[:,None],out=np.full(missing.shape,np.nan),where=n[:,None]!=0)
+# Verify contract: `np.isnan(missing_rates[1]).all()`.
 assert np.isnan(missing_rates[1]).all()
+# Print the observed values to compare against the expected result.
 print('True-class counts:',counts,'row-normalized confusion:',rates)
+# Print diagnostic summary of the computed outputs.
 print('Absent class recall: undefined, not zero.')
 ```
 
@@ -341,15 +540,51 @@ The final axis is the input-channel dimension for NNX Conv.
 
 </details>
 
+### How to write: Catch a channel-order mistake — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+2. Evaluate `caught` from the current inputs and state.
+3. Run the boundary check and catch the expected exception:
+4. Verify contract: `caught`.
+5. Rearrange tensor axes to match the required layout for `repaired`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+wrong = jnp.transpose(...)  # TODO: compute wrong
+# Evaluate `caught` from the current inputs and state.
+caught = ...  # TODO: compute caught
+# Run the boundary check and catch the expected exception:
+try:model(wrong)
+except (ValueError,TypeError):caught=True
+# Verify contract: `caught`.
+assert caught  # TODO: complete assertion check
+# Rearrange tensor axes to match the required layout for `repaired`.
+repaired = jnp.transpose(...)  # TODO: compute repaired
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
 wrong=jnp.transpose(test_x[:2],(0,3,1,2))
+# Evaluate `caught` from the current inputs and state.
 caught=False
+# Run the boundary check and catch the expected exception:
 try:model(wrong)
 except (ValueError,TypeError):caught=True
+# Verify contract: `caught`.
 assert caught
+# Rearrange tensor axes to match the required layout for `repaired`.
 repaired=jnp.transpose(wrong,(0,2,3,1))
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)
 ```
 

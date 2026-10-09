@@ -1,20 +1,19 @@
 ---
+import PageIntro from '../components/shared/PageIntro.astro';
+import SiteFooter from '../components/shared/SiteFooter.astro';
 import '../styles/tokens.css';
 import '../styles/base.css';
 import '../styles/features/project.css';
 import SiteLayout from '../layouts/SiteLayout.astro';
-import { siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
 ---
 
 <SiteLayout {...pages.project}>
-  <main>
-    <a class="text-link" href={siteUrl('projects.html')}>
-      All projects
-    </a>
+  <main id="main">
     <section id="project">
-      <h1>Loading project…</h1>
+      <PageIntro backHref="projects.html" backLabel="All projects" title="Loading project…" />
     </section>
+    <SiteFooter />
   </main>
   <script>
     import '../scripts/entries/project.js';

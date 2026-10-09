@@ -1,0 +1,36 @@
+---
+import { siteUrl } from '../../lib/urls.js';
+
+interface Props {
+  backHref?: string;
+  backLabel?: string;
+  edition?: string;
+  headingId?: string;
+  title?: string;
+  intro?: string;
+  introClass?: string;
+}
+
+const {
+  backHref = 'index.html',
+  backLabel = 'Home',
+  edition,
+  headingId,
+  title,
+  intro,
+  introClass = 'intro',
+} = Astro.props;
+---
+
+<div class="page-intro">
+  {(backHref || edition) && (
+    <p class="page-eyebrow">
+      {backHref && <a href={siteUrl(backHref)}>{backLabel}</a>}
+      {backHref && edition && <span aria-hidden="true"> · </span>}
+      {edition && <span>{edition}</span>}
+    </p>
+  )}
+  {Astro.slots.has('title') ? <slot name="title" /> : <h1 id={headingId}>{title}</h1>}
+  {intro && <p class={introClass || undefined}>{intro}</p>}
+  <slot />
+</div>

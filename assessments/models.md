@@ -12,6 +12,7 @@ Complete `networks-01` through `networks-05`, the classifier project, the recove
 Use the tested CPU environment and record Python, JAX, NumPy, Flax and Optax versions, actual backend/device count and dtype. From the checkout, run:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python projects/mlp-classifier/tests/check.py --stage 3 --implementation projects/mlp-classifier/my_model.py
 ```
 

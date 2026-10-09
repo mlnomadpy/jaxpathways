@@ -6,7 +6,7 @@ Partition arrays and training updates, compare all-reduce with reduce-scatter, a
 
 Compare against a single-device reference; measure real accelerator performance separately.
 
-**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis.
+**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** Logical CPU devices for sharding practice; multi-host work needs a real cluster.
 
@@ -114,7 +114,7 @@ A resilient sharded training experiment.
 
 **Demonstrate:** Explain partitioning, communication costs, and recovery behavior with measured evidence.
 
-Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence.
+Project status: implemented staged practice · [Open source](../../projects/sharded-training/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4.
 
 
 

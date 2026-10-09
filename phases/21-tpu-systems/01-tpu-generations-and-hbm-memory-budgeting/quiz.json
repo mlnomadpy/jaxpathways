@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-03",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "What does a TPU generation's Roofline ridge point (`bf16_tflops / bw_gbs` in FLOPs/byte) tell you about a kernel?",
+      "options": [
+        "How many SSH keys can connect to the TPU VM",
+        "The minimum FLOPs performed per byte transferred from HBM required to become MXU compute-bound rather than HBM bandwidth-bound",
+        "How long `gcloud compute tpus tpu-vm create` takes to provision"
+      ],
+      "correct": 1,
+      "explanation": "Below the ridge point, execution speed is limited by HBM memory bandwidth; above the ridge point, execution is limited by MXU matrix compute throughput."
+    }
+  ]
+}

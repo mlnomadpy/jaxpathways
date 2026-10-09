@@ -1,5 +1,6 @@
 import { courseState, phaseById } from '../lib/course-state.js';
 import { $ } from '../lib/dom.js';
+import { lessonLink } from '../lib/urls.js';
 import { renderDomains } from '../lib/views/domains.js';
 import { initCareers } from './careers.js';
 import { initPathways } from './pathways.js';
@@ -17,7 +18,7 @@ function startPath(id) {
     .flatMap((id) => phaseById(id).lessons)
     .find((l) => l.status === 'authored');
   location.href = lesson
-    ? `lesson.html?path=${encodeURIComponent(id)}&lesson=${encodeURIComponent(lesson.id)}`
+    ? lessonLink(lesson.id, id)
     : `course.html?path=${encodeURIComponent(id)}&roadmap=1`;
 }
 

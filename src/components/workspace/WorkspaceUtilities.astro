@@ -1,0 +1,53 @@
+---
+import { siteUrl } from '../../lib/urls.js';
+---
+
+<details class="workspace-utility">
+  <summary>Prepare a review packet</summary>
+  <section id="review-handoff" class="review-handoff" aria-labelledby="review-heading">
+    <p class="edition">Prepare for human feedback</p>
+    <h2 id="review-heading">Make a review packet</h2>
+    <p>
+      Download the artifacts currently shown above as a Markdown document. It includes your reported
+      observations, associated lesson/project criteria, expected stage output, and blank fields for
+      someone who independently inspects the work.
+    </p>
+    <p id="review-count">Loading artifact selection…</p>
+    <button id="review-export" aria-describedby="review-count">
+      Download review packet
+    </button>
+    <p id="review-status" role="status"></p>
+    <p class="soft">
+      You choose whether and where to share this file. Preparing it does not send a review request,
+      verify your code, or change progress. Attach the actual code and output files separately.
+    </p>
+  </section>
+</details>
+<details class="workspace-utility" id="backup-panel">
+  <summary>Data & backup</summary>
+  <section id="backups" class="backup-area" aria-labelledby="backup-heading">
+    <p class="edition">Take your work with you</p>
+    <h2 id="backup-heading">Back up this workspace</h2>
+    <p>
+      This browser stores your records locally. A version-2 JSON backup includes artifacts, lesson
+      checkpoints and exercise ticks, project stage reports, your career plan, and saved reading
+      positions. Import merges existing records and accepts the earlier notebook format.
+    </p>
+    <div class="backup-actions">
+      <button id="export">Download backup</button>
+      <button id="import-button">Import JSON backup</button>
+      <input type="file" id="import" accept="application/json,.json" hidden />
+    </div>
+    <div id="restore-preview" hidden></div>
+    <p id="backup-status" role="status"></p>
+    <p class="soft">
+      Links in a backup do not copy the linked code or notebooks. Keep those files separately.
+      Clearing browser data can erase local records.
+    </p>
+  </section>
+</details>
+<aside class="organizer-link">
+  <h3>Learning with a group?</h3>
+  <p>Use actual lesson estimates and see work that does not fit the schedule.</p>
+  <a href={siteUrl('organizer.html')}>Open the learning club planner →</a>
+</aside>

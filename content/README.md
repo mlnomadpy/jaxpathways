@@ -19,7 +19,7 @@ An authored lesson needs a narrative, runnable code, expected results, exercises
 
 ## Reusing the existing notebook topics
 
-The training notebook belongs to phase 05; recovery to phase 06; profiling to phase 08. Their files are still unavailable here. Split them into concept-sized companion labs when imported, preserving one integration exercise for each phase. Do not repeat setup and foundational teaching inside every notebook.
+The training lessons belong to phase 05; recovery to phase 06; profiling to phase 08. Each phase splits its material into concept-sized companion labs generated from canonical `lesson.json` sources, preserving an integration project for each phase without repeating setup and foundational teaching inside every notebook.
 
 `npm run curriculum:docs` renders lesson Markdown, Python scripts, notebooks, `CURRICULUM.md`, and phase READMEs for reading on GitHub. These are generated from the same manifest as the website.
 

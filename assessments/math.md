@@ -9,8 +9,12 @@ Create `math_assessment.py` and a report. Write predictions before execution, th
 Use the three-row design matrix and target vector below. The first column is a constant feature; both entries of the weight vector are parameters.
 
 ```python
+# Reference snippet
+# Evaluate `X` from the current inputs and state.
 X = [[1., 0.], [1., 1.], [1., 2.]]
+# Evaluate `y` from the current inputs and state.
 y = [1., 2., 2.]
+# Evaluate `w0` from the current inputs and state.
 w0 = [0., 0.]
 ```
 

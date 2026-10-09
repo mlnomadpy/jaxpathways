@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-08",
-  "contentHash": "31317f8f9d4354ebf28ef91dd3dcde14068ddc49ee52a9f10164d7a10ea73c59",
-  "executedAt": "2026-10-06T23:05:43.620762+00:00",
+  "contentHash": "4a8d3526fe2b2c6c40c67de2d333a1b36437e7c333655c6d97444c9f02aaf521",
+  "executedAt": "2026-10-08T14:07:41.936954+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nAccepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nExpiry is exclusive: 199 accepted, 200 rejected.\nChanged evaluation invalidates the old approval.\nOwnership change requires renewed review.\nPASS: operations-08\n",
   "notebookCells": [
     {
-      "sourceHash": "76d4f30fefdeb52ae21cc5f7e9a0ba6b0a06c6c7854c5e6b0aafc0d57868ad75",
+      "sourceHash": "b79aa01e989e01f2b5e2f166c91e093a32ad99a688f9015494aee4887b77f033",
       "outputs": []
     },
     {
-      "sourceHash": "1eb4600bded272f30ae34f2e9a0ef4828a18b27f4b204b762c7e3ca6d820a3d0",
+      "sourceHash": "4e0e82cbbb197ca486bbb4ac3eed1cb67f3128e50640844933a1647a3d264cca",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "96f9aa6fa7aa4af020b7985784619a9b16c1b76594e7bdcbc14938fa38345d84",
+      "sourceHash": "a6af05bba1c16a813da3dfecfa3577297ebfddb659b80185b049a1e665c2729c",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "ced348c253ac182908f9298b2919328aacc98a190b12ae36c22f2d95b45eeccd",
+      "sourceHash": "6bb233642b3b565283f403f8cf283b5b4e040d9dac920043e9937fa87b09d9cd",
       "outputs": []
     },
     {
@@ -63,7 +63,7 @@
       ]
     },
     {
-      "sourceHash": "ff00417ff5afcd941a697cf9817317a3a652345a27fa188e928a1b13135c6883",
+      "sourceHash": "de5e8f5cf8363474a5b1ef3139071b358274168cefc6e2decfe770a0727f73f5",
       "outputs": [
         {
           "output_type": "stream",
@@ -75,11 +75,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "be05faf0a77491a8e4c663ef972b3939496d26ec883c7c09dc2ff650e251dec2",
       "outputs": []
     },
     {
-      "sourceHash": "828de058571fea95690c5ae3d76d6b0de452c168267a5b2bfd5fe9bd81989133",
+      "sourceHash": "d33e7fde9482ad3ca4bf13390489c59cb08512d9720e4c9f1c1f1308a16014a8",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "599660a6e3068a5e3f2964010b4569f49d737743b86835e798d8689897fc24ac",
       "outputs": []
     },
     {
-      "sourceHash": "cef839013c02edc0f55a88c72f2ccdeff57ccd04bf3bb8168f7dbc665a405e32",
+      "sourceHash": "15f72cb759232815887b1b8f900c6d80796b30c652eae3ae40a11c2e755adacb",
       "outputs": [
         {
           "output_type": "stream",

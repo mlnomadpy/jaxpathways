@@ -114,7 +114,7 @@ A differentiable inverse problem.
 
 **Demonstrate:** Recover a known physical parameter and report error, stability, and gradient checks.
 
-Project status: implemented staged practice · [Open source](../../projects/scientific-inverse/README.md).
+Project status: implemented staged practice · [Open source](../../projects/scientific-inverse/README.md). Copy `projects/scientific-inverse/starter/model.py` to `projects/scientific-inverse/my_model.py` and write your code in `projects/scientific-inverse/my_model.py`. Run `python3 projects/scientific-inverse/tests/check.py --implementation projects/scientific-inverse/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 
 

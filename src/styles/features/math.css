@@ -4,8 +4,8 @@
   overflow-x: auto;
   padding: 14px 8px;
   margin: 20px 0;
-  border-left: 3px solid var(--violet, #6043c4);
-  background: var(--panel, #fff);
+  border-left: 3px solid var(--violet);
+  background: var(--panel);
   break-inside: avoid;
 }
 .math-display .katex-display {
@@ -16,8 +16,8 @@
   text-align: left;
 }
 .math-display:focus-visible {
-  outline: 2px solid var(--violet, #6043c4);
-  outline-offset: 3px;
+  outline: 3px solid var(--focus);
+  outline-offset: 4px;
 }
 .katex {
   font-size: 1.08em;

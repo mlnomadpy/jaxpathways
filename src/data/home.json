@@ -6,7 +6,7 @@
     "actions": [
       {
         "label": "Start the course",
-        "href": "lesson.html?lesson=welcome-01"
+        "href": "lesson-welcome-01.html"
       },
       {
         "label": "Explore learning paths",

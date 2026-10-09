@@ -69,19 +69,33 @@ Prefetching can overlap preparation and consumption, but its benefit depends on 
 Create main.py in your course workspace. Use the tested course environment and add this block first.
 
 ```python
+# Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
+# Import numpy for this computation.
 import numpy as np
 import grain.python as grain
+# Define `TutorialSource` module / container with explicit state and forward pass:
 class TutorialSource:
+    # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
+        # Evaluate `self.count` from the current inputs and state.
         self.count = count
+    # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
+        # Return `self.count` to the caller.
         return self.count
+    # Function `__getitem__(self, index)` implementing this stage's computation:
     def __getitem__(self,index):
+        # Cast or evaluate `value` in explicit floating-point precision.
         value = np.float32(index/10)
+        # Return `{'id': np.int64(index), 'x': value, 'y': np.float32(2 * value - 1)}` to the caller.
         return {"id":np.int64(index),"x":value,"y":np.float32(2*value-1)}
+    # Function `__repr__(self)` implementing this stage's computation:
     def __repr__(self):
+        # Return `f'TutorialSource(v1,n={self.count})'` to the caller.
         return f"TutorialSource(v1,n={self.count})"
+# Function `make_loader(seed, batch_size, count, drop_remainder)` implementing this stage's computation:
 def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
+    # Return `grain.DataLoader(data_source=TutorialSource(count), sampler=grain.IndexSampler(num_records=count, num_epochs=2, shuffle=True, seed=seed), operations=[grain.Batch(batch_size, drop_remainder=drop_remainder)], worker_count=0)` to the caller.
     return grain.DataLoader(
         data_source=TutorialSource(count),
         sampler=grain.IndexSampler(num_records=count,num_epochs=2,shuffle=True,seed=seed),
@@ -96,13 +110,21 @@ This setup makes the dataset and software assumptions explicit. No external data
 Append this block to the same file; follow the named state objects through each function.
 
 ```python
+# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 loader = make_loader()
+# Run `iter` to compute `iterator`.
 iterator = iter(loader)
+# Run `next` to compute `first_batch`.
 first_batch = next(iterator)
+# Run `iterator.get_state` to compute `snapshot`.
 snapshot = iterator.get_state()
+# Run `next` to compute `second_batch`.
 second_batch = next(iterator)
+# Run `iter` to compute `restored_iterator`.
 restored_iterator = iter(make_loader())
+# Run `restored_iterator.set_state` to perform the next check or state transition.
 restored_iterator.set_state(snapshot)
+# Run `next` to compute `replayed_batch`.
 replayed_batch = next(restored_iterator)
 ```
 
@@ -113,16 +135,27 @@ The function boundaries expose which inputs determine the next output and which 
 Append the checks, save main.py and run python main.py. Predict what should agree before running.
 
 ```python
+# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
+# Iterate over `key` to step through the computation:
 for key in ("x","y"):
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
+# Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
+# Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
+# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
+# Print the observed values to compare against the expected result.
 print("First IDs:",first_batch["id"].tolist())
+# Print diagnostic summary of the computed outputs.
 print("Next IDs:",second_batch["id"].tolist())
+# Print diagnostic summary of the computed outputs.
 print("Iterator state bytes:",len(snapshot))
+# Print diagnostic summary of the computed outputs.
 print("Restored next batch matches")
 ```
 
@@ -131,44 +164,77 @@ The comparison checks the next behavior, not merely whether a save call succeede
 ## Run the example
 
 ```python
+# Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
+# Import numpy for this computation.
 import numpy as np
 import grain.python as grain
+# Define `TutorialSource` module / container with explicit state and forward pass:
 class TutorialSource:
+    # Function `__init__(self, count)` implementing this stage's computation:
     def __init__(self,count=12):
+        # Evaluate `self.count` from the current inputs and state.
         self.count = count
+    # Function `__len__(self)` implementing this stage's computation:
     def __len__(self):
+        # Return `self.count` to the caller.
         return self.count
+    # Function `__getitem__(self, index)` implementing this stage's computation:
     def __getitem__(self,index):
+        # Cast or evaluate `value` in explicit floating-point precision.
         value = np.float32(index/10)
+        # Return `{'id': np.int64(index), 'x': value, 'y': np.float32(2 * value - 1)}` to the caller.
         return {"id":np.int64(index),"x":value,"y":np.float32(2*value-1)}
+    # Function `__repr__(self)` implementing this stage's computation:
     def __repr__(self):
+        # Return `f'TutorialSource(v1,n={self.count})'` to the caller.
         return f"TutorialSource(v1,n={self.count})"
+# Function `make_loader(seed, batch_size, count, drop_remainder)` implementing this stage's computation:
 def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
+    # Return `grain.DataLoader(data_source=TutorialSource(count), sampler=grain.IndexSampler(num_records=count, num_epochs=2, shuffle=True, seed=seed), operations=[grain.Batch(batch_size, drop_remainder=drop_remainder)], worker_count=0)` to the caller.
     return grain.DataLoader(
         data_source=TutorialSource(count),
         sampler=grain.IndexSampler(num_records=count,num_epochs=2,shuffle=True,seed=seed),
         operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],
         worker_count=0)
 
+# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 loader = make_loader()
+# Run `iter` to compute `iterator`.
 iterator = iter(loader)
+# Run `next` to compute `first_batch`.
 first_batch = next(iterator)
+# Run `iterator.get_state` to compute `snapshot`.
 snapshot = iterator.get_state()
+# Run `next` to compute `second_batch`.
 second_batch = next(iterator)
+# Run `iter` to compute `restored_iterator`.
 restored_iterator = iter(make_loader())
+# Run `restored_iterator.set_state` to perform the next check or state transition.
 restored_iterator.set_state(snapshot)
+# Run `next` to compute `replayed_batch`.
 replayed_batch = next(restored_iterator)
 
+# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
+# Iterate over `key` to step through the computation:
 for key in ("x","y"):
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
+# Iterate over `batch` to step through the computation:
 for batch in (first_batch,second_batch):
+    # Verify that computed values match the expected reference within numerical tolerance.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
+# Evaluate `make_loader())[:3` and convert the result into Python scalar/collection `one_epoch`.
 one_epoch = list(make_loader())[:3]
+# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
+# Print the observed values to compare against the expected result.
 print("First IDs:",first_batch["id"].tolist())
+# Print diagnostic summary of the computed outputs.
 print("Next IDs:",second_batch["id"].tolist())
+# Print diagnostic summary of the computed outputs.
 print("Iterator state bytes:",len(snapshot))
+# Print diagnostic summary of the computed outputs.
 print("Restored next batch matches")
 ```
 
@@ -195,12 +261,14 @@ The checkpoint captures the iterator after the first batch. Restoring it therefo
 IDs are labels, so a taller bar does not indicate a larger input value or a better batch. This comparison verifies the next batch only. To establish a complete training restart, also restore the matching model, optimizer, random state, and dataset configuration, then compare the next update.
 
 ```python
+# Compute figure data for: Restoring the iterator repeats the next batch
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3'], 'ylabel': 'example ID', 'series': [{'label': 'first batch', 'y': first_batch['id'].tolist()}, {'label': 'next batch', 'y': second_batch['id'].tolist()}, {'label': 'restored next', 'y': replayed_batch['id'].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:00:14.285717+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:03:02.232040+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]
@@ -224,9 +292,13 @@ PASS: recovery-02
 **Predict before running:** If you use the same seed but do not restore state, which batch arrives next?
 
 ```python
+# Experiment — A fresh iterator restarts: The seed fixes ordering.
 fresh_first = next(iter(make_loader()))
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_array_equal(fresh_first["id"],first_batch["id"])
+# Verify contract: `not np.array_equal(fresh_first['id'], second_batch['id'])`.
 assert not np.array_equal(fresh_first["id"],second_batch["id"])
+# Print the observed values to compare against the expected result.
 print("Same seed restarts; it does not resume")
 ```
 
@@ -239,11 +311,17 @@ The seed fixes ordering. Position is separate state.
 **Predict before running:** Predict total record count and uniqueness per epoch.
 
 ```python
+# Experiment — Audit both epochs: Across epochs, repeated IDs are intentional.
 two_epochs = list(make_loader())
+# Verify contract: `len(two_epochs) == 6`.
 assert len(two_epochs)==6
+# Iterate over `start` to step through the computation:
 for start in (0,3):
+    # Combine or mask array elements to form `values`.
     values = np.concatenate([b["id"] for b in two_epochs[start:start+3]])
+    # Create evenly spaced index values in ``.
     np.testing.assert_array_equal(np.sort(values),np.arange(12))
+# Print the observed values to compare against the expected result.
 print("Each epoch covers all twelve IDs")
 ```
 
@@ -255,14 +333,54 @@ Across epochs, repeated IDs are intentional. Check coverage at the correct epoch
 
 Consume two batches, snapshot, and replay the third batch with a new compatible iterator.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `iter(...)` — Call `iter` with your updated parameters or inputs from this lesson's workspace.
+- `make_loader(...)` — Call `make_loader` with your updated parameters or inputs from this lesson's workspace.
+
+**Step-by-step implementation plan:**
+1. Run `next` to perform the next check or state transition.
+2. Run `next` to perform the next check or state transition.
+3. Run `later.get_state` to compute `later_state`.
+4. Run `next` to compute `expected_third`.
+5. Run `iter` to compute `new_iterator`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Consume two batches, snapshot, and replay the third batch with a new...
+later = iter(...)  # TODO: compute later
+# Run `next` to perform the next check or state transition.
+# Run `next` to perform the next check or state transition.
+next(later);next(later)
+# Run `later.get_state` to compute `later_state`.
+later_state = later.get_state(...)  # TODO: compute later_state
+# Run `next` to compute `expected_third`.
+expected_third = next(...)  # TODO: compute expected_third
+# Run `iter` to compute `new_iterator`.
+# Execute the next step of the computation.
+new_iterator = iter(...)  # TODO: compute new_iterator
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Consume two batches, snapshot, and replay the third batch with a new...
 later = iter(make_loader())
+# Run `next` to perform the next check or state transition.
+# Run `next` to perform the next check or state transition.
 next(later);next(later)
+# Run `later.get_state` to compute `later_state`.
 later_state = later.get_state()
+# Run `next` to compute `expected_third`.
 expected_third = next(later)
+# Run `iter` to compute `new_iterator`.
+# Execute the next step of the computation.
 new_iterator = iter(make_loader());new_iterator.set_state(later_state)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
 ```
 
@@ -280,17 +398,66 @@ The loader has two epochs; the fourth and fifth batches belong to the next epoch
 
 </details>
 
+### How to write: Replay through an epoch boundary — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `boundary(...)` — Call `boundary` with your updated parameters or inputs from this lesson's workspace.
+- `iter(...)` — Call `iter` with your updated parameters or inputs from this lesson's workspace.
+
+**Step-by-step implementation plan:**
+1. Repeat the update loop over `range(3)` steps:
+2. Execute the next step of the computation.
+3. Run `boundary.get_state` to compute `boundary_state`.
+4. Evaluate `expected` from the current inputs and state.
+5. Run `iter` to compute `replay`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
+boundary = iter(...)  # TODO: compute boundary
+# Repeat the update loop over `range(3)` steps:
+# Execute the next step of the computation.
+for _ in range(3):next(boundary)
+# Run `boundary.get_state` to compute `boundary_state`.
+boundary_state = boundary.get_state(...)  # TODO: compute boundary_state
+# Evaluate `expected` from the current inputs and state.
+expected = ...  # TODO: compute expected
+# Run `iter` to compute `replay`.
+# Execute the next step of the computation.
+replay = iter(...)  # TODO: compute replay
+# Iterate over `reference` to step through the computation:
+for reference in expected:
+    # Run `next` to compute `actual`.
+    actual = next(...)  # TODO: compute actual
+    # Iterate over `name` to step through the computation:
+    for name in ('id','x','y'):np.testing.assert_array_equal(actual[name],reference[name])
+# Print the observed values to compare against the expected result.
+print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
 boundary=iter(make_loader())
+# Repeat the update loop over `range(3)` steps:
+# Execute the next step of the computation.
 for _ in range(3):next(boundary)
+# Run `boundary.get_state` to compute `boundary_state`.
 boundary_state=boundary.get_state()
+# Evaluate `expected` from the current inputs and state.
 expected=[next(boundary) for _ in range(2)]
+# Run `iter` to compute `replay`.
+# Execute the next step of the computation.
 replay=iter(make_loader());replay.set_state(boundary_state)
+# Iterate over `reference` to step through the computation:
 for reference in expected:
+    # Run `next` to compute `actual`.
     actual=next(replay)
+    # Iterate over `name` to step through the computation:
     for name in ('id','x','y'):np.testing.assert_array_equal(actual[name],reference[name])
+# Print the observed values to compare against the expected result.
 print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
 ```
 
@@ -310,17 +477,53 @@ Read the restore diagnostic; changing the seed changes sampler identity.
 
 </details>
 
-<details><summary>Reference solution and reasoning</summary>
+### How to write: Reject a changed sampler — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `sampler(...)` — Call `sampler` with your updated parameters or inputs from this lesson's workspace.
+- `iter(...)` — Call `iter` with your updated parameters or inputs from this lesson's workspace.
+
+**Step-by-step implementation plan:**
+1. Run the boundary check and catch the expected exception:
+2. Run `iter` to compute `compatible`.
+3. Execute the next step of the computation.
+4. Verify that computed values match the expected reference within numerical tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
 
 ```python
-incompatible = iter(make_loader(seed=99))
+# Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
+incompatible = iter(...)  # TODO: compute incompatible
+# Run the boundary check and catch the expected exception:
 try:
     incompatible.set_state(snapshot)
 except ValueError:
     print("Expected sampler compatibility rejection")
 else:
     raise AssertionError("Expected changed sampler rejection")
+# Run `iter` to compute `compatible`.
+# Execute the next step of the computation.
+compatible = iter(...)  # TODO: compute compatible
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
+```
+
+<details><summary>Reference solution and reasoning</summary>
+
+```python
+# Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
+incompatible = iter(make_loader(seed=99))
+# Run the boundary check and catch the expected exception:
+try:
+    incompatible.set_state(snapshot)
+except ValueError:
+    print("Expected sampler compatibility rejection")
+else:
+    raise AssertionError("Expected changed sampler rejection")
+# Run `iter` to compute `compatible`.
+# Execute the next step of the computation.
 compatible = iter(make_loader(seed=42));compatible.set_state(snapshot)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
 ```
 

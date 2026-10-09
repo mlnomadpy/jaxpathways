@@ -87,18 +87,26 @@ For a real SFT experiment, retain a base checkpoint, tokenizer, chat template an
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
 
 ```python
+# Step 1 — 1. Define sequence log-probability sums: The slice removes the final logit and first token.
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
+# Function `response_logps(logits, tokens, response_mask)` implementing this stage's computation:
 def response_logps(logits, tokens, response_mask):
     # logits at t predict token t+1; the role mask belongs to the target token.
-    logp = jax.nn.log_softmax(logits[:,:-1,:],axis=-1)
-    selected = jnp.take_along_axis(logp,tokens[:,1:,None],axis=-1)[...,0]
-    return jnp.sum(jnp.where(response_mask[:,1:],selected,0.),axis=-1)
+    logp = jax.nn.log_softmax(logits[:, :-1, :], axis=-1)
+    # Run `jnp.take_along_axis` to compute `selected`.
+    selected = jnp.take_along_axis(logp, tokens[:, 1:, None], axis=-1)[..., 0]
+    # Return `jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)` to the caller.
+    return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
+# Function `validate_mask(selected, shape)` implementing this stage's computation:
 def validate_mask(selected, shape):
+    # Convert `a` to a host NumPy array for inspection or verification.
     a = np.asarray(selected)
+    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 ```
@@ -111,13 +119,23 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 
 ```python
 # Token 0/1 is a prompt; 2/3 is its response; 4 marks the end.
-tokens=jnp.array([[0,2,4],[1,3,4]],jnp.int32)
-roles=jnp.array([[False,True,True]]*2)
-validate_mask(roles[:,1:],tokens[:,1:].shape)
-p=jnp.zeros((5,5));history=[]
+tokens = jnp.array([[0, 2, 4], [1, 3, 4]], jnp.int32)
+# Initialize array `roles` with explicit values and shape.
+roles = jnp.array([[False, True, True]] * 2)
+# Run `validate_mask` to perform the next check or state transition.
+validate_mask(roles[:, 1:], tokens[:, 1:].shape)
+# Initialize array `p` with explicit values and shape.
+p = jnp.zeros((5, 5))
+# Evaluate `history` from the current inputs and state.
+history = []
+
+# Function `sft_objective(p)` implementing this stage's computation:
 def sft_objective(p):
-    return -jnp.sum(response_logps(p[tokens],tokens,roles))/jnp.sum(roles[:,1:])
-step=jax.jit(jax.value_and_grad(sft_objective))
+    # Return `-jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])` to the caller.
+    return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
+
+# Differentiate the objective to obtain `step` via automatic differentiation.
+step = jax.jit(jax.value_and_grad(sft_objective))
 ```
 
 Inspect tokens and roles together. Every row has two valid next-token targets, so the loss denominator is four.
@@ -127,16 +145,32 @@ Inspect tokens and roles together. Every row has two valid next-token targets, s
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
+# Step 3 — 3. Fit the transition table and check the final position: The table learns only local transitions.
 for _ in range(100):
-    value,g=step(p);history.append(float(value));p=p-.5*g
-np.testing.assert_allclose(history[0],np.log(5),atol=1e-6)
-assert history[-1]<.15
-assert np.array_equal(np.argmax(np.asarray(p)[[0,1]],axis=1),[2,3])
+    # Run `step` to compute `(value, g)`.
+    value, g = step(p)
+    # Append the current step result to `history`.
+    history.append(float(value))
+    # Evaluate `p` from the current inputs and state.
+    p = p - 0.5 * g
+
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
+# Verify contract: `history[-1] < 0.15`.
+assert history[-1] < 0.15
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
-base_logits=p[tokens]
-changed=base_logits.at[:,-1,:].set(100.)
-np.testing.assert_allclose(response_logps(changed,tokens,roles),response_logps(base_logits,tokens,roles))
-print('Response-only token NLL initial/final:',history[0],history[-1])
+base_logits = p[tokens]
+# Evaluate `changed` from the current inputs and state.
+changed = base_logits.at[:, -1, :].set(100.0)
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(
+    response_logps(changed, tokens, roles),
+    response_logps(base_logits, tokens, roles),
+)
+# Print the observed values to compare against the expected result.
+print('Response-only token NLL initial/final:', history[0], history[-1])
 ```
 
 The table learns only local transitions. Its falling loss verifies these examples; the context-collision exercise exposes its architectural limit.
@@ -144,40 +178,74 @@ The table learns only local transitions. Its falling loss verifies these example
 ## Run the example
 
 ```python
+# Step 1 — 1. Define sequence log-probability sums: The slice removes the final logit and first token.
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
+# Function `response_logps(logits, tokens, response_mask)` implementing this stage's computation:
 def response_logps(logits, tokens, response_mask):
     # logits at t predict token t+1; the role mask belongs to the target token.
-    logp = jax.nn.log_softmax(logits[:,:-1,:],axis=-1)
-    selected = jnp.take_along_axis(logp,tokens[:,1:,None],axis=-1)[...,0]
-    return jnp.sum(jnp.where(response_mask[:,1:],selected,0.),axis=-1)
+    logp = jax.nn.log_softmax(logits[:, :-1, :], axis=-1)
+    # Run `jnp.take_along_axis` to compute `selected`.
+    selected = jnp.take_along_axis(logp, tokens[:, 1:, None], axis=-1)[..., 0]
+    # Return `jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)` to the caller.
+    return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
+# Function `validate_mask(selected, shape)` implementing this stage's computation:
 def validate_mask(selected, shape):
+    # Convert `a` to a host NumPy array for inspection or verification.
     a = np.asarray(selected)
+    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
 # Token 0/1 is a prompt; 2/3 is its response; 4 marks the end.
-tokens=jnp.array([[0,2,4],[1,3,4]],jnp.int32)
-roles=jnp.array([[False,True,True]]*2)
-validate_mask(roles[:,1:],tokens[:,1:].shape)
-p=jnp.zeros((5,5));history=[]
-def sft_objective(p):
-    return -jnp.sum(response_logps(p[tokens],tokens,roles))/jnp.sum(roles[:,1:])
-step=jax.jit(jax.value_and_grad(sft_objective))
-for _ in range(100):
-    value,g=step(p);history.append(float(value));p=p-.5*g
-np.testing.assert_allclose(history[0],np.log(5),atol=1e-6)
-assert history[-1]<.15
-assert np.array_equal(np.argmax(np.asarray(p)[[0,1]],axis=1),[2,3])
-# The final position predicts nothing and has no contribution.
-base_logits=p[tokens]
-changed=base_logits.at[:,-1,:].set(100.)
-np.testing.assert_allclose(response_logps(changed,tokens,roles),response_logps(base_logits,tokens,roles))
-print('Response-only token NLL initial/final:',history[0],history[-1])
+tokens = jnp.array([[0, 2, 4], [1, 3, 4]], jnp.int32)
+# Initialize array `roles` with explicit values and shape.
+roles = jnp.array([[False, True, True]] * 2)
+# Run `validate_mask` to perform the next check or state transition.
+validate_mask(roles[:, 1:], tokens[:, 1:].shape)
+# Initialize array `p` with explicit values and shape.
+p = jnp.zeros((5, 5))
+# Evaluate `history` from the current inputs and state.
+history = []
 
+# Function `sft_objective(p)` implementing this stage's computation:
+def sft_objective(p):
+    # Return `-jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])` to the caller.
+    return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
+
+# Differentiate the objective to obtain `step` via automatic differentiation.
+step = jax.jit(jax.value_and_grad(sft_objective))
+
+# Step 3 — 3. Fit the transition table and check the final position: The table learns only local transitions.
+for _ in range(100):
+    # Run `step` to compute `(value, g)`.
+    value, g = step(p)
+    # Append the current step result to `history`.
+    history.append(float(value))
+    # Evaluate `p` from the current inputs and state.
+    p = p - 0.5 * g
+
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(history[0], np.log(5), atol=1e-6)
+# Verify contract: `history[-1] < 0.15`.
+assert history[-1] < 0.15
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
+# The final position predicts nothing and has no contribution.
+base_logits = p[tokens]
+# Evaluate `changed` from the current inputs and state.
+changed = base_logits.at[:, -1, :].set(100.0)
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(
+    response_logps(changed, tokens, roles),
+    response_logps(base_logits, tokens, roles),
+)
+# Print the observed values to compare against the expected result.
+print('Response-only token NLL initial/final:', history[0], history[-1])
 ```
 
 Expected: Response-only loss decreases from log(5) to below 0.15.
@@ -201,19 +269,25 @@ The second panel is an initial-gradient audit, not another training curve. Rows 
 The table learns prompt-to-answer and answer-to-end transitions. The independent gradient check confirms the intended target shift, and the mask exercise changes which target positions count without removing prompt context.
 
 ```python
+# Compute figure data for: Supervised fine-tuning with response-only token loss — recorded experiment
+# Evaluate `visual_data` from the current inputs and state.
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'response-token NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
+# Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
+    # Evaluate `panel['x']` from the current inputs and state.
     panel['x']=panel['series'][0]['x']
 
+# Allocate initialized array `initial_output_grads` with the specified shape and dtype.
 initial_output_grads=jax.grad(lambda values:-jnp.sum(response_logps(values,tokens,roles))/jnp.sum(roles[:,1:]))(jnp.zeros((2,3,5)))
+# Convert `extra_panel` to a host NumPy array for inspection or verification.
 extra_panel={'kind':'heatmap','values':np.asarray(jnp.linalg.norm(initial_output_grads,axis=-1)).tolist(),'rows':['prompt 0 / answer 2','prompt 1 / answer 3'],'columns':['input position 0','input position 1','input position 2'],'unit':'output-logit gradient L2 norm','xlabel':'position producing the prediction','ylabel':'sequence','title':'Initial supervised gradient by output position'}
+# Evaluate `visual_data` from the current inputs and state.
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
-
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:06:04.951878+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:07:58.604319+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272
@@ -232,9 +306,14 @@ PASS: posttraining-01
 **Predict before running:** Which table rows should get gradients when only answer and end tokens are supervised?
 
 ```python
-g=jax.grad(sft_objective)(jnp.zeros((5,5)))
-assert np.linalg.norm(np.asarray(g)[0])>0 and np.linalg.norm(np.asarray(g)[1])>0
-np.testing.assert_array_equal(np.asarray(g)[4],0.)
+# Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
+# Differentiate the objective to obtain `g` via automatic differentiation.
+g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
+# Verify contract: `np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g...`.
+assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
+# Convert `` to a host NumPy array for inspection or verification.
+np.testing.assert_array_equal(np.asarray(g)[4], 0.0)
+# Print the observed values to compare against the expected result.
 print('Prompt rows learn to predict first answers; the final end-token row has no target.')
 ```
 
@@ -247,20 +326,36 @@ The prediction made at the prompt position is supervised because its target is a
 **Predict before running:** Will independent token sums recover the response objective when answers have unequal lengths?
 
 ```python
-ragged_tokens=jnp.array([[0,2,4,4],[1,3,2,4]])
-ragged_roles=jnp.array([[False,True,True,False],[False,True,True,True]])
-ragged_logits=jnp.arange(2*4*5,dtype=jnp.float32).reshape(2,4,5)/19
-observed=response_logps(ragged_logits,ragged_tokens,ragged_roles)
-arr=np.asarray(ragged_logits,dtype=np.float64);expected=[]
+# Experiment — Check a ragged batch against a scalar loop: Padding and role masks affect the target after shifting.
+# Initialize array `ragged_tokens` with explicit values and shape.
+ragged_tokens = jnp.array([[0, 2, 4, 4], [1, 3, 2, 4]])
+# Initialize array `ragged_roles` with explicit values and shape.
+ragged_roles = jnp.array([[False, True, True, False], [False, True, True, True]])
+# Construct and reshape `ragged_logits` into the target tensor dimensions.
+ragged_logits = jnp.arange(2 * 4 * 5, dtype=jnp.float32).reshape(2, 4, 5) / 19
+# Run `response_logps` to compute `observed`.
+observed = response_logps(ragged_logits, ragged_tokens, ragged_roles)
+# Convert `arr` to a host NumPy array for inspection or verification.
+arr = np.asarray(ragged_logits, dtype=np.float64)
+# Evaluate `expected` from the current inputs and state.
+expected = []
+# Iterate over `row` to step through the computation:
 for row in range(2):
- total=0.
- for position in range(3):
-  if ragged_roles[row,position+1]:
-   values=arr[row,position];log_normalizer=values.max()+np.log(np.exp(values-values.max()).sum())
-   total+=values[int(ragged_tokens[row,position+1])]-log_normalizer
- expected.append(total)
-np.testing.assert_allclose(observed,expected,atol=1e-6)
-print('Supervised targets per sequence:',np.asarray(ragged_roles[:,1:].sum(1)))
+    # Evaluate `total` from the current inputs and state.
+    total = 0.0
+    # Iterate over `position` to step through the computation:
+    for position in range(3):
+        # Branch on condition `ragged_roles[row, position + 1]`:
+        if ragged_roles[row, position + 1]:
+            values = arr[row, position]
+            log_normalizer = values.max() + np.log(np.exp(values - values.max()).sum())
+            total += values[int(ragged_tokens[row, position + 1])] - log_normalizer
+    # Append the current step result to `expected`.
+    expected.append(total)
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(observed, expected, atol=1e-6)
+# Print the observed values to compare against the expected result.
+print('Supervised targets per sequence:', np.asarray(ragged_roles[:, 1:].sum(1)))
 ```
 
 **Expected:** The target counts are two and three; scalar sequence sums match the vectorized implementation.
@@ -271,14 +366,50 @@ Padding and role masks affect the target after shifting. The host loop makes eve
 
 Score only the first response token in each sequence and compare the resulting count and objective.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+
+**Step-by-step implementation plan:**
+1. Aggregate array values to compute `value`.
+2. Verify contract: `int(jnp.sum(first_only[:, 1:])) == 2`.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Score only the first response token in each sequence and compare the...
+first_only = ...  # TODO: compute first_only
+# Aggregate array values to compute `value`.
+value = ...  # TODO: compute value
+    first_only[:, 1:]
+)
+# Verify contract: `int(jnp.sum(first_only[:, 1:])) == 2`.
+assert int(jnp.sum(first_only[:, 1:]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert np.isfinite(float(value))  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('Two first-response targets:', float(value))
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
-first_only=roles.at[:,2].set(False)
-value=-jnp.sum(response_logps(p[tokens],tokens,first_only))/jnp.sum(first_only[:,1:])
-assert int(jnp.sum(first_only[:,1:]))==2
+# Exercise solution: Score only the first response token in each sequence and compare the...
+first_only = roles.at[:, 2].set(False)
+# Aggregate array values to compute `value`.
+value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
+    first_only[:, 1:]
+)
+# Verify contract: `int(jnp.sum(first_only[:, 1:])) == 2`.
+assert int(jnp.sum(first_only[:, 1:])) == 2
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert np.isfinite(float(value))
-print('Two first-response targets:',float(value))
+# Print the observed values to compare against the expected result.
+print('Two first-response targets:', float(value))
 ```
 
 </details>
@@ -295,12 +426,39 @@ Use the shifted target mask, not the unshifted input mask.
 
 </details>
 
+### How to write: Reject a batch with no answer targets — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `targets(...)` — Call `targets` with your updated parameters or inputs from this lesson's workspace.
+- `validate_mask(...)` — Call `validate_mask` with your updated parameters or inputs from this lesson's workspace.
+
+**Step-by-step implementation plan:**
+1. Run the boundary check and catch the expected exception:
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
+# Run the boundary check and catch the expected exception:
+try:
+    validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
+except ValueError:
+    print('No-target SFT batch rejected')
+else:
+    raise AssertionError('empty supervision accepted')
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-try:validate_mask(jnp.zeros_like(roles[:,1:]),tokens[:,1:].shape)
-except ValueError:print('No-target SFT batch rejected')
-else:raise AssertionError('empty supervision accepted')
+# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
+# Run the boundary check and catch the expected exception:
+try:
+    validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
+except ValueError:
+    print('No-target SFT batch rejected')
+else:
+    raise AssertionError('empty supervision accepted')
 ```
 
 An empty answer mask should trigger a clear skip/rejection policy before the update; a fabricated zero objective disguises lost training data.
@@ -319,14 +477,51 @@ Keep the final input token equal and change an earlier token.
 
 </details>
 
+### How to write: Create a failure this model cannot fix — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+
+**Step-by-step implementation plan:**
+1. Initialize array `contexts` with explicit values and shape.
+2. Evaluate `last_logits` from the current inputs and state.
+3. Verify that computed values match the expected reference within numerical tolerance.
+4. Initialize array `conflicting_targets` with explicit values and shape.
+5. Verify contract: `conflicting_targets[0] != conflicting_targets[1]`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Initialize array `contexts` with explicit values and shape.
+contexts = jnp.array(...)  # TODO: compute contexts
+# Evaluate `last_logits` from the current inputs and state.
+last_logits = ...  # TODO: compute last_logits
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_array_equal(last_logits[0], last_logits[1])
+# Initialize array `conflicting_targets` with explicit values and shape.
+conflicting_targets = jnp.array(...)  # TODO: compute conflicting_targets
+# Verify contract: `conflicting_targets[0] != conflicting_targets[1]`.
+assert conflicting_targets[0]  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('Identical final tokens force identical table predictions despite different contexts.')
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-contexts=jnp.array([[1,0],[3,0]])
-last_logits=p[contexts[:,-1]]
-np.testing.assert_array_equal(last_logits[0],last_logits[1])
-conflicting_targets=jnp.array([2,3])
-assert conflicting_targets[0]!=conflicting_targets[1]
+# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Initialize array `contexts` with explicit values and shape.
+contexts = jnp.array([[1, 0], [3, 0]])
+# Evaluate `last_logits` from the current inputs and state.
+last_logits = p[contexts[:, -1]]
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_array_equal(last_logits[0], last_logits[1])
+# Initialize array `conflicting_targets` with explicit values and shape.
+conflicting_targets = jnp.array([2, 3])
+# Verify contract: `conflicting_targets[0] != conflicting_targets[1]`.
+assert conflicting_targets[0] != conflicting_targets[1]
+# Print the observed values to compare against the expected result.
 print('Identical final tokens force identical table predictions despite different contexts.')
 ```
 
@@ -339,8 +534,8 @@ A model that conditions on the earlier context can represent this distinction. M
 Should prompt inputs disappear when using response-only loss?
 
 1. No. They remain context; only their target eligibility changes.
-2. A lower training loss by itself proves the full application is ready.
-3. Matching shapes alone establishes the required behavior.
+2. Yes. Masking a prompt token out of the loss also removes it from causal attention.
+3. No, but the logit produced at the final prompt position must be excluded because its input role is prompt.
 
 <details><summary>Answer and explanation</summary>
 
@@ -356,8 +551,8 @@ When the first answer token fails to learn, inspect the shifted mask. When answe
 
 ## Carry forward
 
-- Uniform probabilities over five tokens give negative log probability $\log 5$ at each supervised target. One supervised target contributes that amount; three targets contribute $3\log 5$. Dividing total negative log likelihood by total valid targets returns $\log5$ for either batch. The sum returned by response_logps is intentionally not already a mean.
-- Two sequences ending in the same prompt token select exactly the same table row, so they must receive the same next-token distribution. If their intended answers differ because of earlier context, this model cannot represent the task. Demonstrate that collision before replacing the table with a Transformer.
+- Shift the role mask with target tokens $t+1$ so the prediction made at the last prompt position still supervises the first response token.
+- Keep causal attention visibility separate from the response loss mask, and carry numerator and valid-target counts explicitly when answers have unequal lengths.
 
 ## Keep your evidence
 

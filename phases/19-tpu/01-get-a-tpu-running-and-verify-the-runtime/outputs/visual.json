@@ -1,0 +1,112 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-01",
+  "contentHash": "225c817b016b10918331becc23626d23f8ba0cf3c39b11e368343d7867506eae",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "kind": "executed",
+  "generatedAt": "2026-10-08T10:31:55.358421+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\nSingle-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "v5litepod-1",
+      "v5litepod-4",
+      "v5litepod-8",
+      "v6e-4"
+    ],
+    "xlabel": "single-host Cloud TPU slice",
+    "ylabel": "count / capacity",
+    "series": [
+      {
+        "label": "TPU chips on host",
+        "y": [
+          1.0,
+          4.0,
+          8.0,
+          4.0
+        ]
+      },
+      {
+        "label": "total HBM (GiB)",
+        "y": [
+          16.0,
+          64.0,
+          128.0,
+          128.0
+        ]
+      }
+    ]
+  },
+  "diagram": {
+    "title": "End-to-end Cloud TPU VM lifecycle from create to verified teardown",
+    "prediction": "Where does Python execute when you SSH into a Cloud TPU VM, and when does billing stop?",
+    "reading": "Read top to bottom: your workstation runs `gcloud` to allocate the Cloud TPU VM, SSH starts Python inside `~/jax-tpu-lab/.venv` on the TPU VM host, `libtpu` dispatches XLA programs to the attached TPU chips, `scp` retrieves the runtime receipt, and `tpu-vm delete` releases the resource.",
+    "alt": "Read top to bottom: workstation gcloud create allocates the TPU VM, SSH launches Python inside .venv on the TPU VM host, libtpu runs XLA on attached TPU chips, scp copies the receipt back, and tpu-vm delete stops billing.",
+    "scope": "Conceptual / analytic teaching diagram; not a recorded benchmark.",
+    "height": 6,
+    "panel": {
+      "kind": "graph",
+      "nodes": [
+        {
+          "id": "0",
+          "x": 5,
+          "y": 1,
+          "label": "Workstation: gcloud compute tpus tpu-vm create / Flex-start",
+          "tone": "data",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "1",
+          "x": 5,
+          "y": 2.7,
+          "label": "TPU VM Linux host: ~/jax-tpu-lab/.venv + jax[tpu] + libtpu",
+          "tone": "state",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "2",
+          "x": 5,
+          "y": 4.4,
+          "label": "Attached TPU chips: jax.devices() + synchronized pmap receipt",
+          "tone": "result",
+          "w": 8.4,
+          "h": 1.05
+        },
+        {
+          "id": "3",
+          "x": 5,
+          "y": 6.1,
+          "label": "scp receipt back + tpu-vm delete + tpu-vm list (0 active)",
+          "tone": "warning",
+          "w": 8.4,
+          "h": 1.05
+        }
+      ],
+      "edges": [
+        {
+          "from": "0",
+          "to": "1"
+        },
+        {
+          "from": "1",
+          "to": "2"
+        },
+        {
+          "from": "2",
+          "to": "3"
+        }
+      ],
+      "height": 7,
+      "width": 10
+    }
+  }
+}

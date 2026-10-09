@@ -44,7 +44,7 @@
     "title": "Learning club planner \u2014 JAX Pathways",
     "description": "Plan a JAX study group with a shared learning route, meeting rhythm and project evidence.",
     "bodyClass": "",
-    "active": "organizer",
+    "active": "notebook",
     "skipTarget": "#main",
     "skipLabel": "Skip to content",
     "noindex": true

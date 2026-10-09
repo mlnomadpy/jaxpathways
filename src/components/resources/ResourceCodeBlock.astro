@@ -1,0 +1,23 @@
+---
+interface Props {
+  label: string;
+  code: string;
+  copyId?: string;
+}
+
+const { label, code, copyId } = Astro.props;
+---
+
+<div class="resource-code">
+  <div class="code-panel-heading">
+    <span>{label}</span>
+    {copyId && (
+      <button type="button" data-copy={copyId}>
+        Copy command
+      </button>
+    )}
+  </div>
+  <pre><code id={copyId}>{code}</code></pre>
+  {copyId && <p class="copy-status" role="status"></p>}
+  <slot />
+</div>

@@ -2,6 +2,7 @@
 import groups from '../../data/path-groups.json';
 import { course } from '../../lib/course-data.js';
 import { careerCoverage, pathwayCoverage } from '../../lib/careers.js';
+import { inlineMath } from '../../lib/math.js';
 import { siteUrl } from '../../lib/urls.js';
 ---
 
@@ -17,17 +18,19 @@ import { siteUrl } from '../../lib/urls.js';
         return (
           <article class="path-card">
             <h3>{route.title}</h3>
-            <p>{route.description}</p>
+            <p set:html={inlineMath(route.description)} />
             <p class="availability-label">
               {availability.planned ? 'Partly available' : 'Available lesson drafts'} ·{' '}
               {availability.available} lessons
             </p>
             <p>
-              <strong>First artifact:</strong> {route.firstArtifact}
+              <strong>First artifact:</strong>{' '}
+              <Fragment set:html={inlineMath(route.firstArtifact)} />
             </p>
             <p class="soft">
-              {coverage.focus.available} available in the focus phases · {coverage.focus.planned}{' '}
-              planned. Total above includes preparation.
+              {coverage.focus.available} available in the focus phases
+              {coverage.focus.planned ? ` · ${coverage.focus.planned} planned` : ''}. Total above
+              includes preparation.
             </p>
             <p class="soft">
               {route.capstone.projectId

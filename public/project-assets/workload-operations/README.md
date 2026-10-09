@@ -9,6 +9,7 @@ This project executes locally on CPU inside temporary directories. It does not p
 Use the pinned `requirements-cpu.txt` in the course workspace or project ZIP. From its extracted top folder:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m pip install -r requirements-cpu.txt
 cp projects/workload-operations/starter/model.py projects/workload-operations/my_model.py
 python3 projects/workload-operations/tests/check.py --stage 1 --implementation projects/workload-operations/my_model.py
@@ -17,6 +18,7 @@ python3 projects/workload-operations/tests/check.py --stage 1 --implementation p
 PowerShell preparation:
 
 ```powershell
+# Copy the starter template into your editable workspace file
 Copy-Item projects/workload-operations/starter/model.py projects/workload-operations/my_model.py
 ```
 
@@ -37,6 +39,7 @@ The worker never launches descendants. The supervisor owns its direct child and 
 Implement `default_config`, `digest`, `atomic_json` and `launch`. Use an argument list without a shell. Capture stdout/stderr and retain malformed output separately. Classify completion only after a successful exit plus a completed event. A timeout must stop and reap the actual child. Keep `run.json` with the same observed result returned by the function.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --stage 1 --implementation projects/workload-operations/my_model.py
 ```
 
@@ -47,6 +50,7 @@ The checker executes a successful worker, an impossible runtime requirement and 
 Implement `summarize`. Sum processed examples and synchronized update times. Report update-path throughput, complete-job throughput and measured update duty fraction separately. Use committed checkpoint events to report uncheckpointed completed updates. Do not label the duty fraction as hardware utilization.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --stage 2 --implementation projects/workload-operations/my_model.py
 ```
 
@@ -57,6 +61,7 @@ Check the arithmetic independently from raw events, not by comparing one summary
 Use your supervisor to launch an uninterrupted reference and another job that fails after update 3. Confirm the failed process has exited, preserve its logs, validate the committed checkpoint at step 2, then resume the compatible run. Compare the next update and every later complete-state hash with the uninterrupted reference.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --stage 3 --implementation projects/workload-operations/my_model.py
 ```
 
@@ -67,6 +72,7 @@ The checker also tests an already-completed resume, incompatible configuration a
 Implement `publish`, `read_artifact`, `activate` and `rollback`. Publication writes `artifacts/<content-id>.json` without activating it. Activation independently checks model MSE on fixed held-out inputs `(-1.5,-0.37,0.22,1.5)` against the known relationship `y=2*x+1`, requiring MSE at most 1. This is an illustrative acceptance criterion, not a production recommendation. It also verifies content, declared validation and required provenance (`worker_hash`, `config_hash`, `data_hash`, `state`) before atomically replacing `active.json`. That pointer records current and previous IDs. Rollback uses the same validation path.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --stage 4 --implementation projects/workload-operations/my_model.py
 ```
 
@@ -77,6 +83,7 @@ The checker independently calculates content identity, exercises both valid sele
 Implement `capacity`. Convert measured seconds per job and arrivals per hour into offered worker-hours per hour. Divide by worker count for nominal load, and use a ceiling for the minimum integer count with reserve. Retain the hourly reserved budget and active-time hypothetical cost per job as separate values.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/workload-operations/tests/check.py --stage 5 --implementation projects/workload-operations/my_model.py
 ```
 
@@ -93,6 +100,8 @@ The synthesis in `assessments/ops.md` requires changed conditions and a written 
 After installing and validating the appropriate JAX runtime on a host you control, the same supervisor can request an actual target:
 
 ```python
+# Reference snippet
+# Run `launch` to compute `result`.
 result = launch(run_directory, default_config(backend="gpu", min_devices=1))
 ```
 

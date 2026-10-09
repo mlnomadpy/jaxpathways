@@ -2,7 +2,7 @@
 import '../../styles/home/lessons.css';
 import { lessons } from '../../data/home.json';
 import { course, inventory } from '../../lib/course-data.js';
-import { siteUrl } from '../../lib/urls.js';
+import { lessonLink, siteUrl } from '../../lib/urls.js';
 import SectionHeading from '../shared/SectionHeading.astro';
 ---
 
@@ -25,7 +25,7 @@ import SectionHeading from '../shared/SectionHeading.astro';
         throw Error(`Unavailable home lesson: ${preview.id}`);
       return (
         <li>
-          <a href={siteUrl(`lesson.html?lesson=${lesson.id}`)}>
+          <a href={siteUrl(lessonLink(lesson.id))}>
             <span class="lesson-number">
               {phase.number}.{String(index + 1).padStart(2, '0')}
             </span>
@@ -51,13 +51,20 @@ import SectionHeading from '../shared/SectionHeading.astro';
       <dt>integration projects</dt>
       <dd data-course-count="projects">{inventory.projects}</dd>
     </div>
-    <div>
-      <dt>planned lessons</dt>
-      <dd data-course-count="planned">{inventory.planned}</dd>
-    </div>
+    {inventory.planned > 0 ? (
+      <div>
+        <dt>planned lessons</dt>
+        <dd data-course-count="planned">{inventory.planned}</dd>
+      </div>
+    ) : (
+      <div>
+        <dt>curriculum phases</dt>
+        <dd data-course-count="phases">{course.phases.length}</dd>
+      </div>
+    )}
   </dl>
   <p class="availability-note">
-    The course is in development. Available exercises run on CPU; planned material is labeled in
-    each path.
+    All {inventory.authored} lesson exercises run on CPU; planned capstones and accelerator
+    validation are labeled in each path.
   </p>
 </section>

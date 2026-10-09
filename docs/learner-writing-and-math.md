@@ -31,7 +31,7 @@ Rendering escapes prose HTML and leaves inline code literal. KaTeX uses `trust: 
 
 ## Scope of this revision
 
-All 42 authored lesson openings received a learner-oriented edit. Eighteen display equations across core mathematical topics replace mathematical ASCII blocks or add a worked explanation; code/data-flow sketches remain text. The most substantial explanation rewrites cover standardization, derivatives, the chain rule, regression loss, and precision choices, with additional notation explanations for gradients, attention and quantization. This is an editorial pass, not a claim that every paragraph or every exercise has undergone independent pedagogical review.
+All 97 authored lessons follow this learner-oriented structure, with guided reasoning, inline and display KaTeX equations, and explicit symbol definitions. Eighteen display equations across core mathematical topics replace mathematical ASCII blocks or add a worked explanation; code/data-flow sketches remain text. The most substantial explanation rewrites cover standardization, derivatives, the chain rule, regression loss, pretraining/post-training objectives, and precision choices, with additional notation explanations for gradients, attention and quantization. This is an editorial pass, not a claim that every paragraph or every exercise has undergone independent pedagogical review.
 
 ## Inline notation follow-up
 

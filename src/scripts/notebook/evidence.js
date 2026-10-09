@@ -2,6 +2,7 @@ import { setSelectValue } from '../browser-actions.js';
 import { $ } from '../../lib/dom.js';
 import { courseState } from '../../lib/course-state.js';
 import { evidenceReviewPacket } from '../../lib/evidence.js';
+import { lessonLink } from '../../lib/urls.js';
 import {
   downloadText as download,
   setStatus as status,
@@ -182,7 +183,7 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       }
       if (entry.lessonId) {
         const link = document.createElement('a');
-        link.href = `lesson.html?path=${encodeURIComponent(entry.route)}&lesson=${encodeURIComponent(entry.lessonId)}`;
+        link.href = lessonLink(entry.lessonId, entry.route);
         link.textContent = 'Related lesson';
         actions.append(link);
       }

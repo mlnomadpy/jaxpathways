@@ -7,8 +7,8 @@
       "question": "Which policy is refreshed for the next rollout batch?",
       "options": [
         "The behavior policy follows the current policy; the reference policy remains frozen.",
-        "A lower training loss by itself proves the full application is ready.",
-        "Matching shapes alone establishes the required behavior."
+        "Both the behavior policy and the reference policy update after every inner PPO gradient step.",
+        "The reference policy refreshes each rollout while old behavior probabilities remain fixed for the entire run."
       ],
       "correct": 0,
       "explanation": "Behavior identity belongs to the collected data. Reference identity belongs to the regularized objective."

@@ -1,0 +1,56 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "tpu-05",
+  "contentHash": "46bf17f185cbcf7eab9d0ae2332040a1b85af78b5c74496b00a279ed6873eb63",
+  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "kind": "executed",
+  "generatedAt": "2026-10-08T10:31:58.390665+00:00",
+  "environment": {
+    "backend": "cpu",
+    "deviceCount": 1,
+    "jax": "0.9.2",
+    "numpy": "2.4.4",
+    "matplotlib": "3.10.8"
+  },
+  "stdout": "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nPod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\n",
+  "data": {
+    "kind": "bar",
+    "labels": [
+      "v5litepod-4",
+      "v5litepod-8",
+      "v5litepod-16",
+      "v6e-16"
+    ],
+    "xlabel": "Cloud TPU slice topology",
+    "ylabel": "host / chip count",
+    "series": [
+      {
+        "label": "Linux VM hosts",
+        "y": [
+          1,
+          1,
+          4,
+          4
+        ]
+      },
+      {
+        "label": "local chips per host",
+        "y": [
+          4,
+          8,
+          4,
+          4
+        ]
+      },
+      {
+        "label": "global TPU chips",
+        "y": [
+          4,
+          8,
+          16,
+          16
+        ]
+      }
+    ]
+  }
+}

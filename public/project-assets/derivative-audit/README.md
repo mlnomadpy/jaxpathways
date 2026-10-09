@@ -7,6 +7,7 @@ Build a derivative audit that connects mathematics, JAX transformations and a sm
 Use the course environment in `requirements-cpu.txt`. From the checkout or the extracted project's top folder:
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/derivative-audit/starter/model.py projects/derivative-audit/my_model.py
 python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 1
 ```
@@ -24,6 +25,7 @@ Derive the Jacobian and Hessian independently. The checker changes the point and
 Register an actual `custom_jvp` for stable scalar softplus and an actual `custom_vjp` for stable vector log-sum-exp. Preserve the primal values and implement the true derivatives. Explain what the forward rule saves and why the backward return is a tuple. Verify first derivatives, second derivatives, common-shift structure and linearity in directional seeds.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage 2
 ```
 
@@ -36,6 +38,7 @@ Implement `tiny_jvp(closed, primals, tangents)` using explicit local rules for `
 Enforce the supported subset: reject effects, unknown primitives, unsupported result/placement contracts, nonfloating inputs and mismatched shape/dtype signatures. Explain why a multi-output program is supported even though the allowed individual primitives each return one result.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/derivative-audit/tests/check.py --implementation projects/derivative-audit/my_model.py --stage all
 ```
 
@@ -48,6 +51,7 @@ Save the original jaxpr, annotate each equation's primal/tangent rule, and inspe
 Submit implementation, audit script, predicted and observed results, precision/tolerances, environment, a deliberate failure/repair, supported-subset documentation, and an interpretation of your derivative comparison figure. Continue to the [internals synthesis assessment](../../assessments/internals.md) for a changed map and a new primitive rule.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/derivative-audit/tests/check.py --implementation solution --stage all
 ```
 

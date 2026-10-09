@@ -1,61 +1,16 @@
 ---
-import GuideContents from '../components/shared/GuideContents.astro';
-import '../styles/tokens.css';
-import '../styles/base.css';
-import '../styles/features/assessment.css';
-import SiteLayout from '../layouts/SiteLayout.astro';
-import SiteFooter from '../components/shared/SiteFooter.astro';
-import { assessmentContent } from '../lib/server/assessment-content.js';
-import { siteUrl } from '../lib/urls.js';
-const content = assessmentContent('content/guides/tpu-performance.md', siteUrl);
+import PracticalGuidePage from '../components/guides/PracticalGuidePage.astro';
 ---
 
-<SiteLayout
+<PracticalGuidePage
   title="TPU generations, precision and profiling | JAX Pathways"
   description="Compare TPU generations, budget training and cache memory, measure BF16 and INT8 error, and learn to interpret an XProf trace."
+  source="content/guides/tpu-performance.md"
+  edition="Practical guide · CPU-tested precision lab · TPU qualification pending"
+  workspaceHref="downloads/jax-tpu-gcp.zip"
+  guideHref="downloads/tpu-performance.md"
+  contentsLabel="TPU performance guide sections"
   active="course"
->
-  <main id="main">
-    <div id="assessment" class="workflow-guide">
-      <a href={siteUrl('course.html')}>Back to the course</a>
-      <p class="edition">Practical guide · CPU-tested precision lab · TPU qualification pending</p>
-      <Fragment set:html={content.heading} />
-      <div class="assessment-actions">
-        <a class="button primary" href={siteUrl('downloads/jax-tpu-gcp.zip')} download>
-          Download the practice workspace
-        </a>
-        <a class="button" href={siteUrl('downloads/tpu-performance.md')} download>
-          Save the guide
-        </a>
-      </div>
-      <GuideContents sections={content.sections} label="TPU performance guide sections" />
-      <article set:html={content.body} />
-    </div>
-    <SiteFooter />
-  </main>
-</SiteLayout>
-
-<style>
-  .workflow-guide :global(img) {
-    width: 100%;
-    height: auto;
-  }
-  .workflow-guide :global(pre) {
-    color: var(--ink);
-  }
-  .workflow-guide :global(table) {
-    display: block;
-    overflow-x: auto;
-    font: 15px/1.65 var(--ui);
-  }
-  .workflow-guide :global(th),
-  .workflow-guide :global(td) {
-    min-width: 150px;
-    padding: 12px;
-    vertical-align: top;
-  }
-  .workflow-guide :global(a:not(.button)) {
-    text-decoration: underline;
-    text-underline-offset: 3px;
-  }
-</style>
+  backHref="course.html#phase-tpu"
+  backLabel="TPUs & Google Cloud course"
+/>

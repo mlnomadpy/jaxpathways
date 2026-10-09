@@ -5,6 +5,7 @@ This project supplies the integration work for the first four phases. Start with
 Use the course environment from `requirements-cpu.txt`. From the extracted bundle’s top folder or the repository root:
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/foundation-toolkit/starter/toolkit.py projects/foundation-toolkit/my_toolkit.py
 python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1
 ```
@@ -12,6 +13,7 @@ python3 projects/foundation-toolkit/tests/check.py --implementation projects/fou
 On PowerShell use `Copy-Item` for the copy command. Implement the four marked functions. Each successive stage includes all earlier checks. Save your code, the command, observed output and an explanation of a failure before moving on.
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/foundation-toolkit/tests/check.py --implementation solution --stage all
 python3 projects/foundation-toolkit/run.py
 ```

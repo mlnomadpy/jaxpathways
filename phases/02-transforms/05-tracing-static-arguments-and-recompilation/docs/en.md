@@ -74,19 +74,30 @@ Before reaching for a workaround, classify the value and the question: is Python
 ## Run the example
 
 ```python
+# Tracing, static arguments, and recompilation: Tracing observes how Python builds an array computation from...
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
+# Function `reduce_values(x, mode)` implementing this stage's computation:
 def reduce_values(x, mode):
+    # Branch on condition `mode == 'sum'`:
     if mode == "sum":
         return x.sum()
+    # Branch on condition `mode == 'mean'`:
     if mode == "mean":
         return x.mean()
     raise ValueError("mode must be sum or mean")
+# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(reduce_values, static_argnames=("mode",))
+# Initialize array `x` with explicit values and shape.
 x = jnp.array([1., 2., 3.])
+# Print the observed values to compare against the expected result.
 print("Sum:", float(compiled(x, mode="sum")))
+# Print diagnostic summary of the computed outputs.
 print("Mean:", float(compiled(x, mode="mean")))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
 ```
 
@@ -114,7 +125,7 @@ The arrows describe dependencies, and the box sizes do not encode runtime. Use t
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:40.893336+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:32.925571+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0
@@ -134,12 +145,19 @@ PASS: transforms-05
 **Predict before running:** Predict the operations needed to square and sum a vector. Which part is executed as Python during tracing?
 
 ```python
+# Experiment — Look at the staged numerical work: The second call supplies new values with the same shape/dtype.
 def sum_squares(values):
+    # Print the observed values to compare against the expected result.
     print("Tracing sum_squares; shape:", values.shape)
+    # Return `jnp.sum(values * values)` to the caller.
     return jnp.sum(values * values)
+# Print the observed values to compare against the expected result.
 print(jax.make_jaxpr(sum_squares)(x))
+# Wrap with `jax.jit` (`staged_squares`) so XLA traces and compiles the function.
 staged_squares = jax.jit(sum_squares)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(staged_squares(x), 14.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(staged_squares(x + 1.), 29.)
 ```
 
@@ -152,21 +170,31 @@ The second call supplies new values with the same shape/dtype. The numerical res
 **Predict before running:** For positive and negative scalar inputs, predict the branch result. Why can eager Python decide but tracing cannot?
 
 ```python
+# Experiment — Reproduce and repair a dynamic branch: The test expects a particular category of error and confirms the...
 def python_branch(value):
+    # Branch on condition `value > 0.0`:
     if value > 0.:
         return value ** 2
+    # Return `-value` to the caller.
     return -value
+# Verify contract: `python_branch(-2.0) == 2.0`.
 assert python_branch(-2.) == 2.
+# Run the boundary check and catch the expected exception:
 try:
     jax.jit(python_branch)(jnp.array(-2.))
 except jax.errors.TracerBoolConversionError:
     print("Expected dynamic Boolean conversion error")
 else:
     raise AssertionError("Expected a traced Python branch to fail")
+# Function `runtime_branch(value)` implementing this stage's computation:
 def runtime_branch(value):
+    # Return `jax.lax.cond(value > 0.0, lambda z: z ** 2, lambda z: -z, value)` to the caller.
     return jax.lax.cond(value > 0., lambda z: z ** 2, lambda z: -z, value)
+# Wrap with `jax.jit` (`compiled_branch`) so XLA traces and compiles the function.
 compiled_branch = jax.jit(runtime_branch)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(compiled_branch(jnp.array(-2.)), 2.)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(compiled_branch(jnp.array(3.)), 9.)
 ```
 
@@ -178,21 +206,77 @@ The test expects a particular category of error and confirms the repair for both
 
 Foundation · Extend reduce_values with a static max mode while preserving sum and mean. Reject unknown modes. Verify all three modes on $[1, 2, 3]$ and on $[-4, -1, -2]$.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+
+**Step-by-step implementation plan:**
+1. Branch on condition `mode == 'sum'`:
+2. Branch on condition `mode == 'mean'`:
+3. Branch on condition `mode == 'max'`:
+4. Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
+5. Iterate over `values` to step through the computation:
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Foundation · Extend reduce_values with a static max mode while...
+def choose_reduction(values, mode):
+    # Branch on condition `mode == 'sum'`:
+    if mode = ...  # TODO: compute if mode
+        return ...  # TODO: return computed result
+    # Branch on condition `mode == 'mean'`:
+    if mode = ...  # TODO: compute if mode
+        return ...  # TODO: return computed result
+    # Branch on condition `mode == 'max'`:
+    if mode = ...  # TODO: compute if mode
+        return ...  # TODO: return computed result
+    raise ValueError("unknown mode")
+# Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
+choose = jax.jit(...)  # TODO: compute choose
+# Iterate over `values` to step through the computation:
+for values in (x, jnp.array([-4., -1., -2.])):
+    # Loop over `(mode, reference)` in `(('sum', jnp.sum), ('mean', jnp.mean), ('max', jnp.max))`:
+    for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        assert jnp.allclose(choose(values, mode=mode), reference(values))  # TODO: complete assertion check
+# Run the boundary check and catch the expected exception:
+try:
+    choose(x, mode = ...  # TODO: compute choose(x, mode
+except ValueError:
+    pass
+else:
+    raise AssertionError("Unknown mode should fail")
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Foundation · Extend reduce_values with a static max mode while...
 def choose_reduction(values, mode):
+    # Branch on condition `mode == 'sum'`:
     if mode == "sum":
         return values.sum()
+    # Branch on condition `mode == 'mean'`:
     if mode == "mean":
         return values.mean()
+    # Branch on condition `mode == 'max'`:
     if mode == "max":
         return values.max()
     raise ValueError("unknown mode")
+# Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
 choose = jax.jit(choose_reduction, static_argnames=("mode",))
+# Iterate over `values` to step through the computation:
 for values in (x, jnp.array([-4., -1., -2.])):
+    # Loop over `(mode, reference)` in `(('sum', jnp.sum), ('mean', jnp.mean), ('max', jnp.max))`:
     for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert jnp.allclose(choose(values, mode=mode), reference(values))
+# Run the boundary check and catch the expected exception:
 try:
     choose(x, mode="typo")
 except ValueError:
@@ -215,13 +299,46 @@ Implement an elementwise absolute value with a numerical selection, jit it, and 
 
 </details>
 
+### How to write: Keep runtime values dynamic — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+
+**Step-by-step implementation plan:**
+1. Return `jnp.where(values >= 0.0, values, -values)` to the caller.
+2. Wrap with `jax.jit` (`compiled_absolute`) so XLA traces and compiles the function.
+3. Iterate over `values` to step through the computation:
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Keep runtime values dynamic (Practice): The vector values are runtime data.
+def elementwise_absolute(values):
+    # Return `jnp.where(values >= 0.0, values, -values)` to the caller.
+    return ...  # TODO: return computed result
+# Wrap with `jax.jit` (`compiled_absolute`) so XLA traces and compiles the function.
+compiled_absolute = jax.jit(...)  # TODO: compute compiled_absolute
+# Iterate over `values` to step through the computation:
+for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+    assert jnp.allclose(compiled_absolute(values), jnp.abs(values))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Keep runtime values dynamic (Practice): The vector values are runtime data.
 def elementwise_absolute(values):
+    # Return `jnp.where(values >= 0.0, values, -values)` to the caller.
     return jnp.where(values >= 0., values, -values)
+# Wrap with `jax.jit` (`compiled_absolute`) so XLA traces and compiles the function.
 compiled_absolute = jax.jit(elementwise_absolute)
+# Iterate over `values` to step through the computation:
 for values in (jnp.array([-2., 0., 3.]), jnp.array([5., -4., -1.])):
+    # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
     assert jnp.allclose(compiled_absolute(values), jnp.abs(values))
 ```
 
@@ -241,16 +358,60 @@ Do not use elapsed time alone to infer whether tracing occurred. Values and shap
 
 </details>
 
+### How to write: Audit a shape-dependent specialization — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+
+**Step-by-step implementation plan:**
+1. Return `jnp.sum(values ** 2)` to the caller.
+2. Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
+3. Iterate over `length` to step through the computation:
+4. Loop over `shift` in `(0.0, 1.0)`:
+5. Create evenly spaced index values in `values`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Audit a shape-dependent specialization (Challenge): Changing the length changes shape metadata and can need a...
+def plain_sum_squares(values):
+    # Return `jnp.sum(values ** 2)` to the caller.
+    return ...  # TODO: return computed result
+# Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
+compiled_squares = jax.jit(...)  # TODO: compute compiled_squares
+# Iterate over `length` to step through the computation:
+for length in (3, 5):
+    # Loop over `shift` in `(0.0, 1.0)`:
+    for shift in (0., 1.):
+        # Create evenly spaced index values in `values`.
+        values = jnp.arange(...)  # TODO: compute values
+        # Run `sum` to compute `expected`.
+        expected = sum(...)  # TODO: compute expected
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+        assert jnp.allclose(compiled_squares(values), expected)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Audit a shape-dependent specialization (Challenge): Changing the length changes shape metadata and can need a...
 def plain_sum_squares(values):
+    # Return `jnp.sum(values ** 2)` to the caller.
     return jnp.sum(values ** 2)
+# Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
 compiled_squares = jax.jit(plain_sum_squares)
+# Iterate over `length` to step through the computation:
 for length in (3, 5):
+    # Loop over `shift` in `(0.0, 1.0)`:
     for shift in (0., 1.):
+        # Create evenly spaced index values in `values`.
         values = jnp.arange(length, dtype=jnp.float32) + shift
+        # Run `sum` to compute `expected`.
         expected = sum(float(v) ** 2 for v in values)
+        # Verify that the output satisfies the expected shape, finite-value, or numerical contract.
         assert jnp.allclose(compiled_squares(values), expected)
 ```
 

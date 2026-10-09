@@ -98,6 +98,7 @@ Post-training quantization (PTQ) starts from trained weights. Use representative
 Open a terminal in the extracted `jax-tpu-gcp` workspace. Reuse the CPU environment from the setup guide:
 
 ```sh
+# Run command in terminal
 .venv/bin/python resources/tpu-gcp/precision_profile.py \
   --platform cpu --run-dir runs/precision-cpu --trace
 ```
@@ -142,6 +143,7 @@ The script records maximum absolute error as well. Relative error is undefined f
 **Transfer exercise:** predict whether batch one changes the INT8 scale overhead or hardware utilization, then run:
 
 ```sh
+# Run command in terminal
 .venv/bin/python resources/tpu-gcp/precision_profile.py \
   --platform cpu --run-dir runs/precision-batch-one \
   --batch 1 --features 127 --outputs 65 --steps 20 --trace
@@ -155,6 +157,7 @@ The reference check covers zero inputs, changed shapes, exact integer accumulati
 Install the supported JAX/TPU runtime on an approved VM as described in the [cloud workflow](tpu-gcp.html). Record its resolved versions. Run the same lab with `--platform tpu` in a fresh folder. If the TPU backend is unavailable, it must fail, not quietly substitute CPU:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python resources/tpu-gcp/precision_profile.py \
   --platform tpu --run-dir runs/precision-tpu --steps 20 --trace
 ```
@@ -166,6 +169,7 @@ The six trace steps are labelled `precision_case`, with inner names such as `bal
 After copying the trace folder to your laptop, install XProf in a separate viewer environment. It need not contain the training runtime:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 -m venv .profile-viewer
 .profile-viewer/bin/python -m pip install xprof
 .profile-viewer/bin/xprof --port 8791 /absolute/path/to/runs/precision-tpu/trace

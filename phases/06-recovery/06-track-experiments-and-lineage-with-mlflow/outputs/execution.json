@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "b653d0cc4ed642da2291e785b424b2d7212c9fca2b7a19a2e4c08a6d83b3d400",
-  "executedAt": "2026-10-06T23:00:38.848743+00:00",
+  "contentHash": "91533229c270d1cb7b7f8786f61b614813d881a98f2205c059e1247473feaa91",
+  "executedAt": "2026-10-08T14:03:25.127410+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.\nValidation difference: 0.11994461664726686\nWrong zero model validation MSE: 6.0\nChanged target changes dataset identity.\nPASS: recovery-06\n",
   "notebookCells": [
     {
-      "sourceHash": "07222002694cd1af51316efe203aa2c2bfb5fda92a8c1c14cacf80b695e8fabb",
+      "sourceHash": "62ed07ecaec4c46eaec9281564fddd76066b7fbafa7404e5ac05b3144dcd8f57",
       "outputs": [
         {
           "output_type": "stream",
@@ -28,18 +28,18 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/06 16:00:36 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/06 16:00:36 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/08 07:03:23 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/08 07:03:23 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 10106.76it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1984.06it/s] \n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 9078.58it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 5178.15it/s]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "5e056379b8a2fa6a4f48f34bf458ffc55990a9bb19dd2e672a95c473408ba188",
+      "sourceHash": "00eec84df17cbd0e43e8983ecfda30fe0a5c5fd919927faff1ddfcadef37fb23",
       "outputs": []
     },
     {
@@ -58,7 +58,7 @@
       ]
     },
     {
-      "sourceHash": "d1df5ee75a2cd65dc0728f3af6dffaf73b84d604c784e1b44d29f51efce69b9b",
+      "sourceHash": "f557e7a8ec353a4b740dfc868e5af57aedc93e86dd993af46c7408882be0748d",
       "outputs": [
         {
           "output_type": "stream",
@@ -70,11 +70,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "956774467dc2ca29f99a1550a3053bf7165ee0f5edcc3ac14881891e4a471df0",
       "outputs": []
     },
     {
-      "sourceHash": "8c361898357bf3efca223f69eaaf93db7a4226f7c111895f2716d229e7be7226",
+      "sourceHash": "772df7adec96bcbc4009f02fc88a88aa3f136fa32fe9b33ddee51e805e634063",
       "outputs": [
         {
           "output_type": "stream",
@@ -86,11 +86,11 @@
       ]
     },
     {
-      "sourceHash": "044f21f6b74984c9cd1b34b6ddda9ea33da8c0bac430d611353268b297f149cb",
+      "sourceHash": "673557f49d53299fa32b9de8b49b8215ad90828ef195e2daa00fc040828c47a6",
       "outputs": []
     },
     {
-      "sourceHash": "32d9fc0b4afb5136827cd18619f12de12829c2fe840424227dd871c38a6ff812",
+      "sourceHash": "deb56d2e3c243bb86584d25e30ef496db1037ba1400380b5d80c19dc144a1265",
       "outputs": [
         {
           "output_type": "stream",

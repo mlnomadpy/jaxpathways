@@ -1,30 +1,36 @@
 import { escapeHtml } from '../html.js';
+import { inlineMath } from '../math.js';
 import { routeViewContext } from './routes.js';
 
+/**
+ * @param {import('../../types/course').Role} role
+ * @param {import('../../types/course').Course} course
+ */
 export function renderCareer(role, course) {
   const { phaseById, routeName, availabilityText, trackLinks, engineeringLinks, focusSummary } =
     routeViewContext(course);
-  const capstone = course.pathways.find((route) => route.id === role.defaultPathwayId).capstone;
+  const route =
+    course.pathways.find((route) => route.id === role.defaultPathwayId) || course.pathways[0];
+  const capstone = route.capstone;
   return `<div class="career-heading">
     <div>
-    <p class="edition">Career route</p>
+    <p class="page-eyebrow"><button type="button" id="close-career" class="career-link" aria-label="Back to career routes">All career routes</button><span aria-hidden="true"> · </span><span>Career route</span></p>
     <h3>${escapeHtml(role.title)}</h3>
     </div>
-    <button id="close-career" aria-label="Back to career routes">All career routes</button>
     </div>
-    <p>${escapeHtml(role.description)}</p>
+    <p>${inlineMath(role.description)}</p>
     <h4>A problem you might work on</h4>
-    <p>${escapeHtml(role.workExample)}</p>${focusSummary(course.pathways.find((r) => r.id === role.defaultPathwayId))}${trackLinks(role.modalityTrackIds)}${engineeringLinks(course.pathways.find((r) => r.id === role.defaultPathwayId))}<p class="route-availability">${availabilityText(course.pathways.find((r) => r.id === role.defaultPathwayId).phaseIds)}. Counts include shared foundations.</p>
+    <p>${inlineMath(role.workExample)}</p>${focusSummary(route)}${trackLinks(role.modalityTrackIds)}${engineeringLinks(route)}<p class="route-availability">${availabilityText(route.phaseIds)}. Counts include shared foundations.</p>
     <div class="role-columns">
     <div>
     <h4>Skills you’ll connect</h4>
-    <ul>${role.skills.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+    <ul>${role.skills.map((s) => `<li>${inlineMath(s)}</li>`).join('')}</ul>
     <h4>Prerequisites</h4>
-    <p>${escapeHtml(role.background)}</p>
+    <p>${inlineMath(role.background)}</p>
     </div>
     <div>
     <h4>Your portfolio project</h4>
-    <p>${escapeHtml(role.portfolio)}</p>${
+    <p>${inlineMath(role.portfolio)}</p>${
       capstone.projectId
         ? `<p>
     <a href="project.html?id=${encodeURIComponent(capstone.projectId)}">Open the guided portfolio project</a>
@@ -37,23 +43,23 @@ export function renderCareer(role, course) {
     </p>`
         : ''
     }<h4>Demonstrate the capability</h4>
-    <p>${escapeHtml(role.readiness)}</p>
+    <p>${inlineMath(role.readiness)}</p>
     </div>
     </div>
     <h4>Questions to defend in a review</h4>
-    <ul>${role.reviewQuestions.map((q) => `<li>${escapeHtml(q)}</li>`).join('')}</ul>
-    <p class="soft">${escapeHtml(role.scopeNote)}</p>
+    <ul>${role.reviewQuestions.map((q) => `<li>${inlineMath(q)}</li>`).join('')}</ul>
+    <p class="soft">${inlineMath(role.scopeNote)}</p>
     <h4 class="career-subhead">Your route in milestones</h4>
     <ol class="career-milestones">${role.milestones
       .map(
         (m) => `<li>
-    <h4>${escapeHtml(m.title)}</h4>
-    <p>${escapeHtml(m.deliverable)}</p>
+    <h4>${inlineMath(m.title)}</h4>
+    <p>${inlineMath(m.deliverable)}</p>
     <p class="milestone-availability">${availabilityText(m.phaseIds)}</p>
     <div>${m.phaseIds.map((id) => `<button data-phase="${id}" class="phase-chip">${phaseById(id).number} ${escapeHtml(phaseById(id).title)}</button>`).join('')}</div>
     <details>
     <summary>What to demonstrate</summary>
-    <ul>${m.criteria.map((s) => `<li>${escapeHtml(s)}</li>`).join('')}</ul>
+    <ul>${m.criteria.map((s) => `<li>${inlineMath(s)}</li>`).join('')}</ul>
     </details>
     </li>`,
       )
@@ -64,7 +70,7 @@ export function renderCareer(role, course) {
     <div class="starting-checks">${role.startingPointChecks
       .map(
         (check) => `<label>
-    <input type="checkbox" value="${check.phaseId}">${escapeHtml(check.question)}</label>`,
+    <input type="checkbox" value="${check.phaseId}">${inlineMath(check.question)}</label>`,
       )
       .join('')}</div>
     </details>

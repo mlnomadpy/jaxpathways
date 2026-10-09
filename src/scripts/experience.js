@@ -15,11 +15,13 @@ export function initExperience() {
 
 function revealContext() {
   const params = new URLSearchParams(location.search),
-    save = document.getElementById('save-work');
+    save = /** @type {HTMLDetailsElement | null} */ (document.getElementById('save-work'));
   if (save && (params.has('lesson') || params.has('project') || location.hash === '#portfolio'))
     save.open = true;
   if (location.hash === '#backups') {
-    const panel = document.getElementById('backup-panel');
+    const panel = /** @type {HTMLDetailsElement | null} */ (
+      document.getElementById('backup-panel')
+    );
     if (panel) panel.open = true;
   }
 }

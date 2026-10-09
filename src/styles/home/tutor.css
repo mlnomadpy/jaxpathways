@@ -1,5 +1,5 @@
 .tutor-band {
-  background: var(--atlas);
+  background: var(--banner-bg);
   color: #f2ecff;
   border-radius: 16px;
   padding: 26px 30px;
@@ -24,11 +24,6 @@
   margin: 0;
   color: #d4c8ed;
 }
-.tutor-heading a {
-  color: white;
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
 .command-line {
   display: flex;
   gap: 20px;
@@ -39,11 +34,14 @@
 }
 .command-line pre {
   margin: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
-  font:
-    14px/1.8 ui-monospace,
-    monospace;
+  font: 14px/1.8 var(--mono);
   min-width: 0;
 }
 .command-line button,
@@ -111,6 +109,7 @@
 }
 .tutor-more {
   margin-top: 10px;
+  border-top: 0;
 }
 .tutor-more summary {
   font-size: 12px;
@@ -118,6 +117,9 @@
   cursor: pointer;
   min-height: 36px;
   padding: 7px 0;
+}
+.tutor-more summary::before {
+  color: #d4c8ed;
 }
 .tutor-more p {
   font-size: 13px;

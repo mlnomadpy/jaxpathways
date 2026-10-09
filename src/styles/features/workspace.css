@@ -1,14 +1,4 @@
 /* Notebook and organizer own their layout; shared choice controls own their fields. */
-.learner-workspace {
-  max-width: 1200px;
-  margin-inline: auto;
-}
-.learner-workspace .page-intro {
-  padding-bottom: 32px;
-}
-.learner-workspace .page-intro h1 {
-  font-size: clamp(36px, 4.5vw, 48px);
-}
 .learner-workspace > section {
   margin-bottom: 48px;
   padding: 0;
@@ -35,11 +25,13 @@
 .workspace-route h3 {
   font-size: 25px;
 }
-.workspace-route > a {
+.workspace-route a:not(.button) {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
+  color: var(--blue);
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .workspace-route #continue {
   margin-top: 12px;
@@ -49,12 +41,19 @@
   padding-top: 20px;
   margin-top: 24px;
 }
+.workspace-route .saved-career h3 {
+  font-size: 20px;
+}
+.workspace-route .saved-career p {
+  font-size: 14px;
+  color: var(--muted);
+}
 .learner-workspace #lesson-progress-summary {
   margin: 0;
   padding: 28px;
   border: 0;
   border-radius: var(--learning-radius);
-  background: var(--atlas);
+  background: var(--banner-bg);
   color: white;
 }
 .learner-workspace #lesson-progress-summary h3 {
@@ -67,9 +66,13 @@
   color: #e1d8f8;
   font-size: 14px;
 }
+.learner-workspace #lesson-progress-summary > a:not(.button) {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
 .learner-workspace #lesson-progress-summary .primary {
   background: white;
-  color: var(--atlas);
+  color: var(--banner-ink);
 }
 .project-practice {
   margin: 24px 0;
@@ -203,7 +206,7 @@
   padding: 24px;
   margin-top: 20px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--learning-radius);
   background: var(--panel);
 }
 #restore-preview button {
@@ -314,7 +317,7 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-@media (max-width: 680px) {
+@media (max-width: 760px) {
   .artifact-context-fields,
   .club-plan,
   .club-controls {

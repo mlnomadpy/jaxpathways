@@ -25,13 +25,11 @@
   min-height: 80px;
 }
 .lesson-preview a:hover {
-  background: #e5dff5;
+  background: var(--nav-surface);
   color: var(--atlas);
 }
 .lesson-number {
-  font:
-    13px ui-monospace,
-    monospace;
+  font: 13px var(--mono);
   color: var(--muted);
 }
 .lesson-title {

@@ -71,7 +71,9 @@ This bounded lab captures stdout and stderr in memory and analyzes events after 
 Create main.py with this block. Run python3 main.py in the CPU course environment.
 
 ```python
+# Step 1: Create the local artifact helpers
 """Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -83,15 +85,23 @@ import tempfile
 import time
 
 
+# Function `digest(value)` implementing this stage's computation:
 def digest(value):
+    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
+# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
+    # Read or serialize artifact data on disk (`path`).
+    # Execute the next step of the computation.
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
+    # Run the boundary check and catch the expected exception:
     try:
+        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush(); os.fsync(stream.fileno())
@@ -192,27 +202,46 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
+# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
+    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
+    # Update state in place with the new values.
     cfg.update(changes)
+    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
+        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
+    # Return `cfg` to the caller.
     return cfg
 
 
+# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
+    # Read or serialize artifact data on disk (`root`).
+    # Execute the next step of the computation.
     root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
+    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0: raise ValueError('timeout must be positive')
+    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
+    # Evaluate `worker` from the current inputs and state.
+    # Read or serialize artifact data on disk (``).
     worker=root/'worker.py';worker.write_text(WORKER)
+    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
+    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
+    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
+    # Evaluate `timed_out` from the current inputs and state.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -221,19 +250,28 @@ def launch(root, config=None, timeout=10.):
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill();stdout,stderr=process.communicate(timeout=1.)
+    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
+    # Evaluate `events` from the current inputs and state.
+    # Evaluate `malformed` from the current inputs and state.
     events=[]; malformed=[]
+    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
+        # Branch on condition `not line.strip()`:
         if not line.strip(): continue
         try:
             event=json.loads(line)
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
+    # Evaluate `status` from the current inputs and state.
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
+    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
+    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
+    # Return `result` to the caller.
     return result
 ```
 
@@ -244,12 +282,20 @@ The supervisor owns the child handle, captures its output and always waits for t
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
+# Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
 def summarize(result):
+    # Evaluate `updates` from the current inputs and state.
     updates=[e for e in result['events'] if e['event']=='progress']
+    # Evaluate `checkpoints` from the current inputs and state.
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
+    # Run `sum` to compute `count`.
+    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates);update_s=sum(e['update_s'] for e in updates)
+    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
+    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
+    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
@@ -264,16 +310,29 @@ The summary retains work counts, timing boundaries and checkpoint lag separately
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
+# Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
+    # Read or serialize artifact data on disk (`observed`).
     observed=launch(Path(folder)/'healthy',dict(steps=12))
+    # Read or serialize artifact data on disk (`interrupted`).
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
+# Run `summarize` to compute `healthy`.
+# Run `summarize` to compute `incident`.
 healthy=summarize(observed); incident=summarize(interrupted)
+# Evaluate `progress` from the current inputs and state.
 progress=[e for e in observed['events'] if e['event']=='progress']
+# Verify contract: `healthy['examples'] == 96 and healthy['updates'] == 12`.
 assert healthy['examples']==96 and healthy['updates']==12
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert incident['last_step']==5 and incident['checkpoint_step']==4
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert incident['uncheckpointed_updates']==1
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert healthy['job_examples_per_s'] < healthy['update_examples_per_s']
+# Print the observed values to compare against the expected result.
 print('healthy:',healthy)
+# Print diagnostic summary of the computed outputs.
 print('incident:',incident)
 ```
 
@@ -282,7 +341,9 @@ Both summaries are derived from real child output; failures are not invented sta
 ## Run the example
 
 ```python
+# Complete runnable example (operations-02)
 """Bounded local JAX workload operations. No scheduler, cloud, or GPU emulator."""
+# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -294,15 +355,23 @@ import tempfile
 import time
 
 
+# Function `digest(value)` implementing this stage's computation:
 def digest(value):
+    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
+# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
+    # Read or serialize artifact data on disk (`path`).
+    # Execute the next step of the computation.
     path = Path(path); path.parent.mkdir(parents=True, exist_ok=True)
+    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
+    # Run the boundary check and catch the expected exception:
     try:
+        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush(); os.fsync(stream.fileno())
@@ -387,27 +456,46 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
+# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
+    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
+    # Update state in place with the new values.
     cfg.update(changes)
+    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
+        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1: raise ValueError(name+' must be a positive integer')
+    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
+    # Return `cfg` to the caller.
     return cfg
 
 
+# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
+    # Read or serialize artifact data on disk (`root`).
+    # Execute the next step of the computation.
     root=Path(root);root.mkdir(parents=True,exist_ok=True)
+    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
+    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0: raise ValueError('timeout must be positive')
+    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
+    # Evaluate `worker` from the current inputs and state.
+    # Read or serialize artifact data on disk (``).
     worker=root/'worker.py';worker.write_text(WORKER)
+    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
+    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
+    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
+    # Evaluate `timed_out` from the current inputs and state.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -416,43 +504,73 @@ def launch(root, config=None, timeout=10.):
         try: stdout,stderr=process.communicate(timeout=1.)
         except subprocess.TimeoutExpired:
             process.kill();stdout,stderr=process.communicate(timeout=1.)
+    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
+    # Evaluate `events` from the current inputs and state.
+    # Evaluate `malformed` from the current inputs and state.
     events=[]; malformed=[]
+    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
+        # Branch on condition `not line.strip()`:
         if not line.strip(): continue
         try:
             event=json.loads(line)
             if not isinstance(event,dict) or 'event' not in event: raise ValueError('not an event')
             events.append(event)
         except (ValueError,TypeError): malformed.append(line)
+    # Evaluate `status` from the current inputs and state.
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
+    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
+    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
+    # Return `result` to the caller.
     return result
 
+# Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
 def summarize(result):
+    # Evaluate `updates` from the current inputs and state.
     updates=[e for e in result['events'] if e['event']=='progress']
+    # Evaluate `checkpoints` from the current inputs and state.
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
+    # Run `sum` to compute `count`.
+    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates);update_s=sum(e['update_s'] for e in updates)
+    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
+    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
+    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
                 job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
+# Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
+    # Read or serialize artifact data on disk (`observed`).
     observed=launch(Path(folder)/'healthy',dict(steps=12))
+    # Read or serialize artifact data on disk (`interrupted`).
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
+# Run `summarize` to compute `healthy`.
+# Run `summarize` to compute `incident`.
 healthy=summarize(observed); incident=summarize(interrupted)
+# Evaluate `progress` from the current inputs and state.
 progress=[e for e in observed['events'] if e['event']=='progress']
+# Verify contract: `healthy['examples'] == 96 and healthy['updates'] == 12`.
 assert healthy['examples']==96 and healthy['updates']==12
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert incident['last_step']==5 and incident['checkpoint_step']==4
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert incident['uncheckpointed_updates']==1
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert healthy['job_examples_per_s'] < healthy['update_examples_per_s']
+# Print the observed values to compare against the expected result.
 print('healthy:',healthy)
+# Print diagnostic summary of the computed outputs.
 print('incident:',incident)
 ```
 
@@ -475,28 +593,37 @@ The horizontal axis is completed update number for the failed run. The vertical 
 The staircase records when state becomes available for recovery. A gap is expected between checkpoints; it becomes operationally relevant when the process fails. Resuming from step $4$ repeats update $5$ using its restored optimizer and random state. This plot does not show elapsed recovery time or prove power-loss durability.
 
 ```python
+# Compute figure data for: Observed progress and committed progress diverge before failure
+# Evaluate `committed` from the current inputs and state.
+# Evaluate `points` from the current inputs and state.
+# Evaluate `saved` from the current inputs and state.
 committed=0;points=[];saved=[]
+# Loop over `event` in `interrupted['events']`:
 for event in interrupted['events']:
+    # Branch on condition `event['event'] == 'checkpoint'`:
     if event['event']=='checkpoint': committed=event['step']
+    # Branch on condition `event['event'] == 'progress'`:
     if event['event']=='progress':
         points.append(event['step']);saved.append(committed)
 # At each completed step include a checkpoint emitted immediately afterward.
 for i,step_number in enumerate(points):
+    # Run `max` to compute `saved[i]`.
     saved[i]=max([e['step'] for e in interrupted['events'] if e['event']=='checkpoint' and e['step']<=step_number],default=0)
+# Evaluate `visual_data` from the current inputs and state.
 visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel':'step index','series':[{'label':'observed progress','y':points},{'label':'committed checkpoint','y':saved}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:04:55.624892+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:07:01.358895+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0006197085604071617, 'update_examples_per_s': 154911.52798813357, 'job_examples_per_s': 123.21681242279833, 'update_duty_fraction': 0.0007954011817134544}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00027408450841903687, 'update_examples_per_s': 145940.38981161822, 'job_examples_per_s': 50.17588215802822, 'update_duty_fraction': 0.0003438107998943672}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00063374824821949, 'update_examples_per_s': 151479.70865357202, 'job_examples_per_s': 112.13858307369776, 'update_duty_fraction': 0.0007402878185497053}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00027787405997514725, 'update_examples_per_s': 143950.104603422, 'job_examples_per_s': 49.36249114026327, 'update_duty_fraction': 0.0003429138955908048}
-examples / synchronized seconds: 96 0.00063374824821949
-measured update duty fraction, not hardware utilization: 0.0007402878185497053
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005524172447621822, 'update_examples_per_s': 173781.68569181502, 'job_examples_per_s': 139.6723229480834, 'update_duty_fraction': 0.000803722914713687}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002816668711602688, 'update_examples_per_s': 142011.73121719362, 'job_examples_per_s': 54.076902728220915, 'update_duty_fraction': 0.0003807917998374047}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0004919175989925861, 'update_examples_per_s': 195154.63605409014, 'job_examples_per_s': 122.64055334182859, 'update_duty_fraction': 0.0006284275681149428}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.000272875651717186, 'update_examples_per_s': 146586.9151325265, 'job_examples_per_s': 52.558187646261175, 'update_duty_fraction': 0.00035854624267619176}
+examples / synchronized seconds: 96 0.0004919175989925861
+measured update duty fraction, not hardware utilization: 0.0006284275681149428
 PASS: operations-02
 
 ```
@@ -506,10 +633,15 @@ PASS: operations-02
 **Predict before running:** Should averaging per-step rates equal total examples divided by total time?
 
 ```python
+# Experiment — Recompute throughput independently: Summing work and time weights slow steps appropriately; an...
 total_examples=sum(e['examples'] for e in progress)
+# Run `sum` to compute `total_time`.
 total_time=sum(e['update_s'] for e in progress)
+# Verify contract: `abs(total_examples / total_time - healthy['update_examples_per_s']) ...`.
 assert abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert all(e['update_s']>0 for e in progress)
+# Print the observed values to compare against the expected result.
 print('examples / synchronized seconds:',total_examples,total_time)
 ```
 
@@ -522,9 +654,13 @@ Summing work and time weights slow steps appropriately; an unweighted mean of ra
 **Predict before running:** Is the last successful update necessarily present in the checkpoint?
 
 ```python
+# Experiment — Locate the incident boundary: A progress log is not a committed state artifact.
 names=[e['event'] for e in interrupted['events']]
+# Verify contract: `names[-1] == 'failed'`.
 assert names[-1]=='failed'
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert [e['step'] for e in interrupted['events'] if e['event']=='checkpoint']==[2,4]
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert [e['step'] for e in interrupted['events'] if e['event']=='progress'][-1]==5
 ```
 
@@ -536,12 +672,41 @@ A progress log is not a committed state artifact. Recovery must select the commi
 
 Compute the fraction of supervisor wall time spent inside synchronized updates, and state precisely what that fraction excludes.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
+- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Verify contract: `0 < duty < 1`.
+2. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+3. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
+duty = sum(...)  # TODO: compute duty
+# Verify contract: `0 < duty < 1`.
+assert 0  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert abs(duty-healthy['update_duty_fraction'])  # TODO: complete assertion check
+# Print the observed values to compare against the expected result.
+print('measured update duty fraction, not hardware utilization:',duty)
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
 duty=sum(e['update_s'] for e in progress)/observed['wall_s']
+# Verify contract: `0 < duty < 1`.
 assert 0 < duty < 1
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert abs(duty-healthy['update_duty_fraction']) < 1e-9
+# Print the observed values to compare against the expected result.
 print('measured update duty fraction, not hardware utilization:',duty)
 ```
 
@@ -559,12 +724,41 @@ Sum examples and seconds first.
 
 </details>
 
+### How to write: Catch an average-of-rates error — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `error(...)` — Call `error` with your updated parameters or inputs from this lesson's workspace.
+- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Run `sum` to compute `wrong`.
+2. Run `sum` to compute `right`.
+3. Verify contract: `abs(wrong - 16 / 3) < 1e-12 and right == 4.0`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
+durations = ...  # TODO: compute durations
+# Run `sum` to compute `wrong`.
+wrong = sum(...)  # TODO: compute wrong
+# Run `sum` to compute `right`.
+right = sum(...)  # TODO: compute right
+# Verify contract: `abs(wrong - 16 / 3) < 1e-12 and right == 4.0`.
+assert abs(wrong-16/3)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
 durations=[1.,3.];counts=[8,8]
+# Run `sum` to compute `wrong`.
 wrong=sum(n/t for n,t in zip(counts,durations))/2
+# Run `sum` to compute `right`.
 right=sum(counts)/sum(durations)
+# Verify contract: `abs(wrong - 16 / 3) < 1e-12 and right == 4.0`.
 assert abs(wrong-16/3)<1e-12 and right==4.
 ```
 
@@ -584,12 +778,44 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 
 </details>
 
+### How to write: Change the checkpoint cadence — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `cadence(...)` — Call `cadence` with your updated parameters or inputs from this lesson's workspace.
+- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
+- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
+
+**Step-by-step implementation plan:**
+1. Create an isolated temporary directory to run and inspect artifacts safely:
+2. Run `launch` to compute `changed`.
+3. Run `summarize` to compute `stats`.
+4. Verify contract: `stats['checkpoint_step'] == 3 and stats['uncheckpointed_updates'] ==...`.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
+# Create an isolated temporary directory to run and inspect artifacts safely:
+with tempfile.TemporaryDirectory() as folder:
+    # Run `launch` to compute `changed`.
+    changed = launch(...)  # TODO: compute changed
+# Run `summarize` to compute `stats`.
+stats = summarize(...)  # TODO: compute stats
+# Verify contract: `stats['checkpoint_step'] == 3 and stats['uncheckpointed_updates'] ==...`.
+assert stats['checkpoint_step']  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
+# Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
+    # Run `launch` to compute `changed`.
     changed=launch(folder,dict(checkpoint_every=3,fail_after=5))
+# Run `summarize` to compute `stats`.
 stats=summarize(changed)
+# Verify contract: `stats['checkpoint_step'] == 3 and stats['uncheckpointed_updates'] ==...`.
 assert stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2
 ```
 

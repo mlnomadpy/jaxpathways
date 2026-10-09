@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="576pt" height="432pt" viewBox="0 0 576 432" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:description>Read top to bottom: HBM holds fp32 master weights and Adam moments plus bf16/int8 caches, streams bf16 operands into the MXU, accumulates dot products in fp32, and updates sharded HBM state.</dc:description>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.10.8, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 432 
+L 576 432 
+L 576 0 
+L 0 0 
+z
+" style="fill: #ffffff"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 288 97.811208 
+Q 288 115.586161 288 131.460455 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 126.260455 
+L 288 131.460455 
+L 285.4 126.260455 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 288 201.268235 
+Q 288 219.043187 288 234.917482 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 229.717482 
+L 288 234.917482 
+L 285.4 229.717482 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 288 304.725261 
+Q 288 322.500213 288 338.374508 
+" style="fill: none; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+    <path d="M 290.6 333.174508 
+L 288 338.374508 
+L 285.4 333.174508 
+z
+" style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_5">
+    <path d="M 45.750204 30.690209 
+L 530.249796 30.690209 
+Q 534.239793 30.690209 534.239793 34.950204 
+L 534.239793 92.764425 
+Q 534.239793 97.02442 530.249796 97.02442 
+L 45.750204 97.02442 
+Q 41.760207 97.02442 41.760207 92.764425 
+L 41.760207 34.950204 
+Q 41.760207 30.690209 45.750204 30.690209 
+z
+" clip-path="url(#p289f00a7fc)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_6">
+    <path d="M 45.750204 134.147235 
+L 530.249796 134.147235 
+Q 534.239793 134.147235 534.239793 138.40723 
+L 534.239793 196.221451 
+Q 534.239793 200.481446 530.249796 200.481446 
+L 45.750204 200.481446 
+Q 41.760207 200.481446 41.760207 196.221451 
+L 41.760207 138.40723 
+Q 41.760207 134.147235 45.750204 134.147235 
+z
+" clip-path="url(#p289f00a7fc)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_7">
+    <path d="M 45.750204 237.604261 
+L 530.249796 237.604261 
+Q 534.239793 237.604261 534.239793 241.864257 
+L 534.239793 299.678477 
+Q 534.239793 303.938472 530.249796 303.938472 
+L 45.750204 303.938472 
+Q 41.760207 303.938472 41.760207 299.678477 
+L 41.760207 241.864257 
+Q 41.760207 237.604261 45.750204 237.604261 
+z
+" clip-path="url(#p289f00a7fc)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="patch_8">
+    <path d="M 45.750204 341.061288 
+L 530.249796 341.061288 
+Q 534.239793 341.061288 534.239793 345.321283 
+L 534.239793 403.135503 
+Q 534.239793 407.395499 530.249796 407.395499 
+L 45.750204 407.395499 
+Q 41.760207 407.395499 41.760207 403.135503 
+L 41.760207 345.321283 
+Q 41.760207 341.061288 45.750204 341.061288 
+z
+" clip-path="url(#p289f00a7fc)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="67.168564" transform="rotate(-0 288 67.168564)">TPU HBM capacity: fp32 master weights + Adam (m, v) + bf16/int8 KV cache</text>
+   </g>
+   <g id="text_2">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="170.625591" transform="rotate(-0 288 170.625591)">HBM bandwidth pipe (819-2765 GB/s): stream bf16 / int8 operands</text>
+   </g>
+   <g id="text_3">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="274.082617" transform="rotate(-0 288 274.082617)">TPU MXU systolic array: bf16/int8 multiply + fp32 accumulation</text>
+   </g>
+   <g id="text_4">
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="377.539643" transform="rotate(-0 288 377.539643)">XProf *.xplane.pb trace: verify MXU busy % vs HBM bandwidth stall</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p289f00a7fc">
+   <rect x="3.00024" y="3.00024" width="569.99952" height="425.99952"/>
+  </clipPath>
+ </defs>
+</svg>

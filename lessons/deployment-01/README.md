@@ -57,6 +57,7 @@ The file labs/keras_backends.py beside this lesson builds the same Dense model, 
 **Optional Keras environment — macOS/Linux, workspace root**
 
 ```sh
+# Run optional keras environment — macos/linux, workspace root using the course Python environment
 python3 -m venv .venv-interop
 .venv-interop/bin/python -m pip install "keras==3.14.1" "jax==0.9.2" "torch==2.11.0"
 ```
@@ -66,6 +67,7 @@ python3 -m venv .venv-interop
 **Optional lab — run from the course workspace root after installing Keras and the selected backend**
 
 ```sh
+# Run optional lab — run from the course workspace root after installing keras and the selected backend using the course Python environment
 python3 phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/labs/keras_backends.py --backend jax
 python3 phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/labs/keras_backends.py --backend torch
 python3 phases/15-deployment/01-keras-and-pytorch-bridges-to-explicit-jax/labs/keras_backends.py --backend tensorflow
@@ -108,16 +110,20 @@ The optional Keras lab runs real backends in separate processes. The default com
 Create main.py in your lesson workspace and run it with the active course Python environment. Keep feature order fixed while you name the input, kernel and bias.
 
 ```python
+# Step 1 — Write the source function and its known input: The arrays define a batch of shape (2,3), a kernel of shape (3,2),...
+# Import numpy for this computation.
 import numpy as np
 import jax
 import jax.numpy as jnp
 # Same dense layer, different parameter layouts.
 x = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)
+# Initialize array `keras_kernel` with explicit values and shape.
 keras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = np.array([.1, -.2], np.float32)
 
+# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(x[0] @ keras_kernel + bias, [3.1, -.45], atol=1e-6)
-
 ```
 
 The arrays define a batch of shape $(2,3)$, a kernel of shape $(3,2)$, and a bias of shape $(2,)$. The first known output is $[3.1,-0.45]$.
@@ -127,13 +133,17 @@ The arrays define a batch of shape $(2,3)$, a kernel of shape $(3,2)$, and a bia
 Append this block to the same main.py and rerun the whole file. Transpose the stored PyTorch-style weights back into input-by-output order, then define the pure prediction function.
 
 ```python
+# Step 2 — Map the stored tensor into explicit JAX parameters: The zero-input check returns the bias twice.
 torch_weight = keras_kernel.T.copy()  # torch Linear: output, input
+# Create device-backed JAX array `params`.
 params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
+# Function `predict(params, inputs)` implementing this stage's computation:
 def predict(params, inputs):
+    # Return `inputs @ params['kernel'] + params['bias']` to the caller.
     return inputs @ params["kernel"] + params["bias"]
 
+# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_allclose(predict(params, jnp.zeros((2,3))), np.tile(bias,(2,1)), atol=1e-6)
-
 ```
 
 The zero-input check returns the bias twice. If it does not, inspect bias broadcasting before comparing full predictions.
@@ -143,12 +153,15 @@ The zero-input check returns the bias twice. If it does not, inspect bias broadc
 Append this block to the same main.py and rerun the whole file. Run both independent checks and inspect the two output rows.
 
 ```python
+# Step 3 — Verify values before extending the architecture: The first assertion checks hand arithmetic; the second compares...
+# Wrap with `jax.jit` (`actual`) so XLA traces and compiles the function.
 actual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))
 # A hand-computed first row detects a shared layout mistake.
 np.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)
+# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)
+# Print the observed values to compare against the expected result.
 print("Matched dense outputs:", actual)
-
 ```
 
 The first assertion checks hand arithmetic; the second compares the entire batch with the source-layout calculation. Continue with the feature-order and second-layer experiments below.
@@ -156,23 +169,32 @@ The first assertion checks hand arithmetic; the second compares the entire batch
 ## Run the example
 
 ```python
+# Move models between JAX, Keras, TensorFlow and PyTorch: Cross-framework conversion must preserve the meaning of inputs,...
+# Import numpy for this computation.
 import numpy as np
 import jax
 import jax.numpy as jnp
 # Same dense layer, different parameter layouts.
 x = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)
+# Initialize array `keras_kernel` with explicit values and shape.
 keras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)
+# Initialize array `bias` with explicit values and shape.
 bias = np.array([.1, -.2], np.float32)
 torch_weight = keras_kernel.T.copy()  # torch Linear: output, input
+# Create device-backed JAX array `params`.
 params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
+# Function `predict(params, inputs)` implementing this stage's computation:
 def predict(params, inputs):
+    # Return `inputs @ params['kernel'] + params['bias']` to the caller.
     return inputs @ params["kernel"] + params["bias"]
+# Wrap with `jax.jit` (`actual`) so XLA traces and compiles the function.
 actual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))
 # A hand-computed first row detects a shared layout mistake.
 np.testing.assert_allclose(actual[0], [3.1, -.45], atol=1e-6)
+# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(actual, x @ keras_kernel + bias, atol=1e-6)
+# Print the observed values to compare against the expected result.
 print("Matched dense outputs:", actual)
-
 ```
 
 Expected: Two rows match; the first is $[3.1, -0.45]$ within absolute tolerance $10^{-6}$.
@@ -198,12 +220,14 @@ With the first convention, a row batch computes $XW+b$. With the transposed stor
 The picture explains this layout contract using an explicit numerical reference. It does not demonstrate that every layer or serialized model can be transferred between frameworks by one transpose. Check activations, bias, preprocessing, and layer-specific conventions against an independent output reference as well.
 
 ```python
+# Compute figure data for: A transpose changes storage layout, not the intended model
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input × output layout', 'values': keras_kernel.tolist(), 'rows': ['input 0', 'input 1', 'input 2'], 'columns': ['output 0', 'output 1'], 'unit': 'weight'}, {'kind': 'heatmap', 'title': 'Output × input layout', 'values': torch_weight.tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1', 'input 2'], 'unit': 'weight'}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T23:03:49.588913+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:05:59.032313+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
@@ -223,12 +247,17 @@ PASS: deployment-01
 **Predict before running:** Will a shape check catch wrong axes when input and output dimensions are equal?
 
 ```python
+# Experiment — A square matrix hides a transpose: Check asymmetric values and independently known outputs, not...
+# Initialize array `square` with explicit values and shape.
 square = np.array([[1., 2.], [3., 4.]], np.float32)
+# Initialize array `z` with explicit values and shape.
 z = np.array([[2., -1.]], np.float32)
+# Verify that the output tensor shape matches our prediction.
 assert (z @ square).shape == (z @ square.T).shape
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert not np.allclose(z @ square, z @ square.T)
+# Print the observed values to compare against the expected result.
 print("Equal shapes, unequal outputs")
-
 ```
 
 **Expected:** Both outputs have the same shape but different values.
@@ -240,15 +269,22 @@ Check asymmetric values and independently known outputs, not just tensor dimensi
 **Predict before running:** Predict both scores if the first and last input features are exchanged while the weights stay fixed.
 
 ```python
+# Experiment — Reorder features without changing tensor dimensions: The repair changes the pairing of features and coefficients.
 permutation = [2, 1, 0]
+# Evaluate `reordered` from the current inputs and state.
 reordered = x[:, permutation]
+# Convert `wrong_order` to a host NumPy array for inspection or verification.
 wrong_order = np.asarray(predict(params, reordered))
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)
+# Verify that the numerical values match the expected reference within tolerance.
 assert not np.allclose(wrong_order, actual)
+# Evaluate `repaired_params` from the current inputs and state.
 repaired_params = {'kernel': params['kernel'][permutation, :], 'bias': params['bias']}
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(predict(repaired_params, reordered), actual, atol=1e-6)
+# Print the observed values to compare against the expected result.
 print('Feature order failed, then matched after aligning kernel rows.')
-
 ```
 
 **Expected:** The wrong first row is $[-0.9,4.05]$; permuting the kernel rows restores both original observations.
@@ -259,12 +295,43 @@ The repair changes the pairing of features and coefficients. It does not change 
 
 Add a batch with four rows and preserve the same parameters. Verify each row independently using a feature-by-feature sum.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Construct and reshape `changed` into the target tensor dimensions.
+2. Combine or mask array elements to form `expected`.
+3. Verify that computed values match the expected reference within numerical tolerance.
+4. Print the observed values to compare against the expected result.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Add a batch with four rows and preserve the same parameters.
+# Construct and reshape `changed` into the target tensor dimensions.
+changed = np.arange(...)  # TODO: compute changed
+# Combine or mask array elements to form `expected`.
+expected = np.stack(...)  # TODO: compute expected
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(predict(params, changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(predict(params, changed), expected, atol
+# Print the observed values to compare against the expected result.
+print("Changed batch verified")
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Add a batch with four rows and preserve the same parameters.
+# Construct and reshape `changed` into the target tensor dimensions.
 changed = np.arange(12, dtype=np.float32).reshape(4, 3) / 4
+# Combine or mask array elements to form `expected`.
 expected = np.stack([sum(row[i] * keras_kernel[i] for i in range(3)) + bias for row in changed])
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(predict(params, changed), expected, atol=2e-6)
+# Print the observed values to compare against the expected result.
 print("Changed batch verified")
 ```
 
@@ -282,15 +349,48 @@ Compute both predictions from the same raw input: once with the source normaliza
 
 </details>
 
+### How to write: Detect a preprocessing mismatch — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `pixels` with explicit values and shape.
+2. Run `predict` to compute `source`.
+3. Run `predict` to compute `wrong`.
+4. Verify that the numerical values match the expected reference within tolerance.
+5. Verify that computed values match the expected reference within numerical tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Detect a preprocessing mismatch (Transfer): Input normalization belongs in the deployment contract.
+# Initialize array `pixels` with explicit values and shape.
+pixels = np.array(...)  # TODO: compute pixels
+# Run `predict` to compute `source`.
+source = predict(...)  # TODO: compute source
+# Run `predict` to compute `wrong`.
+wrong = predict(...)  # TODO: compute wrong
+# Verify that the numerical values match the expected reference within tolerance.
+assert not np.allclose(source, wrong)  # TODO: complete assertion check
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Detect a preprocessing mismatch (Transfer): Input normalization belongs in the deployment contract.
+# Initialize array `pixels` with explicit values and shape.
 pixels = np.array([[255., 128., 0.]], np.float32)
+# Run `predict` to compute `source`.
 source = predict(params, pixels / 255.)
+# Run `predict` to compute `wrong`.
 wrong = predict(params, pixels)
+# Verify that the numerical values match the expected reference within tolerance.
 assert not np.allclose(source, wrong)
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)
-
 ```
 
 Input normalization belongs in the deployment contract. Matching weights cannot compensate for a different input distribution.
@@ -309,20 +409,68 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 
 </details>
 
+### How to write: Map a second layer and locate an omitted activation — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `second_kernel` with explicit values and shape.
+2. Initialize array `second_bias` with explicit values and shape.
+3. Convert `hidden` to a host NumPy array for inspection or verification.
+4. Perform matrix contraction / projection to compute `bridged_scores`.
+5. Verify that computed values match the expected reference within numerical tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
+# Initialize array `second_kernel` with explicit values and shape.
+second_kernel = np.array(...)  # TODO: compute second_kernel
+# Initialize array `second_bias` with explicit values and shape.
+second_bias = np.array(...)  # TODO: compute second_bias
+# Convert `hidden` to a host NumPy array for inspection or verification.
+hidden = np.maximum(...)  # TODO: compute hidden
+# Perform matrix contraction / projection to compute `bridged_scores`.
+bridged_scores = ...  # TODO: compute bridged_scores
+# Verify that computed values match the expected reference within numerical tolerance.
+np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
+# Convert `omitted_relu` to a host NumPy array for inspection or verification.
+omitted_relu = np.asarray(...)  # TODO: compute omitted_relu
+# Verify that the numerical values match the expected reference within tolerance.
+assert not np.allclose(omitted_relu, bridged_scores)  # TODO: complete assertion check
+# Initialize array `positive_probe` with explicit values and shape.
+positive_probe = np.array(...)  # TODO: compute positive_probe
+# Reduce across the target axis to summarize ``.
+np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
+# Print the observed values to compare against the expected result.
+print('Two-layer reference scores:', bridged_scores[:, 0])
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
+# Initialize array `second_kernel` with explicit values and shape.
 second_kernel = np.array([[2.], [-1.]], np.float32)
+# Initialize array `second_bias` with explicit values and shape.
 second_bias = np.array([.3], np.float32)
+# Convert `hidden` to a host NumPy array for inspection or verification.
 hidden = np.maximum(np.asarray(predict(params, x)), 0.)
+# Perform matrix contraction / projection to compute `bridged_scores`.
 bridged_scores = hidden @ second_kernel + second_bias
+# Verify that computed values match the expected reference within numerical tolerance.
 np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
+# Convert `omitted_relu` to a host NumPy array for inspection or verification.
 omitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias
+# Verify that the numerical values match the expected reference within tolerance.
 assert not np.allclose(omitted_relu, bridged_scores)
+# Initialize array `positive_probe` with explicit values and shape.
 positive_probe = np.array([[1., 2.]], np.float32)
+# Reduce across the target axis to summarize ``.
 np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
+# Print the observed values to compare against the expected result.
 print('Two-layer reference scores:', bridged_scores[:, 0])
-
 ```
 
 The first dense layer agrees, but the activation is the first divergent boundary. The final reference scores are $6.5$ and $-4.25$. A probe containing only positive hidden values would make an omitted ReLU invisible.

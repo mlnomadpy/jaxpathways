@@ -8,10 +8,22 @@ import jax.numpy as jnp
 
 def environment_report():
     """Implement the phase contract described in README.md."""
+    # Key APIs to use: `jnp.arange`, `reshape`, `jax.jit`, `jnp.sum`, `y.block_until_ready`
+    # Step 1: Create evenly spaced index values in `x`.
+    # Step 2: Compile and trace the function with XLA (`y`).
+    # Step 3: Synchronize host execution until asynchronous device computation completes.
+    # Step 4: Return `{'python': platform.python_version(), 'jax': jax.__version__, 'numpy': np.__version__, 'backend': jax.default_backend(), 'devices': [str(d) for d in y.devices()], 'input_shape': list(x.shape), 'output_shape': list(y.shape), 'dtype': str(y.dtype), 'row_sums': np.asarray(y).tolist()}` to the caller.
     raise NotImplementedError('Implement environment_report')
 
 def normalize_columns(x, valid):
     """Implement the phase contract described in README.md."""
+    # Key APIs to use: `np.asarray`, `contract`, `or`, `np.isfinite`, `all`
+    # Step 1: Convert `x` to a host NumPy array for inspection or verification.
+    # Step 2: Convert `valid` to a host NumPy array for inspection or verification.
+    # Step 3: Guard input contract (`x.dtype != np.float32 or x.ndim != 2 or (not x.shape[1]) or (not np.isfinite(x).all())`) and fail fast if violated.
+    # Step 4: Guard input contract (`valid.dtype != np.bool_ or valid.shape != (len(x),) or (not np.any(valid))`) and fail fast if violated.
+    # Step 5: Create device-backed JAX array `data`.
+    # Step 6: Create device-backed JAX array `mask`.
     raise NotImplementedError('Implement normalize_columns')
 
 def per_example_loss(w, x, y):
@@ -21,6 +33,13 @@ _gradients = jax.jit(jax.vmap(jax.grad(per_example_loss), in_axes=(None, 0, 0)))
 
 def batch_gradients(w, x, y):
     """Implement the phase contract described in README.md."""
+    # Key APIs to use: `np.asarray`, `contract`, `or`, `weights`, `any`
+    # Step 1: Convert `w` to a host NumPy array for inspection or verification.
+    # Step 2: Convert `x` to a host NumPy array for inspection or verification.
+    # Step 3: Convert `y` to a host NumPy array for inspection or verification.
+    # Step 4: Guard input contract (`w.shape != (2,) or x.ndim != 1 or (not len(x)) or (y.shape != x.shape)`) and fail fast if violated.
+    # Step 5: Guard input contract (`any((a.dtype != np.float32 or not np.isfinite(a).all() for a in [w, x, y]))`) and fail fast if violated.
+    # Step 6: Return `_gradients(jnp.asarray(w), jnp.asarray(x), jnp.asarray(y))` to the caller.
     raise NotImplementedError('Implement batch_gradients')
 
 def initial_state(seed=0, batch=3):
@@ -30,6 +49,13 @@ def initial_state(seed=0, batch=3):
 
 def transition(state, dt=0.05):
     """Implement the phase contract described in README.md."""
+    # Key APIs to use: `key`, `random.split`, `random.normal`
+    # Step 1: Split the PRNG key deterministically into independent subkeys (`(key, noise_key)`).
+    # Step 2: Draw pseudorandom samples for `noise` using the explicit RNG state.
+    # Step 3: Evaluate `velocity` from the current inputs and state.
+    # Step 4: Evaluate `position` from the current inputs and state.
+    # Step 5: Evaluate `new` from the current inputs and state.
+    # Step 6: Return `(new, position)` to the caller.
     raise NotImplementedError('Implement transition')
 
 @partial(jax.jit, static_argnames=['steps'])

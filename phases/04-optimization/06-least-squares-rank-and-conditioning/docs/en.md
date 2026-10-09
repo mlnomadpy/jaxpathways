@@ -65,10 +65,15 @@ $$
 Create main.py and add this small matrix and target. Work out the proposed weights on paper.
 
 ```python
+# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
+# Initialize array `X` with explicit values and shape.
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+# Initialize array `y` with explicit values and shape.
 y = jnp.array([1.0, 2.0, 2.0])
+# Initialize array `expected` with explicit values and shape.
 expected = jnp.array([2 / 3, 5 / 3])
 ```
 
@@ -79,10 +84,15 @@ No weights can match all three targets, so a nonzero residual is expected.
 Append the direct solve and compute the error from the actual predictions.
 
 ```python
+# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
+# Perform matrix contraction / projection to compute `r`.
 r = X @ w - y
+# Verify contract: `int(rank) == 2`.
 assert int(rank) == 2
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(w, expected, atol=2e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 ```
 
@@ -93,9 +103,14 @@ Perpendicular residuals verify optimality for this unconstrained least-squares p
 Append the mean loss and a NumPy float64 solve; run python main.py.
 
 ```python
+# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
+# Convert `np_w` to a host NumPy array for inspection or verification.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
+# Print the observed values to compare against the expected result.
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
 ```
 
@@ -104,21 +119,36 @@ The hand result and a separate numerical implementation agree within float32 tol
 ## Run the example
 
 ```python
+# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
+# Initialize array `X` with explicit values and shape.
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
+# Initialize array `y` with explicit values and shape.
 y = jnp.array([1.0, 2.0, 2.0])
+# Initialize array `expected` with explicit values and shape.
 expected = jnp.array([2 / 3, 5 / 3])
 
+# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
+# Perform matrix contraction / projection to compute `r`.
 r = X @ w - y
+# Verify contract: `int(rank) == 2`.
 assert int(rank) == 2
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(w, expected, atol=2e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
+# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
+# Convert `np_w` to a host NumPy array for inspection or verification.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
+# Print the observed values to compare against the expected result.
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
 ```
 
@@ -145,12 +175,14 @@ The feature matrix makes the third prediction equal the sum of the first two. Ma
 Least squares balances this conflict. For each feature column, the residual contributions cancel, giving $X^{\mathsf T}r=0$. That orthogonality, rather than zero residual on every row, is the optimality condition. The unequal bar heights are an unavoidable limitation of this model, not evidence that the solver failed.
 
 ```python
+# Compute figure data for: Least squares balances unavoidable residuals
+# Perform matrix contraction / projection to compute `visual_data`.
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'least-squares fit', 'y': (X @ w).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:58:58.700250+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:01:51.477308+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113
@@ -165,11 +197,18 @@ PASS: optimization-06
 **Predict before running:** For identical columns, can we tell whether a coefficient belongs to the first or second column?
 
 ```python
+# Experiment — Duplicate a feature: Fit quality and coefficient uniqueness are different questions.
+# Initialize array `a` with explicit values and shape.
 a = jnp.array([1.0, 2.0, 3.0])
+# Combine or mask array elements to form `duplicate`.
 duplicate = jnp.stack([a, a], axis=1)
+# Run `jnp.linalg.lstsq` to compute `(w_dup, _, rank_dup, _)`.
 w_dup, _, rank_dup, _ = jnp.linalg.lstsq(duplicate, 3 * a, rcond=None)
+# Verify contract: `int(rank_dup) == 1`.
 assert int(rank_dup) == 1
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(duplicate @ w_dup, 3 * a, atol=3e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(duplicate @ jnp.array([1.0, 2.0]), duplicate @ jnp.array([0.0, 3.0]))
 ```
 
@@ -182,12 +221,20 @@ Fit quality and coefficient uniqueness are different questions.
 **Predict before running:** If two columns differ by only $0.01$ in one row, can a target change of $0.001$ move a weight by much more?
 
 ```python
+# Experiment — Perturb a weak direction: Nearly dependent columns can amplify target perturbations while...
+# Initialize array `near` with explicit values and shape.
 near = jnp.array([[1.0, 1.0], [0.0, 0.01], [0.0, 0.0]])
+# Initialize array `base` with explicit values and shape.
 base = near @ jnp.array([1.0, 1.0])
+# Initialize array `changed` with explicit values and shape.
 changed = base + jnp.array([0.0, 0.001, 0.0])
+# Run `jnp.linalg.lstsq` to compute `w0`.
 w0 = jnp.linalg.lstsq(near, base, rcond=None)[0]
+# Run `jnp.linalg.lstsq` to compute `w1`.
 w1 = jnp.linalg.lstsq(near, changed, rcond=None)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w1 - w0, jnp.array([-0.1, 0.1]), atol=5e-05)
+# Print the observed values to compare against the expected result.
 print('condition / target change / weight change:', jnp.linalg.cond(near), jnp.linalg.norm(changed - base), jnp.linalg.norm(w1 - w0))
 ```
 
@@ -199,12 +246,43 @@ Nearly dependent columns can amplify target perturbations while preserving a clo
 
 Add a constant bias column to inputs $(-1,0,1)$ and fit targets $(-1,1,3)$. Recover slope $2$ and bias $1$.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `x` with explicit values and shape.
+2. Initialize array `design` with explicit values and shape.
+3. Run `jnp.linalg.lstsq` to compute `fit`.
+4. Verify that the numerical values match the expected reference within tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: Add a constant bias column to inputs (-1,0,1) and fit targets (-1,1,3).
+# Initialize array `x` with explicit values and shape.
+x = jnp.array(...)  # TODO: compute x
+# Initialize array `design` with explicit values and shape.
+design = jnp.stack(...)  # TODO: compute design
+# Run `jnp.linalg.lstsq` to compute `fit`.
+fit = jnp.linalg.lstsq(...)  # TODO: compute fit
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(fit, jnp.array([2.0, 1.0]), atol=2e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: Add a constant bias column to inputs (-1,0,1) and fit targets (-1,1,3).
+# Initialize array `x` with explicit values and shape.
 x = jnp.array([-1.0, 0.0, 1.0])
+# Initialize array `design` with explicit values and shape.
 design = jnp.stack([x, jnp.ones_like(x)], axis=1)
+# Run `jnp.linalg.lstsq` to compute `fit`.
 fit = jnp.linalg.lstsq(design, 2 * x + 1, rcond=None)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(fit, jnp.array([2.0, 1.0]), atol=2e-06)
 ```
 
@@ -222,12 +300,43 @@ The first weight must divide by $100$ to represent the same model.
 
 </details>
 
+### How to write: Change feature units — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `scaled` with explicit values and shape.
+2. Run `jnp.linalg.lstsq` to compute `ws`.
+3. Verify that the numerical values match the expected reference within tolerance.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Change feature units (Transfer / diagnosis): Feature units affect coefficients and conditioning.
+# Initialize array `scaled` with explicit values and shape.
+scaled = ...  # TODO: compute scaled
+# Run `jnp.linalg.lstsq` to compute `ws`.
+ws = jnp.linalg.lstsq(...)  # TODO: compute ws
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(ws, expected / jnp.array([100.0, 1.0]), atol=3e-06)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(scaled @ ws, X @ w, atol=3e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Change feature units (Transfer / diagnosis): Feature units affect coefficients and conditioning.
+# Initialize array `scaled` with explicit values and shape.
 scaled = X * jnp.array([100.0, 1.0])
+# Run `jnp.linalg.lstsq` to compute `ws`.
 ws = jnp.linalg.lstsq(scaled, y, rcond=None)[0]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(ws, expected / jnp.array([100.0, 1.0]), atol=3e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(scaled @ ws, X @ w, atol=3e-06)
 ```
 
@@ -247,11 +356,38 @@ The diagonal entries are singular values here; squaring them changes the ratio f
 
 </details>
 
+### How to write: Explain the squared conditioning — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `D` with explicit values and shape.
+2. Verify that the numerical values match the expected reference within tolerance.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Explain the squared conditioning (Transfer / diagnosis): The normal equations can worsen numerical sensitivity.
+# Initialize array `D` with explicit values and shape.
+D = jnp.diag(...)  # TODO: compute D
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(jnp.linalg.cond(D), 10.0)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jnp.linalg.cond(D.T @ D), 100.0, rtol=2e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Explain the squared conditioning (Transfer / diagnosis): The normal equations can worsen numerical sensitivity.
+# Initialize array `D` with explicit values and shape.
 D = jnp.diag(jnp.array([1.0, 0.1]))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.linalg.cond(D), 10.0)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.linalg.cond(D.T @ D), 100.0, rtol=2e-06)
 ```
 

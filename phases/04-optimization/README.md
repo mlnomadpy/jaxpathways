@@ -214,7 +214,7 @@ A fitted regression model.
 
 **Demonstrate:** Explain prediction geometry and loss assumptions; verify derivatives; diagnose conditioning, curvature and gradient noise; justify an optimizer using held-out evidence.
 
-Project status: implemented staged practice · [Open source](../../projects/optimizer-audit/README.md). Use stages 1, 2, 3, 4, 5 for this phase. Complete the regression audit after the four core lessons. This deeper project follows all twelve optimization lessons and connects curvature, conditioning, gradient noise, optimizer state and regularization.
+Project status: implemented staged practice · [Open source](../../projects/optimizer-audit/README.md). Use stages 1, 2, 3, 4, 5 for this phase. Complete the regression audit after the four core lessons. This deeper project follows all twelve optimization lessons and connects curvature, conditioning, gradient noise, optimizer state and regularization. Copy `projects/optimizer-audit/starter/optimization.py` to `projects/optimizer-audit/my_optimization.py` and write your code in `projects/optimizer-audit/my_optimization.py`. Run `python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1` from the top-level folder to verify stages 1, 2, 3, 4, 5.
 
 
 

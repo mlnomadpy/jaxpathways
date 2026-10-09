@@ -65,13 +65,20 @@ At a stationary point the gradient is zero. Positive definite curvature gives a 
 Create main.py with the objective and independently known curvature.
 
 ```python
+# Step 1 — Write the bowl: At the starting point the gradient is (1,10).
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 
+# Function `loss(w)` implementing this stage's computation:
 def loss(w):
+    # Return `0.5 * (w[0] ** 2 + 10 * w[1] ** 2)` to the caller.
     return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)
+# Initialize array `w` with explicit values and shape.
 w = jnp.array([1.0, 1.0])
+# Initialize array `H` with explicit values and shape.
 H = jnp.diag(jnp.array([1.0, 10.0]))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(loss)(w), H @ w)
 ```
 
@@ -82,9 +89,14 @@ At the starting point the gradient is $(1,10)$.
 Append the full Hessian and a product check.
 
 ```python
+# Step 2 — Check second derivatives: The product agrees with the diagonal matrix without constructing a...
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.hessian(loss)(w), H)
+# Initialize array `v` with explicit values and shape.
 v = jnp.array([2.0, -1.0])
+# Differentiate the objective to obtain `hv` via automatic differentiation.
 hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 ```
 
@@ -95,15 +107,25 @@ The product agrees with the diagonal matrix without constructing a Hessian insid
 Append this scan and run python main.py. The history records losses after each update.
 
 ```python
+# Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
+# Define `run(rate, steps)` to evaluate the objective and its automatic derivatives:
 def run(rate, steps=20):
 
+    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
+        # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
+        # Return `(w, loss(w))` to the caller.
         return (w, loss(w))
+    # Return `jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)` to the caller.
     return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)
+# Run `run` to compute `(final, history)`.
 final, history = run(0.1)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(final, jnp.array([0.9 ** 20, 0.0]), atol=2e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.all(jnp.diff(history) <= 1e-06)
+# Print the observed values to compare against the expected result.
 print('final weights / loss:', final, history[-1])
 ```
 
@@ -112,29 +134,51 @@ The second coordinate vanishes; the first remains near $0.1216$ after $20$ steps
 ## Run the example
 
 ```python
+# Step 1 — Write the bowl: At the starting point the gradient is (1,10).
+# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 
+# Function `loss(w)` implementing this stage's computation:
 def loss(w):
+    # Return `0.5 * (w[0] ** 2 + 10 * w[1] ** 2)` to the caller.
     return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)
+# Initialize array `w` with explicit values and shape.
 w = jnp.array([1.0, 1.0])
+# Initialize array `H` with explicit values and shape.
 H = jnp.diag(jnp.array([1.0, 10.0]))
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(loss)(w), H @ w)
 
+# Step 2 — Check second derivatives: The product agrees with the diagonal matrix without constructing a...
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.hessian(loss)(w), H)
+# Initialize array `v` with explicit values and shape.
 v = jnp.array([2.0, -1.0])
+# Differentiate the objective to obtain `hv` via automatic differentiation.
 hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 
+# Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
+# Define `run(rate, steps)` to evaluate the objective and its automatic derivatives:
 def run(rate, steps=20):
 
+    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
+        # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
+        # Return `(w, loss(w))` to the caller.
         return (w, loss(w))
+    # Return `jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)` to the caller.
     return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)
+# Run `run` to compute `(final, history)`.
 final, history = run(0.1)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(final, jnp.array([0.9 ** 20, 0.0]), atol=2e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.all(jnp.diff(history) <= 1e-06)
+# Print the observed values to compare against the expected result.
 print('final weights / loss:', final, history[-1])
 ```
 
@@ -161,16 +205,22 @@ For a quadratic direction with curvature $\lambda$, gradient descent multiplies 
 The steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.
 
 ```python
+# Compute figure data for: Unequal curvature produces unequal progress
+# Create device-backed JAX array `points`.
 points = [jnp.array([1.0, 1.0])]
+# Repeat the update loop over `range(20)` steps:
 for _ in range(20):
+    # Differentiate the objective to obtain gradients ``.
     points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))
+# Combine or mask array elements to form `trace`.
 trace = jnp.stack(points)
+# Evaluate `visual_data` from the current inputs and state.
 visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-06T22:59:10.824688+00:00. JAX 0.9.2.
+CPU run: 2026-10-08T14:02:02.468125+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395
@@ -184,10 +234,15 @@ PASS: optimization-08
 **Predict before running:** Predict the steep coordinate at rates $0.2$ and $0.21$.
 
 ```python
+# Experiment — Cross the stability boundary: A learning-rate bound depends on curvature, not on a universal...
 edge, _ = run(0.2)
+# Run `run` to compute `(bad, bad_history)`.
 bad, bad_history = run(0.21)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jnp.abs(edge[1]), 1.0, atol=2e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.abs(bad[1]) > 6.0
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert bad_history[-1] > loss(w)
 ```
 
@@ -200,10 +255,16 @@ A learning-rate bound depends on curvature, not on a universal default value.
 **Predict before running:** For $\tfrac12\|z\|^2$, what happens after a gradient step of size $1$?
 
 ```python
+# Experiment — Change coordinates: Coordinates can change optimization geometry while representing...
+# Initialize array `z` with explicit values and shape.
 z = jnp.array([w[0], jnp.sqrt(10.0) * w[1]])
+# Evaluate `round_loss` from the current inputs and state.
 round_loss = lambda z: 0.5 * jnp.dot(z, z)
+# Differentiate the objective to obtain `z_next` via automatic differentiation.
 z_next = z - jax.grad(round_loss)(z)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(z_next, jnp.zeros(2))
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(round_loss(z), loss(w))
 ```
 
@@ -215,12 +276,43 @@ Coordinates can change optimization geometry while representing the same underly
 
 For curvatures $(2,8)$, derive the stable interval and check one step at rate $0.1$ from $(1,1)$.
 
+### How to write this exercise — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+
+**Step-by-step implementation plan:**
+1. Initialize array `H2` with explicit values and shape.
+2. Perform matrix contraction / projection to compute `w_next`.
+3. Verify that the numerical values match the expected reference within tolerance.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Exercise solution: For curvatures (2,8), derive the stable interval and check one step at...
+# Initialize array `H2` with explicit values and shape.
+H2 = jnp.diag(...)  # TODO: compute H2
+# Perform matrix contraction / projection to compute `w_next`.
+w_next = ...  # TODO: compute w_next
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(2 / jnp.max(jnp.linalg.eigvalsh(H2)), 0.25)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution</summary>
 
 ```python
+# Exercise solution: For curvatures (2,8), derive the stable interval and check one step at...
+# Initialize array `H2` with explicit values and shape.
 H2 = jnp.diag(jnp.array([2.0, 8.0]))
+# Perform matrix contraction / projection to compute `w_next`.
 w_next = w - 0.1 * (H2 @ w)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(2 / jnp.max(jnp.linalg.eigvalsh(H2)), 0.25)
 ```
 
@@ -238,14 +330,52 @@ Move by $0.1$ along each axis separately.
 
 </details>
 
+### How to write: Reject the zero-gradient shortcut — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+
+**Step-by-step implementation plan:**
+1. Initialize array `zero` with explicit values and shape.
+2. Verify that the numerical values match the expected reference within tolerance.
+3. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+4. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+5. Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Reject the zero-gradient shortcut (Transfer / diagnosis): Stationarity is a first-order condition, not a proof of a...
+saddle = ...  # TODO: compute saddle
+# Initialize array `zero` with explicit values and shape.
+zero = jnp.zeros(...)  # TODO: compute zero
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(jax.grad(saddle)(zero), zero)  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert saddle(jnp.array([0.0, 0.1]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert saddle(jnp.array([0.1, 0.0]))  # TODO: complete assertion check
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
+assert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-2.0, 2.0]))  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Reject the zero-gradient shortcut (Transfer / diagnosis): Stationarity is a first-order condition, not a proof of a...
 saddle = lambda z: z[0] ** 2 - z[1] ** 2
+# Initialize array `zero` with explicit values and shape.
 zero = jnp.zeros(2)
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(jax.grad(saddle)(zero), zero)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert saddle(jnp.array([0.0, 0.1])) < saddle(zero)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert saddle(jnp.array([0.1, 0.0])) > saddle(zero)
+# Verify that the output satisfies the expected shape, finite-value, or numerical contract.
 assert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-2.0, 2.0]))
 ```
 
@@ -265,12 +395,45 @@ The analytic Hessian is diagonal with entries $e^{w_i}$.
 
 </details>
 
+### How to write: Transfer to a nonquadratic function — Step-by-step recipe & starter scaffold
+
+**Key functions & syntax to use:**
+- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+
+**Step-by-step implementation plan:**
+1. Initialize array `point` with explicit values and shape.
+2. Initialize array `direction` with explicit values and shape.
+3. Differentiate the objective to obtain `product` via automatic differentiation.
+4. Verify that the numerical values match the expected reference within tolerance.
+
+**Starter code scaffold (fill in the TODOs):**
+
+```python
+# Transfer to a nonquadratic function (Transfer / diagnosis): For a nonquadratic function the Hessian changes with the...
+# Initialize array `point` with explicit values and shape.
+point = jnp.array(...)  # TODO: compute point
+# Initialize array `direction` with explicit values and shape.
+direction = jnp.array(...)  # TODO: compute direction
+# Differentiate the objective to obtain `product` via automatic differentiation.
+product = jax.jvp(...)  # TODO: compute product
+# Verify that the numerical values match the expected reference within tolerance.
+assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)  # TODO: complete assertion check
+```
+
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
+# Transfer to a nonquadratic function (Transfer / diagnosis): For a nonquadratic function the Hessian changes with the...
+# Initialize array `point` with explicit values and shape.
 point = jnp.array([0.0, jnp.log(2.0)])
+# Initialize array `direction` with explicit values and shape.
 direction = jnp.array([1.0, 3.0])
+# Differentiate the objective to obtain `product` via automatic differentiation.
 product = jax.jvp(jax.grad(lambda z: jnp.sum(jnp.exp(z))), (point,), (direction,))[1]
+# Verify that the numerical values match the expected reference within tolerance.
 assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)
 ```
 

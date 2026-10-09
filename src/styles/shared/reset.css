@@ -19,7 +19,7 @@ a:hover {
   color: var(--blue);
 }
 main {
-  max-width: 1380px;
+  max-width: 1320px;
   padding-inline: 5%;
   margin-inline: auto;
   min-width: 0;

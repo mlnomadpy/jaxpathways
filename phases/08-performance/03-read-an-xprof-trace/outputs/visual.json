@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-03",
-  "contentHash": "f46ba8d297b36236f6036b5ea168cca1979297d3bebb08380bbfd2f7cd539044",
+  "contentHash": "b71521633980ebc83740f32e5305c66d569ec8d9de40208b314d6e92c5852573",
   "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:35:48.723009+00:00",
+  "generatedAt": "2026-10-07T15:28:08.351207+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +12,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-iy0z82lw\n{\n  \"input_wait_us\": [\n    1257,\n    1254,\n    1263,\n    1255\n  ],\n  \"model_and_wait_us\": [\n    49,\n    24,\n    33,\n    23\n  ],\n  \"step_us\": [\n    1312,\n    1281,\n    1299,\n    1280\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
+  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-jac0630x\n{\n  \"input_wait_us\": [\n    1264,\n    1260,\n    1257,\n    1260\n  ],\n  \"model_and_wait_us\": [\n    76,\n    32,\n    27,\n    37\n  ],\n  \"step_us\": [\n    1346,\n    1294,\n    1285,\n    1299\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
   "data": {
     "kind": "line",
     "x": [
@@ -27,19 +27,19 @@
       {
         "label": "injected input wait",
         "y": [
+          1264,
+          1260,
           1257,
-          1254,
-          1263,
-          1255
+          1260
         ]
       },
       {
         "label": "model call and completion wait",
         "y": [
-          49,
-          24,
-          33,
-          23
+          76,
+          32,
+          27,
+          37
         ]
       }
     ]

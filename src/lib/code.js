@@ -1,9 +1,8 @@
 const CourseCode = (() => {
-  const escape = (s) =>
-    String(s).replace(
-      /[&<>"']/g,
-      (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c],
-    );
+  /** @type {Record<string, string>} */
+  const entities = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  /** @param {unknown} s */
+  const escape = (s) => String(s).replace(/[&<>"']/g, (c) => entities[c] || c);
   const keywords = new Set(
     'def return import from as if else elif for in while with try except finally raise assert lambda class pass and or not True False None async await yield break continue del is nonlocal global'.split(
       ' ',
@@ -14,6 +13,10 @@ const CourseCode = (() => {
       ' ',
     ),
   );
+  /**
+   * @param {unknown} source
+   * @param {string} [language]
+   */
   function highlight(source, language = 'python') {
     if (language === 'text') return escape(source);
     const shell = language === 'shell';
@@ -39,13 +42,15 @@ const CourseCode = (() => {
       })
       .join('');
   }
+  /**
+   * @param {ParentNode} [root]
+   * @param {string} [defaultLanguage]
+   */
   function paint(root = document, defaultLanguage = 'shell') {
     root.querySelectorAll('pre').forEach((pre) => {
-      const node = pre.querySelector('code') || pre;
-      const language =
-        node.dataset.language ||
-        node.closest('[data-language]')?.dataset.language ||
-        defaultLanguage;
+      const node = /** @type {HTMLElement} */ (pre.querySelector('code') || pre);
+      const closest = /** @type {HTMLElement | null} */ (node.closest('[data-language]'));
+      const language = node.dataset.language || closest?.dataset.language || defaultLanguage;
       node.dataset.language = language;
       node.innerHTML = highlight(node.textContent, language);
     });

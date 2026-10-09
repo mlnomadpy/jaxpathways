@@ -11,6 +11,7 @@ If two captions mean the same thing, should a contrastive loss force their image
 Prepare the course Python environment from `requirements-cpu.txt`. Work from the extracted project bundle’s top folder or the repository root:
 
 ```sh
+# Copy the starter template into your editable workspace file
 cp projects/cross-modal-harness/starter/model.py projects/cross-modal-harness/my_model.py
 python3 projects/cross-modal-harness/tests/check.py --implementation projects/cross-modal-harness/my_model.py --stage 1
 ```
@@ -18,12 +19,14 @@ python3 projects/cross-modal-harness/tests/check.py --implementation projects/cr
 PowerShell:
 
 ```powershell
+# Copy the starter template into your editable workspace file
 Copy-Item projects/cross-modal-harness/starter/model.py projects/cross-modal-harness/my_model.py
 ```
 
 Implement the marked functions one stage at a time. The supplied data fixture, initialization and file/export scaffolding remain visible. Read that scaffolding too: passing a stage is not proof that you understand its assumptions. Replace `--stage 1` with successive numbers through `5`; later stages include earlier checks. The public reference command is:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/cross-modal-harness/tests/check.py --implementation solution --stage all
 python3 projects/cross-modal-harness/examples/figures.py
 ```

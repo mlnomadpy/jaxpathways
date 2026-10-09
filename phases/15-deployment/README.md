@@ -6,7 +6,7 @@ Adapt a trained model, verify framework and export contracts, compare precision 
 
 Preserve checkpoint, data and calibration provenance. Compare held-out inputs before and after conversion; separate local request timing from queue simulation and target-device evidence.
 
-**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis.
+**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** CPU for core labs; optional framework environments and target devices for conversion and edge validation.
 
@@ -166,7 +166,7 @@ Verify an inference artifact and capacity hypothesis.
 
 **Demonstrate:** Verify an exported prediction contract, report weight/activation precision error, and distinguish CPU request measurements from target-device evidence.
 
-Project status: implemented staged practice · [Open source](../../projects/deployment-audit/README.md).
+Project status: implemented staged practice · [Open source](../../projects/deployment-audit/README.md). Copy `projects/deployment-audit/starter/model.py` to `projects/deployment-audit/my_model.py` and write your code in `projects/deployment-audit/my_model.py`. Run `python3 projects/deployment-audit/tests/check.py --implementation projects/deployment-audit/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
 Additional project: [Ship a tracked and containerized model release](../../projects/engineering-release/README.md).
 Additional project: [Convert PyTorch weights and audit Flax architecture parity](../../projects/weight-conversion/README.md).

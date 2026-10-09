@@ -6,7 +6,7 @@ Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PP
 
 Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
 
-**Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning; 12: Reinforcement learning.
+**Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning; 12: Reinforcement learning; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
 
 **Hardware:** Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate.
 
@@ -138,7 +138,7 @@ An audited pretraining and adaptation objective toolkit.
 
 **Demonstrate:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
-Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 4, 5, 6, 7, 8 for this phase.
+Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 4, 5, 6, 7, 8 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4` from the top-level folder to verify stages 4, 5, 6, 7, 8.
 
 
 

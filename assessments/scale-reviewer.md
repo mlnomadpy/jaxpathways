@@ -19,6 +19,7 @@ Accept a well-supported choice to retain ordinary JAX. If no actual target is av
 The independent public partition reference is executable in a fresh CPU process:
 
 ```sh
+# Run run command in terminal using the course Python environment
 python3 projects/kernel-audit/tests/check-scale-reference.py
 ```
 
