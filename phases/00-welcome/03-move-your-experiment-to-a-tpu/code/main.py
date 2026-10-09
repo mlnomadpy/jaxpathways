@@ -52,8 +52,10 @@ print(json.dumps(report, indent=2))
 print('Completed prediction:', np.asarray(y).tolist())
 
 # Step 3: Verify invariants on the completed state
-              max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),
-              process_index=jax.process_index(), process_count=jax.process_count())
+# Assert that the device output matches the NumPy reference and print the portability report:
+assert report["max_absolute_error"] < 1e-6
+print(json.dumps(report, indent=2))
+print("Completed prediction:", np.asarray(y).tolist())
 
 # Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
 # Import os for this computation.

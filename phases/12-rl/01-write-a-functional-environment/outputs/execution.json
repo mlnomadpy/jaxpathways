@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "rl-01",
   "contentHash": "9cabca0f6ea785841325d388fff3dc35933440e95da54dd7e3c3025d0de971d1",
-  "executedAt": "2026-10-08T14:04:59.644712+00:00",
+  "executedAt": "2026-10-09T14:08:12.595540+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -19,7 +19,15 @@
     },
     {
       "sourceHash": "8eafdc07ad84a4b5fa59e64ba320b661d81f065b9fd75324c06a327d3f3cb539",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "d0c59f82954f405a875797d70a3e8c863ae8080d694c73c3fe3011e2cd5bd294",
@@ -58,11 +66,27 @@
     },
     {
       "sourceHash": "e3073b2442461f8fa2185abd7f56e2de6777307df18407f008b58f4f94c192f8",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "deadline goal: True False\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "de8cd163eb0be3766d54fdadf5df171dc4a01bffb214137000afe00860ff6cd7",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "fraction starting at one: 0.5020000338554382\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "9b715216a7d0d31c9b45d7afe9141415669ac2f817219f056d99725c76a56d75",

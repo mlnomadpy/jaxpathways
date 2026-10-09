@@ -2,7 +2,7 @@
   {
     "version": "0.5.3",
     "date": "2026-10-08",
-    "hash": "0c269a47c4155b21f93adda9230c869aac451a568c5463d60bfd6ace4c75fecb",
+    "hash": "03da469a576050a4a6eebfeeecc7c6a29df7080f6480bb7acc809edc81b589c4",
     "notes": {
       "version": "0.5.3",
       "date": "2026-10-08",
@@ -36,7 +36,7 @@
       },
       "welcome-03": {
         "title": "Move your experiment to a TPU",
-        "hash": "1eff8b790214357a14b054536bcb14dcbd1519a2ec59a8ea82314bdd7e119a44",
+        "hash": "1323754a1fe0831a13078498276e02217ebd2a1a6edd84321eb05aa1428e9ce7",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -306,7 +306,7 @@
       },
       "performance-05": {
         "title": "Memory, rematerialization, and optimization tradeoffs",
-        "hash": "1105f640d9f33d225aed3ac147edb839d1057958aed8175f9f1531f5bfd4b8b8",
+        "hash": "5a19b06b5fd131381dd84aaf228d48b4814f3ca42a497b9ee6aca3ba9811fb57",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -546,7 +546,7 @@
       },
       "operations-08": {
         "title": "ModelOps: own, approve, roll back and retire a model",
-        "hash": "b62c2510dfc2339bd717c3b6aedcd3b5ac249f88ec35a7cd9950cdeeb2f9633e",
+        "hash": "c60fcdb96d0c8de10759ed807a796c733c6b341221adb640c8f8621571dcf6a8",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -638,7 +638,7 @@
     "phases": {
       "welcome": {
         "title": "Setup & first steps",
-        "hash": "25b2be0c69a99b1ed71ed92c9add03096ecdf92d4dfe6a4c64e4f9249e3f1355",
+        "hash": "70515741ece7fbb2fa431174461f53ba999ca46fe3a4c2f1035d7cd5fb7ddb8e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -686,7 +686,7 @@
       },
       "performance": {
         "title": "Performance diagnosis",
-        "hash": "7f0a96b45cdb753c57b3973386e807fa75ce4a32ceb6d515619069f3ff28ebae",
+        "hash": "ef08e75e1254776be8a6ee6d19a9ea7bae7f6b879c45a47d299b6f45e7700aff",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -734,7 +734,7 @@
       },
       "operations": {
         "title": "Workload operations",
-        "hash": "0f4eb7d28cc0bc34921b697b2fb9c1e829eb60be8adc1bb7c50cd57dd76871f9",
+        "hash": "eaca55d32a676bd2c8cce7d4f6b7fc3580066249045fe73d9c6b0e9cddfca31e",
         "version": "0.5.3",
         "date": "2026-10-08"
       },

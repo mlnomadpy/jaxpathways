@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "tpu-01",
   "contentHash": "a67833264e71f5170b34b3db66b014a849e8aa6e5840de5def2a404bee7aae74",
-  "executedAt": "2026-10-08T14:08:13.721093+00:00",
+  "executedAt": "2026-10-09T14:08:26.117789+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -19,7 +19,16 @@
     },
     {
       "sourceHash": "39fb2db355f5800f11534960e7336cd4c9472f37e2f0adfd47e35bbe0c94eca4",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Verified runtime receipt: {\"contract_ok\": true, \"device_count\": 1, \"device_kinds\": [\"cpu\"], \"expected_backend\": \"cpu\", \"expected_sum_of_squares\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_backend\": \"cpu\", \"pmap_sum_of_squares\": 140.0, \"python\": \"3.14.3\", \"receipt_sha256\": \"4ddc0cbb323fe3bd\"}\n",
+            "Single-host TPU slice HBM totals (GiB): {'v5litepod-1': 16, 'v5litepod-4': 64, 'v5litepod-8': 128, 'v6e-4': 128}\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "c67ad94209f2275a8667d4db75a6112e421598f15c9878b71d464b9c982d8ef2",
@@ -59,11 +68,27 @@
     },
     {
       "sourceHash": "9fc647bc974149b02acef90a207c96abe615ffaad7343b6a8eb4f9078a690865",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mismatch contract_ok: False observed: cpu devices: 1\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "6ae788619155630307d01f4e6dd40f7f4089705538cde3b157bcda446db3ab19",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Requires --worker=all and jax.distributed.initialize(): {'v5litepod-1': False, 'v5litepod-4': False, 'v5litepod-8': False, 'v5litepod-16': True}\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "a8ae46c36e19294e0f0c15dd681d321b59b6a1e5c32802008177c2edde8ef710",
@@ -71,7 +96,15 @@
     },
     {
       "sourceHash": "3691a62c24fd4f631dffe36eeab012d376818233e8631ee2f70f512ee42ef003",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Checked receipt sha256: 4ddc0cbb323fe3bd v5litepod-4 chips: 4 HBM GiB: 64\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "bac64dede2019172f1a9507e1050c37a0fcbf55374c9e5e61e16b7f6ba1169fd",
@@ -79,7 +112,15 @@
     },
     {
       "sourceHash": "8560f2373f21461323bfe12b5eec7ae8a1d3a4ee5467e90febc6afdbe504a9d3",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Slices fitting 48 GiB: ['v5litepod-4', 'v5litepod-8', 'v6e-4']\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "1671397498d9345743e78246feaf4b46899268b2844f00faed7ce95c4b0f4861",
@@ -87,7 +128,15 @@
     },
     {
       "sourceHash": "adc5509c4d7ea623eae040e45ce249fa17e92b036ae043a0054caa1e29cf6371",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Expected 4-device pmap sum of squares: 10416.0\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

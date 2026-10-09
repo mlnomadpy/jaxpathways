@@ -250,7 +250,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'le
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:37.033885+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:51.959606+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2

@@ -338,18 +338,18 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:25.927372+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:34.276495+00:00. JAX 0.9.2.
 
 ```text
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]
-Captured *.xplane.pb trace count: 1 steady_ms: 0.0972
+Captured *.xplane.pb trace count: 1 steady_ms: 0.1092
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]
-Captured *.xplane.pb trace count: 1 steady_ms: 0.0731
+Captured *.xplane.pb trace count: 1 steady_ms: 0.0924
 BF16-accum / FP32-accum max error ratio: 1.49
-Warmup ms: 20.57 Traced steady step ms: 0.0731
+Warmup ms: 21.426 Traced steady step ms: 0.0924
 Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 257376
+xplane.pb bytes: 257384
 PASS: tpu-06
 
 ```

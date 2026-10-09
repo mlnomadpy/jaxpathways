@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "tpu-05",
   "contentHash": "39a340f547fdeb5cb92e33eff2a0b3e2f161f906aa7780661730222945745c98",
-  "executedAt": "2026-10-08T14:08:20.728812+00:00",
+  "executedAt": "2026-10-09T14:08:28.921684+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -19,7 +19,16 @@
     },
     {
       "sourceHash": "9ad8571c05855796bcad63e670ae7389237c6e9d6907b0b227ade6814ecaa980",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\n",
+            "Pod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "da78c1f8c67ccc8f70a8906c549bcb2ddaec7d734784f2e0b692a5875c340571",
@@ -59,11 +68,27 @@
     },
     {
       "sourceHash": "a6214094278c09de83d3df570a349f11a3ca54609a67b02ba592a4cbb0b9a220",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "v5litepod-16 global chips: 16 Idle chips without --worker=all: 12\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "d3666a4304e4911e4f164dec7deae4aee333530625652ea762f82b88e8913a48",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Total HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "a0b0ab11fe83828d091fb0cc1f5fcece5291f7432fcb9bd588db738a6cfb28eb",
@@ -71,7 +96,16 @@
     },
     {
       "sourceHash": "ba7d1e8932b2926f65b660fdfb7600d09938f7eac47aac1447703d9c3b85964e",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Stage: gcloud compute tpus tpu-vm scp public/exercises/transformers-04.py jax-tpu-pod:~/jax-tpu-lab/ --zone=us-east5-a --worker=all\n",
+            "Run: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-east5-a --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/transformers-04.py'\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "c5dfa2f8e9bbc4d41b643fb9220e6c3b8a73778b0b054318706b06064477343e",
@@ -79,7 +113,15 @@
     },
     {
       "sourceHash": "e547bb2ab83193b1645ad2a2abfc900ce57b930842c032bd956f8ea9b81fa68d",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Multi-host Pod slices: ['v5litepod-16', 'v6e-16']\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "3e6997ebb4ad915f6610805168b78bc4ec84f62caf1475ae18f7b1ae35df183e",
@@ -87,7 +129,15 @@
     },
     {
       "sourceHash": "bc4a13058469a83f518bf27cf7f2297580a53000267f0a90c88be934ea46a01b",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Per-host batch: 32 Global batch: 128\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

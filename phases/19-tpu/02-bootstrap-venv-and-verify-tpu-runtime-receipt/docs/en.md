@@ -291,7 +291,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:15.394886+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:27.688189+00:00. JAX 0.9.2.
 
 ```text
 Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}

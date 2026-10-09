@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "transforms-03",
   "contentHash": "3b4b4fe234885ffd9952a5b1e0c6dcaecf8c77f259507dd8ffb7263a8bae9221",
-  "executedAt": "2026-10-08T14:01:28.276815+00:00",
+  "executedAt": "2026-10-09T14:07:42.562162+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -58,7 +58,15 @@
     },
     {
       "sourceHash": "199d248f5c8fc1ea2e0db589eee5f1f8d8e567acf14d68c246237330272083b2",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "loop / vmap / matmul: [1. 1. 8.] [1. 1. 8.] [1. 1. 8.]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "2bf33d3d23e54021ae42dbeadf781c7e7d95ea5a58a58038b4f457b965e5a4b7",

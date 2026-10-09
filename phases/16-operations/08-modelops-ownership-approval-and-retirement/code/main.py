@@ -102,8 +102,9 @@ print('Accepted original / changed artifact / expired approval / wrong target:',
 print('All failed gates preserved the selected version. This fixture does not authenticate reviewers.')
 
 # Step 3: Verify invariants on the completed state
-        assert pointer.read_bytes() == before
-assert checks == [True,False,False,False]
+# Verify that only the reviewed release passed and all rejected transitions preserved active.json:
+assert checks == [True, False, False, False]
+print("Accepted original / changed artifact / expired approval / wrong target:", checks)
 
 # Step 1 — Prepare the explicit contract: Record the model artifact, data/evaluation identity, image digest,...
 # Import hashlib, json, math, tempfile for this computation.

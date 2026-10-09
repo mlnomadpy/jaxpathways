@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "transforms-04",
   "contentHash": "06d0d0fec64302beb055603ee04471d02ecd26da354db884930a5636292040a4",
-  "executedAt": "2026-10-08T14:01:30.842629+00:00",
+  "executedAt": "2026-10-09T14:07:44.932335+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.02730379207059741 2.637505531311035e-05\neager median / min / max seconds: 3.3082906156778336e-05 3.1665898859500885e-05 5.350029096007347e-05\ncompiled median / min / max seconds: 5.062902346253395e-06 4.791188985109329e-06 7.000286132097244e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 8.333474397659302e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.018400083296000957 2.1374784409999847e-05\neager median / min / max seconds: 4.3854350224137306e-05 2.754107117652893e-05 0.00035458290949463844\ncompiled median / min / max seconds: 1.0166317224502563e-05 4.2496249079704285e-06 5.7540833950042725e-05\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 8.542090654373169e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "d8425668d731e7b296b9a16056cbf167ecbdafd9af71edbe52b7799a4454a185",
@@ -33,7 +33,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.018300333060324192 2.2165942937135696e-05\n"
+            "First/repeat seconds: 0.017706250306218863 2.316618338227272e-05\n"
           ]
         }
       ]
@@ -63,7 +63,17 @@
     },
     {
       "sourceHash": "5f3823f85cc0638412dbaa4fe253f79c8ff7c077010bdec229209cbd66247528",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "eager median / min / max seconds: 2.981233410537243e-05 2.8833281248807907e-05 4.637520760297775e-05\n",
+            "compiled median / min / max seconds: 4.6459026634693146e-06 4.5406632125377655e-06 6.00004568696022e-06\n",
+            "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "1bf132710903ea260f865d841ae412f200a9ee1a00e94a8e78d66e6f5f2a6b5b",
@@ -87,7 +97,15 @@
     },
     {
       "sourceHash": "2c6708c4d9998495cc65382b411d492959e62371fa6e2866c0af12953c513dc9",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "compiled value-and-grad median seconds: 9.00006853044033e-06\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

@@ -12,7 +12,7 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-08T14:08:26.260295+00:00",
+  "validatedAt": "2026-10-09T14:08:34.626655+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {
@@ -47,7 +47,7 @@
     },
     {
       "lessonId": "welcome-03",
-      "contentHash": "4874524a3fa24e8d8bc9f1cd4429d63242ac505953300f3ecb9702f7ec5ebd0c",
+      "contentHash": "bf41d1d970fdb1417b6c189b78e206586af574b68f87e023e291c5a67fff7016",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -497,7 +497,7 @@
     },
     {
       "lessonId": "performance-05",
-      "contentHash": "c1aab02dfa5f2ce49e3f1846af8991f733fe8f462828f93fabe8f60f09d6774d",
+      "contentHash": "7f9463c7a28e069d07bb0c938c32434148064e462aa64783b0935e63e410213f",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -897,7 +897,7 @@
     },
     {
       "lessonId": "operations-08",
-      "contentHash": "5edd4b19e56781fa186e20f277abdc1799922cd4cd5970f2711b703946c6c65e",
+      "contentHash": "4b7a9e7f5e148a15080f9647120869cc1a7ba0266039d211f412aa0a70c82d05",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {

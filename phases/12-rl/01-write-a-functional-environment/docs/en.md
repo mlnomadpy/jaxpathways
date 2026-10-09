@@ -263,7 +263,7 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:59.644712+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:12.595540+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]

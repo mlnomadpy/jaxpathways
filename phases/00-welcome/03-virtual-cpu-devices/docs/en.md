@@ -236,7 +236,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:10.189781+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:29.275065+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2

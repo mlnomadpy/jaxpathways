@@ -176,7 +176,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:25.460332+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:40.023773+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211

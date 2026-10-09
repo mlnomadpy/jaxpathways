@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "tpu-06",
   "contentHash": "feab841a0aad04860d808e0172c302fd0b37d92230a83268f25b9ed0f2430b8a",
-  "executedAt": "2026-10-08T14:08:25.927372+00:00",
+  "executedAt": "2026-10-09T14:08:34.276495+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0972\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0731\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 20.57 Traced steady step ms: 0.0731\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 257376\nPASS: tpu-06\n",
+  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.1092\nPrecision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\nCaptured *.xplane.pb trace count: 1 steady_ms: 0.0924\nBF16-accum / FP32-accum max error ratio: 1.49\nWarmup ms: 21.426 Traced steady step ms: 0.0924\nSeed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\nMean error (per-channel vs per-tensor): 0.01389 0.0979\nxplane.pb bytes: 257384\nPASS: tpu-06\n",
   "notebookCells": [
     {
       "sourceHash": "5e397e5f25ebe5b19b1279c368bf550397d915b410c93d4fdafa0e9e7876c23b",
@@ -19,7 +19,16 @@
     },
     {
       "sourceHash": "5d4276339a861633fa8e7e582e2ab0921a06a229168fd12931121b82fa9d8b43",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\n",
+            "Captured *.xplane.pb trace count: 1 steady_ms: 0.1017\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "928508b0f74214b4681107fb9d2de649d561f2e1ca0d2a711eaeef89daf87587",
@@ -33,7 +42,7 @@
           "name": "stdout",
           "text": [
             "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]\n",
-            "Captured *.xplane.pb trace count: 1 steady_ms: 0.0998\n"
+            "Captured *.xplane.pb trace count: 1 steady_ms: 0.0827\n"
           ]
         }
       ]
@@ -59,11 +68,27 @@
     },
     {
       "sourceHash": "86f73d90c12e7b88a5b74ce0ff8035d7993a997a4524e4f2a55a872bd677540a",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "BF16-accum / FP32-accum max error ratio: 1.49\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "baf53034a8b0183a2e461d8b1808677f50b275def8310454cab6b6249fb1e6ad",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Warmup ms: 21.842 Traced steady step ms: 0.0827\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "5aadfe35beef72e9894ccd95d0e45f61a3590d789fba9c1a13086cdc8ad8e3e0",
@@ -71,7 +96,15 @@
     },
     {
       "sourceHash": "9b5ef9107823cca095f0b68ea59f4cec8bb1441a0b87a7ed251f1b61dda21dd3",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "4dc6e21de6657b323bdf35fe169f29e39a64ad4885e73092b83cc498901e4c9f",
@@ -79,7 +112,15 @@
     },
     {
       "sourceHash": "691556b6eda49107054041df51736a8c0c6bb1b1c156c0911d57896c0e83e698",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Mean error (per-channel vs per-tensor): 0.01389 0.0979\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "64b77bb80c05cce8d838e4d486ecf4a1b1050635e158f8f1ea2fde1f9bee284d",
@@ -87,7 +128,15 @@
     },
     {
       "sourceHash": "48034c4d7970d2cdf97f8d7b89797c4be2bb992076c4c51b95dc9e5596630ed6",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "xplane.pb bytes: 271936\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

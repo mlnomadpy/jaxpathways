@@ -255,7 +255,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:20.728812+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:28.921684+00:00. JAX 0.9.2.
 
 ```text
 Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}

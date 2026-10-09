@@ -192,8 +192,9 @@ A registry alias chooses a version. A rollout changes serving processes and traf
 Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
 
 ```python
-        assert pointer.read_bytes() == before
-assert checks == [True,False,False,False]
+# Verify that only the reviewed release passed and all rejected transitions preserved active.json:
+assert checks == [True, False, False, False]
+print("Accepted original / changed artifact / expired approval / wrong target:", checks)
 ```
 
 Checking these invariants confirms the computation is ready for the full worked experiment.
@@ -328,11 +329,12 @@ visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:41.936954+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:24.609036+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
 All failed gates preserved the selected version. This fixture does not authenticate reviewers.
+Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
 All failed gates preserved the selected version. This fixture does not authenticate reviewers.
 Expiry is exclusive: 199 accepted, 200 rejected.

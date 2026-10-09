@@ -240,7 +240,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:21.911895+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:30.150940+00:00. JAX 0.9.2.
 
 ```text
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}

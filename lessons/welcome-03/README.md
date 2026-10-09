@@ -215,8 +215,10 @@ Keep the requested backend, observed output placement and independent arithmetic
 Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
 
 ```python
-              max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),
-              process_index=jax.process_index(), process_count=jax.process_count())
+# Assert that the device output matches the NumPy reference and print the portability report:
+assert report["max_absolute_error"] < 1e-6
+print(json.dumps(report, indent=2))
+print("Completed prediction:", np.asarray(y).tolist())
 ```
 
 Checking these invariants confirms the computation is ready for the full worked experiment.
@@ -300,9 +302,26 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:11.600367+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:30.817587+00:00. JAX 0.9.2.
 
 ```text
+{
+  "expected": "cpu",
+  "output_devices": [
+    "TFRT_CPU_0"
+  ],
+  "platform": "cpu",
+  "jax": "0.9.2",
+  "python": "3.14.3",
+  "shape": [
+    8
+  ],
+  "dtype": "float32",
+  "max_absolute_error": 0.0,
+  "process_index": 0,
+  "process_count": 1
+}
+Completed prediction: [0.34375, 0.8125, 1.28125, 1.75, 2.21875, 2.6875, 3.15625, 3.625]
 {
   "expected": "cpu",
   "output_devices": [

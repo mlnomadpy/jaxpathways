@@ -99,8 +99,11 @@ print('Synchronized gradient samples:',times)
 print('Independent reverse recurrence agrees with both gradients.')
 
 # Step 3: Verify invariants on the completed state
-    times.append(samples)
-for name,lines in zip(['plain','remat'],reports):print(name,'\n'+'\n'.join(lines))
+# Inspect residual live tensors and compare compiler memory and wall-clock gradient samples:
+for name, lines in zip(["plain", "remat"], reports):
+    print(name, "\n" + "\n".join(lines))
+print("Compiler memory estimates:", memory)
+print("Synchronized gradient samples:", times)
 
 # Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
 # Import contextlib for this computation.

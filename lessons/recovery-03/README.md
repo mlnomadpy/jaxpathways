@@ -431,7 +431,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:07.300457+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:57.216589+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3

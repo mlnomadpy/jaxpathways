@@ -178,7 +178,7 @@ visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:32.925571+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:47.276165+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0

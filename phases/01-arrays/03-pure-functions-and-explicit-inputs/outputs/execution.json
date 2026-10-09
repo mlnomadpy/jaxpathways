@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "arrays-03",
   "contentHash": "dd2e85a62a256f0941336b37aa3726f64ed34c3212ed5f1201950848c07c0b9d",
-  "executedAt": "2026-10-08T14:01:17.289591+00:00",
+  "executedAt": "2026-10-09T14:07:36.786190+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -58,7 +58,15 @@
     },
     {
       "sourceHash": "039485e7fba7cc9a62525ee5666a5092cf81d41e45cc89d8b51c77cd98d86e04",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "aliased container weight: 9.0\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "c96908546f9fb39f6e3115ae886de89fb7c0515c1b898b9c38ba42a8e285f617",
@@ -86,7 +94,15 @@
     },
     {
       "sourceHash": "6840b3d300485c1cf97ac634145a264c1f99d89f8618d5c701de9c938776ce4f",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "evaluation losses: 0.0 6.0\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

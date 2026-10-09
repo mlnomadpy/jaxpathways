@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "transforms-02",
   "contentHash": "80587f19e57c6a853fd3de54e859010ce8dc328bb69a6650150f0e1ca8b0d163",
-  "executedAt": "2026-10-08T14:01:25.460332+00:00",
+  "executedAt": "2026-10-09T14:07:40.023773+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -58,7 +58,17 @@
     },
     {
       "sourceHash": "af4de01779861b8065281ca4c6f94ed81684d2ab67da8beaad2ae2392df782a4",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "weight / loss / gradient: 0.0 18.666667938232422 -18.666667938232422\n",
+            "weight / loss / gradient: 1.0 4.6666669845581055 -9.333333969116211\n",
+            "weight / loss / gradient: 2.0 0.0 0.0\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "74ef48b46451f47ed8cff964abcde238572d73113e2ecc3b4614e8de3b972998",

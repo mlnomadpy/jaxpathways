@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "arrays-01",
   "contentHash": "2329cae3f21ebbe7692f10929e5d58c462f9578858879112cc2eba9e04a27f2a",
-  "executedAt": "2026-10-08T14:01:13.832686+00:00",
+  "executedAt": "2026-10-09T14:07:33.189462+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -66,7 +66,15 @@
     },
     {
       "sourceHash": "848ae7c7fae5ef056fabe59af41e73e08e367970ed4f807a686e3ec3689544ac",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "new batch transformed: [[2.4494896 2.4494896]]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "72e29622435ae71bc0a44a2b4f71480a74c1b719776bf2e582b525f8880f706b",

@@ -163,7 +163,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:17.289591+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:36.786190+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]

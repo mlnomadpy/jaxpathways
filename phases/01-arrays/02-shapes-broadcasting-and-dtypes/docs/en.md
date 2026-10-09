@@ -178,7 +178,7 @@ visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:15.665682+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:35.210470+00:00. JAX 0.9.2.
 
 ```text
 [[11. 22. 33.]

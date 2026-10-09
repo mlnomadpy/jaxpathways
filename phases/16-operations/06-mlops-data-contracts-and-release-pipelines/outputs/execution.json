@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "operations-06",
   "contentHash": "2da758d2452e943f6e802d8d63e1ba9129b09fea4932b197d9fd8da95c527e50",
-  "executedAt": "2026-10-08T14:07:34.211365+00:00",
+  "executedAt": "2026-10-09T14:08:13.971709+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -19,7 +19,16 @@
     },
     {
       "sourceHash": "0bda676c98b93e29041c8c1f3da0f3db2da19c97e886c42d41897b0d69ba284d",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Overall MSE: 0.409 high-slice MSE: 4.0 release: False\n",
+            "Two-bin input total variation: 0.4 (requires investigation; not an automatic retraining order)\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "0559249d42b548b0965f5d981fe340c8e18ffa884b8a1c05efde84298bf09a7d",
@@ -59,7 +68,15 @@
     },
     {
       "sourceHash": "a137ef866ac3736ae9c9982486320e669c0f41e76aaa7b6d225acbe91523e85e",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Aggregate-only acceptance would miss the high-slice failure.\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "dc479718171268179470b1eec200d8e561180a263bf6afe5b48e169e7b2a47db",
@@ -67,7 +84,15 @@
     },
     {
       "sourceHash": "7e5a87c253eeb51c768beda1b75b3646a8b0076f33eaaf4a5574a4c580184ac4",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Unweighted slice average: 2.005\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "dda6ad9000c0f45fbf491b2974ab4c245e3125c4531814256ac61042b959ee62",
@@ -75,7 +100,15 @@
     },
     {
       "sourceHash": "13d9443ba8d8803da899d251df725137afde37dfce9a86ea32bba9a7fc7e43c5",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "New population MSE: 3.601\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

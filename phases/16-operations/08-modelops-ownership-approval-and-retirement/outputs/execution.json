@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-08",
-  "contentHash": "5edd4b19e56781fa186e20f277abdc1799922cd4cd5970f2711b703946c6c65e",
-  "executedAt": "2026-10-08T14:07:41.936954+00:00",
+  "contentHash": "4b7a9e7f5e148a15080f9647120869cc1a7ba0266039d211f412aa0a70c82d05",
+  "executedAt": "2026-10-09T14:08:24.609036+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nAccepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nExpiry is exclusive: 199 accepted, 200 rejected.\nChanged evaluation invalidates the old approval.\nOwnership change requires renewed review.\nPASS: operations-08\n",
+  "stdout": "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nAccepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAccepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\nAll failed gates preserved the selected version. This fixture does not authenticate reviewers.\nExpiry is exclusive: 199 accepted, 200 rejected.\nChanged evaluation invalidates the old approval.\nOwnership change requires renewed review.\nPASS: operations-08\n",
   "notebookCells": [
     {
       "sourceHash": "b79aa01e989e01f2b5e2f166c91e093a32ad99a688f9015494aee4887b77f033",
@@ -19,11 +19,28 @@
     },
     {
       "sourceHash": "d27dff2d62d61c272a3891a10317ee04e874c8d98f04aa52fb5ad0ee54ba382a",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\n",
+            "All failed gates preserved the selected version. This fixture does not authenticate reviewers.\n"
+          ]
+        }
+      ]
     },
     {
-      "sourceHash": "7591afae01f1e896044616c7545d3a111c7765480f9fa757f9939380adf6aa2b",
-      "outputs": []
+      "sourceHash": "becf4161f2b58c1015fee6df409b7b33c4027c71ac3ceedce17e69fa8e944219",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "efd903cb6c71fa6dad27c323d20638615804030122ecc0e828d91bced0ea98ef",
@@ -59,7 +76,15 @@
     },
     {
       "sourceHash": "333730dc034a4fd8e9c572a4b3e11b816d184a41ce467938afc850fb06c171bd",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Expiry is exclusive: 199 accepted, 200 rejected.\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "9e04f4fd737709c4c7ef6f7ad5bc061d47ce7a30759d5654e438347d16ce6157",
@@ -67,7 +92,15 @@
     },
     {
       "sourceHash": "be8663c6b020d08df9548abef5baa227622911309e0134c6ffec3309a975a65d",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Changed evaluation invalidates the old approval.\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "7b428a59d13c0fb6762e399e6527a0d51588e590431041fb92e9df56d0ece7a9",
@@ -75,7 +108,15 @@
     },
     {
       "sourceHash": "1f069e0415a725382eda77e3c20bb1d7806542a453862f718ab5a4206b76919c",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Ownership change requires renewed review.\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

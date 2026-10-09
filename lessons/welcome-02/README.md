@@ -176,7 +176,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:08.742597+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:07:27.627379+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)

@@ -186,8 +186,11 @@ The NumPy recurrence propagates cotangents through saved host activations, provi
 Run the final shape and numerical assertions to confirm the state built in Steps 1 and 2.
 
 ```python
-    times.append(samples)
-for name,lines in zip(['plain','remat'],reports):print(name,'\n'+'\n'.join(lines))
+# Inspect residual live tensors and compare compiler memory and wall-clock gradient samples:
+for name, lines in zip(["plain", "remat"], reports):
+    print(name, "\n" + "\n".join(lines))
+print("Compiler memory estimates:", memory)
+print("Synchronized gradient samples:", times)
 ```
 
 Checking these invariants confirms the computation is ready for the full worked experiment.
@@ -329,50 +332,69 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:57.545581+00:00. JAX 0.9.2.
+CPU run: 2026-10-09T14:08:10.027547+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of sub from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of sub from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of sub from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of sub from <string>:14:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
-f32[16] output of tanh from <string>:14:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.591598942875862e-05, 1.554097980260849e-05, 1.0082963854074478e-05, 9.790994226932526e-06, 1.0209158062934875e-05], [1.8999911844730377e-05, 1.1750031262636185e-05, 1.0792165994644165e-05, 7.2089023888111115e-06, 7.832888513803482e-06]]
+Synchronized gradient samples: [[7.766718044877052e-05, 2.9250048100948334e-05, 1.645786687731743e-05, 8.666887879371643e-06, 1.0792165994644165e-05], [3.633415326476097e-05, 1.60830095410347e-05, 7.582828402519226e-06, 8.082948625087738e-06, 8.124858140945435e-06]]
 Independent reverse recurrence agrees with both gradients.
+plain 
+f32[16,16] from a constant
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of sub from <string>:21:20 (layer)
+remat 
+f32[16,16] from a constant
+f32[16] from the argument v
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+f32[16] output of tanh from <string>:21:20 (layer)
+Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
+Synchronized gradient samples: [[7.766718044877052e-05, 2.9250048100948334e-05, 1.645786687731743e-05, 8.666887879371643e-06, 1.0792165994644165e-05], [3.633415326476097e-05, 1.60830095410347e-05, 7.582828402519226e-06, 8.082948625087738e-06, 8.124858140945435e-06]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of sub from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of sub from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of sub from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of sub from <string>:63:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of sub from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of sub from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of sub from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of sub from <string>:125:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
-f32[16] output of tanh from <string>:63:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
+f32[16] output of tanh from <string>:125:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.0374620109796524e-05, 1.5833880752325058e-05, 1.0499730706214905e-05, 1.020822674036026e-05, 7.166992872953415e-06], [1.67088583111763e-05, 7.541850209236145e-06, 7.291790097951889e-06, 7.457565516233444e-06, 6.875023245811462e-06]]
+Synchronized gradient samples: [[3.420934081077576e-05, 1.754099503159523e-05, 1.2458302080631256e-05, 1.0333023965358734e-05, 8.166767656803131e-06], [2.4667009711265564e-05, 3.2833777368068695e-05, 3.491668030619621e-05, 1.1249911040067673e-05, 7.917173206806183e-06]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)
