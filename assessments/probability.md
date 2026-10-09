@@ -1,6 +1,6 @@
 # Probability synthesis: distinguish inference error from model error
 
-**Scope:** CPU review draft after the four probability lessons and Bayesian regression project. This assessment joins exact inference, approximate sampling, variational approximation and predictive diagnosis. Public solutions are review aids, not independent evidence of a learner's work.
+**Scope:** exact conjugate inference, Hamiltonian Monte Carlo sampling, variational approximation, and posterior predictive checks building on the four probability lessons and [Bayesian regression project](../project.html?id=bayesian-regression).
 
 Create probability_assessment.py and a report. Write predictions before running experiments, record actual arrays and seeds, and retain failures. Use CPU float32 JAX calculations and independent float64 NumPy references with justified tolerances.
 

@@ -584,7 +584,7 @@ If metrics look suspiciously good, trace which arrays reach train_step. If evalu
 
 Keep pre/post parameter snapshots around evaluation, optimizer step count 80, independent held-out loss and accuracy, complete replay comparison, and a deliberately bad held-out update on an isolated clone.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

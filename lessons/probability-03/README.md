@@ -51,7 +51,7 @@ First take a half momentum step using the current gradient. Take a full position
 
 A proposed trajectory changes energy by $\Delta H$. Accept with probability $\min(1,e^{-\Delta H})$, implemented as $\log u<-\Delta H$. A rejected proposal retains the current sample; removing repeated values would change the distribution. Non-finite energy error is rejected. The signed energy error can be negative, so it should not be interpreted as a nonnegative loss. An enormous positive error suggests an integration problem, often a step size too large for target curvature.
 
-## Read diagnostics as evidence, not a certificate
+## Combine multiple sampler diagnostics
 
 We start four chains from dispersed points and discard the first $400$ transitions. This fixed discard is a teaching convention, not automatic warmup adaptation. Classical split R-hat compares between-chain and within-chain variance after splitting each chain. A value near one says those variance estimates agree; chains can still miss a mode together. Modern rank-normalized split R-hat, bulk and tail effective sample size, Monte Carlo standard errors and divergence diagnostics are stronger complementary tools. Our compact implementation is explicitly classical R-hat and does not implement those modern diagnostics.
 
@@ -556,7 +556,7 @@ If acceptance collapses, inspect the finite energy error distribution and reduce
 
 Reversibility check, four traces, two-dimensional moments, key replay and classical split R-hat with limitations. Keep the environment, observed outputs and your explanation of the figure.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

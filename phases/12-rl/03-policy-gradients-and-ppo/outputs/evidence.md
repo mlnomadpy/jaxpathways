@@ -16,4 +16,4 @@ Keep the exact small-state policy-gradient comparison, actual training curves an
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

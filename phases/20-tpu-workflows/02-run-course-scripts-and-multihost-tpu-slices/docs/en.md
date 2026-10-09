@@ -474,7 +474,7 @@ If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.v
 
 Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-host and multi-host slices plus the process-0 checkpoint writer check.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

@@ -359,7 +359,7 @@ If a run is missing, inspect the tracking URI and experiment ID before repeating
 
 Keep both MLflow run IDs, source/data hashes, complete loss histories, the selection metric and predictions independently recomputed from the downloaded artifact.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

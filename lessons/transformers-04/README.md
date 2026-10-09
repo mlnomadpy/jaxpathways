@@ -934,7 +934,7 @@ If loss does not improve, inspect the first shifted input/target window and veri
 
 Save the target alignment, uniform-loss derivation, training/held-out metrics with corpus limitations, snapshot continuation check, generated cycle and metadata/prompt rejection repairs.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

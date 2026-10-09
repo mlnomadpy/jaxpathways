@@ -16,4 +16,4 @@ Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

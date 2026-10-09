@@ -16,4 +16,4 @@ Keep the Hessian and Hessian-vector checks, stable/divergent trajectories, resca
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

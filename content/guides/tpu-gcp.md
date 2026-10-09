@@ -213,9 +213,9 @@ set -o pipefail
   2>&1 | tee tpu-launch.log
 ```
 
-Use a Python version supported by the selected JAX release and the [current JAX TPU installation instructions](https://docs.jax.dev/en/latest/installation.html). If the image lacks `venv`, install the matching Python venv package using the image's administrator-approved setup. Record the resolved environment, then pin it for subsequent comparisons. These cloud install commands have not been qualified on TPU hardware by this course.
+Use a Python version supported by the selected JAX release and the [current JAX TPU installation instructions](https://docs.jax.dev/en/latest/installation.html). If the image lacks `venv`, install the matching Python venv package using the image's administrator-approved setup. Record the resolved environment in `tpu-environment.txt`, then pin it for subsequent comparisons. **TODO (Cloud TPU VM CI):** Add automated Cloud TPU VM execution receipts to CI alongside the local CPU receipts.
 
-The explicit platform sets `JAX_PLATFORMS=tpu` in the child. A missing TPU runtime must fail rather than produce a CPU result labelled as TPU. Check the `started` event in `events.jsonl` for `backend: tpu`, then check `completed` and the checkpoint. Device count reports visibility; this worker does not distribute its arrays across every visible device.
+The explicit platform sets `JAX_PLATFORMS=tpu` in the child. A missing TPU runtime must fail rather than produce a CPU result labelled as TPU. Check the `started` event in `events.jsonl` for `backend: tpu`, then check `completed` and the checkpoint. Device count reports visibility; this single-device worker runs on `TPU:0` until you add explicit sharding in Phase 09.
 
 **Run course lessons in parallel on the same TPU VM:** you can also upload any lesson script (`exercises/<lesson-id>.py`) or the full course workspace (`jax-course-workspace.zip`) and run the lesson on TPU right alongside your CPU study:
 
@@ -228,9 +228,9 @@ JAX_PLATFORMS=tpu .venv/bin/python exercises/optimization-01.py
 
 For multi-chip sharding lessons (`welcome-cpu` and Phase 09 `distributed`), replace the four logical CPU lines (`jax.config.update("jax_platforms", "cpu")` and `jax.config.update("jax_num_cpu_devices", 4)`) with `devices = jax.devices("tpu")` on a 4-chip TPU VM (`v5litepod-4` or `v6e-4`). When you later move to a multi-host TPU slice, call `jax.distributed.initialize()` at process start and launch across every host simultaneously with `gcloud compute tpus tpu-vm ssh "$TPU_NAME" --worker=all --command="..."`.
 
-Read `compile_warmup_s` separately from update timing. `job_examples_per_s` includes process startup, compilation and checkpoint overhead. `update_examples_per_s` measures synchronized updates. Their difference is useful here, but neither measures TPU utilization. This tiny line fit is a runtime exercise, not evidence that TPUs accelerate your real model.
+Read `compile_warmup_s` separately from steady-state update timing: `job_examples_per_s` includes process startup, compilation, and checkpoint overhead, whereas `update_examples_per_s` measures synchronized updates after compilation.
 
-Repeat the four-step recovery exercise on the same target backend in a new folder. Compare same-backend uninterrupted and resumed states. Do not demand bitwise equality between CPU and TPU arithmetic. For a cross-backend comparison, first define a numerical error budget and evaluate held-out outputs as taught in [numerical parity](lesson.html?lesson=deployment-08).
+Repeat the four-step recovery exercise on the same target backend in a new folder. Compare same-backend uninterrupted and resumed states. For a cross-backend CPU-versus-TPU comparison, define an explicit numerical tolerance budget and evaluate held-out outputs as taught in [numerical parity](lesson.html?lesson=deployment-08).
 
 ## 7. Retrieve evidence, then delete the owned resources
 

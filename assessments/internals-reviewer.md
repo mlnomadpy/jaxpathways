@@ -1,6 +1,6 @@
 # Reviewer notes: internals synthesis
 
-These public reference derivations support review; they are not a private or validated exam key.
+Use these reference derivations to verify the Jacobian, JVP/VJP, and custom-derivative calculations.
 
 For the rectangular map, the Jacobian is
 

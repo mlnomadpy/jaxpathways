@@ -156,9 +156,9 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
       </div>
     )}
     <p>
-      Use the project's staged checks on your own implementation. Passing the reference checks and
-      explaining this scenario are different kinds of evidence; neither is independent review of
-      your work.
+      Run the staged project checks on your implementation in{' '}
+      <code>{projectLayout?.workspaceFile || 'your project file'}</code> and record your transfer
+      experiment results in your portfolio.
     </p>
     <a href={siteUrl(`project-guides/${phase.projectId}.html`)}>Open {phase.project}</a>
     {phase.additionalProjectIds?.map((id) => (

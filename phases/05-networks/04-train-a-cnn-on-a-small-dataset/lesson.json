@@ -95,7 +95,7 @@
         "explanation": "The mistaken array has eight channels where the layer expects one. Explicit layout conversion is the repair; changing the declared channel count would silently change the model task."
       }
     ],
-    "exercise": "Apply the trained model to one \\(10\\times10\\) image. Predict intermediate shape and parameter count before executing. Do not claim accuracy from an unlabeled input.",
+    "exercise": "Apply the trained model to one \\(10\\times10\\) image. Predict the intermediate activation shape and total parameter count before executing, then verify both assertions.",
     "solution": "# Exercise solution: Apply the trained model to one 10\\times10 image.\n# Initialize array `larger` with explicit values and shape.\nlarger=jnp.zeros((1,10,10,1));larger=larger.at[0,4,:,0].set(1.)\n# Verify that the output tensor shape matches our prediction.\nassert model.conv(larger).shape==(1,8,8,4)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert model(larger).shape==(1,2)\n# Verify that the output satisfies the expected shape, finite-value, or numerical contract.\nassert sum(a.size for a in jax.tree.leaves(nnx.state(model,nnx.Param)))==50",
     "question": "What does spatial mean pooling discard in this classifier?",
     "options": [

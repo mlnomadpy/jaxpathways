@@ -21,7 +21,7 @@ export function renderNotebookSummary({ routes, projects, allLessons, context, s
     ? `<p class="edition">Resume your reading</p><h3>${escapeHtml(last.title)}</h3><a class="button primary" href="${lessonLink(last.id, reading.path)}${reading.sectionId ? '#' + encodeURIComponent(reading.sectionId) : ''}">Continue from your saved section</a><p class="soft">Reading position is separate from completing an exercise.</p>`
     : next
       ? `<p class="edition">${hasPractice ? 'Your next experiment' : 'Your learning starts here'}</p><h3>${escapeHtml(next.title)}</h3><a class="button primary" href="${lessonLink(next.id, route.id)}">Start this lesson</a>`
-      : '<p>All available exercises are self-reported complete. Review your artifacts; remaining course topics may still be unwritten.</p>';
+      : '<p>All available exercises on this route are complete. Review your saved portfolio artifacts below.</p>';
   $('#lesson-progress-summary').innerHTML =
     resume +
     `<p>${exercised.length} / ${available.length} exercises reported · ${available.filter((l) => courseState.lessonProgress.lessons[l.id]?.checkpointPassed).length} checkpoints passed</p>${last && next ? `<a href="${lessonLink(next.id, route.id)}">Next unmarked exercise on ${escapeHtml(route.title)}: ${escapeHtml(next.title)}</a>` : ''}`;

@@ -41,7 +41,7 @@
       },
       {
         "title": "Batch collection trades waiting for throughput",
-        "body": "With regularly spaced arrivals separated by \\(\\delta\\), filling a batch of \\(B\\) from empty makes its first example wait \\((B-1)\\delta\\) before execution; the average collection wait is \\((B-1)\\delta/2\\) if all positions are equally represented. A timeout permits partial batches and limits intentional collection delay, but a busy worker can still add queueing. A production experiment should replay realistic arrivals, batch sizes and sequence lengths, record queue, collection and execution times separately, and compare tail latency against an explicit service-level objective. This lesson measures batch computation and simulates a batch-one queue; it does not claim a dynamic batching server ran."
+        "body": "With regularly spaced arrivals separated by \\(\\delta\\), filling a batch of \\(B\\) from empty makes its first example wait \\((B-1)\\delta\\) before execution; the average collection wait is \\((B-1)\\delta/2\\) if all positions are equally represented. A timeout permits partial batches and limits intentional collection delay, but a busy worker can still add queueing. A production experiment should replay realistic arrivals, batch sizes and sequence lengths, record queue, collection and execution times separately, and compare tail latency against an explicit service-level objective. **TODO (Dynamic Batching Server Extension):** Replay this arrival trace against a live dynamic-batching HTTP server and compare p99 queue + execution latency."
       },
       {
         "title": "Plan replicas with headroom, then test the plan",

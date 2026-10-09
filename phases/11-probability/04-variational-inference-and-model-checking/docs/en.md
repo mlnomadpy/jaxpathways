@@ -71,7 +71,7 @@ A posterior predictive check draws plausible replicated observations and compare
 
 ## Keep inference and model errors separate
 
-The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but do not certify model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. A NumPyro SVI or NUTS implementation is an ecosystem bridge; this lesson does not claim those optional APIs were executed.
+The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but do not certify model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. **TODO (NumPyro Extension):** Compare this hand-written ELBO loop against `numpyro.infer.SVI` and `numpyro.infer.NUTS` on the same target density.
 
 ## 1. Specify a correlated target and a simpler approximation
 
@@ -523,7 +523,7 @@ If the objective has stopped improving, compare to the independent analytic opti
 
 Analytic and optimized KL, variance comparison, Monte Carlo estimate and explained residual stress fixture. Keep the environment, observed outputs and your explanation of the figure.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

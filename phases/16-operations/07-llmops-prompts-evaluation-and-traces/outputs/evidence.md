@@ -16,4 +16,4 @@ Keep all case IDs and per-slice replay scores, missing/duplicate-response reject
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

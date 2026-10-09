@@ -702,7 +702,7 @@ If ratios always equal one during repeated updates, inspect whether old log prob
 
 Keep reward/reference identity, collected old probabilities, signed clipping checks, exact reward/KL history and detached behavior information.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

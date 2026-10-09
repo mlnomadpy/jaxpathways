@@ -16,4 +16,4 @@ Save analytic and numerical derivatives, the step-size/error table with dtype, t
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

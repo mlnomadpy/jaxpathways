@@ -113,7 +113,7 @@ test('both project workspaces render and stage ticks preserve their storage keys
     try {
       initExperience();await initProject();assert(p.$('.project-stages'));const first=p.$('[data-stage]');assert(first);first.checked=true;first.dispatchEvent(new Event('change'));
       assert.deepEqual(JSON.parse(localStorage.getItem('jaxpathways-project-'+id)),[first.dataset.stage]);
-      assert.match(p.$('#project-status').textContent,/self-reported/);
+      assert.match(p.$('#project-status').textContent,/stages completed/);
     } finally {await p.close();}
   }
 });

@@ -104,7 +104,7 @@ Corrupt one exported file in a disposable copy and confirm loading fails before 
 
 ## Bring local paired data carefully
 
-`load_pairs(path, split)` reads an explicit manifest and local `.npy` image arrays with `allow_pickle=False`. Images must already satisfy the exact grayscale/shape/range contract. Keep originals and record how they were converted; this loader does not claim to decode every image format.
+`load_pairs(path, split)` reads an explicit manifest and local `.npy` image arrays with `allow_pickle=False`. Images must already satisfy the exact grayscale/shape/range contract. Keep original raw files alongside converted `.npy` arrays and record the preprocessing script used to produce them.
 
 ```json
 {

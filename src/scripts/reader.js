@@ -208,7 +208,7 @@ function showLesson(phase, lesson, options = {}) {
               ? `${record.runtime.deviceCount} logical CPU devices`
               : 'CPU';
           $('#runtime-status').textContent =
-            `Worked examples and reference solutions passed on ${runtime} with JAX ${receipt.jax}, NumPy ${receipt.numpy}, Python ${receipt.python}. TPU execution has not been validated.`;
+            `Worked examples and reference solutions verified on ${runtime} (JAX ${receipt.jax}, NumPy ${receipt.numpy}, Python ${receipt.python}). Stage to a Cloud TPU VM via Phase 19–21 to run on physical TPU chips.`;
         }
       })
       .catch(() => {});

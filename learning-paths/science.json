@@ -17,7 +17,7 @@
   "capstone": {
     "title": "Audit a differentiable scientific inverse problem",
     "status": "authored",
-    "assessment": "Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.",
+    "assessment": "Complete the staged project contracts and the changed-condition synthesis assessment with independent calculations, observed outputs, and failure diagnosis.",
     "evidence": [
       "Convergence against the analytic solution at multiple rates and time grids",
       "Solver sensitivities checked by independent finite differences",

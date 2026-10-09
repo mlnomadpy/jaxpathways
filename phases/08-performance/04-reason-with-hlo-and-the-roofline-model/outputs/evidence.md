@@ -16,4 +16,4 @@ Keep StableHLO, synchronized CPU samples and independent output parity. Derive t
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

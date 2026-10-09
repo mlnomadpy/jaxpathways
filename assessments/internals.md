@@ -1,6 +1,6 @@
 # Internals synthesis: extend and defend a derivative transformation
 
-**Status:** public review draft. Complete the internals lessons and [derivative audit project](../project.html?id=derivative-audit). This assessment asks you to transfer the methods to a new map and primitive; passing public project checks alone does not complete it.
+**Scope:** `jaxpr` inspection, forward/reverse-mode autodiff, and custom VJP rules. Complete the internals lessons and [derivative audit project](../project.html?id=derivative-audit), then transfer those methods to the new map and primitive below.
 
 Record Python/JAX/NumPy versions, actual backend/device count, dtype, commands and tolerances. Preserve your implementation and create a separate assessment harness/report. State predictions before running. Do not change public tests to make a result pass.
 

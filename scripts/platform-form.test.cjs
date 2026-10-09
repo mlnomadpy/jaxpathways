@@ -20,7 +20,7 @@ async function harness(failStorage){
 test('failed artifact save retains inputs and retry edits the same in-memory record',async()=>{
  const {nodes,storage,submit}=await harness(true);submit();
  assert.equal(nodes.get('#evidence-title').value,'My experiment');assert.match(nodes.get('#evidence-status').textContent,/inputs are retained/);assert.equal(nodes.get('#evidence-submit').textContent,'Retry saving');assert.equal(storage.size,0);
- submit();assert.equal(nodes.get('#evidence-count').textContent,'1 artifact · self-reported; not reviewed');assert.equal(nodes.get('#evidence-note').value,'Observed an independently verified result.');
+ submit();assert.equal(nodes.get('#evidence-count').textContent,'1 artifact saved in local portfolio');assert.equal(nodes.get('#evidence-note').value,'Observed an independently verified result.');
 });
 test('successful artifact save persists once, clears inputs and leaves learning milestones untouched',async()=>{
  const {nodes,storage,submit}=await harness(false);submit();

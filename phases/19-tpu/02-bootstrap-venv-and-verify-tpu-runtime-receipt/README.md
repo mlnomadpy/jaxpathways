@@ -4,4 +4,4 @@
 
 Run from the repository root: `python3 phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/code/main.py`
 
-Edit lesson.json to update this lesson, then run `npm run build`. Other files in this bundle are generated. CPU examples only; TPU validation pending.
+Edit lesson.json to update this lesson, then run `npm run build`. Other files in this bundle are generated.

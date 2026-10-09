@@ -57,7 +57,7 @@ The exported trace’s complete events express timestamps and durations in micro
 
 The program prints the trace directory and retains the actual XPlane and Perfetto files there. To choose a durable folder, set `JAX_COURSE_TRACE_DIR` before running. Open the official XProf viewer in a compatible separately installed environment, select this log directory/profile, then open Trace Viewer and locate `learner_step`. Expand its host thread and inspect `input_wait` and `model_and_wait`.
 
-Select one step and record its start, duration, enclosing thread and child intervals. When you run this lesson on a TPU VM provisioned with the workflow from `lesson-welcome-03.html` and `tpu-gcp.html`, set `JAX_PLATFORMS=tpu` and `JAX_COURSE_TRACE_DIR=/tmp/tpu-trace`, copy the trace directory back to your workstation with `gcloud compute tpus tpu-vm scp --recurse`, and inspect the `TPU:0` device lanes alongside host submission; an empty host region does not prove an idle device. This default CPU run does not claim an XProf UI session or accelerator trace was executed.
+Select one step and record its start, duration, enclosing thread and child intervals. When you run this lesson on a TPU VM provisioned with the workflow from `lesson-welcome-03.html` and `tpu-gcp.html`, set `JAX_PLATFORMS=tpu` and `JAX_COURSE_TRACE_DIR=/tmp/tpu-trace`, copy the trace directory back to your workstation with `gcloud compute tpus tpu-vm scp --recurse`, and inspect the `TPU:0` device lanes alongside host submission; an empty host region does not prove an idle device. **TODO (Cloud TPU Trace Extension):** Capture a TPU XPlane trace on a Cloud TPU VM and compare the `TPU:0` device lanes against this CPU trace.
 
 **Optional viewer in a separate compatible Python environment**
 
@@ -545,7 +545,7 @@ If expected events are absent, verify that the trace scope surrounds execution, 
 
 Keep the actual XPlane and Perfetto paths, named interval durations and nesting check, units and an interpretation separating injected input delay from completed computation.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

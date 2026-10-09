@@ -16,4 +16,4 @@ Keep the 8-by-8-to-6-by-6 shape diagram, NumPy patch dot product, seeds 20/21, i
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

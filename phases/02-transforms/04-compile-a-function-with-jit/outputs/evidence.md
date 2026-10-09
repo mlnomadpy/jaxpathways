@@ -16,4 +16,4 @@ Keep the independent loss/gradient calculation, backend/shapes/dtype, first-call
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

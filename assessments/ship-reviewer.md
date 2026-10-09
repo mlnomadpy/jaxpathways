@@ -1,6 +1,6 @@
 # Shipping synthesis reviewer notes
 
-Public reference reasoning is not independent evidence of learner work.
+Use these reference notes to verify adaptation gradients, quantization error bounds, and batching latency calculations.
 
 ## Adaptation
 

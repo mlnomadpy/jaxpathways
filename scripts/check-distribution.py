@@ -150,4 +150,4 @@ for assessment in assessment_api['assessments']:
     assert (ROOT/'dist'/assessment['url']).is_file()
     notes=assessment['id']+'-reviewer.md'
     assert (ROOT/'assessments'/notes).read_bytes()==(ROOT/'public/assessments'/notes).read_bytes()
-print(f"OK: {len(assessment_api['assessments'])} synthesis review drafts match source, pathway and project.")
+print(f"OK: {len(assessment_api['assessments'])} synthesis assessments match source, pathway and project.")

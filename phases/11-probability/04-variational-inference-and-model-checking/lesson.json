@@ -41,7 +41,7 @@
       },
       {
         "title": "Keep inference and model errors separate",
-        "body": "The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but do not certify model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. A NumPyro SVI or NUTS implementation is an ecosystem bridge; this lesson does not claim those optional APIs were executed."
+        "body": "The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but do not certify model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. **TODO (NumPyro Extension):** Compare this hand-written ELBO loop against `numpyro.infer.SVI` and `numpyro.infer.NUTS` on the same target density."
       }
     ],
     "output": "The optimized variances are \\((0.36,0.36)\\), compared with target marginal variances \\((1,1)\\). Remaining KL is approximately \\(0.5108\\). The curved stress fixture has visibly structured residuals and low nominal interval coverage.",

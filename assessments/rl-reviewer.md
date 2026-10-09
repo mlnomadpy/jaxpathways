@@ -1,6 +1,6 @@
 # RL synthesis: reviewer notes
 
-[Return to the assessment](rl.md). Review the learner’s implementation and reasoning before these numerical references. Public solutions and passing assertions do not establish independent competency.
+[Return to the assessment](rl.md). Use these numerical references to verify your environment transitions, policy gradients, and evaluation rollouts.
 
 ## Boundary arithmetic
 

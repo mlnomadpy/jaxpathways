@@ -4,11 +4,11 @@ You have a model and access to a TPU. Should you change the batch size, use smal
 
 By the end, you will have a **hardware and precision report**: a workload description, memory estimate, explicit precision policy, numerical comparisons, synchronized timings and a short profile. Begin with [TPU and Google Cloud setup](tpu-gcp.html), [honest benchmarking](lesson.html?lesson=performance-01) and [reading an XProf trace](lesson.html?lesson=performance-03). The [practice workspace](downloads/jax-tpu-gcp.zip) contains the executable lab below.
 
-The recorded lab uses JAX 0.9.2 and NumPy 2.4.4 on CPU. Hardware tables were checked against Google's documentation on **6 October 2026**. TPU execution, kernel selection and accelerator performance still require a run on the chosen target. These activities add depth to the TPU pathway; they do not count as new completed lessons.
+The recorded reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Run the same `precision_profile.py` script on your Cloud TPU VM to compare target-device MXU timings against your CPU baseline.
 
 ## 1. Choose for the workload, then check the generation
 
-Training runs forward computation, backward computation and optimizer updates. Its persistent state includes more than weights. Inference usually retains weights and, for a causal model, a growing key/value cache. **Prefill** processes the prompt together; **decode** generates another token for each active sequence. Prefill can expose large matrix products, while small-batch decode often spends much of its time moving weights and cache data. These are workload hypotheses to test, not universal bottleneck labels.
+Training runs forward computation, backward computation and optimizer updates. Its persistent state includes more than weights. Inference usually retains weights and, for a causal model, a growing key/value cache. **Prefill** processes the prompt together; **decode** generates another token for each active sequence. Prefill can expose large matrix products, while small-batch decode often spends much of its time moving weights and cache data. Test which regime dominates your workload by profiling both phases.
 
 | Work you are doing | First question | Measure before choosing |
 | --- | --- | --- |
@@ -18,9 +18,9 @@ Training runs forward computation, backward computation and optimizer updates. I
 | Causal decode | How much weight/cache traffic does each new token require? | Inter-token latency, output tokens per second and cache growth |
 | Audio streaming | Can chunks complete before the next deadline? | Chunk latency, real-time factor and task quality |
 
-There is no reliable rule that one suffix means training only and another means inference only. v5e and v6e have both training and serving configurations. TPU7x has both training and inference recipes. v5p's large memory and interconnect make it relevant to large training workloads, but the hardware name alone does not prohibit serving.
+There is no fixed rule that one suffix means training only and another means inference only: v5e, v6e, and TPU7x support both training and serving configurations, while v5p's large HBM capacity and 3D torus interconnect target large-scale training slices.
 
-Here is a **per physical chip** comparison, not a benchmark. Peak compute describes suitable operations at high utilization. The HBM units below deliberately preserve the units in the linked specification tables; GB and GiB are different. Aggregate pod memory does not imply that one unsharded array fits on one device.
+The table below lists **per physical chip** specifications from Google Cloud's documentation (preserving documented GB vs. GiB units):
 
 | Generation | Peak BF16 TFLOPs/chip | HBM/chip, as documented | Topology at scale | What to investigate |
 | --- | ---: | --- | --- | --- |

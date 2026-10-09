@@ -53,7 +53,7 @@ query 3: 1 1 1 1
 
 For vocabulary {a:$0$, b:$1$, c:$2$}, abcab becomes $[0,1,2,0,1]$. Inputs $[0,1,2,0]$ pair with next-token targets $[1,2,0,1]$. Do not train the last token to predict the first token of an unrelated packed example. A separator or an ignored loss position must express that boundary.
 
-Production tokenizers introduce normalization, special IDs and subword rules. This lesson teaches alignment using a simple character mapping and does not claim to replace them. Validate unknown characters explicitly rather than silently assigning an existing ID.
+Production tokenizers add Unicode normalization, special control IDs, and subword merges on top of this exact index-alignment contract. Validate unknown characters explicitly rather than silently assigning an existing ID.
 
 ## Combine causal and segment boundaries
 
@@ -481,7 +481,7 @@ NaN in a padded output can mean that its mask row permits no keys; count allowed
 
 Keep token/target alignment, the two masks, future perturbation, segment-leakage comparison and all-masked-row repair. Verify that masks and ignored loss positions enforce the same boundaries.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

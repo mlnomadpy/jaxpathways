@@ -2,7 +2,7 @@
   {
     "version": "0.5.3",
     "date": "2026-10-08",
-    "hash": "c3c01c845d4ead9a29d691631ac1221b3a81322b54d54ecc897e14aa0819287f",
+    "hash": "0f140e277d8a8fabeb6ac82a95cf945039f483c51631d15e694a7e9c0c9e56be",
     "notes": {
       "version": "0.5.3",
       "date": "2026-10-08",
@@ -36,7 +36,7 @@
       },
       "welcome-03": {
         "title": "Move your experiment to a TPU",
-        "hash": "29c345825980335f6bb8a938495ad0750e4b781aa3152d40b69b8bf13a2d4a2a",
+        "hash": "123d54afe2006469a27d8d7c57195e375ca0c2972d1d4ca32d34d9fe4b2e7cca",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -210,7 +210,7 @@
       },
       "networks-04": {
         "title": "Train a CNN on a small dataset",
-        "hash": "d85a20628fe4aab4adcc5847b30d5f95d6d407cd3b5768539389bdf2da5e9e15",
+        "hash": "64613361792ca5184604cb9d3d65d9360d1622f7a4fe319b27e9b09944ee3db2",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -264,7 +264,7 @@
       },
       "transformers-02": {
         "title": "Masking, tokenization, and sequence packing",
-        "hash": "c12cd75390f168c48a88c01a191b3d7c50395fcf0bc29814578eafc2d279e2ef",
+        "hash": "3ac14c64fe48b8c5d7fa744c3d619ba5c29124e80c8eabe91d7d1c91ae7568fb",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -294,7 +294,7 @@
       },
       "performance-03": {
         "title": "Read an XProf trace",
-        "hash": "7b30df109e5a470ac64bc21b8c4b37d2c5d81c892ec301603ed270a9fef304cd",
+        "hash": "d7c9f8c026db3a4436e45d5d9471d1f87100f135bc93bf2000599144c8184eaa",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -372,13 +372,13 @@
       },
       "probability-03": {
         "title": "Hamiltonian Monte Carlo and sampler diagnostics",
-        "hash": "ddac2222c85e29173ceaf134c0c47323d543bfe0e9cc8cfb34bfc37c9e4854cf",
+        "hash": "ab17f05e557bcef1a3b3d186801f6ee8b5b5aa70b4060051bc1cd7e3d9152c1a",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "probability-04": {
         "title": "Variational inference and model checking",
-        "hash": "304b52773b37e7a3d149f5bcb6ebed08817d7df77740cc8edb10e49b842a04b3",
+        "hash": "da863f64819c58767b41386bee2767721c110ebcc7276ce02df9196ee6fd688d",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -492,7 +492,7 @@
       },
       "deployment-04": {
         "title": "Inference capacity, batching, and autoscaling",
-        "hash": "47ffca3c25388e9a08f9861cd70dd6830a1ef69819cfa651529a40f1deb153a5",
+        "hash": "8b11c68fdaf1d285e14efc609c02d7c0f496c3c4f705a3a441e14c385311d001",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -638,7 +638,7 @@
     "phases": {
       "welcome": {
         "title": "Setup & first steps",
-        "hash": "1e2f6f0dbfe592f8ea9de58c5b2c8400ef2e295974248e902c68e12e9d74bc56",
+        "hash": "5e11dcaddd3e268322b7042a42c4bd7e89141f70d7e7455cb30eb6bd637051c6",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -668,7 +668,7 @@
       },
       "networks": {
         "title": "Neural network training",
-        "hash": "42709c41d6ef85c3ff9111da5c9e47cada3b42976d7857a87cb3bdba891cf7c2",
+        "hash": "fa0806a5d8f8a2ca22915e21a41ceae85d07091bd38c4314548befbd4c35435c",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -680,13 +680,13 @@
       },
       "transformers": {
         "title": "Transformers & language models",
-        "hash": "33f5d19cfd1487e8da94862e9eebea137e5b3b1fbd971a58412a46bb307eec62",
+        "hash": "f260ff85dc4c7f9a43196dbccf060b9703878dbcc6c1f41805ff7fcb0104e56b",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
       "performance": {
         "title": "Performance diagnosis",
-        "hash": "d5c9cbf66c74a3db88e1a8a26d50d105eec906674f398ba9362cb7097704cfd6",
+        "hash": "203f2d03fadd46bae282bc4c5c9aac07394c97b9eefcb8fcf1ddea5c84e4c1b0",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -704,7 +704,7 @@
       },
       "probability": {
         "title": "Probabilistic modeling",
-        "hash": "c191a74f63eeabd90b72fb7020f37ca4ef8e4d11aef29f714115a026bfbc71c8",
+        "hash": "e8b4c8f7e24327fcc4473a65c60f198c8badc83cbc35585aec51f020181ed678",
         "version": "0.5.3",
         "date": "2026-10-08"
       },
@@ -728,7 +728,7 @@
       },
       "deployment": {
         "title": "Deployment, interoperability & edge AI",
-        "hash": "cf61cc04464dce6540f7703346186b89bd81a5df2b55d2ef39ac9f2f0f35cbb8",
+        "hash": "cd91bdc021220884b9c8be48c0ce593779abe11a6d5c187bcd32b303772d7425",
         "version": "0.5.3",
         "date": "2026-10-08"
       },

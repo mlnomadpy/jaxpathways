@@ -84,7 +84,7 @@ for(const lesson of authored){
 assert.ok(lessons.has('first-gradient'));
 for(const notebook of course.notebookIntegration)assert.ok(phases.has(notebook.phaseId));
 console.log(`OK: ${phases.size} phases, ${lessons.size} canonical lesson briefs, ${routes.size} routes; prerequisites acyclic and ordered.`);
-console.log(`Content status: ${authored.length} authored lessons with script/notebook companions; ${lessons.size-authored.length} planned. ${course.projectIds?.length||1} staged integration projects are available; CPU synthesis review drafts are linked separately; each route states its assessment availability.`);
+console.log(`Content status: ${authored.length} authored lessons with script/notebook companions; ${lessons.size-authored.length} planned. ${course.projectIds?.length||1} staged integration projects and synthesis assessments are linked across all routes.`);
 const roleIds=new Set();
 for(const role of course.roles){
   assert.ok(!roleIds.has(role.id));roleIds.add(role.id);

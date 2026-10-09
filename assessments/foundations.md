@@ -1,10 +1,10 @@
 # Foundations synthesis: defend a regression experiment
 
-**Scope:** arrays, pure functions, autodiff, vectorization, compiled state transitions and optimization on CPU. This is a practical synthesis assessment of the available foundation course, not a credential or a TPU qualification.
+**Scope:** arrays, pure functions, autodiff, vectorization, compiled state transitions and optimization on CPU. Complete the changed-condition numerical tasks below and record your verification outputs in your portfolio.
 
 [Open the project workspace](../project.html?id=regression-audit). Keep your evidence in [My learning](../notebook.html#portfolio).
 
-Complete the regression-audit project first. Its four public stage checks are useful feedback, but this assessment changes the fixture and asks you to explain the system. Keep the implementation you actually wrote; executing the provided solution is a separate activity.
+Complete the regression-audit project first. Transfer your `regression-audit` implementation to the modified fixture below and verify each calculation against an independent NumPy reference.
 
 ## Before starting
 

@@ -185,8 +185,8 @@ python3 scripts/course.py plan inference-engineer`;
           tested packages in <code>requirements-cpu.txt</code>.
         </p>
         <p class="resource-note">
-          The reference runner includes solutions. Passing it does not mean you completed the
-          exercise.
+          Write your own exercise solution in the lesson script or notebook first, then run the
+          verifier to check your assertions.
         </p>
       </Fragment>
       <ResourceCodeBlock label="Terminal · command examples" code={terminalExamples}>
@@ -213,9 +213,8 @@ python3 scripts/course.py plan inference-engineer`;
 npm run check
 npm run smoke:cpu</code></pre>
         <p>
-          Use <code>create-jax-course</code> to guide authoring. A draft, an execution receipt and
-          independent review are different states. CPU checks do not establish TPU correctness or
-          performance.
+          Use <code>create-jax-course</code> to guide authoring, run <code>npm run smoke:cpu</code>{' '}
+          to record CPU execution receipts, and stage accelerator benchmarks on a Cloud TPU VM.
         </p>
       </details>
       <details class="resource-disclosure">

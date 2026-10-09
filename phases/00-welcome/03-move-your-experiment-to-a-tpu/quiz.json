@@ -7,7 +7,7 @@
       "question": "The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?",
       "options": [
         "The TPU installation and its execution are validated.",
-        "The arithmetic matches the reference, but the requested TPU execution has not been validated.",
+        "The arithmetic matches the reference on the fallback CPU backend, so the requested TPU backend was not active.",
         "The model must be numerically wrong."
       ],
       "correct": 1,

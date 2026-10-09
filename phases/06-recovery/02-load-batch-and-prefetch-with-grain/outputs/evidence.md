@@ -16,4 +16,4 @@ Keep Grain sampler configuration and exact example IDs for full and partial batc
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

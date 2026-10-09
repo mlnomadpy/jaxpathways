@@ -502,12 +502,12 @@ Reversing rows should reverse predictions because each observation is evaluated 
 The values match NumPy, but the output array is on CPU when the requested platform was TPU. What has been demonstrated?
 
 1. The TPU installation and its execution are validated.
-2. The arithmetic matches the reference, but the requested TPU execution has not been validated.
+2. The arithmetic matches the reference on the fallback CPU backend, so the requested TPU backend was not active.
 3. The model must be numerically wrong.
 
 <details><summary>Answer and explanation</summary>
 
-The arithmetic matches the reference, but the requested TPU execution has not been validated.
+The arithmetic matches the reference on the fallback CPU backend, so the requested TPU backend was not active.
 
 A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.
 
@@ -527,7 +527,7 @@ Read the first failing boundary: interpreter/import, explicit backend discovery,
 
 Keep separate CPU and TPU reports with requested/observed platform, package versions, completed predictions, NumPy error and changed-bias and row-permutation checks. Until the target command succeeds, TPU execution remains unverified.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

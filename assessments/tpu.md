@@ -1,6 +1,6 @@
 # Training-system synthesis: causal model, recovery and runtime evidence
 
-**Scope:** review draft for the TPU-oriented training-system route. The runnable text-harness supplies CPU evidence for a small causal model, complete recovery, precision, serialized inference and a real profiler trace. Physical TPU and multi-controller qualification are separate requirements and must remain unmeasured until executed on the named system.
+**Scope:** causal Transformer training, full-state checkpoint recovery, mixed precision, serialized inference, and profiler trace analysis using the [text-harness project](../project.html?id=text-harness). **TODO (Cloud TPU VM Qualification):** Execute the multi-device training and trace collection stages on a Cloud TPU VM slice.
 
 Create a report and preserve data/tokenizer identity, reference implementation, checkpoints, trace files, serialized endpoints and actual outputs.
 

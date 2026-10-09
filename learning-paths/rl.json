@@ -18,7 +18,7 @@
   "capstone": {
     "title": "Train and audit a policy from interaction",
     "status": "authored",
-    "assessment": "Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.",
+    "assessment": "Complete the staged project contracts and the changed-condition synthesis assessment with independent calculations, observed outputs, and failure diagnosis.",
     "evidence": [
       "Verified transitions, terminal masks and reconstructed return targets",
       "A policy-gradient comparison against independent state enumeration",

@@ -23,7 +23,7 @@ The training lessons belong to phase 05; recovery to phase 06; profiling to phas
 
 `npm run curriculum:docs` renders lesson Markdown, Python scripts, notebooks, `CURRICULUM.md`, and phase READMEs for reading on GitHub. These are generated from the same manifest as the website.
 
-Use `npm run smoke:cpu` after changing numerical material. It executes both the scripts and notebook code cells in fresh CPU processes and records the tested environment in `public/validation.json`. Browser checkpoints are formative checks; exercise completion is self-reported. Neither awards a reviewed competency.
+Use `npm run smoke:cpu` after changing numerical material. It executes both the scripts and notebook code cells in fresh CPU processes and records the tested environment in `public/validation.json`. Browser checkpoints and saved portfolio artifacts track progress across lessons and staged projects.
 
 ## A lesson bundle
 

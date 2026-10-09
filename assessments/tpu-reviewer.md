@@ -1,6 +1,6 @@
 # Training-system synthesis reviewer notes
 
-These public notes explain evidence requirements; they do not certify a learner or a target platform.
+Use these reference notes to verify byte-tokenization offsets, causal masking, checkpoint recovery, and KV-cache precision.
 
 ## Tokens and attention
 

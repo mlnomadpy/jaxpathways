@@ -72,13 +72,13 @@ export function renderPathway(route, course, hasNext) {
     }${
       route.capstone.assessmentDraft
         ? `<p>
-    <a href="${escapeHtml(route.capstone.assessmentDraft.url)}">Synthesis assessment · review draft</a>
+    <a href="${escapeHtml(route.capstone.assessmentDraft.url)}">Synthesis assessment</a>
     </p>`
         : ''
     }${(route.assessmentExtensions || [])
       .map(
         (a) => `<p>
-    <a href="${escapeHtml(a.url)}">${escapeHtml(a.title)} · review draft</a>
+    <a href="${escapeHtml(a.url)}">${escapeHtml(a.title)}</a>
     </p>`,
       )
       .join('')}<details>

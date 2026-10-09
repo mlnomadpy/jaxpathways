@@ -403,7 +403,7 @@ A majority or constant-label baseline is part of evaluation. A good-looking clas
 
 ## Make it yours
 
-Apply the trained model to one $10\times10$ image. Predict intermediate shape and parameter count before executing. Do not claim accuracy from an unlabeled input.
+Apply the trained model to one $10\times10$ image. Predict the intermediate activation shape and total parameter count before executing, then verify both assertions.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
@@ -623,7 +623,7 @@ Before tuning, inspect sample labels and input layout. Validate a convolution pa
 
 Keep the 8-by-8-to-6-by-6 shape diagram, NumPy patch dot product, seeds 20/21, independent held-out cross-entropy, 24-observation confusion matrix, constant-class baseline, and layout failure repair.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

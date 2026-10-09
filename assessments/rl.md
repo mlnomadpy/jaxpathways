@@ -1,6 +1,6 @@
 # RL synthesis: defend an agent trained from interaction
 
-**Scope:** a CPU tabular policy, functional finite-horizon environment, randomized rollouts, REINFORCE and clipped policy updates, independent expectation checks and held-out evaluation. This is a public review draft. It does not establish performance on a realistic control benchmark or provide an independent reviewer.
+**Scope:** tabular policies, functional finite-horizon environments, randomized rollouts, REINFORCE and clipped policy updates, independent expectation checks, and held-out evaluation.
 
 [Open the project](../project.html?id=policy-evaluation). Complete `rl-01` through `rl-04`, then retain your own implementation, `assessment.py`, and a short report. Keep reference code separate from learner evidence.
 

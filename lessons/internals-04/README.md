@@ -752,7 +752,7 @@ If primals match but tangents fail, audit multiplication’s two terms and zero 
 
 Annotated primitive rules, constant/literal handling, independent expression oracles, changed compiled values and explicit unsupported/signature errors. Keep the environment, observed outputs and your explanation of the figure.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

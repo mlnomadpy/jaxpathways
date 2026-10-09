@@ -470,7 +470,7 @@ If a run oscillates or diverges, inspect the steepest curvature and the effectiv
 
 Keep the Hessian and Hessian-vector checks, stable/divergent trajectories, rescaling comparison and saddle counterexample.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

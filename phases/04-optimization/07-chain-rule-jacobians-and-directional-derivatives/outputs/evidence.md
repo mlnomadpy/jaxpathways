@@ -16,4 +16,4 @@ Keep the handwritten Jacobian, JVP and VJP checks, adjoint identity, finite-dire
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

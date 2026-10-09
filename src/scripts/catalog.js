@@ -13,7 +13,7 @@ function progress() {
     entries = ids.map((id) => courseState.lessonProgress.lessons[id] || {});
   $('#progress').hidden = !entries.some((e) => e.checkpointPassed || e.evidenceSaved);
   $('#progress').textContent =
-    `${entries.filter((e) => e.checkpointPassed).length}/${ids.length} checkpoints · ${entries.filter((e) => e.evidenceSaved).length}/${ids.length} exercises self-reported`;
+    `${entries.filter((e) => e.checkpointPassed).length}/${ids.length} checkpoints · ${entries.filter((e) => e.evidenceSaved).length}/${ids.length} exercises completed`;
 }
 
 function syncCourseFilterButtons(activeGroup = 'all') {
@@ -282,7 +282,7 @@ function initCatalog() {
     }
     if ($('#content-status'))
       $('#content-status').textContent =
-        `${authoredIds().length} lesson drafts with CPU companions${plannedCount ? `; ${plannedCount} topics have no lesson material` : ''}. ${courseState.course.projectIds?.length || 1} staged projects are available. Project synthesis and math assessment review drafts are linked from their phases; remaining route assessments are planned.`;
+        `${authoredIds().length} interactive lessons with runnable scripts and notebooks${plannedCount ? `; ${plannedCount} planned` : ''}. ${courseState.course.projectIds?.length || 1} staged projects and 8 synthesis assessments are linked across the phases.`;
   }
 }
 

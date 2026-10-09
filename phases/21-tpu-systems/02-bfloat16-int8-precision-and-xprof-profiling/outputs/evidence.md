@@ -16,4 +16,4 @@ Keep the BF16 vs INT8 error summary, FP32-vs-BF16 accumulator drift comparison, 
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

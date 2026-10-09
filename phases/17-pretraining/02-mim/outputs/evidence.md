@@ -16,4 +16,4 @@ Keep patch-order slices, visible-only feature shapes, hidden-patch counts, indep
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

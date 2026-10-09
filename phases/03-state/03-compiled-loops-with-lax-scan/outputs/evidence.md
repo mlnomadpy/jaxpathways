@@ -16,4 +16,4 @@ Keep the labeled carry/output transition, Python-reference trajectory, polynomia
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

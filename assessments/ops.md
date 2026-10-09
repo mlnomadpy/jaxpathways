@@ -1,6 +1,6 @@
 # Operations synthesis: rehearse an incident and defend the recovery
 
-**Scope:** a real local CPU JAX subprocess, explicit lifecycle and measurement boundaries, complete-state recovery, content-addressed artifact selection, actual held-out release validation and transparent capacity arithmetic. This public review draft does not certify cloud or accelerator operations.
+**Scope:** a real local CPU JAX subprocess, explicit lifecycle and measurement boundaries, complete-state recovery, content-addressed artifact selection, actual held-out release validation and transparent capacity arithmetic. **TODO (Cloud & Accelerator Extension):** Run the same supervisor and rollback drills against a multi-host Cloud TPU VM slice.
 
 [Open the project](../project.html?id=workload-operations). Complete `operations-01` through `operations-05`, then keep your implementation and an independent `assessment.py` harness. Run every drill only in a caller-owned temporary directory, with bounded child-process deadlines. Do not terminate unrelated processes or allocate external infrastructure.
 
@@ -19,7 +19,7 @@ Record source hashes, Python/JAX/NumPy versions, actual backend/device count, dt
 
 Run three jobs: a normal job with \(7\) updates and batch size \(5\); a job requiring more devices than are actually available; and a job that stalls after completing \(2\) updates. Choose and record a bounded deadline that allows this environment to initialize before the injected stall.
 
-Retain the process exit, stdout/stderr, parsed events and supervisor duration. For each result, distinguish the requested runtime from observed discovery and identify the last completed lifecycle boundary. Prove the timed-out process has been reaped before attempting another job. Do not claim a timeout alone diagnoses its cause; use the injected event and trace.
+Retain the process exit, stdout/stderr, parsed events and supervisor duration. For each result, distinguish the requested runtime from observed discovery and identify the last completed lifecycle boundary. Prove the timed-out process has been reaped before attempting another job. Correlate the supervisor timeout with the injected event and trace to pinpoint the exact stalled stage.
 
 State the extra cancellation contract that would be required if the worker launched descendants. Do not implement process-tree termination against unrelated processes.
 

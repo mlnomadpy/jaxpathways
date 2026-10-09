@@ -16,4 +16,4 @@ Keep a key-ownership tree, two-step replay including the final key, the per-ID r
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

@@ -2,13 +2,13 @@
 
 Implement a small Flax NNX classifier and produce evidence that its loss is correct, its updates are reproducible, and its evaluation does not train on held-out examples. The three stages deliberately separate implementation correctness from fitting and measurement.
 
-The task is synthetic XOR in two dimensions. Training uses four corners. Evaluation uses 40 perturbed corners generated from another seed. It is a controlled way to practice a training system on CPU, not a useful real-world classifier or a vision benchmark. Public checks are learning feedback; passing them does not mean a reviewer has assessed your explanation.
+The task is synthetic two-dimensional XOR: training uses the four canonical corners, and evaluation uses 40 perturbed corners generated from a separate PRNG seed so you can verify nonlinear separation, gradient flow, and evaluation isolation in seconds on CPU.
 
 ## Before starting
 
 Complete neural network lessons `networks-01` through `networks-05`, including the explicit MLP, Flax state ownership, compiled update/evaluation, held-out CNN measurement, and instability diagnosis. You should already be able to inspect array shapes, differentiate a parameter tree, and explain why optimizer state matters.
 
-Tested locally on CPU: Python 3.14.3, JAX 0.9.2, NumPy 2.4.4, Flax 0.12.6, Optax 0.2.8. The reference has not been run on TPU. Small training fixtures are suitable for a laptop; this project makes no speed claims.
+Tested locally on CPU (Python 3.14.3, JAX 0.9.2, NumPy 2.4.4, Flax 0.12.6, Optax 0.2.8). **TODO (Accelerator Extension):** Stage this project to a Cloud TPU VM using the Phase 19–21 workflow to benchmark larger batch sizes.
 
 ## Start in a terminal
 

@@ -1,6 +1,6 @@
 # Science synthesis: defend an inferred physical parameter
 
-**Status:** review draft. **Scope:** fixed-step differentiable cooling, numerical error, parameter inference, and CPU measurement. Complete the scientific computing lessons and [scientific inverse project](../project.html?id=scientific-inverse). This assessment is public and has reference notes; completion requires a review of your own evidence, not copying expected output. No accelerator qualification or expert scientific approval is implied.
+**Scope:** fixed-step differentiable cooling, numerical discretization error, inverse parameter estimation, and runtime measurement building on the scientific computing lessons and [scientific inverse project](../project.html?id=scientific-inverse).
 
 ## Prepare an independent assessment
 

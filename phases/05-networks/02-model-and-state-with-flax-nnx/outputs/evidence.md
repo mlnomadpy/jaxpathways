@@ -16,4 +16,4 @@ Keep the NumPy forward comparison, count of 13 trainable scalars and one diagnos
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

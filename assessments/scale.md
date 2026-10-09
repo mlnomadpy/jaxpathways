@@ -1,6 +1,6 @@
 # Scale synthesis: decide whether a custom kernel improves a sharded workload
 
-**Status:** public review draft. **Scope:** numerical equivalence, profiling, partitioning and a bounded Pallas optimization decision. Complete performance, distributed and kernel lessons, plus the [kernel audit project](../project.html?id=kernel-audit).
+**Scope:** numerical equivalence, profiling, partitioning, and a bounded Pallas kernel optimization decision building on the performance, distributed, and kernel lessons plus the [kernel audit project](../project.html?id=kernel-audit).
 
 Keep CPU logical-device and interpretation evidence separate from real accelerator evidence. A CPU-only submission can complete the numerical and decision-preparation tasks; it must leave target performance qualification explicitly unresolved. An implemented target runner is not an executed target result.
 
@@ -62,4 +62,4 @@ Conclude with **keep**, **revise**, **use the baseline**, or **await target evid
 - **Accept target qualification:** The actual device, non-interpret execution, numerical result, baseline and timing boundary are documented. **Revise:** a CPU simulation is called TPU execution. Without hardware, mark this criterion unresolved.
 - **Accept decision:** Local and end-to-end evidence support the recommendation and remaining uncertainty is visible. **Revise:** only favorable configurations are shown or a performance claim exceeds its hardware/workload evidence.
 
-Submit source, environment, data-generation rules, checks, trace, figure data, timing records where available and your decision report. Public tests and review drafts do not provide an independently reviewed qualification.
+Save your source code, environment specification, data-generation rules, verification checks, trace files, figure data, timing records, and decision report in your portfolio.

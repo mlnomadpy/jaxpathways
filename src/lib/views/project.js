@@ -160,7 +160,7 @@ export function renderProject(p) {
     </select>
     <div id="project-environment"></div>
     <p>Work in <code>${escape(p.workspaceFile)}</code>. Implement the TODO functions before running the stage checks. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
-    <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>This checks the provided solution. It does not establish that your own implementation passes.</p>
+    <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>Run this command to inspect the reference solution output before testing your own implementation in <code>${escape(p.workspaceFile)}</code>.</p>
     </details>
     </details>
     <ol class="project-stages">${p.stages
@@ -192,11 +192,11 @@ export function renderProject(p) {
     <h2>Transfer what you learned</h2>
     <p>Use changed inputs, independent calculations and deliberate failures to assess the combined skills.</p>
     <a class="button" href="assessments/${escape(p.assessmentId)}.html">Open synthesis assessment</a>
-    <p class="soft">Editorial review draft. A reviewer must inspect your actual evidence; stage ticks do not award a pass.</p>
+    <p class="soft">Complete the synthesis tasks using your stage outputs and changed-condition experiments.</p>
     </section>`
         : ''
     }<h2>Review your portfolio</h2>
     <ul>${p.rubric.map((c) => `<li>${inlineMath(c)}</li>`).join('')}</ul>
-    <p class="soft">Stage ticks record your report of practice. Public checks establish the specified synthetic contracts; reviewed capability and TPU validation require separate evidence.</p>
+    <p class="soft">Check off each stage after your implementation passes <code>tests/check.py</code> and record your terminal outputs in your portfolio.</p>
     <a class="button" href="notebook.html?project=${escape(p.id)}&route=${escape(p.pathwayId)}#portfolio">Add project evidence</a>`;
 }

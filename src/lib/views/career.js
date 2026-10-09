@@ -66,7 +66,7 @@ export function renderCareer(role, course) {
       .join('')}</ol>
     <details class="starting-check">
     <summary>Find my starting point</summary>
-    <p>Check what you can already explain and demonstrate. This suggests where to begin; it is not a graded assessment.</p>
+    <p>Select the topics you can already implement and explain to jump directly to your recommended starting phase.</p>
     <div class="starting-checks">${role.startingPointChecks
       .map(
         (check) => `<label>
@@ -89,5 +89,5 @@ export function renderCareer(role, course) {
       .map((id) => `<button data-choice="${id}">${escapeHtml(routeName(id))}</button>`)
       .join('')}</div>`
         : ''
-    }<p class="soft">Milestone availability is shown above. Portfolio briefs without a linked staged project remain planned. Public checks and self-reported work do not establish reviewed readiness.</p>`;
+    }<p class="soft">Complete each milestone’s lessons and staged integration project, then record your verification outputs in your portfolio.</p>`;
 }

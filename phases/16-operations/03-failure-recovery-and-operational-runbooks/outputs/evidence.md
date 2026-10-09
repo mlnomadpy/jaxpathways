@@ -16,4 +16,4 @@ Keep the injected failure timeline, accepted checkpoint identity and full-state 
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

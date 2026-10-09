@@ -403,7 +403,7 @@ When broadcasting fails, align trailing dimensions on paper. When it succeeds wi
 
 Keep an axis sketch, asymmetric offset checks, aligned-versus-pairwise residual arrays, a rejected shape mismatch, and the float32 precision observation. Explain the intended residual contract.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

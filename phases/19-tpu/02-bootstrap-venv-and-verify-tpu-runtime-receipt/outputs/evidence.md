@@ -16,4 +16,4 @@ Keep the JSON runtime receipt (observed_backend, device_count, pmap_sum_of_squar
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

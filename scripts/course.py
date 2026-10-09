@@ -94,7 +94,7 @@ def main():
                 raise ValueError('Lesson script is outside the course source')
             print(f"Command: {sys.executable} {script.relative_to(ROOT)}\nWorking directory: {ROOT}\nBackend: CPU", flush=True)
             result = subprocess.run([sys.executable, str(script)], cwd=ROOT, env={**os.environ, 'JAX_PLATFORMS': 'cpu'}, timeout=60)
-            print(f'Exit code: {result.returncode}. This run does not award a reviewed competency.')
+            print(f'Exit code: {result.returncode}.')
             return result.returncode
         elif args.command == 'quiz':
             quiz = json.loads((ROOT / lesson['artifacts']['quizSource']).read_text())

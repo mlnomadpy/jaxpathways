@@ -1,6 +1,6 @@
 # Probability synthesis reviewer notes
 
-These notes supply public reference reasoning. They do not prove that a learner executed or independently understood the work.
+Use these reference derivations to check your analytical posterior, HMC diagnostics, and variational bounds.
 
 ## Exact posterior
 

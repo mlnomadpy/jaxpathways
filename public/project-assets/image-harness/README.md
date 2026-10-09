@@ -175,7 +175,7 @@ The benchmark first warms the loaded runtime, then records twelve completed runs
 
 Record actual device/backend, batch, precision, repetitions and artifact bytes. Twelve local samples do not establish a stable production tail latency. The NumPy integer reference may be slower than the compiled float graph: that is a measurement to retain, not a reason to claim native int8 acceleration.
 
-For a supported target runtime, carry the same raw-image/EXIF/resize/channel/range/class mapping and canary cases into that runtime’s actual export/conversion path. Use the deployment course’s actual JAX export and optional LiteRT framework labs as preparation. This project’s receipt establishes CPU JAX-deserialized inference and CPU integer-reference execution only; it does not claim an Android, browser, GPU, TPU or LiteRT benchmark. A device-qualified extension requires real decoding/preprocessing/transfer/model timings, kernel support evidence, memory observations and target-device outputs.
+For a supported target runtime, carry the same raw-image/EXIF/resize/channel/range/class mapping and canary cases into that runtime’s actual export/conversion path. Use the deployment course’s actual JAX export and optional LiteRT framework labs as preparation. **TODO (Target-Device Benchmark Extension):** Export the model to LiteRT or a Cloud TPU VM and record end-to-end decoding, preprocessing, host-to-device transfer, and kernel execution timings.
 
 ## What a completed learner artifact contains
 

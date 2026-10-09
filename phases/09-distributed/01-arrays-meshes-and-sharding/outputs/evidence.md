@@ -16,4 +16,4 @@ Padding repairs the shape but adds artificial rows. The mask keeps them out of b
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

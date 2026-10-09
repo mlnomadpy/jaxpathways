@@ -79,7 +79,7 @@ export function setupClubPlanner(routes) {
       }
       article.append(list);
       const sessionGuidance =
-        'Session: predict one result, run the build, compare a changed condition, and discuss one diagnostic artifact. Peer feedback is not reviewed certification.';
+        'Session: predict one result, run the build, compare a changed condition, and review one diagnostic artifact together.';
       $('#club-plan').append(article);
       planText += `## Week ${i + 1} (${used[i]} / ${budget} min)\n${lessons.map((l) => `- ${l.title} (${l.minutes || 60} min)`).join('\n') || '- Discussion and evidence review'}\n\n${sessionGuidance}\n\n`;
     });

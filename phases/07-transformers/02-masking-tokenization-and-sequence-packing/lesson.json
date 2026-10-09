@@ -31,7 +31,7 @@
       },
       {
         "title": "Keep token IDs and targets aligned",
-        "body": "For vocabulary {a:\\(0\\), b:\\(1\\), c:\\(2\\)}, abcab becomes \\([0,1,2,0,1]\\). Inputs \\([0,1,2,0]\\) pair with next-token targets \\([1,2,0,1]\\). Do not train the last token to predict the first token of an unrelated packed example. A separator or an ignored loss position must express that boundary.\n\nProduction tokenizers introduce normalization, special IDs and subword rules. This lesson teaches alignment using a simple character mapping and does not claim to replace them. Validate unknown characters explicitly rather than silently assigning an existing ID."
+        "body": "For vocabulary {a:\\(0\\), b:\\(1\\), c:\\(2\\)}, abcab becomes \\([0,1,2,0,1]\\). Inputs \\([0,1,2,0]\\) pair with next-token targets \\([1,2,0,1]\\). Do not train the last token to predict the first token of an unrelated packed example. A separator or an ignored loss position must express that boundary.\n\nProduction tokenizers add Unicode normalization, special control IDs, and subword merges on top of this exact index-alignment contract. Validate unknown characters explicitly rather than silently assigning an existing ID."
       },
       {
         "title": "Combine causal and segment boundaries",

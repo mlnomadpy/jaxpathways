@@ -16,4 +16,4 @@ Keep original and updated arrays, a repeated-index integer reference, the whole-
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

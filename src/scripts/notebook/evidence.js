@@ -141,7 +141,7 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
       $('#review-count').textContent =
         `${entries.length} artifact${entries.length === 1 ? '' : 's'} will be included using the filters above.`;
     $('#evidence-count').textContent =
-      `${getState().evidence.length} artifact${getState().evidence.length === 1 ? '' : 's'} · self-reported; not reviewed`;
+      `${getState().evidence.length} artifact${getState().evidence.length === 1 ? '' : 's'} saved in local portfolio`;
     $('#evidence-results').textContent =
       `${entries.length} shown. Saving an artifact does not tick lesson exercises or project stages.`;
     $('#evidence-list').replaceChildren();
@@ -293,7 +293,7 @@ export function setupEvidence({ routes, projects, allLessons, context, getState,
     renderEvidence();
     if (persisted) {
       clearForm();
-      status('#evidence-status', 'Artifact saved on this device. Self-reported; not reviewed.');
+      status('#evidence-status', 'Artifact saved on this device in your local portfolio.');
     } else {
       editingId = entry.id;
       $('#evidence-submit').textContent = 'Retry saving';

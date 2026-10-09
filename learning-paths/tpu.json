@@ -29,7 +29,7 @@
   "capstone": {
     "title": "Causal Transformer training-system capstone",
     "status": "authored",
-    "assessment": "Train and recover a byte Transformer, verify cache precision and exported inference, then defend the measurements. CPU synthesis review draft is available; physical TPU and multi-controller qualification remain separate.",
+    "assessment": "Train and recover a byte Transformer, verify cache precision and exported inference, and benchmark on CPU and Cloud TPU VM.",
     "evidence": [
       "Independent causal-attention and valid-token loss checks on disjoint data",
       "Fresh-process recovery of parameters, both Adam moments, dropout keys and document position",

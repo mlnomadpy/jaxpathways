@@ -17,7 +17,7 @@
   "capstone": {
     "title": "Audit a Bayesian regression model",
     "status": "authored",
-    "assessment": "Defend the prior and likelihood, verify posterior and sampler calculations independently, distinguish latent and observation uncertainty, and diagnose changed-condition predictive failures. The synthesis remains a public review draft.",
+    "assessment": "Defend the prior and likelihood, verify posterior and sampler calculations independently, distinguish latent and observation uncertainty, and diagnose changed-condition predictive failures.",
     "evidence": [
       "Prior, likelihood and posterior calculations checked against an independent reference",
       "Multiple seeded chains with trace, acceptance and between-chain diagnostics",

@@ -558,7 +558,7 @@ When the first answer token fails to learn, inspect the shifted mask. When answe
 
 Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

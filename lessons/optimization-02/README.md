@@ -487,7 +487,7 @@ If the finite-difference check fails, sweep several step sizes before changing t
 
 Save analytic and numerical derivatives, the step-size/error table with dtype, the nonquadratic transfer check, and the omitted-term failure/repair. Add the one-sided slopes showing why a symmetric probe cannot certify differentiability at a kink.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

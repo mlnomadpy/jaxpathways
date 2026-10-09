@@ -47,7 +47,7 @@
     },
     {
       "lessonId": "welcome-03",
-      "contentHash": "6b9533060aad93810e6bbf22f62b40dd99dbca47d5870bba22a90333a4300e6a",
+      "contentHash": "7e5af195c67a7121a7af498ed8ad582b2115825bab42446d97f5cebd82a7b75e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -337,7 +337,7 @@
     },
     {
       "lessonId": "networks-04",
-      "contentHash": "55ebba98463d0426610e643f7e0ac2e77bf35e8d99567d72984550ccf8b27b0b",
+      "contentHash": "251b9a846b89003b06e7a7a665e73cbb04f85b94c0099c3f28aacbb62f164579",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -427,7 +427,7 @@
     },
     {
       "lessonId": "transformers-02",
-      "contentHash": "1e1eaad269308d199db190191773038b30fd4dd1cd4eab980df297f67cb91950",
+      "contentHash": "c49fc9c1365c51ac2bf2dd2f690724a060f60a75e83c1118499cd010c1cb9e79",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -477,7 +477,7 @@
     },
     {
       "lessonId": "performance-03",
-      "contentHash": "b71521633980ebc83740f32e5305c66d569ec8d9de40208b314d6e92c5852573",
+      "contentHash": "7921e96d0df5408c0bb5ab3f0e6bec5410bfb556bf3126f4809d418ceee62c07",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -607,7 +607,7 @@
     },
     {
       "lessonId": "probability-03",
-      "contentHash": "a989b7f7ff3c6d5805d455cc717d63e868002e07e748435177b77857ad4eb132",
+      "contentHash": "b9d7e9df13a9770fd1dcfe91a6cb06639b16bd6ef348a8f774e9f4d8b10ee651",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -617,7 +617,7 @@
     },
     {
       "lessonId": "probability-04",
-      "contentHash": "f6f159ea8303e149b43108ba0a2890cbe179d6ce5c78026ddc2140ca1c18ff05",
+      "contentHash": "ae094472074f3ea6f0c7c1524f2999013af02daaf68dcb2e589ab3f9de399bc9",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -807,7 +807,7 @@
     },
     {
       "lessonId": "deployment-04",
-      "contentHash": "fd39da2610256a2e339fb7206abc0ff8857c5ed4caeefc025e7967bd65cb6ca4",
+      "contentHash": "6e439fe0e6db027f7d6af162a660c03bce61e8cd70da3256467d2412d34180b8",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {

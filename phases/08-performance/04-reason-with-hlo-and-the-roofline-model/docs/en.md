@@ -464,7 +464,7 @@ If a roofline claim looks implausible, check operation-count convention, byte un
 
 Keep StableHLO, synchronized CPU samples and independent output parity. Derive the byte/FLOP model and label the roofline peak and bandwidth as hypothetical.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

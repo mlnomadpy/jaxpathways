@@ -382,7 +382,7 @@ If nothing changes, check whether the returned update was discarded. If old valu
 
 Keep original and updated arrays, a repeated-index integer reference, the whole-matrix replacement check, and compact-versus-fixed-shape outputs. Explain replacement, accumulation, and name rebinding.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

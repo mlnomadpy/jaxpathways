@@ -35,7 +35,7 @@
         "body": "A proposed trajectory changes energy by \\(\\Delta H\\). Accept with probability \\(\\min(1,e^{-\\Delta H})\\), implemented as \\(\\log u<-\\Delta H\\). A rejected proposal retains the current sample; removing repeated values would change the distribution. Non-finite energy error is rejected. The signed energy error can be negative, so it should not be interpreted as a nonnegative loss. An enormous positive error suggests an integration problem, often a step size too large for target curvature."
       },
       {
-        "title": "Read diagnostics as evidence, not a certificate",
+        "title": "Combine multiple sampler diagnostics",
         "body": "We start four chains from dispersed points and discard the first \\(400\\) transitions. This fixed discard is a teaching convention, not automatic warmup adaptation. Classical split R-hat compares between-chain and within-chain variance after splitting each chain. A value near one says those variance estimates agree; chains can still miss a mode together. Modern rank-normalized split R-hat, bulk and tail effective sample size, Monte Carlo standard errors and divergence diagnostics are stronger complementary tools. Our compact implementation is explicitly classical R-hat and does not implement those modern diagnostics."
       },
       {

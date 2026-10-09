@@ -589,7 +589,7 @@ If `gcloud compute tpus tpu-vm create` fails with `RESOURCE_EXHAUSTED`, switch z
 
 Keep the slice HBM capacity table, single-host vs Pod classification, and gcloud create/describe/delete command log.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

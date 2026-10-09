@@ -16,4 +16,4 @@ Keep the ridge gradient/solve comparison, penalty sweep with separate train/vali
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

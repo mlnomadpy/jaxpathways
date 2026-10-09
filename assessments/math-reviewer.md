@@ -1,6 +1,6 @@
 # Math synthesis reviewer notes
 
-This is an editorial review draft. Check the learner’s independent implementation and explanations as well as the values below. These references were calculated with host NumPy; they are not a learner execution receipt.
+Use these host NumPy reference calculations to verify your analytical derivations and JAX execution outputs.
 
 ## Geometry
 

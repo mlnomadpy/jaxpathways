@@ -16,4 +16,4 @@ Keep reference identity, response log-probability conventions, log(2) initializa
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

@@ -16,4 +16,4 @@ Keep both MLflow run IDs, source/data hashes, complete loss histories, the selec
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

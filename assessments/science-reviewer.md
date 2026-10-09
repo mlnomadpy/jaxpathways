@@ -1,6 +1,6 @@
 # Reviewer notes: science synthesis
 
-These are public reference derivations, not a private exam key. Review the learner's code and evidence rather than accepting a copied numeric answer.
+Use these analytical derivations to check your conservation invariants, discretization error, and inverse-problem gradients.
 
 The conserved sum is \(s=a+b=a_0+b_0\). The difference solves \(d'=-2kd\), so
 

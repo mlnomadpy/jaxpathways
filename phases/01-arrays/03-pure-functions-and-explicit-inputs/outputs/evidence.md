@@ -16,4 +16,4 @@ Keep both parameter configurations, their known predictions, a container-alias e
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

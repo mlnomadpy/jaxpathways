@@ -1,6 +1,6 @@
 # Math synthesis: explain an optimizer’s behavior
 
-**Scope:** a CPU assessment review draft for the expanded Math & optimization phase. Complete its twelve lessons before attempting all tasks. The regression project is useful preparation. This extension is reviewed separately from the core regression assessment; it adds no automatic credential.
+**Scope:** linear algebra, conditioning, spectrum analysis, and optimizer dynamics across the twelve Math & optimization lessons and the [regression audit project](../project.html?id=regression-audit).
 
 Create `math_assessment.py` and a report. Write predictions before execution, then keep actual arrays, plots and assertions. Use independent NumPy calculations for your reference, JAX for automatic derivatives and updates, and a recorded float32 or float64 policy. An oracle that calls the same autodiff function is not independent.
 

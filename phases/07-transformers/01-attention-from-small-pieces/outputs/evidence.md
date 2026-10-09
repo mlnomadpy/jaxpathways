@@ -16,4 +16,4 @@ Save the Q/K/V axis diagram, uniform hand calculation, NumPy nonuniform referenc
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

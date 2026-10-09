@@ -562,7 +562,7 @@ If margins have the wrong sign, inspect chosen/rejected order. If training ranki
 
 Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

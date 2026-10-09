@@ -116,7 +116,7 @@ Use the table as a decision guide. The starter above does not require these opti
 | Retrieve or publish model artifacts | [Hugging Face CLI](https://huggingface.co/docs/huggingface_hub/guides/cli): `hf --help` | Model revision, model card, tokenizer and evaluation report |
 | Inspect existing TPU resources | [gcloud](https://docs.cloud.google.com/sdk/gcloud/reference/compute/tpus/tpu-vm/list): `gcloud compute tpus tpu-vm list --project PROJECT_ID --zone ZONE` | Actual project, zone, resource and runtime identity |
 
-Use the gcloud example only with your configured account and replace both placeholders. Listing resources does not provision a TPU. CPU success does not validate TPU execution.
+Run the `gcloud` command with your configured account and replace both `PROJECT_ID` and `ZONE` placeholders.
 
 For a **new, separate ML repository** with uv already installed, this is an optional environment workflow. Do not run it inside the course checkout to replace its tested environment:
 
@@ -130,7 +130,7 @@ uv sync --locked
 uv run python -c "import jax; print(jax.devices())"
 ```
 
-These commands resolve current packages and create a lock; they do not reproduce the course's pinned package set. Expect a printed device list, not a guarantee of GPU/TPU availability. Keep the lock in version control and validate the environment you resolved. The [uv project guide](https://docs.astral.sh/uv/guides/projects/) explains dependency management and execution; use JAX's [installation guide](https://docs.jax.dev/en/latest/installation.html) for accelerator-specific requirements.
+These commands resolve current packages, create a lockfile, and print the active JAX device list. Keep `uv.lock` in version control and consult the [uv project guide](https://docs.astral.sh/uv/guides/projects/) and [JAX installation guide](https://docs.jax.dev/en/latest/installation.html) when configuring GPU or TPU wheels.
 
 MLflow and W&B require instrumentation in your training program. Installing a CLI cannot infer the scientific meaning of a run. Start with one tracker and map its run ID to the local run directory. `wandb offline` keeps SDK logs local; a later `wandb sync` uploads them. Choose what to publish deliberately, keeping credentials and restricted datasets out of artifacts.
 
@@ -143,7 +143,7 @@ python3 scripts/course.py show recovery-06
 python3 scripts/course.py plan training-engineer
 ```
 
-These commands list available lessons, display the MLflow lesson, and print a proposed career route. See [terminal help](developer.html#terminal) for running companions. The course reference runner includes solutions; successful execution does not mean you completed the learner exercise.
+These commands list available lessons, display the MLflow lesson, and print a proposed career route. See [terminal help](developer.html#terminal) for running lesson scripts and notebooks.
 
 ## 6. Grow toward a training harness
 

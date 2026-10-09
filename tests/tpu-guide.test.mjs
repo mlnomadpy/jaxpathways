@@ -12,7 +12,7 @@ test('TPU guide is reachable from its route and resolves links under the deploym
   assert.match(renderPathway(route, course, true), /href="tpu-gcp.html"/);
   const content = assessmentContent('content/guides/tpu-gcp.md', href => /^(https?:|#)/.test(href) ? href : '/jaxpathways/' + href);
   assert.match(content.body, /href="\/jaxpathways\/downloads\/jax-tpu-gcp.zip"/);
-  assert.match(content.body, /does not distribute/);
+  assert.match(content.body, /single-device worker/);
 });
 
 test('portable TPU workspace contains the exact shared worker and a standalone CLI help entry', () => {

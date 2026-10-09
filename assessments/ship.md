@@ -1,6 +1,6 @@
 # Shipping synthesis: justify a model release
 
-**Scope:** review draft after the six deployment lessons and deployment-audit project. This assessment covers adaptation, artifact identity, precision, actual local runtime behavior and an explicitly hypothetical service plan. A CPU release audit does not establish a cloud service or edge device deployment.
+**Scope:** model adaptation, artifact identity, quantized precision, local exported runtime behavior, and service capacity planning building on the six deployment lessons and [deployment-audit project](../project.html?id=deployment-audit).
 
 Create a release folder and a report. Keep original and adapted checkpoints, manifests, exact commands, independent checks, timing samples and plots. State which evidence was measured and which results came from simulation.
 

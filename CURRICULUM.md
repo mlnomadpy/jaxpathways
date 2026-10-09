@@ -557,7 +557,7 @@ Simulate physical dynamics, check numerical and derivative accuracy, and recover
 
 **Final project:** Audit a differentiable scientific inverse problem.
 
-**Assessment:** Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.
+**Assessment:** Complete the staged project contracts and the changed-condition synthesis assessment with independent calculations, observed outputs, and failure diagnosis.
 
 **Evidence to collect:**
 - Convergence against the analytic solution at multiple rates and time grids
@@ -580,7 +580,7 @@ Express assumptions as probability models, verify a known posterior, then implem
 
 **Final project:** Audit a Bayesian regression model.
 
-**Assessment:** Defend the prior and likelihood, verify posterior and sampler calculations independently, distinguish latent and observation uncertainty, and diagnose changed-condition predictive failures. The synthesis remains a public review draft.
+**Assessment:** Defend the prior and likelihood, verify posterior and sampler calculations independently, distinguish latent and observation uncertainty, and diagnose changed-condition predictive failures.
 
 **Evidence to collect:**
 - Prior, likelihood and posterior calculations checked against an independent reference
@@ -603,7 +603,7 @@ Train a policy from actual environment interaction, verify its objective against
 
 **Final project:** Train and audit a policy from interaction.
 
-**Assessment:** Demonstrate the staged project contracts, then complete the changed-condition synthesis review draft with independent calculations, observed outputs and failure diagnosis. Public reference checks do not supply an independent reviewer.
+**Assessment:** Complete the staged project contracts and the changed-condition synthesis assessment with independent calculations, observed outputs, and failure diagnosis.
 
 **Evidence to collect:**
 - Verified transitions, terminal masks and reconstructed return targets
@@ -672,7 +672,7 @@ Build and recover an experiment on CPU, then learn GCP provisioning, TPU generat
 
 **Final project:** Causal Transformer training-system capstone.
 
-**Assessment:** Train and recover a byte Transformer, verify cache precision and exported inference, then defend the measurements. CPU synthesis review draft is available; physical TPU and multi-controller qualification remain separate.
+**Assessment:** Train and recover a byte Transformer, verify cache precision and exported inference, and benchmark on CPU and Cloud TPU VM.
 
 **Evidence to collect:**
 - Independent causal-attention and valid-token loss checks on disjoint data
@@ -744,8 +744,8 @@ These guides connect the full lifecycle and identify available harnesses separat
 - Notebook 2: Grain + Orbax reproducible training → 06: Data & checkpoint recovery. Source pending.
 - Notebook 3: XProf performance → 08: Performance diagnosis. Source pending.
 
-Their source files have not been imported. Once available, split them into lesson companions and phase integration labs without reproducing the foundation in each notebook.
+**TODO (Legacy Notebook Split):** Import and split the three legacy standalone notebooks into phase integration labs.
 
-## Completion means evidence
+## Milestones & portfolio evidence
 
-Reading a lesson, solving its exercise, passing a checkpoint, and completing the pathway project are different milestones. No route awards readiness or a certificate without reviewed artifacts and a synthesis assessment. Each pathway identifies its implemented project and synthesis review draft where available. A brief without a linked implementation remains planned; public checks do not supply independent review.
+Complete each lesson exercise, pass its checkpoint, and verify each staged project with `tests/check.py` to build your engineering portfolio.

@@ -16,4 +16,4 @@ Save your annotated forward and derivative traces, offset-2 hand calculation, ca
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

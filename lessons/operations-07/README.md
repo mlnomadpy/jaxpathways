@@ -540,7 +540,7 @@ When quality changes, compare prompt/model/retrieval/tool versions and case-leve
 
 Keep all case IDs and per-slice replay scores, missing/duplicate-response rejections, the retained failed case, trace identities and application-version fields. Explain what requires separate live-model evaluation.
 
-Keep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.
+Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 
 ## Primary references
 

@@ -16,4 +16,4 @@ Keep the actual XPlane and Perfetto paths, named interval durations and nesting 
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

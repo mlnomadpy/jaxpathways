@@ -1,6 +1,6 @@
 # Models synthesis: defend training, recovery and image deployment
 
-**Scope:** classifier fundamentals plus a connected image lifecycle: raw-pixel preprocessing, CNN training, full-state recovery, frozen error analysis, calibrated precision, actual exported inference and CPU measurements. This assessment builds on the classifier and image-harness projects. It is not a real-photo benchmark, an independently reviewed credential or a target-device qualification.
+**Scope:** classifier fundamentals plus a connected image lifecycle: raw-pixel preprocessing, CNN training, full-state recovery, frozen error analysis, calibrated precision, actual exported inference and CPU measurements. This assessment builds on the [classifier](../project.html?id=mlp-classifier) and [image-harness](../project.html?id=image-harness) projects.
 
 [Open classifier fundamentals](../project.html?id=mlp-classifier) and [the image lifecycle harness](../project.html?id=image-harness). Keep your evidence in [My learning](../notebook.html#portfolio).
 The image tasks assess training through recovered and exported inference. Language-model-specific masking, generation and text-serving contracts belong to the separate text harness; this image evidence does not silently certify them.
@@ -54,7 +54,7 @@ Explain what the zero-logit observation contributes. Predict the derivative when
 
 In a disposable diagnostic function, compute sigmoid probabilities and then `-label*log(p)-(1-label)*log(1-p)` in float32. Show whether its extreme-logit result is finite and identify the unstable intermediate operation. Restore the logit-based objective and demonstrate finite values. Do not repair the test by deleting extreme observations.
 
-Finally, on a newly initialized width-five NNX model, compare the derivative of the output bias at two seeds against your independent finite-difference calculation. Preserve/restore the perturbed parameter after every comparison. Report tolerances and explain cancellation; do not claim that decreasing the perturbation arbitrarily must improve accuracy.
+Finally, on a newly initialized width-five NNX model, compare the derivative of the output bias at two seeds against your independent finite-difference calculation. Preserve/restore the perturbed parameter after every comparison. Report tolerances and explain why excessively small perturbations increase floating-point cancellation error.
 
 **Keep:** scalar derivation, bias-shift derivative, stable/unstable results and two seeded parameter-gradient comparisons.
 
@@ -120,7 +120,7 @@ Freeze clean and declared-corruption evaluation sets before tuning. Evaluate in 
 
 Calibrate integer scales on training/calibration images only, using predeclared percentiles \(95\) and \(30\). Preserve their data identity and compare float32, the source FP16/BF16 policies and the integer reference on the same held-out images. Record accuracy, cross-entropy, maximum logit difference and input/hidden clipping counts. Equal class accuracy does not imply equal logits or confidence.
 
-Independently compute one integer convolution dot product. Show the maximum nine-product accumulation bound for signed symmetric int8 values, explain why int16 is unsafe, and state which operations in this reference remain float32. Compare parameter payload bytes separately from complete serialized-artifact bytes. Do not claim an integer speedup from storage reduction.
+Independently compute one integer convolution dot product. Show the maximum nine-product accumulation bound for signed symmetric int8 values, explain why int16 is unsafe, and state which operations in this reference remain float32. Compare parameter payload bytes separately from complete serialized-artifact bytes, and measure actual execution latency separately from storage size.
 
 ## Task 9: reload the artifact and measure the actual inference path
 

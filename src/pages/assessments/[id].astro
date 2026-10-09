@@ -26,7 +26,7 @@ const content = assessmentContent(assessment.source);
   <PageIntro
     backHref="course.html"
     backLabel="Course"
-    edition="Synthesis assessment · CPU · editorial review draft"
+    edition="Synthesis assessment · CPU & changed-condition verification"
   >
     <Fragment slot="title" set:html={content.heading} />
     <AssessmentActions assessment={assessment} />
@@ -39,7 +39,7 @@ const content = assessmentContent(assessment.source);
   <article set:html={content.body} />
   <AssessmentActions assessment={assessment} />
   <p class="soft">
-    Public reference checks, learner reports and reviewer decisions are separate. No automated
-    certificate is awarded.
+    Complete each task with changed inputs, independent numerical checks, and saved terminal outputs
+    in your portfolio.
   </p>
 </GuideLayout>

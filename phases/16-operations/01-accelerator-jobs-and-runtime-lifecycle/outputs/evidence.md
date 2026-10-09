@@ -16,4 +16,4 @@ Keep actual child exit codes, bounded timeout/termination output and proof that 
 - Why the result supports or contradicts my prediction: 
 - Checkpoint result: 
 - Artifact link or saved filename: 
-- Review status: self-reported; not reviewed
+- Portfolio status: saved in local workspace

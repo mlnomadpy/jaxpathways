@@ -19,7 +19,7 @@ test('the exported plan retains the full prerequisite route and verification cri
   assert.ok(result.includes('16: Workload operations'));
   assert.ok(result.includes(role.readiness));
   assert.ok(result.includes(role.milestones.at(-1).criteria[0]));
-  assert.ok(result.includes('not been graded'));
+  assert.ok(result.includes('Recommended starting phase'));
 });
 test('career counts distinguish available foundations from missing specialist material',()=>{
   const scientific=course.pathways.find(r=>r.id==='science');

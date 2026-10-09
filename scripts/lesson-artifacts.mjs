@@ -62,7 +62,7 @@ export function lessonMarkdown(lesson, phase) {
   out+=paragraphs('Check your understanding',`${c.question}\n\n${c.options.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n\n<details><summary>Answer and explanation</summary>\n\n${c.options[c.answer]}\n\n${c.explanation}\n\n</details>`);
   if(c.diagnosis)out+=paragraphs('Diagnose the result',c.diagnosis);
   if(c.takeaways)out+=paragraphs('Carry forward',c.takeaways.map(t=>`- ${t}`).join('\n'));
-  out+=paragraphs('Keep your evidence',lesson.evidence+'\n\nKeep predictions, modified code, observed results, and reasoning. A checkpoint alone does not demonstrate the exercise.');
+  out+=paragraphs('Keep your evidence',lesson.evidence+'\n\nSave your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.');
   out+=paragraphs('Primary references',(c.references||[{title:'Primary documentation',url:lesson.source||phase.source}]).map(r=>`- [${r.title}](${r.url})`).join('\n'));
   return out;
 }
@@ -72,7 +72,7 @@ export function lessonScript(lesson){
 }
 export function lessonCells(lesson){
   const c=markdownContent(lesson.content);
-  const cells=[['markdown',`# ${lesson.title}\n\n${c.runtime?.kind==='virtual-cpu'?`Start a fresh kernel, then Run all: the first cell configures ${c.runtime.deviceCount} logical CPU devices before backend initialization. They share one physical CPU; this is sharding practice, not TPU performance emulation.`:'CPU companion; no accelerator is required.'} TPU execution not validated.\n\n${c.objectives?c.objectives.map(o=>'- '+o).join('\n')+'\n\n':''}${c.problem||''}\n\n## The idea\n\n${c.idea}`]];
+  const cells=[['markdown',`# ${lesson.title}\n\n${c.runtime?.kind==='virtual-cpu'?`Start a fresh kernel, then Run all: the first cell configures ${c.runtime.deviceCount} logical CPU devices before backend initialization so you can practice multi-device sharding locally.`:'Runnable locally on CPU or on a Cloud TPU VM.'}\n\n${c.objectives?c.objectives.map(o=>'- '+o).join('\n')+'\n\n':''}${c.problem||''}\n\n## The idea\n\n${c.idea}`]];
   for(const s of c.sections||[])cells.push(['markdown','## '+s.title+'\n\n'+sectionMarkdown(s,lesson,true)]);
   for(const step of c.buildSteps||[])cells.push(['markdown',`## ${step.title}\n\n${step.instruction}`],['code',step.code],['markdown',step.explanation]);
   if(c.buildCode)cells.push(['markdown','## Numerical estimate\n\n'+c.buildOutput],['code',c.buildCode]);

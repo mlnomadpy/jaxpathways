@@ -1,4 +1,4 @@
-"""Inventory source structure; this does not claim close reading or technical validation."""
+"""Inventory lesson markdown structure, headers, and code fences."""
 import argparse, subprocess
 import collections, hashlib, json, re, statistics
 from pathlib import Path

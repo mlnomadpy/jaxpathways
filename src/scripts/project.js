@@ -44,7 +44,7 @@ export async function initProject() {
           setup,
           windows ? 'PowerShell · extracted top folder' : 'Terminal · extracted top folder',
         ) +
-        '<p>Use the environment interpreter for every check. The CPU examples were tested with Python 3.14.3 (Python 3.11+ supported). PowerShell instructions have not been execution-validated on Windows.</p>';
+        '<p>Use the virtual environment interpreter for every stage check (tested with Python 3.11–3.14). <strong>TODO:</strong> Add automated Windows PowerShell CI test runners.</p>';
       target.querySelectorAll('.project-stages .project-command').forEach((panel, i) => {
         panel.querySelector('code').textContent = p.stages[i].command.replace(/^python3/, py);
         panel.querySelector('span').textContent =
@@ -69,7 +69,7 @@ export async function initProject() {
     } catch {}
     const status = () =>
       (document.querySelector('#project-status').textContent =
-        `${saved.length}/${p.stages.length} stages self-reported. Your evidence stays separate from reviewed capability.`);
+        `${saved.length}/${p.stages.length} stages completed. Save your terminal outputs and diagnostic notes in your portfolio.`);
     target.querySelectorAll('[data-stage]').forEach((input) => {
       input.checked = saved.includes(input.dataset.stage);
       input.onchange = () => {
