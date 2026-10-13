@@ -220,7 +220,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:02.468125+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:54.734539+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395

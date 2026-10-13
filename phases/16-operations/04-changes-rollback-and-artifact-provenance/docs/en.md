@@ -834,12 +834,12 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:23.595244+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:02:40.876431+00:00. JAX 0.9.2.
 
 ```text
-first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4
+first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990
 failed gate kept selection: True rollback restored first: True
-first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4
+first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990
 failed gate kept selection: True rollback restored first: True
 PASS: operations-04
 

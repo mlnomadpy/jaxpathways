@@ -516,14 +516,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:19.539180+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:41.074840+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 96.411 Median steady step ms: 0.0399
+Warmup ms: 109.556 Median steady step ms: 0.0571
 Drifted state_hash vs control: 98b637bef786a354 62b9a0a939c380dc
 Step 8 resumed vs control hash: c2f49383b86e426e c2f49383b86e426e
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']

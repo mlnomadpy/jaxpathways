@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "first-gradient",
   "contentHash": "ce57b7b20026757981198adf6fca315ea31e8ad60911d9ce24eccd466633c07e",
-  "executedAt": "2026-10-08T14:01:22.309382+00:00",
+  "executedAt": "2026-10-13T08:56:13.590941+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -27,7 +27,15 @@
     },
     {
       "sourceHash": "1628dcf876b2cf303573c68128cbb304da8356ea600fd89a36c40f0cde94817f",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Finite-difference estimate: 5.999999999999339\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "593bebd927a890a4045d45b6290d8d2dfb77f225a92db1ca2d76465e8f1c4311",
@@ -36,7 +44,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Finite-difference estimate: 5.999999999999339\n"
+            "6.0\n"
           ]
         }
       ]
@@ -62,11 +70,33 @@
     },
     {
       "sourceHash": "1a47c5f7be412ed2877b6d28ac0894023a26e31a3375e0fcf2f38d1c68e5859a",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "chain rule: -1.0 -12.0\n",
+            "chain rule: 0.0 6.0\n",
+            "chain rule: 2.0 42.0\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "5b5d814f978daa7ed82c6ce5163617b983855f9c542fcb27e2bf8ad6c114ddd7",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "h / estimate / error: 0.1 27.009973526000977 0.009973526000976562\n",
+            "h / estimate / error: 0.01 27.000045776367188 4.57763671875e-05\n",
+            "h / estimate / error: 0.001 26.9975643157959 0.0024356842041015625\n",
+            "h / estimate / error: 1e-05 27.0843505859375 0.0843505859375\n",
+            "h / estimate / error: 1e-07 0.0 27.0\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "a2886c4716126740b58ad520b78e1be51b836dc5f77532c15068820dd0ae1606",

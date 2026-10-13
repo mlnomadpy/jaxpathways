@@ -6340,7 +6340,10 @@
         "completion": "Use mlp-classifier before the larger image harness. Retain independent forward/loss checks, two runs with declared seeds, state-pure evaluation and class-specific failure analysis.",
         "furtherWork": "Natural-image dataset ingestion, richer augmentation studies and pretrained vision transfer remain larger follow-up labs; synthetic images are separate from real-photo generalization."
       },
-      "projectNote": "Copy `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py` and write your code in `projects/mlp-classifier/my_model.py`. Run `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` from the top-level folder to verify all 3 stages."
+      "projectNote": "Copy `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py` and write your code in `projects/mlp-classifier/my_model.py`. Run `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` from the top-level folder to verify all 3 stages.",
+      "additionalProjectIds": [
+        "reproducible-experiments"
+      ]
     },
     {
       "id": "recovery",
@@ -7384,7 +7387,8 @@
       "projectNote": "This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3.",
       "additionalProjectIds": [
         "engineering-release",
-        "sharded-training"
+        "sharded-training",
+        "reproducible-experiments"
       ],
       "studyGuide": {
         "question": "Can an interrupted run make exactly the same next update?",
@@ -21648,6 +21652,7 @@
     "posttraining-audit",
     "tpu-runtime-audit",
     "tpu-workflow-audit",
-    "tpu-systems-audit"
+    "tpu-systems-audit",
+    "reproducible-experiments"
   ]
 }

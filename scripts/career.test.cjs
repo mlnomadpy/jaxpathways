@@ -30,5 +30,5 @@ test('career counts distinguish available foundations from missing specialist ma
   const training=careerCoverage(['networks'],course);
   assert.equal(training.available,5);
   assert.equal(training.planned,0);
-  assert.deepEqual(training.projects,['mlp-classifier']);
+  assert.deepEqual(training.projects,['mlp-classifier','reproducible-experiments']);
 });

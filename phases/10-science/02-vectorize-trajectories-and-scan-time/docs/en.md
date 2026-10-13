@@ -285,7 +285,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:12.461254+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:15.207266+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]

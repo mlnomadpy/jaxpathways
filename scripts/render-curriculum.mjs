@@ -93,7 +93,7 @@ for(const manifest of projects){
   const project=JSON.parse(readFileSync(new URL(manifest,root)));
   const directory=`projects/${project.id}/`;
   for(const file of readdirSync(new URL(directory,root),{recursive:true})){
-    if(!/\.(png|svg|wav|md)$/.test(file))continue;
+    if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)))continue;
     const output=`public/project-assets/${project.id}/${file}`;
     mkdirSync(new URL(output.slice(0,output.lastIndexOf('/')+1),root),{recursive:true});
     writeFileSync(new URL(output,root),readFileSync(new URL(directory+file,root)));

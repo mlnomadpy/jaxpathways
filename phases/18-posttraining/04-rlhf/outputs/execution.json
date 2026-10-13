@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
   "contentHash": "8409909ae439cbb5c29796399494918f9ab94ba1e7ed0f0d50c7ced84406a2c5",
-  "executedAt": "2026-10-08T14:08:09.515476+00:00",
+  "executedAt": "2026-10-13T09:03:30.320146+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.\nReward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.\nClipped surrogate terms: [ 2.4 -1.6]\nEnumerated baseline score gradient matches exact expected-reward gradient.\nReference/final KL: 0.0 0.7824773192405701\nBehavior log probabilities and advantages are detached.\nRegularized objective reference/trained/optimum: 0.28191882371902466 1.7620493173599243 1.7987911701202393\nPASS: posttraining-04\n",
+  "stdout": "Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\nReward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\nClipped surrogate terms: [ 2.4 -1.6]\nEnumerated baseline score gradient matches exact expected-reward gradient.\nReference/final KL: 0.0 0.7824773192405701\nBehavior log probabilities and advantages are detached.\nRegularized objective reference/trained/optimum: 0.28191882371902466 1.7620493173599243 1.7987911701202393\nPASS: posttraining-04\n",
   "notebookCells": [
     {
       "sourceHash": "e44bce0e8fc2ac90e3cac7f6f0ab1098fbba155317f31990f12ec2fa0770d137",
@@ -29,7 +29,7 @@
           "name": "stdout",
           "text": [
             "Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\n",
-            "Synthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.\n"
+            "Synthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\n"
           ]
         }
       ]
@@ -42,7 +42,7 @@
           "name": "stdout",
           "text": [
             "Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\n",
-            "Synthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.\n"
+            "Synthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\n"
           ]
         }
       ]

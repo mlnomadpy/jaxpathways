@@ -385,7 +385,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:50.429487+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:09.675769+00:00. JAX 0.9.2.
 
 ```text
 Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464

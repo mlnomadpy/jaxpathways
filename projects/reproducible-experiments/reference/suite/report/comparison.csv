@@ -1,0 +1,7 @@
+run_id,status,attempts,validation_mse
+baseline-s11,completed,2,0.14520302414894104
+baseline-s23,completed,1,0.10575453191995621
+baseline-s37,completed,1,0.0789206251502037
+candidate-s11,completed,1,0.0868861973285675
+candidate-s23,completed,1,0.056462422013282776
+candidate-s37,completed,1,0.03229616954922676

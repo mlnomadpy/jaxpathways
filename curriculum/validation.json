@@ -12,7 +12,7 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-09T14:08:34.626655+00:00",
+  "validatedAt": "2026-10-13T09:03:48.304740+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {

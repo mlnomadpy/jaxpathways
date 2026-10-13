@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.6.0",
+    "date": "2026-10-13",
+    "title": "Reproducible JAX/Flax experiments workshop",
+    "summary": "One connected workshop turns an experimental question into real tracked Flax runs, complete paired comparisons and an evidence-linked Markdown research notebook.",
+    "changes": [
+      "Added a four-stage project with learner-owned configuration, observation and paired-comparison contracts, linked to existing Flax, randomness, tracking, recovery and distributed lessons.",
+      "Added frozen source/data/config plans, bounded process jobs, portable job scripts, retained failures and fresh retries; two-worker execution is CPU-only and accelerator qualification remains separate.",
+      "Implemented CSV, TensorBoard, offline W&B and local SQLite MLflow logging, with actual history readback and artifact checks.",
+      "Added six recorded CPU runs, explained learning-curve and paired-difference figures, a generated Markdown research notebook and instructor interpretation.",
+      "Linked the workshop from Projects, learner resources, model/operations pathways and neural training/recovery phase guides.",
+      "Expanded release tracking to workshop source and excluded generated project execution receipts so rerunning checks does not change canonical course revisions."
+    ]
+  },
+  {
     "version": "0.5.3",
     "date": "2026-10-08",
     "title": "3-step Cloud TPU mini-course, scroll stage transitions & project code blueprints",

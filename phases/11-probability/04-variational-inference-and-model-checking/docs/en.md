@@ -267,7 +267,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:57.432898+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:07.124798+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855

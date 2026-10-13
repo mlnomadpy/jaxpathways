@@ -639,7 +639,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:06:10.120639+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:26.881393+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}

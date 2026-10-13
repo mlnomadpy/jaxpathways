@@ -327,56 +327,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-09T14:08:07.159416+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:58:56.099367+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-a4dmqt8y
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-yai64c4h
 {
   "input_wait_us": [
-    1264,
-    1258,
-    1255,
-    1261
+    1270,
+    1263,
+    1273,
+    1258
   ],
   "model_and_wait_us": [
-    260,
-    48,
-    34,
+    332,
+    82,
+    58,
+    46
+  ],
+  "step_us": [
+    1616,
+    1350,
+    1335,
+    1307
+  ]
+}
+Four named steps verified; host annotations are not isolated device kernels.
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-x7boh03x
+{
+  "input_wait_us": [
+    1272,
+    1259,
+    1263,
+    1256
+  ],
+  "model_and_wait_us": [
+    57,
+    56,
+    40,
     40
   ],
   "step_us": [
-    1542,
-    1315,
-    1293,
-    1303
+    1335,
+    1321,
+    1307,
+    1299
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-8zpzh6oc
-{
-  "input_wait_us": [
-    1264,
-    1266,
-    1262,
-    1286
-  ],
-  "model_and_wait_us": [
-    114,
-    67,
-    90,
-    118
-  ],
-  "step_us": [
-    1386,
-    1340,
-    1358,
-    1416
-  ]
-}
-Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [8, 7, 6, 12]
-Wrong double-counted totals: [2764, 2673, 2710, 2820]
-{'minimum_ms': 0.067, 'median_ms': 0.10200000000000001, 'maximum_ms': 0.118}
+Unattributed outer time, microseconds: [6, 6, 4, 3]
+Wrong double-counted totals: [2664, 2636, 2610, 2595]
+{'minimum_ms': 0.04, 'median_ms': 0.048, 'maximum_ms': 0.057}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 

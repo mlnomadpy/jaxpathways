@@ -235,7 +235,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:42.881459+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:57.197305+00:00. JAX 0.9.2.
 
 ```text
 Forward program:

@@ -132,6 +132,6 @@ Build and audit a neural classifier.
 
 Project status: implemented staged practice · [Open source](../../projects/mlp-classifier/README.md). Copy `projects/mlp-classifier/starter/model.py` to `projects/mlp-classifier/my_model.py` and write your code in `projects/mlp-classifier/my_model.py`. Run `python3 projects/mlp-classifier/tests/check.py --implementation projects/mlp-classifier/my_model.py --stage 1` from the top-level folder to verify all 3 stages.
 
-
+Additional project: [Reproducible JAX/Flax experiments workshop](../../projects/reproducible-experiments/README.md).
 
 [Primary documentation](https://flax.readthedocs.io/).

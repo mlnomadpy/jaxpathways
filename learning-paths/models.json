@@ -64,5 +64,12 @@
     "recovery-06",
     "deployment-07",
     "operations-06"
+  ],
+  "additionalGuides": [
+    {
+      "title": "Reproducible JAX/Flax experiments workshop",
+      "url": "project-guides/reproducible-experiments.html",
+      "scope": "CPU-tested experiments, logging, paired comparisons and a Markdown research notebook. Optional trackers run locally; accelerator qualification is separate."
+    }
   ]
 }

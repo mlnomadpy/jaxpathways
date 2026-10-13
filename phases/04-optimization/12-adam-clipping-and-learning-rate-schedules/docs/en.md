@@ -263,7 +263,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:26.411763+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:57:17.701978+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]

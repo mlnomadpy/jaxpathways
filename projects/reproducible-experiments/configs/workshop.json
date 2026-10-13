@@ -1,0 +1,15 @@
+{
+  "hypothesis": "With a fixed synthetic split and model width, learning rate 0.04 will reduce final validation MSE more than 0.01 over 40 full-batch updates.",
+  "decision_rule": "Inspect every paired seed difference and the descriptive mean and sample SD. Favor the candidate only if all three differences are negative; require a fresh validation plan before extending the conclusion.",
+  "seeds": [11, 23, 37],
+  "common": {
+    "data_seed": 101,
+    "steps": 40,
+    "log_every": 5,
+    "width": 8,
+    "backend": "cpu",
+    "precision": "float32",
+    "loggers": ["csv"]
+  },
+  "learning_rates": {"baseline": 0.01, "candidate": 0.04}
+}

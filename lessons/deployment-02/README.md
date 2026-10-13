@@ -387,7 +387,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:57.173513+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:13.286395+00:00. JAX 0.9.2.
 
 ```text
 {

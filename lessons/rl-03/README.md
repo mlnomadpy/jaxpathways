@@ -558,7 +558,7 @@ visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:11.711219+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:23.152752+00:00. JAX 0.9.2.
 
 ```text
 REINFORCE initial/final exact return: 0.46687505 0.9521624

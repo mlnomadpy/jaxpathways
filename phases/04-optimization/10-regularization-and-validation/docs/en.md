@@ -206,7 +206,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:13.081899+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:57:05.894612+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0

@@ -288,7 +288,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:45.571348+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:00.291152+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]

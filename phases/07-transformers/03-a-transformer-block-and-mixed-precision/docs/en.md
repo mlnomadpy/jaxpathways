@@ -265,7 +265,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:39.056987+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:58:39.667928+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)

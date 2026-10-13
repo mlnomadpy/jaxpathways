@@ -34,15 +34,15 @@ for (const phase of course.phases) {
 const sources = {};
 for (const directory of ['curriculum', 'learning-paths', 'projects']) {
   for (const file of readdirSync(directory, { recursive: true }).sort()) {
-    if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|validation)\.json$/.test(file) || file.includes('/outputs/')) continue;
+    if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || file.includes('/outputs/')) continue;
     sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
   }
 }
 // Practical guides and their launchers are canonical course material too.
-for (const directory of ['content/guides', 'resources/tpu-gcp']) {
+for (const directory of ['content/guides', 'resources/tpu-gcp', 'projects/reproducible-experiments']) {
   if (!existsSync(directory)) continue;
   for (const file of readdirSync(directory, { recursive: true }).sort()) {
-    if (!/\.(md|py)$/.test(file) || file.includes('__pycache__')) continue;
+    if (!/\.(md|py|txt)$/.test(file) || file.includes('__pycache__') || file.startsWith('reference/') || file === 'my_workflow.py' || file.startsWith('.venv/') || file.startsWith('runs/')) continue;
     sources[`${directory}/${file}`] = hash(readFileSync(`${directory}/${file}`, 'utf8'));
   }
 }

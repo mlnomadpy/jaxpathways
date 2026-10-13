@@ -401,7 +401,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:06:14.303642+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:30.950444+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0

@@ -12,6 +12,8 @@ export function projectGuide(project, course, plannedIds = []) {
       const directory = plannedIds.includes(projectReadme[1]) ? 'project-plans' : 'project-guides';
       return siteUrl(`${directory}/${projectReadme[1]}.html`);
     }
+    const guide = /^content\/guides\/([^/]+)\.md$/.exec(target);
+    if (guide) return siteUrl(`${guide[1]}.html`);
     const assessment = /^assessments\/([^/]+)\.md$/.exec(target);
     if (assessment) return siteUrl(`assessments/${assessment[1]}.html`);
     const phase = course.phases.find(

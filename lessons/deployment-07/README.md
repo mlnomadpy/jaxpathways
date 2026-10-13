@@ -302,7 +302,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:06:16.305452+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:32.994500+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3

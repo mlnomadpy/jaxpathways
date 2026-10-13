@@ -146,5 +146,6 @@ Project status: implemented staged practice · [Open source](../../projects/reco
 
 Additional project: [Ship a tracked and containerized model release](../../projects/engineering-release/README.md).
 Additional project: [Resume and profile a sharded training run](../../projects/sharded-training/README.md).
+Additional project: [Reproducible JAX/Flax experiments workshop](../../projects/reproducible-experiments/README.md).
 
 [Primary documentation](https://orbax.readthedocs.io/en/latest/).

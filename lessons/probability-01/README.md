@@ -217,7 +217,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:43.628169+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:51.368834+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766

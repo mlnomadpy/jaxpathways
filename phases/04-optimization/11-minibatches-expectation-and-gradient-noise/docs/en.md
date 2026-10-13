@@ -214,7 +214,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:17.617251+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:57:09.915358+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625

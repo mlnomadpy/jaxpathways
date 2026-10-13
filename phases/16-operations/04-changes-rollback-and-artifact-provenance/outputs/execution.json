@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "operations-04",
   "contentHash": "d9d832ea713d6bf104d52f995d2989e02246422d37c4959fbfe31825606c6ede",
-  "executedAt": "2026-10-08T14:07:23.595244+00:00",
+  "executedAt": "2026-10-13T09:02:40.876431+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\nfailed gate kept selection: True rollback restored first: True\nfirst / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\nfailed gate kept selection: True rollback restored first: True\nPASS: operations-04\n",
+  "stdout": "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\nfirst / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\nPASS: operations-04\n",
   "notebookCells": [
     {
       "sourceHash": "173b3b89774defa7383e32a35a271dd3c10d22a5888dca79393294672c9ff5be",
@@ -36,7 +36,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\n",
+            "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\n",
             "failed gate kept selection: True rollback restored first: True\n"
           ]
         }
@@ -49,7 +49,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\n",
+            "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\n",
             "failed gate kept selection: True rollback restored first: True\n"
           ]
         }

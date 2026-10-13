@@ -275,7 +275,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:59.243938+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:02.211938+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]

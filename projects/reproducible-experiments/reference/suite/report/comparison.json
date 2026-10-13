@@ -1,0 +1,716 @@
+{
+  "schema": 1,
+  "complete": true,
+  "plan": {
+    "schema": 1,
+    "created_at": "2026-10-13T09:25:14.546261+00:00",
+    "hypothesis": "With a fixed synthetic split and model width, learning rate 0.04 will reduce final validation MSE more than 0.01 over 40 full-batch updates.",
+    "decision_rule": "Inspect every paired seed difference and the descriptive mean and sample SD. Favor the candidate only if all three differences are negative; require a fresh validation plan before extending the conclusion.",
+    "seeds": [
+      11,
+      23,
+      37
+    ],
+    "metric_contract": "post-update full-split MSE/v1; fixed train 64 and validation 32 rows",
+    "data_sha256": "d3f43eba7ef34bf9593eb02340d5688cb497565584c6d6879333bc6a6e06842f",
+    "constant_validation_mse": 0.819550831229089,
+    "source_files": {
+      "analysis.py": "9d51798c928c757653a768a6fb52befd53fec6d0372cb975bd9d68e2e60a5f5a",
+      "experiment.py": "b5f1e133dfd1a3ebf51043d9d12cc09d9f19cbf619c2cec19af7fc5bfa4569c6",
+      "loggers.py": "967bf063febef3f119cb991879fef369950610f6c75ff6c9da592e2ca5b0396b",
+      "model.py": "c07a73818d04d85d8ccf9d28445a34b3c49db52684a8e21e7bf5dcd26658cf18",
+      "workflow.py": "85ac986d6993f50e6ad33c3a36c36e4cbe007f613ff3d499015b392d82d2499b"
+    },
+    "config_files": {
+      "baseline-s11": "aa0b299781eb455f85a2bed739fdd395d4099bfaa2d714b8dd7c69401a60a39c",
+      "baseline-s23": "5eaf2092931ffc63998f37557060f5ddba88bf321951d12c4203081ba514ed5e",
+      "baseline-s37": "0c87d6b6996dab9671c702175182c30f1ad8226e4f15ec9cd43cb0d7ddab76ad",
+      "candidate-s11": "bca9046a21493e63a490d0c4269fcc8944d2e74f127235d1f48deb09f18dcbbc",
+      "candidate-s23": "f82d8fdfb0c2d2df2e19d3214fe1c3251e43aefa9b2723ee142142f1153177a9",
+      "candidate-s37": "9e2ab13650a8cb4bbca93d2eb8e6db78e1d3bb880c83b897e1a07da28df85564"
+    }
+  },
+  "inventory": [
+    {
+      "run_id": "baseline-s11",
+      "status": "completed",
+      "attempts": 2
+    },
+    {
+      "run_id": "baseline-s23",
+      "status": "completed",
+      "attempts": 1
+    },
+    {
+      "run_id": "baseline-s37",
+      "status": "completed",
+      "attempts": 1
+    },
+    {
+      "run_id": "candidate-s11",
+      "status": "completed",
+      "attempts": 1
+    },
+    {
+      "run_id": "candidate-s23",
+      "status": "completed",
+      "attempts": 1
+    },
+    {
+      "run_id": "candidate-s37",
+      "status": "completed",
+      "attempts": 1
+    }
+  ],
+  "runs": [
+    {
+      "run_id": "baseline-s11",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "baseline",
+        "seed": 11,
+        "learning_rate": 0.01
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 0.30578601360321045,
+          "validation_mse": 0.3904431462287903,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.24417510628700256,
+          "validation_mse": 0.3206353485584259,
+          "gradient_norm": 1.0399165153503418,
+          "update_ms": 0.2382076345384121
+        },
+        {
+          "step": 10,
+          "train_mse": 0.20100779831409454,
+          "validation_mse": 0.26969003677368164,
+          "gradient_norm": 0.8712915182113647,
+          "update_ms": 0.2427087165415287
+        },
+        {
+          "step": 15,
+          "train_mse": 0.1706075370311737,
+          "validation_mse": 0.23214814066886902,
+          "gradient_norm": 0.7319188714027405,
+          "update_ms": 0.23150024935603142
+        },
+        {
+          "step": 20,
+          "train_mse": 0.1490749567747116,
+          "validation_mse": 0.20420566201210022,
+          "gradient_norm": 0.616740345954895,
+          "update_ms": 0.22941594943404198
+        },
+        {
+          "step": 25,
+          "train_mse": 0.133713036775589,
+          "validation_mse": 0.18318425118923187,
+          "gradient_norm": 0.5217492580413818,
+          "update_ms": 0.2321670763194561
+        },
+        {
+          "step": 30,
+          "train_mse": 0.12264943867921829,
+          "validation_mse": 0.16718372702598572,
+          "gradient_norm": 0.4437018036842346,
+          "update_ms": 0.22845808416604996
+        },
+        {
+          "step": 35,
+          "train_mse": 0.11458169668912888,
+          "validation_mse": 0.15484774112701416,
+          "gradient_norm": 0.379925936460495,
+          "update_ms": 0.22675003856420517
+        },
+        {
+          "step": 40,
+          "train_mse": 0.10860298573970795,
+          "validation_mse": 0.14520302414894104,
+          "gradient_norm": 0.32818663120269775,
+          "update_ms": 0.2277921885251999
+        }
+      ],
+      "attempts": 2,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s11/attempt-02",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    },
+    {
+      "run_id": "baseline-s23",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "baseline",
+        "seed": 23,
+        "learning_rate": 0.01
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 0.35243532061576843,
+          "validation_mse": 0.4766899347305298,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.24419397115707397,
+          "validation_mse": 0.3519371449947357,
+          "gradient_norm": 1.3477121591567993,
+          "update_ms": 0.30858302488923073
+        },
+        {
+          "step": 10,
+          "train_mse": 0.1766708493232727,
+          "validation_mse": 0.2691734731197357,
+          "gradient_norm": 1.0660821199417114,
+          "update_ms": 0.2405000850558281
+        },
+        {
+          "step": 15,
+          "train_mse": 0.13416671752929688,
+          "validation_mse": 0.21341247856616974,
+          "gradient_norm": 0.8475846648216248,
+          "update_ms": 0.23033283650875092
+        },
+        {
+          "step": 20,
+          "train_mse": 0.10708848387002945,
+          "validation_mse": 0.1752040535211563,
+          "gradient_norm": 0.6783257126808167,
+          "update_ms": 0.23004179820418358
+        },
+        {
+          "step": 25,
+          "train_mse": 0.08957421779632568,
+          "validation_mse": 0.14854925870895386,
+          "gradient_norm": 0.547332763671875,
+          "update_ms": 0.23070815950632095
+        },
+        {
+          "step": 30,
+          "train_mse": 0.07803520560264587,
+          "validation_mse": 0.12960603833198547,
+          "gradient_norm": 0.4460029900074005,
+          "update_ms": 0.26841601356863976
+        },
+        {
+          "step": 35,
+          "train_mse": 0.07026544213294983,
+          "validation_mse": 0.11588560044765472,
+          "gradient_norm": 0.3676447868347168,
+          "update_ms": 0.24425005540251732
+        },
+        {
+          "step": 40,
+          "train_mse": 0.06490015238523483,
+          "validation_mse": 0.10575453191995621,
+          "gradient_norm": 0.3070870041847229,
+          "update_ms": 0.23308396339416504
+        }
+      ],
+      "attempts": 1,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s23/attempt-01",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    },
+    {
+      "run_id": "baseline-s37",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "baseline",
+        "seed": 37,
+        "learning_rate": 0.01
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 1.245495080947876,
+          "validation_mse": 1.2508896589279175,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.7764838933944702,
+          "validation_mse": 0.803220808506012,
+          "gradient_norm": 2.7947394847869873,
+          "update_ms": 0.23816712200641632
+        },
+        {
+          "step": 10,
+          "train_mse": 0.489610493183136,
+          "validation_mse": 0.5253951549530029,
+          "gradient_norm": 2.1883955001831055,
+          "update_ms": 0.23116730153560638
+        },
+        {
+          "step": 15,
+          "train_mse": 0.31335586309432983,
+          "validation_mse": 0.3514997959136963,
+          "gradient_norm": 1.7161357402801514,
+          "update_ms": 0.2287076786160469
+        },
+        {
+          "step": 20,
+          "train_mse": 0.2048770785331726,
+          "validation_mse": 0.24183125793933868,
+          "gradient_norm": 1.3466209173202515,
+          "update_ms": 0.2270410768687725
+        },
+        {
+          "step": 25,
+          "train_mse": 0.13803941011428833,
+          "validation_mse": 0.17208372056484222,
+          "gradient_norm": 1.0572755336761475,
+          "update_ms": 0.2266252413392067
+        },
+        {
+          "step": 30,
+          "train_mse": 0.09679286181926727,
+          "validation_mse": 0.12727420032024384,
+          "gradient_norm": 0.8309128880500793,
+          "update_ms": 0.22516585886478424
+        },
+        {
+          "step": 35,
+          "train_mse": 0.07126902043819427,
+          "validation_mse": 0.09813577681779861,
+          "gradient_norm": 0.6540939211845398,
+          "update_ms": 0.2250843681395054
+        },
+        {
+          "step": 40,
+          "train_mse": 0.05540572479367256,
+          "validation_mse": 0.0789206251502037,
+          "gradient_norm": 0.5162096619606018,
+          "update_ms": 0.2287919633090496
+        }
+      ],
+      "attempts": 1,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s37/attempt-01",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    },
+    {
+      "run_id": "candidate-s11",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "candidate",
+        "seed": 11,
+        "learning_rate": 0.04
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 0.30578601360321045,
+          "validation_mse": 0.3904431462287903,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.14527182281017303,
+          "validation_mse": 0.1991356760263443,
+          "gradient_norm": 0.6610904335975647,
+          "update_ms": 0.24004094302654266
+        },
+        {
+          "step": 10,
+          "train_mse": 0.10690401494503021,
+          "validation_mse": 0.14214840531349182,
+          "gradient_norm": 0.33656081557273865,
+          "update_ms": 0.23691682144999504
+        },
+        {
+          "step": 15,
+          "train_mse": 0.09491986036300659,
+          "validation_mse": 0.12053185701370239,
+          "gradient_norm": 0.20663975179195404,
+          "update_ms": 0.23191701620817184
+        },
+        {
+          "step": 20,
+          "train_mse": 0.08880101144313812,
+          "validation_mse": 0.10951437056064606,
+          "gradient_norm": 0.16291238367557526,
+          "update_ms": 0.2343328669667244
+        },
+        {
+          "step": 25,
+          "train_mse": 0.08414576202630997,
+          "validation_mse": 0.10220135003328323,
+          "gradient_norm": 0.14849591255187988,
+          "update_ms": 0.2327091060578823
+        },
+        {
+          "step": 30,
+          "train_mse": 0.08000223338603973,
+          "validation_mse": 0.09642727673053741,
+          "gradient_norm": 0.14185106754302979,
+          "update_ms": 0.22912491112947464
+        },
+        {
+          "step": 35,
+          "train_mse": 0.07615262269973755,
+          "validation_mse": 0.09142337739467621,
+          "gradient_norm": 0.13715551793575287,
+          "update_ms": 0.22795889526605606
+        },
+        {
+          "step": 40,
+          "train_mse": 0.07253673672676086,
+          "validation_mse": 0.0868861973285675,
+          "gradient_norm": 0.13303814828395844,
+          "update_ms": 0.22862525656819344
+        }
+      ],
+      "attempts": 1,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/candidate-s11/attempt-01",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    },
+    {
+      "run_id": "candidate-s23",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "candidate",
+        "seed": 23,
+        "learning_rate": 0.04
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 0.35243532061576843,
+          "validation_mse": 0.4766899347305298,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.1013229489326477,
+          "validation_mse": 0.16647610068321228,
+          "gradient_norm": 0.731379508972168,
+          "update_ms": 0.23695779964327812
+        },
+        {
+          "step": 10,
+          "train_mse": 0.06311153620481491,
+          "validation_mse": 0.10173200815916061,
+          "gradient_norm": 0.3118872046470642,
+          "update_ms": 0.23220805451273918
+        },
+        {
+          "step": 15,
+          "train_mse": 0.053958967328071594,
+          "validation_mse": 0.08228049427270889,
+          "gradient_norm": 0.1741458922624588,
+          "update_ms": 0.2366248518228531
+        },
+        {
+          "step": 20,
+          "train_mse": 0.04991231858730316,
+          "validation_mse": 0.07365135848522186,
+          "gradient_norm": 0.13005727529525757,
+          "update_ms": 0.22920779883861542
+        },
+        {
+          "step": 25,
+          "train_mse": 0.04704968258738518,
+          "validation_mse": 0.06816651672124863,
+          "gradient_norm": 0.11556826531887054,
+          "update_ms": 0.22862525656819344
+        },
+        {
+          "step": 30,
+          "train_mse": 0.0445743203163147,
+          "validation_mse": 0.06380490958690643,
+          "gradient_norm": 0.10933928191661835,
+          "update_ms": 0.22737495601177216
+        },
+        {
+          "step": 35,
+          "train_mse": 0.04229927435517311,
+          "validation_mse": 0.05997015908360481,
+          "gradient_norm": 0.10531952977180481,
+          "update_ms": 0.22733304649591446
+        },
+        {
+          "step": 40,
+          "train_mse": 0.04017296060919762,
+          "validation_mse": 0.056462422013282776,
+          "gradient_norm": 0.10195405781269073,
+          "update_ms": 0.23062527179718018
+        }
+      ],
+      "attempts": 1,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/candidate-s23/attempt-01",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    },
+    {
+      "run_id": "candidate-s37",
+      "config": {
+        "data_seed": 101,
+        "steps": 40,
+        "log_every": 5,
+        "width": 8,
+        "backend": "cpu",
+        "precision": "float32",
+        "loggers": [
+          "csv"
+        ],
+        "name": "candidate",
+        "seed": 37,
+        "learning_rate": 0.04
+      },
+      "environment": {
+        "python": "3.14.3",
+        "jax": "0.9.2",
+        "jaxlib": "0.9.2",
+        "flax": "0.12.6",
+        "optax": "0.2.8",
+        "numpy": "2.4.4",
+        "logger_versions": {},
+        "backend": "cpu",
+        "device_kind": "cpu",
+        "local_devices": [
+          "TFRT_CPU_0"
+        ],
+        "process_count": 1,
+        "scope": "single process, first local device, float32; no distributed scaling measurement"
+      },
+      "history": [
+        {
+          "step": 0,
+          "train_mse": 1.245495080947876,
+          "validation_mse": 1.2508896589279175,
+          "gradient_norm": null,
+          "update_ms": null
+        },
+        {
+          "step": 5,
+          "train_mse": 0.1806679368019104,
+          "validation_mse": 0.21677589416503906,
+          "gradient_norm": 1.4597365856170654,
+          "update_ms": 0.23974990472197533
+        },
+        {
+          "step": 10,
+          "train_mse": 0.049260906875133514,
+          "validation_mse": 0.07099814713001251,
+          "gradient_norm": 0.5210832953453064,
+          "update_ms": 0.23650005459785461
+        },
+        {
+          "step": 15,
+          "train_mse": 0.03140566498041153,
+          "validation_mse": 0.04450026899576187,
+          "gradient_norm": 0.20208171010017395,
+          "update_ms": 0.2338341437280178
+        },
+        {
+          "step": 20,
+          "train_mse": 0.02808486670255661,
+          "validation_mse": 0.03777218237519264,
+          "gradient_norm": 0.09925505518913269,
+          "update_ms": 0.23445812985301018
+        },
+        {
+          "step": 25,
+          "train_mse": 0.026871485635638237,
+          "validation_mse": 0.03533909097313881,
+          "gradient_norm": 0.0701989009976387,
+          "update_ms": 0.2332502044737339
+        },
+        {
+          "step": 30,
+          "train_mse": 0.026038173586130142,
+          "validation_mse": 0.03405288979411125,
+          "gradient_norm": 0.06251754611730576,
+          "update_ms": 0.2287500537931919
+        },
+        {
+          "step": 35,
+          "train_mse": 0.025302540510892868,
+          "validation_mse": 0.03311449661850929,
+          "gradient_norm": 0.05987126752734184,
+          "update_ms": 0.2443748526275158
+        },
+        {
+          "step": 40,
+          "train_mse": 0.024609588086605072,
+          "validation_mse": 0.03229616954922676,
+          "gradient_norm": 0.05837288126349449,
+          "update_ms": 0.23466721177101135
+        }
+      ],
+      "attempts": 1,
+      "evidence": "/private/tmp/jax-workshop-reference-qualified/runs/candidate-s37/attempt-01",
+      "loggers": {
+        "csv": {
+          "path": "metrics.csv"
+        }
+      }
+    }
+  ],
+  "scope": "full-batch synthetic regression; validation comparison, not a final test result",
+  "backend": "cpu",
+  "paired": {
+    "seeds": [
+      11,
+      23,
+      37
+    ],
+    "differences": [
+      -0.058316826820373535,
+      -0.04929210990667343,
+      -0.046624455600976944
+    ],
+    "count": 3,
+    "mean_difference": -0.05141113077600797,
+    "sample_sd_difference": 0.006127444268742875,
+    "baseline_mean": 0.10995939373970032,
+    "candidate_mean": 0.058548262963692345
+  }
+}

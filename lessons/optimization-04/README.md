@@ -216,7 +216,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:21.347697+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:57:13.094127+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}

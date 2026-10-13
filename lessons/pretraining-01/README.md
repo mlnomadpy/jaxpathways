@@ -349,7 +349,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:46.766682+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:05.451585+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112

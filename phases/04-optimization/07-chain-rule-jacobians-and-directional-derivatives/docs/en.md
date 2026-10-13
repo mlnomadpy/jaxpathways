@@ -212,7 +212,7 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:54.582744+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:46.081403+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]

@@ -409,13 +409,13 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:08:09.515476+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:30.320146+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
-Synthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.
+Synthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
-Synthetic preference bandit with actual sampled PPO updates; no human ratings or language-generation claim.
+Synthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.
 Clipped surrogate terms: [ 2.4 -1.6]
 Enumerated baseline score gradient matches exact expected-reward gradient.
 Reference/final KL: 0.0 0.7824773192405701

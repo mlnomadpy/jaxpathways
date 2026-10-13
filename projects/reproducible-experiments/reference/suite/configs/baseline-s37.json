@@ -1,0 +1,14 @@
+{
+  "data_seed": 101,
+  "steps": 40,
+  "log_every": 5,
+  "width": 8,
+  "backend": "cpu",
+  "precision": "float32",
+  "loggers": [
+    "csv"
+  ],
+  "name": "baseline",
+  "seed": 37,
+  "learning_rate": 0.01
+}

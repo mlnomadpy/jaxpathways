@@ -305,7 +305,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:18.403150+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:30.491415+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863

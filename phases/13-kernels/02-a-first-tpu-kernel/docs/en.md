@@ -293,7 +293,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:21.947777+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:34.366898+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0

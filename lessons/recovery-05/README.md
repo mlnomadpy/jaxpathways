@@ -319,21 +319,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:18.426772+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:58:15.011525+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-uem4o66m
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-d2z9fzpp
 {
-  "save_call_seconds": 0.004411875270307064,
-  "remaining_work_and_wait_seconds": 0.014456083066761494,
+  "save_call_seconds": 0.0034878337755799294,
+  "remaining_work_and_wait_seconds": 0.015905458014458418,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-351xanch
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-5py4v0hb
 {
-  "save_call_seconds": 0.0018216250464320183,
-  "remaining_work_and_wait_seconds": 0.009038458112627268,
+  "save_call_seconds": 0.002052625175565481,
+  "remaining_work_and_wait_seconds": 0.010445499792695045,
   "accepted_step": 1,
   "live_step": 2
 }

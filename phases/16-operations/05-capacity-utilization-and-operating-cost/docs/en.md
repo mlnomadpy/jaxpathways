@@ -694,16 +694,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:33.031647+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:02:50.728321+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.6653099581599236, 0.6619620830751956, 0.6629581670276821]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11088499302665393, 'load_fraction': 0.055442496513326965, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002772124825666348, 'within_reserve': True}
+measured local job seconds: [0.6997332503087819, 0.7041556253097951, 0.7108614579774439]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11847690966290732, 'load_fraction': 0.05923845483145366, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002961922741572683, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.6668672077357769, 0.6649332502856851, 0.7188250827603042]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.1198041804600507, 'load_fraction': 0.05990209023002535, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00029951045115012676, 'within_reserve': True}
+measured local job seconds: [0.7015819172374904, 0.6995829590596259, 0.7016148748807609]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11693581248012681, 'load_fraction': 0.05846790624006341, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00029233953120031704, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.05990209023002535 0.1198041804600507
+nominal load at two demand scenarios: 0.05846790624006341 0.11693581248012681
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 

@@ -331,7 +331,7 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:25.127410+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:58:23.804381+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}

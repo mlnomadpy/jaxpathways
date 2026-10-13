@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "recovery-06",
   "contentHash": "0a441bdc68539ca3439d6d80abe888f42fec18d2102b06e76d3c2b65373d9a7e",
-  "executedAt": "2026-10-08T14:03:25.127410+00:00",
+  "executedAt": "2026-10-13T08:58:23.804381+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -23,7 +23,20 @@
     },
     {
       "sourceHash": "84146a6d8e864b49f6f780bff6cbe4c6787034c860f40c014a2ffecf82cc96f3",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stderr",
+          "text": [
+            "2026/10/13 01:58:21 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/13 01:58:21 INFO mlflow.store.db.utils: Updating database tables\n",
+            "\r",
+            "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 3701.95it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1547.71it/s]\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "c46075e0ecfcd140950746885b3553aeee401a119eff92dd6662e1c2931e9d93",
@@ -40,12 +53,12 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/08 07:03:23 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/08 07:03:23 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/13 01:58:22 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/13 01:58:22 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 9078.58it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 5178.15it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2083.61it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1371.58it/s]\n"
           ]
         }
       ]
@@ -71,7 +84,15 @@
     },
     {
       "sourceHash": "3b8f26245c4edcecc224d8c5f603eb896a5d40672fe6b190bd329cd25cc14f35",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Validation difference: 0.11994461664726686\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "07754830219d37873f1e31857387342cb6a964fdf7342d9b674873bceafdac7e",
@@ -79,7 +100,15 @@
     },
     {
       "sourceHash": "8d7e53211a25176c5a14f45be0793ba64f3c970026ad6c61b41d73c3e30a9075",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Wrong zero model validation MSE: 6.0\n"
+          ]
+        }
+      ]
     },
     {
       "sourceHash": "a71d732b88be1c23f05451f0ac77cb2ae6404753f762b8b427b8fa234985126d",
@@ -87,7 +116,15 @@
     },
     {
       "sourceHash": "48a235fb2fcea7363b48daa3d7b763b56496fbba074a647895d5177fd5cce4d5",
-      "outputs": []
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Changed target changes dataset identity.\n"
+          ]
+        }
+      ]
     }
   ],
   "scope": "Recorded instructor reference run; all script assertions and notebook code cells passed. No accelerator performance claim."

@@ -295,17 +295,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:03:54.941256+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:58:57.687344+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0}
-Local CPU samples seconds: [1.750001683831215e-05, 8.999835699796677e-06, 8.958857506513596e-06, 8.916947990655899e-06, 6.6659413278102875e-06]
+Compiler estimates (backend-specific): {'bytes accessed1{}': 512.0, 'bytes accessedout{}': 2048.0, 'flops': 8192.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0}
+Local CPU samples seconds: [2.4040695279836655e-05, 1.7916783690452576e-05, 1.5083234757184982e-05, 1.4625024050474167e-05, 1.3125129044055939e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'flops': 8192.0, 'bytes accessedout{}': 2048.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0}
-Local CPU samples seconds: [1.8459279090166092e-05, 8.875038474798203e-06, 9.040813893079758e-06, 6.58305361866951e-06, 7.2498805820941925e-06]
+Compiler estimates (backend-specific): {'flops': 8192.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'transcendentals': 256.0, 'bytes accessed1{}': 512.0}
+Local CPU samples seconds: [4.462478682398796e-05, 2.9083341360092163e-05, 2.4667009711265564e-05, 1.5375204384326935e-05, 1.2082979083061218e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]

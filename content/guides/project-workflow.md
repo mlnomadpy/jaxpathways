@@ -6,6 +6,8 @@ You have a notebook that works. A week later, you change the data and cannot exp
 
 **Your result:** a small project with two separate run directories, saved input snapshots, a tested command-line interface (CLI), and a written comparison. The included CLI prepares experiments; training and accelerator execution come from the linked course lessons.
 
+Continue into the [reproducible JAX/Flax experiments workshop](project-guides/reproducible-experiments.html) when you are ready to connect this preparation to real training, CSV and tracker logging, paired comparisons and a generated research notebook.
+
 ## 1. Give each file a clear responsibility
 
 Begin with the [downloadable workspace](downloads/jax-project-workspace.zip). Extract it and open the `jax-project-workspace` folder in your editor. It contains this layout:

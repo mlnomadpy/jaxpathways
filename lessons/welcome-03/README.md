@@ -302,7 +302,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-09T14:07:30.817587+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:02.401435+00:00. JAX 0.9.2.
 
 ```text
 {

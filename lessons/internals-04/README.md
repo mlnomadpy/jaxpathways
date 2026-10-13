@@ -432,7 +432,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:51.428412+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:07.212895+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']

@@ -200,7 +200,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:57.919503+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:50.023018+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]

@@ -351,7 +351,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:05:49.640203+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:01:04.949744+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]

@@ -1,0 +1,4 @@
+# Optional local adapters. W&B is forced offline; nothing is uploaded by the workshop.
+tensorboard==2.21.0
+wandb==0.25.1
+mlflow==3.16.1

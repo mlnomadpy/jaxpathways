@@ -1,0 +1,79 @@
+{
+  "schemaVersion": 1,
+  "id": "reproducible-experiments",
+  "title": "Reproducible JAX/Flax experiments workshop",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU reference; optional local trackers; GPU/TPU qualification separate",
+  "source": "projects/reproducible-experiments/README.md",
+  "requiredLessonIds": [
+    "state-01",
+    "networks-02",
+    "networks-03",
+    "recovery-06"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Freeze the experimental question and configuration",
+      "command": "python3 projects/reproducible-experiments/tests/check.py --implementation projects/reproducible-experiments/my_workflow.py --stage 1",
+      "evidence": "Reject ambiguous or nonfinite choices and preserve resolved inputs",
+      "expected": "PASS stage 1 and all earlier stages",
+      "diagnosis": "Inspect the rejected contract and its retained evidence. Keep failed attempts and fix the implementation before starting a new suite.",
+      "codeGuide": "Implement resolve_config in my_workflow.py, following the worked examples in the workshop guide. The supplied model, logger adapters and CLI consume this function directly.",
+      "starterSnippet": "def resolve_config(value):\n    # Stage 1: require the exact schema; reject bool-as-int, nonfinite rates,\n    # duplicate loggers, invalid cadence, unsupported backend/precision.\n    # Copy the input, sort logger names and return the resolved configuration.\n    raise NotImplementedError('Implement configuration validation')",
+      "solutionSnippet": "def resolve_config(value):\n    required = {'name', 'seed', 'data_seed', 'learning_rate', 'steps', 'log_every', 'width', 'backend', 'precision', 'loggers'}\n    if not isinstance(value, dict) or set(value) != required:\n        raise ValueError('configuration must have exactly the documented fields')\n    cfg = dict(value)\n    if cfg['name'] not in ('baseline', 'candidate'):\n        raise ValueError('name must be baseline or candidate')\n    for key, low, high in [('seed', 0, 2**31-1), ('data_seed', 0, 2**31-1), ('steps', 1, 500), ('log_every', 1, 500), ('width', 1, 64)]:\n        if type(cfg[key]) is not int or not low <= cfg[key] <= high:\n            raise ValueError('invalid ' + key)\n    rate = cfg['learning_rate']\n    if type(rate) not in (int, float) or not math.isfinite(rate) or not 0 < rate <= 1:\n        raise ValueError('learning_rate must be finite in (0, 1]')\n    if cfg['log_every'] > cfg['steps'] or cfg['backend'] not in ('cpu', 'gpu', 'tpu') or cfg['precision'] != 'float32':\n        raise ValueError('invalid cadence, backend or precision; this lab qualifies float32')\n    logs = cfg['loggers']\n    if not isinstance(logs, list) or any(type(x) is not str for x in logs) or len(set(logs)) != len(logs):\n        raise ValueError('loggers must be a unique list')\n    if 'csv' not in logs or not set(logs) <= {'csv', 'tensorboard', 'wandb', 'mlflow'}:\n        raise ValueError('CSV is mandatory; unknown logger')\n    cfg['loggers'] = sorted(logs)\n    return cfg"
+    },
+    {
+      "id": "2",
+      "title": "Log complete post-update observations",
+      "command": "python3 projects/reproducible-experiments/tests/check.py --implementation projects/reproducible-experiments/my_workflow.py --stage 2",
+      "evidence": "CSV history with correct steps, splits and initial-state boundary",
+      "expected": "PASS stage 2 and all earlier stages",
+      "diagnosis": "Inspect the rejected contract and its retained evidence. Keep failed attempts and fix the implementation before starting a new suite.",
+      "codeGuide": "Implement validate_history in my_workflow.py, following the worked examples in the workshop guide. The supplied model, logger adapters and CLI consume this function directly.",
+      "starterSnippet": "def validate_history(rows, config):\n    # Stage 2: derive expected logged steps, including zero and final step.\n    # Require exact columns, ordered unique steps, finite nonnegative values.\n    # At step zero gradient_norm and update_ms must be None, not invented zeros.\n    raise NotImplementedError('Implement the metric observation contract')",
+      "solutionSnippet": "def validate_history(rows, config):\n    \"\"\"Require every declared observation, including initial and final state.\"\"\"\n    expected = sorted({0, config['steps'], *range(config['log_every'], config['steps']+1, config['log_every'])})\n    fields = {'step', 'train_mse', 'validation_mse', 'gradient_norm', 'update_ms'}\n    if len(rows) != len(expected):\n        raise ValueError('missing or duplicate observations')\n    for row, step in zip(rows, expected):\n        if set(row) != fields or type(row['step']) is not int or row['step'] != step:\n            raise ValueError('metric schema or completed-step boundary changed')\n        for key in fields - {'step'}:\n            v = row[key]\n            if step == 0 and key in ('gradient_norm', 'update_ms') and v is None:\n                continue\n            if type(v) not in (int, float) or not math.isfinite(v) or v < 0:\n                raise ValueError('invalid metric: ' + key)\n        if step == 0 and (row['gradient_norm'] is not None or row['update_ms'] is not None):\n            raise ValueError('initial row has no preceding update')\n    return rows"
+    },
+    {
+      "id": "3",
+      "title": "Compare complete paired seed results",
+      "command": "python3 projects/reproducible-experiments/tests/check.py --implementation projects/reproducible-experiments/my_workflow.py --stage 3",
+      "evidence": "Independent paired arithmetic, descriptive SD and missing-run rejection",
+      "expected": "PASS stage 3 and all earlier stages",
+      "diagnosis": "Inspect the rejected contract and its retained evidence. Keep failed attempts and fix the implementation before starting a new suite.",
+      "codeGuide": "Implement paired_summary in my_workflow.py, following the worked examples in the workshop guide. The supplied model, logger adapters and CLI consume this function directly.",
+      "starterSnippet": "def paired_summary(records, expected_seeds):\n    # Stage 3: require exactly one baseline and candidate per declared seed.\n    # Compute candidate-minus-baseline validation MSE for each paired seed.\n    # Return seeds, differences, count, mean_difference, sample_sd_difference,\n    # baseline_mean, candidate_mean. Sample SD divides by n-1.\n    raise NotImplementedError('Implement complete paired comparison')",
+      "solutionSnippet": "def paired_summary(records, expected_seeds):\n    \"\"\"Negative candidate-minus-baseline MSE favors the candidate. SD is descriptive.\"\"\"\n    if len(expected_seeds) < 2 or len(set(expected_seeds)) != len(expected_seeds):\n        raise ValueError('need at least two distinct paired seeds')\n    pairs = {}\n    for r in records:\n        if set(r) != {'name', 'seed', 'validation_mse'} or r['name'] not in ('baseline', 'candidate') or r['seed'] not in expected_seeds:\n            raise ValueError('unexpected comparison row')\n        key = (r['name'], r['seed'])\n        if key in pairs or type(r['validation_mse']) not in (int, float) or not math.isfinite(r['validation_mse']) or r['validation_mse'] < 0:\n            raise ValueError('duplicate or invalid result')\n        pairs[key] = r['validation_mse']\n    if set(pairs) != {(name, seed) for name in ('baseline', 'candidate') for seed in expected_seeds}:\n        raise ValueError('incomplete pairing; never silently drop failed seeds')\n    differences = [pairs['candidate', seed] - pairs['baseline', seed] for seed in expected_seeds]\n    return {'seeds': list(expected_seeds), 'differences': differences, 'count': len(differences),\n            'mean_difference': statistics.mean(differences), 'sample_sd_difference': statistics.stdev(differences),\n            'baseline_mean': statistics.mean(pairs['baseline', s] for s in expected_seeds),\n            'candidate_mean': statistics.mean(pairs['candidate', s] for s in expected_seeds)}"
+    },
+    {
+      "id": "4",
+      "title": "Execute, diagnose and write the research notebook",
+      "command": "python3 projects/reproducible-experiments/tests/check.py --implementation projects/reproducible-experiments/my_workflow.py --stage 4",
+      "evidence": "Real Flax training, retained failures, provenance checks, figures and a written decision",
+      "expected": "PASS stage 4 and all earlier stages",
+      "diagnosis": "Inspect the rejected contract and its retained evidence. Keep failed attempts and fix the implementation before starting a new suite.",
+      "codeGuide": "Complete the three functions, run the cumulative verifier, then use plan with --implementation my_workflow.py, run the suite, and analyze into a new report folder. Add your interpretation to RESEARCH_NOTEBOOK.md."
+    }
+  ],
+  "rubric": [
+    "Freeze source, data, seeds, backend and the declared experimental question before execution",
+    "Log traceable post-update observations to CSV and verify optional tracker histories",
+    "Retain every planned run and failed attempt; reject incomplete or incompatible comparisons",
+    "Explain paired seed differences and descriptive variability without claiming a confidence interval",
+    "Generate a research notebook with linked configurations, environments, metrics, artifacts and a learner-written decision"
+  ],
+  "workspaceFile": "projects/reproducible-experiments/my_workflow.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/reproducible-experiments/starter/workflow.py projects/reproducible-experiments/my_workflow.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/reproducible-experiments/starter/workflow.py projects/reproducible-experiments/my_workflow.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/reproducible-experiments/tests/check.py --implementation solution --stage all",
+  "setupNote": "Install this project’s minimal requirements.txt in an isolated Python environment. Work through four stages using the supplied Flax NNX model and CLI. CSV needs no account; TensorBoard, offline W&B and SQLite MLflow are optional implemented adapters. The generated research notebook is Markdown. GPU/TPU and multi-host measurements require separate target execution."
+}

@@ -1,0 +1,18 @@
+{
+  "scope": "Recorded six-run CPU Flax NNX reference, one retained intentional failure and fresh retry; optional logger readback verified separately on actual CPU training. No GPU/TPU validation.",
+  "recorded_at": "2026-10-13T09:27:58.270205+00:00",
+  "sha256": {
+    "reference/suite/report/RESEARCH_NOTEBOOK.md": "14f070b0463a44c24dc6a87fd29be76856dd99624fcdf928d1dd4f7e470f1da5",
+    "reference/suite/report/loss_curves.png": "b831c218541457d616874785752b99577781f53b272aafd8ae3f6508dc8c63c9",
+    "reference/suite/report/comparison.json": "0d361f8ccd00511376194e953dc87a7436ed1141dbc413326bdce8a1cae5f502",
+    "reference/suite/report/comparison.csv": "2042bb33baf9e3bf3a31b300a9f561e8f50a34ed92290145b6f823c039203033",
+    "reference/suite/report/paired.png": "4f4447e498eaac28401774b1ad383309c56b1eb9211fbd30df7be1c7e9f4f18b",
+    "tests/check.py": "970db108f3b337fa4cc0b6bb93a0a8f7c08d0a5d12f36335c165d2ea6c47e1ff",
+    "tests/loggers_check.py": "252f1581aaf71a8a3f780232875bf757ab9eac6bffaa46a0a2d5b3d8a52918b4"
+  },
+  "optional_adapters": {
+    "tensorboard": "2.21.0",
+    "wandb": "0.25.1",
+    "mlflow": "3.16.1"
+  }
+}

@@ -225,7 +225,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:47.348581+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:55.596113+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]

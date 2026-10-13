@@ -186,7 +186,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:41.526895+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:32.344554+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]

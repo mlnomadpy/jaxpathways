@@ -287,7 +287,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:58.604319+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:18.772971+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272

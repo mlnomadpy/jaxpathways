@@ -291,7 +291,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:01.082011+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:03.887914+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875

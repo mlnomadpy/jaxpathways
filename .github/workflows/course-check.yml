@@ -24,6 +24,8 @@ jobs:
       - run: npm run test:tpu-precision
       - run: npm run test:math
       - run: npm run test:project
+      - run: python -m pip install -r projects/reproducible-experiments/requirements-loggers.txt
+      - run: npm run test:experiment-loggers
       - run: npm run build
       - run: npm run check
       - run: npm run check:deployment

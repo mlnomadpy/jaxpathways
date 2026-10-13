@@ -311,7 +311,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:53.208961+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:00:02.377097+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]

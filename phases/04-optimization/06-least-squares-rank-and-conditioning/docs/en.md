@@ -182,7 +182,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:01:51.477308+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:56:42.657575+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113

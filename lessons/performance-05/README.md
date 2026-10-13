@@ -332,7 +332,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-09T14:08:10.027547+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:00.519780+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -354,7 +354,7 @@ f32[16] output of tanh from <string>:21:20 (layer)
 f32[16] output of tanh from <string>:21:20 (layer)
 f32[16] output of tanh from <string>:21:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[7.766718044877052e-05, 2.9250048100948334e-05, 1.645786687731743e-05, 8.666887879371643e-06, 1.0792165994644165e-05], [3.633415326476097e-05, 1.60830095410347e-05, 7.582828402519226e-06, 8.082948625087738e-06, 8.124858140945435e-06]]
+Synchronized gradient samples: [[3.5624951124191284e-05, 2.4999957531690598e-05, 1.6874633729457855e-05, 1.2709293514490128e-05, 1.3084150850772858e-05], [2.5999732315540314e-05, 1.587485894560814e-05, 1.3667158782482147e-05, 1.2625008821487427e-05, 1.2166332453489304e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -374,7 +374,7 @@ f32[16] output of tanh from <string>:21:20 (layer)
 f32[16] output of tanh from <string>:21:20 (layer)
 f32[16] output of tanh from <string>:21:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[7.766718044877052e-05, 2.9250048100948334e-05, 1.645786687731743e-05, 8.666887879371643e-06, 1.0792165994644165e-05], [3.633415326476097e-05, 1.60830095410347e-05, 7.582828402519226e-06, 8.082948625087738e-06, 8.124858140945435e-06]]
+Synchronized gradient samples: [[3.5624951124191284e-05, 2.4999957531690598e-05, 1.6874633729457855e-05, 1.2709293514490128e-05, 1.3084150850772858e-05], [2.5999732315540314e-05, 1.587485894560814e-05, 1.3667158782482147e-05, 1.2625008821487427e-05, 1.2166332453489304e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
@@ -394,7 +394,7 @@ f32[16] output of tanh from <string>:125:20 (layer)
 f32[16] output of tanh from <string>:125:20 (layer)
 f32[16] output of tanh from <string>:125:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.420934081077576e-05, 1.754099503159523e-05, 1.2458302080631256e-05, 1.0333023965358734e-05, 8.166767656803131e-06], [2.4667009711265564e-05, 3.2833777368068695e-05, 3.491668030619621e-05, 1.1249911040067673e-05, 7.917173206806183e-06]]
+Synchronized gradient samples: [[2.995925024151802e-05, 2.141715958714485e-05, 1.7916783690452576e-05, 1.2792181223630905e-05, 1.2208241969347e-05], [2.6708003133535385e-05, 1.6207806766033173e-05, 1.291697844862938e-05, 1.4041084796190262e-05, 1.1334195733070374e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

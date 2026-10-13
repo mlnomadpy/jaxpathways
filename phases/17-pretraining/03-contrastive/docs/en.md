@@ -337,7 +337,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:07:54.832245+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T09:03:14.647100+00:00. JAX 0.9.2.
 
 ```text
 Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct

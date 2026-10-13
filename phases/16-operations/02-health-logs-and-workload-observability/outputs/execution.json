@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "lessonId": "operations-02",
   "contentHash": "ef74783641ccab700ef9f53a812f58d0d5e7c66fffeaaf4605bf83f436ccf218",
-  "executedAt": "2026-10-08T14:07:01.358895+00:00",
+  "executedAt": "2026-10-13T09:02:17.760418+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005524172447621822, 'update_examples_per_s': 173781.68569181502, 'job_examples_per_s': 139.6723229480834, 'update_duty_fraction': 0.000803722914713687}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002816668711602688, 'update_examples_per_s': 142011.73121719362, 'job_examples_per_s': 54.076902728220915, 'update_duty_fraction': 0.0003807917998374047}\nhealthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0004919175989925861, 'update_examples_per_s': 195154.63605409014, 'job_examples_per_s': 122.64055334182859, 'update_duty_fraction': 0.0006284275681149428}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.000272875651717186, 'update_examples_per_s': 146586.9151325265, 'job_examples_per_s': 52.558187646261175, 'update_duty_fraction': 0.00035854624267619176}\nexamples / synchronized seconds: 96 0.0004919175989925861\nmeasured update duty fraction, not hardware utilization: 0.0006284275681149428\nPASS: operations-02\n",
+  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0008293339051306248, 'update_examples_per_s': 115755.54720011051, 'job_examples_per_s': 121.83398213170844, 'update_duty_fraction': 0.001052510960196922}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00025999918580055237, 'update_examples_per_s': 153846.63562248362, 'job_examples_per_s': 50.06903787174272, 'update_duty_fraction': 0.0003254477270117532}\nhealthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005934163928031921, 'update_examples_per_s': 161775.10625635617, 'job_examples_per_s': 120.56918707164613, 'update_duty_fraction': 0.0007452888757840575}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002459581010043621, 'update_examples_per_s': 162629.3252251553, 'job_examples_per_s': 55.378197899713314, 'update_duty_fraction': 0.000340517909811431}\nexamples / synchronized seconds: 96 0.0005934163928031921\nmeasured update duty fraction, not hardware utilization: 0.0007452888757840575\nPASS: operations-02\n",
   "notebookCells": [
     {
       "sourceHash": "173b3b89774defa7383e32a35a271dd3c10d22a5888dca79393294672c9ff5be",
@@ -36,8 +36,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0009556272998452187, 'update_examples_per_s': 100457.57380052764, 'job_examples_per_s': 86.96584984400924, 'update_duty_fraction': 0.0008656972944289091}\n",
-            "incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00024004187434911728, 'update_examples_per_s': 166637.59233034457, 'job_examples_per_s': 45.31976420349161, 'update_duty_fraction': 0.0002719660286116539}\n"
+            "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005002925172448158, 'update_examples_per_s': 191887.73905451567, 'job_examples_per_s': 135.53266467737615, 'update_duty_fraction': 0.0007063122706285629}\n",
+            "incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002477080561220646, 'update_examples_per_s': 161480.4162053129, 'job_examples_per_s': 57.30937158000886, 'update_duty_fraction': 0.00035489982579152716}\n"
           ]
         }
       ]
@@ -49,8 +49,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00047387275844812393, 'update_examples_per_s': 202586.0281869513, 'job_examples_per_s': 140.98873629290586, 'update_duty_fraction': 0.0006959450143461919}\n",
-            "incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002381661906838417, 'update_examples_per_s': 167949.95076819602, 'job_examples_per_s': 57.829600840312644, 'update_duty_fraction': 0.0003443263935226088}\n"
+            "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0004959139041602612, 'update_examples_per_s': 193581.98912078966, 'job_examples_per_s': 138.2065457165826, 'update_duty_fraction': 0.0007139432048626469}\n",
+            "incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00020687514916062355, 'update_examples_per_s': 193353.33490898367, 'job_examples_per_s': 57.20195220761811, 'update_duty_fraction': 0.0002958415598807464}\n"
           ]
         }
       ]
@@ -81,7 +81,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "examples / synchronized seconds: 96 0.00047387275844812393\n"
+            "examples / synchronized seconds: 96 0.0004959139041602612\n"
           ]
         }
       ]
@@ -101,7 +101,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "measured update duty fraction, not hardware utilization: 0.0006959450143461919\n"
+            "measured update duty fraction, not hardware utilization: 0.0007139432048626469\n"
           ]
         }
       ]

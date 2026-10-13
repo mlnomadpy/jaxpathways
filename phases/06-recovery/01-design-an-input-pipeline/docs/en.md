@@ -294,16 +294,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:02:52.562299+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:57:47.272412+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.011976082809269428
+Preparation seconds (local observation only): 0.012722666375339031
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 2.5833025574684143e-05
+Preparation seconds (local observation only): 2.570822834968567e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]

@@ -295,7 +295,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:18.158095+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:21.336748+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257

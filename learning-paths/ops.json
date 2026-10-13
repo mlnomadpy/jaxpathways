@@ -68,5 +68,12 @@
     "operations-06",
     "operations-07",
     "operations-08"
+  ],
+  "additionalGuides": [
+    {
+      "title": "Reproducible JAX/Flax experiments workshop",
+      "url": "project-guides/reproducible-experiments.html",
+      "scope": "CPU-tested experiments, logging, paired comparisons and a Markdown research notebook. Optional trackers run locally; accelerator qualification is separate."
+    }
   ]
 }

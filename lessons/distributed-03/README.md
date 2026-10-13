@@ -424,17 +424,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-08T14:04:03.035337+00:00. JAX 0.9.2.
+CPU run: 2026-10-13T08:59:05.589337+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 113.99993672966957, 'reduce_scatter': 101.95793583989143, 'all_gather_only': 94.16602551937103}
+Completed CPU median microseconds: {'all_reduce': 84.16688069701195, 'reduce_scatter': 78.3340074121952, 'all_gather_only': 83.70820432901382}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 112.08280920982361, 'reduce_scatter': 105.79079389572144, 'all_gather_only': 95.83402425050735}
+Completed CPU median microseconds: {'all_reduce': 86.45793423056602, 'reduce_scatter': 84.91566404700279, 'all_gather_only': 75.12513548135757}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
