@@ -1,0 +1,16 @@
+{
+  "python": "3.14.3",
+  "jax": "0.9.2",
+  "jaxlib": "0.9.2",
+  "flax": "0.12.6",
+  "optax": "0.2.8",
+  "numpy": "2.4.4",
+  "logger_versions": {},
+  "backend": "cpu",
+  "device_kind": "cpu",
+  "local_devices": [
+    "TFRT_CPU_0"
+  ],
+  "process_count": 1,
+  "scope": "single process, first local device, float32; no distributed scaling measurement"
+}

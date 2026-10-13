@@ -19,7 +19,7 @@ public/figures/
 public/executions/
 
 # Local workshop evidence and learner implementation
-runs/
+/runs/
 projects/reproducible-experiments/my_workflow.py
 
 # Rebuilt project guide assets

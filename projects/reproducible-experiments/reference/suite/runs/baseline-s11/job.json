@@ -1,0 +1,44 @@
+{
+  "run_id": "baseline-s11",
+  "status": "completed",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "failed",
+      "returncode": 1,
+      "command": [
+        "/Users/tahabsn/.pixi/envs/python/bin/python3",
+        "/private/tmp/jax-workshop-reference-qualified/source/experiment.py",
+        "worker",
+        "--suite",
+        "/private/tmp/jax-workshop-reference-qualified",
+        "--run-id",
+        "baseline-s11",
+        "--attempt-dir",
+        "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s11/attempt-01",
+        "--fail-after",
+        "1"
+      ],
+      "intentional_failure": true,
+      "summary_sha256": null
+    },
+    {
+      "attempt": 2,
+      "status": "completed",
+      "returncode": 0,
+      "command": [
+        "/Users/tahabsn/.pixi/envs/python/bin/python3",
+        "/private/tmp/jax-workshop-reference-qualified/source/experiment.py",
+        "worker",
+        "--suite",
+        "/private/tmp/jax-workshop-reference-qualified",
+        "--run-id",
+        "baseline-s11",
+        "--attempt-dir",
+        "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s11/attempt-02"
+      ],
+      "intentional_failure": false,
+      "summary_sha256": "bc4a302625187bc6981199b62d6df87b25b160982934e2cfa58e54ebe3e09343"
+    }
+  ]
+}

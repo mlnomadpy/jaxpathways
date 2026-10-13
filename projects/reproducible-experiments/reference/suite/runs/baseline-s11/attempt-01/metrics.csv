@@ -1,0 +1,2 @@
+step,train_mse,validation_mse,gradient_norm,update_ms
+0,0.30578601360321045,0.3904431462287903,,

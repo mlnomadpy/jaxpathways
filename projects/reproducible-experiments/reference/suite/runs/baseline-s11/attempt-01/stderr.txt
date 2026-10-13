@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/private/tmp/jax-workshop-reference-qualified/source/experiment.py", line 268, in <module>
+    result = main()
+  File "/private/tmp/jax-workshop-reference-qualified/source/experiment.py", line 243, in main
+    if args.action == 'worker': return worker(args)
+                                       ~~~~~~^^^^^^
+  File "/private/tmp/jax-workshop-reference-qualified/source/experiment.py", line 158, in worker
+    if args.fail_after == step: raise RuntimeError('intentional first-attempt failure for recovery practice')
+                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+RuntimeError: intentional first-attempt failure for recovery practice

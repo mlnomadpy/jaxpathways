@@ -1,0 +1,1 @@
+Completed candidate-s11 validation MSE 0.0868861973285675

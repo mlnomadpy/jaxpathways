@@ -1,0 +1,24 @@
+{
+  "run_id": "baseline-s23",
+  "status": "completed",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed",
+      "returncode": 0,
+      "command": [
+        "/Users/tahabsn/.pixi/envs/python/bin/python3",
+        "/private/tmp/jax-workshop-reference-qualified/source/experiment.py",
+        "worker",
+        "--suite",
+        "/private/tmp/jax-workshop-reference-qualified",
+        "--run-id",
+        "baseline-s23",
+        "--attempt-dir",
+        "/private/tmp/jax-workshop-reference-qualified/runs/baseline-s23/attempt-01"
+      ],
+      "intentional_failure": false,
+      "summary_sha256": "acde117b7fae1b23ca7e4017943444b4143a1b33490b3cb2d041b7385438a5b5"
+    }
+  ]
+}

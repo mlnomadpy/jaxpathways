@@ -1,0 +1,24 @@
+{
+  "run_id": "candidate-s37",
+  "status": "completed",
+  "attempts": [
+    {
+      "attempt": 1,
+      "status": "completed",
+      "returncode": 0,
+      "command": [
+        "/Users/tahabsn/.pixi/envs/python/bin/python3",
+        "/private/tmp/jax-workshop-reference-qualified/source/experiment.py",
+        "worker",
+        "--suite",
+        "/private/tmp/jax-workshop-reference-qualified",
+        "--run-id",
+        "candidate-s37",
+        "--attempt-dir",
+        "/private/tmp/jax-workshop-reference-qualified/runs/candidate-s37/attempt-01"
+      ],
+      "intentional_failure": false,
+      "summary_sha256": "b2a07d97c8f0c87099a92b503175119b8c8c8ce4fbb813b497afdc1b63c391aa"
+    }
+  ]
+}

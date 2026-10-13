@@ -1,0 +1,19 @@
+{
+  "status": "completed",
+  "plan_sha256": "e25dde4100224c96ba5bb5a096b8bf60f59527ce679b96fd044528aca52d567b",
+  "run_id": "candidate-s11",
+  "data_sha256": "d3f43eba7ef34bf9593eb02340d5688cb497565584c6d6879333bc6a6e06842f",
+  "config_sha256": "bca9046a21493e63a490d0c4269fcc8944d2e74f127235d1f48deb09f18dcbbc",
+  "metric_contract": "post-update full-split MSE/v1; fixed train 64 and validation 32 rows",
+  "final_validation_mse": 0.0868861973285675,
+  "checkpoint_sha256": "848a2dd93b9579be5aea6317ce291b86aed6123b051a67c453867e42c07945cd",
+  "metrics_sha256": "24c8ff6e6933dace6c85d0e97dcf92cd28c631c44e36c254e6aa8f0fe26c3301",
+  "environment_sha256": "574ab0fd26a4fbc66f5f718547941e8616cf539a94eb5c4bf8e3cf66c7ab99b7",
+  "loggers": {
+    "csv": {
+      "path": "metrics.csv"
+    }
+  },
+  "train_wall_seconds": 0.012400582898408175,
+  "scope": "includes validation/logging; excludes initialization and warmup"
+}
