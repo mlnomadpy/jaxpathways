@@ -1,0 +1,53 @@
+{
+  "schemaVersion": 1,
+  "files": [
+    {
+      "path": "worker-0/attempt-v4/target.log",
+      "originalSha256": "2dd4862e349ba0f1c9428521a925a67a78c579784826960e045bc909390c8df9",
+      "publishedSha256": "21bf214ae2d4d24810e96251bf21189ea4ac2fc907838362a841a39f8f26b3ae",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "worker-0/attempt-v3/target.log",
+      "originalSha256": "59beadcebae06c2d1c404cf3741cc6ddf745d1545bf11c9447cdeaf16a69b442",
+      "publishedSha256": "e0902730b1266f36c9610fdb161ea47c9762290385b1da73084131051bd1aef7",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "worker-1/attempt-v4/target.log",
+      "originalSha256": "f3b88088e17b97c1bc382e66c7be10d8e2f4434d623d9d10ee4e5b85b7d1835c",
+      "publishedSha256": "0a4af9ee476fe4a891ec2b3f7615a2f31ea40efd1345deead58830548f394a57",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "worker-1/attempt-v3/target.log",
+      "originalSha256": "eff15bb99211241acfda5c39971a8310ffd754351f9dba6f127fdd926090c35d",
+      "publishedSha256": "e51689fd0fcddf38a917334dff4dcee54c4eaa60e42e8b59c8527a0adfc7930c",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "worker-2/attempt-v4/target.log",
+      "originalSha256": "279dd616bf7b6b6c5074efce42ef233f288fa5dc4ec57bd35328f5ddf860aeb9",
+      "publishedSha256": "288ac3160d0d3f28d58619a83fd39d220936cd35e1614ec85cfac093873af22f",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "worker-3/attempt-v4/target.log",
+      "originalSha256": "903deeb8fdfaeb69ebfafe593d541898c9e5ad10ad2c35cf849589e49f12e655",
+      "publishedSha256": "2d3b08102fff0e1d570203ae887a5fcdbd5fdcaff2d620c42e9bc01a7567169e",
+      "reason": "temporary cloud account/bucket identifiers replaced; numerical/source/receipt data unchanged"
+    },
+    {
+      "path": "checkpoint-step-4/commit_success.txt",
+      "originalSha256": "12022b6037d33ec14ec197804ece472d701d759abe3b10a865ddbe5a86fdc8dd",
+      "publishedSha256": "64a82b86aeb4c35d03a038d6fd1fbcb52e3a90c854ab715c1b5aea9b37111815",
+      "reason": "deleted temporary bucket name in completion marker replaced; tensor data and all other checkpoint files unchanged"
+    }
+  ],
+  "archives": {
+    "worker-0.tgz": "ae169b7c105ce3241609c8a78a55c7faa12a572b3a1aada2412320aeb5e35aba",
+    "worker-1.tgz": "b4236017c5083a07cc991925f14e18c4a251dfcfad229cdcd7c28b58b7c2667c",
+    "worker-2.tgz": "667c79fc2b78ab949c5dca1d4329908b73e5d332f0a944b0cc1d429c8c9e7bd4",
+    "worker-3.tgz": "e292b5c5777a6316ffaa01e0bf1181b5d759b6ef752df75426aebffc8aed8564"
+  }
+}

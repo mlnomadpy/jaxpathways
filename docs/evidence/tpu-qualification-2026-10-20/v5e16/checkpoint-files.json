@@ -1,0 +1,38 @@
+{
+  "schemaVersion": 1,
+  "scope": "Original downloaded GCS checkpoint hashes and published hashes. Only the completion marker bucket identifier is redacted; retained tensors are unchanged.",
+  "files": {
+    "_CHECKPOINT_METADATA": "fe6b3ad3e1e80637ec994a5f938267281740073c0443e3cb4a9475da32fc231d",
+    "_METADATA": "f1cb2bee01cf453d4357c92ffae2f64c586bce5206e313a241be6d571dc8a92d",
+    "_sharding": "42af0c56b12621d12c0f954bf7e407fda629287ea6764200a946fe03cabea3fc",
+    "array_metadatas/process_0": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_1": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_2": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_3": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "commit_success.txt": "12022b6037d33ec14ec197804ece472d701d759abe3b10a865ddbe5a86fdc8dd",
+    "d/586f88af17434e64aed9b288be3a27d7": "393fc62ba642cf4dacff6a7f7e5a1cf1aa8a974a88450c06748da0f7a6d132ae",
+    "manifest.ocdbt": "7fb81ea6ee399e3c941c48c27d8fb024f3f489864da82a1b051132c759f4dc21",
+    "ocdbt.process_0/d/338968ea98c487e2890be3a48c1e7f55": "393fc62ba642cf4dacff6a7f7e5a1cf1aa8a974a88450c06748da0f7a6d132ae",
+    "ocdbt.process_0/d/67695a426636d800c181cb53b74df5c3": "d537acb5d0002f4eb7e35fb4cde5645648e93cbd4cc56edae8b61aa36268ef15",
+    "ocdbt.process_0/d/67ceefd96964f5c03de4b7026d6bae2c": "25951839887f5aafc330b8ecdc6307dcba43d3c2bacb9f1c6571da6434c47129",
+    "ocdbt.process_0/d/fc6f1509b72e331c15f71c71b355cd9e": "a08238920b7200dd976377a485d95833c54765385830aa88b4c97e14ba24a3b7",
+    "ocdbt.process_0/manifest.ocdbt": "7ff67b4ec508293aae811676657362ce4d07b3fb8e0b599cca4700ce45487e2b"
+  },
+  "publishedFiles": {
+    "_CHECKPOINT_METADATA": "fe6b3ad3e1e80637ec994a5f938267281740073c0443e3cb4a9475da32fc231d",
+    "_METADATA": "f1cb2bee01cf453d4357c92ffae2f64c586bce5206e313a241be6d571dc8a92d",
+    "_sharding": "42af0c56b12621d12c0f954bf7e407fda629287ea6764200a946fe03cabea3fc",
+    "array_metadatas/process_0": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_1": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_2": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "array_metadatas/process_3": "83eb2a6cdb8095ccdd5f8547f723ec0327e991ff28b1da3464be5a97fa2675d6",
+    "commit_success.txt": "64a82b86aeb4c35d03a038d6fd1fbcb52e3a90c854ab715c1b5aea9b37111815",
+    "d/586f88af17434e64aed9b288be3a27d7": "393fc62ba642cf4dacff6a7f7e5a1cf1aa8a974a88450c06748da0f7a6d132ae",
+    "manifest.ocdbt": "7fb81ea6ee399e3c941c48c27d8fb024f3f489864da82a1b051132c759f4dc21",
+    "ocdbt.process_0/d/338968ea98c487e2890be3a48c1e7f55": "393fc62ba642cf4dacff6a7f7e5a1cf1aa8a974a88450c06748da0f7a6d132ae",
+    "ocdbt.process_0/d/67695a426636d800c181cb53b74df5c3": "d537acb5d0002f4eb7e35fb4cde5645648e93cbd4cc56edae8b61aa36268ef15",
+    "ocdbt.process_0/d/67ceefd96964f5c03de4b7026d6bae2c": "25951839887f5aafc330b8ecdc6307dcba43d3c2bacb9f1c6571da6434c47129",
+    "ocdbt.process_0/d/fc6f1509b72e331c15f71c71b355cd9e": "a08238920b7200dd976377a485d95833c54765385830aa88b4c97e14ba24a3b7",
+    "ocdbt.process_0/manifest.ocdbt": "7ff67b4ec508293aae811676657362ce4d07b3fb8e0b599cca4700ce45487e2b"
+  }
+}

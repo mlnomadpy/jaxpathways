@@ -10,6 +10,9 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "public/downloads"
 OUT.mkdir(parents=True, exist_ok=True)
 reference_root = ROOT / "resources/tpu-gcp"
+# This portable bundle supports the standalone single-host target. The coordinated
+# multi-host target stays repository-only because it requires a shared GCS checkpoint
+# and a matching multi-worker launch contract.
 TPU_WORKSPACE_FILES = (
     "resources/tpu-gcp/check.py",
     "resources/tpu-gcp/check_precision.py",

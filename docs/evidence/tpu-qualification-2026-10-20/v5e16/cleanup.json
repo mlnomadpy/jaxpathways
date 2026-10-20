@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-20T23:44:25.535671+00:00",
+  "scope": "Read-only filtered inventory after deleting the task-owned resources. Project and cloud account identifiers omitted.",
+  "ownedQueuedResourceCount": 0,
+  "ownedTpuVmCount": 0,
+  "ownedBucketCount": 0,
+  "activeTemporaryServiceAccountCount": 0,
+  "syntheticCheckpointDownloaded": true,
+  "otherWorkloadsModified": false
+}

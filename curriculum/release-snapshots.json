@@ -2,7 +2,7 @@
   {
     "version": "0.8.0",
     "date": "2026-10-20",
-    "hash": "7fa18fa0e614fb21800e680329aa869872b9201a655a7b65270f15dbb78a9ecb",
+    "hash": "bdc4879fee020b1a6d7bf17fe7951d024c4c35546ae809e47739baefe916284d",
     "notes": {
       "version": "0.8.0",
       "date": "2026-10-20",
@@ -17,7 +17,7 @@
         "Added a 70,704-parameter real-text causal Transformer pilot with pretraining, continuation adaptation, checkpoint lineage, held-out baseline comparison and verified export. Its measured quality remains weak.",
         "Removed stale generic programs from ten planned model capstones, preserving their distinct implementation and evidence gates.",
         "Reduced reader data loading, extended strict checking to every browser controller, repaired book history links and added native-browser and Windows CI checks.",
-        "Added source-bound hardware evidence for real v5e training/recovery, precision, Pallas and four-device collectives, plus tracking protocols for human teaching reviews and native book compatibility. Multi-host runs, human reviews and target-scale model releases remain unqualified."
+        "Added source-bound real v5e training/recovery, precision, Pallas, four-device collectives and sixteen-device multi-host checkpoint evidence, plus protocols for human teaching reviews and native book compatibility. Human reviews and target-scale model releases remain open."
       ]
     },
     "lessons": {
@@ -623,7 +623,7 @@
       },
       "tpu-05": {
         "title": "Review scripts before TPU staging",
-        "hash": "cff281549f82169be2608cd0d3237859f2806cfa37ca095e59257e6caf59b9c6",
+        "hash": "f628f83fc7ce1334b86276a6898f8c795f5f49b2cb707fa88f394ba2026a2f6c",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
@@ -763,7 +763,7 @@
       },
       "tpu-workflows": {
         "title": "TPU Workflows: Launching Jobs & Checkpointed Experiments",
-        "hash": "9acbc2f5fdca4e88452ae756949f23b0bc0d8e65e70eb5d6e642a18139f38a45",
+        "hash": "1524ac46d794eb05e0270519d568d5b1bcca4230e9d31f3642f67a00ac6e99a3",
         "version": "0.8.0",
         "date": "2026-10-20"
       },

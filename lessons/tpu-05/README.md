@@ -57,7 +57,7 @@ python "public/exercises/${LESSON_ID}.py" | tee "${LESSON_ID}-cpu.txt"
 
 Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.
 
-The following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from the existing single-host launcher or four-device collective receipt; the actual multi-host run remains pending.
+The following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from a single-host receipt. A separate sixteen-device v5e checkpoint test has actual per-process receipts: see the [hardware evidence guide](https://www.tahabouhsine.com/jaxpathways/tpu-performance.html). It uses `resources/tpu-gcp/multihost_target.py`, not this one-step teaching example; its result does not qualify the example below.
 
 **Record multi-host process and device discovery only**
 
@@ -273,6 +273,8 @@ Expected: Prints the global chip counts across v5litepod-4 (4), v5litepod-8 (8),
 
 **Predict:** How do `hosts`, `chips_per_host`, and `global_chips` change when moving from `v5litepod-4` and `v5litepod-8` to `v5litepod-16` and `v6e-16`?
 
+![Host count, per-host local chips, and global TPU chips across single-host and Pod slices](../../phases/20-tpu-workflows/02-run-course-scripts-and-multihost-tpu-slices/outputs/figure.svg)
+
 **Recorded CPU computation**
 
 ### Read the figure
@@ -295,6 +297,27 @@ visual_data = {
         {'label': 'global TPU chips', 'y': [float(s['global_chips']) for s in SLICE_CATALOG]},
     ],
 }
+```
+
+## Recorded reference execution
+
+CPU run: 2026-10-20T23:45:50.961449+00:00. JAX 0.9.2.
+
+```text
+CPU route: python public/exercises/distributed-02.py
+CPU-only route remains excluded from TPU Pod execution
+Correctly rejected CPU-only lesson for TPU Pod execution
+Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}
+CPU route: python public/exercises/distributed-02.py
+v5litepod-16 global chips: 16 Idle chips without --worker=all: 12
+Total HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}
+CPU route: python public/exercises/distributed-02.py
+Rejected unsafe route: {}
+Rejected unsafe route: {'hosts': 4, 'execution_class': 'cpu-only'}
+Multi-host Pod slices: ['v5litepod-16', 'v6e-16']
+Per-host batch: 32 Global batch: 128
+PASS: tpu-05
+
 ```
 
 ## Compare local vs global device counts across slices
@@ -479,7 +502,7 @@ If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.v
 ## Carry forward
 
 - Keep `distributed-02` on CPU. Before staging another script, inspect its exact backend selection and dependencies, assert the TPU backend and topology, and document which process owns each input.
-- The existing launcher, precision, and four-device collective receipts are bounded to their recorded setups. `--worker=all` establishes topology discovery; multi-host training still needs a separate successful run with a checked global update and all worker receipts.
+- Every hardware receipt applies to its exact source, environment, devices and workload. `--worker=all` provides a launch mechanism; training and recovery need their own checked global updates and complete worker receipts. The recorded sixteen-device checkpoint test is separate from this lesson's one-step example.
 
 ## Keep your evidence
 

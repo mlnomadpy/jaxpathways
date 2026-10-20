@@ -4,7 +4,7 @@ You have a model and access to a TPU. Should you change the batch size, use smal
 
 By the end, you will have a **hardware and precision report**: a workload description, memory estimate, explicit precision policy, numerical comparisons, synchronized timings and a short profile. Begin with [TPU and Google Cloud setup](tpu-gcp.html), [honest benchmarking](lesson.html?lesson=performance-01) and [reading an XProf trace](lesson.html?lesson=performance-03). The [practice workspace](downloads/jax-tpu-gcp.zip) contains the executable lab below.
 
-The recorded figure and reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Separate bounded real-target runs now cover a v5e1 launcher, precision runner and four Pallas cases, plus one single-host four-device v5e collective path. Their scope and results are summarized below and in [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md).
+The recorded figure and reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Separate bounded real-target runs cover a v5e1 launcher, precision runner and four Pallas cases, a single-host four-device v5e collective path, and a four-VM-worker sixteen-device synthetic checkpoint-recovery test. Their scope is summarized in [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/main/docs/tpu-qualification-2026-10-20.md).
 
 ## 1. Choose for the workload, then check the generation
 
@@ -165,7 +165,7 @@ An isolated single-host v5e1 run used one JAX TPU device with Python 3.12.13, JA
 | Outlier | BF16 | 0.04985 | 0.131 |
 | Outlier | INT8 | 0.423 | 0.132 |
 
-These six correctness checks passed on the actual TPU backend, and the run retained lowered HLO plus an XPlane profile and Perfetto trace. These tiny-dot measurements do not establish a model speedup. A separate Pallas experiment compared custom kernels with jitted JAX baselines on the same TPU; all four custom-kernel medians were slower, as the qualification report explains. Do not extrapolate these results to a trained model, other shapes, or end-to-end training or serving. The VM and queued resource were deleted after the evidence was copied. Find manifests, raw timing samples and trace files under `docs/evidence/tpu-qualification-2026-10-20/v5e1/smoke-v1/`; see [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md) for the complete qualification boundary.
+These six correctness checks passed on the actual TPU backend, and the run retained lowered HLO plus an XPlane profile and Perfetto trace. These tiny-dot measurements do not establish a model speedup. A separate Pallas experiment compared custom kernels with jitted JAX baselines on the same TPU; all four custom-kernel medians were slower, as the qualification report explains. Do not extrapolate these results to a trained model, other shapes, or end-to-end training or serving. The VM and queued resource were deleted after the evidence was copied. Find manifests, raw timing samples and trace files under `docs/evidence/tpu-qualification-2026-10-20/v5e1/smoke-v1/`; see [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/main/docs/tpu-qualification-2026-10-20.md) for the complete qualification boundary.
 
 ### Four-device collectives on one host
 
@@ -177,7 +177,13 @@ A second run at source commit `53f1be134a94858400bdf8331c628e66db6fa26b` used on
 | `psum_scatter` / `reduce_scatter` | 0.24606 |
 | `all_gather` | 0.21951 |
 
-These are measurements of a tiny deterministic fixture on four devices in one host, not a scaling result or general performance claim. Timing excludes compilation, input placement and trace overhead. The receipt, lowered StableHLO, XPlane profile and Perfetto trace are retained under `docs/evidence/tpu-qualification-2026-10-20/v5e4/collectives-v1/` in the course repository. This single-host run does not qualify multi-host process initialization or communication; that test is still pending a separate target execution.
+These are measurements of a tiny deterministic fixture on four devices in one host, not a scaling result or general performance claim. Timing excludes compilation, input placement and trace overhead. The receipt, lowered StableHLO, XPlane profile and Perfetto trace are retained under `docs/evidence/tpu-qualification-2026-10-20/v5e4/collectives-v1/` in the course repository. This single-host run is distinct from the multi-host recovery result below.
+
+### Four-host checkpoint recovery on v5e16
+
+At source commit `b71fe83679327da4df0bcc397796cd3d17ba44dc`, four v5e VM workers ran four processes across sixteen TPU devices. Each process owned a distinct 16-row slice of a synthetic 64×8 fixture, with four rows per device. The FP32 gradient reduction requested `HIGHEST` precision. Orbax Checkpoint 0.11.34 saved the model, momentum and step state at step 4 to GCS and waited for the save; abstract sharded restore succeeded, then replay to step 8 matched an independent NumPy reference for weights and momentum on every process. All four receipts reported exit 0. The runtime used Python 3.12.13, JAX/libtpu 0.9.2/0.0.37, NumPy 2.4.4, Flax 0.12.6, gcsfs 2026.10.1 and TensorStore 0.1.82.
+
+This qualifies one bounded synthetic multi-host recovery path. It did not test worker loss, elastic recovery or fresh-process restore, and makes no model-quality, model-scale or performance claim; the sample loss also rises on its last two updates. The successful receipts and retained failed attempts are under `docs/evidence/tpu-qualification-2026-10-20/v5e16/`. See [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/main/docs/tpu-qualification-2026-10-20.md) for process mapping and the exact limits.
 
 ## 5. Capture a short TPU profile, then explain the timeline
 
@@ -215,7 +221,7 @@ Read a trace from outside inward. Locate the warmed step annotation, then identi
 | Long collectives or mismatched host timelines | Communication or host skew | Inspect all hosts, topology and data arrival; change one mesh axis |
 | More recomputation after rematerialization | Memory saving trades additional work | Compare runtime peak and step time at the same shape |
 
-These rows generate experiments, not automatic diagnoses. Profile summaries, memory views and roofline information depend on backend and captured data. Missing device lanes are not evidence that device work took zero time. Check the trace window, runtime/profiler compatibility and actual backend. For multi-host training, coordinate capture across processes and save host identities; this lab is single-process and is verified separately from distributed scaling. Google's [TPU profiling guide](https://docs.cloud.google.com/tpu/docs/profile-tpu-vm) connects these tools to actual TPU workloads.
+These rows generate experiments, not automatic diagnoses. Profile summaries, memory views and roofline information depend on backend and captured data. Missing device lanes are not evidence that device work took zero time. Check the trace window, runtime/profiler compatibility and actual backend. For multi-host training, coordinate capture across processes and save host identities. This precision lab is single-process; the separate four-VM-worker receipt verifies recovery for a tiny fixture, not distributed performance or scaling. Google's [TPU profiling guide](https://docs.cloud.google.com/tpu/docs/profile-tpu-vm) connects these tools to actual TPU workloads.
 
 ## 6. Use a roofline estimate to decide what to try
 

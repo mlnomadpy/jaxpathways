@@ -37,13 +37,20 @@ def check_published_link(href, source):
         assert link.fragment in parser.ids, f'{source}: same-site fragment missing from built site: {href}'
 def assert_narrative(source, text, chapter):
     # Visible prose and code survive; each TeX token survives in MathML annotation.
-    pattern = re.compile(r"(`+)([^\n]*?)\1|\\\((.*?)\\\)|\\\[(.*?)\\\]|\$\$(.*?)\$\$", re.S)
+    pattern = re.compile(r"(`+)([^\n]*?)\1|\\\((.*?)\\\)|\\\[(.*?)\\\]|\$\$(.*?)\$\$|\[([^\n\]]+)\]\(([^)\s]+)\)", re.S)
     annotations = {node.text for node in chapter.iter('{http://www.w3.org/1998/Math/MathML}annotation')}
     cursor = 0
     for match in pattern.finditer(source):
         assert source[cursor:match.start()].replace('**', '') in text, 'missing surrounding math prose'
         if match.group(1): assert match.group(2) in text, 'missing inline code'
-        else: assert next(group for group in match.groups()[2:] if group is not None) in annotations, 'missing MathML expression'
+        elif match.group(6):
+            links = [node for node in chapter.iter('{http://www.w3.org/1999/xhtml}a') if node.attrib.get('href') == match.group(7)]
+            for link in links:
+                try: assert_narrative(match.group(6), ''.join(link.itertext()), link)
+                except AssertionError: continue
+                break
+            else: raise AssertionError('missing narrative link or link label')
+        else: assert next(group for group in match.groups()[2:5] if group is not None) in annotations, 'missing MathML expression'
         cursor = match.end()
     assert source[cursor:].replace('**', '') in text, 'missing narrative text'
 
@@ -80,7 +87,7 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
         if lesson['content'].get('visual'):
             v=lesson['content']['visual']
             image=chapter.find('.//{http://www.w3.org/1999/xhtml}img[@src="figures/'+lesson['id']+'.png"]')
-            assert image is not None and image.attrib['src']=='figures/'+lesson['id']+'.png'
+            assert image is not None and image.attrib['src']=='figures/'+lesson['id']+'.png', f'{lesson["id"]}: missing book figure; regenerate its evidence, then rebuild the downloads'
             assert image.attrib.get('alt')==v.get('alt',v['title'])
             assert book.read('OEBPS/'+image.attrib['src'])==(ROOT/lesson['path']/'outputs/figure.png').read_bytes()
             for field in ['prediction','reading','connection']:
@@ -203,7 +210,7 @@ with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
         'resources/tpu-gcp/multihost_target.py',
         'resources/tpu-gcp/check_multihost_target.py',
     ):
-        assert 'jaxpathways/'+repository_only not in names, f'multi-host target must remain repository-only: {repository_only}'
+        assert 'jaxpathways/'+repository_only not in names, f'multi-host target requires coordinated workers and shared GCS, so it remains repository-only: {repository_only}'
     assert all(name.startswith('jaxpathways/') and not any(part in ('.git','.venv','__pycache__','LEARNING.md') for part in Path(name).parts) for name in names)
 print('OK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.')
 
@@ -222,8 +229,8 @@ with ZipFile(OUT/'jax-tpu-gcp.zip') as bundle:
         'resources/tpu-gcp/multihost_target.py',
         'resources/tpu-gcp/check_multihost_target.py',
     ):
-        assert prefix+repository_only not in names, f'multi-host target must remain repository-only: {repository_only}'
-print('OK: TPU workspace has its pinned single-host target, checker and exact base lesson source; no multi-host target is shipped.')
+        assert prefix+repository_only not in names, f'multi-host target requires coordinated workers and shared GCS, so it remains repository-only: {repository_only}'
+print('OK: TPU workspace has its pinned single-host target, checker and exact base lesson source; coordinated multi-host files remain repository-only.')
 
 assessment_api=json.loads((ROOT/'public/api/v1/assessments.json').read_text())
 for assessment in assessment_api['assessments']:

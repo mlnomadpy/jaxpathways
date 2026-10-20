@@ -75,10 +75,11 @@
     },
     {
       "projectId": "kernel-audit",
-      "sourceHash": "cb4dc8cd40b4c6cd11bfa48ece119af3d926e4ea9605c6ce95bbf37b334cc1ef",
+      "sourceHash": "dc5eb349f78a77526d94516c6656a02c4b887b2c75618146b8b4a589f1765fa4",
       "command": "python3 projects/kernel-audit/tests/check.py --implementation solution --stage all",
       "stdout": "PASS stage 1: actual grid semantics, full and partial tiles, singleton rows, two dtypes and rejected contracts\nPASS stage 2: fused broadcast contract, ReLU boundaries, tails, two precisions and no CPU target fallback\nPASS stage 3: actual pipeline CPU simulation, synchronous/buffered agreement, input buffering, tails/dtypes and guarded target benchmark\nActual backend: cpu. No TPU compilation, execution latency or speedup validated.\n",
-      "status": "passed"
+      "status": "passed",
+      "executedAt": "2026-10-20T23:47:20.321763+00:00"
     },
     {
       "projectId": "image-harness",

@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "scope": "Fresh local CPU process restored the published physical TPU step-4 checkpoint into explicit CPU sharding. Only the marker bucket identifier is redacted. This is portability evidence, not a fresh-process TPU restart.",
+  "backend": "cpu",
+  "jaxVersion": "0.9.2",
+  "orbaxVersion": "0.11.34",
+  "state": {
+    "momentum": [
+      1.984182357788086,
+      1.5342566967010498,
+      -0.014062568545341492,
+      -0.33793309330940247,
+      -0.4589235782623291,
+      -1.0842070579528809,
+      -1.2770774364471436,
+      -2.0666344165802
+    ],
+    "step": 4,
+    "weights": [
+      -0.2616834342479706,
+      -0.20765326917171478,
+      0.010064743459224701,
+      0.050686441361904144,
+      0.05925660580396652,
+      0.14138054847717285,
+      0.1608043909072876,
+      0.2686653137207031
+    ]
+  },
+  "weightsMatchNumpy": true,
+  "momentumMatchesNumpy": true,
+  "verificationSourceSha256": "56a302c6eeaa37785ebbadc02e2202cf657d31b16848279fac0cbdd2c72b6f7d",
+  "verifiedAt": "2026-10-20T23:41:31.368058+00:00",
+  "pythonVersion": "3.14.3"
+}

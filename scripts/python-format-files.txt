@@ -31,3 +31,4 @@ resources/tpu-gcp/collectives_target.py
 resources/tpu-gcp/check_collectives_target.py
 resources/tpu-gcp/multihost_target.py
 resources/tpu-gcp/check_multihost_target.py
+docs/evidence/tpu-qualification-2026-10-20/v5e16/restore-on-cpu.py

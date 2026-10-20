@@ -62,11 +62,72 @@ test('current hardware claims retain exact program identities and actual target 
         const perfetto = traceFiles.find((file) => file.endsWith('perfetto_trace.json.gz'));
         const trace = JSON.parse(gunzipSync(readFileSync(`${root}/trace/${perfetto}`)));
         assert(trace.traceEvents.some((event) => event.name === 'tpu::System::Execute'));
+      } else if (entry.kind === 'multi-host-training-recovery') {
+        assert.equal(receipt.executionMode, 'real-tpu-multi-host-sixteen-device');
+        assert.equal(receipt.backend, 'tpu');
+        assert.equal(receipt.processCount, 4);
+        assert.equal(receipt.globalDeviceCount, 16);
+        assert.equal(receipt.localDeviceCount, 4);
+        assert.equal(receipt.globalDevices.length, 16);
+        assert(receipt.globalDevices.every((device) => device.platform === 'tpu' && device.kind === 'TPU v5 lite'));
+        assert.equal(receipt.sourceSha256, entry.sources['resources/tpu-gcp/multihost_target.py']);
+        assert.equal(receipt.baseLessonSha256, entry.sources['phases/09-distributed/04-resilient-distributed-training/code/main.py']);
+        assert.equal(receipt.sourceAndLessonEqualAcrossProcesses, true);
+        assert.equal(receipt.allRangesAreDisjointAndComplete, true);
+        assert.equal(receipt.arrayConstruction, 'jax.make_array_from_process_local_data');
+        assert.deepEqual(receipt.ownedRows, [receipt.processIndex * 16, (receipt.processIndex + 1) * 16]);
+        assert.equal(receipt.localDataSha256ByProcess[receipt.processIndex], receipt.localDataSha256);
+        assert.equal(receipt.optimizer.checkpointStep, 4);
+        assert.equal(receipt.optimizer.finalStep, 8);
+        assert.equal(receipt.optimizer.checkpointUriScheme, 'gs');
+        assert.equal(receipt.optimizer.checkpointUriIncluded, false);
+        assert.equal(receipt.optimizer.storageClient, 'gcsfs.core.GCSFileSystem');
+        assert.equal(receipt.optimizer.bucketNamespace, 'flat');
+        for (const key of ['orbaxCheckpointSavedAndWaited', 'abstractShardedRestoreSucceeded',
+          'restoredStateMatchesSavedStep', 'finalWeightsMatchIndependentNumpy', 'finalMomentumMatchesIndependentNumpy']) {
+          assert.equal(receipt.optimizer[key], true, key);
+        }
       } else {
         assert.fail(`Unknown qualification kind: ${entry.kind}`);
       }
     }
   }
+});
+
+test('multi-host proof retains all ranks, one checkpoint identity and a portable checkpoint', () => {
+  const entry = registry.qualifications.find((item) => item.kind === 'multi-host-training-recovery');
+  const receipts = entry.evidence.map(read).sort((a, b) => a.processIndex - b.processIndex);
+  assert.deepEqual(receipts.map((item) => item.processIndex), [0, 1, 2, 3]);
+  const environments = entry.environments.map((path) => readFileSync(path, 'utf8'));
+  assert.equal(new Set(environments).size, 1, 'all workers must use the same recorded environment');
+  for (const version of ['flax==0.12.6', 'orbax-checkpoint==0.11.34', 'tensorstore==0.1.82', 'gcsfs==2026.10.1']) {
+    assert(environments[0].includes(version));
+  }
+  assert.equal(new Set(receipts.map((item) => item.fixtureSha256)).size, 1);
+  assert.equal(new Set(receipts.map((item) => item.optimizer.checkpointIdentitySha256)).size, 1);
+  assert.equal(new Set(receipts[0].localDataSha256ByProcess).size, 4);
+  for (const receipt of receipts) {
+    assert.deepEqual(receipt.allOwnedRanges, [[0, 16], [16, 32], [32, 48], [48, 64]]);
+    assert.deepEqual(receipt.optimizer.referenceLosses, receipts[0].optimizer.referenceLosses);
+  }
+  const root = 'docs/evidence/tpu-qualification-2026-10-20/v5e16';
+  const manifest = read(`${root}/checkpoint-files.json`);
+  for (const [path, expected] of Object.entries(manifest.publishedFiles)) {
+    assert.equal(createHash('sha256').update(readFileSync(`${root}/checkpoint-step-4/${path}`)).digest('hex'), expected);
+    if (path !== 'commit_success.txt') assert.equal(expected, manifest.files[path]);
+  }
+  const restored = read(`${root}/checkpoint-cpu-restore.json`);
+  assert.equal(restored.backend, 'cpu');
+  assert.equal(restored.state.step, 4);
+  assert.equal(restored.weightsMatchNumpy, true);
+  assert.equal(restored.momentumMatchesNumpy, true);
+  assert.equal(restored.verificationSourceSha256, createHash('sha256').update(readFileSync(`${root}/restore-on-cpu.py`)).digest('hex'));
+  const cleanup = read(`${root}/cleanup.json`);
+  for (const key of ['ownedQueuedResourceCount', 'ownedTpuVmCount', 'ownedBucketCount', 'activeTemporaryServiceAccountCount']) {
+    assert.equal(cleanup[key], 0, key);
+  }
+  assert.equal(cleanup.syntheticCheckpointDownloaded, true);
+  assert.equal(cleanup.otherWorkloadsModified, false);
 });
 
 test('precision evidence includes actual integer checks and a retained TPU device trace', () => {

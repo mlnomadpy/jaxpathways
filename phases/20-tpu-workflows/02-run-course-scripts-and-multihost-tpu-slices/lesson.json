@@ -36,7 +36,7 @@
       },
       {
         "title": "2. Separate multi-host discovery from a qualified training run",
-        "body": "Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.\n\nThe following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from the existing single-host launcher or four-device collective receipt; the actual multi-host run remains pending.",
+        "body": "Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.\n\nThe following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from a single-host receipt. A separate sixteen-device v5e checkpoint test has actual per-process receipts: see the [hardware evidence guide](https://www.tahabouhsine.com/jaxpathways/tpu-performance.html). It uses `resources/tpu-gcp/multihost_target.py`, not this one-step teaching example; its result does not qualify the example below.",
         "commands": [
           {
             "label": "Record multi-host process and device discovery only",
@@ -128,7 +128,7 @@
     "diagnosis": "If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.venv` is missing, run your `.venv` bootstrap command with `--worker=all` as well so every host has `~/jax-tpu-lab/.venv` installed.",
     "takeaways": [
       "Keep `distributed-02` on CPU. Before staging another script, inspect its exact backend selection and dependencies, assert the TPU backend and topology, and document which process owns each input.",
-      "The existing launcher, precision, and four-device collective receipts are bounded to their recorded setups. `--worker=all` establishes topology discovery; multi-host training still needs a separate successful run with a checked global update and all worker receipts."
+      "Every hardware receipt applies to its exact source, environment, devices and workload. `--worker=all` provides a launch mechanism; training and recovery need their own checked global updates and complete worker receipts. The recorded sixteen-device checkpoint test is separate from this lesson's one-step example."
     ],
     "references": [
       {

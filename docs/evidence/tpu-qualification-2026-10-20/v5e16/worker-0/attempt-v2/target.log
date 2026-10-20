@@ -1,0 +1,71 @@
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/fsspec/registry.py", line 268, in get_filesystem_class
+    register_implementation(protocol, _import_class(bit["class"]))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/fsspec/registry.py", line 303, in _import_class
+    mod = importlib.import_module(mod)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/importlib/__init__.py", line 90, in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen importlib._bootstrap>", line 1387, in _gcd_import
+  File "<frozen importlib._bootstrap>", line 1360, in _find_and_load
+  File "<frozen importlib._bootstrap>", line 1324, in _find_and_load_unlocked
+ModuleNotFoundError: No module named 'gcsfs'
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 452, in <module>
+    main()
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 448, in main
+    run(args, jax)
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 293, in run
+    checkpointer.save(checkpoint_path, state)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/standard_checkpointer.py", line 118, in save
+    super().save(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 560, in save
+    commit_ops = asyncio_utils.run_sync(
+                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/asyncio_utils.py", line 50, in run_sync
+    return asyncio.run(coro)
+           ^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 195, in run
+    return runner.run(main)
+           ^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/runners.py", line 118, in run
+    return self._loop.run_until_complete(task)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/base_events.py", line 691, in run_until_complete
+    return future.result()
+           ^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 461, in _save
+    if await async_path.exists(directory):
+       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/path/async_path.py", line 86, in exists
+    return await asyncio.to_thread(path.exists)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/asyncio/threads.py", line 25, in to_thread
+    return await loop.run_in_executor(None, func_call)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/.local/share/uv/python/cpython-3.12.13-linux-x86_64-gnu/lib/python3.12/concurrent/futures/thread.py", line 59, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/etils/epath/gpath.py", line 152, in exists
+    return self._backend.exists(self._path_str)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/etils/epath/backend.py", line 453, in exists
+    return self.fs(path).exists(path)
+           ^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/etils/epath/backend.py", line 439, in fs
+    return self._get_filesystem('gcs')
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/etils/epath/backend.py", line 433, in _get_filesystem
+    return fsspec.filesystem(name)
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/fsspec/registry.py", line 328, in filesystem
+    cls = get_filesystem_class(protocol)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/fsspec/registry.py", line 270, in get_filesystem_class
+    raise ImportError(bit.get("err")) from e
+ImportError: Please install gcsfs to access Google Storage

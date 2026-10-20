@@ -1,0 +1,96 @@
+E1020 23:36:01.945045    8021 coordination_service_agent.cc:281] Polled an error from coordination service (this can be an error from this or another task).
+F1020 23:36:01.945065    8021 client.h:80] Terminating process because the JAX distributed service detected fatal errors. This most likely indicates that another task died; see the other task logs for more details. Disable Python buffering, i.e. `python -u`, to be sure to see all the previous output. absl::Status: UNAVAILABLE: Failed to send RPC to coordination service. Either the leader task was preempted/died/restarted unexpectedly or this task is experiencing network issues. Check earlier logs from 1) this task, 2) the leader (usually slice 0 task 0), and 3) cluster scheduler to debug further.
+Additional GRPC error information from remote target coordination_service while calling /tensorflow.CoordinationService/PollForError:
+:UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"Socket closed"}
+ERROR:absl:[process=2][thread=serialize_shardings][operation_id=1] _SignalingThread.run() raised an exception: UNAVAILABLE: Socket closed
+Additional GRPC error information from remote target coordination_service while calling /tensorflow.CoordinationService/GetKeyValue:
+:UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"Socket closed"}
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 355, in run
+    self._wait_for_signals()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 340, in _wait_for_signals
+    wait_for_signals(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 249, in wait_for_signals
+    client.blocking_key_value_get(barrier_key, timeout_secs)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/signaling_client.py", line 137, in blocking_key_value_get
+    return str(self._client.blocking_key_value_get(key, timeout_secs * 1000))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: UNAVAILABLE: Socket closed
+Additional GRPC error information from remote target coordination_service while calling /tensorflow.CoordinationService/GetKeyValue:
+:UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"Socket closed"}
+ERROR:absl:[process=2] Failed to run 2 Handler Commit operations or the Commit callback in background save thread, directory: gs://<temporary-test-bucket>/synthetic-v3/step-4
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 229, in _thread_func
+    _background_wait_for_commit_futures(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 86, in _background_wait_for_commit_futures
+    future.ChainedFuture(commit_futures, cb=lambda: None).result(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 198, in result
+    f.result(timeout=get_remaining_time(start, timeout))
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 198, in result
+    f.result(timeout=get_remaining_time(start, timeout))
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 506, in result
+    return self._f.result(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 442, in result
+    return self._t.result(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 391, in result
+    self.join(timeout=timeout)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 388, in join
+    raise self._exception
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 355, in run
+    self._wait_for_signals()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 340, in _wait_for_signals
+    wait_for_signals(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 249, in wait_for_signals
+    client.blocking_key_value_get(barrier_key, timeout_secs)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/signaling_client.py", line 137, in blocking_key_value_get
+    return str(self._client.blocking_key_value_get(key, timeout_secs * 1000))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: UNAVAILABLE: Socket closed
+Additional GRPC error information from remote target coordination_service while calling /tensorflow.CoordinationService/GetKeyValue:
+:UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"Socket closed"}
+Traceback (most recent call last):
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 452, in <module>
+    main()
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 448, in main
+    run(args, jax)
+  File "/home/tahabsn/jaxpathways-qualification/resources/tpu-gcp/multihost_target.py", line 294, in run
+    checkpointer.wait_until_finished()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 589, in wait_until_finished
+    self._async_manager.wait_until_finished()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 296, in wait_until_finished
+    self.check_for_errors()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 271, in check_for_errors
+    raise exception  # pylint: disable=raising-bad-type
+    ^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 229, in _thread_func
+    _background_wait_for_commit_futures(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/checkpointers/async_checkpointer.py", line 86, in _background_wait_for_commit_futures
+    future.ChainedFuture(commit_futures, cb=lambda: None).result(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 198, in result
+    f.result(timeout=get_remaining_time(start, timeout))
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 198, in result
+    f.result(timeout=get_remaining_time(start, timeout))
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 506, in result
+    return self._f.result(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 442, in result
+    return self._t.result(timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 391, in result
+    self.join(timeout=timeout)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 388, in join
+    raise self._exception
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 355, in run
+    self._wait_for_signals()
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 340, in _wait_for_signals
+    wait_for_signals(
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/future.py", line 249, in wait_for_signals
+    client.blocking_key_value_get(barrier_key, timeout_secs)
+  File "/home/tahabsn/jaxpathways-qualification-env/lib/python3.12/site-packages/orbax/checkpoint/_src/futures/signaling_client.py", line 137, in blocking_key_value_get
+    return str(self._client.blocking_key_value_get(key, timeout_secs * 1000))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+jax.errors.JaxRuntimeError: UNAVAILABLE: Socket closed
+Additional GRPC error information from remote target coordination_service while calling /tensorflow.CoordinationService/GetKeyValue:
+:UNKNOWN:Error received from peer  {grpc_status:14, grpc_message:"Socket closed"}

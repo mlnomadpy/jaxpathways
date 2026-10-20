@@ -95,6 +95,7 @@ jobs:
       - run: python resources/tpu-gcp/check_collectives_target.py
       - run: python resources/tpu-gcp/check_multihost_target.py
       - run: npm run test:tpu-precision
+      - run: python docs/evidence/tpu-qualification-2026-10-20/v5e16/restore-on-cpu.py
       - run: npm run test:math
       - uses: actions/upload-artifact@v6
         with:
