@@ -53,11 +53,14 @@ export function phaseSchema(phase, site) {
       .map((id) => course.phases.find((item) => item.id === id)?.title)
       .filter(Boolean),
     dateModified: currentRelease.phases[phase.id]?.date,
-    hasPart: lessons.map((lesson) => ({
-      '@type': 'LearningResource',
-      '@id': absolute(`lesson-${lesson.id}.html`) + '#lesson',
+    // Google's paywall validator also consumes Course.hasPart. Syllabus entries
+    // describe lesson coverage without posing as paywall page fragments.
+    syllabusSections: lessons.map((lesson) => ({
+      '@type': 'Syllabus',
+      '@id': absolute(`lesson-${lesson.id}.html`) + '#syllabus',
       url: absolute(`lesson-${lesson.id}.html`),
       name: lesson.title,
+      description: lesson.objective,
     })),
   };
 }

@@ -1,5 +1,15 @@
 [
   {
+    "version": "0.7.2",
+    "date": "2026-10-20",
+    "title": "Google Rich Results schema compatibility",
+    "summary": "Use course syllabus sections so Google does not interpret lesson outlines as paywall fragments.",
+    "changes": [
+      "Replaced Course.hasPart lesson outlines with syllabusSections and typed Syllabus entries while preserving lesson URLs, outcomes and free-access declarations.",
+      "Added regression checks for typed syllabus sections and the absence of Course.hasPart, following Google Rich Results Test warnings on published catalog, phase and lesson pages."
+    ]
+  },
+  {
     "version": "0.7.1",
     "date": "2026-10-20",
     "title": "Discoverable courses, career guides and free book",

@@ -60,7 +60,7 @@ for(const location of locations){
  }
  if(file.startsWith('phase-guides/')){
   const item=graph.find(item=>item['@type']==='Course');assert(item?.provider?.['@id']);
-  assert(item.hasPart.length>0);assert.equal(item.url,location);
+  assert(!('hasPart' in item),'Course hasPart is interpreted as paywall sections by Google');assert(item.syllabusSections.length>0);for(const section of item.syllabusSections){assert.equal(section['@type'],'Syllabus');assert(locations.includes(section.url));assert(section.description);}assert.equal(item.url,location);
  }else if(!file.startsWith('lesson-')){
   assert(!graph.some(item=>item['@type']==='Course'),`non-course labelled Course: ${file}`);
  }
