@@ -9,6 +9,14 @@ from zipfile import ZipFile, ZIP_DEFLATED, ZIP_STORED
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / 'public/downloads'
 OUT.mkdir(exist_ok=True)
+REPOSITORY_ONLY_TPU_FILES = {
+    "resources/tpu-gcp/multihost_target.py",
+    "resources/tpu-gcp/check_multihost_target.py",
+}
+PROJECT_EXTRA_FILES = {
+    # kernel-audit's README documents this optional, separately pinned TPU environment.
+    "kernel-audit": ("resources/tpu-gcp/requirements-qualification.txt",),
+}
 course = json.loads((ROOT / 'public/curriculum.json').read_text())
 release = json.loads((ROOT / 'curriculum/releases.json').read_text())[0]
 lessons = [lesson for phase in course['phases'] for lesson in phase['lessons'] if lesson['status'] == 'authored']
@@ -144,6 +152,13 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
         requirements_name=requirements_path.as_posix()
         if requirements_name not in included:
             bundle.write(ROOT/requirements_path,requirements_name)
+            included.add(requirements_name)
+        for relative in PROJECT_EXTRA_FILES.get(project['id'], ()):
+            extra_path = ROOT / relative
+            extra_name = Path(relative).as_posix()
+            if extra_name not in included:
+                bundle.write(extra_path, extra_name)
+                included.add(extra_name)
 with ZipFile(OUT/'jax-tutor-skills.zip','w',compression=ZIP_DEFLATED) as bundle:
     for path in sorted((ROOT/'skills').glob('*/SKILL.md')): bundle.write(path,path.relative_to(ROOT))
     for path in sorted((ROOT/'skills').glob('*/references/*.md')): bundle.write(path,path.relative_to(ROOT))
@@ -169,6 +184,11 @@ for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills'
     workspace_files.update(path for path in (ROOT/directory).rglob('*')
                            if path.is_file() and path.suffix in ('.md', '.json', '.py', '.ipynb', '.txt', '.svg', '.png')
                            and '__pycache__' not in path.parts)
+# Multi-host qualification remains repository-only until its separate hardware and storage approval is complete.
+workspace_files = {
+    path for path in workspace_files
+    if path.relative_to(ROOT).as_posix() not in REPOSITORY_ONLY_TPU_FILES
+}
 # Registered project bundles include their executed binary artifacts and media.
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     workspace_files.update(path for path in (ROOT/manifest).parent.rglob('*')

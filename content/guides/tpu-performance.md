@@ -4,7 +4,7 @@ You have a model and access to a TPU. Should you change the batch size, use smal
 
 By the end, you will have a **hardware and precision report**: a workload description, memory estimate, explicit precision policy, numerical comparisons, synchronized timings and a short profile. Begin with [TPU and Google Cloud setup](tpu-gcp.html), [honest benchmarking](lesson.html?lesson=performance-01) and [reading an XProf trace](lesson.html?lesson=performance-03). The [practice workspace](downloads/jax-tpu-gcp.zip) contains the executable lab below.
 
-The recorded reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Run the same `precision_profile.py` script on your Cloud TPU VM to compare target-device MXU timings against your CPU baseline.
+The recorded figure and reference outputs below use JAX 0.9.2 and NumPy 2.4.4 on CPU, with hardware specification tables checked against Google Cloud TPU documentation. Separate bounded real-target runs now cover a v5e1 launcher, precision runner and four Pallas cases, plus one single-host four-device v5e collective path. Their scope and results are summarized below and in [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md).
 
 ## 1. Choose for the workload, then check the generation
 
@@ -116,6 +116,33 @@ The example computes \(Y=XW\), where \(X\) is \(64\times128\) and \(W\) is \(128
 **Read the bottom plot:** the bars count stored operands supplied to the executable. FP32 uses 65,536 bytes; BF16 uses 32,768; INT8 uses 16,896, including 512 bytes of row/column scales. Outputs remain FP32. The bars exclude live original arrays, compilation, temporary buffers, optimizer state and cache, so they are not runtime peak memory. Smaller bars do not predict faster execution.
 
 Inspect the [recorded JSON results](downloads/tpu-performance/report.json), [reproducible plotting script](downloads/tpu-performance/render_precision.py) and [lab source](downloads/tpu-performance/precision_profile.py). The figure is rendered from the JSON, with a source hash checked at build time. The reference includes CPU timings, but the plotted conclusions concern error and stored bytes. CPU timing is not a TPU benchmark.
+
+### A bounded real-TPU check
+
+An isolated single-host v5e1 run used one JAX TPU device with Python 3.12.13, JAX 0.9.2, libtpu 0.0.37 and NumPy 2.4.4. It ran the same 64×128 by 128×64 synthetic dot and balanced/outlier inputs described above. The table reports the target runner's maximum absolute error against a NumPy float64 dot of the original FP32 operands and the median of five warmed, synchronized calls. The timing starts with already-placed operands and excludes transfer, quantization and compilation.
+
+| Input case | Policy | Maximum absolute error | Median time (ms) |
+| --- | --- | ---: | ---: |
+| Balanced | FP32 | 7.14e-7 | 0.148 |
+| Balanced | BF16 | 0.0109 | 0.134 |
+| Balanced | INT8 | 0.0352 | 0.135 |
+| Outlier | FP32 | 3.21e-6 | 0.132 |
+| Outlier | BF16 | 0.04985 | 0.131 |
+| Outlier | INT8 | 0.423 | 0.132 |
+
+These six correctness checks passed on the actual TPU backend, and the run retained lowered HLO plus an XPlane profile and Perfetto trace. The measurements are tiny-kernel observations, not a speed claim: the corresponding five-sample medians on the same TPU were all lower for the jitted JAX baselines than for the custom Pallas kernels. Do not extrapolate these results to a trained model, other shapes, or end-to-end training or serving. The VM and queued resource were deleted after the evidence was copied. Find manifests, raw timing samples and trace files under `docs/evidence/tpu-qualification-2026-10-20/v5e1/smoke-v1/`; see [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md) for the complete qualification boundary.
+
+### Four-device collectives on one host
+
+A second run at source commit `53f1be134a94858400bdf8331c628e66db6fa26b` used one TPU v5 lite host exposing four local JAX devices. It distributed a deterministic 16×8 fixture over a four-way `data` mesh, checked the full-batch gradient from `psum` against an independent NumPy float32 calculation, and checked that `psum_scatter` followed by `all_gather` reconstructed the same result. All checks passed at absolute and relative tolerances of 2e-6. The dot operations requested `HIGHEST` precision; receipt and StableHLO confirm `all_reduce`, `reduce_scatter` and `all_gather`, while placement checks confirm the per-device shards and replicated outputs.
+
+| Operation | Median of seven warmed synchronized calls (ms) |
+| --- | ---: |
+| `psum` / `all_reduce` | 0.25544 |
+| `psum_scatter` / `reduce_scatter` | 0.24606 |
+| `all_gather` | 0.21951 |
+
+These are measurements of a tiny deterministic fixture on four devices in one host, not a scaling result or general performance claim. Timing excludes compilation, input placement and trace overhead. The receipt, lowered StableHLO, XPlane profile and Perfetto trace are retained under `docs/evidence/tpu-qualification-2026-10-20/v5e4/collectives-v1/` in the course repository. This single-host run does not qualify multi-host process initialization or communication; that test is still pending a separate target execution.
 
 For row \(i\) and output column \(j\), the symmetric quantizer uses separate scales:
 

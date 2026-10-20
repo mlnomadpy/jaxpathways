@@ -1,0 +1,11 @@
+{"event": "started", "monotonic_s": 277.724236817, "pid": 5616, "backend": "tpu", "device_count": 1}
+{"event": "restored", "monotonic_s": 278.15071105, "step": 4, "state_hash": "7ee05f2a8d01e76be2235e327a5105ba45289ecaab86fea7a6d22643c5074dbe"}
+{"event": "ready", "monotonic_s": 278.436062582, "compile_warmup_s": 0.2851996320000012, "step": 4}
+{"event": "progress", "monotonic_s": 278.436914711, "step": 5, "loss": 0.8378463387489319, "examples": 8, "update_s": 0.0002461999999923137, "state_hash": "d6b338769d14918f25ce532ecdc6e465b34bf9f2b0fddac1d5581daf4dc4a531"}
+{"event": "progress", "monotonic_s": 278.437549751, "step": 6, "loss": 0.4634981155395508, "examples": 8, "update_s": 0.00020141100003456813, "state_hash": "e7bcd0a3b2c98999d60455f148f40487d98c67fa900706a3de814e7c45c9af9e"}
+{"event": "checkpoint", "monotonic_s": 278.439888311, "step": 6, "state_hash": "e7bcd0a3b2c98999d60455f148f40487d98c67fa900706a3de814e7c45c9af9e"}
+{"event": "progress", "monotonic_s": 278.440551362, "step": 7, "loss": 0.7546423673629761, "examples": 8, "update_s": 0.00022749099997554367, "state_hash": "5ee6e625707c80dbdd6869683e22de56e19dac47d7dd8d5864becabfe122b0c3"}
+{"event": "progress", "monotonic_s": 278.441174671, "step": 8, "loss": 0.50294029712677, "examples": 8, "update_s": 0.0002006999999935033, "state_hash": "0ecc1e8d97dd3b3aa82119df134591b6a737d8f5deafde0ae9d351fceccbc0fc"}
+{"event": "checkpoint", "monotonic_s": 278.443871141, "step": 8, "state_hash": "0ecc1e8d97dd3b3aa82119df134591b6a737d8f5deafde0ae9d351fceccbc0fc"}
+{"event": "checkpoint", "monotonic_s": 278.445607201, "step": 8, "state_hash": "0ecc1e8d97dd3b3aa82119df134591b6a737d8f5deafde0ae9d351fceccbc0fc"}
+{"event": "completed", "monotonic_s": 278.445635861, "step": 8, "state_hash": "0ecc1e8d97dd3b3aa82119df134591b6a737d8f5deafde0ae9d351fceccbc0fc"}

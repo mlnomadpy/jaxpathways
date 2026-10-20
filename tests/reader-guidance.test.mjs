@@ -84,8 +84,34 @@ test('runtime classification separates CPU execution from target qualification g
   );
   assert.match(executionScope(lessons.find((l) => l.id === 'tpu-05')).target, /execution matrix/);
   assert.doesNotMatch(executionScope(lessons.find((l) => l.id === 'tpu-05')).target, /implemented/);
+  for (const id of ['tpu-04', 'tpu-06', 'kernels-02']) {
+    const target = executionScope(lessons.find((lesson) => lesson.id === id)).target;
+    assert.match(target, /v5e1 launch, resume and precision checks/);
+    assert.match(target, /four single-device Pallas cases/);
+    assert.match(target, /four-device v5e collective fixture/);
+    assert.match(target, /recorded source, environment, cases and hardware/);
+    assert.doesNotMatch(target, /qualification is still pending/);
+  }
   for (const lesson of lessons)
     assert.doesNotMatch(executionScope(lesson).description, /stages directly|run on physical TPU/);
+});
+
+test('practice guidance links bounded hardware receipts without claiming general qualification', async () => {
+  const { window, document } = view('tpu-04');
+  try {
+    const panel = document.querySelector('[data-practice-panel="tpu"]');
+    assert.match(panel.textContent, /v5e1 launch, resume, and precision checks/);
+    assert.match(panel.textContent, /four single-device Pallas cases/);
+    assert.match(panel.textContent, /four-device v5e collective fixture/);
+    assert.match(panel.textContent, /recorded source, environment, cases, and hardware/);
+    assert.doesNotMatch(panel.textContent, /remain unqualified on physical TPU hardware/);
+    assert.equal(
+      document.querySelector('#practice-drawer a[href="tpu-performance.html"]')?.textContent,
+      'TPU performance and hardware evidence guide',
+    );
+  } finally {
+    await window.happyDOM.abort();
+  }
 });
 
 test('downloaded notebooks and Markdown preserve the same runtime boundaries as the reader', () => {

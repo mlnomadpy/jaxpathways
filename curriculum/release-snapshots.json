@@ -2,7 +2,7 @@
   {
     "version": "0.8.0",
     "date": "2026-10-20",
-    "hash": "0de2c82a98d1835b9398470675d5ca3709ffb738ba2ad68af075882f2be0b1a3",
+    "hash": "f5056fb0c1761ce018cabd3d4bb83a00e5f72fe6762231a5df5a29a0d93bd7d5",
     "notes": {
       "version": "0.8.0",
       "date": "2026-10-20",
@@ -17,7 +17,7 @@
         "Added a 70,704-parameter real-text causal Transformer pilot with pretraining, continuation adaptation, checkpoint lineage, held-out baseline comparison and verified export. Its measured quality remains weak.",
         "Removed stale generic programs from ten planned model capstones, preserving their distinct implementation and evidence gates.",
         "Reduced reader data loading, extended strict checking to every browser controller, repaired book history links and added native-browser and Windows CI checks.",
-        "Added explicit tracking protocols for human teaching reviews and native book compatibility. Physical TPU runs, human reviews and target-scale model releases remain unqualified."
+        "Added source-bound hardware evidence for real v5e training/recovery, precision, Pallas and four-device collectives, plus tracking protocols for human teaching reviews and native book compatibility. Multi-host runs, human reviews and target-scale model releases remain unqualified."
       ]
     },
     "lessons": {

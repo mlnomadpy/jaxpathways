@@ -75,6 +75,7 @@ jobs:
       - run: npm run test:tpu-lessons
       - run: npm run test:tpu-launcher
       - run: python resources/tpu-gcp/check_collectives_target.py
+      - run: python resources/tpu-gcp/check_multihost_target.py
       - run: npm run test:tpu-precision
       - run: npm run test:math
       - uses: actions/upload-artifact@v6

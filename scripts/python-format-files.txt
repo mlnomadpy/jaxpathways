@@ -29,3 +29,5 @@ projects/welcome-audit/tests/check.py
 scripts/smoke-tpu.py
 resources/tpu-gcp/collectives_target.py
 resources/tpu-gcp/check_collectives_target.py
+resources/tpu-gcp/multihost_target.py
+resources/tpu-gcp/check_multihost_target.py

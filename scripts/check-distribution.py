@@ -132,6 +132,10 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
                 assert bundle.read(str(path.relative_to(ROOT)))==path.read_bytes()
         requirements=project['environment']['requirementsPath']
         assert bundle.read(requirements)==(ROOT/requirements).read_bytes()
+        for extra in {
+            'kernel-audit': ('resources/tpu-gcp/requirements-qualification.txt',),
+        }.get(project['id'], ()):
+            assert bundle.read(extra)==(ROOT/extra).read_bytes(), f'{project["id"]}: missing extra environment file {extra}'
         assert set(project['requiredLessonIds'])<=set(l['id'] for l in authored)
 with ZipFile(OUT/'jax-tutor-skills.zip') as bundle:
     for path in (ROOT/'skills').rglob('*.md'):
@@ -167,7 +171,9 @@ print('OK: beginner workspace source/package/instruction fidelity.')
 
 with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
     assert bundle.testzip() is None
-    names=set(bundle.namelist())
+    workspace_names=bundle.namelist()
+    assert len(workspace_names)==len(set(workspace_names)), 'course workspace contains duplicate archive paths'
+    names=set(workspace_names)
     assert 'jaxpathways/START-HERE.md' in names
     assert 'npx skills add . --skill start-learning learn-jax jax-course-guide check-jax' in bundle.read('jaxpathways/START-HERE.md').decode()
     for source in ('curriculum/course.json','curriculum/projects.json','requirements-cpu.txt','scripts/course.py','public/curriculum.json','public/validation.json'):
@@ -186,8 +192,38 @@ with ZipFile(OUT/'jax-course-workspace.zip') as bundle:
         for path in (ROOT/manifest).parent.rglob('*'):
             if path.is_file() and '__pycache__' not in path.parts:
                 assert bundle.read('jaxpathways/'+str(path.relative_to(ROOT)))==path.read_bytes()
+    for source in (
+        'resources/tpu-gcp/collectives_target.py',
+        'resources/tpu-gcp/check_collectives_target.py',
+        'resources/tpu-gcp/requirements-qualification.txt',
+        'phases/09-distributed/03-communication-efficient-algorithms/code/main.py',
+    ):
+        assert bundle.read('jaxpathways/'+source)==(ROOT/source).read_bytes()
+    for repository_only in (
+        'resources/tpu-gcp/multihost_target.py',
+        'resources/tpu-gcp/check_multihost_target.py',
+    ):
+        assert 'jaxpathways/'+repository_only not in names, f'multi-host target must remain repository-only: {repository_only}'
     assert all(name.startswith('jaxpathways/') and not any(part in ('.git','.venv','__pycache__','LEARNING.md') for part in Path(name).parts) for name in names)
 print('OK: course workspace includes tutor prerequisites, authored lesson artifacts and project sources without local learner state.')
+
+with ZipFile(OUT/'jax-tpu-gcp.zip') as bundle:
+    names=bundle.namelist()
+    assert len(names)==len(set(names)), 'TPU/GCP workspace contains duplicate archive paths'
+    prefix='jax-tpu-gcp/'
+    for source in (
+        'resources/tpu-gcp/collectives_target.py',
+        'resources/tpu-gcp/check_collectives_target.py',
+        'resources/tpu-gcp/requirements-qualification.txt',
+        'phases/09-distributed/03-communication-efficient-algorithms/code/main.py',
+    ):
+        assert bundle.read(prefix+source)==(ROOT/source).read_bytes(), f'TPU/GCP workspace is missing exact source: {source}'
+    for repository_only in (
+        'resources/tpu-gcp/multihost_target.py',
+        'resources/tpu-gcp/check_multihost_target.py',
+    ):
+        assert prefix+repository_only not in names, f'multi-host target must remain repository-only: {repository_only}'
+print('OK: TPU workspace has its pinned single-host target, checker and exact base lesson source; no multi-host target is shipped.')
 
 assessment_api=json.loads((ROOT/'public/api/v1/assessments.json').read_text())
 for assessment in assessment_api['assessments']:

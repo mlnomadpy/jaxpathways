@@ -2,7 +2,7 @@
 
 Phase 19: TPU Setup: Provisioning & Runtime Verification · about 20 minutes · CPU
 
-This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate runtime receipt collector is implemented in the target instructions. Physical TPU qualification is still pending; the CPU receipt does not qualify it.
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate runtime receipt collector is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.
 
 ## What you will be able to do
 

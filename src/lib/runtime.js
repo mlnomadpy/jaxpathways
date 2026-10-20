@@ -37,7 +37,7 @@ function executionScope(lesson) {
         ? 'This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU.'
         : 'This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt.',
     target: targetRunner
-      ? `A separate ${targetRunner} is implemented in the target instructions. Physical TPU qualification is still pending; the CPU receipt does not qualify it.`
+      ? `A separate ${targetRunner} is implemented in the target instructions. Bounded hardware receipts cover v5e1 launch, resume and precision checks; four single-device Pallas cases; and a four-device v5e collective fixture. Each receipt applies only to its recorded source, environment, cases and hardware. Other lessons and TPU configurations require separate qualification.`
       : 'Use the execution matrix to review device selection and data ownership before adapting a separate target program.',
   };
 }

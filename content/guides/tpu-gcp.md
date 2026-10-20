@@ -4,9 +4,9 @@ Your training script works on your laptop. What has to change before you can run
 
 This guide connects those steps. Use it **in parallel with the course starting right after Phase 00** ([Move your experiment to a TPU](lesson-welcome-03.html)) rather than waiting until the late phases. You will produce a **run dossier**: configuration, environment, backend evidence, training events, a checkpoint, a recovery comparison, and resource cleanup evidence. Begin with [Phase 00 setup](lesson-welcome-01.html) and revisit this workflow as you reach the [state and recovery lessons](course.html?phase=recovery). The [project organization guide](project-workflow.html) explains where to keep source, configuration, and run evidence.
 
-The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested. The cloud commands are documentation-checked instructions, verified on CPU prior to Cloud TPU VM execution. This small single-process workload does not shard work across all visible chips or establish production model quality.
+The downloadable launcher reuses the course's [workload operations project](project.html?id=workload-operations). Its CPU execution and recovery are tested, and the launcher, resume path and precision runner also have a bounded real-TPU run on one v5e chip. That evidence does not qualify every course lesson, multi-chip or multi-host execution, or production model quality; see [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md) for the exact environment and results.
 
-Alongside this launcher, use the same TPU VM to run each phase's lesson scripts (`exercises/<lesson-id>.py`) on TPU in parallel with your CPU baseline, and continue with [TPU generations, precision and profiling](tpu-performance.html) to compare training and serving workloads, budget model and cache memory, and measure real numerical error before interpreting a target trace.
+Use [TPU generations, precision and profiling](tpu-performance.html) to plan a workload and interpret target-device evidence. A phase lesson is not automatically TPU-ready: some scripts explicitly select CPU, and others require separate dependencies or target qualification. Select a reviewed TPU target and confirm its backend receipt instead of setting a TPU platform for every lesson script.
 
 ## 1. Separate the resource from the job
 
@@ -174,7 +174,7 @@ gcloud compute instances describe "$VM" \
 
 An accepted request is not a ready runtime. Inspect status and errors before trying SSH. If your waiting deadline expires, delete the group as shown below even if training never started. The [list-instances reference](https://docs.cloud.google.com/sdk/gcloud/reference/compute/instance-groups/managed/list-instances) explains the resource inspection command. A managed group can maintain capacity independently of your Python process, so the end of a job is not your cleanup signal from the cloud.
 
-## 6. Launch inside the VM and run course experiments on TPU
+## 6. Launch a reviewed target inside the VM
 
 On your **laptop**, from the folder containing the downloaded ZIP, upload the workspace and connect via SSH.
 
@@ -198,14 +198,14 @@ gcloud compute ssh "$VM" --project "$PROJECT_ID" --zone "$ZONE"
 
 Use your organization's approved SSH or IAP configuration if direct access is unavailable. Do not disable host verification to hide an access error. See the [SSH](https://docs.cloud.google.com/sdk/gcloud/reference/compute/ssh) and [SCP](https://docs.cloud.google.com/sdk/gcloud/reference/compute/scp) references.
 
-The following commands run **inside the VM**, in a Bash-compatible shell:
+The following commands run **inside the VM**, in a Bash-compatible shell. First make Python 3.12.13 available using your approved Python installation method. The TPU image's default `python3` can be older; do not assume it matches the recorded environment.
 
 ```sh
 # Run run command in terminal using the course Python environment
 python3 -m zipfile -e jax-tpu-gcp.zip .
 cd jax-tpu-gcp
-python3 -m venv .venv
-.venv/bin/python -m pip install --upgrade 'jax[tpu]'
+python3.12 -m venv .venv
+.venv/bin/python -m pip install -r resources/tpu-gcp/requirements-qualification.txt
 .venv/bin/python -m pip freeze > tpu-environment.txt
 set -o pipefail
 .venv/bin/python resources/tpu-gcp/launch.py \
@@ -213,20 +213,11 @@ set -o pipefail
   2>&1 | tee tpu-launch.log
 ```
 
-Use a Python version supported by the selected JAX release and the [current JAX TPU installation instructions](https://docs.jax.dev/en/latest/installation.html). If the image lacks `venv`, install the matching Python venv package using the image's administrator-approved setup. Record the resolved environment in `tpu-environment.txt`, then pin it for subsequent comparisons. **TODO (Cloud TPU VM CI):** Add automated Cloud TPU VM execution receipts to CI alongside the local CPU receipts.
+The qualification stack pins Python-compatible JAX, libtpu, NumPy and Pallas' `absl-py` dependency for the reviewed launcher, precision and kernel targets. It is a minimal target environment, not the full Flax/Orbax environment used by later lessons. If the image lacks `venv`, install the matching Python venv package using the image's administrator-approved setup. Record the resolved environment in `tpu-environment.txt`, then pin it for subsequent comparisons. The manual v5e1 qualification is recorded in [the dated qualification report](https://github.com/mlnomadpy/jaxpathways/blob/codex/review-repairs/docs/tpu-qualification-2026-10-20.md); automated TPU CI receipts are not yet part of the local CPU checks.
 
-The explicit platform sets `JAX_PLATFORMS=tpu` in the child. A missing TPU runtime must fail rather than produce a CPU result labelled as TPU. Check the `started` event in `events.jsonl` for `backend: tpu`, then check `completed` and the checkpoint. Device count reports visibility; this single-device worker runs on `TPU:0` until you add explicit sharding in Phase 09.
+The explicit platform sets `JAX_PLATFORMS=tpu` in the child. A missing TPU runtime must fail rather than produce a CPU result labelled as TPU. Check the `started` event in `events.jsonl` for `backend: tpu`, then check `completed` and the checkpoint. Device count reports visibility; the qualified worker uses one device (`TPU:0`) and does not shard across a slice.
 
-**Run course lessons in parallel on the same TPU VM:** you can also upload any lesson script (`exercises/<lesson-id>.py`) or the full course workspace (`jax-course-workspace.zip`) and run the lesson on TPU right alongside your CPU study:
-
-```sh
-# Run command in terminal
-COURSE_EXPECT_PLATFORM=tpu JAX_PLATFORMS=tpu .venv/bin/python exercises/welcome-03.py
-JAX_PLATFORMS=tpu .venv/bin/python exercises/arrays-01.py
-JAX_PLATFORMS=tpu .venv/bin/python exercises/optimization-01.py
-```
-
-For multi-chip sharding lessons (`welcome-cpu` and Phase 09 `distributed`), replace the four logical CPU lines (`jax.config.update("jax_platforms", "cpu")` and `jax.config.update("jax_num_cpu_devices", 4)`) with `devices = jax.devices("tpu")` on a 4-chip TPU VM (`v5litepod-4` or `v6e-4`). When you later move to a multi-host TPU slice, call `jax.distributed.initialize()` at process start and launch across every host simultaneously with `gcloud compute tpus tpu-vm ssh "$TPU_NAME" --worker=all --command="..."`.
+The v5e1 receipt covers the single-device launcher and resume path, the precision lab, and four small Pallas cases. It does not establish that arbitrary `exercises/<lesson-id>.py` scripts run on TPU. In particular, `welcome-cpu` deliberately configures virtual CPU devices. Multi-chip sharding and multi-host collectives need their own explicit target setup and evidence; do not infer those results from this one-chip run.
 
 Read `compile_warmup_s` separately from steady-state update timing: `job_examples_per_s` includes process startup, compilation, and checkpoint overhead, whereas `update_examples_per_s` measures synchronized updates after compilation.
 

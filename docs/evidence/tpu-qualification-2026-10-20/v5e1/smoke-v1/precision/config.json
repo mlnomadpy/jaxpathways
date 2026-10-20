@@ -1,0 +1,9 @@
+{
+  "platform": "tpu",
+  "run_dir": "/home/tahabsn/jaxpathways-qualification/runs/smoke-v1/precision",
+  "batch": 64,
+  "features": 128,
+  "outputs": 64,
+  "steps": 5,
+  "trace": true
+}

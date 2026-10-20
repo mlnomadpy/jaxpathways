@@ -1,0 +1,4 @@
+fused-float32 1
+fused-bfloat16 1
+pipeline-float32 1
+pipeline-bfloat16 1
