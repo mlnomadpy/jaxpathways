@@ -1,4 +1,4 @@
-"""Qualify four-process, sixteen-device TPU collectives and checkpoint replay.
+"""Qualify multi-process, sixteen-device v5e collectives and checkpoint replay.
 
 Run the same command on every TPU VM worker. This bounded synthetic workload
 is an integration target, not a model-scale or production-training benchmark.
@@ -35,8 +35,8 @@ def arguments():
     parser.add_argument("--expected-processes", type=int, default=4)
     parser.add_argument("--expected-local-devices", type=int, default=4)
     args = parser.parse_args()
-    if args.expected_processes < 1 or args.expected_local_devices < 1:
-        parser.error("expected process and local device counts must be positive")
+    if args.expected_processes < 2 or args.expected_local_devices < 1:
+        parser.error("multi-host qualification requires at least two processes")
     if args.expected_processes * args.expected_local_devices != TOTAL_DEVICES:
         parser.error("expected processes × local devices must equal exactly 16")
     if GLOBAL_ROWS % args.expected_processes:
@@ -110,18 +110,26 @@ def run(args, jax):
     topology = np.asarray(
         multihost_utils.process_allgather(
             np.asarray(
-                [process_index, process_count, local_device_count, global_device_count],
+                [
+                    process_index,
+                    process_count,
+                    local_device_count,
+                    global_device_count,
+                    args.expected_processes,
+                    args.expected_local_devices,
+                ],
                 dtype=np.int32,
             )
         )
-    ).reshape((-1, 4))
+    ).reshape((-1, 6))
     expected_indices = np.arange(args.expected_processes, dtype=np.int32)
     if (
-        topology.shape != (args.expected_processes, 4)
+        topology.shape != (args.expected_processes, 6)
         or not np.array_equal(topology[:, 0], expected_indices)
         or not np.all(topology[:, 1] == args.expected_processes)
         or not np.all(topology[:, 2] == args.expected_local_devices)
         or not np.all(topology[:, 3] == TOTAL_DEVICES)
+        or not np.all(topology[:, 4:] == topology[0, 4:])
         or jax.default_backend() != "tpu"
     ):
         raise RuntimeError(
@@ -143,6 +151,8 @@ def run(args, jax):
     local_devices = jax.local_devices()
     if len(devices) != TOTAL_DEVICES or any(d.platform != "tpu" for d in devices):
         raise RuntimeError("all sixteen global devices must report platform=tpu")
+    if any(d.device_kind != "TPU v5 lite" for d in devices):
+        raise RuntimeError("this qualification target requires v5e devices")
     mesh = Mesh(np.asarray(devices), ("data",))
     row_sharding = NamedSharding(mesh, P("data", None))
     label_sharding = NamedSharding(mesh, P("data"))
@@ -340,7 +350,7 @@ def run(args, jax):
     receipt = {
         "schemaVersion": 1,
         "executedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "executionMode": "real-tpu-four-process-sixteen-device",
+        "executionMode": "real-tpu-multi-host-sixteen-device",
         "backend": jax.default_backend(),
         "processIndex": process_index,
         "processCount": process_count,
@@ -404,7 +414,7 @@ def run(args, jax):
                 "complete",
             ],
         },
-        "limits": "One four-process sixteen-device TPU Pod execution and a tiny synthetic linear workload; no production-quality, model-scale, or generalized performance claim.",
+        "limits": f"One {process_count}-process sixteen-device v5e execution and a tiny synthetic linear workload; no production-quality, model-scale, or generalized performance claim.",
     }
     (worker_output / "execution-multihost.json").write_text(
         json.dumps(receipt, indent=2, allow_nan=False) + "\n"

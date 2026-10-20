@@ -2,7 +2,7 @@
   {
     "version": "0.8.0",
     "date": "2026-10-20",
-    "hash": "f5056fb0c1761ce018cabd3d4bb83a00e5f72fe6762231a5df5a29a0d93bd7d5",
+    "hash": "d9b4f59fa26b9bdf8aa57714f13d0ae6cc7aa1aab94734679e9bde11294899b0",
     "notes": {
       "version": "0.8.0",
       "date": "2026-10-20",
@@ -622,8 +622,8 @@
         "date": "2026-10-20"
       },
       "tpu-05": {
-        "title": "Run course scripts and multi-host TPU Pod slices",
-        "hash": "77d0c483616266db859ee4032750a402b5b8fbe1cc1679d55af04e3f0794db3a",
+        "title": "Review scripts before TPU staging",
+        "hash": "cff281549f82169be2608cd0d3237859f2806cfa37ca095e59257e6caf59b9c6",
         "version": "0.8.0",
         "date": "2026-10-20"
       },
@@ -763,7 +763,7 @@
       },
       "tpu-workflows": {
         "title": "TPU Workflows: Launching Jobs & Checkpointed Experiments",
-        "hash": "b872aff6b35ae2977bbdc197b323f950eb89144a3fa3dd0f8bda67ce63b86200",
+        "hash": "9acbc2f5fdca4e88452ae756949f23b0bc0d8e65e70eb5d6e642a18139f38a45",
         "version": "0.8.0",
         "date": "2026-10-20"
       },

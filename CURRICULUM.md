@@ -296,11 +296,11 @@ Start here. Start after: 00: Setup & first steps.
 Start here. Start after: 19: TPU Setup: Provisioning & Runtime Verification.
 
 - Stage and launch checkpointed TPU jobs (lesson and exercise available)
-- Run course scripts and multi-host TPU Pod slices (lesson and exercise available)
+- Review scripts before TPU staging (lesson and exercise available)
 
 **Build:** Gate simulated multi-worker checkpoint publication on complete receipts.
 
-**Checkpoint:** Stage scripts with gcloud compute tpus tpu-vm scp, separate XLA warmup from timed step loops, verify zero-drift checkpoint resume, and build single-host and --worker=all Pod launch commands.
+**Checkpoint:** Classify each exact program before staging. Route CPU-only and unreviewed scripts to CPU or inspection; use a TPU target only when its backend, pinned dependencies, topology, and data ownership are reviewed. Treat --worker=all discovery as topology evidence, not distributed training.
 
 ### [21: TPU Systems: Generations, Memory, Precision & XProf](phases/21-tpu-systems/README.md)
 

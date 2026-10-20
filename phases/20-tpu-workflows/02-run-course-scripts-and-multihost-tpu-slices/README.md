@@ -1,4 +1,4 @@
-# Run course scripts and multi-host TPU Pod slices
+# Review scripts before TPU staging
 
 [Read](docs/en.md) · [Code](code/main.py) · [Notebook](notebooks/exercise.ipynb) · [Quiz](quiz.json) · [Evidence template](outputs/evidence.md)
 

@@ -11,7 +11,7 @@
         "The script runs four times faster"
       ],
       "correct": 1,
-      "explanation": "Every host in a multi-host TPU Pod slice runs its own OS and Python process; `--worker=all` is required so all hosts join the collective mesh."
+      "explanation": "Each TPU VM worker has its own OS and Python process. Every worker must participate in the distributed program. gcloud --worker=all can launch them together; concurrent explicit worker commands or another supported job manager can do the same. Launching only one worker does not complete a global collective."
     }
   ]
 }

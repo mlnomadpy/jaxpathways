@@ -1,4 +1,4 @@
-# Run course scripts and multi-host TPU Pod slices
+# Review scripts before TPU staging
 
 Phase 20: TPU Workflows: Launching Jobs & Checkpointed Experiments · about 20 minutes · CPU
 
@@ -6,10 +6,10 @@ This worked reference is validated on CPU. Accelerator compatibility requires a 
 
 ## What you will be able to do
 
-- Classify course scripts using a CPU-only / single-host-compatible / multi-host-qualified execution matrix before staging.
-- Distinguish single-host TPU slices (`1` host, `1–8` chips) from multi-host TPU Pod slices (`2+` hosts, `--worker=all`).
-- Generate exact `gcloud compute tpus tpu-vm scp` and `ssh` command pipelines for single-host and multi-host runs.
-- Retrieve `events.jsonl`, stdout logs, and checkpoints via `scp --recurse` before deleting the TPU VM.
+- Classify each course script as CPU-only, review-required, single-host-compatible, or multi-host-qualified before staging.
+- Keep CPU-only `distributed-02` on CPU; do not infer compatibility for Transformers, Pallas, or other lessons.
+- Generate a TPU command only for a source-reviewed target with an explicit backend assertion, pinned dependencies, known topology, and data-ownership contract.
+- Distinguish `--worker=all` process discovery from a multi-host program with verified global data and collective updates.
 
 ## The problem
 
@@ -17,13 +17,13 @@ A course script may contain CPU-specific device selection or assumptions that do
 
 ## The idea
 
-Use a per-script execution matrix. `distributed-02` is CPU-only because it explicitly selects CPU devices; route it to CPU. Treat other scripts as unreviewed until their source is checked. A TPU-compatible single-host script may run on one TPU VM after its backend contract is verified. Multi-host requires simultaneous worker launch and distributed initialization, followed by a program that assigns each process data and uses the intended collective. Keep discovery receipts separate from training receipts.
+Use a per-script execution matrix. `distributed-02` is CPU-only because it explicitly selects CPU devices; route it to CPU. Treat other scripts as unreviewed until their exact source, backend selection, dependencies, topology assumptions, and data ownership are checked. Existing bounded receipts cover the v5e1 checkpointed launcher and precision target and the four-device single-host collective target; each is limited to its named source and configuration. Multi-host requires simultaneous worker launch and initialization, followed by distinct process-owned inputs and a checked global update. Keep discovery receipts separate from training receipts.
 
-## Why multi-host TPU Pod slices require `--worker=all` and `jax.distributed.initialize()`
+## Why every worker must launch and initialize
 
-`--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery. A multi-host training receipt must separately record each process identity, its owned input range, collective result, synchronized update, and per-process logs.
+`--worker=all` starts a process on each host, and `jax.distributed.initialize()` lets those processes discover the global topology. These steps establish process and device discovery only. They do not create a training mesh, distribute data, perform a collective update, or prove checkpoint recovery.
 
-**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection and assumptions. Single-host TPU-compatible → allowed only after that review and a backend assertion. Multi-host-qualified → allowed only after the program explicitly initializes all hosts, assigns distinct process-local inputs, and checks a global result. No generic “run any script” command is valid.
+**Execution matrix:** `distributed-02` → CPU-only (its source requests `jax.devices("cpu")`); do not set `JAX_PLATFORMS=tpu`. Other lesson scripts → inspect-required until a source review identifies device selection, dependencies, topology assumptions, and data ownership. A TPU-compatible single-host script may run only after that review, with a backend assertion and matching pinned environment. Multi-host-qualified requires all hosts, distinct process-owned inputs, and a verified global result. Existing bounded receipts cover only the v5e1 launcher and precision target and the four-device single-host collective target; no generic “run any script” command is valid.
 
 $$
 g_{\text{global}} = \frac{1}{P}\sum_{p=0}^{P-1} g^{(p)} = \operatorname{psum}(g^{(p)}, \texttt{'data'}) / P
@@ -41,7 +41,7 @@ If a TPU slice has `hosts = 4` and `chips_per_host = 4` (`v5litepod-16`), what a
 
 ## 1. Route a script using the execution matrix
 
-For `distributed-02`, use its CPU mode and retain its CPU receipt. For a script reviewed as single-host TPU-compatible, set `LESSON_ID` to that reviewed ID and run on one TPU VM. Use `set -o pipefail` so `tee` cannot hide a failed Python process. Do not infer TPU compatibility from a successful import or from `JAX_PLATFORMS=tpu`.
+For `distributed-02`, use its CPU mode and retain its CPU receipt; the command below runs that CPU path only. The separate v5e1 launcher and precision target and four-device single-host collective target are qualified only for their recorded sources, pinned environments, and device layouts. A different lesson ID is not a substitute for one of those target programs: review its exact source, backend assertion, dependencies, topology, and input ownership before considering a new TPU qualification.
 
 **Run the known CPU-only distributed lesson in CPU mode**
 
@@ -55,9 +55,9 @@ python "public/exercises/${LESSON_ID}.py" | tee "${LESSON_ID}-cpu.txt"
 
 ## 2. Separate multi-host discovery from a qualified training run
 
-Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, and synchronized output/checkpoint evidence; no TPU training has been qualified by this lesson.
+Launching with `--worker=all` and calling `jax.distributed.initialize()` verifies that processes can discover the global device topology. The command below is a discovery check only. A training claim additionally requires distinct per-process data, an explicit global reduction/update, independently derived expected values, synchronized output/checkpoint evidence, and a receipt from every process.
 
-The following one-step example performs an actual global reduction and parameter update: every process contributes a distinct scalar input, `lax.psum` computes a global mean gradient, each replica applies the same update, and process 0 publishes a checkpoint after a global barrier. It is executable code, not a claimed result. Qualify it on a named TPU slice and retain all per-worker receipts before describing it as verified.
+The following one-step example is executable but unqualified; it is not a reported TPU result. Run it only after the same pinned dependencies are installed on each worker, then retain every receipt and validate the named multi-host slice. Do not infer multi-host support from the existing single-host launcher or four-device collective receipt; the actual multi-host run remains pending.
 
 **Record multi-host process and device discovery only**
 
@@ -273,8 +273,6 @@ Expected: Prints the global chip counts across v5litepod-4 (4), v5litepod-8 (8),
 
 **Predict:** How do `hosts`, `chips_per_host`, and `global_chips` change when moving from `v5litepod-4` and `v5litepod-8` to `v5litepod-16` and `v6e-16`?
 
-![Host count, per-host local chips, and global TPU chips across single-host and Pod slices](../outputs/figure.svg)
-
 **Recorded CPU computation**
 
 ### Read the figure
@@ -297,27 +295,6 @@ visual_data = {
         {'label': 'global TPU chips', 'y': [float(s['global_chips']) for s in SLICE_CATALOG]},
     ],
 }
-```
-
-## Recorded reference execution
-
-CPU run: 2026-10-20T22:27:13.155520+00:00. JAX 0.9.2.
-
-```text
-CPU route: python public/exercises/distributed-02.py
-CPU-only route remains excluded from TPU Pod execution
-Correctly rejected CPU-only lesson for TPU Pod execution
-Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}
-CPU route: python public/exercises/distributed-02.py
-v5litepod-16 global chips: 16 Idle chips without --worker=all: 12
-Total HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}
-CPU route: python public/exercises/distributed-02.py
-Rejected unsafe route: {}
-Rejected unsafe route: {'hosts': 4, 'execution_class': 'cpu-only'}
-Multi-host Pod slices: ['v5litepod-16', 'v6e-16']
-Per-host batch: 32 Global batch: 128
-PASS: tpu-05
-
 ```
 
 ## Compare local vs global device counts across slices
@@ -491,7 +468,7 @@ What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` s
 
 Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)
 
-Every host in a multi-host TPU Pod slice runs its own OS and Python process; `--worker=all` is required so all hosts join the collective mesh.
+Each TPU VM worker has its own OS and Python process. Every worker must participate in the distributed program. gcloud --worker=all can launch them together; concurrent explicit worker commands or another supported job manager can do the same. Launching only one worker does not complete a global collective.
 
 </details>
 
@@ -501,12 +478,12 @@ If `gcloud compute tpus tpu-vm ssh --worker=all` fails on one worker because `.v
 
 ## Carry forward
 
-- Stage any `public/exercises/<lesson-id>.py` script with `gcloud compute tpus tpu-vm scp` to run course experiments on TPU in parallel.
-- Use single-host commands for `1–8` chip slices (`v5litepod-4`, `v5litepod-8`, `v6e-4`) and add `--worker=all` + `jax.distributed.initialize()` for multi-host slices (`v5litepod-16`, `v6e-16`).
+- Keep `distributed-02` on CPU. Before staging another script, inspect its exact backend selection and dependencies, assert the TPU backend and topology, and document which process owns each input.
+- The existing launcher, precision, and four-device collective receipts are bounded to their recorded setups. `--worker=all` establishes topology discovery; multi-host training still needs a separate successful run with a checked global update and all worker receipts.
 
 ## Keep your evidence
 
-Keep the generated scp_in_cmd, ssh_run_cmd, and scp_out_cmd workflow for single-host and multi-host slices plus the process-0 checkpoint writer check.
+Keep the execution classification and rejected-route checks. For a target run, retain the exact source/environment hashes, selected backend and devices, data ownership, numerical check, and all worker receipts required by that target. A topology receipt alone is not a training result.
 
 Save your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.
 

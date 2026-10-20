@@ -1,4 +1,4 @@
-"""Run course scripts and multi-host TPU Pod slices: worked experiments and reference solutions. CPU checks."""
+"""Review scripts before TPU staging: worked experiments and reference solutions. CPU checks."""
 
 # Tabulate single-host and multi-host TPU slice topologies
 # Step 1 — Tabulate single-host and multi-host TPU slice topologies

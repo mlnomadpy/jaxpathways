@@ -114,6 +114,21 @@ test('practice guidance links bounded hardware receipts without claiming general
   }
 });
 
+test('TPU staging guidance keeps CPU examples and target qualification separate', () => {
+  const manifest = JSON.parse(readFileSync('curriculum/course.json', 'utf8'));
+  const phase = manifest.phases.find((item) => item.id === 'tpu-workflows');
+  const staged = phase.lessons.find((item) => item.id === 'tpu-05');
+  const authored = JSON.parse(readFileSync(`${staged.path}/lesson.json`, 'utf8'));
+  assert.deepEqual(staged.content, authored.content, 'stale embedded content must not contradict the authored execution matrix');
+  for (const prose of [phase.learningAdvice, staged.objective, staged.exercise,
+    authored.content.problem, ...authored.content.takeaways]) {
+    assert.doesNotMatch(prose, /(?:run|stage|upload) any (?:lesson|course|public\/exercises)/i);
+  }
+  assert.match(authored.content.idea, /distributed-02.*CPU-only/);
+  assert.match(authored.content.idea, /backend selection, dependencies, topology assumptions, and data ownership/);
+  assert.match(authored.content.sections[2].body, /discovery check only/);
+});
+
 test('downloaded notebooks and Markdown preserve the same runtime boundaries as the reader', () => {
   for (const phase of course.phases) {
     for (const lesson of phase.lessons.filter((item) => item.status === 'authored')) {
