@@ -200,7 +200,7 @@ def draw_mechanism(ax, diagram):
     else:
         raise ValueError(f'Unknown mechanism kind: {kind}')
 
-def worker(lesson):
+def worker(lesson, output_root=None):
     os.environ['JAX_PLATFORMS']='cpu'
     os.environ.setdefault('MPLCONFIGDIR','/tmp/jaxpathways-matplotlib')
     source=json.loads((ROOT/lesson['path']/'lesson.json').read_text())['content']; visual=source['visual']
@@ -209,10 +209,15 @@ def worker(lesson):
     with contextlib.redirect_stdout(captured):
         if source.get('buildCode'): exec(compile(source['buildCode'],lesson['id']+'-build','exec'),namespace)
         exec(compile(source['code'],lesson['id']+'-example','exec'),namespace)
-        if visual['kind']=='executed':
+        if visual['kind'] in ('executed', 'analytic'):
             exec(compile(visual['code'],lesson['id']+'-figure','exec'),namespace)
             data=namespace['visual_data']
         else: data={'kind':'flow','nodes':visual['nodes'],'layout':visual.get('layout','sequence')}
+    if visual['kind'] == 'analytic':
+        assert visual.get('code'), f"{lesson['id']}: analytic figures require reproducible calculation code"
+        assert any(word in (visual['title'] + visual['reading'] + visual['connection']).lower()
+                   for word in ('analytic', 'calculated', 'calculation')), f"{lesson['id']}: analytic scope must be explicit"
+        assert 'kind' in data and ('panels' in data or data['kind'] in ('heatmap','line','bar','vectors','flow','table'))
     import matplotlib
     matplotlib.use('Agg')
     import matplotlib.pyplot as plt
@@ -223,7 +228,9 @@ def worker(lesson):
     # Stack panels vertically to remain readable at phone width and in EPUB.
     fig, axes=plt.subplots(count,1,figsize=(8,4.6*count),squeeze=False,layout='constrained')
     for ax,panel in zip(axes[:,0],panels):draw_panel(ax,panel)
-    folder=ROOT/lesson['path']/'outputs';folder.mkdir(parents=True,exist_ok=True)
+    folder=(Path(output_root)/lesson['id'] if output_root else ROOT/lesson['path']/'outputs');folder.mkdir(parents=True,exist_ok=True)
+    if visual['kind'] == 'analytic':
+        fig.suptitle('Analytic calculation · no device result recorded', fontsize=12, color='#7a3f18')
     fig.savefig(folder/'figure.svg',metadata={'Date':None,'Description':visual['title']})
     fig.savefig(folder/'figure.png',dpi=140)
     plt.close(fig)
@@ -234,8 +241,10 @@ def worker(lesson):
         fig.savefig(folder/'mechanism.svg',metadata={'Date':None,'Description':diagram['alt']})
         fig.savefig(folder/'mechanism.png',dpi=160)
         plt.close(fig)
+    provenance={'executed':'recorded_cpu_computation','analytic':'analytic_calculation_not_device_execution','conceptual':'conceptual_diagram'}[visual['kind']]
     record={'schemaVersion':1,'lessonId':lesson['id'],'contentHash':digest(source),'rendererHash':hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
             'kind':visual['kind'],'generatedAt':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+            'provenance':provenance,
             'environment':{'backend':jax.default_backend(),'deviceCount':jax.local_device_count(),'jax':jax.__version__,'numpy':np.__version__,'matplotlib':matplotlib.__version__},
             'stdout':captured.getvalue(),'data':data}
     if source.get('diagram'): record['diagram']=source['diagram']
@@ -244,15 +253,17 @@ def worker(lesson):
     (folder/'visual.json').write_text(json.dumps(record,indent=2,allow_nan=False)+'\n')
 
 if __name__=='__main__':
-    parser=argparse.ArgumentParser();parser.add_argument('--lesson');parser.add_argument('--worker',action='store_true');args=parser.parse_args()
+    parser=argparse.ArgumentParser();parser.add_argument('--lesson');parser.add_argument('--worker',action='store_true');parser.add_argument('--output-dir',type=Path);args=parser.parse_args()
     course=json.loads((ROOT/'curriculum/course.json').read_text())
     lessons=[l for p in course['phases'] for l in p['lessons'] if l['status']=='authored' and (not args.lesson or l['id']==args.lesson)]
     if args.worker:
-        assert len(lessons)==1;worker(lessons[0])
+        assert len(lessons)==1;worker(lessons[0],args.output_dir)
     else:
         failures=[]
         for lesson in lessons:
-            result=subprocess.run([sys.executable,__file__,'--worker','--lesson',lesson['id']],cwd=ROOT,capture_output=True,text=True,timeout=120)
+            command=[sys.executable,__file__,'--worker','--lesson',lesson['id']]
+            if args.output_dir: command.extend(['--output-dir',str(args.output_dir)])
+            result=subprocess.run(command,cwd=ROOT,capture_output=True,text=True,timeout=120)
             print(('PASS ' if result.returncode==0 else 'FAIL ')+lesson['id'],flush=True)
             if result.returncode:print(result.stdout,result.stderr,flush=True);failures.append(lesson['id'])
         if failures:raise SystemExit('Failed figures: '+', '.join(failures))

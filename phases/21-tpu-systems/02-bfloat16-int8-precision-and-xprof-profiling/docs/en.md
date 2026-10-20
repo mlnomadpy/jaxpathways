@@ -5,25 +5,23 @@ Phase 21: TPU Systems: Generations, Memory, Precision & XProf · about 25 minute
 ## What you will be able to do
 
 - Measure numerical error for `bfloat16` matmuls with `float32` accumulation versus `bfloat16` accumulation.
-- Implement per-channel `int8` weight quantization with `float32` rescaling and bound its error against an `fp32` reference.
+- Implement per-column INT8 weight quantization and an FP32 dequantization reference; account for scales and test a zero-valued channel.
 - Capture a warmed `jax.profiler.trace` (`*.xplane.pb`) on a Cloud TPU VM (or local CPU rehearsal) after synchronizing warmup.
 - Download the trace directory with `gcloud compute tpus tpu-vm scp --recurse` and inspect it in TensorBoard / XProf.
 
 ## The problem
 
-Casting activations and weights to `bfloat16` or `int8` halves or quarters memory traffic on a TPU, but careless accumulation in `bfloat16` or uncalibrated quantization silently degrades logits—and without a warmed `jax.profiler.trace` (`*.xplane.pb`), you cannot prove whether your TPU step is compute-bound, memory-bound, or waiting on the host.
+Compare BF16 operand rounding and a per-column INT8 weight-quantization reference on CPU, while distinguishing stored values, dequantized operands, accumulation type, and device-kernel execution. Retain a trace of the actual worked workload in a user-selected directory so its events can be inspected.
 
 ## The idea
 
-Always pair low-precision matmul operands (`bfloat16` or per-channel `int8`) with `preferred_element_type=jnp.float32` accumulation and measure numerical error against an `fp32` oracle; then wrap warmed steady-state steps in `with jax.profiler.trace(trace_dir):` and copy the `*.xplane.pb` trace back for XProf inspection.
+This lesson measures numerical error for a BF16 matmul and an FP32 dequantization reference for INT8 weights. The INT8 path stores quantized weights plus scale metadata, then casts and rescales them to FP32 before the dot; it does not demonstrate a native INT8 kernel, packed runtime storage, or reduced device-memory traffic. The FP32 result is a finite-precision reference, not exact arithmetic. Keep the generated XProf directory after the example returns.
 
 ## Why TPU matmuls use `bfloat16` operands with `float32` accumulation
 
-`bfloat16` uses the same $8$-bit exponent range as `float32` (preventing underflow/overflow without loss scaling) but keeps only $7$ mantissa bits instead of $23$. When the TPU MXU multiplies two `bfloat16` matrices $X \in \mathbb{R}^{B \times K}$ and $W \in \mathbb{R}^{K \times N}$, accumulating the $K$ products in `float32` (`preferred_element_type=jnp.float32`) avoids compounding rounding error across the reduction dimension $K$.
+BF16 has the same exponent width as FP32, but its shorter significand still rounds values; this does not eliminate all underflow, overflow, or accuracy problems. `preferred_element_type=jnp.float32` requests a FP32 result/accumulation type through the JAX dot API, but a CPU run does not establish a TPU kernel’s internal implementation.
 
-For inference weight compression, symmetric per-channel `int8` quantization scales each output column $j$ by $s_j = \max_i |W_{i,j}| / 127$, stores $W^{(\text{int8})}_{i,j} = \text{clip}(\text{round}(W_{i,j}/s_j), -127, 127)$, and rescales the dot product in `float32`.
-
-Finally, when profiling on a TPU VM with `jax.profiler.trace`, always execute and synchronize (`jax.block_until_ready`) one warmup call **before** entering the `with jax.profiler.trace(trace_dir):` block so the captured `*.xplane.pb` file shows steady-state device execution rather than XLA compilation.
+The INT8 example quantizes each output column using `scale = max(abs(W[:, j])) / 127`, stores one signed byte per weight plus one FP32 scale per column, and then dequantizes to FP32 before the dot. A zero column uses scale zero and must produce a zero quantized column without division by zero. This is a numerical reference only: it does not show a native INT8 dot, packed storage, activation quantization, or reduced device memory traffic. Compare against the FP32 JAX computation, which is finite precision. The measured error is specific to the fixed input and weight arrays.
 
 $$
 \text{Cost per } 10^6 \text{ tokens} = \frac{C_{\text{chip\_hour}} \times N_{\text{chips}} \times (T_{\text{run}} / 3600)}{\text{Tokens}_{\text{processed}} / 10^6}
@@ -41,25 +39,18 @@ When accumulating in `bfloat16`, every partial sum across the inner dimension `K
 
 ## 1. Capture a warmed XProf trace on your Cloud TPU VM and inspect in TensorBoard
 
-Stage `public/exercises/tpu-06.py` to your Cloud TPU VM, run it inside `~/jax-tpu-lab/.venv` with `JAX_PLATFORMS=tpu`, copy the generated trace directory back with `gcloud compute tpus tpu-vm scp --recurse`, and open it in TensorBoard (`xprof`).
+The worked CPU example warms the exact function it profiles and writes its trace under `TPU_TRACE_DIR` (default `./tpu-xprof-trace`). The directory remains after the function returns. Open that directory in TensorBoard/XProf and inspect the actual event names, timestamp units, host dispatch, compilation boundary, device work, synchronization, and input stalls that are present in your trace. A CPU trace teaches event reading; it does not establish TPU performance. For timing comparisons, measure synchronized steps outside the profiler.
 
 **Run tpu-06.py and capture a 5-step warmed XProf trace on the Cloud TPU VM**
 
 ```bash
-# Run tpu-06.py and capture a 5-step warmed XProf trace on the Cloud TPU VM
 gcloud compute tpus tpu-vm scp public/exercises/tpu-06.py "$TPU_NAME":~/jax-tpu-lab/ --zone="$ZONE"
-
-gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="
-  set -euo pipefail
-  source ~/jax-tpu-lab/.venv/bin/activate
-  JAX_PLATFORMS=tpu python ~/jax-tpu-lab/tpu-06.py
-  JAX_PLATFORMS=tpu python -c 'import jax, jax.numpy as jnp; x = jnp.ones((2048, 2048), dtype=jnp.bfloat16); fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16)); jax.block_until_ready(fn(x)); jax.profiler.start_trace(\"/tmp/tpu-xprof-trace\"); [jax.block_until_ready(fn(x)) for _ in range(5)]; jax.profiler.stop_trace()'
-"
-
-gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME":/tmp/tpu-xprof-trace ./tpu-xprof-trace --zone="$ZONE"
+gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="set -euo pipefail; source ~/jax-tpu-lab/.venv/bin/activate; export TPU_TRACE_DIR=~/jax-tpu-lab/tpu-xprof-trace; JAX_PLATFORMS=tpu python ~/jax-tpu-lab/tpu-06.py"
+mkdir -p ./tpu-xprof-trace
+gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME":~/jax-tpu-lab/tpu-xprof-trace ./ --zone="$ZONE"
 ```
 
-**Expected:** Executes tpu-06.py on the TPU VM, records a 5-step warmed XProf trace into /tmp/tpu-xprof-trace, and downloads the *.xplane.pb directory to ./tpu-xprof-trace.
+**Expected:** Runs the lesson workload, captures that workload in the persistent TPU_TRACE_DIR, then copies the retained trace directory back. Inspect actual events in XProf; CPU and TPU traces remain separately identified.
 
 **Launch TensorBoard with the XProf profile plugin on your workstation**
 
@@ -79,6 +70,7 @@ Create main.py with evaluate_precision_policies.
 # Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
 # Import pathlib (Path) for this computation.
 from pathlib import Path
+import os
 import tempfile
 import time
 import jax
@@ -105,8 +97,9 @@ def evaluate_precision_policies(seed=0):
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
     ).astype(jnp.float32)
     # Reduce across the target axis to summarize `scale`.
-    scale = jnp.max(jnp.abs(w), axis=0, keepdims=True) / 127.0
-    # Combine or mask array elements to form `w_int8`.
+    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
+    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
+    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
@@ -127,9 +120,13 @@ def evaluate_precision_policies(seed=0):
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
+            "weight_bytes": int(w_int8.size),
+            "scale_bytes": int(scale.size * 4),
         })
     # Return `results` to the caller.
     return results
+
+
 ```
 
 Measuring both max and mean absolute error across accumulation dtypes quantifies why FP32 accumulation is standard on TPU MXUs.
@@ -140,7 +137,7 @@ Append capture_warmed_trace and the verification assertions to main.py.
 
 ```python
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
-def capture_warmed_trace(steps=4):
+def capture_warmed_trace(steps=4, trace_dir=None):
     # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
@@ -152,23 +149,24 @@ def capture_warmed_trace(steps=4):
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     # Enter managed runtime/context scope for this block:
-    with tempfile.TemporaryDirectory(prefix="tpu-course-trace-") as trace_dir:
-        # Enter managed runtime/context scope for this block:
-        with jax.profiler.trace(trace_dir):
-            # Record execution timing or profiler trace in `t1`.
-            t1 = time.perf_counter()
-            # Repeat the update loop over `range(steps)` steps:
-            for _ in range(steps):
-                # Run `step_fn` to compute `x`.
-                x = step_fn(x)
-            # Synchronize host execution until asynchronous device computation completes.
-            jax.block_until_ready(x)
-            # Record execution timing or profiler trace in `steady_ms`.
-            steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-        # Read or serialize artifact data on disk (`xplane_files`).
-        xplane_files = list(Path(trace_dir).rglob("*.xplane.pb"))
-        # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
-        return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files)}
+    trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    with jax.profiler.trace(str(trace_dir)):
+        # Record execution timing or profiler trace in `t1`.
+        t1 = time.perf_counter()
+        # Repeat the update loop over `range(steps)` steps:
+        for _ in range(steps):
+            # Run `step_fn` to compute `x`.
+            x = step_fn(x)
+        # Synchronize host execution until asynchronous device computation completes.
+        jax.block_until_ready(x)
+        # Record execution timing or profiler trace in `steady_ms`.
+        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
+    # Collect files from the retained trace directory.
+    xplane_files = list(trace_dir.rglob("*.xplane.pb"))
+    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
+    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+
 
 
 # Run `evaluate_precision_policies` to compute `prec_table`.
@@ -204,7 +202,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 # Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
 # Import pathlib (Path) for this computation.
 from pathlib import Path
-import tempfile
+import os
 import time
 import jax
 import jax.numpy as jnp
@@ -230,8 +228,9 @@ def evaluate_precision_policies(seed=0):
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
     ).astype(jnp.float32)
     # Reduce across the target axis to summarize `scale`.
-    scale = jnp.max(jnp.abs(w), axis=0, keepdims=True) / 127.0
-    # Combine or mask array elements to form `w_int8`.
+    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
+    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
+    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
@@ -252,13 +251,16 @@ def evaluate_precision_policies(seed=0):
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
+            "weight_bytes": int(w_int8.size),
+            "scale_bytes": int(scale.size * 4),
         })
     # Return `results` to the caller.
     return results
 
 
+
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
-def capture_warmed_trace(steps=4):
+def capture_warmed_trace(steps=4, trace_dir=None):
     # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
@@ -270,23 +272,24 @@ def capture_warmed_trace(steps=4):
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     # Enter managed runtime/context scope for this block:
-    with tempfile.TemporaryDirectory(prefix="tpu-course-trace-") as trace_dir:
-        # Enter managed runtime/context scope for this block:
-        with jax.profiler.trace(trace_dir):
-            # Record execution timing or profiler trace in `t1`.
-            t1 = time.perf_counter()
-            # Repeat the update loop over `range(steps)` steps:
-            for _ in range(steps):
-                # Run `step_fn` to compute `x`.
-                x = step_fn(x)
-            # Synchronize host execution until asynchronous device computation completes.
-            jax.block_until_ready(x)
-            # Record execution timing or profiler trace in `steady_ms`.
-            steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-        # Read or serialize artifact data on disk (`xplane_files`).
-        xplane_files = list(Path(trace_dir).rglob("*.xplane.pb"))
-        # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
-        return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files)}
+    trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    with jax.profiler.trace(str(trace_dir)):
+        # Record execution timing or profiler trace in `t1`.
+        t1 = time.perf_counter()
+        # Repeat the update loop over `range(steps)` steps:
+        for _ in range(steps):
+            # Run `step_fn` to compute `x`.
+            x = step_fn(x)
+        # Synchronize host execution until asynchronous device computation completes.
+        jax.block_until_ready(x)
+        # Record execution timing or profiler trace in `steady_ms`.
+        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
+    # Collect files from the retained trace directory.
+    xplane_files = list(trace_dir.rglob("*.xplane.pb"))
+    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
+    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+
 
 
 # Run `evaluate_precision_policies` to compute `prec_table`.
@@ -300,26 +303,27 @@ assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 # Print the observed values to compare against the expected result.
 print("Precision comparison:", prec_table)
 # Print diagnostic summary of the computed outputs.
+print("Retained trace directory:", trace_info["trace_dir"])
 print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
 ```
 
 Expected: Prints the precision error table (showing lower error for fp32 accumulation than bf16 accumulation) and confirms that at least one *.xplane.pb trace file was captured.
 
-## Maximum and mean absolute matmul error across BF16 and INT8 precision policies
+## Measured numerical error for BF16 and an FP32 INT8 dequantization reference
 
 **Predict:** How do `bf16 (fp32 accum)`, `bf16 (bf16 accum)`, and `int8 per-col (fp32 accum)` compare in maximum and mean absolute error against an `fp32` reference?
 
-![Maximum and mean absolute matmul error across BF16 and INT8 precision policies](../outputs/figure.svg)
+![Measured numerical error for BF16 and an FP32 INT8 dequantization reference](../outputs/figure.svg)
 
 **Recorded CPU computation**
 
 ### Read the figure
 
-The horizontal axis compares the three reduced-precision matmul policies. For each policy, the two bars report maximum absolute error and mean absolute error relative to an exact `float32` matrix multiplication.
+Errors are measured against the finite-precision FP32 JAX dot for this seeded input. The INT8 row quantizes weights, then dequantizes to FP32 before the dot; it is not a native INT8 kernel result.
 
 ### Connect it to the computation
 
-Accumulating `bfloat16` inputs in `float32` cuts both mean and maximum error compared to `bfloat16` accumulation, while per-channel `int8` with `float32` accumulation keeps mean error small (`~0.01`) at one-quarter the weight bytes of `fp32`.
+The measured INT8 error belongs to this fixed example. Its storage estimate must include one FP32 scale per output column, and this code does not demonstrate runtime memory traffic savings.
 
 ```python
 # Compute figure data for: Maximum and mean absolute matmul error across BF16 and INT8 precision policies
@@ -338,18 +342,19 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:47.962542+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:58:58.362237+00:00. JAX 0.9.2.
 
 ```text
-Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]
-Captured *.xplane.pb trace count: 1 steady_ms: 0.0778
-Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322}]
-Captured *.xplane.pb trace count: 1 steady_ms: 0.0847
+Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
+Captured *.xplane.pb trace count: 4 steady_ms: 0.0845
+Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
+Retained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace
+Captured *.xplane.pb trace count: 4 steady_ms: 0.0663
 BF16-accum / FP32-accum max error ratio: 1.49
-Warmup ms: 23.231 Traced steady step ms: 0.0847
-Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 1
+Warmup ms: 16.804 Traced steady step ms: 0.0663
+Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 4
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 257384
+xplane.pb bytes: 259893
 PASS: tpu-06
 
 ```

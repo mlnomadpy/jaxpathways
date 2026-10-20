@@ -4,7 +4,7 @@ Runnable CPU harness: text-harness. Open project.html?id=text-harness or project
 
 Build a small causal language-model system with trustworthy masking, recovery and decoding.
 
-Runnable four-stage CPU byte-Transformer harness: real training, complete fresh-process recovery, fixed held-out evaluation, FP32/BF16/INT8 KV caches, six inference exports and profiler traces. Includes a local document loader. External-corpus quality, service load and physical TPU qualification remain extensions.
+Runnable four-stage CPU byte-Transformer harness: real training, complete fresh-process recovery, fixed held-out evaluation, FP32/BF16/INT8 KV caches, six inference exports and profiler traces. Includes a local document loader. External-corpus quality, service load and physical TPU qualification remain extensions. An additional tiny bidirectional embedding pilot connects three objective phases and reports held-out retrieval against BM25, including a poor measured outcome.
 
 ## Before you start
 

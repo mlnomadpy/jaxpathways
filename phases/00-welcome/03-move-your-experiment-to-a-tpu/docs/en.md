@@ -151,7 +151,6 @@ Add this block to main.py after the preceding block. Run the assembled file in a
 
 ```python
 # Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
-# Import os for this computation.
 import os
 import json
 import platform
@@ -174,11 +173,9 @@ if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
-# Assert invariant `devices and all(d.platform == expected for d in devices)` holds
 assert devices and all(d.platform == expected for d in devices)
 # Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
-# Compute `w_host` from `np.array([0.5, -0.25, 1.0], dtype=np.float32)`
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, devices[0])
@@ -186,15 +183,12 @@ x = jax.device_put(x_host, devices[0])
 w = jax.device_put(w_host, devices[0])
 # Wrap with `jax.jit` (`predict`) so XLA traces and compiles the function.
 predict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))
-# Run `predict` to compute `y`.
 y = predict(x, w)
 # Synchronize host execution until asynchronous device computation completes.
 y.block_until_ready()
-# Cast or evaluate `reference` in explicit floating-point precision.
 reference = x_host @ w_host + np.float32(0.125)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
-# Assert invariant `{d.platform for d in y.devices()} == {expected}` holds
 assert {d.platform for d in y.devices()} == {expected}
 # Convert `report` to a host NumPy array for inspection or verification.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
@@ -202,9 +196,7 @@ report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
               python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),
               max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),
               process_index=jax.process_index(), process_count=jax.process_count())
-# Print diagnostic summary of the computed outputs.
 print(json.dumps(report, indent=2))
-# Print diagnostic summary of the computed outputs.
 print('Completed prediction:', np.asarray(y).tolist())
 ```
 
@@ -227,7 +219,6 @@ Checking these invariants confirms the computation is ready for the full worked 
 
 ```python
 # Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
-# Import os for this computation.
 import os
 import json
 import platform
@@ -242,11 +233,9 @@ if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
 # Selecting a requested backend must fail when it is unavailable.
 devices = jax.devices(expected)
-# Assert invariant `devices and all(d.platform == expected for d in devices)` holds
 assert devices and all(d.platform == expected for d in devices)
 # Construct and reshape `x_host` into the target tensor dimensions.
 x_host = np.arange(24, dtype=np.float32).reshape(8, 3) / 8
-# Compute `w_host` from `np.array([0.5, -0.25, 1.0], dtype=np.float32)`
 w_host = np.array([0.5, -0.25, 1.0], dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, devices[0])
@@ -254,15 +243,12 @@ x = jax.device_put(x_host, devices[0])
 w = jax.device_put(w_host, devices[0])
 # Wrap with `jax.jit` (`predict`) so XLA traces and compiles the function.
 predict = jax.jit(lambda a, b: a @ b + jnp.float32(0.125))
-# Run `predict` to compute `y`.
 y = predict(x, w)
 # Synchronize host execution until asynchronous device computation completes.
 y.block_until_ready()
-# Cast or evaluate `reference` in explicit floating-point precision.
 reference = x_host @ w_host + np.float32(0.125)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(y), reference, rtol=1e-5, atol=1e-5)
-# Assert invariant `{d.platform for d in y.devices()} == {expected}` holds
 assert {d.platform for d in y.devices()} == {expected}
 # Convert `report` to a host NumPy array for inspection or verification.
 report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
@@ -270,9 +256,7 @@ report = dict(expected=expected, output_devices=[str(d) for d in y.devices()],
               python=platform.python_version(), shape=list(y.shape), dtype=str(y.dtype),
               max_absolute_error=float(np.max(np.abs(np.asarray(y)-reference))),
               process_index=jax.process_index(), process_count=jax.process_count())
-# Print diagnostic summary of the computed outputs.
 print(json.dumps(report, indent=2))
-# Print diagnostic summary of the computed outputs.
 print('Completed prediction:', np.asarray(y).tolist())
 ```
 
@@ -302,7 +286,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:02.401435+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:09.080862+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -376,11 +360,8 @@ def verify_report(record, required):
     # Guard input contract (`record['shape'] != [8] or record['dtype'] != 'float32'`) and fail fast if violated.
     if record['shape'] != [8] or record['dtype'] != 'float32':
         raise ValueError('prediction contract changed')
-    # Return `True` to the caller.
     return True
-# Assert invariant `verify_report(report, expected)` holds
 assert verify_report(report, expected)
-# Compute `wrong` from `{**report, 'platform': 'cpu' if expected == 'tpu' el...`
 wrong = {**report, 'platform': 'cpu' if expected == 'tpu' else 'tpu'}
 # Run the boundary check and catch the expected exception:
 try:
@@ -408,10 +389,9 @@ Predict the effect of replacing the bias by minus one quarter. Run a second comp
 
 **Step-by-step implementation plan:**
 1. Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
-2. Run `changed_predict` to compute `changed`.
-3. Synchronize host execution until asynchronous device computation completes.
+2. Synchronize host execution until asynchronous device computation completes.
+3. Convert `` to a host NumPy array for inspection or verification.
 4. Convert `` to a host NumPy array for inspection or verification.
-5. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -419,7 +399,6 @@ Predict the effect of replacing the bias by minus one quarter. Run a second comp
 # Exercise solution: Predict the effect of replacing the bias by minus one quarter.
 # Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
 changed_predict = jax.jit(...)  # TODO: compute changed_predict
-# Run `changed_predict` to compute `changed`.
 changed = changed_predict(...)  # TODO: compute changed
 # Synchronize host execution until asynchronous device computation completes.
 changed.block_until_ready()
@@ -427,9 +406,7 @@ changed.block_until_ready()
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
-# Assert invariant `{d.platform for d in changed.devices()} == {expected}` holds
 assert {d.platform for d  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Changed bias, first prediction:', float(changed[0]))
 ```
 
@@ -439,7 +416,6 @@ print('Changed bias, first prediction:', float(changed[0]))
 # Exercise solution: Predict the effect of replacing the bias by minus one quarter.
 # Wrap with `jax.jit` (`changed_predict`) so XLA traces and compiles the function.
 changed_predict = jax.jit(lambda a, b: a @ b - jnp.float32(0.25))
-# Run `changed_predict` to compute `changed`.
 changed = changed_predict(x, w)
 # Synchronize host execution until asynchronous device computation completes.
 changed.block_until_ready()
@@ -447,9 +423,7 @@ changed.block_until_ready()
 np.testing.assert_allclose(np.asarray(changed), reference - 0.375, atol=1e-5, rtol=1e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(changed), x_host @ w_host - 0.25, atol=1e-5, rtol=1e-5)
-# Assert invariant `{d.platform for d in changed.devices()} == {expected}` holds
 assert {d.platform for d in changed.devices()} == {expected}
-# Print the observed values to compare against the expected result.
 print('Changed bias, first prediction:', float(changed[0]))
 ```
 
@@ -475,30 +449,22 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Run `predict` to compute `reversed_y`.
-2. Synchronize host execution until asynchronous device computation completes.
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
-5. Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
+1. Synchronize host execution until asynchronous device computation completes.
+2. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
 reversed_x = jax.device_put(...)  # TODO: compute reversed_x
-# Run `predict` to compute `reversed_y`.
 reversed_y = predict(...)  # TODO: compute reversed_y
 # Synchronize host execution until asynchronous device computation completes.
 reversed_y.block_until_ready()
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
-# Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d  # TODO: complete assertion check
-# Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
 assert np.isclose(float(reversed_y[0]), 3.625)  # TODO: complete assertion check
-# Assert that `np.isclose(float(reversed_y[-1]), 0.34375)`.
 assert np.isclose(float(reversed_y[-1]), 0.34375)  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')
 ```
 
@@ -507,19 +473,14 @@ print('Row reversal preserved values and requested placement.')
 ```python
 # Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
 reversed_x = jax.device_put(x_host[::-1].copy(), devices[0])
-# Run `predict` to compute `reversed_y`.
 reversed_y = predict(reversed_x, w)
 # Synchronize host execution until asynchronous device computation completes.
 reversed_y.block_until_ready()
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reversed_y), reference[::-1], atol=1e-5, rtol=1e-5)
-# Assert invariant `{d.platform for d in reversed_y.devices()} == {expected}` holds
 assert {d.platform for d in reversed_y.devices()} == {expected}
-# Assert that `np.isclose(float(reversed_y[0]), 3.625)`.
 assert np.isclose(float(reversed_y[0]), 3.625)
-# Assert that `np.isclose(float(reversed_y[-1]), 0.34375)`.
 assert np.isclose(float(reversed_y[-1]), 0.34375)
-# Print the observed values to compare against the expected result.
 print('Row reversal preserved values and requested placement.')
 ```
 

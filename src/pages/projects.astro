@@ -40,7 +40,7 @@ const planned = course.phases.filter((phase) => !phase.projectId);
           Available projects
         </a>
         <a class="button" href="#alignment-retrieval">
-          CLIP, SigLIP & retrieval plans
+          Model lifecycle plans
         </a>
         {planned.length > 0 && (
           <a class="button" href="#planned">
@@ -61,10 +61,11 @@ const planned = course.phases.filter((phase) => !phase.projectId);
     </section>
     <ModalityTracks />
     <section id="alignment-retrieval" class="project-roadmap" aria-labelledby="alignment-heading">
-      <h2 id="alignment-heading">Next: alignment and retrieval</h2>
+      <h2 id="alignment-heading">Next: complete model lifecycles</h2>
       <p>
-        Three planned capstones connect model training to search. Read their staged specifications;
-        runnable workspaces and measured results are still to come.
+        Planned capstones connect text, image, audio and multimodal training to evaluation and
+        release. Read their staged specifications; runnable workspaces and measured results are
+        still to come.
       </p>
       <ul>
         {projectPlans.map((project) => (

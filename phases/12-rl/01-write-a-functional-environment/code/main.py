@@ -3,7 +3,6 @@
 # Define state and the transition
 # Step 1: Define state and the transition
 """Finite-horizon tabular policy training. CPU teaching environment, not a benchmark."""
-# Import functools (partial) for this computation.
 from functools import partial
 from typing import NamedTuple
 import jax
@@ -21,57 +20,40 @@ class State(NamedTuple):
     done: jax.Array
 
 
-# Function `reset(key)` implementing this stage's computation:
 def reset(key):
     """Start uniformly at position 0 or 1; goal is position 3."""
-    # Return `State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))` to the caller.
     return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))
 
 
-# Function `step(state, action, horizon)` implementing this stage's computation:
 def step(state, action, horizon=8):
     """Action 0: left, 1: right. Caller supplies binary action and positive horizon.
 
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
-    # Return `(State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated)` to the caller.
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
 # Check a complete episode
 # Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
-# Compute `positions, rewards` from `[int(s.position)], []`
 positions, rewards = [int(s.position)], []
-# Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
-    # Run `step` to compute `(s, reward, terminated, truncated)`.
     s, reward, terminated, truncated = step(s, jnp.int32(action))
-    # Append the current step result to `positions`.
-    # Append the current step result to `positions`.
     positions.append(int(s.position))
     rewards.append(float(reward))
-# Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Assert that `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
-# Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
-# Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
 
 # Step 3: Verify invariants on the completed state
@@ -80,7 +62,6 @@ assert int(s.elapsed) == 2
 
 # Complete runnable example (rl-01)
 """Finite-horizon tabular policy training. CPU teaching environment, not a benchmark."""
-# Import functools (partial) for this computation.
 from functools import partial
 from typing import NamedTuple
 import jax
@@ -98,56 +79,39 @@ class State(NamedTuple):
     done: jax.Array
 
 
-# Function `reset(key)` implementing this stage's computation:
 def reset(key):
     """Start uniformly at position 0 or 1; goal is position 3."""
-    # Return `State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))` to the caller.
     return State(jax.random.randint(key, (), 0, 2), jnp.int32(0), jnp.bool_(False))
 
 
-# Function `step(state, action, horizon)` implementing this stage's computation:
 def step(state, action, horizon=8):
     """Action 0: left, 1: right. Caller supplies binary action and positive horizon.
 
     Returns next state, reward, termination event, truncation event. Finished
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
-    # Compute `active` from `~state.done`
     active = ~state.done
     # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
     # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
-    # Compute `elapsed` from `state.elapsed + active.astype(jnp.int32)`
     elapsed = state.elapsed + active.astype(jnp.int32)
-    # Compute `terminated` from `active & (position == 3)`
     terminated = active & (position == 3)
-    # Compute `truncated` from `active & ~terminated & (elapsed >= horizon)`
     truncated = active & ~terminated & (elapsed >= horizon)
     # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
-    # Return `(State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated)` to the caller.
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
 # Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
-# Compute `positions, rewards` from `[int(s.position)], []`
 positions, rewards = [int(s.position)], []
-# Iterate over `action` to step through the computation:
 for action in [1, 1, 0, 0]:
-    # Run `step` to compute `(s, reward, terminated, truncated)`.
     s, reward, terminated, truncated = step(s, jnp.int32(action))
-    # Append the current step result to `positions`.
-    # Append the current step result to `positions`.
     positions.append(int(s.position))
     rewards.append(float(reward))
-# Assert invariant `positions == [1, 2, 3, 3, 3]` holds
 assert positions == [1, 2, 3, 3, 3]
-# Assert that `jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))`.
 assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))
-# Assert invariant `int(s.elapsed) == 2` holds
 assert int(s.elapsed) == 2
-# Print the observed values to compare against the expected result.
 print('positions:', positions, 'rewards:', rewards)
 
 # Figure data experiment
@@ -158,80 +122,53 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 # Experiment: A goal at the deadline
 # Experiment — A goal at the deadline: The goal transition defines a completed task, so the two flags...
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
-# Run `step` to compute `(s, r, term, trunc)`.
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
-# Assert invariant `bool(term) and not bool(trunc) and float(r) == 1.` holds
 assert bool(term) and not bool(trunc) and float(r) == 1.
-# Print the observed values to compare against the expected result.
 print('deadline goal:', bool(term), bool(trunc))
 
 # Experiment: The same key is the same start
 # Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
-# Compute `a, b` from `reset(key), reset(key)`
 a, b = reset(key), reset(key)
-# Assert invariant `int(a.position) == int(b.position)` holds
 assert int(a.position) == int(b.position)
 # Create or split explicit PRNG key(s) (`starts`) for reproducible randomness.
 starts = jax.vmap(reset)(jax.random.split(key, 1000)).position
-# Assert invariant `0.4 < float(starts.mean()) < 0.6` holds
 assert 0.4 < float(starts.mean()) < 0.6
-# Print the observed values to compare against the expected result.
 print('fraction starting at one:', float(starts.mean()))
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
-# Compute `total` from `0.`
 total = 0.
-# Iterate over `i` to step through the computation:
 for i in range(3):
-    # Run `step` to compute `(s, r, term, trunc)`.
     s, r, term, trunc = step(s, jnp.int32(0), 3)
     # Accumulate the next contribution into `total`.
     total += float(r)
-    # Assert invariant `not bool(term) and bool(trunc) == (i == 2)` holds
     assert not bool(term) and bool(trunc) == (i == 2)
-# Assert that `abs(total + .03) < 1e-6`.
 assert abs(total + .03) < 1e-6
-# Run `step` to compute `(s2, r, term, trunc)`.
 s2, r, term, trunc = step(s, jnp.int32(1), 3)
-# Assert invariant `int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.` holds
 assert int(s2.position) == 0 and int(s2.elapsed) == 3 and float(r) == 0.
 
 # Reference practice: Separate the two target meanings
 # Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
 r, gamma, value = -.01, .9, 2.
-# Compute `continuing_timeout` from `r + gamma * value`
 continuing_timeout = r + gamma * value
-# Compute `terminal` from `r`
 terminal = r
-# Compute `finite_horizon_timeout` from `r`
 finite_horizon_timeout = r
-# Assert that `abs(continuing_timeout - 1.79) < 1e-7`.
 assert abs(continuing_timeout - 1.79) < 1e-7
-# Assert invariant `terminal == finite_horizon_timeout == -.01` holds
 assert terminal == finite_horizon_timeout == -.01
 
 # Reference practice: Enumerate all one-step moves
 # Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(step)
-# Iterate over `position` to step through the computation:
 for position in range(3):
-    # Loop over `action` in `[0, 1]`:
     for action in [0, 1]:
-        # Run `State` to compute `s`.
         s = State(jnp.int32(position), jnp.int32(0), jnp.bool_(False))
-        # Run `compiled` to compute `(nxt, reward, term, trunc)`.
         nxt, reward, term, trunc = compiled(s, jnp.int32(action))
-        # Run `min` to compute `expected`.
         expected = min(3, max(0, position + (1 if action else -1)))
-        # Assert invariant `int(nxt.position) == expected` holds
         assert int(nxt.position) == expected
-        # Assert invariant `bool(term) == (expected == 3)` holds
         assert bool(term) == (expected == 3)
-        # Assert that `abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6`.
         assert abs(float(reward) - (1. if expected == 3 else -.01)) < 1e-6
 print("PASS: rl-01")

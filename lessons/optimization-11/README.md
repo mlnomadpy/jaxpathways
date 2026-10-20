@@ -66,25 +66,18 @@ Create main.py. Keep the parameter fixed while measuring the sampling distributi
 
 ```python
 # Step 1 — Compute per-example gradients: Each example supplies a slope; the dataset objective uses their mean.
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Construct `y` via `jnp.array([1.0, 2.0, 3.0, 4.0])`
 y = jnp.array([1.0, 2.0, 3.0, 4.0])
-# Construct `w` via `jnp.array(0.0)`
 w = jnp.array(0.0)
 
-# Function `example_loss(w, y)` implementing this stage's computation:
 def example_loss(w, y):
-    # Return `0.5 * (w - y) ** 2` to the caller.
     return 0.5 * (w - y) ** 2
 # Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 # Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
-# Assert that `jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))`.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Assert that `jnp.allclose(full, -2.5)`.
 assert jnp.allclose(full, -2.5)
 ```
 
@@ -99,11 +92,8 @@ Append the exact with-replacement distribution. No random simulation is needed f
 pairs = (per[:, None] + per[None, :]) / 2
 # Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Assert that `jnp.allclose(jnp.mean(pairs), full)`.
 assert jnp.allclose(jnp.mean(pairs), full)
-# Assert that `jnp.allclose(jnp.var(per), 1.25)`.
 assert jnp.allclose(jnp.var(per), 1.25)
-# Assert that `jnp.allclose(jnp.var(pairs), 0.625)`.
 assert jnp.allclose(jnp.var(pairs), 0.625)
 ```
 
@@ -121,11 +111,8 @@ key = jax.random.key(7)
 indices = jax.random.choice(key, 4, shape=(2,), replace=True)
 # Sample deterministic random values into `replay` using an explicit PRNG key.
 replay = jax.random.choice(key, 4, shape=(2,), replace=True)
-# Assert invariant `jnp.array_equal(indices, replay)` holds
 assert jnp.array_equal(indices, replay)
-# Print the observed values to compare against the expected result.
 print('full gradient / single variance / pair variance:', full, jnp.var(per), jnp.var(pairs))
-# Print diagnostic summary of the computed outputs.
 print('sample indices / sample gradient:', indices, jnp.mean(per[indices]))
 ```
 
@@ -135,36 +122,26 @@ Replay checks reproducibility. One sample does not estimate the full sampling di
 
 ```python
 # Step 1 — Compute per-example gradients: Each example supplies a slope; the dataset objective uses their mean.
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Construct `y` via `jnp.array([1.0, 2.0, 3.0, 4.0])`
 y = jnp.array([1.0, 2.0, 3.0, 4.0])
-# Construct `w` via `jnp.array(0.0)`
 w = jnp.array(0.0)
 
-# Function `example_loss(w, y)` implementing this stage's computation:
 def example_loss(w, y):
-    # Return `0.5 * (w - y) ** 2` to the caller.
     return 0.5 * (w - y) ** 2
 # Differentiate the objective to obtain `per` via automatic differentiation.
 per = jax.vmap(jax.grad(example_loss), in_axes=(None, 0))(w, y)
 # Differentiate the objective to obtain `full` via automatic differentiation.
 full = jax.grad(lambda w: jnp.mean(jax.vmap(example_loss, in_axes=(None, 0))(w, y)))(w)
-# Assert that `jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))`.
 assert jnp.allclose(per, jnp.array([-1.0, -2.0, -3.0, -4.0]))
-# Assert that `jnp.allclose(full, -2.5)`.
 assert jnp.allclose(full, -2.5)
 
 # Step 2 — Enumerate every pair: All ordered pairs are equally likely under independent uniform draws.
 pairs = (per[:, None] + per[None, :]) / 2
 # Check tensor shape invariant: `pairs.shape == (4, 4)`
 assert pairs.shape == (4, 4)
-# Assert that `jnp.allclose(jnp.mean(pairs), full)`.
 assert jnp.allclose(jnp.mean(pairs), full)
-# Assert that `jnp.allclose(jnp.var(per), 1.25)`.
 assert jnp.allclose(jnp.var(per), 1.25)
-# Assert that `jnp.allclose(jnp.var(pairs), 0.625)`.
 assert jnp.allclose(jnp.var(pairs), 0.625)
 
 # Step 3 — Sample and replay one batch: Replay checks reproducibility.
@@ -174,11 +151,8 @@ key = jax.random.key(7)
 indices = jax.random.choice(key, 4, shape=(2,), replace=True)
 # Sample deterministic random values into `replay` using an explicit PRNG key.
 replay = jax.random.choice(key, 4, shape=(2,), replace=True)
-# Assert invariant `jnp.array_equal(indices, replay)` holds
 assert jnp.array_equal(indices, replay)
-# Print the observed values to compare against the expected result.
 print('full gradient / single variance / pair variance:', full, jnp.var(per), jnp.var(pairs))
-# Print diagnostic summary of the computed outputs.
 print('sample indices / sample gradient:', indices, jnp.mean(per[indices]))
 ```
 
@@ -206,15 +180,13 @@ The bar heights are squared gradient units, not loss or gradient magnitude. A sh
 
 ```python
 # Compute figure data for: Averaging independent gradients reduces variance
-# Compute `triples` from `(per[:, None, None] + per[None, :, None] + per[None,...`
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
-# Reduce across the target axis to summarize `visual_data`.
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:57:09.915358+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:58.425895+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -235,13 +207,9 @@ PASS: optimization-11
 first = jnp.mean(per[:3])
 # Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
-# Compute `wrong` from `(first + last) / 2`
 wrong = (first + last) / 2
-# Compute `correct` from `(3 * first + last) / 4`
 correct = (3 * first + last) / 4
-# Assert that `jnp.allclose(wrong, -3.0)`.
 assert jnp.allclose(wrong, -3.0)
-# Assert that `jnp.allclose(correct, full)`.
 assert jnp.allclose(correct, full)
 ```
 
@@ -257,13 +225,10 @@ Batch means require example-count weights when batch sizes differ.
 # Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
 # Aggregate array values to compute `full_loss`.
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
-# Construct `optimum` via `jnp.array(2.5)`
 optimum = jnp.array(2.5)
 # Differentiate the objective to obtain `noisy` via automatic differentiation.
 noisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])
-# Assert that `jnp.allclose(jax.grad(full_loss)(optimum), 0.0)`.
 assert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)
-# Assert invariant `full_loss(noisy) > full_loss(optimum)` holds
 assert full_loss(noisy) > full_loss(optimum)
 ```
 
@@ -282,20 +247,16 @@ Enumerate all $64$ ordered batches of size $3$. Check their mean and variance ag
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Assert invariant `triples.size == 64` holds
-2. Assert that `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`.
-3. Assert that `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Enumerate all 64 ordered batches of size 3.
 triples = ...  # TODO: compute triples
-# Assert invariant `triples.size == 64` holds
 assert triples.size  # TODO: complete assertion check
-# Assert that `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`.
 assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)  # TODO: complete assertion check
-# Assert that `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`.
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete assertion check
 ```
 
@@ -304,11 +265,8 @@ assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete as
 ```python
 # Exercise solution: Enumerate all 64 ordered batches of size 3.
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
-# Assert invariant `triples.size == 64` holds
 assert triples.size == 64
-# Assert that `jnp.allclose(jnp.mean(triples), full, atol=1e-06)`.
 assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)
-# Assert that `jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)`.
 assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)
 ```
 
@@ -336,8 +294,6 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `g1` via automatic differentiation.
 2. Differentiate the objective to obtain `g2` via automatic differentiation.
-3. Compute `accumulated` from `(3 * g1 + g2) / 4`
-4. Assert that `jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -347,9 +303,7 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 g1 = jax.grad(...)  # TODO: compute g1
 # Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(...)  # TODO: compute g2
-# Compute `accumulated` from `(3 * g1 + g2) / 4`
 accumulated = ...  # TODO: compute accumulated
-# Assert that `jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)`.
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete assertion check
 ```
 
@@ -361,9 +315,7 @@ assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete ass
 g1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)
 # Differentiate the objective to obtain `g2` via automatic differentiation.
 g2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)
-# Compute `accumulated` from `(3 * g1 + g2) / 4`
 accumulated = (3 * g1 + g2) / 4
-# Assert that `jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)`.
 assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)
 ```
 
@@ -389,17 +341,15 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Assert that `jnp.allclose(biased, -1.3)`.
-2. Assert that `not jnp.allclose(biased, full)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
 biased = ...  # TODO: compute biased
-# Assert that `jnp.allclose(biased, -1.3)`.
 assert jnp.allclose(biased, -1.3)  # TODO: complete assertion check
-# Assert that `not jnp.allclose(biased, full)`.
 assert not jnp.allclose(biased, full)  # TODO: complete assertion check
 ```
 
@@ -408,9 +358,7 @@ assert not jnp.allclose(biased, full)  # TODO: complete assertion check
 ```python
 # Detect a biased sampler (Transfer / diagnosis): Uniform mean-gradient claims require the corresponding...
 biased = 0.9 * per[0] + 0.1 * per[3]
-# Assert that `jnp.allclose(biased, -1.3)`.
 assert jnp.allclose(biased, -1.3)
-# Assert that `not jnp.allclose(biased, full)`.
 assert not jnp.allclose(biased, full)
 ```
 

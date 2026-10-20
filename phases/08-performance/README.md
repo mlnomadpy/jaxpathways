@@ -6,7 +6,7 @@ Measure completed work, inspect a real profiler trace and relate compiler output
 
 Keep workload shapes, warm-up policy and synchronized timings with your device report.
 
-**Prerequisites:** 05: Neural network training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 05: Neural network training.
 
 **Hardware:** CPU for timing concepts; TPU or GPU for profiling.
 
@@ -126,11 +126,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-A trace-backed before-and-after performance report.
+Measure CPU JIT latency and changed-shape traces with retained JAXPR evidence.
 
 **Demonstrate:** Separate compilation, execution, input stalls, and synchronization before claiming a speedup.
 
-Project status: implemented staged practice · [Open source](../../projects/performance-audit/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 4` from the top-level folder to verify stage 4.
+Project status: implemented staged practice · [Open source](../../projects/performance-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/performance-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/performance-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Resume and profile a sharded training run](../../projects/sharded-training/README.md).
 

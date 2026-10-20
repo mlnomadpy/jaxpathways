@@ -102,16 +102,12 @@ Create main.py in your activated course environment. Paste this block, then run 
 
 ```python
 # Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Function `lora_forward(x, base, a, b, ...)` implementing this stage's computation:
 def lora_forward(x, base, a, b, alpha=1.0):
-    # Compute `rank` from `a.shape[1]`
     rank = a.shape[1]
-    # Return `x @ base + alpha / rank * (x @ a @ b)` to the caller.
     return x @ base + (alpha / rank) * (x @ a @ b)
 ```
 
@@ -126,21 +122,15 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 # Construct and reshape `source_w` into the target tensor dimensions.
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
-# Construct `base` via `jnp.zeros_like(source_w)`
 base = jnp.zeros_like(source_w)
 # Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
-# Repeat the update loop over `range(150)` steps:
 for _ in range(150):
-    # Compute `base` from `base - 0.15 * base_step(base)`
     base = base - 0.15 * base_step(base)
-# Assert invariant `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4` holds
 assert float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4
 # Convert `frozen` to a host NumPy array for inspection or verification.
 frozen = np.asarray(base).copy()
-# Construct `u` via `jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])`
 u = jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])
-# Construct `v` via `jnp.array([[0.5, -0.2, 0.3, 0.1]])`
 v = jnp.array([[0.5, -0.2, 0.3, 0.1]])
 # Perform matrix / vector contraction (`@`) to compute `target`.
 target = x @ (base + u @ v)
@@ -148,19 +138,14 @@ target = x @ (base + u @ v)
 a = jax.random.normal(jax.random.key(4), (6, 1)) * 0.1
 # Allocate initialized array `b` with the specified shape and dtype.
 b = jnp.zeros((1, 4))
-# Compute `params` from `(a, b)`
 params = (a, b)
-# Reduce across the target axis to summarize `loss`.
 loss = lambda ab: jnp.mean((lora_forward(x, base, *ab, alpha=1.0) - target) ** 2)
 # Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(loss))
-# Compute `history` from `[]`
 history = []
-# Run `step` to compute `initial_grads`.
 initial_grads = step(params)[1]
 # Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(initial_grads[0], np.zeros((6, 1)))
-# Assert invariant `np.linalg.norm(initial_grads[1]) > 0` holds
 assert np.linalg.norm(initial_grads[1]) > 0
 ```
 
@@ -173,26 +158,19 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 ```python
 # Step 3 — 3. Adapt and verify the serving merge: The reference target has rank one by construction.
 for _ in range(250):
-    # Run `step` to compute `(value, g)`.
     value, g = step(params)
-    # Append the current step result to `history`.
     history.append(float(value))
     # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
-# Compute `a, b` from `params`
 a, b = params
-# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
 # Execute `np.testing.assert_array_equal(base, frozen)`
 np.testing.assert_array_equal(base, frozen)
-# Perform matrix contraction / projection to compute `merged`.
 merged = base + a @ b
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(x, base, a, b), x @ merged, rtol=1e-5, atol=1e-6
 )
-# Print the observed values to compare against the expected result.
 print(
     'LoRA initial/final:',
     history[0],
@@ -210,37 +188,27 @@ The reference target has rank one by construction. Exact base equality and chang
 
 ```python
 # Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Function `lora_forward(x, base, a, b, ...)` implementing this stage's computation:
 def lora_forward(x, base, a, b, alpha=1.0):
-    # Compute `rank` from `a.shape[1]`
     rank = a.shape[1]
-    # Return `x @ base + alpha / rank * (x @ a @ b)` to the caller.
     return x @ base + (alpha / rank) * (x @ a @ b)
 
 # Step 2 — 2. Train a base, freeze it and initialize the adapter: This step includes the source-task training.
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 # Construct and reshape `source_w` into the target tensor dimensions.
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
-# Construct `base` via `jnp.zeros_like(source_w)`
 base = jnp.zeros_like(source_w)
 # Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
-# Repeat the update loop over `range(150)` steps:
 for _ in range(150):
-    # Compute `base` from `base - 0.15 * base_step(base)`
     base = base - 0.15 * base_step(base)
-# Assert invariant `float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4` holds
 assert float(jnp.mean((x @ base - x @ source_w) ** 2)) < 1e-4
 # Convert `frozen` to a host NumPy array for inspection or verification.
 frozen = np.asarray(base).copy()
-# Construct `u` via `jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])`
 u = jnp.array([[0.2], [-0.3], [0.1], [0.2], [-0.1], [0.4]])
-# Construct `v` via `jnp.array([[0.5, -0.2, 0.3, 0.1]])`
 v = jnp.array([[0.5, -0.2, 0.3, 0.1]])
 # Perform matrix / vector contraction (`@`) to compute `target`.
 target = x @ (base + u @ v)
@@ -248,43 +216,31 @@ target = x @ (base + u @ v)
 a = jax.random.normal(jax.random.key(4), (6, 1)) * 0.1
 # Allocate initialized array `b` with the specified shape and dtype.
 b = jnp.zeros((1, 4))
-# Compute `params` from `(a, b)`
 params = (a, b)
-# Reduce across the target axis to summarize `loss`.
 loss = lambda ab: jnp.mean((lora_forward(x, base, *ab, alpha=1.0) - target) ** 2)
 # Evaluate both scalar loss and parameter gradients in one pass (`step`).
 step = jax.jit(jax.value_and_grad(loss))
-# Compute `history` from `[]`
 history = []
-# Run `step` to compute `initial_grads`.
 initial_grads = step(params)[1]
 # Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(initial_grads[0], np.zeros((6, 1)))
-# Assert invariant `np.linalg.norm(initial_grads[1]) > 0` holds
 assert np.linalg.norm(initial_grads[1]) > 0
 
 # Step 3 — 3. Adapt and verify the serving merge: The reference target has rank one by construction.
 for _ in range(250):
-    # Run `step` to compute `(value, g)`.
     value, g = step(params)
-    # Append the current step result to `history`.
     history.append(float(value))
     # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
-# Compute `a, b` from `params`
 a, b = params
-# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
 # Execute `np.testing.assert_array_equal(base, frozen)`
 np.testing.assert_array_equal(base, frozen)
-# Perform matrix contraction / projection to compute `merged`.
 merged = base + a @ b
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(x, base, a, b), x @ merged, rtol=1e-5, atol=1e-6
 )
-# Print the observed values to compare against the expected result.
 print(
     'LoRA initial/final:',
     history[0],
@@ -318,22 +274,17 @@ The first adapter update affects B; later updates can train both factors. The un
 
 ```python
 # Compute figure data for: LoRA: adapt, save and merge low-rank updates — recorded experiment
-# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'adaptation MSE (squared output units)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
-# Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
-# Compute `extra_panel` from `{'kind':'bar','x':[0,1],'labels':['factor A','factor...`
 extra_panel={'kind':'bar','x':[0,1],'labels':['factor A','factor B'],'series':[{'label':'initial gradient norm','y':[float(jnp.linalg.norm(initial_grads[0])),float(jnp.linalg.norm(initial_grads[1]))]}],'xlabel':'trainable factor','ylabel':'gradient L2 norm','title':'Why the first update changes only B'}
-# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:22.771675+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:52:13.228766+00:00. JAX 0.9.2.
 
 ```text
 LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24
@@ -353,15 +304,12 @@ PASS: posttraining-02
 
 ```python
 # Experiment — Show why two zero factors cannot start learning: Each factor’s derivative contains the other factor.
-# Construct `zero` via `(jnp.zeros_like(a), jnp.zeros_like(b))`
 zero = (jnp.zeros_like(a), jnp.zeros_like(b))
 # Differentiate the objective to obtain `zero_grad` via automatic differentiation.
 zero_grad = jax.grad(loss)(zero)
-# Assert invariant `all(` holds
 assert all(
     np.array_equal(np.asarray(g), np.zeros(g.shape)) for g in zero_grad
 )
-# Print the observed values to compare against the expected result.
 print('Both zero factors produce zero first gradients.')
 ```
 
@@ -380,7 +328,6 @@ rng = np.random.default_rng(14)
 a_probe = jnp.asarray(rng.normal(size=(6, 2)) * 0.1, jnp.float32)
 # Create device-backed JAX array `b_probe`.
 b_probe = jnp.asarray(rng.normal(size=(2, 4)) * 0.1, jnp.float32)
-# Compute `scale` from `3.0 / 2`
 scale = 3.0 / 2
 # Evaluate the compound expression for `output_gradient`.
 output_gradient = (
@@ -397,11 +344,8 @@ actual_a, actual_b = jax.grad(
     ),
     argnums=(0, 1),
 )(a_probe, b_probe)
-# Compute `np.testing.assert_allclose(actual_a, expected_a, atol` as `1e-6)`.
 np.testing.assert_allclose(actual_a, expected_a, atol=1e-6)
-# Compute `np.testing.assert_allclose(actual_b, expected_b, atol` as `1e-6)`.
 np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)
-# Print the observed values to compare against the expected result.
 print('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')
 ```
 
@@ -419,23 +363,20 @@ Save both adapter factors and their rank/scaling metadata, reload them and check
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Import tempfile for this computation.
-2. Create an isolated temporary directory to run and inspect artifacts safely:
-3. Read or serialize artifact data on disk (`path`).
-4. Convert `` to a host NumPy array for inspection or verification.
-5. Enter `np.load(path, allow_pickle=False)` context block:
+1. Create an isolated temporary directory to run and inspect artifacts safely:
+2. Convert `` to a host NumPy array for inspection or verification.
+3. Enter `np.load(path, allow_pickle=False)` context block:
+4. Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Save both adapter factors and their rank/scaling metadata, reload them...
-# Import tempfile for this computation.
 import tempfile
 from pathlib import Path
 
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
-    # Read or serialize artifact data on disk (`path`).
     path = Path(...)  # TODO: compute path
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(
@@ -449,14 +390,12 @@ with tempfile.TemporaryDirectory() as folder:
     with np.load(path, allow_pickle=False) as z:
         # Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
         assert int(z['rank'])  # TODO: complete assertion check
-        # Perform matrix contraction / projection to compute ``.
         np.testing.assert_allclose(
             lora_forward(x, base, z['a'], z['b'], float(z['alpha'])),
             x @ merged,
             atol = ...  # TODO: compute atol
             rtol = ...  # TODO: compute rtol
         )
-# Print the observed values to compare against the expected result.
 print('Adapter round trip and merge checked.')
 ```
 
@@ -464,13 +403,11 @@ print('Adapter round trip and merge checked.')
 
 ```python
 # Exercise solution: Save both adapter factors and their rank/scaling metadata, reload them...
-# Import tempfile for this computation.
 import tempfile
 from pathlib import Path
 
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
-    # Read or serialize artifact data on disk (`path`).
     path = Path(folder) / 'adapter.npz'
     # Convert `` to a host NumPy array for inspection or verification.
     np.savez(
@@ -484,14 +421,12 @@ with tempfile.TemporaryDirectory() as folder:
     with np.load(path, allow_pickle=False) as z:
         # Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
         assert int(z['rank']) == z['a'].shape[1]
-        # Perform matrix contraction / projection to compute ``.
         np.testing.assert_allclose(
             lora_forward(x, base, z['a'], z['b'], float(z['alpha'])),
             x @ merged,
             atol=1e-6,
             rtol=1e-5,
         )
-# Print the observed values to compare against the expected result.
 print('Adapter round trip and merge checked.')
 ```
 
@@ -515,22 +450,18 @@ The equivalence is algebraic, so a new input should still agree.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Perform matrix contraction / projection to compute ``.
-2. Assert that `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3`.
-3. Print the observed values to compare against the expected result.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check the merge on new inputs (Transfer): The second check detects an operational merge error that...
 new_x = jnp.asarray(...)  # TODO: compute new_x
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
 )
-# Assert that `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3`.
 assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged))  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('New-input merge passes; accidental double merge changes outputs.')
 ```
 
@@ -539,13 +470,10 @@ print('New-input merge passes; accidental double merge changes outputs.')
 ```python
 # Check the merge on new inputs (Transfer): The second check detects an operational merge error that...
 new_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
 )
-# Assert that `np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3`.
 assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) > 1e-3
-# Print the observed values to compare against the expected result.
 print('New-input merge passes; accidental double merge changes outputs.')
 ```
 
@@ -574,9 +502,9 @@ Use an independent singular-value decomposition for the rank bound, and divide a
 **Step-by-step implementation plan:**
 1. Create device-backed JAX array `a2`.
 2. Create device-backed JAX array `b2`.
-3. Perform matrix contraction / projection to compute ``.
-4. Run `np.diag` to compute `target_update`.
-5. Run `np.linalg.svd` to compute `(u_s, s_s, v_s)`.
+3. Perform matrix / vector contraction (`@`) to compute `rank_one`.
+4. Execute `np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)`.
+5. Construct an identity matrix ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -587,16 +515,13 @@ rng = np.random.default_rng(...)  # TODO: compute rng
 a2 = jnp.asarray(...)  # TODO: compute a2
 # Create device-backed JAX array `b2`.
 b2 = jnp.asarray(...)  # TODO: compute b2
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(x, base, a2, b2, alpha = ...  # TODO: compute lora_forward(x, base, a2, b2, alpha
     x @ (base + 1.5 * a2 @ b2),
     rtol = ...  # TODO: compute rtol
     atol = ...  # TODO: compute atol
 )
-# Run `np.diag` to compute `target_update`.
 target_update = np.diag(...)  # TODO: compute target_update
-# Run `np.linalg.svd` to compute `(u_s, s_s, v_s)`.
 u_s, s_s, v_s = np.linalg.svd(...)  # TODO: compute u_s, s_s, v_s
 # Perform matrix / vector contraction (`@`) to compute `rank_one`.
 rank_one = ...  # TODO: compute rank_one
@@ -606,7 +531,6 @@ np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)
 np.testing.assert_allclose(
     np.mean((np.eye(2) @ target_update - np.eye(2) @ rank_one) ** 2), 0.25
 )
-# Print the observed values to compare against the expected result.
 print('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')
 ```
 
@@ -619,16 +543,13 @@ rng = np.random.default_rng(8)
 a2 = jnp.asarray(rng.normal(size=(6, 2)), jnp.float32)
 # Create device-backed JAX array `b2`.
 b2 = jnp.asarray(rng.normal(size=(2, 4)), jnp.float32)
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(
     lora_forward(x, base, a2, b2, alpha=3.0),
     x @ (base + 1.5 * a2 @ b2),
     rtol=1e-5,
     atol=2e-6,
 )
-# Run `np.diag` to compute `target_update`.
 target_update = np.diag([3.0, 1.0])
-# Run `np.linalg.svd` to compute `(u_s, s_s, v_s)`.
 u_s, s_s, v_s = np.linalg.svd(target_update)
 # Perform matrix / vector contraction (`@`) to compute `rank_one`.
 rank_one = (u_s[:, :1] * s_s[:1]) @ v_s[:1]
@@ -638,7 +559,6 @@ np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)
 np.testing.assert_allclose(
     np.mean((np.eye(2) @ target_update - np.eye(2) @ rank_one) ** 2), 0.25
 )
-# Print the observed values to compare against the expected result.
 print('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')
 ```
 

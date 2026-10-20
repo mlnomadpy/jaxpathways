@@ -61,7 +61,7 @@ npm run check            # Astro, lint, formatting, content, behavior and output
 npm run check:deployment # Build/test /jaxpathways/, then restore the local root build
 ```
 
-Home, Course, Learning paths, Careers, My learning, Resources, the group planner, project workspaces, nineteen illustrated project guides, assessments, and the printable reader are Astro routes. Existing `.html` URLs and browser storage keys are preserved. Learning records remain local to the same browser origin; changing hostname or port does not transfer them automatically. Export a backup from My learning when moving between origins.
+Home, Course, Learning paths, Careers, My learning, Resources, the group planner, project workspaces, illustrated project guides, assessments, and the printable reader are Astro routes. Existing `.html` URLs and browser storage keys are preserved. Learning records remain local to the same browser origin; changing hostname or port does not transfer them automatically. Export a backup from My learning when moving between origins.
 
 See [the architecture and authoring guide](docs/astro-migration.md) for content locations, reusable components, browser modules, styles and GitHub Pages setup.
 
@@ -136,7 +136,7 @@ The website exposes static JSON catalogs for lessons, pathways, and roles. See [
 
 ## Finish the foundation route
 
-The [regression audit project](projects/regression-audit/README.md) connects arrays, gradients, compiled loops, and optimization through four stages. Public checks cover shape contracts, independently checked gradients, parameter recovery, replay, and held-out results. Run `npm run test:project` to validate all nineteen registered project reference suites. Passing those synthetic checks is bounded evidence, not a reviewed career assessment.
+The [regression audit project](projects/regression-audit/README.md) connects arrays, gradients, compiled loops, and optimization through four stages. Public checks cover shape contracts, independently checked gradients, parameter recovery, replay, and held-out results. Run `npm run test:project` to validate all registered project reference suites (see [current counts](docs/course-status.md)). Passing those synthetic checks is bounded evidence, not a reviewed career assessment.
 
 ## Read offline or learn with a tutor
 

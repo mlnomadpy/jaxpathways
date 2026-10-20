@@ -27,7 +27,7 @@ $$
 S(D) = \sum_{k=0}^{8D - 1} k^2 = \frac{(8D - 1)(8D)(16D - 1)}{6}
 
 $$
-Checking that the `pmap` result equals $S(D)$ (for example, $S(1) = 140$, $S(4) = 10416$, $S(8) = 85344$) verifies both device discovery and multi-chip execution in one step.
+The formula gives an expected value for a chosen device count. Only a receipt that records `observed_backend`, `device_count`, and the synchronized result can support a runtime claim. The four-row figure below is a NumPy calculation, not evidence that four TPU devices ran.
 
 $$
 M_{\text{state}} = N_{\text{params}} \times (\text{bytes}_{\text{param}} + \text{bytes}_{\text{grad}} + 2 \cdot \text{bytes}_{\text{moment}})
@@ -254,21 +254,21 @@ print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in sl
 
 Expected: Prints the verified JSON runtime receipt (observed_total: 140.0 on 1 device) and the expected pmap sums for 1-device (140.0), 4-device (10416.0), and 8-device (85344.0) slices.
 
-## Per-chip contribution to the 4-device synchronized pmap verification receipt
+## Calculated expectation for four devices (not an observed runtime receipt)
 
-**Predict:** How do the four per-chip sums of squares (`0..7`, `8..15`, `16..23`, `24..31`) combine into the 4-device runtime receipt (`10416.0`)?
+**Predict:** If four devices each sum a distinct block of eight integers, what cumulative sum of squares should the verifier report?
 
-![Per-chip contribution to the 4-device synchronized pmap verification receipt](../../phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/outputs/figure.svg)
+![Calculated expectation for four devices (not an observed runtime receipt)](../../phases/19-tpu/02-bootstrap-venv-and-verify-tpu-runtime-receipt/outputs/figure.svg)
 
-**Recorded CPU computation**
+**Analytic calculation; no device result recorded**
 
 ### Read the figure
 
-The horizontal axis lists each local chip (`chip 0` through `chip 3`) on a 4-device TPU slice (`v5litepod-4` or `v6e-4`). The bars show each chip's local sum of squares (`140`, `1100`, `3084`, `6092`) alongside the cumulative running total across chips (`140`, `1240`, `4324`, `10416`).
+This analytic illustration computes four eight-value row sums with NumPy. It does not read a TPU execution receipt and does not show observed device participation.
 
 ### Connect it to the computation
 
-Because `x` is reshaped to `(4, 8)`, every chip executes the same `pmap` program on its own slice of 8 numbers; matching the final cumulative sum of `10416.0` proves all 4 chips participated.
+The calculated total is 10416. A runtime claim must instead use the device count and per-device values in a saved receipt; the current local receipt records one CPU device.
 
 ```python
 # Compute figure data for: Per-chip contribution to the 4-device synchronized pmap verification receipt
@@ -291,7 +291,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:36.563884+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:52:23.450063+00:00. JAX 0.9.2.
 
 ```text
 Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}

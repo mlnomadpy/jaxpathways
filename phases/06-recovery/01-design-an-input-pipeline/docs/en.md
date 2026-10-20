@@ -80,21 +80,15 @@ Create main.py in your course workspace. Use the tested course environment and a
 
 ```python
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
-# Import numpy for this computation.
 import numpy as np
 import hashlib
 import time
-# Compute `ids` from `np.arange(11,dtype=np.int64)`
 ids = np.arange(11,dtype=np.int64)
-# Cast or evaluate `features` in explicit floating-point precision.
 features = (ids/10).astype(np.float32)
-# Cast or evaluate `labels` in explicit floating-point precision.
 labels = (2*features-1).astype(np.float32)
-# Function `dataset_digest(x, y)` implementing this stage's computation:
 def dataset_digest(x,y):
     # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest = hashlib.sha256()
-    # Iterate over `array` to step through the computation:
     for array in (x,y):
         # Update state in place with the new values.
         digest.update(str(array.dtype).encode())
@@ -102,13 +96,9 @@ def dataset_digest(x,y):
         digest.update(str(array.shape).encode())
         # Update state in place with the new values.
         digest.update(array.tobytes())
-    # Return `digest.hexdigest()` to the caller.
     return digest.hexdigest()
-# Run `dataset_digest` to compute `fingerprint`.
 fingerprint = dataset_digest(features,labels)
-# Function `epoch_order(seed, epoch)` implementing this stage's computation:
 def epoch_order(seed,epoch):
-    # Return `np.random.default_rng(np.random.SeedSequence([seed, epoch])).permutation(len(ids))` to the caller.
     return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))
 ```
 
@@ -124,22 +114,15 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
     # Guard input contract (`batch_size <= 0`) and fail fast if violated.
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
-    # Run `epoch_order` to compute `order`.
     order = epoch_order(seed,epoch)
-    # Iterate over `start` to step through the computation:
     for start in range(0,len(order),batch_size):
-        # Compute `chosen` from `order[start:start+batch_size]`
         chosen = order[start:start+batch_size]
-        # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
         # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
-# Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
-# Evaluate `make_batches(seed=17, epoch=0)` and convert the result into Python scalar/collection `batches`.
 batches = list(make_batches(seed=17,epoch=0))
-# Record execution timing or profiler trace in `elapsed`.
 elapsed = time.perf_counter()-start_time
 # Combine or mask array elements to form `seen`.
 seen = np.concatenate([b["id"] for b in batches])
@@ -153,27 +136,19 @@ Append the checks, save main.py and run python main.py. Predict what should agre
 
 ```python
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
-# Assert invariant `[len(b["id"]) for b in batches] == [4` holds
 assert [len(b["id"]) for b in batches] == [4,4,3]
 # Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
-# Assert invariant `len(np.unique(seen)) == len(ids)` holds
 assert len(np.unique(seen)) == len(ids)
-# Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
 # Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
-# Print the observed values to compare against the expected result.
 print("Batch sizes:",[len(b["id"]) for b in batches])
-# Print diagnostic summary of the computed outputs.
 print("Example order:",seen.tolist())
-# Print diagnostic summary of the computed outputs.
 print("Preparation seconds (local observation only):",elapsed)
-# Print diagnostic summary of the computed outputs.
 print("Dataset SHA256:",fingerprint)
 ```
 
@@ -183,21 +158,15 @@ The comparison checks the next behavior, not merely whether a save call succeede
 
 ```python
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
-# Import numpy for this computation.
 import numpy as np
 import hashlib
 import time
-# Compute `ids` from `np.arange(11,dtype=np.int64)`
 ids = np.arange(11,dtype=np.int64)
-# Cast or evaluate `features` in explicit floating-point precision.
 features = (ids/10).astype(np.float32)
-# Cast or evaluate `labels` in explicit floating-point precision.
 labels = (2*features-1).astype(np.float32)
-# Function `dataset_digest(x, y)` implementing this stage's computation:
 def dataset_digest(x,y):
     # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest = hashlib.sha256()
-    # Iterate over `array` to step through the computation:
     for array in (x,y):
         # Update state in place with the new values.
         digest.update(str(array.dtype).encode())
@@ -205,13 +174,9 @@ def dataset_digest(x,y):
         digest.update(str(array.shape).encode())
         # Update state in place with the new values.
         digest.update(array.tobytes())
-    # Return `digest.hexdigest()` to the caller.
     return digest.hexdigest()
-# Run `dataset_digest` to compute `fingerprint`.
 fingerprint = dataset_digest(features,labels)
-# Function `epoch_order(seed, epoch)` implementing this stage's computation:
 def epoch_order(seed,epoch):
-    # Return `np.random.default_rng(np.random.SeedSequence([seed, epoch])).permutation(len(ids))` to the caller.
     return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))
 
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
@@ -219,48 +184,33 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
     # Guard input contract (`batch_size <= 0`) and fail fast if violated.
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
-    # Run `epoch_order` to compute `order`.
     order = epoch_order(seed,epoch)
-    # Iterate over `start` to step through the computation:
     for start in range(0,len(order),batch_size):
-        # Compute `chosen` from `order[start:start+batch_size]`
         chosen = order[start:start+batch_size]
-        # Branch on condition `drop_last and len(chosen) < batch_size`:
         if drop_last and len(chosen) < batch_size:
             break
         # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
-# Record execution timing or profiler trace in `start_time`.
 start_time = time.perf_counter()
-# Evaluate `make_batches(seed=17, epoch=0)` and convert the result into Python scalar/collection `batches`.
 batches = list(make_batches(seed=17,epoch=0))
-# Record execution timing or profiler trace in `elapsed`.
 elapsed = time.perf_counter()-start_time
 # Combine or mask array elements to form `seen`.
 seen = np.concatenate([b["id"] for b in batches])
 
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
-# Assert invariant `[len(b["id"]) for b in batches] == [4` holds
 assert [len(b["id"]) for b in batches] == [4,4,3]
 # Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
-# Assert invariant `len(np.unique(seen)) == len(ids)` holds
 assert len(np.unique(seen)) == len(ids)
-# Iterate over `batch` to step through the computation:
 for batch in batches:
-    # Compute `np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol` as `1e-7)`.
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 # Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
 # Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
-# Print the observed values to compare against the expected result.
 print("Batch sizes:",[len(b["id"]) for b in batches])
-# Print diagnostic summary of the computed outputs.
 print("Example order:",seen.tolist())
-# Print diagnostic summary of the computed outputs.
 print("Preparation seconds (local observation only):",elapsed)
-# Print diagnostic summary of the computed outputs.
 print("Dataset SHA256:",fingerprint)
 ```
 
@@ -288,22 +238,21 @@ The connected segments are a visual aid for following the sequence; an ID halfwa
 
 ```python
 # Compute figure data for: Shuffling changes order, not dataset membership
-# Compute `visual_data` from `{'kind': 'line', 'x': list(range(len(seen))), 'xlabe...`
 visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:57:47.272412+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:46:29.735773+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.012722666375339031
+Preparation seconds (local observation only): 0.00836424995213747
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 2.570822834968567e-05
+Preparation seconds (local observation only): 1.874985173344612e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]
@@ -321,9 +270,7 @@ PASS: recovery-01
 epoch_one = np.concatenate([b["id"] for b in make_batches(17,1)])
 # Execute `np.testing.assert_array_equal(np.sort(epoch_one),ids)`
 np.testing.assert_array_equal(np.sort(epoch_one),ids)
-# Assert invariant `not np.array_equal(epoch_one,seen)` holds
 assert not np.array_equal(epoch_one,seen)
-# Print the observed values to compare against the expected result.
 print("Epoch one order:",epoch_one.tolist())
 ```
 
@@ -340,13 +287,9 @@ Coverage is an invariant; ordering is a deterministic epoch-specific output. A c
 dropped = list(make_batches(17,0,drop_last=True))
 # Combine or mask array elements to form `dropped_ids`.
 dropped_ids = np.concatenate([b["id"] for b in dropped])
-# Assert invariant `len(dropped_ids)==8` holds
 assert len(dropped_ids)==8
-# Run `np.setdiff1d` to compute `omitted`.
 omitted = np.setdiff1d(ids,dropped_ids)
-# Assert invariant `len(omitted)==3` holds
 assert len(omitted)==3
-# Print the observed values to compare against the expected result.
 print("Omitted IDs:",omitted.tolist())
 ```
 
@@ -366,10 +309,7 @@ Pad the final three-label batch to four elements with zero. Show that an unmaske
 
 **Step-by-step implementation plan:**
 1. Combine or mask array elements to form `padded_labels`.
-2. Compute `mask` from `np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.fl...`
-3. Aggregate array values to compute `masked`.
-4. Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
-5. Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
+2. Aggregate array values to compute `masked`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -378,13 +318,10 @@ Pad the final three-label batch to four elements with zero. Show that an unmaske
 last = ...  # TODO: compute last
 # Combine or mask array elements to form `padded_labels`.
 padded_labels = np.pad(...)  # TODO: compute padded_labels
-# Compute `mask` from `np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.fl...`
 mask = np.array(...)  # TODO: compute mask
 # Aggregate array values to compute `masked`.
 masked = ...  # TODO: compute masked
-# Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
 np.testing.assert_allclose(masked,last.mean(),atol = ...  # TODO: compute np.testing.assert_allclose(masked,last.mean(),atol
-# Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 assert not np.isclose(padded_labels.mean(),last.mean())  # TODO: complete assertion check
 ```
 
@@ -395,13 +332,10 @@ assert not np.isclose(padded_labels.mean(),last.mean())  # TODO: complete assert
 last = batches[-1]["y"]
 # Combine or mask array elements to form `padded_labels`.
 padded_labels = np.pad(last,(0,4-len(last)))
-# Compute `mask` from `np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.fl...`
 mask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)
 # Aggregate array values to compute `masked`.
 masked = (padded_labels*mask).sum()/mask.sum()
-# Compute `np.testing.assert_allclose(masked,last.mean(),atol` as `1e-7)`.
 np.testing.assert_allclose(masked,last.mean(),atol=1e-7)
-# Assert that `not np.isclose(padded_labels.mean(),last.mean())`.
 assert not np.isclose(padded_labels.mean(),last.mean())
 ```
 
@@ -427,30 +361,20 @@ The fingerprint includes dtype, shape and array bytes.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Run `dataset_digest` to compute `reversed_digest`.
-2. Run `labels.copy` to compute `changed_labels`.
-3. Accumulate the next contribution into `changed_labels[0]`.
-4. Run `dataset_digest` to compute `changed_digest`.
-5. Assert invariant `same==fingerprint` holds
+1. Accumulate the next contribution into `changed_labels[0]`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Fingerprint meaning, not just a row count (Transfer): A sampler permutation can be reproduced against a fixed source.
 same = dataset_digest(...)  # TODO: compute same
-# Run `dataset_digest` to compute `reversed_digest`.
 reversed_digest = dataset_digest(...)  # TODO: compute reversed_digest
-# Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
 changed_labels = labels.copy(...)  # TODO: compute changed_labels
 changed_labels[0]+=0.1
-# Run `dataset_digest` to compute `changed_digest`.
 changed_digest = dataset_digest(...)  # TODO: compute changed_digest
-# Assert invariant `same==fingerprint` holds
 assert same  # TODO: complete assertion check
-# Assert invariant `reversed_digest!=fingerprint and changed_digest!=fingerprint` holds
 assert reversed_digest  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Copy preserves fingerprint; reordered source and edited labels invalidate it.')
 ```
 
@@ -459,19 +383,13 @@ print('Copy preserves fingerprint; reordered source and edited labels invalidate
 ```python
 # Fingerprint meaning, not just a row count (Transfer): A sampler permutation can be reproduced against a fixed source.
 same=dataset_digest(features.copy(),labels.copy())
-# Run `dataset_digest` to compute `reversed_digest`.
 reversed_digest=dataset_digest(features[::-1],labels[::-1])
-# Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
 changed_labels=labels.copy()
 changed_labels[0]+=0.1
-# Run `dataset_digest` to compute `changed_digest`.
 changed_digest=dataset_digest(features,changed_labels)
-# Assert invariant `same==fingerprint` holds
 assert same==fingerprint
-# Assert invariant `reversed_digest!=fingerprint and changed_digest!=fingerprint` holds
 assert reversed_digest!=fingerprint and changed_digest!=fingerprint
-# Print the observed values to compare against the expected result.
 print('Copy preserves fingerprint; reordered source and edited labels invalidate it.')
 ```
 
@@ -497,30 +415,20 @@ The known relation $y=2x-1$ provides a stronger oracle than a falling training l
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Compute `wrong_labels` from `batch["y"][::-1]`
-2. Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
-3. Compute `fixed` from `labels[batch["id"]]`
-4. Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
-5. Run `labels.copy` to compute `changed_labels`.
+1. Accumulate the next contribution into `changed_labels[0]`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Catch a feature/label shuffle mismatch (Challenge): Wrong alignment can preserve shapes and numeric ranges.
 batch = ...  # TODO: compute batch
-# Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = ...  # TODO: compute wrong_labels
-# Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)  # TODO: complete assertion check
-# Compute `fixed` from `labels[batch["id"]]`
 fixed = ...  # TODO: compute fixed
-# Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
-# Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
 changed_labels = labels.copy(...)  # TODO: compute changed_labels
 changed_labels[0]+=1
-# Assert invariant `dataset_digest(features,changed_labels)!=fingerprint` holds
 assert dataset_digest(features,changed_labels)  # TODO: complete assertion check
 ```
 
@@ -529,19 +437,13 @@ assert dataset_digest(features,changed_labels)  # TODO: complete assertion check
 ```python
 # Catch a feature/label shuffle mismatch (Challenge): Wrong alignment can preserve shapes and numeric ranges.
 batch = batches[0]
-# Compute `wrong_labels` from `batch["y"][::-1]`
 wrong_labels = batch["y"][::-1]
-# Assert that `not np.allclose(wrong_labels,2*batch["x"]-1)`.
 assert not np.allclose(wrong_labels,2*batch["x"]-1)
-# Compute `fixed` from `labels[batch["id"]]`
 fixed = labels[batch["id"]]
-# Compute `np.testing.assert_allclose(fixed,2*batch["x"]-1,atol` as `1e-7)`.
 np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
-# Run `labels.copy` to compute `changed_labels`.
 # Accumulate the next contribution into `changed_labels[0]`.
 changed_labels = labels.copy()
 changed_labels[0]+=1
-# Assert invariant `dataset_digest(features,changed_labels)!=fingerprint` holds
 assert dataset_digest(features,changed_labels)!=fingerprint
 ```
 

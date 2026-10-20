@@ -15,7 +15,7 @@ Once a Cloud TPU VM is running, typing ad-hoc interactive commands in an SSH she
 
 ## The idea
 
-A TPU job launcher enforces four contracts: (1) validate `JAX_PLATFORMS` and device discovery before training, (2) run and synchronize one warmup step so XLA compilation is recorded separately from steady updates, (3) write atomic checkpoints (`temp` + `fsync` + `os.replace`) so `--resume` continues from the exact step, parameter, optimizer, and PRNG state, and (4) copy `events.jsonl` and checkpoints back via `gcloud compute tpus tpu-vm scp`.
+The launcher records warmup and synchronized updates separately, then checkpoints the complete deterministic state with an integrity hash and a run-configuration identity. A requested resume must find a checkpoint, validate its contents and configuration, and define completed-run behavior explicitly.
 
 ## Why launching a TPU experiment is different from running a notebook cell
 
@@ -23,7 +23,7 @@ When you launch a JAX script on a TPU VM, the first call to a `@jax.jit` step tr
 
 A production-grade TPU launcher runs one synchronized warmup call before the training loop and logs `compile_warmup_s` in a dedicated `warmup` event. Subsequent `step` events measure synchronized steady-state updates (`jax.block_until_ready`).
 
-Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing to a temporary sibling file (`checkpoint-latest.json.tmp`), flushing with `os.fsync`, and atomically renaming with `os.replace` guarantees that the checkpoint on disk is always complete.
+Whenever a checkpoint step arrives, writing directly to `checkpoint-latest.json` risks leaving a half-written file if a Spot TPU VM is preempted mid-write. Writing to a temporary sibling file (`checkpoint-latest.json.tmp`), flushing with `os.fsync`, and atomically renaming with `os.replace` makes the visible checkpoint path switch atomically on supported local filesystems. This does not by itself promise survival across power loss or distributed publication. A checkpoint hash detects changed serialized state; a separately hashed configuration binds data identity, seed, learning rate, batch schedule, and optimizer rule.
 
 $$
 T_{\text{step}} = \frac{T_{\text{total}}(S) - T_{\text{compile}}(1)}{S - 1}
@@ -51,7 +51,7 @@ Without restoring the optimizer momentum/variance buffers (`m_w`, `m_b`) and the
 
 ## 1. Stage the launcher and run a checkpoint-resumed TPU experiment
 
-Use `gcloud compute tpus tpu-vm scp` to copy `resources/tpu-gcp/launch.py` to `~/jax-tpu-lab/` on the TPU VM. Then run `launch.py --platform tpu` over SSH: first run $4$ steps and save a checkpoint at step $4$; resume to step $8$ with `--resume`; and compare the final parameter checksum against an uninterrupted $8$-step control job.
+Use the local CPU exercise first to test the resume contract: a missing requested checkpoint raises an error; modified state or changed configuration is rejected; resuming an already completed run returns its saved final state without executing another update. Only after these checks should you run the same launcher on a TPU VM.
 
 **Stage launch.py and verify checkpoint resume on the Cloud TPU VM**
 
@@ -93,7 +93,8 @@ def digest_obj(value):
     # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-    ).hexdigest()[:16]
+    ).hexdigest()
+
 
 
 # Function `atomic_write_json(path, payload)` implementing this stage's computation:
@@ -151,16 +152,27 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
-    # Branch on condition `resume and ckpt_path.exists()`:
-    if resume and ckpt_path.exists():
+    config = {"schema": 1, "seed": int(seed), "lr": float(lr), "data": "linspace64-target-3x-minus-0.5-v1", "batch_size": 16, "optimizer": "momentum-0.8-noise-key-v1"}
+    config_hash = digest_obj(config)
+    # A requested resume requires an existing, compatible, intact checkpoint.
+    if resume:
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f"resume requested but checkpoint is missing: {ckpt_path}")
         saved = json.loads(ckpt_path.read_text(encoding="utf-8"))
+        supplied_hash = saved.pop("state_hash", None)
+        if supplied_hash != digest_obj(saved):
+            raise ValueError("checkpoint state hash mismatch")
+        if saved.get("config_hash") != config_hash or saved.get("config") != config:
+            raise ValueError("checkpoint run configuration mismatch")
         step = int(saved["step"])
         w = jnp.array(saved["w"], dtype=jnp.float32)
         b = jnp.array(saved["b"], dtype=jnp.float32)
         m_w = jnp.array(saved["m_w"], dtype=jnp.float32)
         m_b = jnp.array(saved["m_b"], dtype=jnp.float32)
         key = jnp.array(saved["key"], dtype=jnp.uint32)
-        emit("restored", step=step, state_hash=saved["state_hash"])
+        state_payload = dict(saved)
+        state_payload["state_hash"] = supplied_hash
+        emit("restored", step=step, state_hash=supplied_hash)
     else:
         step = 0
         w = jnp.zeros((1, 1), dtype=jnp.float32)
@@ -169,6 +181,11 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         m_b = jnp.zeros_like(b)
         key = jax.random.PRNGKey(seed)
         emit("started", step=step)
+        state_payload = {"step": 0, "w": np.asarray(w).tolist(), "b": np.asarray(b).tolist(), "m_w": np.asarray(m_w).tolist(), "m_b": np.asarray(m_b).tolist(), "key": np.asarray(key).tolist(), "config": config, "config_hash": config_hash}
+        state_payload["state_hash"] = digest_obj(state_payload)
+        atomic_write_json(ckpt_path, state_payload)
+    if step > steps:
+        raise ValueError(f"checkpoint step {step} exceeds requested final step {steps}")
 
     @jax.jit
     # Function `train_step(w, b, m_w, m_b, ...)` implementing this stage's computation:
@@ -200,6 +217,10 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
 
+    if step == steps:
+        emit("completed", step=step, state_hash=state_payload["state_hash"])
+        return {"final_step": step, "state_hash": state_payload["state_hash"], "w": float(np.asarray(w).squeeze()), "b": float(np.asarray(b).squeeze()), "warmup_ms": 0.0, "step_losses": [], "step_times_ms": []}
+
     # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     # Run `train_step` to compute `warm`.
@@ -228,6 +249,8 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             "m_w": np.asarray(m_w).tolist(),
             "m_b": np.asarray(m_b).tolist(),
             "key": np.asarray(key).tolist(),
+            "config": config,
+            "config_hash": config_hash,
         }
         state_payload["state_hash"] = digest_obj(state_payload)
         step_losses.append(float(loss))
@@ -249,6 +272,8 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         "step_losses": step_losses,
         "step_times_ms": step_times_ms,
     }
+
+
 ```
 
 Warmup compiles the JIT function without mutating w, b, m_w, m_b, or key, so step 1 starts from the exact initial or restored state.
@@ -305,7 +330,8 @@ def digest_obj(value):
     # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
-    ).hexdigest()[:16]
+    ).hexdigest()
+
 
 
 # Function `atomic_write_json(path, payload)` implementing this stage's computation:
@@ -356,16 +382,27 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
-    # Branch on condition `resume and ckpt_path.exists()`:
-    if resume and ckpt_path.exists():
+    config = {"schema": 1, "seed": int(seed), "lr": float(lr), "data": "linspace64-target-3x-minus-0.5-v1", "batch_size": 16, "optimizer": "momentum-0.8-noise-key-v1"}
+    config_hash = digest_obj(config)
+    # A requested resume requires an existing, compatible, intact checkpoint.
+    if resume:
+        if not ckpt_path.exists():
+            raise FileNotFoundError(f"resume requested but checkpoint is missing: {ckpt_path}")
         saved = json.loads(ckpt_path.read_text(encoding="utf-8"))
+        supplied_hash = saved.pop("state_hash", None)
+        if supplied_hash != digest_obj(saved):
+            raise ValueError("checkpoint state hash mismatch")
+        if saved.get("config_hash") != config_hash or saved.get("config") != config:
+            raise ValueError("checkpoint run configuration mismatch")
         step = int(saved["step"])
         w = jnp.array(saved["w"], dtype=jnp.float32)
         b = jnp.array(saved["b"], dtype=jnp.float32)
         m_w = jnp.array(saved["m_w"], dtype=jnp.float32)
         m_b = jnp.array(saved["m_b"], dtype=jnp.float32)
         key = jnp.array(saved["key"], dtype=jnp.uint32)
-        emit("restored", step=step, state_hash=saved["state_hash"])
+        state_payload = dict(saved)
+        state_payload["state_hash"] = supplied_hash
+        emit("restored", step=step, state_hash=supplied_hash)
     else:
         step = 0
         w = jnp.zeros((1, 1), dtype=jnp.float32)
@@ -374,6 +411,11 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         m_b = jnp.zeros_like(b)
         key = jax.random.PRNGKey(seed)
         emit("started", step=step)
+        state_payload = {"step": 0, "w": np.asarray(w).tolist(), "b": np.asarray(b).tolist(), "m_w": np.asarray(m_w).tolist(), "m_b": np.asarray(m_b).tolist(), "key": np.asarray(key).tolist(), "config": config, "config_hash": config_hash}
+        state_payload["state_hash"] = digest_obj(state_payload)
+        atomic_write_json(ckpt_path, state_payload)
+    if step > steps:
+        raise ValueError(f"checkpoint step {step} exceeds requested final step {steps}")
 
     @jax.jit
     # Function `train_step(w, b, m_w, m_b, ...)` implementing this stage's computation:
@@ -405,6 +447,10 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
 
+    if step == steps:
+        emit("completed", step=step, state_hash=state_payload["state_hash"])
+        return {"final_step": step, "state_hash": state_payload["state_hash"], "w": float(np.asarray(w).squeeze()), "b": float(np.asarray(b).squeeze()), "warmup_ms": 0.0, "step_losses": [], "step_times_ms": []}
+
     # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     # Run `train_step` to compute `warm`.
@@ -433,6 +479,8 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             "m_w": np.asarray(m_w).tolist(),
             "m_b": np.asarray(m_b).tolist(),
             "key": np.asarray(key).tolist(),
+            "config": config,
+            "config_hash": config_hash,
         }
         state_payload["state_hash"] = digest_obj(state_payload)
         step_losses.append(float(loss))
@@ -454,6 +502,7 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         "step_losses": step_losses,
         "step_times_ms": step_times_ms,
     }
+
 
 
 # Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run: Because parameters, momentum buffers, and PRNG keys are all...
@@ -480,7 +529,7 @@ print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
 print("Losses across 6 steps:", [round(v, 5) for v in control["step_losses"]])
 ```
 
-Expected: Prints the matching 16-character state_hash for the resumed and control runs and the monotonically decreasing 6-step loss trajectory.
+Expected: Prints the matching 64-character state_hash for the resumed and control runs and the monotonically decreasing 6-step loss trajectory.
 
 ## Interrupted-and-resumed trajectory vs uninterrupted 6-step control run
 
@@ -516,16 +565,16 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:41.074840+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:58:53.178365+00:00. JAX 0.9.2.
 
 ```text
-Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc
+Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc
+Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 109.556 Median steady step ms: 0.0571
-Drifted state_hash vs control: 98b637bef786a354 62b9a0a939c380dc
-Step 8 resumed vs control hash: c2f49383b86e426e c2f49383b86e426e
+Warmup ms: 79.34 Median steady step ms: 0.0432
+Resume rejection: checkpoint state hash mismatch
+Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
 Loaded step: 4 Leftover tmp files: []
 PASS: tpu-02
@@ -549,37 +598,33 @@ assert control["warmup_ms"] > median_step_ms
 
 Logging warmup separately in events.jsonl prevents compilation overhead from distorting per-step throughput numbers on CPU or TPU.
 
-## Verify what breaks if momentum state is omitted on resume
+## Verify checkpoint integrity rejects omitted momentum
 
-**Predict before running:** If a resumed job resets momentum buffers m_w and m_b to zero at step 3, will step 4 match the uninterrupted run?
+**Predict before running:** If the momentum buffers are changed in a saved checkpoint without updating its state hash, will resume continue with the altered state?
 
 ```python
-# Experiment — Verify what breaks if momentum state is omitted on resume: Restoring model weights alone is not a valid checkpoint resume;...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Verify checkpoint integrity rejects a modified momentum buffer
 with tempfile.TemporaryDirectory(prefix="tpu-bad-resume-") as tmp:
-    # Read or serialize artifact data on disk (`bad_dir`).
     bad_dir = Path(tmp) / "bad"
-    # Run `run_tpu_ready_job` to perform the next check or state transition.
     run_tpu_ready_job(bad_dir, steps=3, save_every=3, resume=False)
-    # Read or serialize artifact data on disk (`ckpt`).
-    ckpt = json.loads((bad_dir / "checkpoint-latest.json").read_text(encoding="utf-8"))
-    # Compute `ckpt["m_w"]` from `[[0.0]]`
+    ckpt_path = bad_dir / "checkpoint-latest.json"
+    ckpt = json.loads(ckpt_path.read_text(encoding="utf-8"))
     ckpt["m_w"] = [[0.0]]
-    # Compute `ckpt["m_b"]` from `[0.0]`
     ckpt["m_b"] = [0.0]
-    # Compute `(bad_dir / "checkpoint-latest.json").write_text(json.dumps(ckpt), encoding` as `"utf-8")`.
-    (bad_dir / "checkpoint-latest.json").write_text(json.dumps(ckpt), encoding="utf-8")
-    # Run `run_tpu_ready_job` to compute `bad_part2`.
-    bad_part2 = run_tpu_ready_job(bad_dir, steps=6, save_every=3, resume=True)
-# Print the observed values to compare against the expected result.
-print("Drifted state_hash vs control:", bad_part2["state_hash"], control["state_hash"])
-# Assert invariant `bad_part2["state_hash"] != control["state_hash"]` holds
-assert bad_part2["state_hash"] != control["state_hash"]
+    ckpt_path.write_text(json.dumps(ckpt), encoding="utf-8")
+    try:
+        run_tpu_ready_job(bad_dir, steps=6, save_every=3, resume=True)
+    except ValueError as exc:
+        message = str(exc)
+    else:
+        raise AssertionError("modified checkpoint was accepted")
+print("Resume rejection:", message)
+assert message == "checkpoint state hash mismatch"
 ```
 
-**Expected:** Resetting momentum at step 3 produces a different step-6 state_hash and loss trajectory.
+**Expected:** Resume raises ValueError with checkpoint state hash mismatch before loading or training from the modified state.
 
-Restoring model weights alone is not a valid checkpoint resume; optimizer state and PRNG keys must be restored together.
+The state hash covers the serialized step, parameters, optimizer moments, PRNG key, and run configuration. A changed momentum buffer is corruption and must be rejected. To study the trajectory of a buggy weight-only resume, use a separate intentionally weakened loader that recomputes a valid hash after omitting momentum; that demonstrates the modeling error but is not an acceptable checkpoint path.
 
 ## Make it yours
 

@@ -79,7 +79,7 @@ export function renderLesson({ phase, lesson, prerequisiteLinks, allLessons, ind
       <div class="exercise-workbench">
         <div class="exercise-workbench-header">
           <span class="exercise-badge">Hands-On Exercise · Modify &amp; Verify</span>
-          <span class="exercise-hint">Run in your local Python environment or Cloud TPU VM</span>
+          <span class="exercise-hint">Run in the declared lesson environment</span>
         </div>
         <h2>Make it yours</h2>
         <p class="stage-code-guide"><strong>Where to put your code:</strong> Append your solution at the bottom of <code>${escapeHtml(artifacts.scriptSource)}</code> (or inside the <em>Make it yours</em> cell of <code>${escapeHtml(artifacts.notebook)}</code>) and run <code>python3 ${escapeHtml(artifacts.scriptSource)}</code> to verify your prediction before opening the reference solution.</p>

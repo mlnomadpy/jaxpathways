@@ -1,18 +1,27 @@
-# Verify grad, jit, vmap, and PyTree transformations
+# Compare scalar, vectorized and compiled functions
 
-Phase 02 dedicated integration project ([Phase 02](../../phases/02-transforms/README.md)). See also the cross-phase companion project [`foundation-toolkit`](../foundation-toolkit/README.md).
+This project checks whether three ways of applying \(f(x)=\sin(x)+x^2\) agree: a Python loop, `jax.vmap`, and `jax.jit(jax.vmap(...))`. It also checks the derivative \(f'(x)=\cos(x)+2x\). A successful call on one batch shape does not prove that a changed shape reuses the same trace.
 
-## Mathematical contract
+## Before you start
 
-Given input batch $X \in \mathbb{R}^{B \times d_\text{in}}$ and projection weights $W_\text{enc}, P$, the normalized representation is:
+Complete `first-gradient` and `transforms-02` through `transforms-05`. Be comfortable with pure functions and the difference between mapping values and tracing a function. Run from the repository root with `requirements-cpu.txt` installed. Edit `projects/transforms-audit/starter/model.py`.
 
-$$
-H = \tanh(X W_\text{enc} + b_\text{enc}) P, \qquad \hat{H}_i = \frac{H_i}{\max(\|H_i\|_2, 10^{-6})}
-$$
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-cpu.txt
+python3 projects/transforms-audit/tests/check.py --implementation starter --stage 1
+python3 projects/transforms-audit/tests/check.py --implementation starter --stage 2
+python3 projects/transforms-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/transforms-audit
+python3 projects/transforms-audit/tests/check.py --implementation starter --stage 4
+```
 
-## Stage verification
+On Windows PowerShell, activate `.venv\Scripts\Activate.ps1` and use `python` instead of `python3`.
 
-1. **Stage 1 — Parameter and state contract:** `python3 projects/transforms-audit/tests/check.py --stage 1`
-2. **Stage 2 — Masked forward pass:** `python3 projects/transforms-audit/tests/check.py --stage 2`
-3. **Stage 3 — Gradient verification:** `python3 projects/transforms-audit/tests/check.py --stage 3`
-4. **Stage 4 — Compiled scan qualification:** `python3 projects/transforms-audit/tests/check.py --stage 4`
+Stage 1 compares the vectorized and loop values, then checks the analytic derivative at four inputs. At \(x=0.7\), for example, the derivative is \(1.4+\cos(0.7)\), about 2.165. If value checks pass while derivative checks fail, inspect the argument to `jax.grad` and the axis used by `vmap`.
+
+Stage 2 changes the values and adds a fifth element. The new output must equal \(\sin(x)+x^2\); the compiled function should be traced once for the original shape and once for the extended shape. Do not claim that the function is shape-polymorphic from this result.
+
+Stage 3 saves the JAXPR as `runs/transforms-audit/transforms-audit.jaxpr.txt`. Read the `sin`, multiply and addition operations to connect the traced program to the formula. Without `--evidence-dir`, the artifact is temporary. Stage 4 integrates all checks. Passing output begins `PASS transforms-audit stage N`.
+
+The JAXPR and comparisons are local CPU evidence. The example makes no timing or TPU compilation claim. Reference: `python3 projects/transforms-audit/tests/check.py --implementation solution --stage 4`.

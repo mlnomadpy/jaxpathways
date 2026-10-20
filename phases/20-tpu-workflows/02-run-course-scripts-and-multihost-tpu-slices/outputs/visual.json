@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-05",
-  "contentHash": "39a340f547fdeb5cb92e33eff2a0b3e2f161f906aa7780661730222945745c98",
-  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "contentHash": "09cbfe2aa061d9ab3329236f15e12a6bbbdb04609765c10fc42a27e3e277a585",
+  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-08T10:31:58.390665+00:00",
+  "generatedAt": "2026-10-20T10:58:50.448372+00:00",
+  "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nPod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\n",
+  "stdout": "Correctly rejected CPU-only lesson for TPU Pod execution\nSlice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nCPU route: python public/exercises/distributed-02.py\n",
   "data": {
     "kind": "bar",
     "labels": [
@@ -27,28 +28,28 @@
       {
         "label": "Linux VM hosts",
         "y": [
-          1,
-          1,
-          4,
-          4
+          1.0,
+          1.0,
+          4.0,
+          4.0
         ]
       },
       {
         "label": "local chips per host",
         "y": [
-          4,
-          8,
-          4,
-          4
+          4.0,
+          8.0,
+          4.0,
+          4.0
         ]
       },
       {
         "label": "global TPU chips",
         "y": [
-          4,
-          8,
-          16,
-          16
+          4.0,
+          8.0,
+          16.0,
+          16.0
         ]
       }
     ]

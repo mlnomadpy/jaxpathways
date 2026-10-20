@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-02",
-  "contentHash": "726ab335a6c59ecd156ca672d72cd5f56172df6a3d400d78f2493e355a1ce432",
-  "executedAt": "2026-10-13T09:03:41.074840+00:00",
+  "contentHash": "90a369489019c4bccc04bade800129bfb8c90c341621d2a9a4160ef2a6d2b1d4",
+  "executedAt": "2026-10-20T10:58:53.178365+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,14 +11,14 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: 62b9a0a939c380dc\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 109.556 Median steady step ms: 0.0571\nDrifted state_hash vs control: 98b637bef786a354 62b9a0a939c380dc\nStep 8 resumed vs control hash: c2f49383b86e426e c2f49383b86e426e\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
+  "stdout": "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nResumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\nLosses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\nWarmup ms: 79.34 Median steady step ms: 0.0432\nResume rejection: checkpoint state hash mismatch\nStep 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\nRecorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']\nLoaded step: 4 Leftover tmp files: []\nPASS: tpu-02\n",
   "notebookCells": [
     {
-      "sourceHash": "89d48ea6a6dcb27189becfbda5a2575695a130117e62b065a136c8548cad7436",
+      "sourceHash": "b7112ebf276c607f35e15db89d335c8f7665191150cd7e1bf22c2e6801dab431",
       "outputs": []
     },
     {
-      "sourceHash": "0a5ae09c26f8e141a7685192d2dfced5009464b8fee262cdc9512348bf184055",
+      "sourceHash": "b0f3d6ed93675f28e803e7c9127ce0a71308bb309b7db419bb36c84271f16645",
       "outputs": []
     },
     {
@@ -28,20 +28,20 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc\n",
+            "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\n",
             "Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "0e925185534b6ebbc67c6a656f4c814b14f1f179452fdded4256c8912b5c124c",
+      "sourceHash": "848156daa3822ce35b68f6ce26c53e528c05fb1eab14d80ff6c62f0270eea5bf",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Resumed state_hash matches uninterrupted control: 62b9a0a939c380dc\n",
+            "Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1\n",
             "Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]\n"
           ]
         }
@@ -73,19 +73,19 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Warmup ms: 110.235 Median steady step ms: 0.0403\n"
+            "Warmup ms: 81.028 Median steady step ms: 0.0458\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "a058e0cd1197ab1bc170a227e32afb3a4b65cf0c272e1d87dbab02a5905a8175",
+      "sourceHash": "51ea7603a08d8126bfe8e67b51eb9f8997d0c7e1a48de52f49ce31a737a73bfc",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Drifted state_hash vs control: 98b637bef786a354 62b9a0a939c380dc\n"
+            "Resume rejection: checkpoint state hash mismatch\n"
           ]
         }
       ]
@@ -101,7 +101,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Step 8 resumed vs control hash: c2f49383b86e426e c2f49383b86e426e\n"
+            "Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9\n"
           ]
         }
       ]

@@ -1,0 +1,16 @@
+{
+  "source_id": "gutenberg-11",
+  "title": "Alice's Adventures in Wonderland",
+  "author": "Lewis Carroll",
+  "edition": "Project Gutenberg eBook 11, Millennium Fulcrum Edition 3.0",
+  "source_url": "https://www.gutenberg.org/cache/epub/11/pg11.txt",
+  "metadata_url": "https://www.gutenberg.org/ebooks/11",
+  "retrieved_at": "2026-10-20",
+  "rights": "Project Gutenberg lists this text as public domain in the United States. The included source file retains its terms and header. Rights may differ by jurisdiction; users outside the US should check their local law and the included Project Gutenberg License.",
+  "source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+  "split_unit": "chapter",
+  "split_map": {"I": "train", "II": "train", "III": "train", "IV": "train", "V": "validation", "VI": "test", "VII": "test", "VIII": "test"},
+  "selection": "At most 32 paragraphs per chapter, sampled at evenly spaced eligible paragraph indices; paragraphs are retained as source passages.",
+  "queries_and_judgments": "Queries and single-positive qrels are manually authored educational pilot judgments, not Project Gutenberg labels or a benchmark.",
+  "limitations": ["One public-domain novel and one English-language genre", "The held-out chapters share characters, setting and style with training chapters", "Tiny pilot qrels cannot establish general retrieval quality", "Training labels use source chapter identity"]
+}

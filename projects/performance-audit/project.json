@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "performance-audit",
-  "title": "Audit XLA compilation boundaries, step latency, and memory",
+  "title": "Measure CPU JIT latency and changed-shape traces with retained JAXPR evidence",
   "pathwayId": "scale",
   "status": "authored",
   "hardware": "CPU",
@@ -15,56 +15,49 @@
   "stages": [
     {
       "id": "1",
-      "title": "Parameter and state contract",
-      "command": "python3 projects/performance-audit/tests/check.py --stage 1",
-      "evidence": "Deterministic PRNG key split and explicit tensor shapes",
-      "expected": "PASS stage 1: parameter initialization and shape contract (performance-audit)",
-      "diagnosis": "Verify that PRNG keys are split before parameter initialization and shapes match (d_model, d_out).",
-      "codeGuide": "In `projects/performance-audit/starter/model.py`, implement `init_params(...)` with explicit `jax.random.split` and float32 arrays.",
-      "starterSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    # Step 1: Split PRNG key from `seed` into weight and projection subkeys.\n    # Step 2: Initialize `w_enc` of shape `(d_model, d_out)` and zero `b_enc`.\n    raise NotImplementedError('Stage 1: implement init_params')",
-      "solutionSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    key = jax.random.key(seed)\n    k_w, k_p = jax.random.split(key)\n    scale = 1.0 / jnp.sqrt(jnp.float32(d_model))\n    return {\n        'w_enc': jax.random.normal(k_w, (d_model, d_out), dtype=jnp.float32) * scale,\n        'b_enc': jnp.zeros((d_out,), dtype=jnp.float32),\n        'proj': jax.random.normal(k_p, (d_out, d_out), dtype=jnp.float32) / jnp.sqrt(jnp.float32(d_out)),\n        'temperature': jnp.float32(0.07),\n    }"
+      "title": "Contract and independent calculation",
+      "command": "python3 projects/performance-audit/tests/check.py --implementation starter --stage 1",
+      "evidence": "Check output against an independent NumPy result and synchronize every timing.",
+      "expected": "PASS performance-audit stage 1",
+      "diagnosis": "Check output against an independent NumPy result and synchronize every timing.",
+      "codeGuide": "Implement the relevant contract in `projects/performance-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence.",
+      "starterSnippet": "\"\"\"Starter: profile a small CPU workload and retain trace evidence.\"\"\"\nimport json,time\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef performance_report(output_dir, repeats=5):\n    raise NotImplementedError(\"measure synchronized calls, count shape traces, and save report plus JAXPR\")",
+      "solutionSnippet": "\"\"\"Measure CPU first-call and steady latency, shape tracing, and retain a JAXPR artifact.\"\"\"\nimport json,time\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef performance_report(output_dir, repeats=5):\n    if repeats<3: raise ValueError(\"use at least three repeated calls\")\n    traces={\"count\":0}\n    def traced(x):\n        traces[\"count\"]+=1\n        return jnp.tanh(x@x)\n    f=jax.jit(traced); x=jnp.eye(16,dtype=jnp.float32)\n    t=time.perf_counter(); first=f(x); first.block_until_ready(); first_seconds=time.perf_counter()-t\n    samples=[]\n    for _ in range(repeats):\n        t=time.perf_counter(); y=f(x); y.block_until_ready(); samples.append(time.perf_counter()-t)\n    second=f(jnp.eye(32,dtype=jnp.float32)); second.block_until_ready()\n    jaxpr=str(jax.make_jaxpr(traced)(x))\n    out=Path(output_dir); out.mkdir(parents=True,exist_ok=True); (out/\"workload.jaxpr.txt\").write_text(jaxpr)\n    report={\"backend\":jax.default_backend(),\"shapes\":[[16,16],[32,32]],\"trace_count\":traces[\"count\"],\"first_call_seconds\":first_seconds,\"steady_seconds\":samples,\"output_shape\":list(y.shape),\"output\":np.asarray(y).tolist(),\"changed_shape_output\":np.asarray(second).tolist(),\"memory_measured\":False,\"trace_artifact\":\"workload.jaxpr.txt\"}\n    (out/\"report.json\").write_text(json.dumps(report,indent=2)+\"\\n\")\n    return report"
     },
     {
       "id": "2",
-      "title": "Masked forward pass and normalization",
-      "command": "python3 projects/performance-audit/tests/check.py --stage 2",
-      "evidence": "Unit-norm embeddings on valid rows and exact zeros on masked rows",
-      "expected": "PASS stage 2: masked forward representation and unit normalization (performance-audit)",
-      "diagnosis": "Guard division by zero with jnp.maximum(norms, 1e-6) and apply the row mask both before and after normalization.",
-      "codeGuide": "In `projects/performance-audit/starter/model.py`, implement `forward_batch(...)` with input shape validation and L2 normalization.",
-      "starterSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    # Step 1: Guard input rank and feature dimension.\n    # Step 2: Compute projections and unit-normalize valid rows.\n    raise NotImplementedError('Stage 2: implement forward_batch')",
-      "solutionSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    raw = jnp.tanh(x @ params['w_enc'] + params['b_enc']) @ params['proj']\n    norms = jnp.linalg.norm(raw, axis=-1, keepdims=True)\n    embeddings = raw / jnp.maximum(norms, 1e-6)\n    return {'raw': raw, 'embeddings': embeddings, 'norms': jnp.squeeze(norms, axis=-1)}"
+      "title": "Changed condition and diagnosis",
+      "command": "python3 projects/performance-audit/tests/check.py --implementation starter --stage 2",
+      "evidence": "Call the compiled function at two shapes and verify two Python trace events.",
+      "expected": "PASS performance-audit stage 2",
+      "diagnosis": "Call the compiled function at two shapes and verify two Python trace events.",
+      "codeGuide": "Implement the relevant contract in `projects/performance-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "3",
-      "title": "Autodiff and finite-difference verification",
-      "command": "python3 projects/performance-audit/tests/check.py --stage 3",
-      "evidence": "Agreement between jax.value_and_grad and central finite differences",
-      "expected": "PASS stage 3: autodiff vs finite-difference gradient check (performance-audit)",
-      "diagnosis": "Ensure the loss function is pure and normalizes target vectors consistently.",
-      "codeGuide": "In `projects/performance-audit/starter/model.py`, implement `compute_loss_and_grads(...)` using `jax.value_and_grad`.",
-      "starterSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    # Step 1: Differentiate the scalar alignment objective with `jax.value_and_grad`.\n    raise NotImplementedError('Stage 3: implement compute_loss_and_grads')",
-      "solutionSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    return jax.value_and_grad(_objective)(params, x, targets)"
+      "title": "Retained evidence",
+      "command": "python3 projects/performance-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/performance-audit",
+      "evidence": "Retain the JAXPR and timing report; state that this CPU exercise does not measure device memory.",
+      "expected": "PASS performance-audit stage 3",
+      "diagnosis": "Retain the JAXPR and timing report; state that this CPU exercise does not measure device memory.",
+      "codeGuide": "Implement the relevant contract in `projects/performance-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "4",
-      "title": "Compiled scan loop and held-out qualification",
-      "command": "python3 projects/performance-audit/tests/check.py --stage 4",
-      "evidence": "Monotonic training loss reduction and finite held-out evaluation",
-      "expected": "PASS stage 4: compiled scan training and held-out qualification (performance-audit)",
-      "diagnosis": "Check that jax.lax.scan carries updated parameters forward on every step.",
-      "codeGuide": "In `projects/performance-audit/starter/model.py`, implement `qualification_report(...)` using `jax.lax.scan`.",
-      "starterSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    # Step 1: Run `jax.lax.scan` over `steps` updates and evaluate held-out loss.\n    raise NotImplementedError('Stage 4: implement qualification_report')",
-      "solutionSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    fitted, history = jax.lax.scan(step_fn, params, None, length=steps)\n    return {'initial_loss': float(history[0]), 'final_loss': float(history[-1]), 'finite': True}"
+      "title": "Integrated project check",
+      "command": "python3 projects/performance-audit/tests/check.py --implementation starter --stage 4",
+      "evidence": "Run all prior checks and preserve their failure boundaries.",
+      "expected": "PASS performance-audit stage 4",
+      "diagnosis": "Run all prior checks and preserve their failure boundaries.",
+      "codeGuide": "Implement the relevant contract in `projects/performance-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     }
   ],
   "rubric": [
-    "Initialize parameters deterministically from explicit PRNG keys",
-    "Enforce input shape contracts and masked row normalization",
-    "Verify automatic gradients against central finite differences",
-    "Compile the multi-step update with jax.lax.scan and report held-out metrics"
+    "Check output against an independent NumPy result and synchronize every timing.",
+    "Call the compiled function at two shapes and verify two Python trace events.",
+    "Retain the JAXPR and timing report; state that this CPU exercise does not measure device memory."
   ],
-  "setupNote": "Open `projects/performance-audit/starter/model.py` and implement each stage, verifying with `python3 projects/performance-audit/tests/check.py --stage 1` through `--stage 4`.",
+  "setupNote": "Run stages 1 through 4 using the commands shown. Stage 3 writes persistent evidence under `runs/performance-audit/` when using its documented `--evidence-dir`; without that option, evidence stays in a temporary directory. The untouched starter deliberately fails.",
   "workspaceFile": "projects/performance-audit/starter/model.py",
-  "referenceCommand": "python3 projects/performance-audit/tests/check.py --implementation solution --stage all"
+  "referenceCommand": "python3 projects/performance-audit/tests/check.py --implementation solution --stage 4"
 }

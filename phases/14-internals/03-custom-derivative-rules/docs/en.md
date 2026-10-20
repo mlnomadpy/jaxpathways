@@ -73,50 +73,36 @@ Create main.py for the first block, then append subsequent blocks in order using
 
 ```python
 # Step 1 — Write stable primal functions and exact derivative contracts: The JVP rule returns primal and tangent; the VJP forward rule...
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
 # Register custom derivative rule on `stable_softplus(x)`:
 @jax.custom_jvp
-# Function `stable_softplus(x)` implementing this stage's computation:
 def stable_softplus(x):
-    # Return `jnp.logaddexp(0.0, x)` to the caller.
     return jnp.logaddexp(0.0,x)
 
 @stable_softplus.defjvp
-# Function `softplus_jvp(primals, tangents)` implementing this stage's computation:
 def softplus_jvp(primals,tangents):
-    # Compute `x,` from `primals`
     x,=primals
-    # Compute `dx,` from `tangents`
     dx,=tangents
-    # Return `(stable_softplus(x), jax.nn.sigmoid(x) * dx)` to the caller.
     return stable_softplus(x),jax.nn.sigmoid(x)*dx
 
 # Register custom derivative rule on `stable_logsumexp(x)`:
 @jax.custom_vjp
-# Function `stable_logsumexp(x)` implementing this stage's computation:
 def stable_logsumexp(x):
-    # Return `jax.scipy.special.logsumexp(x)` to the caller.
     return jax.scipy.special.logsumexp(x)
 
-# Function `logsumexp_fwd(x)` implementing this stage's computation:
 def logsumexp_fwd(x):
     # Evaluate numerically stable log-space cross-entropy/likelihood (`value`).
     value=stable_logsumexp(x)
     # Apply nonlinear activation or probability normalization to compute `weights`.
     weights=jax.nn.softmax(x)
-    # Return `(value, weights)` to the caller.
     return value,weights
 
-# Function `logsumexp_bwd(weights, cotangent)` implementing this stage's computation:
 def logsumexp_bwd(weights,cotangent):
-    # Return `(cotangent * weights,)` to the caller.
     return (cotangent*weights,)
 
 # Execute `stable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)`.
@@ -131,7 +117,6 @@ Create main.py for the first block, then append subsequent blocks in order using
 
 ```python
 # Step 2 — Check first and second derivatives independently: An exact first derivative can still hide mistakes in a...
-# Construct `points` via `jnp.array([-4.,0.,3.])`
 points=jnp.array([-4.,0.,3.])
 # Vectorize across the batch dimension with `jax.vmap` (`values`).
 values=jax.vmap(stable_softplus)(points)
@@ -141,29 +126,22 @@ first=jax.vmap(jax.grad(stable_softplus))(points)
 second=jax.vmap(jax.grad(jax.grad(stable_softplus)))(points)
 # Convert `reference_first` to a host NumPy array for inspection or verification.
 reference_first=1/(1+np.exp(-np.asarray(points)))
-# Compute `reference_second` from `reference_first*(1-reference_first)`
 reference_second=reference_first*(1-reference_first)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(values,np.logaddexp(0,np.asarray(points)),rtol=1e-12)
-# Compute `np.testing.assert_allclose(first,reference_first,rtol` as `1e-12)`.
 np.testing.assert_allclose(first,reference_first,rtol=1e-12)
-# Compute `np.testing.assert_allclose(second,reference_second,rtol` as `1e-12)`.
 np.testing.assert_allclose(second,reference_second,rtol=1e-12)
-# Construct `x` via `jnp.array([-0.8,0.4,1.1])`
 x=jnp.array([-0.8,0.4,1.1])
 # Convert `weights` to a host NumPy array for inspection or verification.
 # Accumulate the next contribution into `weights`.
 weights=np.exp(np.asarray(x)-np.max(np.asarray(x)))
 weights/=weights.sum()
-# Run `np.diag` to compute `hessian_reference`.
 hessian_reference=np.diag(weights)-np.outer(weights,weights)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(stable_logsumexp)(x),weights,rtol=1e-12)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.jacrev(jax.grad(stable_logsumexp))(x),hessian_reference,rtol=1e-12,atol=1e-12)
-# Print diagnostic summary of the computed outputs.
 print("Softplus first/second:",np.asarray(first),np.asarray(second))
-# Print diagnostic summary of the computed outputs.
 print("Logsumexp gradient:",weights)
 ```
 
@@ -175,7 +153,6 @@ Create main.py for the first block, then append subsequent blocks in order using
 
 ```python
 # Step 3 — Exercise extremes and seed linearity: Numerical stability must hold in both the primal and derivative path.
-# Construct `extremes` via `jnp.array([-1000.,0.,1000.])`
 extremes=jnp.array([-1000.,0.,1000.])
 # Vectorize across the batch dimension with `jax.vmap` (`extreme_values`).
 extreme_values=jax.vmap(stable_softplus)(extremes)
@@ -183,7 +160,6 @@ extreme_values=jax.vmap(stable_softplus)(extremes)
 extreme_gradients=jax.vmap(jax.grad(stable_softplus))(extremes)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(extreme_values).all() and np.isfinite(extreme_gradients).all()
-# Compute `np.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol` as `1e-12)`.
 np.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol=1e-12)
 # Enter `np.errstate(over='ignore')` context block:
 with np.errstate(over='ignore'):
@@ -193,9 +169,7 @@ with np.errstate(over='ignore'):
 assert not np.isfinite(naive[-1])
 # Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _,pullback=jax.vjp(stable_logsumexp,x)
-# Compute `np.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol` as `1e-12)`.
 np.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Stable extreme values:",np.asarray(extreme_values),"naive positive extreme:",naive[-1])
 ```
 
@@ -205,57 +179,42 @@ Numerical stability must hold in both the primal and derivative path. Backward s
 
 ```python
 # Step 1 — Write stable primal functions and exact derivative contracts: The JVP rule returns primal and tangent; the VJP forward rule...
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
 # Register custom derivative rule on `stable_softplus(x)`:
 @jax.custom_jvp
-# Function `stable_softplus(x)` implementing this stage's computation:
 def stable_softplus(x):
-    # Return `jnp.logaddexp(0.0, x)` to the caller.
     return jnp.logaddexp(0.0,x)
 
 @stable_softplus.defjvp
-# Function `softplus_jvp(primals, tangents)` implementing this stage's computation:
 def softplus_jvp(primals,tangents):
-    # Compute `x,` from `primals`
     x,=primals
-    # Compute `dx,` from `tangents`
     dx,=tangents
-    # Return `(stable_softplus(x), jax.nn.sigmoid(x) * dx)` to the caller.
     return stable_softplus(x),jax.nn.sigmoid(x)*dx
 
 # Register custom derivative rule on `stable_logsumexp(x)`:
 @jax.custom_vjp
-# Function `stable_logsumexp(x)` implementing this stage's computation:
 def stable_logsumexp(x):
-    # Return `jax.scipy.special.logsumexp(x)` to the caller.
     return jax.scipy.special.logsumexp(x)
 
-# Function `logsumexp_fwd(x)` implementing this stage's computation:
 def logsumexp_fwd(x):
     # Evaluate numerically stable log-space cross-entropy/likelihood (`value`).
     value=stable_logsumexp(x)
     # Apply nonlinear activation or probability normalization to compute `weights`.
     weights=jax.nn.softmax(x)
-    # Return `(value, weights)` to the caller.
     return value,weights
 
-# Function `logsumexp_bwd(weights, cotangent)` implementing this stage's computation:
 def logsumexp_bwd(weights,cotangent):
-    # Return `(cotangent * weights,)` to the caller.
     return (cotangent*weights,)
 
 # Execute `stable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)`.
 stable_logsumexp.defvjp(logsumexp_fwd,logsumexp_bwd)
 
 # Step 2 — Check first and second derivatives independently: An exact first derivative can still hide mistakes in a...
-# Construct `points` via `jnp.array([-4.,0.,3.])`
 points=jnp.array([-4.,0.,3.])
 # Vectorize across the batch dimension with `jax.vmap` (`values`).
 values=jax.vmap(stable_softplus)(points)
@@ -265,33 +224,25 @@ first=jax.vmap(jax.grad(stable_softplus))(points)
 second=jax.vmap(jax.grad(jax.grad(stable_softplus)))(points)
 # Convert `reference_first` to a host NumPy array for inspection or verification.
 reference_first=1/(1+np.exp(-np.asarray(points)))
-# Compute `reference_second` from `reference_first*(1-reference_first)`
 reference_second=reference_first*(1-reference_first)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(values,np.logaddexp(0,np.asarray(points)),rtol=1e-12)
-# Compute `np.testing.assert_allclose(first,reference_first,rtol` as `1e-12)`.
 np.testing.assert_allclose(first,reference_first,rtol=1e-12)
-# Compute `np.testing.assert_allclose(second,reference_second,rtol` as `1e-12)`.
 np.testing.assert_allclose(second,reference_second,rtol=1e-12)
-# Construct `x` via `jnp.array([-0.8,0.4,1.1])`
 x=jnp.array([-0.8,0.4,1.1])
 # Convert `weights` to a host NumPy array for inspection or verification.
 # Accumulate the next contribution into `weights`.
 weights=np.exp(np.asarray(x)-np.max(np.asarray(x)))
 weights/=weights.sum()
-# Run `np.diag` to compute `hessian_reference`.
 hessian_reference=np.diag(weights)-np.outer(weights,weights)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(stable_logsumexp)(x),weights,rtol=1e-12)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.jacrev(jax.grad(stable_logsumexp))(x),hessian_reference,rtol=1e-12,atol=1e-12)
-# Print diagnostic summary of the computed outputs.
 print("Softplus first/second:",np.asarray(first),np.asarray(second))
-# Print diagnostic summary of the computed outputs.
 print("Logsumexp gradient:",weights)
 
 # Step 3 — Exercise extremes and seed linearity: Numerical stability must hold in both the primal and derivative path.
-# Construct `extremes` via `jnp.array([-1000.,0.,1000.])`
 extremes=jnp.array([-1000.,0.,1000.])
 # Vectorize across the batch dimension with `jax.vmap` (`extreme_values`).
 extreme_values=jax.vmap(stable_softplus)(extremes)
@@ -299,7 +250,6 @@ extreme_values=jax.vmap(stable_softplus)(extremes)
 extreme_gradients=jax.vmap(jax.grad(stable_softplus))(extremes)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(extreme_values).all() and np.isfinite(extreme_gradients).all()
-# Compute `np.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol` as `1e-12)`.
 np.testing.assert_allclose(extreme_values,[0.,np.log(2.),1000.],atol=1e-12)
 # Enter `np.errstate(over='ignore')` context block:
 with np.errstate(over='ignore'):
@@ -309,9 +259,7 @@ with np.errstate(over='ignore'):
 assert not np.isfinite(naive[-1])
 # Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _,pullback=jax.vjp(stable_logsumexp,x)
-# Compute `np.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol` as `1e-12)`.
 np.testing.assert_allclose(pullback(2.0-0.3)[0],2*pullback(1.0)[0]-pullback(0.3)[0],rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Stable extreme values:",np.asarray(extreme_values),"naive positive extreme:",naive[-1])
 ```
 
@@ -351,7 +299,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:01:04.949744+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:50:14.579922+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]
@@ -378,32 +326,22 @@ PASS: internals-03
 # Experiment — Expose a wrong but linear rule: The wrong tangent expression is linear, so transposition can...
 # Register custom derivative rule on `wrong_softplus(z)`:
 @jax.custom_jvp
-# Function `wrong_softplus(z)` implementing this stage's computation:
 def wrong_softplus(z):
-    # Return `jnp.logaddexp(0.0, z)` to the caller.
     return jnp.logaddexp(0.0,z)
 @wrong_softplus.defjvp
-# Function `wrong_rule(primals, tangents)` implementing this stage's computation:
 def wrong_rule(primals,tangents):
-    # Compute `z,` from `primals`
     z,=primals
     dz,=tangents
-    # Return `(wrong_softplus(z), 0.5 * jax.nn.sigmoid(z) * dz)` to the caller.
     return wrong_softplus(z),0.5*jax.nn.sigmoid(z)*dz
-# Compute `probe` from `0.4`
 probe=0.4
 eps=1e-5
-# Compute `finite` from `(np.logaddexp(0,probe+eps)-np.logaddexp(0,probe-eps)...`
 finite=(np.logaddexp(0,probe+eps)-np.logaddexp(0,probe-eps))/(2*eps)
 # Differentiate the objective to obtain `wrong` via automatic differentiation.
 wrong=float(jax.grad(wrong_softplus)(probe))
 # Differentiate the objective to obtain `right` via automatic differentiation.
 right=float(jax.grad(stable_softplus)(probe))
-# Assert that `abs(wrong-finite)>0.2`.
 assert abs(wrong-finite)>0.2
-# Compute `np.testing.assert_allclose(right,finite,rtol` as `1e-9)`.
 np.testing.assert_allclose(right,finite,rtol=1e-9)
-# Print the observed values to compare against the expected result.
 print("Wrong/correct/finite-difference derivative:",wrong,right,finite)
 ```
 
@@ -424,15 +362,12 @@ try:
 except TypeError as error:
     rejected=True
     print("Expected custom_vjp forward-mode boundary:",str(error).splitlines()[0])
-# Assert invariant `rejected` holds
 assert rejected
 # Evaluate numerically stable log-space cross-entropy/likelihood (`ordinary`).
 ordinary=lambda z:jax.scipy.special.logsumexp(z)
 # Compute exact directional derivative / Jacobian / Hessian (`ordinary_direction`).
 ordinary_direction=jax.jvp(ordinary,(x,),(jnp.ones_like(x),))[1]
-# Compute `np.testing.assert_allclose(ordinary_direction,1.0,atol` as `1e-12)`.
 np.testing.assert_allclose(ordinary_direction,1.0,atol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Ordinary JAX common-shift JVP:",float(ordinary_direction))
 ```
 
@@ -453,41 +388,33 @@ Check the custom log-sum-exp gradient on $(-3,0.2,2,5)$ against an independent s
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Construct `changed` via `jnp.array([-3.,0.2,2.,5.])`
-2. Convert `host` to a host NumPy array for inspection or verification.
-3. Reduce across the target axis to summarize `p`.
-4. Accumulate the next contribution into `p`.
-5. Differentiate the objective to obtain `actual` via automatic differentiation.
+1. Convert `host` to a host NumPy array for inspection or verification.
+2. Accumulate the next contribution into `p`.
+3. Differentiate the objective to obtain `actual` via automatic differentiation.
+4. Aggregate array values to compute `reference`.
+5. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Check the custom log-sum-exp gradient on (-3,0.2,2,5) against an...
-# Construct `changed` via `jnp.array([-3.,0.2,2.,5.])`
 changed = jnp.array(...)  # TODO: compute changed
 # Convert `host` to a host NumPy array for inspection or verification.
-# Reduce across the target axis to summarize `p`.
 # Accumulate the next contribution into `p`.
 host = np.asarray(...)  # TODO: compute host
 p = np.exp(...)  # TODO: compute p
 p/=p.sum()
 # Differentiate the objective to obtain `actual` via automatic differentiation.
 actual = jax.grad(...)  # TODO: compute actual
-# Compute `np.testing.assert_allclose(actual,p,rtol` as `1e-12)`.
 np.testing.assert_allclose(actual,p,rtol = ...  # TODO: compute np.testing.assert_allclose(actual,p,rtol
-# Iterate over `direction` to step through the computation:
 for direction in (np.array([1.,-.5,.2,0.]),np.array([0.,1.,-1.,.3])):
-    # Compute `eps` from `1e-5`
     eps = ...  # TODO: compute eps
     # Aggregate array values to compute `reference`.
     reference = ...  # TODO: compute reference
-    # Compute `fd` from `(reference(host+eps*direction)-reference(host-eps*di...`
     fd = ...  # TODO: compute fd
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol = ...  # TODO: compute np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol
-# Compute `np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol` as `1e-12)`.
 np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Changed-size gradient and cotangent scaling verified")
 ```
 
@@ -495,31 +422,23 @@ print("Changed-size gradient and cotangent scaling verified")
 
 ```python
 # Exercise solution: Check the custom log-sum-exp gradient on (-3,0.2,2,5) against an...
-# Construct `changed` via `jnp.array([-3.,0.2,2.,5.])`
 changed=jnp.array([-3.,0.2,2.,5.])
 # Convert `host` to a host NumPy array for inspection or verification.
-# Reduce across the target axis to summarize `p`.
 # Accumulate the next contribution into `p`.
 host=np.asarray(changed)
 p=np.exp(host-host.max())
 p/=p.sum()
 # Differentiate the objective to obtain `actual` via automatic differentiation.
 actual=jax.grad(stable_logsumexp)(changed)
-# Compute `np.testing.assert_allclose(actual,p,rtol` as `1e-12)`.
 np.testing.assert_allclose(actual,p,rtol=1e-12)
-# Iterate over `direction` to step through the computation:
 for direction in (np.array([1.,-.5,.2,0.]),np.array([0.,1.,-1.,.3])):
-    # Compute `eps` from `1e-5`
     eps=1e-5
     # Aggregate array values to compute `reference`.
     reference=lambda z:np.max(z)+np.log(np.exp(z-np.max(z)).sum())
-    # Compute `fd` from `(reference(host+eps*direction)-reference(host-eps*di...`
     fd=(reference(host+eps*direction)-reference(host-eps*direction))/(2*eps)
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol=1e-8,atol=1e-10)
-# Compute `np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol` as `1e-12)`.
 np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Changed-size gradient and cotangent scaling verified")
 ```
 
@@ -546,26 +465,20 @@ Use stable references and avoid direct exponentiation of the shifted logits.
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
 
 **Step-by-step implementation plan:**
-1. Compute `np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol` as `1e-12)`.
-2. Differentiate the objective to obtain gradients ``.
-3. Differentiate the objective to obtain `hess` via automatic differentiation.
-4. Compute `np.testing.assert_allclose(jnp.sum(hess,axis` as `1),0.,atol=1e-12)`.
-5. Print the observed values to compare against the expected result.
+1. Differentiate the objective to obtain gradients ``.
+2. Differentiate the objective to obtain `hess` via automatic differentiation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check common-shift invariance of curvature (Practice): The common shift leaves probabilities unchanged.
 shift = ...  # TODO: compute shift
-# Compute `np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol` as `1e-12)`.
 np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)
 # Differentiate the objective to obtain `hess` via automatic differentiation.
 hess = jax.jacrev(...)  # TODO: compute hess
-# Compute `np.testing.assert_allclose(jnp.sum(hess,axis` as `1),0.,atol=1e-12)`.
 np.testing.assert_allclose(jnp.sum(hess,axis = ...  # TODO: compute np.testing.assert_allclose(jnp.sum(hess,axis
-# Print the observed values to compare against the expected result.
 print("Stable shift invariance and zero common-direction curvature verified")
 ```
 
@@ -574,15 +487,12 @@ print("Stable shift invariance and zero common-direction curvature verified")
 ```python
 # Check common-shift invariance of curvature (Practice): The common shift leaves probabilities unchanged.
 shift=1000.0
-# Compute `np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol` as `1e-12)`.
 np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)
 # Differentiate the objective to obtain `hess` via automatic differentiation.
 hess=jax.jacrev(jax.grad(stable_logsumexp))(x+shift)
-# Compute `np.testing.assert_allclose(jnp.sum(hess,axis` as `1),0.,atol=1e-12)`.
 np.testing.assert_allclose(jnp.sum(hess,axis=1),0.,atol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Stable shift invariance and zero common-direction curvature verified")
 ```
 
@@ -610,26 +520,18 @@ At fixed x, compare the response to twice a tangent with twice the response.
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
 
 **Step-by-step implementation plan:**
-1. Compute `bad` from `lambda tangent:coefficient*tangent*tangent`
-2. Assert that `not np.isclose(bad(2.0),2*bad(1.0))`.
-3. Compute exact directional derivative / Jacobian / Hessian (`good`).
-4. Compute `np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol` as `1e-12)`.
-5. Print the observed values to compare against the expected result.
+1. Compute exact directional derivative / Jacobian / Hessian (`good`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Audit a nonlinear seed rule before registering it (Challenge): Linearity follows from the definition of a derivative at a...
 coefficient = float(...)  # TODO: compute coefficient
-# Compute `bad` from `lambda tangent:coefficient*tangent*tangent`
 bad = ...  # TODO: compute bad
-# Assert that `not np.isclose(bad(2.0),2*bad(1.0))`.
 assert not np.isclose(bad(2.0),2*bad(1.0))  # TODO: complete assertion check
 # Compute exact directional derivative / Jacobian / Hessian (`good`).
 good = ...  # TODO: compute good
-# Compute `np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol` as `1e-12)`.
 np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Nonlinear seed rule rejected by its contract; repaired JVP is linear")
 ```
 
@@ -638,15 +540,11 @@ print("Nonlinear seed rule rejected by its contract; repaired JVP is linear")
 ```python
 # Audit a nonlinear seed rule before registering it (Challenge): Linearity follows from the definition of a derivative at a...
 coefficient=float(jax.nn.sigmoid(0.4))
-# Compute `bad` from `lambda tangent:coefficient*tangent*tangent`
 bad=lambda tangent:coefficient*tangent*tangent
-# Assert that `not np.isclose(bad(2.0),2*bad(1.0))`.
 assert not np.isclose(bad(2.0),2*bad(1.0))
 # Compute exact directional derivative / Jacobian / Hessian (`good`).
 good=lambda tangent:jax.jvp(stable_softplus,(jnp.array(0.4),),(jnp.array(tangent),))[1]
-# Compute `np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol` as `1e-12)`.
 np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Nonlinear seed rule rejected by its contract; repaired JVP is linear")
 ```
 

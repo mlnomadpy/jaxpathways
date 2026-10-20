@@ -19,6 +19,9 @@ for(const phase of course.phases)for(const lesson of phase.lessons)if(lesson.sta
   loadLessonEvidence(lesson);
 }
 writeFileSync(new URL('public/curriculum.json',root),JSON.stringify(course,null,2)+'\n');
+const currentPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.json',root)));
+const currentRelease=JSON.parse(readFileSync(new URL('curriculum/releases.json',root)))[0];
+writeFileSync(new URL('docs/course-status.md',root),`# Current course status\n\nGenerated from canonical registries for version ${currentRelease.version} (${currentRelease.date}). Historical audits describe their own inspected revisions.\n\n- ${course.phases.length} phases and ${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').length} authored lessons.\n- ${course.pathways.length} pathways and ${course.roles.length} career routes.\n- ${course.projectIds.length} registered practice projects.\n- ${currentPlans.length} separately labeled planned model-lifecycle capstones.\n\nAuthored means teaching sources exist. Recorded CPU reference execution, named accelerator qualification, learner work and independent review are separate evidence. Read [the book audit](book-audit-2026-10-20.md) and [repair record](book-repairs-2026-10-20.md) for findings and verification limits.\n`);
 const phaseName=id=>{const p=course.phases.find(p=>p.id===id);return `${p.number}: ${p.title}`;};
 let text=`# JAX Pathways curriculum\n\n${course.title}.\n\nLearn the shared foundation, build complete systems, then specialize. Notebooks are runnable companions to lessons. The course manifest is [curriculum/course.json](curriculum/course.json); authored content lives in each lesson folder; this document is generated with \`npm run curriculum:docs\`.\n\n## Start here\n\nIf you know basic Python, begin at phase 00. If you already use NumPy, use the foundations route to translate that experience into transformed functions. Math is introduced when needed, with optimization providing the common bridge to applications.\n\nA CPU is sufficient for the early lessons. TPU and multi-device exercises declare their hardware explicitly.\n\n## The course\n\n`;
 for(const phase of course.phases){
@@ -89,11 +92,13 @@ writeFileSync(new URL('public/llms.txt',root),llms);
 const projects=JSON.parse(readFileSync(new URL('curriculum/projects.json',root)));
 json('public/api/v1/projects.json',{schemaVersion:1,projects:projects.map(path=>JSON.parse(readFileSync(new URL(path,root))))});
 // Publish figure/audio/source assets used by the static project teaching guides.
-for(const manifest of projects){
-  const project=JSON.parse(readFileSync(new URL(manifest,root)));
+const projectPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.json',root)));
+for(const project of [...projects.map(manifest=>JSON.parse(readFileSync(new URL(manifest,root)))),...projectPlans]){
   const directory=`projects/${project.id}/`;
+  const guideSource=readFileSync(new URL(project.source,root),'utf8');
   for(const file of readdirSync(new URL(directory,root),{recursive:true})){
-    if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)))continue;
+    const linkedData=/\.(json|csv)$/.test(file) && guideSource.includes(']('+file+')');
+    if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)) && !linkedData)continue;
     const output=`public/project-assets/${project.id}/${file}`;
     mkdirSync(new URL(output.slice(0,output.lastIndexOf('/')+1),root),{recursive:true});
     writeFileSync(new URL(output,root),readFileSync(new URL(directory+file,root)));

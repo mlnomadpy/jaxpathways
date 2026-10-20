@@ -4,7 +4,11 @@ import { escapeHtml } from '../html.js';
 import { renderMath } from '../math.js';
 
 /** Render repository-owned Markdown; raw HTML is rejected to keep the content contract. */
-export function assessmentContent(sourcePath, resolveLink = (href) => href) {
+export function assessmentContent(
+  sourcePath,
+  resolveLink = (href) => href,
+  mathOutput = 'htmlAndMathml',
+) {
   const source = readFileSync(sourcePath, 'utf8');
   let heading = 0;
   const sections = [];
@@ -21,7 +25,7 @@ export function assessmentContent(sourcePath, resolveLink = (href) => href) {
           if (match) return { type: 'courseDisplayMath', raw: match[0], text: match[1].trim() };
         },
         renderer(token) {
-          return renderMath(token.text, true);
+          return renderMath(token.text, true, mathOutput);
         },
       },
       {
@@ -35,7 +39,7 @@ export function assessmentContent(sourcePath, resolveLink = (href) => href) {
           if (match) return { type: 'courseMath', raw: match[0], text: match[1] };
         },
         renderer(token) {
-          return renderMath(token.text);
+          return renderMath(token.text, false, mathOutput);
         },
       },
     ],

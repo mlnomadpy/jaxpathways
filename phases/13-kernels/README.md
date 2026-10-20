@@ -6,7 +6,7 @@ Write actual Pallas grids and buffered pipelines, verify boundaries and precisio
 
 Begin with a profiled operation and independent oracle. Complete CPU semantics first; actual TPU compilation, correctness and performance require the separate target runner on supported hardware.
 
-**Prerequisites:** 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 09: Distributed training.
 
 **Hardware:** CPU interpretation/simulation reference; TPU target lab requires separately validated hardware.
 

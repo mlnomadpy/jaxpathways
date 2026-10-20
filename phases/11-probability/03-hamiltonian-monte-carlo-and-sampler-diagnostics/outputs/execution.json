@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "probability-03",
-  "contentHash": "c5d6fe000957133915b32da4ce0850ca33089393ec3fd8f7d783c04d2de16e6e",
-  "executedAt": "2026-10-13T09:00:02.377097+00:00",
+  "contentHash": "885ece097a303a05c8c195774eb72f9abcd75ad850620788cbe97176199dae1b",
+  "executedAt": "2026-10-20T10:48:50.098468+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]\n [0.7727629  0.9861013 ]]\nclassical split R-hat: [1.0002148 1.000253 ] acceptance: [0.97749996 0.98625    0.98125    0.980625  ]\nmean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]\n [0.7727629  0.9861013 ]]\nclassical split R-hat: [1.0002148 1.000253 ] acceptance: [0.97749996 0.98625    0.98125    0.980625  ]\nbad acceptance: 0.0 maximum energy error: 50229501952.0\nPASS: probability-03\n",
   "notebookCells": [
     {
-      "sourceHash": "83b3fb6d184fca8e740846bfd772a9c2446c1c820550a65ba60061132cdd516b",
+      "sourceHash": "563343d39b7adec6e30472433c9dffe6958f684744e40b65b7eff1892fe52929",
       "outputs": []
     },
     {
-      "sourceHash": "df815681deb2ced90da97a9cb97b25d625f757cb420b80929c1aa83f60f6f9e8",
+      "sourceHash": "d5d8b0875895eb38d4d085338a95eaa77fcda71384225fd92eefd7e52f1c1c5a",
       "outputs": []
     },
     {
-      "sourceHash": "a4884e006eb2974f75687a6d695333727b3d7c171d0855ad8a5654019560cf7f",
+      "sourceHash": "6af45c3b7d68bb8ac4bb5b4684ae65e120ea65b56cb81cd499edee768a407ad8",
       "outputs": [
         {
           "output_type": "stream",
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "sourceHash": "2cb4d586de5b967b460a7f2bdcd018d76a29b8c9555020aece999dbd1c416ab4",
+      "sourceHash": "0bdc15065f2ae93dfdff1666b1d79833f2f34e072758546e688df1056064659f",
       "outputs": [
         {
           "output_type": "stream",
@@ -69,19 +69,19 @@
       ]
     },
     {
-      "sourceHash": "6f6e4ee0410c2b22cc16366a35284673ad067ac604d1918b6d99933c449b4895",
+      "sourceHash": "206b26421da20a55d225af772afd98d853ef65b51faf79d0cb3f85d6282b89ed",
       "outputs": []
     },
     {
-      "sourceHash": "0769fade29e122490b9da525b865477fed882aac4034c694b5edc3992429be92",
+      "sourceHash": "1282b864104b72683ce3e2fc0a63ff771e365b4be93273423f68a9e40f31af7b",
       "outputs": []
     },
     {
-      "sourceHash": "40d6d6431639c7697f43f18ae0ba5790d3efd8c7da53ea4bd8537207756aeee6",
+      "sourceHash": "215176feb06d673f578516003c66a32637bbe7bf80da217e54c7643022d1ac3e",
       "outputs": []
     },
     {
-      "sourceHash": "fbd0b298c558a8e4d0fa1cb52775321e6ea3364eda346e6e9efedf241294e435",
+      "sourceHash": "a88523b954c47f4658a7d0146f7ad3f98a46a174f42a2a1303868f3e11e81f56",
       "outputs": [
         {
           "output_type": "stream",
@@ -93,19 +93,19 @@
       ]
     },
     {
-      "sourceHash": "24dd2a7e49a3fead83ca5f2b298cef9c059fa0bae9738f042e44de2700009d5f",
+      "sourceHash": "ed3feb01641af209c0e046ac76e6e8a089b821ebf9f215f20951f3f65783420c",
       "outputs": []
     },
     {
-      "sourceHash": "629b06c2463beeb5253a84584eeef25ee448c716ba357396d04be55cf54ed391",
+      "sourceHash": "f2e2ba017c08da59d3222e30a4cb51a5d13324abc1e53e465d8fa77600e91009",
       "outputs": []
     },
     {
-      "sourceHash": "8629eefafafb7c74249f3f90abf1259a7cda49559bbcaf5eaeeddc62d190b5f7",
+      "sourceHash": "0bdf4be6a835f95e2851d7d0e4250477f20d64858d6ca25e1fc2f40e3840c71b",
       "outputs": []
     },
     {
-      "sourceHash": "04475202504f6289f043e0c77d19538c435d3e28ea65c2e03075d58fa378155b",
+      "sourceHash": "ce1af1f35afe3f0f26bf122e8dbad8306faa802df0855450d1c6f989a962e3e9",
       "outputs": []
     }
   ],

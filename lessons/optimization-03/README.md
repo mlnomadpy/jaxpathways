@@ -74,7 +74,6 @@ Create a file named main.py in your activated learning environment. Add these im
 
 ```python
 # Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -88,7 +87,6 @@ Append this block below the inputs. Before proceeding, trace which values are in
 ```python
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
 def loss(w):
-    # Return `(w - 2.0) ** 2` to the caller.
     return (w - 2.) ** 2
 # Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:
 def train(initial, rate, steps):
@@ -96,9 +94,7 @@ def train(initial, rate, steps):
     def step(w, _):
         # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
-        # Return `(next_w, loss(next_w))` to the caller.
         return next_w, loss(next_w)
-    # Return `jax.lax.scan(step, jnp.array(initial), None, length=steps)` to the caller.
     return jax.lax.scan(step, jnp.array(initial), None, length=steps)
 ```
 
@@ -111,15 +107,10 @@ Append the remaining block, then run python main.py in the terminal. Compare the
 ```python
 # Step 3 — 3. Measure and verify: The weight approaches 2.0 and the final loss is below 10^{-8}.
 final, history = train(0., 0.1, 60)
-# Print the observed values to compare against the expected result.
 print("Final weight:", float(final))
-# Print diagnostic summary of the computed outputs.
 print("Final loss:", float(history[-1]))
-# Assert that `jnp.allclose(final, 2., atol=1e-4)`.
 assert jnp.allclose(final, 2., atol=1e-4)
-# Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
-# Assert invariant `jnp.all(jnp.diff(history) <= 1e-7)` holds
 assert jnp.all(jnp.diff(history) <= 1e-7)
 ```
 
@@ -129,12 +120,10 @@ The weight approaches $2.0$ and the final loss is below $10^{-8}$.
 
 ```python
 # Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
 def loss(w):
-    # Return `(w - 2.0) ** 2` to the caller.
     return (w - 2.) ** 2
 # Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:
 def train(initial, rate, steps):
@@ -142,21 +131,14 @@ def train(initial, rate, steps):
     def step(w, _):
         # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
-        # Return `(next_w, loss(next_w))` to the caller.
         return next_w, loss(next_w)
-    # Return `jax.lax.scan(step, jnp.array(initial), None, length=steps)` to the caller.
     return jax.lax.scan(step, jnp.array(initial), None, length=steps)
 # Step 3 — 3. Measure and verify: The weight approaches 2.0 and the final loss is below 10^{-8}.
 final, history = train(0., 0.1, 60)
-# Print the observed values to compare against the expected result.
 print("Final weight:", float(final))
-# Print diagnostic summary of the computed outputs.
 print("Final loss:", float(history[-1]))
-# Assert that `jnp.allclose(final, 2., atol=1e-4)`.
 assert jnp.allclose(final, 2., atol=1e-4)
-# Assert invariant `history[-1] < 1e-8` holds
 assert history[-1] < 1e-8
-# Assert invariant `jnp.all(jnp.diff(history) <= 1e-7)` holds
 assert jnp.all(jnp.diff(history) <= 1e-7)
 ```
 
@@ -184,31 +166,22 @@ The large rate crosses the optimum and lands farther away on each step. The loss
 
 ```python
 # Compute figure data for: Gradient descent trades step size for stability
-# Compute `rates` from `[0.1, 0.5, 1.1]`
 rates = [0.1, 0.5, 1.1]
-# Compute `series` from `[]`
 series = []
-# Loop over `rate_plot` in `rates`:
 for rate_plot in rates:
     # Create device-backed JAX array `position_plot`.
     position_plot = jnp.array(0.0)
-    # Compute `losses` from `[]`
     losses = []
-    # Repeat the update loop over `range(12)` steps:
     for _ in range(12):
-        # Append the current step result to `losses`.
         losses.append(float((position_plot - 2) ** 2))
-        # Compute `position_plot` from `position_plot - rate_plot * 2 * (position_plot - 2)`
         position_plot = position_plot - rate_plot * 2 * (position_plot - 2)
-    # Append the current step result to `series`.
     series.append({'label': 'rate ' + str(rate_plot), 'y': losses})
-# Compute `visual_data` from `{'kind': 'line', 'x': list(range(12)), 'xlabel': 'co...`
 visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:57.181436+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:48.289484+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -227,11 +200,8 @@ PASS: optimization-03
 ```python
 # Experiment — Check the first two steps: A hand-derived trajectory checks update sign and the recording...
 two_w, two_losses = train(0., 0.1, 2)
-# Assert that `jnp.allclose(two_w, 0.72)`.
 assert jnp.allclose(two_w, 0.72)
-# Assert that `jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))`.
 assert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))
-# Print the observed values to compare against the expected result.
 print("First two post-update losses:", two_losses)
 ```
 
@@ -246,9 +216,7 @@ A hand-derived trajectory checks update sign and the recording convention.
 ```python
 # Experiment — Test the edge of stability: Magnitude-one error multipliers do not contract even though the...
 edge_w, edge_losses = train(0., 1., 5)
-# Assert that `jnp.allclose(edge_w, 4.)`.
 assert jnp.allclose(edge_w, 4.)
-# Assert that `jnp.allclose(edge_losses, jnp.full(5, 4.))`.
 assert jnp.allclose(edge_losses, jnp.full(5, 4.))
 ```
 
@@ -262,19 +230,13 @@ Magnitude-one error multipliers do not contract even though the loop remains fin
 
 ```python
 # Experiment — A tiny update far from the solution: A stopping rule must distinguish lack of progress from reaching...
-# Construct `far` via `jnp.array(0.)`
 far = jnp.array(0.)
-# Compute `quadratic` from `lambda value: (value-2.)**2`
 quadratic = lambda value: (value-2.)**2
 # Differentiate the objective to obtain `grad_far` via automatic differentiation.
 grad_far = jax.grad(quadratic)(far)
-# Compute `next_far` from `far - 1e-8*grad_far`
 next_far = far - 1e-8*grad_far
-# Assert that `jnp.abs(next_far-far)<1e-6`.
 assert jnp.abs(next_far-far)<1e-6
-# Assert that `jnp.abs(grad_far)>3.`.
 assert jnp.abs(grad_far)>3.
-# Assert invariant `quadratic(next_far)>3.9` holds
 assert quadratic(next_far)>3.9
 ```
 
@@ -294,17 +256,15 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Assert invariant `unstable_history[-1] > loss(0.)` holds
-2. Assert that `abs(1 - 2 * 1.1) > 1`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Run ten steps with learning rate 1.1.
 unstable, unstable_history = train(...)  # TODO: compute unstable, unstable_history
-# Assert invariant `unstable_history[-1] > loss(0.)` holds
 assert unstable_history[-1]  # TODO: complete assertion check
-# Assert that `abs(1 - 2 * 1.1) > 1`.
 assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
 ```
 
@@ -313,9 +273,7 @@ assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
 ```python
 # Exercise solution: Run ten steps with learning rate 1.1.
 unstable, unstable_history = train(0., 1.1, 10)
-# Assert invariant `unstable_history[-1] > loss(0.)` holds
 assert unstable_history[-1] > loss(0.)
-# Assert that `abs(1 - 2 * 1.1) > 1`.
 assert abs(1 - 2 * 1.1) > 1
 ```
 
@@ -342,30 +300,24 @@ The error multiplier is $1-8\eta$; use $\eta=0.1$.
 - `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
 
 **Step-by-step implementation plan:**
-1. Return `4 * (w - 3.0) ** 2` to the caller.
-2. Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
-3. Differentiate the objective to obtain `new` via automatic differentiation.
-4. Return `(new, scaled_loss(new))` to the caller.
-5. Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
+1. Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
+2. Differentiate the objective to obtain `new` via automatic differentiation.
+3. Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Transfer the stability analysis (Transfer / diagnosis): Changing curvature changes the stability interval to...
 def scaled_loss(w):
-    # Return `4 * (w - 3.0) ** 2` to the caller.
     return ...  # TODO: return computed result
 # Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
 def scaled_step(w, _):
     # Differentiate the objective to obtain `new` via automatic differentiation.
     new = ...  # TODO: compute new
-    # Return `(new, scaled_loss(new))` to the caller.
     return ...  # TODO: return computed result
 # Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
-# Assert that `jnp.allclose(scaled_w, 3., atol=1e-5)`.
 assert jnp.allclose(scaled_w, 3., atol=1e-5)  # TODO: complete assertion check
-# Assert invariant `jnp.all(jnp.diff(scaled_history) <= 1e-6)` holds
 assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
 ```
 
@@ -374,19 +326,15 @@ assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
 ```python
 # Transfer the stability analysis (Transfer / diagnosis): Changing curvature changes the stability interval to...
 def scaled_loss(w):
-    # Return `4 * (w - 3.0) ** 2` to the caller.
     return 4*(w-3.)**2
 # Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
 def scaled_step(w, _):
     # Differentiate the objective to obtain `new` via automatic differentiation.
     new = w-0.1*jax.grad(scaled_loss)(w)
-    # Return `(new, scaled_loss(new))` to the caller.
     return new, scaled_loss(new)
 # Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
-# Assert that `jnp.allclose(scaled_w, 3., atol=1e-5)`.
 assert jnp.allclose(scaled_w, 3., atol=1e-5)
-# Assert invariant `jnp.all(jnp.diff(scaled_history) <= 1e-6)` holds
 assert jnp.all(jnp.diff(scaled_history) <= 1e-6)
 ```
 
@@ -415,9 +363,6 @@ The derivative at zero is $-4$.
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `uphill` via automatic differentiation.
 2. Differentiate the objective to obtain `downhill` via automatic differentiation.
-3. Assert invariant `loss(uphill) > loss(0.)` holds
-4. Assert invariant `loss(downhill) < loss(0.)` holds
-5. Assert that `jnp.allclose(downhill, 0.4)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -427,11 +372,8 @@ The derivative at zero is $-4$.
 uphill = ...  # TODO: compute uphill
 # Differentiate the objective to obtain `downhill` via automatic differentiation.
 downhill = ...  # TODO: compute downhill
-# Assert invariant `loss(uphill) > loss(0.)` holds
 assert loss(uphill)  # TODO: complete assertion check
-# Assert invariant `loss(downhill) < loss(0.)` holds
 assert loss(downhill)  # TODO: complete assertion check
-# Assert that `jnp.allclose(downhill, 0.4)`.
 assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
 ```
 
@@ -443,11 +385,8 @@ assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
 uphill = 0. + 0.1*jax.grad(loss)(0.)
 # Differentiate the objective to obtain `downhill` via automatic differentiation.
 downhill = 0. - 0.1*jax.grad(loss)(0.)
-# Assert invariant `loss(uphill) > loss(0.)` holds
 assert loss(uphill) > loss(0.)
-# Assert invariant `loss(downhill) < loss(0.)` holds
 assert loss(downhill) < loss(0.)
-# Assert that `jnp.allclose(downhill, 0.4)`.
 assert jnp.allclose(downhill, 0.4)
 ```
 

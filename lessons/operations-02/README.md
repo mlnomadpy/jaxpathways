@@ -73,7 +73,6 @@ Create main.py with this block. Run python3 main.py in the CPU course environmen
 ```python
 # Step 1: Create the local artifact helpers
 """Bounded local JAX subprocess supervisor and lifecycle verifier."""
-# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -85,19 +84,14 @@ import tempfile
 import time
 
 
-# Function `digest(value)` implementing this stage's computation:
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
-# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
     try:
@@ -219,13 +213,11 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
-    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
     # Update state in place with the new values.
     cfg.update(changes)
-    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
@@ -233,32 +225,23 @@ def default_config(**changes):
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
-    # Return `cfg` to the caller.
     return cfg
 
 
-# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
-    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
-    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -270,14 +253,10 @@ def launch(root, config=None, timeout=10.):
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
-    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Compute `events` from `[]`
     events=[]
     malformed=[]
-    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
-        # Branch on condition `not line.strip()`:
         if not line.strip():
             continue
         try:
@@ -287,14 +266,11 @@ def launch(root, config=None, timeout=10.):
             events.append(event)
         except (ValueError,TypeError):
             malformed.append(line)
-    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
-    # Return `result` to the caller.
     return result
 ```
 
@@ -307,19 +283,12 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
 def summarize(result):
-    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    # Run `sum` to compute `count`.
-    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates)
     update_s=sum(e['update_s'] for e in updates)
-    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
-    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
-    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
@@ -337,27 +306,16 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 # Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
-    # Read or serialize artifact data on disk (`observed`).
     observed=launch(Path(folder)/'healthy',dict(steps=12))
-    # Read or serialize artifact data on disk (`interrupted`).
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
-# Run `summarize` to compute `healthy`.
-# Run `summarize` to compute `incident`.
 healthy=summarize(observed)
 incident=summarize(interrupted)
-# Compute `progress` from `[e for e in observed['events'] if e['event']=='progr...`
 progress=[e for e in observed['events'] if e['event']=='progress']
-# Assert invariant `healthy['examples']==96 and healthy['updates']==12` holds
 assert healthy['examples']==96 and healthy['updates']==12
-# Assert invariant `incident['last_step']==5 and incident['checkpoint_step']==4` holds
 assert incident['last_step']==5 and incident['checkpoint_step']==4
-# Assert invariant `incident['uncheckpointed_updates']==1` holds
 assert incident['uncheckpointed_updates']==1
-# Assert invariant `healthy['job_examples_per_s'] < healthy['update_examples_per_s']` holds
 assert healthy['job_examples_per_s'] < healthy['update_examples_per_s']
-# Print the observed values to compare against the expected result.
 print('healthy:',healthy)
-# Print diagnostic summary of the computed outputs.
 print('incident:',incident)
 ```
 
@@ -368,7 +326,6 @@ Both summaries are derived from real child output; failures are not invented sta
 ```python
 # Complete runnable example (operations-02)
 """Bounded local JAX subprocess supervisor and lifecycle verifier."""
-# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -380,19 +337,14 @@ import tempfile
 import time
 
 
-# Function `digest(value)` implementing this stage's computation:
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
-# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
     try:
@@ -498,13 +450,11 @@ except Exception as error:
 
 # Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
-    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
     # Update state in place with the new values.
     cfg.update(changes)
-    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
@@ -512,32 +462,23 @@ def default_config(**changes):
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
-    # Return `cfg` to the caller.
     return cfg
 
 
-# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
-    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
-    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -549,14 +490,10 @@ def launch(root, config=None, timeout=10.):
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
-    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Compute `events` from `[]`
     events=[]
     malformed=[]
-    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
-        # Branch on condition `not line.strip()`:
         if not line.strip():
             continue
         try:
@@ -566,31 +503,21 @@ def launch(root, config=None, timeout=10.):
             events.append(event)
         except (ValueError,TypeError):
             malformed.append(line)
-    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
-    # Return `result` to the caller.
     return result
 
 # Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
 def summarize(result):
-    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    # Run `sum` to compute `count`.
-    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates)
     update_s=sum(e['update_s'] for e in updates)
-    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
-    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
-    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
@@ -600,27 +527,16 @@ def summarize(result):
 # Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
-    # Read or serialize artifact data on disk (`observed`).
     observed=launch(Path(folder)/'healthy',dict(steps=12))
-    # Read or serialize artifact data on disk (`interrupted`).
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
-# Run `summarize` to compute `healthy`.
-# Run `summarize` to compute `incident`.
 healthy=summarize(observed)
 incident=summarize(interrupted)
-# Compute `progress` from `[e for e in observed['events'] if e['event']=='progr...`
 progress=[e for e in observed['events'] if e['event']=='progress']
-# Assert invariant `healthy['examples']==96 and healthy['updates']==12` holds
 assert healthy['examples']==96 and healthy['updates']==12
-# Assert invariant `incident['last_step']==5 and incident['checkpoint_step']==4` holds
 assert incident['last_step']==5 and incident['checkpoint_step']==4
-# Assert invariant `incident['uncheckpointed_updates']==1` holds
 assert incident['uncheckpointed_updates']==1
-# Assert invariant `healthy['job_examples_per_s'] < healthy['update_examples_per_s']` holds
 assert healthy['job_examples_per_s'] < healthy['update_examples_per_s']
-# Print the observed values to compare against the expected result.
 print('healthy:',healthy)
-# Print diagnostic summary of the computed outputs.
 print('incident:',incident)
 ```
 
@@ -644,37 +560,31 @@ The staircase records when state becomes available for recovery. A gap is expect
 
 ```python
 # Compute figure data for: Observed progress and committed progress diverge before failure
-# Compute `committed` as `0`.
 committed=0
 points=[]
 saved=[]
-# Loop over `event` in `interrupted['events']`:
 for event in interrupted['events']:
-    # Branch on condition `event['event'] == 'checkpoint'`:
     if event['event']=='checkpoint': committed=event['step']
-    # Branch on condition `event['event'] == 'progress'`:
     if event['event']=='progress':
         points.append(event['step'])
         saved.append(committed)
 # At each completed step include a checkpoint emitted immediately afterward.
 for i,step_number in enumerate(points):
-    # Run `max` to compute `saved[i]`.
     saved[i]=max([e['step'] for e in interrupted['events'] if e['event']=='checkpoint' and e['step']<=step_number],default=0)
-# Compute `visual_data` from `{'kind':'line','x':points,'xlabel':'completed update...`
 visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel':'step index','series':[{'label':'observed progress','y':points},{'label':'committed checkpoint','y':saved}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:02:17.760418+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:51:22.258741+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0008293339051306248, 'update_examples_per_s': 115755.54720011051, 'job_examples_per_s': 121.83398213170844, 'update_duty_fraction': 0.001052510960196922}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00025999918580055237, 'update_examples_per_s': 153846.63562248362, 'job_examples_per_s': 50.06903787174272, 'update_duty_fraction': 0.0003254477270117532}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005934163928031921, 'update_examples_per_s': 161775.10625635617, 'job_examples_per_s': 120.56918707164613, 'update_duty_fraction': 0.0007452888757840575}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0002459581010043621, 'update_examples_per_s': 162629.3252251553, 'job_examples_per_s': 55.378197899713314, 'update_duty_fraction': 0.000340517909811431}
-examples / synchronized seconds: 96 0.0005934163928031921
-measured update duty fraction, not hardware utilization: 0.0007452888757840575
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0003859163261950016, 'update_examples_per_s': 248758.58698834025, 'job_examples_per_s': 176.72946936655072, 'update_duty_fraction': 0.0007104457036284513}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00017587607726454735, 'update_examples_per_s': 227432.86421969283, 'job_examples_per_s': 69.44720752337886, 'update_duty_fraction': 0.0003053525609047209}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0003807488828897476, 'update_examples_per_s': 252134.68591527935, 'job_examples_per_s': 174.31857639191733, 'update_duty_fraction': 0.0006913708669599339}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00018524983897805214, 'update_examples_per_s': 215924.61413550316, 'job_examples_per_s': 70.63820657474201, 'update_duty_fraction': 0.0003271429098417335}
+examples / synchronized seconds: 96 0.0003807488828897476
+measured update duty fraction, not hardware utilization: 0.0006913708669599339
 PASS: operations-02
 
 ```
@@ -686,13 +596,9 @@ PASS: operations-02
 ```python
 # Experiment — Recompute throughput independently: Summing work and time weights slow steps appropriately; an...
 total_examples=sum(e['examples'] for e in progress)
-# Run `sum` to compute `total_time`.
 total_time=sum(e['update_s'] for e in progress)
-# Assert that `abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6`.
 assert abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6
-# Assert invariant `all(e['update_s']>0 for e in progress)` holds
 assert all(e['update_s']>0 for e in progress)
-# Print the observed values to compare against the expected result.
 print('examples / synchronized seconds:',total_examples,total_time)
 ```
 
@@ -707,11 +613,8 @@ Summing work and time weights slow steps appropriately; an unweighted mean of ra
 ```python
 # Experiment — Locate the incident boundary: A progress log is not a committed state artifact.
 names=[e['event'] for e in interrupted['events']]
-# Assert invariant `names[-1]=='failed'` holds
 assert names[-1]=='failed'
-# Assert that `[e['step'] for e in interrupted['events'] if e['event']=='checkpoint']==[2,4]`.
 assert [e['step'] for e in interrupted['events'] if e['event']=='checkpoint']==[2,4]
-# Assert that `[e['step'] for e in interrupted['events'] if e['event']=='progress'][-1]==5`.
 assert [e['step'] for e in interrupted['events'] if e['event']=='progress'][-1]==5
 ```
 
@@ -731,20 +634,16 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Assert invariant `0 < duty < 1` holds
-2. Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
-3. Print the observed values to compare against the expected result.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
 duty = sum(...)  # TODO: compute duty
-# Assert invariant `0 < duty < 1` holds
 assert 0  # TODO: complete assertion check
-# Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
 assert abs(duty-healthy['update_duty_fraction'])  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('measured update duty fraction, not hardware utilization:',duty)
 ```
 
@@ -753,11 +652,8 @@ print('measured update duty fraction, not hardware utilization:',duty)
 ```python
 # Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
 duty=sum(e['update_s'] for e in progress)/observed['wall_s']
-# Assert invariant `0 < duty < 1` holds
 assert 0 < duty < 1
-# Assert that `abs(duty-healthy['update_duty_fraction']) < 1e-9`.
 assert abs(duty-healthy['update_duty_fraction']) < 1e-9
-# Print the observed values to compare against the expected result.
 print('measured update duty fraction, not hardware utilization:',duty)
 ```
 
@@ -783,9 +679,8 @@ Sum examples and seconds first.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Run `sum` to compute `wrong`.
-2. Run `sum` to compute `right`.
-3. Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -793,11 +688,8 @@ Sum examples and seconds first.
 # Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
 durations = ...  # TODO: compute durations
 counts = ...  # TODO: compute counts
-# Run `sum` to compute `wrong`.
 wrong = sum(...)  # TODO: compute wrong
-# Run `sum` to compute `right`.
 right = sum(...)  # TODO: compute right
-# Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
 assert abs(wrong-16/3)  # TODO: complete assertion check
 ```
 
@@ -807,11 +699,8 @@ assert abs(wrong-16/3)  # TODO: complete assertion check
 # Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
 durations=[1.,3.]
 counts=[8,8]
-# Run `sum` to compute `wrong`.
 wrong=sum(n/t for n,t in zip(counts,durations))/2
-# Run `sum` to compute `right`.
 right=sum(counts)/sum(durations)
-# Assert that `abs(wrong-16/3)<1e-12 and right==4.`.
 assert abs(wrong-16/3)<1e-12 and right==4.
 ```
 
@@ -840,9 +729,6 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 
 **Step-by-step implementation plan:**
 1. Create an isolated temporary directory to run and inspect artifacts safely:
-2. Run `launch` to compute `changed`.
-3. Run `summarize` to compute `stats`.
-4. Assert invariant `stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -850,11 +736,8 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 # Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
-    # Run `launch` to compute `changed`.
     changed = launch(...)  # TODO: compute changed
-# Run `summarize` to compute `stats`.
 stats = summarize(...)  # TODO: compute stats
-# Assert invariant `stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2` holds
 assert stats['checkpoint_step']  # TODO: complete assertion check
 ```
 
@@ -864,11 +747,8 @@ assert stats['checkpoint_step']  # TODO: complete assertion check
 # Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory() as folder:
-    # Run `launch` to compute `changed`.
     changed=launch(folder,dict(checkpoint_every=3,fail_after=5))
-# Run `summarize` to compute `stats`.
 stats=summarize(changed)
-# Assert invariant `stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2` holds
 assert stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2
 ```
 

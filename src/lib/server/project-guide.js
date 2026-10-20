@@ -1,4 +1,5 @@
 import path from 'node:path';
+import { existsSync } from 'node:fs';
 import { assessmentContent } from './assessment-content.js';
 import { siteUrl } from '../urls.js';
 
@@ -24,10 +25,18 @@ export function projectGuide(project, course, plannedIds = []) {
       .flatMap((phase) => phase.lessons)
       .find((lesson) => target.startsWith(lesson.path + '/'));
     if (lesson) return siteUrl(`lesson.html?lesson=${lesson.id}`);
-    if (target.startsWith(`projects/${project.id}/`)) {
-      return siteUrl(
-        `project-assets/${project.id}/${target.slice(`projects/${project.id}/`.length)}`,
-      );
+    const projectAsset = /^projects\/([^/]+)\/(.+)$/.exec(target);
+    if (
+      projectAsset &&
+      existsSync(target) &&
+      (projectAsset[1] === project.id ||
+        plannedIds.includes(projectAsset[1]) ||
+        course.projectIds.includes(projectAsset[1]))
+    ) {
+      return siteUrl(`project-assets/${projectAsset[1]}/${projectAsset[2]}`);
+    }
+    if (target.startsWith('docs/') && existsSync(target)) {
+      return `https://github.com/mlnomadpy/jaxpathways/blob/main/${target.split('/').map(encodeURIComponent).join('/')}`;
     }
     throw new Error(`Unresolved project guide link: ${project.id}: ${href}`);
   });

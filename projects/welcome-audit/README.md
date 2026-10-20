@@ -1,18 +1,32 @@
-# Verify environment, devices, and synchronized timing
+# Check your environment and a saved arithmetic result
 
-Phase 00 dedicated integration project ([Phase 00](../../phases/00-welcome/README.md)). See also the cross-phase companion project [`foundation-toolkit`](../foundation-toolkit/README.md).
+This project asks two practical questions: which JAX backend ran your program, and can you reproduce a small result from the saved input? A device name in the output tells you what JAX discovered. It does not show that a TPU ran the computation.
 
-## Mathematical contract
+## Before you start
 
-Given input batch $X \in \mathbb{R}^{B \times d_\text{in}}$ and projection weights $W_\text{enc}, P$, the normalized representation is:
+Complete `welcome-01` and `welcome-02`. You should be able to open a terminal in the repository root and run a saved Python file. The project is CPU-only and uses JAX and NumPy from `requirements-cpu.txt`.
 
-$$
-H = \tanh(X W_\text{enc} + b_\text{enc}) P, \qquad \hat{H}_i = \frac{H_i}{\max(\|H_i\|_2, 10^{-6})}
-$$
+From the repository root, create and activate an environment, then install the course dependencies:
 
-## Stage verification
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-cpu.txt
+```
 
-1. **Stage 1 — Parameter and state contract:** `python3 projects/welcome-audit/tests/check.py --stage 1`
-2. **Stage 2 — Masked forward pass:** `python3 projects/welcome-audit/tests/check.py --stage 2`
-3. **Stage 3 — Gradient verification:** `python3 projects/welcome-audit/tests/check.py --stage 3`
-4. **Stage 4 — Compiled scan qualification:** `python3 projects/welcome-audit/tests/check.py --stage 4`
+On Windows PowerShell, activate with `.venv\Scripts\Activate.ps1`; use `python` in place of `python3` in the checks. Edit `projects/welcome-audit/starter/model.py`. Run each command from the repository root:
+
+```sh
+python3 projects/welcome-audit/tests/check.py --implementation starter --stage 1
+python3 projects/welcome-audit/tests/check.py --implementation starter --stage 2
+python3 projects/welcome-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/welcome-audit
+python3 projects/welcome-audit/tests/check.py --implementation starter --stage 4
+```
+
+Stage 1 calls for the Gram matrix of \(X=[[1,2],[3,4]]\). Work it by hand: \(XX^T=[[5,11],[11,25]]\), so the checksum is 52. It also checks that JAX reports the CPU backend and the listed device count matches the runtime.
+
+Stage 2 changes the input to \(X+I\). Predict the result before running: \([[2,2],[3,5]][[2,3],[2,5]]=[[8,16],[16,34]]\). If your report still contains the original matrix, check where you build the input. If the checksum differs, sum all four entries, including both off-diagonal terms.
+
+Stage 3 writes a JSON receipt with the input, Gram matrix, checksum, backend and device inventory. Without `--evidence-dir`, the receipt stays in a temporary directory. Stage 4 reruns all checks together. Each stage prints `PASS welcome-audit stage N` when it succeeds.
+
+The receipt supports reproducibility of this CPU calculation. It does not establish TPU compatibility or observed accelerator execution. The reference command is `python3 projects/welcome-audit/tests/check.py --implementation solution --stage 4`.

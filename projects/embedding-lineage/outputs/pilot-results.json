@@ -1,0 +1,328 @@
+{
+  "elapsed_seconds": 36.12,
+  "environment": {
+    "devices": [
+      "TFRT_CPU_0"
+    ],
+    "flax": "0.12.6",
+    "jax": "0.9.2",
+    "optax": "0.2.8",
+    "python": "3.14.3"
+  },
+  "export_reload": {
+    "deterministic": true,
+    "embedding_sha256": "019df01c6d81e45fbe4a3a51ab687b9b9a337060dc6a9faa34f460ae6691dd47",
+    "processes": 2,
+    "python": "3.14.3"
+  },
+  "held_out_evaluation": {
+    "limitations": "Single novel, chapter-group split, five manually authored qrels; pilot only.",
+    "parameter_count": 70765,
+    "parent_checkpoint_sha256": "78d666b5bb6c66011dce974397a009a227092aa32cff1e9ea1913e1e1c0ed549",
+    "test_bm25": {
+      "mrr": 0.4982231698649609,
+      "ndcg_at_5": 0.5,
+      "queries": 5,
+      "recall_at_1": 0.4
+    },
+    "test_dense": {
+      "mrr": 0.021441989476547015,
+      "ndcg_at_5": 0.0,
+      "queries": 5,
+      "recall_at_1": 0.0
+    },
+    "test_oov_word_fraction": 0.15330867846759424,
+    "test_passages": 96,
+    "test_passages_truncated": 42,
+    "test_queries": 5,
+    "validation_bm25": {
+      "mrr": 0.5714285714285714,
+      "ndcg_at_5": 0.5,
+      "queries": 2,
+      "recall_at_1": 0.5
+    },
+    "validation_dense": {
+      "mrr": 0.5454545454545454,
+      "ndcg_at_5": 0.5,
+      "queries": 2,
+      "recall_at_1": 0.5
+    }
+  },
+  "interpretation": "The objective curves fall, but held-out dense retrieval ranked none of five judged positives first (recall@1 0.0; MRR 0.021). BM25 ranked two of five first (recall@1 0.4; MRR 0.498). Validation has two judgments and test has five single-positive judgments. Treat this as a small pilot smoke result, not a benchmark.",
+  "negative_checks": {
+    "changed_config_rejected": true,
+    "changed_loader_copy_rejected": true,
+    "corrupted_parameter_checksum_rejected": true,
+    "stale_or_swapped_parent_checkpoint_rejected": true,
+    "two_fresh_processes_match_in_process_probe": true
+  },
+  "run_date": "2026-10-20",
+  "source_and_model": {
+    "data_sha256": "39351b525bcb62606d2824f015aed47bb301f4bbac53fd4f9c1305e1a4b3baa3",
+    "gutenberg_source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+    "parameter_count": 70765,
+    "parent_checkpoint_sha256": "78d666b5bb6c66011dce974397a009a227092aa32cff1e9ea1913e1e1c0ed549",
+    "source_code_identity": {
+      "files": {
+        "model.py": "1284424af995cc93d198837399056278b76f4c05070f170a86ac0df651742f53",
+        "network.py": "ce2dad5d7eeeac07e08780ab3cc6227b0854267df7f05b28bd75fe93b7240b6d",
+        "probe_export.py": "d40f23c70fb1ab56126206d0d12c0d8e547e2c6f561679bb1b9b79d36c2bb949",
+        "run.py": "8efed261e6727f405a916c51051f0c32f0c1aa99b1b06d2e8564c56a6c2ab5c0"
+      },
+      "sha256": "1cf5a7a39f280ea8b7d910a91ae0792e666ddcbaea8b759eafde551b724a3de8"
+    }
+  },
+  "stage_metrics": {
+    "1": {
+      "checkpoint_sha256": "96b9cc2f783d6d6d1c6b6e0a9b1cce4f663b8d2c75bff1cbb787313d41755dfd",
+      "objective_checks": {
+        "empty_mlm_selection_rejected": true,
+        "mlm_numpy_abs_error": 8.030941609504794e-07,
+        "objectives_checked": [
+          "mlm"
+        ]
+      },
+      "optimizer_monitoring": {
+        "actual_updates": 14,
+        "finite_loss_and_gradients": true,
+        "learning_rate": 0.003
+      },
+      "parameter_count": 70765,
+      "train_documents": 106,
+      "train_mlm_history": [
+        {
+          "epoch": 1,
+          "gradient_norm_max": 1.3848135471343994,
+          "gradient_norm_mean": 1.1524868522371565,
+          "train_mlm_nll": 7.455342633383615,
+          "updates": 7
+        },
+        {
+          "epoch": 2,
+          "gradient_norm_max": 1.0264700651168823,
+          "gradient_norm_mean": 0.958258833203997,
+          "train_mlm_nll": 7.04965741293771,
+          "updates": 7
+        }
+      ],
+      "validation_documents": 32,
+      "validation_mlm_nll": 6.699055281552401,
+      "validation_retrieval": {
+        "mrr": 0.5294117647058824,
+        "ndcg_at_5": 0.5,
+        "queries": 2,
+        "recall_at_1": 0.5
+      }
+    },
+    "2": {
+      "checkpoint_sha256": "770bc089d29ebe4c88333e48474d2f159d20e3fff46082a2cf670f9be1c1051a",
+      "objective_checks": {
+        "contrastive_numpy_abs_error": 0.0,
+        "objectives_checked": [
+          "contrastive"
+        ]
+      },
+      "optimizer_monitoring": {
+        "actual_updates": 16,
+        "finite_loss_and_gradients": true,
+        "learning_rate": 0.001
+      },
+      "train_contrastive_history": [
+        {
+          "gradient_norm": 5.053580284118652,
+          "loss": 2.188981056213379,
+          "step": 1
+        },
+        {
+          "gradient_norm": 6.518809795379639,
+          "loss": 2.0240890979766846,
+          "step": 2
+        },
+        {
+          "gradient_norm": 7.394286155700684,
+          "loss": 1.8736287355422974,
+          "step": 3
+        },
+        {
+          "gradient_norm": 10.220793724060059,
+          "loss": 1.3506019115447998,
+          "step": 4
+        },
+        {
+          "gradient_norm": 9.781912803649902,
+          "loss": 1.2107148170471191,
+          "step": 5
+        },
+        {
+          "gradient_norm": 8.26169490814209,
+          "loss": 0.955066978931427,
+          "step": 6
+        },
+        {
+          "gradient_norm": 8.814173698425293,
+          "loss": 0.9970007538795471,
+          "step": 7
+        },
+        {
+          "gradient_norm": 4.745502471923828,
+          "loss": 0.8437608480453491,
+          "step": 8
+        },
+        {
+          "gradient_norm": 3.2493255138397217,
+          "loss": 0.6067379713058472,
+          "step": 9
+        },
+        {
+          "gradient_norm": 8.01268482208252,
+          "loss": 0.7813403606414795,
+          "step": 10
+        },
+        {
+          "gradient_norm": 7.812562942504883,
+          "loss": 1.2791815996170044,
+          "step": 11
+        },
+        {
+          "gradient_norm": 10.132291793823242,
+          "loss": 0.9727391004562378,
+          "step": 12
+        },
+        {
+          "gradient_norm": 7.573815822601318,
+          "loss": 0.786815881729126,
+          "step": 13
+        },
+        {
+          "gradient_norm": 7.618814945220947,
+          "loss": 0.6558355093002319,
+          "step": 14
+        },
+        {
+          "gradient_norm": 6.168330669403076,
+          "loss": 0.6804078817367554,
+          "step": 15
+        },
+        {
+          "gradient_norm": 8.346749305725098,
+          "loss": 0.6531342267990112,
+          "step": 16
+        }
+      ],
+      "train_contrastive_loss_final": 0.6531342267990112,
+      "train_contrastive_loss_initial": 2.188981056213379,
+      "validation_mlm_nll": 6.721331816215019,
+      "validation_retrieval": {
+        "mrr": 0.5625,
+        "ndcg_at_5": 0.5,
+        "queries": 2,
+        "recall_at_1": 0.5
+      }
+    },
+    "3": {
+      "checkpoint_sha256": "78d666b5bb6c66011dce974397a009a227092aa32cff1e9ea1913e1e1c0ed549",
+      "objective_checks": {
+        "objectives_checked": [
+          "supcon"
+        ],
+        "supervised_contrastive_numpy_abs_error": 0.0
+      },
+      "optimizer_monitoring": {
+        "actual_updates": 16,
+        "finite_loss_and_gradients": true,
+        "learning_rate": 0.001
+      },
+      "train_supervised_contrastive_final": 0.14092397689819336,
+      "train_supervised_contrastive_history": [
+        {
+          "gradient_norm": 24.571517944335938,
+          "loss": 2.7833380699157715,
+          "step": 1
+        },
+        {
+          "gradient_norm": 12.409154891967773,
+          "loss": 2.157775402069092,
+          "step": 2
+        },
+        {
+          "gradient_norm": 11.141264915466309,
+          "loss": 1.4660154581069946,
+          "step": 3
+        },
+        {
+          "gradient_norm": 9.275186538696289,
+          "loss": 1.1041254997253418,
+          "step": 4
+        },
+        {
+          "gradient_norm": 9.531076431274414,
+          "loss": 1.1190426349639893,
+          "step": 5
+        },
+        {
+          "gradient_norm": 6.869600296020508,
+          "loss": 0.7273011207580566,
+          "step": 6
+        },
+        {
+          "gradient_norm": 8.09481143951416,
+          "loss": 0.7038906812667847,
+          "step": 7
+        },
+        {
+          "gradient_norm": 6.148911952972412,
+          "loss": 0.49164268374443054,
+          "step": 8
+        },
+        {
+          "gradient_norm": 4.9671196937561035,
+          "loss": 0.32417958974838257,
+          "step": 9
+        },
+        {
+          "gradient_norm": 7.562159538269043,
+          "loss": 0.34476494789123535,
+          "step": 10
+        },
+        {
+          "gradient_norm": 5.867500305175781,
+          "loss": 0.328459233045578,
+          "step": 11
+        },
+        {
+          "gradient_norm": 3.350743293762207,
+          "loss": 0.1734941601753235,
+          "step": 12
+        },
+        {
+          "gradient_norm": 2.9647016525268555,
+          "loss": 0.145094096660614,
+          "step": 13
+        },
+        {
+          "gradient_norm": 4.431271076202393,
+          "loss": 0.20371359586715698,
+          "step": 14
+        },
+        {
+          "gradient_norm": 3.6803946495056152,
+          "loss": 0.16984492540359497,
+          "step": 15
+        },
+        {
+          "gradient_norm": 2.7435154914855957,
+          "loss": 0.14092397689819336,
+          "step": 16
+        }
+      ],
+      "train_supervised_contrastive_initial": 2.7833380699157715,
+      "validation_mlm_nll": 6.722367704688729,
+      "validation_retrieval": {
+        "mrr": 0.5454545454545454,
+        "ndcg_at_5": 0.5,
+        "queries": 2,
+        "recall_at_1": 0.5
+      }
+    }
+  }
+}

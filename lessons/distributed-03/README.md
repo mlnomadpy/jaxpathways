@@ -92,13 +92,11 @@ Add this block after the preceding block in a fresh Python file, then run the co
 
 ```python
 # Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update('jax_platforms', 'cpu')
 # Update state in place with the new values.
 jax.config.update('jax_num_cpu_devices', 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
@@ -113,7 +111,6 @@ Add this block after the preceding block in a fresh Python file, then run the co
 
 ```python
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
-# Assert invariant `jax.local_device_count() == 4` holds
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -125,9 +122,7 @@ replicated = NamedSharding(mesh, P())
 features = NamedSharding(mesh, P('data'))
 # Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
-# Compute `yh` from `xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)`
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
-# Compute `wh` from `np.linspace(0.1, -0.2, 8, dtype=np.float32)`
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
@@ -146,7 +141,6 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
 def local_contribution(a, b, weights):
-    # Return `2 * a.T @ (a @ weights - b) / 16` to the caller.
     return 2 * a.T @ (a @ weights - b) / 16
 ```
 
@@ -159,7 +153,6 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
 def reduce_all(a, b, weights):
-    # Return `jax.lax.psum(local_contribution(a, b, weights), 'data')` to the caller.
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 ```
 
@@ -172,7 +165,6 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def reduce_shard(a, b, weights):
-    # Return `jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)` to the caller.
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 ```
 
@@ -193,15 +185,10 @@ shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
 # Configure multi-device placement / sharding specification (`gather`).
 gather = jax.jit(jax.shard_map(lambda g: jax.lax.all_gather(g, 'data', tiled=True),
     mesh=mesh, in_specs=P('data'), out_specs=P(), check_vma=False))
-# Run `all_gradient` to compute `ga`.
 ga = all_gradient(x, y, w)
-# Run `shard_gradient` to compute `gs`.
 gs = shard_gradient(x, y, w)
-# Run `gather` to compute `gg`.
 gg = gather(gs)
-# Perform matrix contraction / projection to compute `reference`.
 reference = 2 * xh.T @ (xh @ wh - yh) / 16
-# Iterate over `result` to step through the computation:
 for result in [ga, gs, gg]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
@@ -213,9 +200,7 @@ assert all(s.data.shape == (2,) for s in gs.addressable_shards)
 assert all(s.data.shape == (8,) for s in gg.addressable_shards)
 # Trace or lower the function to inspect its compiler representation (`hlo_all`).
 hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Run `str` to compute `hlo_shard`.
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Assert invariant `'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard` holds
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 ```
 
@@ -230,37 +215,23 @@ Add this block after the preceding block in a fresh Python file, then run the co
 def completed_samples(fn, *args):
     # Synchronize host execution until asynchronous device computation completes.
     fn(*args).block_until_ready()
-    # Compute `samples` from `[]`
     samples = []
-    # Repeat the update loop over `range(7)` steps:
     for _ in range(7):
-        # Record execution timing or profiler trace in `start`.
         start = perf_counter()
         # Synchronize host execution until asynchronous device computation completes.
         fn(*args).block_until_ready()
-        # Record execution timing or profiler trace in ``.
         samples.append((perf_counter() - start) * 1e6)
-    # Return `samples` to the caller.
     return samples
-# Run `completed_samples` to compute `all_us`.
 all_us = completed_samples(all_gradient, x, y, w)
-# Run `completed_samples` to compute `shard_us`.
 shard_us = completed_samples(shard_gradient, x, y, w)
-# Run `completed_samples` to compute `gather_us`.
 gather_us = completed_samples(gather, gs)
 # Idealized ring payload per rank; not a network measurement.
 ranks, gradient_bytes = 4, wh.nbytes
-# Compute `ring_scatter_bytes` from `(ranks - 1) / ranks * gradient_bytes`
 ring_scatter_bytes = (ranks - 1) / ranks * gradient_bytes
-# Compute `ring_all_bytes` from `2 * ring_scatter_bytes`
 ring_all_bytes = 2 * ring_scatter_bytes
-# Print the observed values to compare against the expected result.
 print('Gradient reference:', reference.tolist())
-# Print diagnostic summary of the computed outputs.
 print('Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)')
-# Print diagnostic summary of the computed outputs.
 print('Idealized ring bytes per rank:', ring_all_bytes, ring_scatter_bytes)
-# Print diagnostic summary of the computed outputs.
 print('Completed CPU median microseconds:', {
     'all_reduce': float(np.median(all_us)), 'reduce_scatter': float(np.median(shard_us)),
     'all_gather_only': float(np.median(gather_us))})
@@ -272,20 +243,17 @@ Compare both the numerical global result and the placement needed by its next co
 
 ```python
 # Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update('jax_platforms', 'cpu')
 # Update state in place with the new values.
 jax.config.update('jax_num_cpu_devices', 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 from time import perf_counter
 
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
-# Assert invariant `jax.local_device_count() == 4` holds
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 # Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -297,9 +265,7 @@ replicated = NamedSharding(mesh, P())
 features = NamedSharding(mesh, P('data'))
 # Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
-# Compute `yh` from `xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)`
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
-# Compute `wh` from `np.linspace(0.1, -0.2, 8, dtype=np.float32)`
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
@@ -310,17 +276,14 @@ w = jax.device_put(wh, replicated)
 
 # Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
 def local_contribution(a, b, weights):
-    # Return `2 * a.T @ (a @ weights - b) / 16` to the caller.
     return 2 * a.T @ (a @ weights - b) / 16
 
 # Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
 def reduce_all(a, b, weights):
-    # Return `jax.lax.psum(local_contribution(a, b, weights), 'data')` to the caller.
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 
 # Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def reduce_shard(a, b, weights):
-    # Return `jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)` to the caller.
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 
 # Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
@@ -333,15 +296,10 @@ shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
 # Configure multi-device placement / sharding specification (`gather`).
 gather = jax.jit(jax.shard_map(lambda g: jax.lax.all_gather(g, 'data', tiled=True),
     mesh=mesh, in_specs=P('data'), out_specs=P(), check_vma=False))
-# Run `all_gradient` to compute `ga`.
 ga = all_gradient(x, y, w)
-# Run `shard_gradient` to compute `gs`.
 gs = shard_gradient(x, y, w)
-# Run `gather` to compute `gg`.
 gg = gather(gs)
-# Perform matrix contraction / projection to compute `reference`.
 reference = 2 * xh.T @ (xh @ wh - yh) / 16
-# Iterate over `result` to step through the computation:
 for result in [ga, gs, gg]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
@@ -353,46 +311,30 @@ assert all(s.data.shape == (2,) for s in gs.addressable_shards)
 assert all(s.data.shape == (8,) for s in gg.addressable_shards)
 # Trace or lower the function to inspect its compiler representation (`hlo_all`).
 hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Run `str` to compute `hlo_shard`.
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
-# Assert invariant `'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard` holds
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
 # Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def completed_samples(fn, *args):
     # Synchronize host execution until asynchronous device computation completes.
     fn(*args).block_until_ready()
-    # Compute `samples` from `[]`
     samples = []
-    # Repeat the update loop over `range(7)` steps:
     for _ in range(7):
-        # Record execution timing or profiler trace in `start`.
         start = perf_counter()
         # Synchronize host execution until asynchronous device computation completes.
         fn(*args).block_until_ready()
-        # Record execution timing or profiler trace in ``.
         samples.append((perf_counter() - start) * 1e6)
-    # Return `samples` to the caller.
     return samples
-# Run `completed_samples` to compute `all_us`.
 all_us = completed_samples(all_gradient, x, y, w)
-# Run `completed_samples` to compute `shard_us`.
 shard_us = completed_samples(shard_gradient, x, y, w)
-# Run `completed_samples` to compute `gather_us`.
 gather_us = completed_samples(gather, gs)
 # Idealized ring payload per rank; not a network measurement.
 ranks, gradient_bytes = 4, wh.nbytes
-# Compute `ring_scatter_bytes` from `(ranks - 1) / ranks * gradient_bytes`
 ring_scatter_bytes = (ranks - 1) / ranks * gradient_bytes
-# Compute `ring_all_bytes` from `2 * ring_scatter_bytes`
 ring_all_bytes = 2 * ring_scatter_bytes
-# Print the observed values to compare against the expected result.
 print('Gradient reference:', reference.tolist())
-# Print diagnostic summary of the computed outputs.
 print('Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)')
-# Print diagnostic summary of the computed outputs.
 print('Idealized ring bytes per rank:', ring_all_bytes, ring_scatter_bytes)
-# Print diagnostic summary of the computed outputs.
 print('Completed CPU median microseconds:', {
     'all_reduce': float(np.median(all_us)), 'reduce_scatter': float(np.median(shard_us)),
     'all_gather_only': float(np.median(gather_us))})
@@ -418,23 +360,22 @@ The reduction in the middle storage bar comes from partitioning the summed gradi
 
 ```python
 # Compute figure data for: One mathematical gradient, different local storage
-# Compute `visual_data` from `{'panels':[{'kind':'bar','labels':['all-reduce','red...`
 visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','after gather'],'ylabel':'values stored per device','series':[{'label':'observed local shape','y':[ga.addressable_shards[0].data.size,gs.addressable_shards[0].data.size,gg.addressable_shards[0].data.size]}]},{'kind':'bar','labels':['all-reduce','reduce-scatter','scatter + gather'],'ylabel':'modeled bytes per rank','series':[{'label':'idealized ring payload','y':[ring_all_bytes,ring_scatter_bytes,ring_scatter_bytes*2]}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:59:05.589337+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:47:48.161184+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 84.16688069701195, 'reduce_scatter': 78.3340074121952, 'all_gather_only': 83.70820432901382}
+Completed CPU median microseconds: {'all_reduce': 99.08340871334076, 'reduce_scatter': 102.49996557831764, 'all_gather_only': 108.41712355613708}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 86.45793423056602, 'reduce_scatter': 84.91566404700279, 'all_gather_only': 75.12513548135757}
+Completed CPU median microseconds: {'all_reduce': 109.4592735171318, 'reduce_scatter': 109.74984616041183, 'all_gather_only': 86.12498641014099}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
@@ -448,29 +389,22 @@ PASS: distributed-03
 
 ```python
 # Experiment — Update slices before gathering: An elementwise update can consume the partitioned gradient.
-# Compute `v_host` from `np.linspace(-0.02, 0.03, 8, dtype=np.float32)`
 v_host = np.linspace(-0.02, 0.03, 8, dtype=np.float32)
 # Place `ws` explicitly onto the target JAX device.
 ws = jax.device_put(wh, features)
 # Place `vs` explicitly onto the target JAX device.
 vs = jax.device_put(v_host, features)
-# Compute `new_v` from `0.9 * vs + gs`
 new_v = 0.9 * vs + gs
-# Compute `new_w` from `ws - 0.1 * new_v`
 new_w = ws - 0.1 * new_v
-# Run `gather` to compute `updated`.
 updated = gather(new_w)
-# Compute `expected_w` from `wh - 0.1 * (0.9 * v_host + reference)`
 expected_w = wh - 0.1 * (0.9 * v_host + reference)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(updated), expected_w, atol=2e-6, rtol=2e-6)
-# Iterate over `shard` to step through the computation:
 for shard in updated.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(shard.data), expected_w, atol=2e-6, rtol=2e-6)
 # Check tensor shape invariant: `all(s.data.shape == (2,) for s in new_v.addressable_shards)`
 assert all(s.data.shape == (2,) for s in new_v.addressable_shards)
-# Print diagnostic summary of the computed outputs.
 print('Sharded momentum matches the independent elementwise update.')
 ```
 
@@ -490,10 +424,9 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 
 **Step-by-step implementation plan:**
 1. Configure multi-device placement / sharding specification (`y2`).
-2. Cast or evaluate `w2h` in explicit floating-point precision.
-3. Place `w2` explicitly onto the target JAX device.
-4. Perform matrix contraction / projection to compute `r2`.
-5. Iterate over `answer` to step through the computation:
+2. Place `w2` explicitly onto the target JAX device.
+3. Convert `` to a host NumPy array for inspection or verification.
+4. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -502,25 +435,18 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 x2 = jax.device_put(...)  # TODO: compute x2
 # Configure multi-device placement / sharding specification (`y2`).
 y2 = jax.device_put(...)  # TODO: compute y2
-# Cast or evaluate `w2h` in explicit floating-point precision.
 w2h = ...  # TODO: compute w2h
 # Place `w2` explicitly onto the target JAX device.
 w2 = jax.device_put(...)  # TODO: compute w2
-# Perform matrix contraction / projection to compute `r2`.
 r2 = ...  # TODO: compute r2
-# Iterate over `answer` to step through the computation:
 for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(answer), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(answer), r2, atol
-    # Iterate over `shard` to step through the computation:
     for shard in answer.addressable_shards:
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
-# Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = ...  # TODO: compute wrong_labels
-# Assert that `np.max(np.abs(wrong_labels-r2)) > 0.01`.
 assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')
 ```
 
@@ -531,25 +457,18 @@ print('Joint permutation preserves the gradient; label-only reversal does not.')
 x2 = jax.device_put(xh[::-1].copy(), rows)
 # Configure multi-device placement / sharding specification (`y2`).
 y2 = jax.device_put(yh[::-1].copy(), NamedSharding(mesh, P('data')))
-# Cast or evaluate `w2h` in explicit floating-point precision.
 w2h = wh + np.float32(0.17)
 # Place `w2` explicitly onto the target JAX device.
 w2 = jax.device_put(w2h, replicated)
-# Perform matrix contraction / projection to compute `r2`.
 r2 = 2 * xh.T @ (xh @ w2h - yh) / 16
-# Iterate over `answer` to step through the computation:
 for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(answer), r2, atol=2e-6, rtol=2e-6)
-    # Iterate over `shard` to step through the computation:
     for shard in answer.addressable_shards:
         # Convert `` to a host NumPy array for inspection or verification.
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol=2e-6, rtol=2e-6)
-# Perform matrix contraction / projection to compute `wrong_labels`.
 wrong_labels = 2 * xh.T @ (xh @ w2h - yh[::-1]) / 16
-# Assert that `np.max(np.abs(wrong_labels-r2)) > 0.01`.
 assert np.max(np.abs(wrong_labels-r2)) > 0.01
-# Print the observed values to compare against the expected result.
 print('Joint permutation preserves the gradient; label-only reversal does not.')
 ```
 
@@ -575,37 +494,24 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Iterate over `p` to step through the computation:
-2. Compute `size` from `2**20`
-3. Compute `rs` from `size * (p - 1) // p`
-4. Compute `ar` from `2 * rs`
-5. Compute `cycle` from `rs + rs`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Account for the complete communication cycle (Transfer): The two-phase payload equals the all-reduce payload under...
 budget = ...  # TODO: compute budget
-# Iterate over `p` to step through the computation:
 for p in [2, 4, 8]:
-    # Compute `size` from `2**20`
     size = ...  # TODO: compute size
-    # Compute `rs` from `size * (p - 1) // p`
     rs = ...  # TODO: compute rs
-    # Compute `ar` from `2 * rs`
     ar = ...  # TODO: compute ar
-    # Compute `cycle` from `rs + rs`
     cycle = ...  # TODO: compute cycle
-    # Assert invariant `ar == cycle` holds
     assert ar  # TODO: complete assertion check
-    # Assert invariant `size // p * p == size` holds
     assert size // p * p  # TODO: complete assertion check
-    # Append the current step result to `budget`.
     budget.append({'ranks': p, 'all_reduce_bytes': ar,
                    'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-# Assert invariant `[row['all_reduce_bytes'] for row in budget] == [1048576` holds
 assert [row['all_reduce_bytes'] for row  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Idealized payload/storage budget, not observed network traffic:', budget)
 ```
 
@@ -614,26 +520,16 @@ print('Idealized payload/storage budget, not observed network traffic:', budget)
 ```python
 # Account for the complete communication cycle (Transfer): The two-phase payload equals the all-reduce payload under...
 budget = []
-# Iterate over `p` to step through the computation:
 for p in [2, 4, 8]:
-    # Compute `size` from `2**20`
     size = 2**20
-    # Compute `rs` from `size * (p - 1) // p`
     rs = size * (p - 1) // p
-    # Compute `ar` from `2 * rs`
     ar = 2 * rs
-    # Compute `cycle` from `rs + rs`
     cycle = rs + rs
-    # Assert invariant `ar == cycle` holds
     assert ar == cycle
-    # Assert invariant `size // p * p == size` holds
     assert size // p * p == size
-    # Append the current step result to `budget`.
     budget.append({'ranks': p, 'all_reduce_bytes': ar,
                    'scatter_gather_bytes': cycle, 'shard_storage_bytes': size // p})
-# Assert invariant `[row['all_reduce_bytes'] for row in budget] == [1048576` holds
 assert [row['all_reduce_bytes'] for row in budget] == [1048576, 1572864, 1835008]
-# Print the observed values to compare against the expected result.
 print('Idealized payload/storage budget, not observed network traffic:', budget)
 ```
 

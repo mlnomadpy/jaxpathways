@@ -83,7 +83,6 @@ Create benchmark.py in your activated course environment and add this block.
 
 ```python
 # Step 1 — Prepare and place the workload: CPU placement and waiting occur before timing.
-# Import json for this computation.
 import json
 import platform
 import time
@@ -95,9 +94,7 @@ import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
-# Cast or evaluate `x_host` in explicit floating-point precision.
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
-# Cast or evaluate `w_host` in explicit floating-point precision.
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, cpu)
@@ -116,28 +113,20 @@ Append this block to the same file. Run the assembled file with python benchmark
 ```python
 # Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
 def predict(x, w):
-    # Return `jnp.tanh(x @ w)` to the caller.
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
 compiled_predict = jax.jit(predict)
-# Function `synchronized_samples(fn, args, repeats)` implementing this stage's computation:
 def synchronized_samples(fn, args, repeats=7):
     # Guard input contract (`repeats < 1`) and fail fast if violated.
     if repeats < 1:
         raise ValueError("at least one repeat is required")
-    # Compute `samples` from `[]`
     samples = []
-    # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
-        # Record execution timing or profiler trace in `start`.
         start = time.perf_counter()
-        # Run `fn` to compute `result`.
         result = fn(*args)
         # Synchronize host execution until asynchronous device computation completes.
         jax.block_until_ready(result)
-        # Record execution timing or profiler trace in ``.
         samples.append(time.perf_counter() - start)
-    # Return `(result, samples)` to the caller.
     return result, samples
 ```
 
@@ -150,15 +139,11 @@ Append this block to the same file. Run the assembled file with python benchmark
 ```python
 # Step 3 — Separate first call from warm calls: The report prints variable measured times.
 start = time.perf_counter()
-# Run `compiled_predict` to compute `first`.
 first = compiled_predict(x, w)
 # Synchronize host execution until asynchronous device computation completes.
 first.block_until_ready()
-# Record execution timing or profiler trace in `first_call_seconds`.
 first_call_seconds = time.perf_counter() - start
-# Run `synchronized_samples` to compute `(result, samples)`.
 result, samples = synchronized_samples(compiled_predict, (x, w))
-# Perform matrix contraction / projection to compute `reference`.
 reference = np.tanh(x_host @ w_host)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result), reference, atol=2e-5, rtol=2e-5)
@@ -172,9 +157,7 @@ report = {
     "warm_samples_seconds": samples, "warm_median_seconds": statistics.median(samples),
     "max_abs_error": float(np.max(np.abs(np.asarray(result) - reference))),
 }
-# Assert invariant `len(samples) == 7 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 7 and all(t >= 0 for t in samples)
-# Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
 ```
 
@@ -184,7 +167,6 @@ The report prints variable measured times. Redirect the full run output to a tex
 
 ```python
 # Step 1 — Prepare and place the workload: CPU placement and waiting occur before timing.
-# Import json for this computation.
 import json
 import platform
 import time
@@ -196,9 +178,7 @@ import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
-# Cast or evaluate `x_host` in explicit floating-point precision.
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
-# Cast or evaluate `w_host` in explicit floating-point precision.
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(x_host, cpu)
@@ -208,40 +188,28 @@ w = jax.device_put(w_host, cpu)
 jax.block_until_ready((x, w))
 # Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
 def predict(x, w):
-    # Return `jnp.tanh(x @ w)` to the caller.
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
 compiled_predict = jax.jit(predict)
-# Function `synchronized_samples(fn, args, repeats)` implementing this stage's computation:
 def synchronized_samples(fn, args, repeats=7):
     # Guard input contract (`repeats < 1`) and fail fast if violated.
     if repeats < 1:
         raise ValueError("at least one repeat is required")
-    # Compute `samples` from `[]`
     samples = []
-    # Repeat the update loop over `range(repeats)` steps:
     for _ in range(repeats):
-        # Record execution timing or profiler trace in `start`.
         start = time.perf_counter()
-        # Run `fn` to compute `result`.
         result = fn(*args)
         # Synchronize host execution until asynchronous device computation completes.
         jax.block_until_ready(result)
-        # Record execution timing or profiler trace in ``.
         samples.append(time.perf_counter() - start)
-    # Return `(result, samples)` to the caller.
     return result, samples
 # Step 3 — Separate first call from warm calls: The report prints variable measured times.
 start = time.perf_counter()
-# Run `compiled_predict` to compute `first`.
 first = compiled_predict(x, w)
 # Synchronize host execution until asynchronous device computation completes.
 first.block_until_ready()
-# Record execution timing or profiler trace in `first_call_seconds`.
 first_call_seconds = time.perf_counter() - start
-# Run `synchronized_samples` to compute `(result, samples)`.
 result, samples = synchronized_samples(compiled_predict, (x, w))
-# Perform matrix contraction / projection to compute `reference`.
 reference = np.tanh(x_host @ w_host)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result), reference, atol=2e-5, rtol=2e-5)
@@ -255,9 +223,7 @@ report = {
     "warm_samples_seconds": samples, "warm_median_seconds": statistics.median(samples),
     "max_abs_error": float(np.max(np.abs(np.asarray(result) - reference))),
 }
-# Assert invariant `len(samples) == 7 and all(t >= 0 for t in samples)` holds
 assert len(samples) == 7 and all(t >= 0 for t in samples)
-# Print the observed values to compare against the expected result.
 print(json.dumps(report, indent=2))
 ```
 
@@ -285,13 +251,12 @@ The warm line shows variation between individual samples. An isolated higher poi
 
 ```python
 # Compute figure data for: Separate the first call from warm measurements
-# Compute `visual_data` from `{'kind': 'panels', 'panels': [{'kind': 'bar', 'title...`
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call', 'labels': ['first'], 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': [first_call_seconds]}]}, {'kind': 'line', 'title': 'Warm calls', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm sample', 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': samples}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:58:52.796738+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:47:33.645730+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -309,17 +274,17 @@ CPU run: 2026-10-13T08:58:52.796738+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.03735812474042177,
+  "first_call_seconds": 0.051288416143506765,
   "warm_samples_seconds": [
-    3.7457793951034546e-05,
-    1.7416663467884064e-05,
-    1.1541415005922318e-05,
-    1.1499971151351929e-05,
-    1.0082963854074478e-05,
-    1.0291114449501038e-05,
-    1.0291114449501038e-05
+    5.9833284467458725e-05,
+    2.5249551981687546e-05,
+    1.200009137392044e-05,
+    1.429067924618721e-05,
+    1.00000761449337e-05,
+    8.584000170230865e-06,
+    8.875038474798203e-06
   ],
-  "warm_median_seconds": 1.1499971151351929e-05,
+  "warm_median_seconds": 1.200009137392044e-05,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -337,25 +302,25 @@ CPU run: 2026-10-13T08:58:52.796738+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.02327195880934596,
+  "first_call_seconds": 0.02849070867523551,
   "warm_samples_seconds": [
-    3.416696563363075e-05,
-    1.8500257283449173e-05,
-    1.1417083442211151e-05,
-    1.1125113815069199e-05,
-    9.417068213224411e-06,
-    1.2292061001062393e-05,
-    1.195911318063736e-05
+    0.00011466676369309425,
+    0.0001077083870768547,
+    4.1958410292863846e-05,
+    3.5458244383335114e-05,
+    1.2999866157770157e-05,
+    1.1667143553495407e-05,
+    1.3041310012340546e-05
   ],
-  "warm_median_seconds": 1.195911318063736e-05,
+  "warm_median_seconds": 3.5458244383335114e-05,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 1.3458076864480972e-05
-Complete-call samples: [1.962529495358467e-05, 1.162523403763771e-05, 1.1583324521780014e-05]
-Structured samples: [4.3209176510572433e-05, 2.38749198615551e-05, 2.229074016213417e-05]
-Changed workload: (96, 32) [3.424985334277153e-05, 1.9040890038013458e-05, 1.170765608549118e-05, 1.074979081749916e-05, 1.6582664102315903e-05]
-Energy shape and samples: (64,) [4.245806485414505e-05, 2.1624844521284103e-05, 1.3624783605337143e-05, 1.2750271707773209e-05, 1.1958181858062744e-05]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [2.4916138499975204e-05, 1.8250197172164917e-05, 1.0041985660791397e-05, 1.2875068932771683e-05, 8.95792618393898e-06]}
+Handle-only seconds: 1.1832918971776962e-05
+Complete-call samples: [1.8625054508447647e-05, 1.2416858226060867e-05, 1.2083910405635834e-05]
+Structured samples: [6.495881825685501e-05, 3.074994310736656e-05, 3.1624920666217804e-05]
+Changed workload: (96, 32) [6.645871326327324e-05, 5.883257836103439e-05, 5.4459087550640106e-05, 2.1249987185001373e-05, 1.1249911040067673e-05]
+Energy shape and samples: (64,) [5.758274346590042e-05, 4.183407872915268e-05, 2.150004729628563e-05, 1.8625054508447647e-05, 1.8666032701730728e-05]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [4.9999915063381195e-05, 5.924981087446213e-05, 5.816575139760971e-05, 5.9042125940322876e-05, 6.141699850559235e-05]}
 PASS: performance-01
 
 ```
@@ -367,16 +332,11 @@ PASS: performance-01
 ```python
 # Experiment — Compare handle-only and synchronized boundaries: The separate intervals have different measurement boundaries and...
 start = time.perf_counter()
-# Run `compiled_predict` to compute `handle`.
 handle = compiled_predict(x, w)
-# Record execution timing or profiler trace in `handle_seconds`.
 handle_seconds = time.perf_counter() - start
 handle.block_until_ready()  # drain this call before the separate comparison
-# Run `synchronized_samples` to compute `(_, complete_samples)`.
 _, complete_samples = synchronized_samples(compiled_predict, (x, w), repeats=3)
-# Print the observed values to compare against the expected result.
 print("Handle-only seconds:", handle_seconds)
-# Print diagnostic summary of the computed outputs.
 print("Complete-call samples:", complete_samples)
 ```
 
@@ -394,13 +354,11 @@ The separate intervals have different measurement boundaries and noise. Only syn
 structured = jax.jit(lambda a, b: {"prediction": jnp.tanh(a @ b), "mean": jnp.mean(jnp.tanh(a @ b))})
 # Synchronize host execution until asynchronous device computation completes.
 jax.block_until_ready(structured(x, w))
-# Run `synchronized_samples` to compute `(structured_result, structured_times)`.
 structured_result, structured_times = synchronized_samples(structured, (x, w), 3)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(structured_result["prediction"]), reference, atol=2e-5, rtol=2e-5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(structured_result["mean"]), reference.mean(), atol=2e-5, rtol=2e-5)
-# Print the observed values to compare against the expected result.
 print("Structured samples:", structured_times)
 ```
 
@@ -423,8 +381,7 @@ Repeat the benchmark with $96$ rows while preserving the feature and output dime
 1. Place `larger` explicitly onto the target JAX device.
 2. Synchronize host execution until asynchronous device computation completes.
 3. Synchronize host execution until asynchronous device computation completes.
-4. Run `synchronized_samples` to compute `(larger_result, larger_times)`.
-5. Convert `` to a host NumPy array for inspection or verification.
+4. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -437,11 +394,9 @@ larger = jax.device_put(...)  # TODO: compute larger
 larger.block_until_ready()
 # Synchronize host execution until asynchronous device computation completes.
 compiled_predict(larger, w).block_until_ready()
-# Run `synchronized_samples` to compute `(larger_result, larger_times)`.
 larger_result, larger_times = synchronized_samples(...)  # TODO: compute larger_result, larger_times
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(larger_result), np.tanh(larger_host @ w_host), atol=2e-5, rtol=2e-5)
-# Print the observed values to compare against the expected result.
 print("Changed workload:", larger.shape, larger_times)
 ```
 
@@ -456,11 +411,9 @@ larger = jax.device_put(larger_host, cpu)
 larger.block_until_ready()
 # Synchronize host execution until asynchronous device computation completes.
 compiled_predict(larger, w).block_until_ready()
-# Run `synchronized_samples` to compute `(larger_result, larger_times)`.
 larger_result, larger_times = synchronized_samples(compiled_predict, (larger, w), 5)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(larger_result), np.tanh(larger_host @ w_host), atol=2e-5, rtol=2e-5)
-# Print the observed values to compare against the expected result.
 print("Changed workload:", larger.shape, larger_times)
 ```
 
@@ -489,9 +442,9 @@ Square before reducing the output-feature axis; the result has shape $(64,)$.
 **Step-by-step implementation plan:**
 1. Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.
 2. Synchronize host execution until asynchronous device computation completes.
-3. Run `synchronized_samples` to compute `(energy_result, energy_times)`.
-4. Reduce along axis=1 to compute `energy_reference`.
-5. Check tensor shape invariant: `energy_result.shape == (64,)`
+3. Reduce along axis=1 to compute `energy_reference`.
+4. Check tensor shape invariant: `energy_result.shape == (64,)`
+5. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -501,7 +454,6 @@ Square before reducing the output-feature axis; the result has shape $(64,)$.
 energy = jax.jit(...)  # TODO: compute energy
 # Synchronize host execution until asynchronous device computation completes.
 energy(x, w).block_until_ready()
-# Run `synchronized_samples` to compute `(energy_result, energy_times)`.
 energy_result, energy_times = synchronized_samples(...)  # TODO: compute energy_result, energy_times
 # Reduce along axis=1 to compute `energy_reference`.
 energy_reference = np.sum(...)  # TODO: compute energy_reference
@@ -509,7 +461,6 @@ energy_reference = np.sum(...)  # TODO: compute energy_reference
 assert energy_result.shape  # TODO: complete assertion check
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol
-# Print the observed values to compare against the expected result.
 print("Energy shape and samples:", energy_result.shape, energy_times)
 ```
 
@@ -521,7 +472,6 @@ print("Energy shape and samples:", energy_result.shape, energy_times)
 energy = jax.jit(lambda a, b: jnp.sum((a @ b)**2, axis=1))
 # Synchronize host execution until asynchronous device computation completes.
 energy(x, w).block_until_ready()
-# Run `synchronized_samples` to compute `(energy_result, energy_times)`.
 energy_result, energy_times = synchronized_samples(energy, (x, w), 5)
 # Reduce along axis=1 to compute `energy_reference`.
 energy_reference = np.sum((x_host @ w_host)**2, axis=1)
@@ -529,7 +479,6 @@ energy_reference = np.sum((x_host @ w_host)**2, axis=1)
 assert energy_result.shape == (64,)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol=2e-3, rtol=2e-5)
-# Print the observed values to compare against the expected result.
 print("Energy shape and samples:", energy_result.shape, energy_times)
 ```
 
@@ -559,8 +508,7 @@ Prepare and wait for inputs, reuse one compiled callable, warm it, then synchron
 1. Repair a timer that includes setup but omits completion (Diagnosis): The repaired boundary excludes setup, separates warmup and...
 2. Synchronize host execution until asynchronous device computation completes.
 3. Synchronize host execution until asynchronous device computation completes.
-4. Run `synchronized_samples` to compute `(result, measured)`.
-5. Return `({'boundary': 'placed inputs; warm call plus output wait', 'samples': measured}, result)` to the caller.
+4. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -571,17 +519,12 @@ def repaired_benchmark(fn, args):
     jax.block_until_ready(args)
     # Synchronize host execution until asynchronous device computation completes.
     jax.block_until_ready(fn(*args))
-    # Run `synchronized_samples` to compute `(result, measured)`.
     result, measured = synchronized_samples(...)  # TODO: compute result, measured
-    # Return `({'boundary': 'placed inputs; warm call plus output wait', 'samples': measured}, result)` to the caller.
     return ...  # TODO: return computed result
-# Run `repaired_benchmark` to compute `(fixed_report, fixed_result)`.
 fixed_report, fixed_result = repaired_benchmark(...)  # TODO: compute fixed_report, fixed_result
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(fixed_result), reference, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(fixed_result), reference, atol
-# Assert invariant `len(fixed_report["samples"]) == 5` holds
 assert len(fixed_report["samples"])  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print(fixed_report)
 ```
 
@@ -594,17 +537,12 @@ def repaired_benchmark(fn, args):
     jax.block_until_ready(args)
     # Synchronize host execution until asynchronous device computation completes.
     jax.block_until_ready(fn(*args))
-    # Run `synchronized_samples` to compute `(result, measured)`.
     result, measured = synchronized_samples(fn, args, 5)
-    # Return `({'boundary': 'placed inputs; warm call plus output wait', 'samples': measured}, result)` to the caller.
     return {"boundary": "placed inputs; warm call plus output wait", "samples": measured}, result
-# Run `repaired_benchmark` to compute `(fixed_report, fixed_result)`.
 fixed_report, fixed_result = repaired_benchmark(compiled_predict, (x, w))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(fixed_result), reference, atol=2e-5, rtol=2e-5)
-# Assert invariant `len(fixed_report["samples"]) == 5` holds
 assert len(fixed_report["samples"]) == 5
-# Print the observed values to compare against the expected result.
 print(fixed_report)
 ```
 

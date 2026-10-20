@@ -4,10 +4,10 @@
   "minutes": 40,
   "content": {
     "idea": "Your first goal is a small, repeatable result: save a Python file, run it with the intended Python environment, and explain its output. A terminal accepts commands; Python executes the program; JAX is a package that Python imports. Keeping those three roles separate makes setup errors much easier to locate.",
-    "code": "# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...\n# Import os for this computation.\nimport os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\n# Import required JAX, NumPy, and standard-library modules.\nimport platform\nimport jax\nimport numpy as np\n# Print the observed values to compare against the expected result.\nprint(\"Python:\", platform.python_version())\n# Print diagnostic summary of the computed outputs.\nprint(\"JAX:\", jax.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"NumPy:\", np.__version__)\n# Print diagnostic summary of the computed outputs.\nprint(\"Backend:\", jax.default_backend())\n# Print diagnostic summary of the computed outputs.\nprint(\"Devices:\", jax.devices())\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Sum:\", float(x.sum()))\n# Assert invariant `float(x.sum()) == 6.0` holds\nassert float(x.sum()) == 6.0",
+    "code": "# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...\nimport os\n# Choose CPU before importing JAX for this first experiment.\nos.environ[\"JAX_PLATFORMS\"] = \"cpu\"\n# Import required JAX, NumPy, and standard-library modules.\nimport platform\nimport jax\nimport numpy as np\nprint(\"Python:\", platform.python_version())\nprint(\"JAX:\", jax.__version__)\nprint(\"NumPy:\", np.__version__)\nprint(\"Backend:\", jax.default_backend())\nprint(\"Devices:\", jax.devices())\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\nprint(\"Sum:\", float(x.sum()))\nassert float(x.sum()) == 6.0",
     "output": "The package versions match the pins, Backend is cpu, and the last line is Sum: \\(6.0\\). The exact Python patch and CPU device text depend on your installation.",
     "exercise": "Edit the starter as shown in Step \\(6\\): change the array length from \\(4\\) to \\(6\\) and the expected sum from \\(6\\) to \\(15\\). Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.",
-    "solution": "# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...\nx = jax.numpy.arange(6, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\nprint(\"Changed experiment sum:\", float(x.sum()))\n# Assert invariant `float(x.sum()) == 15.0` holds\nassert float(x.sum()) == 15.0",
+    "solution": "# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...\nx = jax.numpy.arange(6, dtype=jax.numpy.float32)\nprint(\"Changed experiment sum:\", float(x.sum()))\nassert float(x.sum()) == 15.0",
     "question": "Which evidence lets another learner reproduce your environment?",
     "options": [
       "A screenshot of the final number only",
@@ -265,7 +265,7 @@
       {
         "title": "Step 3: Verify shapes and numerical invariants",
         "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
-        "code": "import numpy as np\n# Print the observed values to compare against the expected result.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Print diagnostic summary of the computed outputs.\n# Run `jax.numpy.arange` to compute `x`.\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\n# Print the observed values to compare against the expected result.\n# Assert invariant `float(x.sum()) == 6.0` holds\nassert float(x.sum()) == 6.0",
+        "code": "import numpy as np\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\nassert float(x.sum()) == 6.0",
         "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
       }
     ]

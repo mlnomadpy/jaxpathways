@@ -82,7 +82,6 @@ Create main.py and add this setup block. Continue with the next block in the sam
 
 ```python
 # Step 1 — Prepare the explicit contract: The fixture gives every observation an ID, a source group and a split.
-# Import hashlib, json, math for this computation.
 import hashlib, json, math
 ```
 
@@ -95,20 +94,15 @@ Append this block, run main.py in the course environment, and retain the actual 
 ```python
 # Step 2 — Run and inspect the controlled experiment: The input mix changes from [0.9,0.1] to [0.5,0.5] across two...
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
-# Function `validate_rows(rows)` implementing this stage's computation:
 def validate_rows(rows):
     """An observation has a stable identity, split, group, input and target."""
     # Guard input contract (`not rows`) and fail fast if violated.
     if not rows:
         raise ValueError('empty dataset')
-    # Run `set` to compute `ids`.
     ids = set()
-    # Compute `groups` from `{}`
     groups = {}
-    # Iterate over `row` to step through the computation:
     for row in rows:
         # Guard input contract (`set(row) != {'id', 'group', 'split', 'x', 'y'}`) and fail fast if violated.
         if set(row) != {'id', 'group', 'split', 'x', 'y'}:
@@ -122,7 +116,6 @@ def validate_rows(rows):
         # Guard input contract (`row['split'] not in {'train', 'validation', 'test'}`) and fail fast if violated.
         if row['split'] not in {'train', 'validation', 'test'}:
             raise ValueError('unknown split')
-        # Iterate over `name` to step through the computation:
         for name in ['x', 'y']:
             # Guard input contract (`isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or (not math.isfinite(row[name]))`) and fail fast if violated.
             if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):
@@ -130,14 +123,11 @@ def validate_rows(rows):
         # Guard input contract (`row['group'] in groups and groups[row['group']] != row['split']`) and fail fast if violated.
         if row['group'] in groups and groups[row['group']] != row['split']:
             raise ValueError('source group leaks between splits')
-        # Run `ids.add` to perform the next check or state transition.
         # Execute `ids.add(row['id'])`
         ids.add(row['id'])
         groups[row['group']] = row['split']
-    # Return `digest(rows)` to the caller.
     return digest(rows)
 
-# Function `gate_metrics(errors, slices, limit)` implementing this stage's computation:
 def gate_metrics(errors, slices, limit):
     """Count-weighted MSE plus every required slice; no empty-slice pass."""
     # Guard input contract (`len(errors) != len(slices) or not errors or (not math.isfinite(limit)) or (limit < 0)`) and fail fast if violated.
@@ -149,31 +139,20 @@ def gate_metrics(errors, slices, limit):
     # Guard input contract (`not set(slices) <= {'low', 'high'}`) and fail fast if violated.
     if not set(slices) <= {'low', 'high'}:
         raise ValueError('unknown slice')
-    # Compute `result` from `{name: {'count': slices.count(name), 'mse': None} fo...`
     result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}
-    # Iterate over `(name, item)` to step through the computation:
     for name, item in result.items():
-        # Compute `selected` from `[e for e, s in zip(errors, slices) if s == name]`
         selected = [e for e, s in zip(errors, slices) if s == name]
-        # Branch on condition `selected`:
         if selected: item['mse'] = math.fsum(selected) / len(selected)
-    # Compute `result['overall']` from `{'count': len(errors), 'mse': math.fsum(errors) / le...`
     result['overall'] = {'count': len(errors), 'mse': math.fsum(errors) / len(errors)}
-    # Run `all` to compute `result['passed']`.
     result['passed'] = all(v['count'] > 0 and v['mse'] <= limit for v in result.values())
-    # Return `result` to the caller.
     return result
 
-# Compute `rows` from `[dict(id=f'r{i}', group=f'g{i}', split='train' if i<...`
 rows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]
-# Run `validate_rows` to compute `fingerprint`.
 fingerprint = validate_rows(rows)
 # Accumulate the next contribution into `changed[-1]['x']`.
 changed = [dict(r) for r in rows]
 changed[-1]['x'] += 1
-# Assert invariant `validate_rows(changed) != fingerprint` holds
 assert validate_rows(changed) != fingerprint
-# Compute `leaked` from `[dict(r) for r in rows]`
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
 # Run the boundary check and catch the expected exception:
@@ -183,30 +162,19 @@ except ValueError:
     pass
 else:
     raise AssertionError('cross-split source leakage accepted')
-# Compute `errors` from `[.01] * 9 + [4.]`
 errors = [.01] * 9 + [4.]
-# Compute `slices` from `['low'] * 9 + ['high']`
 slices = ['low'] * 9 + ['high']
-# Run `gate_metrics` to compute `metrics`.
 metrics = gate_metrics(errors, slices, .5)
-# Assert that `math.isclose(metrics['overall']['mse'], .409)`.
 assert math.isclose(metrics['overall']['mse'], .409)
-# Assert invariant `metrics['overall']['mse'] < .5 and not metrics['passed']` holds
 assert metrics['overall']['mse'] < .5 and not metrics['passed']
-# Assert invariant `metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.` holds
 assert metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.
-# Assert invariant `not gate_metrics([.01]*9` holds
 assert not gate_metrics([.01]*9, ['low']*9, .5)['passed']
 # Total variation on two declared bins: changed input mix is a diagnostic, not proof of degraded accuracy.
 reference_mix = [.9, .1]
 current_mix = [.5, .5]
-# Compute `shift` from `.5 * sum(abs(a-b) for a,b in zip(reference_mix,curre...`
 shift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))
-# Assert that `math.isclose(shift, .4)`.
 assert math.isclose(shift, .4)
-# Print diagnostic summary of the computed outputs.
 print('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])
-# Print diagnostic summary of the computed outputs.
 print('Two-bin input total variation:',shift,'(requires investigation; not an automatic retraining order)')
 ```
 
@@ -227,25 +195,19 @@ Checking these invariants confirms the computation is ready for the full worked 
 
 ```python
 # Step 1 — Prepare the explicit contract: The fixture gives every observation an ID, a source group and a split.
-# Import hashlib, json, math for this computation.
 import hashlib, json, math
 
 # Step 2 — Run and inspect the controlled experiment: The input mix changes from [0.9,0.1] to [0.5,0.5] across two...
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
-# Function `validate_rows(rows)` implementing this stage's computation:
 def validate_rows(rows):
     """An observation has a stable identity, split, group, input and target."""
     # Guard input contract (`not rows`) and fail fast if violated.
     if not rows:
         raise ValueError('empty dataset')
-    # Run `set` to compute `ids`.
     ids = set()
-    # Compute `groups` from `{}`
     groups = {}
-    # Iterate over `row` to step through the computation:
     for row in rows:
         # Guard input contract (`set(row) != {'id', 'group', 'split', 'x', 'y'}`) and fail fast if violated.
         if set(row) != {'id', 'group', 'split', 'x', 'y'}:
@@ -259,7 +221,6 @@ def validate_rows(rows):
         # Guard input contract (`row['split'] not in {'train', 'validation', 'test'}`) and fail fast if violated.
         if row['split'] not in {'train', 'validation', 'test'}:
             raise ValueError('unknown split')
-        # Iterate over `name` to step through the computation:
         for name in ['x', 'y']:
             # Guard input contract (`isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or (not math.isfinite(row[name]))`) and fail fast if violated.
             if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):
@@ -267,14 +228,11 @@ def validate_rows(rows):
         # Guard input contract (`row['group'] in groups and groups[row['group']] != row['split']`) and fail fast if violated.
         if row['group'] in groups and groups[row['group']] != row['split']:
             raise ValueError('source group leaks between splits')
-        # Run `ids.add` to perform the next check or state transition.
         # Execute `ids.add(row['id'])`
         ids.add(row['id'])
         groups[row['group']] = row['split']
-    # Return `digest(rows)` to the caller.
     return digest(rows)
 
-# Function `gate_metrics(errors, slices, limit)` implementing this stage's computation:
 def gate_metrics(errors, slices, limit):
     """Count-weighted MSE plus every required slice; no empty-slice pass."""
     # Guard input contract (`len(errors) != len(slices) or not errors or (not math.isfinite(limit)) or (limit < 0)`) and fail fast if violated.
@@ -286,31 +244,20 @@ def gate_metrics(errors, slices, limit):
     # Guard input contract (`not set(slices) <= {'low', 'high'}`) and fail fast if violated.
     if not set(slices) <= {'low', 'high'}:
         raise ValueError('unknown slice')
-    # Compute `result` from `{name: {'count': slices.count(name), 'mse': None} fo...`
     result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}
-    # Iterate over `(name, item)` to step through the computation:
     for name, item in result.items():
-        # Compute `selected` from `[e for e, s in zip(errors, slices) if s == name]`
         selected = [e for e, s in zip(errors, slices) if s == name]
-        # Branch on condition `selected`:
         if selected: item['mse'] = math.fsum(selected) / len(selected)
-    # Compute `result['overall']` from `{'count': len(errors), 'mse': math.fsum(errors) / le...`
     result['overall'] = {'count': len(errors), 'mse': math.fsum(errors) / len(errors)}
-    # Run `all` to compute `result['passed']`.
     result['passed'] = all(v['count'] > 0 and v['mse'] <= limit for v in result.values())
-    # Return `result` to the caller.
     return result
 
-# Compute `rows` from `[dict(id=f'r{i}', group=f'g{i}', split='train' if i<...`
 rows = [dict(id=f'r{i}', group=f'g{i}', split='train' if i<4 else 'validation', x=float(i), y=2.*i+1.) for i in range(6)]
-# Run `validate_rows` to compute `fingerprint`.
 fingerprint = validate_rows(rows)
 # Accumulate the next contribution into `changed[-1]['x']`.
 changed = [dict(r) for r in rows]
 changed[-1]['x'] += 1
-# Assert invariant `validate_rows(changed) != fingerprint` holds
 assert validate_rows(changed) != fingerprint
-# Compute `leaked` from `[dict(r) for r in rows]`
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
 # Run the boundary check and catch the expected exception:
@@ -320,30 +267,19 @@ except ValueError:
     pass
 else:
     raise AssertionError('cross-split source leakage accepted')
-# Compute `errors` from `[.01] * 9 + [4.]`
 errors = [.01] * 9 + [4.]
-# Compute `slices` from `['low'] * 9 + ['high']`
 slices = ['low'] * 9 + ['high']
-# Run `gate_metrics` to compute `metrics`.
 metrics = gate_metrics(errors, slices, .5)
-# Assert that `math.isclose(metrics['overall']['mse'], .409)`.
 assert math.isclose(metrics['overall']['mse'], .409)
-# Assert invariant `metrics['overall']['mse'] < .5 and not metrics['passed']` holds
 assert metrics['overall']['mse'] < .5 and not metrics['passed']
-# Assert invariant `metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.` holds
 assert metrics['high']['count'] == 1 and metrics['high']['mse'] == 4.
-# Assert invariant `not gate_metrics([.01]*9` holds
 assert not gate_metrics([.01]*9, ['low']*9, .5)['passed']
 # Total variation on two declared bins: changed input mix is a diagnostic, not proof of degraded accuracy.
 reference_mix = [.9, .1]
 current_mix = [.5, .5]
-# Compute `shift` from `.5 * sum(abs(a-b) for a,b in zip(reference_mix,curre...`
 shift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))
-# Assert that `math.isclose(shift, .4)`.
 assert math.isclose(shift, .4)
-# Print diagnostic summary of the computed outputs.
 print('Overall MSE:',metrics['overall']['mse'],'high-slice MSE:',metrics['high']['mse'],'release:',metrics['passed'])
-# Print diagnostic summary of the computed outputs.
 print('Two-bin input total variation:',shift,'(requires investigation; not an automatic retraining order)')
 ```
 
@@ -368,13 +304,12 @@ The plot comes from the exact errors checked by gate_metrics. The changed-mix ex
 
 ```python
 # Compute figure data for: An average can conceal the failing slice
-# Compute `visual_data` from `{'kind':'bar','labels':['overall (10)','low (9)','hi...`
 visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel':'evaluation group (count)','ylabel':'mean squared error','series':[{'label':'observed MSE','y':[metrics[k]['mse'] for k in ['overall','low','high']]},{'label':'illustrative limit','y':[.5,.5,.5]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:02:51.963647+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:51:48.399230+00:00. JAX 0.9.2.
 
 ```text
 Overall MSE: 0.409 high-slice MSE: 4.0 release: False
@@ -394,11 +329,8 @@ PASS: operations-06
 
 ```python
 # Experiment — A good aggregate hides a bad slice: A policy must define both aggregation and required slice evidence.
-# Assert invariant `metrics['overall']['mse'] < .5` holds
 assert metrics['overall']['mse'] < .5
-# Assert invariant `metrics['high']['mse'] > .5 and metrics['passed'] is False` holds
 assert metrics['high']['mse'] > .5 and metrics['passed'] is False
-# Print the observed values to compare against the expected result.
 print('Aggregate-only acceptance would miss the high-slice failure.')
 ```
 
@@ -417,17 +349,15 @@ Show that averaging slice means without counts changes the overall error.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
-2. Print the observed values to compare against the expected result.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Show that averaging slice means without counts changes the overall error.
 wrong = ...  # TODO: compute wrong
-# Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
 assert math.isclose(wrong,2.005)  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Unweighted slice average:',wrong)
 ```
 
@@ -436,9 +366,7 @@ print('Unweighted slice average:',wrong)
 ```python
 # Exercise solution: Show that averaging slice means without counts changes the overall error.
 wrong=(metrics['low']['mse']+metrics['high']['mse'])/2
-# Assert that `math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])`.
 assert math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['mse'])
-# Print the observed values to compare against the expected result.
 print('Unweighted slice average:',wrong)
 ```
 
@@ -465,20 +393,14 @@ Change counts rather than the model errors.
 
 **Step-by-step implementation plan:**
 1. Change the population mix (transfer): Aggregate performance changes with population mix even when...
-2. Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
-3. Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
-4. Print the observed values to compare against the expected result.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Change the population mix (transfer): Aggregate performance changes with population mix even when...
 shifted = gate_metrics(...)  # TODO: compute shifted
-# Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
 assert math.isclose(shifted['overall']['mse'],3.601)  # TODO: complete assertion check
-# Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
 assert shifted['high']['mse']  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('New population MSE:',shifted['overall']['mse'])
 ```
 
@@ -487,11 +409,8 @@ print('New population MSE:',shifted['overall']['mse'])
 ```python
 # Change the population mix (transfer): Aggregate performance changes with population mix even when...
 shifted=gate_metrics([.01]+[4.]*9,['low']+['high']*9,.5)
-# Assert that `math.isclose(shifted['overall']['mse'],3.601)`.
 assert math.isclose(shifted['overall']['mse'],3.601)
-# Assert invariant `shifted['high']['mse']==metrics['high']['mse']` holds
 assert shifted['high']['mse']==metrics['high']['mse']
-# Print the observed values to compare against the expected result.
 print('New population MSE:',shifted['overall']['mse'])
 ```
 

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "tpu-runtime-audit",
-  "title": "Verify TPU mesh topology, bfloat16 accumulation, and collectives",
+  "title": "Inspect CPU device inventory, BF16 storage, and collective participant arithmetic",
   "pathwayId": "tpu",
   "status": "authored",
-  "hardware": "CPU / Cloud TPU VM",
+  "hardware": "CPU",
   "source": "projects/tpu-runtime-audit/README.md",
   "requiredLessonIds": [
     "tpu-01",
@@ -13,56 +13,49 @@
   "stages": [
     {
       "id": "1",
-      "title": "Parameter and state contract",
-      "command": "python3 projects/tpu-runtime-audit/tests/check.py --stage 1",
-      "evidence": "Deterministic PRNG key split and explicit tensor shapes",
-      "expected": "PASS stage 1: parameter initialization and shape contract (tpu-runtime-audit)",
-      "diagnosis": "Verify that PRNG keys are split before parameter initialization and shapes match (d_model, d_out).",
-      "codeGuide": "In `projects/tpu-runtime-audit/starter/model.py`, implement `init_params(...)` with explicit `jax.random.split` and float32 arrays.",
-      "starterSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    # Step 1: Split PRNG key from `seed` into weight and projection subkeys.\n    # Step 2: Initialize `w_enc` of shape `(d_model, d_out)` and zero `b_enc`.\n    raise NotImplementedError('Stage 1: implement init_params')",
-      "solutionSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    key = jax.random.key(seed)\n    k_w, k_p = jax.random.split(key)\n    scale = 1.0 / jnp.sqrt(jnp.float32(d_model))\n    return {\n        'w_enc': jax.random.normal(k_w, (d_model, d_out), dtype=jnp.float32) * scale,\n        'b_enc': jnp.zeros((d_out,), dtype=jnp.float32),\n        'proj': jax.random.normal(k_p, (d_out, d_out), dtype=jnp.float32) / jnp.sqrt(jnp.float32(d_out)),\n        'temperature': jnp.float32(0.07),\n    }"
+      "title": "Contract and independent calculation",
+      "command": "python3 projects/tpu-runtime-audit/tests/check.py --implementation starter --stage 1",
+      "evidence": "Check actual CPU devices and compare BF16-stored weights converted to FP32 operands.",
+      "expected": "PASS tpu-runtime-audit stage 1",
+      "diagnosis": "Check actual CPU devices and compare BF16-stored weights converted to FP32 operands.",
+      "codeGuide": "Implement the relevant contract in `projects/tpu-runtime-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence.",
+      "starterSnippet": "\"\"\"Learner starter: Inspect actual CPU device inventory and compare explicit BF16 storage with FP32 accumulation.\"\"\"\nimport jax\nimport jax.numpy as jnp\n\ndef runtime_report() -> dict:\n    raise NotImplementedError(\"implement the inspect actual cpu device inventory and compare explicit bf16 storage with fp32 accumulation contract\")\n\ndef simulated_collective_sum(values, omitted=()):\n    raise NotImplementedError(\"simulate participant accounting explicitly and label it CPU-only\")",
+      "solutionSnippet": "\"\"\"Reference implementation: Inspect actual CPU device inventory and compare explicit BF16 storage with FP32 accumulation.\"\"\"\nimport jax\nimport jax.numpy as jnp\nfrom jax import lax\n\ndef runtime_report():\n    devices=jax.devices(); x=jnp.array([[1.25,-2.5],[3.0,0.5]],dtype=jnp.float32); w=jnp.array([[0.25,1.5],[-1.0,2.0]],dtype=jnp.float32)\n    wb=w.astype(jnp.bfloat16); out=x@wb.astype(jnp.float32)\n    participants=jnp.arange(len(devices),dtype=jnp.float32)+1\n    collective=jax.pmap(lambda v:lax.psum(v,\"workers\"),axis_name=\"workers\")(participants)\n    return {\"backend\":jax.default_backend(),\"device_count\":len(devices),\"devices\":[str(d) for d in devices],\"stored_dtype\":str(wb.dtype),\"compute_dtype\":str(out.dtype),\"output\":out,\"collective_inputs\":participants,\"collective_outputs\":collective}\n\ndef simulated_collective_sum(values, omitted=()):\n    \"\"\"CPU-only arithmetic simulation; it does not create worker processes or qualify TPU collectives.\"\"\"\n    values=list(values); omitted=set(omitted)\n    if any(i<0 or i>=len(values) for i in omitted): raise ValueError(\"participant index out of range\")\n    return sum(v for i,v in enumerate(values) if i not in omitted)"
     },
     {
       "id": "2",
-      "title": "Masked forward pass and normalization",
-      "command": "python3 projects/tpu-runtime-audit/tests/check.py --stage 2",
-      "evidence": "Unit-norm embeddings on valid rows and exact zeros on masked rows",
-      "expected": "PASS stage 2: masked forward representation and unit normalization (tpu-runtime-audit)",
-      "diagnosis": "Guard division by zero with jnp.maximum(norms, 1e-6) and apply the row mask both before and after normalization.",
-      "codeGuide": "In `projects/tpu-runtime-audit/starter/model.py`, implement `forward_batch(...)` with input shape validation and L2 normalization.",
-      "starterSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    # Step 1: Guard input rank and feature dimension.\n    # Step 2: Compute projections and unit-normalize valid rows.\n    raise NotImplementedError('Stage 2: implement forward_batch')",
-      "solutionSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    raw = jnp.tanh(x @ params['w_enc'] + params['b_enc']) @ params['proj']\n    norms = jnp.linalg.norm(raw, axis=-1, keepdims=True)\n    embeddings = raw / jnp.maximum(norms, 1e-6)\n    return {'raw': raw, 'embeddings': embeddings, 'norms': jnp.squeeze(norms, axis=-1)}"
+      "title": "Changed condition and diagnosis",
+      "command": "python3 projects/tpu-runtime-audit/tests/check.py --implementation starter --stage 2",
+      "evidence": "Omit one participant in the explicitly simulated sum and detect the missing contribution.",
+      "expected": "PASS tpu-runtime-audit stage 2",
+      "diagnosis": "Omit one participant in the explicitly simulated sum and detect the missing contribution.",
+      "codeGuide": "Implement the relevant contract in `projects/tpu-runtime-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "3",
-      "title": "Autodiff and finite-difference verification",
-      "command": "python3 projects/tpu-runtime-audit/tests/check.py --stage 3",
-      "evidence": "Agreement between jax.value_and_grad and central finite differences",
-      "expected": "PASS stage 3: autodiff vs finite-difference gradient check (tpu-runtime-audit)",
-      "diagnosis": "Ensure the loss function is pure and normalizes target vectors consistently.",
-      "codeGuide": "In `projects/tpu-runtime-audit/starter/model.py`, implement `compute_loss_and_grads(...)` using `jax.value_and_grad`.",
-      "starterSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    # Step 1: Differentiate the scalar alignment objective with `jax.value_and_grad`.\n    raise NotImplementedError('Stage 3: implement compute_loss_and_grads')",
-      "solutionSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    return jax.value_and_grad(_objective)(params, x, targets)"
+      "title": "Retained evidence",
+      "command": "python3 projects/tpu-runtime-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/tpu-runtime-audit",
+      "evidence": "Retain backend and dtype evidence; distinguish CPU observation and simulation from TPU qualification.",
+      "expected": "PASS tpu-runtime-audit stage 3",
+      "diagnosis": "Retain backend and dtype evidence; distinguish CPU observation and simulation from TPU qualification.",
+      "codeGuide": "Implement the relevant contract in `projects/tpu-runtime-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "4",
-      "title": "Compiled scan loop and held-out qualification",
-      "command": "python3 projects/tpu-runtime-audit/tests/check.py --stage 4",
-      "evidence": "Monotonic training loss reduction and finite held-out evaluation",
-      "expected": "PASS stage 4: compiled scan training and held-out qualification (tpu-runtime-audit)",
-      "diagnosis": "Check that jax.lax.scan carries updated parameters forward on every step.",
-      "codeGuide": "In `projects/tpu-runtime-audit/starter/model.py`, implement `qualification_report(...)` using `jax.lax.scan`.",
-      "starterSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    # Step 1: Run `jax.lax.scan` over `steps` updates and evaluate held-out loss.\n    raise NotImplementedError('Stage 4: implement qualification_report')",
-      "solutionSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    fitted, history = jax.lax.scan(step_fn, params, None, length=steps)\n    return {'initial_loss': float(history[0]), 'final_loss': float(history[-1]), 'finite': True}"
+      "title": "Integrated project check",
+      "command": "python3 projects/tpu-runtime-audit/tests/check.py --implementation starter --stage 4",
+      "evidence": "Run all prior checks and preserve their failure boundaries.",
+      "expected": "PASS tpu-runtime-audit stage 4",
+      "diagnosis": "Run all prior checks and preserve their failure boundaries.",
+      "codeGuide": "Implement the relevant contract in `projects/tpu-runtime-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     }
   ],
   "rubric": [
-    "Initialize parameters deterministically from explicit PRNG keys",
-    "Enforce input shape contracts and masked row normalization",
-    "Verify automatic gradients against central finite differences",
-    "Compile the multi-step update with jax.lax.scan and report held-out metrics"
+    "Check actual CPU devices and compare BF16-stored weights converted to FP32 operands.",
+    "Omit one participant in the explicitly simulated sum and detect the missing contribution.",
+    "Retain backend and dtype evidence; distinguish CPU observation and simulation from TPU qualification."
   ],
-  "setupNote": "Open `projects/tpu-runtime-audit/starter/model.py` and implement each stage, verifying with `python3 projects/tpu-runtime-audit/tests/check.py --stage 1` through `--stage 4`.",
+  "setupNote": "Run stages 1 through 4 using the commands shown. Stage 3 writes persistent evidence under `runs/tpu-runtime-audit/` when using its documented `--evidence-dir`; without that option, evidence stays in a temporary directory. The untouched starter deliberately fails.",
   "workspaceFile": "projects/tpu-runtime-audit/starter/model.py",
-  "referenceCommand": "python3 projects/tpu-runtime-audit/tests/check.py --implementation solution --stage all"
+  "referenceCommand": "python3 projects/tpu-runtime-audit/tests/check.py --implementation solution --stage 4"
 }

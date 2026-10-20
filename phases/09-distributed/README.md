@@ -6,7 +6,7 @@ Partition arrays and training updates, compare all-reduce with reduce-scatter, a
 
 Compare against a single-device reference; measure real accelerator performance separately.
 
-**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 06: Data & checkpoint recovery; 08: Performance diagnosis.
 
 **Hardware:** Logical CPU devices for sharding practice; multi-host work needs a real cluster.
 

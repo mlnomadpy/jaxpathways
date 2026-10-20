@@ -20,4 +20,5 @@ const styles = [
 export const readerStyles = [
   katexCss,
   ...styles.map((file) => readFileSync(join(process.cwd(), 'src/styles', file), 'utf8')),
+  '.solution-reveal{margin:1rem 0}.solution-reveal>summary{cursor:pointer;font-weight:700;padding:.5rem 0}.book-phase{break-before:page;margin-top:4rem}.book-phase>article{margin-top:2rem}',
 ].join('\n');

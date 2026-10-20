@@ -4,7 +4,7 @@
   "description": "Profile a correct workload, preserve its global objective while partitioning arrays, and audit actual Pallas kernels before requesting target measurements. CPU semantics are available; accelerator speed and multi-host claims require their own receipts.",
   "prerequisites": "Shared foundations and a working training loop",
   "outcome": "A checked kernel and a measurement-backed optimization argument",
-  "libraries": "JAX sharding · profiling · Pallas",
+  "libraries": "JAX sharding \u00b7 profiling \u00b7 Pallas",
   "source": "https://docs.jax.dev/en/latest/",
   "phaseIds": [
     "welcome",
@@ -14,9 +14,6 @@
     "optimization",
     "networks",
     "recovery",
-    "tpu",
-    "tpu-workflows",
-    "tpu-systems",
     "performance",
     "distributed",
     "kernels"
@@ -45,9 +42,6 @@
   "audience": "Engineers comfortable with training loops who want to reason about memory, communication and throughput.",
   "firstArtifact": "A synchronized timing report and a checked array placement on logical CPU devices.",
   "focusPhaseIds": [
-    "tpu",
-    "tpu-workflows",
-    "tpu-systems",
     "performance",
     "distributed",
     "kernels"
@@ -60,5 +54,12 @@
   "engineeringLessonIds": [
     "deployment-07",
     "operations-06"
+  ],
+  "additionalGuides": [
+    {
+      "title": "Optional TPU and Google Cloud specialization",
+      "url": "pathways.html?path=tpu",
+      "scope": "The required path runs on CPU. This optional route adds cloud provisioning, TPU execution and hardware-specific evidence; CPU examples do not qualify TPU performance."
+    }
   ]
 }

@@ -46,5 +46,12 @@
   "engineeringLessonIds": [
     "recovery-06",
     "operations-06"
+  ],
+  "additionalGuides": [
+    {
+      "title": "Optional TPU and Google Cloud specialization",
+      "url": "pathways.html?path=tpu",
+      "scope": "The required path runs on CPU. This optional route adds cloud provisioning, TPU execution and hardware-specific evidence; CPU examples do not qualify TPU performance."
+    }
   ]
 }

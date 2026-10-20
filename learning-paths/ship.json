@@ -14,9 +14,6 @@
     "optimization",
     "networks",
     "recovery",
-    "tpu",
-    "tpu-workflows",
-    "tpu-systems",
     "performance",
     "deployment"
   ],
@@ -59,5 +56,12 @@
     "operations-06",
     "operations-07",
     "operations-08"
+  ],
+  "additionalGuides": [
+    {
+      "title": "Optional TPU and Google Cloud specialization",
+      "url": "pathways.html?path=tpu",
+      "scope": "The required path runs on CPU. This optional route adds cloud provisioning, TPU execution and hardware-specific evidence; CPU examples do not qualify TPU performance."
+    }
   ]
 }

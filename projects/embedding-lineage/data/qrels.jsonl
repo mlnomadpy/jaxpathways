@@ -1,0 +1,12 @@
+{"query_id":"train-01","doc_id":"pg11-chapter-I-passage-002","relevance":1}
+{"query_id":"train-02","doc_id":"pg11-chapter-I-passage-010","relevance":1}
+{"query_id":"train-03","doc_id":"pg11-chapter-I-passage-013","relevance":1}
+{"query_id":"train-04","doc_id":"pg11-chapter-I-passage-018","relevance":1}
+{"query_id":"train-05","doc_id":"pg11-chapter-IV-passage-001","relevance":1}
+{"query_id":"val-01","doc_id":"pg11-chapter-V-passage-001","relevance":1}
+{"query_id":"val-02","doc_id":"pg11-chapter-V-passage-014","relevance":1}
+{"query_id":"test-01","doc_id":"pg11-chapter-VI-passage-029","relevance":1}
+{"query_id":"test-02","doc_id":"pg11-chapter-VI-passage-024","relevance":1}
+{"query_id":"test-03","doc_id":"pg11-chapter-VII-passage-018","relevance":1}
+{"query_id":"test-04","doc_id":"pg11-chapter-VIII-passage-002","relevance":1}
+{"query_id":"test-05","doc_id":"pg11-chapter-VIII-passage-017","relevance":1}

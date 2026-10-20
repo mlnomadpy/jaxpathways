@@ -1,18 +1,27 @@
-# Audit TPU job launch manifests, preemption recovery, and traces
+# Gate a simulated multi-worker checkpoint publication
 
-Phase 20 dedicated integration project ([Phase 20](../../phases/20-tpu-workflows/README.md)). See also the cross-phase companion project [`text-harness`](../text-harness/README.md).
+A coordinator should publish a checkpoint only when every expected worker has produced a receipt at a common step. Missing workers, duplicate IDs and mismatched progress can make a partial checkpoint look complete. This project checks the gate with in-memory lists. It does not launch workers or contact a TPU VM.
 
-## Mathematical contract
+## Before you start
 
-Given input batch $X \in \mathbb{R}^{B \times d_\text{in}}$ and projection weights $W_\text{enc}, P$, the normalized representation is:
+Complete the TPU workflow lessons and understand the difference between a staged command and a distributed run. This simulation needs only the course CPU environment. Edit `projects/tpu-workflow-audit/starter/model.py` from the repository root.
 
-$$
-H = \tanh(X W_\text{enc} + b_\text{enc}) P, \qquad \hat{H}_i = \frac{H_i}{\max(\|H_i\|_2, 10^{-6})}
-$$
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-cpu.txt
+python3 projects/tpu-workflow-audit/tests/check.py --implementation starter --stage 1
+python3 projects/tpu-workflow-audit/tests/check.py --implementation starter --stage 2
+python3 projects/tpu-workflow-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/tpu-workflow-audit
+python3 projects/tpu-workflow-audit/tests/check.py --implementation starter --stage 4
+```
 
-## Stage verification
+On Windows PowerShell, activate `.venv\Scripts\Activate.ps1` and use `python` instead of `python3`.
 
-1. **Stage 1 — Parameter and state contract:** `python3 projects/tpu-workflow-audit/tests/check.py --stage 1`
-2. **Stage 2 — Masked forward pass:** `python3 projects/tpu-workflow-audit/tests/check.py --stage 2`
-3. **Stage 3 — Gradient verification:** `python3 projects/tpu-workflow-audit/tests/check.py --stage 3`
-4. **Stage 4 — Compiled scan qualification:** `python3 projects/tpu-workflow-audit/tests/check.py --stage 4`
+Stage 1 gives expected workers `w0,w1,w2`, but receipts only from `w0,w2`. Publication must be false and `w1` must be listed as missing. When both workers report step 7, the gate can mark the set publishable.
+
+Stage 2 changes the receipt steps to 7 and 6, then tries duplicate worker IDs, duplicate receipts, an unknown worker, a negative step, non-integer steps, NaN and infinity. Unequal progress must block publication; invalid inputs must be rejected. If the gate accepts any of these, inspect receipt identity and step validation before the publication decision.
+
+Stage 3 writes the complete receipt-gate result and its simulation scope to `runs/tpu-workflow-audit/tpu-workflow-audit-evidence.json`. Without `--evidence-dir`, it uses a temporary directory. Stage 4 reruns all stages. Passing output begins `PASS tpu-workflow-audit stage N`.
+
+This tests publication logic on data structures only. It does not prove multi-host startup, network reliability, checkpoint durability or TPU behavior. Reference command: `python3 projects/tpu-workflow-audit/tests/check.py --implementation solution --stage 4`.

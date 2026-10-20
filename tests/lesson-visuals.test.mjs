@@ -48,7 +48,7 @@ test('figures have captions, explanations, keyboard access and downloadable evid
     for(const lesson of lessons){
       window.document.body.innerHTML=lessonVisual(lesson)+lessonExecution(lesson);
       assert(window.document.querySelector('img')?.getAttribute('alt'),lesson.id);
-      assert(window.document.querySelector('figcaption')?.textContent.includes(lesson.content.visual.kind==='executed'?'CPU computation':'Conceptual'),lesson.id);
+      assert(window.document.querySelector('figcaption')?.textContent.includes(lesson.content.visual.kind==='executed'?'CPU computation':lesson.content.visual.kind==='analytic'?'Calculated scenario':'Conceptual'),lesson.id);
       const walkthrough=window.document.querySelector('.figure-walkthrough');
       assert.equal(walkthrough.querySelectorAll('p').length, lesson.content.visual.reading.split('\n\n').length+lesson.content.visual.connection.split('\n\n').length,lesson.id);
       assert(walkthrough.textContent.includes(lesson.content.visual.connection.split('\n\n').at(-1).split(/\\\(|`/)[0]),lesson.id);

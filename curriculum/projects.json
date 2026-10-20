@@ -27,5 +27,6 @@
   "projects/tpu-runtime-audit/project.json",
   "projects/tpu-workflow-audit/project.json",
   "projects/tpu-systems-audit/project.json",
-  "projects/reproducible-experiments/project.json"
+  "projects/reproducible-experiments/project.json",
+  "projects/embedding-lineage/project.json"
 ]

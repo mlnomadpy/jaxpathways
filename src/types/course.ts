@@ -19,7 +19,7 @@ export interface LessonContent {
   };
   visual?: {
     title: string;
-    kind: 'executed' | 'conceptual';
+    kind: 'executed' | 'analytic' | 'conceptual';
     prediction: string;
     reading: string;
     connection: string;
@@ -189,6 +189,15 @@ export interface Role {
   modalityTrackIds: string[];
   reviewQuestions: string[];
   scopeNote: string;
+  skillEvidence?: {
+    skill: string;
+    lessonIds: string[];
+    projectId: string;
+    stageIds: string[];
+    evidence: string;
+    reviewCriterion: string;
+    scope: string;
+  }[];
   milestones: {
     title: string;
     phaseIds: string[];

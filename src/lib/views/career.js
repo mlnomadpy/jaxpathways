@@ -49,6 +49,13 @@ export function renderCareer(role, course) {
     <h4>Questions to defend in a review</h4>
     <ul>${role.reviewQuestions.map((q) => `<li>${inlineMath(q)}</li>`).join('')}</ul>
     <p class="soft">${inlineMath(role.scopeNote)}</p>
+    <h4>Capability and evidence map</h4>
+    <ul class="capability-map">${(role.skillEvidence || [])
+      .map(
+        (item) =>
+          `<li><strong>${inlineMath(item.skill)}</strong><p>${inlineMath(item.scope)}. ${inlineMath(item.evidence)}</p><p>${item.lessonIds.map((id) => `<a href="lesson.html?lesson=${encodeURIComponent(id)}">${escapeHtml(id)}</a>`).join(' · ')} · <a href="project.html?id=${encodeURIComponent(item.projectId)}">Practice project</a> · stages ${item.stageIds.map(escapeHtml).join(', ')}</p><p>${inlineMath(item.reviewCriterion)}</p></li>`,
+      )
+      .join('')}</ul>
     <h4 class="career-subhead">Your route in milestones</h4>
     <ol class="career-milestones">${role.milestones
       .map(

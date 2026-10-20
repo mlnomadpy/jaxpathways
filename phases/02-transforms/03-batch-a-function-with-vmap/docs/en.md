@@ -107,9 +107,7 @@ Write the core computation and transformation step over the initialized inputs.
 
 ```python
 def predict(weight, x):
-    # Return `jnp.dot(weight, x)` to the caller.
     return jnp.dot(weight, x)
-# Construct `weight` via `jnp.array([2., -1.])`
 weight = jnp.array([2., -1.])
 ```
 
@@ -123,8 +121,6 @@ Check that the resulting arrays satisfy the expected shape, dtype, and numerical
 batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
 # Vectorize across the batch dimension with `jax.vmap` (`batched`).
 batched = jax.vmap(predict, in_axes=(None, 0))
-# Print the observed values to compare against the expected result.
-# Assert that `jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))`.
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 ```
 
@@ -134,22 +130,15 @@ These assertions lock in the exact numerical contract before you run the full ex
 
 ```python
 # Batch a function with vmap: Vectorization lets us describe one example clearly and then...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
-# Function `predict(weight, x)` implementing this stage's computation:
 def predict(weight, x):
-    # Return `jnp.dot(weight, x)` to the caller.
     return jnp.dot(weight, x)
-# Construct `weight` via `jnp.array([2., -1.])`
 weight = jnp.array([2., -1.])
-# Construct `batch` via `jnp.array([[1., 1.], [2., 3.], [4., 0.]])`
 batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
 # Vectorize across the batch dimension with `jax.vmap` (`batched`).
 batched = jax.vmap(predict, in_axes=(None, 0))
-# Print the observed values to compare against the expected result.
 print(batched(weight, batch))
-# Assert that `jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))`.
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 ```
 
@@ -177,13 +166,12 @@ There are three outputs because there are three observations. Summing across the
 
 ```python
 # Compute figure data for: Vectorization keeps one result per row
-# Compute `visual_data` from `{'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'...`
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:19.618912+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:21.429738+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]
@@ -199,17 +187,13 @@ PASS: transforms-03
 ```python
 # Experiment — Verify against a loop and a matrix product: The loop makes example selection explicit; the matrix product...
 loop_predictions = jnp.stack([predict(weight, row) for row in batch])
-# Run `batched` to compute `vector_predictions`.
 vector_predictions = batched(weight, batch)
 # Perform matrix / vector contraction (`@`) to compute `matrix_predictions`.
 matrix_predictions = batch @ weight
 # Check tensor shape invariant: `vector_predictions.shape == (3,)`
 assert vector_predictions.shape == (3,)
-# Assert that `jnp.allclose(vector_predictions, loop_predictions)`.
 assert jnp.allclose(vector_predictions, loop_predictions)
-# Assert that `jnp.allclose(vector_predictions, matrix_predictions)`.
 assert jnp.allclose(vector_predictions, matrix_predictions)
-# Print the observed values to compare against the expected result.
 print("loop / vmap / matmul:", loop_predictions, vector_predictions, matrix_predictions)
 ```
 
@@ -226,11 +210,8 @@ The loop makes example selection explicit; the matrix product checks an independ
 column_batch = batch.T
 # Vectorize across the batch dimension with `jax.vmap` (`column_predict`).
 column_predict = jax.vmap(predict, in_axes=(None, 1))
-# Assert that `jnp.allclose(column_predict(weight, column_batch), vector_predictions)`.
 assert jnp.allclose(column_predict(weight, column_batch), vector_predictions)
-# Function `feature_pair(row)` implementing this stage's computation:
 def feature_pair(row):
-    # Return `jnp.array([jnp.sum(row), jnp.sum(row ** 2)])` to the caller.
     return jnp.array([jnp.sum(row), jnp.sum(row ** 2)])
 # Vectorize across the batch dimension with `jax.vmap` (`features_rows`).
 features_rows = jax.vmap(feature_pair)(batch)
@@ -240,7 +221,6 @@ features_columns = jax.vmap(feature_pair, out_axes=1)(batch)
 assert features_rows.shape == (3, 2)
 # Check tensor shape invariant: `features_columns.shape == (2, 3)`
 assert features_columns.shape == (2, 3)
-# Assert that `jnp.allclose(features_rows.T, features_columns)`.
 assert jnp.allclose(features_rows.T, features_columns)
 ```
 
@@ -262,7 +242,6 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.
 2. Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
-3. Assert that `jnp.allclose(per_example_gradient, batch)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -272,7 +251,6 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 per_example_gradient = jax.vmap(...)  # TODO: compute per_example_gradient
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape  # TODO: complete assertion check
-# Assert that `jnp.allclose(per_example_gradient, batch)`.
 assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion check
 ```
 
@@ -284,7 +262,6 @@ assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion che
 per_example_gradient = jax.vmap(jax.grad(predict), in_axes=(None, 0))(weight, batch)
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape == (3, 2)
-# Assert that `jnp.allclose(per_example_gradient, batch)`.
 assert jnp.allclose(per_example_gradient, batch)
 ```
 
@@ -311,31 +288,22 @@ The per-example squared-loss gradient is $2(\hat y-y)x$: twice the residual time
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Construct `targets` via `jnp.array([0., 2., 7.])`
-2. Function `single_loss(parameters, row, target)` implementing this stage's computation:
-3. Return `(predict(parameters, row) - target) ** 2` to the caller.
-4. Differentiate the objective to obtain `individual_grads` via automatic differentiation.
-5. Perform matrix contraction / projection to compute `manual_grads`.
+1. Differentiate the objective to obtain `individual_grads` via automatic differentiation.
+2. Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].
-# Construct `targets` via `jnp.array([0., 2., 7.])`
 targets = jnp.array(...)  # TODO: compute targets
-# Function `single_loss(parameters, row, target)` implementing this stage's computation:
 def single_loss(parameters, row, target):
-    # Return `(predict(parameters, row) - target) ** 2` to the caller.
     return ...  # TODO: return computed result
 # Differentiate the objective to obtain `individual_grads` via automatic differentiation.
 individual_grads = jax.vmap(...)  # TODO: compute individual_grads
-# Perform matrix contraction / projection to compute `manual_grads`.
 manual_grads = ...  # TODO: compute manual_grads
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 assert individual_grads.shape  # TODO: complete assertion check
-# Assert that `jnp.allclose(individual_grads, manual_grads)`.
 assert jnp.allclose(individual_grads, manual_grads)  # TODO: complete assertion check
-# Assert that `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`.
 assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))  # TODO: complete assertion check
 ```
 
@@ -343,21 +311,15 @@ assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))  # TODO: complete 
 
 ```python
 # Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].
-# Construct `targets` via `jnp.array([0., 2., 7.])`
 targets = jnp.array([0., 2., 7.])
-# Function `single_loss(parameters, row, target)` implementing this stage's computation:
 def single_loss(parameters, row, target):
-    # Return `(predict(parameters, row) - target) ** 2` to the caller.
     return (predict(parameters, row) - target) ** 2
 # Differentiate the objective to obtain `individual_grads` via automatic differentiation.
 individual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, targets)
-# Perform matrix contraction / projection to compute `manual_grads`.
 manual_grads = 2. * (batch @ weight - targets)[:, None] * batch
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 assert individual_grads.shape == (3, 2)
-# Assert that `jnp.allclose(individual_grads, manual_grads)`.
 assert jnp.allclose(individual_grads, manual_grads)
-# Assert that `jnp.allclose(individual_grads[0], jnp.array([2., 2.]))`.
 assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))
 ```
 
@@ -386,20 +348,16 @@ Differentiation is linear over these independent sums. Ensure your function actu
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Return `jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))` to the caller.
-2. Iterate over `labels` to step through the computation:
-3. Differentiate the objective to obtain `each` via automatic differentiation.
-4. Differentiate the objective to obtain `aggregate` via automatic differentiation.
-5. Check tensor shape invariant: `aggregate.shape == weight.shape`
+1. Differentiate the objective to obtain `each` via automatic differentiation.
+2. Differentiate the objective to obtain `aggregate` via automatic differentiation.
+3. Check tensor shape invariant: `aggregate.shape == weight.shape`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Prove the mean-gradient identity with an experiment (Challenge): The aggregate has parameter shape, while per-example...
 def batch_mean_loss(parameters, rows, labels):
-    # Return `jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))` to the caller.
     return jnp.mean(jax.vmap(single_loss, in_axes = ...  # TODO: compute return jnp.mean(jax.vmap(single_loss, in_axes
-# Iterate over `labels` to step through the computation:
 for labels in (targets, targets + 0.5):
     # Differentiate the objective to obtain `each` via automatic differentiation.
     each = jax.vmap(...)  # TODO: compute each
@@ -407,7 +365,6 @@ for labels in (targets, targets + 0.5):
     aggregate = jax.grad(...)  # TODO: compute aggregate
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape  # TODO: complete assertion check
-    # Assert that `jnp.allclose(aggregate, jnp.mean(each, axis=0))`.
     assert jnp.allclose(aggregate, jnp.mean(each, axis=0))  # TODO: complete assertion check
 ```
 
@@ -416,9 +373,7 @@ for labels in (targets, targets + 0.5):
 ```python
 # Prove the mean-gradient identity with an experiment (Challenge): The aggregate has parameter shape, while per-example...
 def batch_mean_loss(parameters, rows, labels):
-    # Return `jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))` to the caller.
     return jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))
-# Iterate over `labels` to step through the computation:
 for labels in (targets, targets + 0.5):
     # Differentiate the objective to obtain `each` via automatic differentiation.
     each = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, labels)
@@ -426,7 +381,6 @@ for labels in (targets, targets + 0.5):
     aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape == weight.shape
-    # Assert that `jnp.allclose(aggregate, jnp.mean(each, axis=0))`.
     assert jnp.allclose(aggregate, jnp.mean(each, axis=0))
 ```
 

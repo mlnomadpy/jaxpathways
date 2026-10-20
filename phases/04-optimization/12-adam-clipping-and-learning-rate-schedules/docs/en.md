@@ -81,21 +81,15 @@ Create main.py. Use an explicit two-gradient sequence to inspect the optimizer i
 
 ```python
 # Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import optax
-# Construct `params` via `jnp.zeros(2)`
 params = jnp.zeros(2)
 # Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
-# Run `adam.init` to compute `state`.
 state = adam.init(params)
-# Construct `m` via `jnp.zeros(2)`
 m = jnp.zeros(2)
-# Construct `v` via `jnp.zeros(2)`
 v = jnp.zeros(2)
-# Construct `gradients` via `[jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]`
 gradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]
 ```
 
@@ -107,21 +101,14 @@ Append the manual recurrences and compare each update with Optax.
 
 ```python
 # Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
-# Iterate over `(t, g)` to step through the computation:
 for t, g in enumerate(gradients, start=1):
-    # Compute `m` from `0.9 * m + 0.1 * g`
     m = 0.9 * m + 0.1 * g
-    # Compute `v` from `0.99 * v + 0.01 * g * g`
     v = 0.99 * v + 0.01 * g * g
-    # Compute `expected` from `-0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.9...`
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
-    # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
-    # Assert that `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
     # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
-    # Print diagnostic summary of the computed outputs.
     print('step / update:', t, update)
 ```
 
@@ -133,19 +120,14 @@ Append a global clipping plus SGD chain and run python main.py.
 
 ```python
 # Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
-# Construct `g` via `jnp.array([3.0, 4.0])`
 g = jnp.array([3.0, 4.0])
 # Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
-# Construct `clipped, _` via `clip.update(g, clip.init(jnp.zeros(2)))`
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
-# Assert that `jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)`.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
 # Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
-# Construct `update, _` via `chain.update(g, chain.init(jnp.zeros(2)))`
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
-# Assert that `jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)`.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 ```
 
@@ -155,55 +137,37 @@ For this SGD chain, the update norm is $0.1$. That bound does not automatically 
 
 ```python
 # Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import optax
-# Construct `params` via `jnp.zeros(2)`
 params = jnp.zeros(2)
 # Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
-# Run `adam.init` to compute `state`.
 state = adam.init(params)
-# Construct `m` via `jnp.zeros(2)`
 m = jnp.zeros(2)
-# Construct `v` via `jnp.zeros(2)`
 v = jnp.zeros(2)
-# Construct `gradients` via `[jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]`
 gradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]
 
 # Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
-# Iterate over `(t, g)` to step through the computation:
 for t, g in enumerate(gradients, start=1):
-    # Compute `m` from `0.9 * m + 0.1 * g`
     m = 0.9 * m + 0.1 * g
-    # Compute `v` from `0.99 * v + 0.01 * g * g`
     v = 0.99 * v + 0.01 * g * g
-    # Compute `expected` from `-0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.9...`
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
-    # Run `adam.update` to compute `(update, state)`.
     update, state = adam.update(g, state, params)
-    # Assert that `jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)`.
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
     # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
-    # Print diagnostic summary of the computed outputs.
     print('step / update:', t, update)
 
 # Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
-# Construct `g` via `jnp.array([3.0, 4.0])`
 g = jnp.array([3.0, 4.0])
 # Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
-# Construct `clipped, _` via `clip.update(g, clip.init(jnp.zeros(2)))`
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
-# Assert that `jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)`.
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
 # Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
-# Construct `update, _` via `chain.update(g, chain.init(jnp.zeros(2)))`
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
-# Assert that `jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)`.
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 ```
 
@@ -233,37 +197,27 @@ At update $50$, the losses are approximately $1.28\times10^{-4}$ for Adam, $2.96
 
 ```python
 # Compute figure data for: Compare optimizer paths under a fixed update budget
-# Function `plot_bowl(z)` implementing this stage's computation:
 def plot_bowl(z):
-    # Return `0.5 * (z[0] ** 2 + 10 * z[1] ** 2)` to the caller.
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
-# Compute `series` from `[]`
 series = []
-# Loop over `(name, tx)` in `[('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]`:
 for name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]:
     # Create device-backed JAX array `p_plot`.
     p_plot = jnp.array([1.0, 1.0])
-    # Run `tx.init` to compute `s_plot`.
     s_plot = tx.init(p_plot)
-    # Compute `vals` from `[float(plot_bowl(p_plot))]`
     vals = [float(plot_bowl(p_plot))]
-    # Repeat the update loop over `range(50)` steps:
     for _ in range(50):
         # Differentiate the objective to obtain gradients `(delta, s_plot)`.
         delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)
         # Apply the computed gradient updates to update the model parameters.
         p_plot = optax.apply_updates(p_plot, delta)
-        # Append the current step result to `vals`.
         vals.append(float(plot_bowl(p_plot)))
-    # Append the current step result to `series`.
     series.append({'label': name, 'y': vals})
-# Compute `visual_data` from `{'kind': 'line', 'x': list(range(51)), 'xlabel': 'co...`
 visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update', 'ylabel': 'objective', 'yscale': 'log', 'series': series}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:57:17.701978+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:46:04.755758+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -286,25 +240,17 @@ PASS: optimization-12
 # Experiment — Inspect the schedule boundary: A schedule is indexed by optimizer updates.
 # Configure or step the Optax optimizer state (`schedule`).
 schedule = optax.linear_schedule(init_value=0.1, end_value=0.01, transition_steps=4)
-# Construct `rates` via `jnp.array([schedule(i) for i in range(6)])`
 rates = jnp.array([schedule(i) for i in range(6)])
-# Assert that `jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)`.
 assert jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)
 # Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
-# Construct `p` via `jnp.array(0.0)`
 p = jnp.array(0.0)
-# Run `tx.init` to compute `s`.
 s = tx.init(p)
-# Repeat the update loop over `range(5)` steps:
 for _ in range(5):
-    # Construct `delta, s` via `tx.update(jnp.array(1.0), s, p)`
     delta, s = tx.update(jnp.array(1.0), s, p)
     # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
-# Assert that `jnp.allclose(p, -0.275, atol=1e-06)`.
 assert jnp.allclose(p, -0.275, atol=1e-06)
-# Print the observed values to compare against the expected result.
 print('schedule rates:', rates)
 ```
 
@@ -319,38 +265,28 @@ A schedule is indexed by optimizer updates. Recording only the number of epochs 
 ```python
 # Experiment — Compare a fixed update budget: This is a controlled demonstration at stated rates and update...
 def bowl(w):
-    # Return `0.5 * (w[0] ** 2 + 10 * w[1] ** 2)` to the caller.
     return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)
-# Construct `start` via `jnp.array([1.0, 1.0])`
 start = jnp.array([1.0, 1.0])
 # Configure or step the Optax optimizer state (`optimizers`).
 optimizers = {'sgd': optax.sgd(0.05), 'momentum': optax.sgd(0.05, momentum=0.9), 'adam': optax.adam(0.1)}
-# Compute `traces` from `{}`
 traces = {}
-# Iterate over `(name, tx)` to step through the computation:
 for name, tx in optimizers.items():
 
     # Define `step(carry, _)` to evaluate the objective and its automatic derivatives:
     def step(carry, _):
-        # Compute `p, s` from `carry`
         p, s = carry
         # Differentiate the objective to obtain `(delta, s)` via automatic differentiation.
         delta, s = tx.update(jax.grad(bowl)(p), s, p)
         # Configure or step the Optax optimizer state (`p`).
         p = optax.apply_updates(p, delta)
-        # Return `((p, s), bowl(p))` to the caller.
         return ((p, s), bowl(p))
     # Run compiled structured control flow via `jax.lax` (`((_, _), history)`).
     (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)
     # Confirm that all computed values remain finite (no NaN or Inf).
     assert jnp.all(jnp.isfinite(history))
-    # Assert invariant `history[-1] < bowl(start)` holds
     assert history[-1] < bowl(start)
-    # Compute `traces[name]` from `history`
     traces[name] = history
-    # Print diagnostic summary of the computed outputs.
     print(name, 'initial / final loss:', bowl(start), history[-1])
-# Assert that `not jnp.allclose(traces['sgd'], traces['adam'])`.
 assert not jnp.allclose(traces['sgd'], traces['adam'])
 ```
 
@@ -369,20 +305,16 @@ Compare global norm clipping with coordinate-wise clipping on $(3,4)$. Check whi
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Assert that `jnp.allclose(coordinate, jnp.array([1.0, 1.0]))`.
-2. Assert that `jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])`.
-3. Assert that `not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
 coordinate = jnp.clip(...)  # TODO: compute coordinate
-# Assert that `jnp.allclose(coordinate, jnp.array([1.0, 1.0]))`.
 assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))  # TODO: complete assertion check
-# Assert that `jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])`.
 assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])  # TODO: complete assertion check
-# Assert that `not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])`.
 assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])  # TODO: complete assertion check
 ```
 
@@ -391,11 +323,8 @@ assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])  # TODO: com
 ```python
 # Exercise solution: Compare global norm clipping with coordinate-wise clipping on (3,4).
 coordinate = jnp.clip(g, -1.0, 1.0)
-# Assert that `jnp.allclose(coordinate, jnp.array([1.0, 1.0]))`.
 assert jnp.allclose(coordinate, jnp.array([1.0, 1.0]))
-# Assert that `jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])`.
 assert jnp.allclose(clipped[0] / clipped[1], g[0] / g[1])
-# Assert that `not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])`.
 assert not jnp.allclose(coordinate[0] / coordinate[1], g[0] / g[1])
 ```
 
@@ -422,10 +351,7 @@ The retained count has reached the final rate; a reset count starts at $0$.
 
 **Step-by-step implementation plan:**
 1. Configure or step the Optax optimizer state (`tx`).
-2. Construct `p` via `jnp.array(0.0)`
-3. Run `tx.init` to compute `s`.
-4. Repeat the update loop over `range(5)` steps:
-5. Construct `delta, s` via `tx.update(jnp.array(1.0), s, p)`
+2. Configure or step the Optax optimizer state (`p`).
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -433,23 +359,15 @@ The retained count has reached the final rate; a reset count starts at $0$.
 # Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
 # Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(...)  # TODO: compute tx
-# Construct `p` via `jnp.array(0.0)`
 p = jnp.array(...)  # TODO: compute p
-# Run `tx.init` to compute `s`.
 s = tx.init(...)  # TODO: compute s
-# Repeat the update loop over `range(5)` steps:
 for _ in range(5):
-    # Construct `delta, s` via `tx.update(jnp.array(1.0), s, p)`
     delta, s = tx.update(...)  # TODO: compute delta, s
     # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(...)  # TODO: compute p
-# Construct `continued, _` via `tx.update(jnp.array(1.0), s, p)`
 continued, _ = tx.update(...)  # TODO: compute continued, _
-# Construct `restarted, _` via `tx.update(jnp.array(1.0), tx.init(p), p)`
 restarted, _ = tx.update(...)  # TODO: compute restarted, _
-# Assert that `jnp.allclose(continued, -0.01, atol=1e-06)`.
 assert jnp.allclose(continued, -0.01, atol=1e-06)  # TODO: complete assertion check
-# Assert that `jnp.allclose(restarted, -0.1, atol=1e-06)`.
 assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion check
 ```
 
@@ -459,23 +377,15 @@ assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion che
 # Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
 # Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
-# Construct `p` via `jnp.array(0.0)`
 p = jnp.array(0.0)
-# Run `tx.init` to compute `s`.
 s = tx.init(p)
-# Repeat the update loop over `range(5)` steps:
 for _ in range(5):
-    # Construct `delta, s` via `tx.update(jnp.array(1.0), s, p)`
     delta, s = tx.update(jnp.array(1.0), s, p)
     # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
-# Construct `continued, _` via `tx.update(jnp.array(1.0), s, p)`
 continued, _ = tx.update(jnp.array(1.0), s, p)
-# Construct `restarted, _` via `tx.update(jnp.array(1.0), tx.init(p), p)`
 restarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)
-# Assert that `jnp.allclose(continued, -0.01, atol=1e-06)`.
 assert jnp.allclose(continued, -0.01, atol=1e-06)
-# Assert that `jnp.allclose(restarted, -0.1, atol=1e-06)`.
 assert jnp.allclose(restarted, -0.1, atol=1e-06)
 ```
 
@@ -505,9 +415,6 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 **Step-by-step implementation plan:**
 1. Configure or step the Optax optimizer state (`before`).
 2. Configure or step the Optax optimizer state (`after`).
-3. Construct `u_before, _` via `before.update(g, before.init(jnp.zeros(2)))`
-4. Construct `u_after, _` via `after.update(g, after.init(jnp.zeros(2)))`
-5. Assert that `jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -517,13 +424,9 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 before = optax.chain(...)  # TODO: compute before
 # Configure or step the Optax optimizer state (`after`).
 after = optax.chain(...)  # TODO: compute after
-# Construct `u_before, _` via `before.update(g, before.init(jnp.zeros(2)))`
 u_before, _ = before.update(...)  # TODO: compute u_before, _
-# Construct `u_after, _` via `after.update(g, after.init(jnp.zeros(2)))`
 u_after, _ = after.update(...)  # TODO: compute u_after, _
-# Assert that `jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)  # TODO: complete assertion check
-# Assert that `jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete assertion check
 ```
 
@@ -535,13 +438,9 @@ assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete
 before = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
 # Configure or step the Optax optimizer state (`after`).
 after = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))
-# Construct `u_before, _` via `before.update(g, before.init(jnp.zeros(2)))`
 u_before, _ = before.update(g, before.init(jnp.zeros(2)))
-# Construct `u_after, _` via `after.update(g, after.init(jnp.zeros(2)))`
 u_after, _ = after.update(g, after.init(jnp.zeros(2)))
-# Assert that `jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)
-# Assert that `jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)`.
 assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)
 ```
 

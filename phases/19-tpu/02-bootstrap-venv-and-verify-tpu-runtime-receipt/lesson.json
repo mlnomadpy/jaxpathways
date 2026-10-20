@@ -15,7 +15,7 @@
       {
         "id": "guided-reasoning",
         "title": "Why a synchronized `pmap` receipt is stronger than `import jax`",
-        "body": "Importing `jax` on a Cloud TPU VM only proves that the Python package is installed on the Linux host. To prove that `libtpu` can initialize the attached TPU chips, allocate High Bandwidth Memory (HBM), compile an XLA HLO computation, and synchronize results back to the host, you should run a small `jax.pmap` reduction across `jax.local_devices()` and call `jax.block_until_ready`.\n\nIf each device \\(d \\in \\{0, \\dots, D-1\\}\\) receives a slice of \\(8\\) consecutive integers starting at \\(8d\\), then across \\(D\\) devices the global vector contains \\(0, 1, \\dots, 8D - 1\\), and the exact sum of squares is:\n\\[\nS(D) = \\sum_{k=0}^{8D - 1} k^2 = \\frac{(8D - 1)(8D)(16D - 1)}{6}\n\\]\nChecking that the `pmap` result equals \\(S(D)\\) (for example, \\(S(1) = 140\\), \\(S(4) = 10416\\), \\(S(8) = 85344\\)) verifies both device discovery and multi-chip execution in one step.",
+        "body": "Importing `jax` on a Cloud TPU VM only proves that the Python package is installed on the Linux host. To prove that `libtpu` can initialize the attached TPU chips, allocate High Bandwidth Memory (HBM), compile an XLA HLO computation, and synchronize results back to the host, you should run a small `jax.pmap` reduction across `jax.local_devices()` and call `jax.block_until_ready`.\n\nIf each device \\(d \\in \\{0, \\dots, D-1\\}\\) receives a slice of \\(8\\) consecutive integers starting at \\(8d\\), then across \\(D\\) devices the global vector contains \\(0, 1, \\dots, 8D - 1\\), and the exact sum of squares is:\n\\[\nS(D) = \\sum_{k=0}^{8D - 1} k^2 = \\frac{(8D - 1)(8D)(16D - 1)}{6}\n\\]\nThe formula gives an expected value for a chosen device count. Only a receipt that records `observed_backend`, `device_count`, and the synchronized result can support a runtime claim. The four-row figure below is a NumPy calculation, not evidence that four TPU devices ran.",
         "check": {
           "prompt": "What happens if you close your SSH terminal without running `gcloud compute tpus tpu-vm delete`?",
           "answer": "The Cloud TPU VM stays allocated in the `READY` state and continues billing every hour even when no Python process or SSH session is active. Always delete the TPU VM and verify with `gcloud compute tpus tpu-vm list`."
@@ -136,12 +136,12 @@
       }
     ],
     "visual": {
-      "title": "Per-chip contribution to the 4-device synchronized pmap verification receipt",
-      "kind": "executed",
-      "prediction": "How do the four per-chip sums of squares (`0..7`, `8..15`, `16..23`, `24..31`) combine into the 4-device runtime receipt (`10416.0`)?",
-      "reading": "The horizontal axis lists each local chip (`chip 0` through `chip 3`) on a 4-device TPU slice (`v5litepod-4` or `v6e-4`). The bars show each chip's local sum of squares (`140`, `1100`, `3084`, `6092`) alongside the cumulative running total across chips (`140`, `1240`, `4324`, `10416`).",
-      "connection": "Because `x` is reshaped to `(4, 8)`, every chip executes the same `pmap` program on its own slice of 8 numbers; matching the final cumulative sum of `10416.0` proves all 4 chips participated.",
-      "alt": "Per-chip contribution to the 4-device synchronized pmap verification receipt. Bar chart showing per-chip sums (140, 1100, 3084, 6092) and cumulative totals reaching 10416 across chip 0 to chip 3.",
+      "title": "Calculated expectation for four devices (not an observed runtime receipt)",
+      "kind": "analytic",
+      "prediction": "If four devices each sum a distinct block of eight integers, what cumulative sum of squares should the verifier report?",
+      "reading": "This analytic illustration computes four eight-value row sums with NumPy. It does not read a TPU execution receipt and does not show observed device participation.",
+      "connection": "The calculated total is 10416. A runtime claim must instead use the device count and per-device values in a saved receipt; the current local receipt records one CPU device.",
+      "alt": "Analytic four-device expectation, not an execution plot: calculated row sums 140, 1100, 3084, and 6092, cumulative total 10416.",
       "code": "# Compute figure data for: Per-chip contribution to the 4-device synchronized pmap verification receipt\n# Create evenly spaced index values in `per_chip`.\nper_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]\n# Compute `cumulative` from `[float(sum(per_chip[: i + 1])) for i in range(4)]`\ncumulative = [float(sum(per_chip[: i + 1])) for i in range(4)]\n# Construct dictionary `visual_data` with the structured fields for this stage.\nvisual_data = {\n    'kind': 'bar',\n    'labels': ['chip 0 (0..7)', 'chip 1 (8..15)', 'chip 2 (16..23)', 'chip 3 (24..31)'],\n    'xlabel': '4-chip TPU VM local device shard',\n    'ylabel': 'sum of squares',\n    'series': [\n        {'label': 'per-chip row sum', 'y': per_chip},\n        {'label': 'cumulative receipt sum', 'y': cumulative},\n    ],\n}"
     },
     "runtime": {

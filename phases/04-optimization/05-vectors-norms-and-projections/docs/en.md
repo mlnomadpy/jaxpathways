@@ -66,15 +66,10 @@ Create main.py in your activated CPU course environment. Add the vectors and ver
 
 ```python
 # Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
-# Construct `u` via `jnp.array([3.0, 4.0])`
 u = jnp.array([3.0, 4.0])
-# Construct `a` via `jnp.array([1.0, 0.0])`
 a = jnp.array([1.0, 0.0])
-# Assert that `jnp.allclose(jnp.linalg.norm(u), 5.0)`.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
-# Assert that `jnp.allclose(jnp.dot(u, a), 3.0)`.
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 ```
 
@@ -87,16 +82,12 @@ Append this eager helper. Keep the input check outside any jitted function in th
 ```python
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
-    # Run `jnp.dot` to compute `denominator`.
     denominator = jnp.dot(a, a)
     # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
-    # Return `jnp.dot(a, u) / denominator * a` to the caller.
     return jnp.dot(a, u) / denominator * a
-# Run `project` to compute `p`.
 p = project(u, a)
-# Compute `r` from `u - p`
 r = u - p
 ```
 
@@ -108,13 +99,9 @@ Append these assertions and run python main.py. Compare with your drawing before
 
 ```python
 # Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
-# Assert that `jnp.allclose(p, jnp.array([3.0, 0.0]))`.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
-# Assert that `jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)`.
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
-# Assert that `jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))`.
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
-# Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
 ```
 
@@ -124,39 +111,26 @@ You should see $[3,0]$ and $[0,4]$; the squared lengths sum to $25$.
 
 ```python
 # Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
-# Construct `u` via `jnp.array([3.0, 4.0])`
 u = jnp.array([3.0, 4.0])
-# Construct `a` via `jnp.array([1.0, 0.0])`
 a = jnp.array([1.0, 0.0])
-# Assert that `jnp.allclose(jnp.linalg.norm(u), 5.0)`.
 assert jnp.allclose(jnp.linalg.norm(u), 5.0)
-# Assert that `jnp.allclose(jnp.dot(u, a), 3.0)`.
 assert jnp.allclose(jnp.dot(u, a), 3.0)
 
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
-    # Run `jnp.dot` to compute `denominator`.
     denominator = jnp.dot(a, a)
     # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
-    # Return `jnp.dot(a, u) / denominator * a` to the caller.
     return jnp.dot(a, u) / denominator * a
-# Run `project` to compute `p`.
 p = project(u, a)
-# Compute `r` from `u - p`
 r = u - p
 
 # Step 3 — Check with geometry: You should see [3,0] and [0,4]; the squared lengths sum to 25.
-# Assert that `jnp.allclose(p, jnp.array([3.0, 0.0]))`.
 assert jnp.allclose(p, jnp.array([3.0, 0.0]))
-# Assert that `jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)`.
 assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
-# Assert that `jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))`.
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
-# Print the observed values to compare against the expected result.
 print('projection / residual:', p, r)
 ```
 
@@ -184,13 +158,12 @@ The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $
 
 ```python
 # Compute figure data for: Projection and leftover form a right triangle
-# Compute `visual_data` from `{'kind': 'vectors', 'arrows': [{'label': 'input u', ...`
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:37.069941+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:33.435928+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -205,11 +178,8 @@ PASS: optimization-05
 
 ```python
 # Experiment — Rescale the direction: A line does not change when its nonzero direction is rescaled.
-# Assert that `jnp.allclose(project(u, 2 * a), p)`.
 assert jnp.allclose(project(u, 2 * a), p)
-# Assert that `jnp.allclose(project(u, -a), p)`.
 assert jnp.allclose(project(u, -a), p)
-# Assert that `jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))`.
 assert jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))
 ```
 
@@ -223,13 +193,9 @@ A line does not change when its nonzero direction is rescaled. A dot product alo
 
 ```python
 # Experiment — Rotate the line: Changing direction changes what can be explained; merely...
-# Construct `diagonal` via `jnp.array([1.0, 1.0])`
 diagonal = jnp.array([1.0, 1.0])
-# Run `project` to compute `p2`.
 p2 = project(u, diagonal)
-# Assert that `jnp.allclose(p2, jnp.array([3.5, 3.5]))`.
 assert jnp.allclose(p2, jnp.array([3.5, 3.5]))
-# Assert that `jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)`.
 assert jnp.allclose(jnp.dot(diagonal, u - p2), 0.0, atol=1e-06)
 ```
 
@@ -248,25 +214,17 @@ Project $u=(2,-1,2)$ onto $a=(1,0,1)$. Check the residual by hand first.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
-2. Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
-3. Run `project` to compute `p3`.
-4. Assert that `jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))`.
-5. Assert that `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
-# Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
 u3 = jnp.array(...)  # TODO: compute u3
-# Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
 a3 = jnp.array(...)  # TODO: compute a3
-# Run `project` to compute `p3`.
 p3 = project(...)  # TODO: compute p3
-# Assert that `jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))`.
 assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))  # TODO: complete assertion check
-# Assert that `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`.
 assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
 ```
 
@@ -274,15 +232,10 @@ assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Project u=(2,-1,2) onto a=(1,0,1).
-# Construct `u3` via `jnp.array([2.0, -1.0, 2.0])`
 u3 = jnp.array([2.0, -1.0, 2.0])
-# Construct `a3` via `jnp.array([1.0, 0.0, 1.0])`
 a3 = jnp.array([1.0, 0.0, 1.0])
-# Run `project` to compute `p3`.
 p3 = project(u3, a3)
-# Assert that `jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))`.
 assert jnp.allclose(p3, jnp.array([2.0, 0.0, 2.0]))
-# Assert that `jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)`.
 assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)
 ```
 
@@ -359,22 +312,16 @@ Check the directions have zero dot product. Nonorthogonal directions can count t
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Construct `a1` via `jnp.array([1.0, 1.0])`
-2. Construct `a2` via `jnp.array([1.0, -1.0])`
-3. Assert that `jnp.allclose(project(u, a1) + project(u, a2), u)`.
-4. Assert that `not jnp.allclose(project(u, a) + project(u, a1), u)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
-# Construct `a1` via `jnp.array([1.0, 1.0])`
 a1 = jnp.array(...)  # TODO: compute a1
-# Construct `a2` via `jnp.array([1.0, -1.0])`
 a2 = jnp.array(...)  # TODO: compute a2
-# Assert that `jnp.allclose(project(u, a1) + project(u, a2), u)`.
 assert jnp.allclose(project(u, a1) + project(u, a2), u)  # TODO: complete assertion check
-# Assert that `not jnp.allclose(project(u, a) + project(u, a1), u)`.
 assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete assertion check
 ```
 
@@ -382,13 +329,9 @@ assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete ass
 
 ```python
 # Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
-# Construct `a1` via `jnp.array([1.0, 1.0])`
 a1 = jnp.array([1.0, 1.0])
-# Construct `a2` via `jnp.array([1.0, -1.0])`
 a2 = jnp.array([1.0, -1.0])
-# Assert that `jnp.allclose(project(u, a1) + project(u, a2), u)`.
 assert jnp.allclose(project(u, a1) + project(u, a2), u)
-# Assert that `not jnp.allclose(project(u, a) + project(u, a1), u)`.
 assert not jnp.allclose(project(u, a) + project(u, a1), u)
 ```
 

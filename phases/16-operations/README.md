@@ -6,7 +6,7 @@ Launch and observe real local jobs, detect failures and stalls, restore complete
 
 Use a bounded failure drill and retain its raw event log. Check state and data identity before resuming; separate measured execution from hypothetical demand and pricing.
 
-**Prerequisites:** 09: Distributed training; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 09: Distributed training.
 
 **Hardware:** Executed local CPU processes; accelerator and cluster transfer require separate validation.
 

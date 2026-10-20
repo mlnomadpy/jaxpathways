@@ -33,9 +33,9 @@ function courseTypeCue(phase) {
       filterGroup: 'onboarding-tpu',
       badge: 'Onboarding · Local CPU',
       eraId: 'era-onboarding',
-      eraTitle: 'Start Here · Setup & Cloud TPU Track',
+      eraTitle: 'Start Here · CPU Setup & Optional TPU Track',
       eraSubtitle:
-        'Set up your local CPU environment first, then complete the 3-step Cloud TPU mini-course before starting accelerator phases.',
+        'Start with the local CPU environment. Add the optional TPU specialization when you need to qualify accelerator execution.',
       hardwareBadge: 'Laptop CPU + TPU bridge',
       paceLabel,
     };
@@ -47,9 +47,9 @@ function courseTypeCue(phase) {
       filterGroup: 'onboarding-tpu',
       badge: `Cloud TPU Mini-Course · Step ${stepNum} of 3`,
       eraId: 'era-onboarding',
-      eraTitle: 'Start Here · Setup & Cloud TPU Track',
+      eraTitle: 'Start Here · CPU Setup & Optional TPU Track',
       eraSubtitle:
-        'Set up your local CPU environment first, then complete the 3-step Cloud TPU mini-course before starting accelerator phases.',
+        'Start with the local CPU environment. Add the optional TPU specialization when you need to qualify accelerator execution.',
       hardwareBadge: 'Cloud TPU VM + CPU verifier',
       paceLabel,
     };
@@ -81,17 +81,16 @@ function courseTypeCue(phase) {
       paceLabel,
     };
   }
-  const usesTpu = (phase.prerequisitePhaseIds || []).includes('tpu');
-  if (usesTpu) {
+  if (['distributed', 'kernels', 'deployment', 'operations'].includes(phase.id)) {
     return {
-      kind: 'tpu-specialization',
+      kind: 'systems-specialization',
       filterGroup: 'tpu-scale',
-      badge: 'TPU Scale & Production · CPU + Cloud TPU',
+      badge: 'Systems Specialization · CPU Reference',
       eraId: 'era-scale',
       eraTitle: 'Part III · Accelerator Scale, Kernels, Deployment & Operations',
       eraSubtitle:
         'Partition across device meshes, author Pallas TPU kernels, ship inference services, and operate production workloads.',
-      hardwareBadge: 'Logical CPU + Cloud TPU target',
+      hardwareBadge: 'CPU reference; target qualification separate',
       paceLabel,
     };
   }

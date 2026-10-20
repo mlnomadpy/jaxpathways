@@ -76,13 +76,11 @@ Create main.py in your course workspace. Paste this block first. If using a note
 
 ```python
 # Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
-# Import jax for this computation.
 import jax
 # Run this file in a fresh process; in a notebook restart the kernel first.
 jax.config.update("jax_platforms", "cpu")
 # Update state in place with the new values.
 jax.config.update("jax_num_cpu_devices", 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
@@ -125,21 +123,15 @@ Append the checks, save the file and run python main.py with the setup lesson en
 
 ```python
 # Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
-# Print the observed values to compare against the expected result.
 print("JAX version:", jax.__version__)
-# Print diagnostic summary of the computed outputs.
 print("CPU devices:", len(devices))
-# Iterate over `shard` to step through the computation:
 for shard in x.addressable_shards:
-    # Print diagnostic summary of the computed outputs.
     print("Device", shard.device.id, "index", shard.index, "values", np.asarray(shard.data))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(y), 2 * host + 1)
-# Assert invariant `len(x.addressable_shards) == 4` holds
 assert len(x.addressable_shards) == 4
 # Check tensor shape invariant: `all(shard.data.shape == (1, 2) for shard in x.addressable_shards)`
 assert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)
-# Print the observed values to compare against the expected result.
 print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
 ```
 
@@ -149,13 +141,11 @@ Assertions compare against host calculations or hand-derived values; printing a 
 
 ```python
 # Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
-# Import jax for this computation.
 import jax
 # Run this file in a fresh process; in a notebook restart the kernel first.
 jax.config.update("jax_platforms", "cpu")
 # Update state in place with the new values.
 jax.config.update("jax_num_cpu_devices", 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
@@ -182,21 +172,15 @@ y = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)
 y.block_until_ready()
 
 # Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
-# Print the observed values to compare against the expected result.
 print("JAX version:", jax.__version__)
-# Print diagnostic summary of the computed outputs.
 print("CPU devices:", len(devices))
-# Iterate over `shard` to step through the computation:
 for shard in x.addressable_shards:
-    # Print diagnostic summary of the computed outputs.
     print("Device", shard.device.id, "index", shard.index, "values", np.asarray(shard.data))
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(y), 2 * host + 1)
-# Assert invariant `len(x.addressable_shards) == 4` holds
 assert len(x.addressable_shards) == 4
 # Check tensor shape invariant: `all(shard.data.shape == (1, 2) for shard in x.addressable_shards)`
 assert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)
-# Print the observed values to compare against the expected result.
 print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
 ```
 
@@ -224,19 +208,15 @@ You can check the interpretation by locating row $2$, feature $1$: its owner is 
 
 ```python
 # Compute figure data for: Four logical devices own four different rows
-# Run `np.empty` to compute `owners`.
 owners = np.empty(host.shape, dtype=int)
-# Loop over `s` in `x.addressable_shards`:
 for s in x.addressable_shards:
-    # Compute `owners[s.index]` from `s.device.id`
     owners[s.index] = s.device.id
-# Compute `visual_data` from `{'kind': 'heatmap', 'values': owners.tolist(), 'unit...`
 visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CPU device ID', 'rows': ['row ' + str(i) for i in range(4)], 'columns': ['feature 0', 'feature 1']}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:00.799023+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:07.979734+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2
@@ -276,7 +256,6 @@ negative_y = jax.jit(lambda a: 2*a+1, in_shardings=rows, out_shardings=rows)(neg
 np.testing.assert_array_equal(np.asarray(negative_y), 2*negative+1)
 # Check tensor shape invariant: `all(s.data.shape == (1,2) for s in negative_x.addressable_shards)`
 assert all(s.data.shape == (1,2) for s in negative_x.addressable_shards)
-# Print the observed values to compare against the expected result.
 print("Negative input result:", np.asarray(negative_y).tolist())
 ```
 
@@ -291,15 +270,11 @@ Placement follows the declared shape/specification, not the signs or magnitudes 
 ```python
 # Experiment — Replicate instead of partitioning: Replication stores full copies.
 copies = jax.device_put(host, replicated)
-# Assert invariant `copies.is_fully_replicated` holds
 assert copies.is_fully_replicated
-# Assert invariant `len(copies.addressable_shards) == 4` holds
 assert len(copies.addressable_shards) == 4
-# Iterate over `shard` to step through the computation:
 for shard in copies.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), host)
-# Print the observed values to compare against the expected result.
 print("Replicated local shapes:", [s.data.shape for s in copies.addressable_shards])
 ```
 
@@ -323,7 +298,7 @@ Predict and verify the per-device shapes for twelve rows, then demonstrate how r
 2. Place `z` explicitly onto the target JAX device.
 3. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
 4. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-5. Iterate over `shard` to step through the computation:
+5. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -337,7 +312,6 @@ z = jax.device_put(...)  # TODO: compute z
 z2 = jax.jit(...)  # TODO: compute z2
 # Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape  # TODO: complete assertion check
-# Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
@@ -355,7 +329,6 @@ else:
 fixed = jax.device_put(...)  # TODO: compute fixed
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated  # TODO: complete assertion check
 ```
 
@@ -371,7 +344,6 @@ z = jax.device_put(twelve, rows)
 z2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)
 # Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape == (3,2) for s in z2.addressable_shards)
-# Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
@@ -389,7 +361,6 @@ else:
 fixed = jax.device_put(uneven, replicated)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated
 ```
 
@@ -419,7 +390,7 @@ Use each shard index to select the corresponding NumPy reference slice.
 2. Place `z` explicitly onto the target JAX device.
 3. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
 4. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-5. Iterate over `shard` to step through the computation:
+5. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -433,7 +404,6 @@ z = jax.device_put(...)  # TODO: compute z
 z2 = jax.jit(...)  # TODO: compute z2
 # Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape  # TODO: complete assertion check
-# Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
@@ -451,7 +421,6 @@ z = jax.device_put(twelve, rows)
 z2 = jax.jit(lambda a:a*a, in_shardings=rows, out_shardings=rows)(z)
 # Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
 assert all(s.data.shape == (3,2) for s in z2.addressable_shards)
-# Iterate over `shard` to step through the computation:
 for shard in z2.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
@@ -484,7 +453,6 @@ Do not drop a row to hide the error.
 2. Run the boundary check and catch the expected exception:
 3. Place `fixed` explicitly onto the target JAX device.
 4. Convert `` to a host NumPy array for inspection or verification.
-5. Assert invariant `fixed.is_fully_replicated` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -503,7 +471,6 @@ else:
 fixed = jax.device_put(...)  # TODO: compute fixed
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated  # TODO: complete assertion check
 ```
 
@@ -524,7 +491,6 @@ else:
 fixed = jax.device_put(uneven, replicated)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(np.asarray(fixed), uneven)
-# Assert invariant `fixed.is_fully_replicated` holds
 assert fixed.is_fully_replicated
 ```
 

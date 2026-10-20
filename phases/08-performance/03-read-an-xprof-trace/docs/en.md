@@ -98,7 +98,6 @@ Create a Python file in the course environment. Add this block after the precedi
 
 ```python
 # Step 1 — Prepare a traceable workload: Inputs and compilation precede the measured steps.
-# Import gzip for this computation.
 import gzip
 import json
 import os
@@ -110,13 +109,10 @@ import jax
 import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
-# Run `trace_root.mkdir` to perform the next check or state transition.
 trace_root.mkdir(parents=True,exist_ok=True)
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
-# Cast or evaluate `host` in explicit floating-point precision.
 host=rng.normal(size=(48,32)).astype(np.float32)
-# Cast or evaluate `weights` in explicit floating-point precision.
 weights=rng.normal(size=(32,16)).astype(np.float32)
 # Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
@@ -136,60 +132,34 @@ Create a Python file in the course environment. Add this block after the precedi
 # Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
 # Enter `jax.profiler.trace(trace_root, create_perfett` context block:
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
-    # Loop over `index` in `range(4)`:
     for index in range(4):
-        # Enter managed runtime/context scope for this block:
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
-            # Enter managed runtime/context scope for this block:
             with jax.profiler.TraceAnnotation('input_wait'):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
-            # Enter managed runtime/context scope for this block:
             with jax.profiler.TraceAnnotation('model_and_wait'):
-                # Run `compiled` to compute `result`.
                 result=compiled(x,w)
                 # Synchronize host execution until asynchronous device computation completes.
                 result.block_until_ready()
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
-# Run `sorted` to compute `traces`.
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
-# Assert invariant `traces and list(trace_root.rglob('*.xplane.pb'))` holds
 assert traces and list(trace_root.rglob('*.xplane.pb'))
-# Read or serialize artifact data on disk (`events`).
 events=json.loads(gzip.decompress(traces[-1].read_bytes()))['traceEvents']
-# Function `complete(name)` implementing this stage's computation:
 def complete(name):
-    # Return `sorted([e for e in events if e.get('ph') == 'X' and e.get('name') == name], key=lambda e: e['ts'])` to the caller.
     return sorted([e for e in events if e.get('ph')=='X' and e.get('name')==name],key=lambda e:e['ts'])
-# Run `complete` to compute `steps`.
-# Run `complete` to compute `input_events`.
-# Run `complete` to compute `model_events`.
 steps=complete('learner_step')
 input_events=complete('input_wait')
 model_events=complete('model_and_wait')
-# Assert invariant `len(steps)==len(input_events)==len(model_events)==4` holds
 assert len(steps)==len(input_events)==len(model_events)==4
-# Iterate over `(outer, waiting, compute)` to step through the computation:
 for outer,waiting,compute in zip(steps,input_events,model_events):
-    # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
-    # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
-# Compute `input_us` from `[e['dur'] for e in input_events]`
 input_us=[e['dur'] for e in input_events]
-# Compute `model_us` from `[e['dur'] for e in model_events]`
 model_us=[e['dur'] for e in model_events]
-# Compute `step_us` from `[e['dur'] for e in steps]`
 step_us=[e['dur'] for e in steps]
-# Assert invariant `all(t>=0 for t in input_us+model_us+step_us)` holds
 assert all(t>=0 for t in input_us+model_us+step_us)
-# Print diagnostic summary of the computed outputs.
 print('Trace directory:',trace_root)
-# Print diagnostic summary of the computed outputs.
 print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us':step_us},indent=2))
-# Print diagnostic summary of the computed outputs.
 print('Four named steps verified; host annotations are not isolated device kernels.')
 ```
 
@@ -210,7 +180,6 @@ Checking these invariants confirms the computation is ready for the full worked 
 
 ```python
 # Step 1 — Prepare a traceable workload: Inputs and compilation precede the measured steps.
-# Import gzip for this computation.
 import gzip
 import json
 import os
@@ -222,13 +191,10 @@ import jax
 import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
-# Run `trace_root.mkdir` to perform the next check or state transition.
 trace_root.mkdir(parents=True,exist_ok=True)
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
-# Cast or evaluate `host` in explicit floating-point precision.
 host=rng.normal(size=(48,32)).astype(np.float32)
-# Cast or evaluate `weights` in explicit floating-point precision.
 weights=rng.normal(size=(32,16)).astype(np.float32)
 # Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
@@ -240,60 +206,34 @@ compiled(x,w).block_until_ready()
 # Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
 # Enter `jax.profiler.trace(trace_root, create_perfett` context block:
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
-    # Loop over `index` in `range(4)`:
     for index in range(4):
-        # Enter managed runtime/context scope for this block:
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
-            # Enter managed runtime/context scope for this block:
             with jax.profiler.TraceAnnotation('input_wait'):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
-            # Enter managed runtime/context scope for this block:
             with jax.profiler.TraceAnnotation('model_and_wait'):
-                # Run `compiled` to compute `result`.
                 result=compiled(x,w)
                 # Synchronize host execution until asynchronous device computation completes.
                 result.block_until_ready()
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
-# Run `sorted` to compute `traces`.
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
-# Assert invariant `traces and list(trace_root.rglob('*.xplane.pb'))` holds
 assert traces and list(trace_root.rglob('*.xplane.pb'))
-# Read or serialize artifact data on disk (`events`).
 events=json.loads(gzip.decompress(traces[-1].read_bytes()))['traceEvents']
-# Function `complete(name)` implementing this stage's computation:
 def complete(name):
-    # Return `sorted([e for e in events if e.get('ph') == 'X' and e.get('name') == name], key=lambda e: e['ts'])` to the caller.
     return sorted([e for e in events if e.get('ph')=='X' and e.get('name')==name],key=lambda e:e['ts'])
-# Run `complete` to compute `steps`.
-# Run `complete` to compute `input_events`.
-# Run `complete` to compute `model_events`.
 steps=complete('learner_step')
 input_events=complete('input_wait')
 model_events=complete('model_and_wait')
-# Assert invariant `len(steps)==len(input_events)==len(model_events)==4` holds
 assert len(steps)==len(input_events)==len(model_events)==4
-# Iterate over `(outer, waiting, compute)` to step through the computation:
 for outer,waiting,compute in zip(steps,input_events,model_events):
-    # Iterate over `inner` to step through the computation:
     for inner in (waiting,compute):
-        # Assert that `outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1`.
         assert outer['ts']<=inner['ts']<=inner['ts']+inner['dur']<=outer['ts']+outer['dur']+1
-    # Assert invariant `waiting['ts']+waiting['dur']<=compute['ts']+1` holds
     assert waiting['ts']+waiting['dur']<=compute['ts']+1
-# Compute `input_us` from `[e['dur'] for e in input_events]`
 input_us=[e['dur'] for e in input_events]
-# Compute `model_us` from `[e['dur'] for e in model_events]`
 model_us=[e['dur'] for e in model_events]
-# Compute `step_us` from `[e['dur'] for e in steps]`
 step_us=[e['dur'] for e in steps]
-# Assert invariant `all(t>=0 for t in input_us+model_us+step_us)` holds
 assert all(t>=0 for t in input_us+model_us+step_us)
-# Print diagnostic summary of the computed outputs.
 print('Trace directory:',trace_root)
-# Print diagnostic summary of the computed outputs.
 print(json.dumps({'input_wait_us':input_us,'model_and_wait_us':model_us,'step_us':step_us},indent=2))
-# Print diagnostic summary of the computed outputs.
 print('Four named steps verified; host annotations are not isolated device kernels.')
 ```
 
@@ -321,62 +261,61 @@ The outer step also contains small amounts of other host work. Do not add the ou
 
 ```python
 # Compute figure data for: Where four annotated steps spent host time
-# Compute `visual_data` from `{'kind':'line','x':[0,1,2,3],'xlabel':'captured step...`
 visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:58:56.099367+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:47:37.536684+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-yai64c4h
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-l3tdro07
 {
   "input_wait_us": [
-    1270,
     1263,
-    1273,
-    1258
+    1253,
+    1269,
+    1271
   ],
   "model_and_wait_us": [
-    332,
+    108,
+    137,
+    74,
+    140
+  ],
+  "step_us": [
+    1393,
+    1406,
+    1354,
+    1423
+  ]
+}
+Four named steps verified; host annotations are not isolated device kernels.
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-g8x32sim
+{
+  "input_wait_us": [
+    1263,
+    1279,
+    1265,
+    1275
+  ],
+  "model_and_wait_us": [
     82,
-    58,
-    46
+    136,
+    62,
+    122
   ],
   "step_us": [
-    1616,
     1350,
+    1429,
     1335,
-    1307
+    1407
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-x7boh03x
-{
-  "input_wait_us": [
-    1272,
-    1259,
-    1263,
-    1256
-  ],
-  "model_and_wait_us": [
-    57,
-    56,
-    40,
-    40
-  ],
-  "step_us": [
-    1335,
-    1321,
-    1307,
-    1299
-  ]
-}
-Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [6, 6, 4, 3]
-Wrong double-counted totals: [2664, 2636, 2610, 2595]
-{'minimum_ms': 0.04, 'median_ms': 0.048, 'maximum_ms': 0.057}
+Unattributed outer time, microseconds: [5, 14, 8, 10]
+Wrong double-counted totals: [2695, 2844, 2662, 2804]
+{'minimum_ms': 0.062, 'median_ms': 0.10200000000000001, 'maximum_ms': 0.136}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 
@@ -389,15 +328,11 @@ PASS: performance-03
 ```python
 # Experiment — Account for the enclosing step: Outer and child intervals describe nested boundaries.
 overhead=np.asarray(step_us)-np.asarray(input_us)-np.asarray(model_us)
-# Assert invariant `np.all(overhead>=-2)` holds
 assert np.all(overhead>=-2)
 # Convert `wrong` to a host NumPy array for inspection or verification.
 wrong=np.asarray(step_us)+np.asarray(input_us)+np.asarray(model_us)
-# Assert invariant `np.all(wrong>=np.asarray(step_us))` holds
 assert np.all(wrong>=np.asarray(step_us))
-# Print the observed values to compare against the expected result.
 print('Unattributed outer time, microseconds:',overhead.tolist())
-# Print diagnostic summary of the computed outputs.
 print('Wrong double-counted totals:',wrong.tolist())
 ```
 
@@ -416,9 +351,7 @@ Convert every model interval to milliseconds and summarize its minimum, median a
 
 **Step-by-step implementation plan:**
 1. Aggregate array values to compute `summary`.
-2. Assert invariant `summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']` holds
-3. Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
-4. Print the observed values to compare against the expected result.
+2. Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -427,11 +360,9 @@ Convert every model interval to milliseconds and summarize its minimum, median a
 model_ms = np.asarray(...)  # TODO: compute model_ms
 # Aggregate array values to compute `summary`.
 summary = ...  # TODO: compute summary
-# Assert invariant `summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']` holds
 assert summary['minimum_ms']  # TODO: complete assertion check
 # Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
-# Print the observed values to compare against the expected result.
 print(summary)
 ```
 
@@ -442,11 +373,9 @@ print(summary)
 model_ms=np.asarray(model_us)/1000
 # Aggregate array values to compute `summary`.
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
-# Assert invariant `summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']` holds
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']
 # Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
-# Print the observed values to compare against the expected result.
 print(summary)
 ```
 
@@ -472,37 +401,26 @@ Sort endpoints and merge intervals that intersect.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Compute `total` as `0`.
-2. Iterate over `(start, end)` to step through the computation:
-3. Guard input contract (`end < start`) and fail fast if violated.
-4. Branch on condition `right is None`:
-5. Return `total + (0 if right is None else right - left)` to the caller.
+1. Guard input contract (`end < start`) and fail fast if violated.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
-    # Compute `total` as `0`.
     total = ...  # TODO: compute total
     left = ...  # TODO: compute left
-    # Iterate over `(start, end)` to step through the computation:
     for start,end in sorted(intervals):
         # Guard input contract (`end < start`) and fail fast if violated.
         if end<start:raise ValueError('negative interval')
-        # Branch on condition `right is None`:
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)
         else:
             total+=right-left
             left,right = ...  # TODO: compute left,right
-    # Return `total + (0 if right is None else right - left)` to the caller.
     return ...  # TODO: return computed result
-# Assert invariant `union_duration([(0,10),(2,7),(8,12)])==12` holds
 assert union_duration([(0,10),(2,7),(8,12)])  # TODO: complete assertion check
-# Assert invariant `sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19` holds
 assert sum(b-a for a,b  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('Hypothetical union: 12 microseconds; summed duration: 19.')
 ```
 
@@ -511,26 +429,19 @@ print('Hypothetical union: 12 microseconds; summed duration: 19.')
 ```python
 # Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
-    # Compute `total` as `0`.
     total=0
     left=right=None
-    # Iterate over `(start, end)` to step through the computation:
     for start,end in sorted(intervals):
         # Guard input contract (`end < start`) and fail fast if violated.
         if end<start:raise ValueError('negative interval')
-        # Branch on condition `right is None`:
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)
         else:
             total+=right-left
             left,right=start,end
-    # Return `total + (0 if right is None else right - left)` to the caller.
     return total+(0 if right is None else right-left)
-# Assert invariant `union_duration([(0,10),(2,7),(8,12)])==12` holds
 assert union_duration([(0,10),(2,7),(8,12)])==12
-# Assert invariant `sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19` holds
 assert sum(b-a for a,b in [(0,10),(2,7),(8,12)])==19
-# Print the observed values to compare against the expected result.
 print('Hypothetical union: 12 microseconds; summed duration: 19.')
 ```
 

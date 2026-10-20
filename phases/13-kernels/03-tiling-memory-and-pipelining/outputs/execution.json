@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-03",
-  "contentHash": "e79181cbca8c70a8148a2253a8f7e3038063f06fb15a1c6c66a01d8ed0f0d021",
-  "executedAt": "2026-10-13T09:00:43.595970+00:00",
+  "contentHash": "ffafe87d6ffe3d1dddcd0ab058e87d4adff0aae938e053a9460b4bb5cbe3f3b6",
+  "executedAt": "2026-10-20T10:49:49.884306+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Actual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nActual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nThree-buffer schedule matches the two-buffer result\nSingle-tile pipeline checked\nChanged shape, dtype and schedules verified\nUnsupported pipeline tile rejected\nTile, two/three-input-slot modeled bytes: (8, 128) 24576 32768\nTile, two/three-input-slot modeled bytes: (16, 128) 49152 65536\nTile, two/three-input-slot modeled bytes: (16, 256) 98304 131072\nPASS: kernels-03\n",
   "notebookCells": [
     {
-      "sourceHash": "fcd4e6c3b35c70b4d7b642db798b531f7a739e933c1db6b0040a7dc7ad99b410",
+      "sourceHash": "258634076b7219c38952d73ef0d77fb04d9f527edd48928d65d420018ad3fb6d",
       "outputs": []
     },
     {
-      "sourceHash": "f1e7de2c8522f43b51e015b5dd493cf64e4b6c7c30d895d18a3a89cf3b9524fd",
+      "sourceHash": "47e177697d4ec6e7261caff191832c228d9357c25067a03740e8170270bb4458",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "7650ae66e24198106532812d60966ec4a2c8a9672efd44c1001132bab34ca627",
+      "sourceHash": "e8abff9e5c1dae606210cc25bbb8e544b1a9a3c17898e56c7c2d14959da72a52",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "781d6783950414b28b21dc7506a89b0fdcea16d4db2d380cd8303d107ef06432",
+      "sourceHash": "17756ae1f7d651fff6470204554a27190add755e4e65b3a5d775a239c476aa83",
       "outputs": [
         {
           "output_type": "stream",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "sourceHash": "fa2f2d49a9bf2bdb638406a39bd18ed2c6f28e216d8b0d549f6b9c6d2b978224",
+      "sourceHash": "47e19d40395783992b07407a98dbe9ea56143cd9aff9484a2c1548d2726313b0",
       "outputs": []
     },
     {
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "d099e25c04b74cc42c8e7d0cb33eb7966649afdebaf445eea5e900e40b6307d6",
+      "sourceHash": "e10e7fa7e67cd32cb913343f3cbae0f3f51420fb0a8f2e80483d6c73e7f07dd9",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "9c371a5d887dfcdcaf85cf134fecfd4273fbaef1e786529480e4012b6aa9e9e1",
+      "sourceHash": "1b36a026e72aa576f815588814ac46b3e980c3611d8b5e7a97a1df259011edf2",
       "outputs": [
         {
           "output_type": "stream",
@@ -100,11 +100,11 @@
       ]
     },
     {
-      "sourceHash": "908411154c0c4422320061c88b363f7d9da1e424652556ce36c8609d9c7a6d83",
+      "sourceHash": "44b9155c0a2e8ef3d4b394472d4210ffabc8ed1d8ad26e180cf41bed6e38842f",
       "outputs": []
     },
     {
-      "sourceHash": "c5f032e4d90338fbfb882c14b80e56498ba97d2a9b5f96cda9ff8f0b2c797225",
+      "sourceHash": "91c49b024c4fb35f4accbc28837cb44caaed81ef14fe879fa75326d6aaaf66da",
       "outputs": [
         {
           "output_type": "stream",
@@ -116,11 +116,11 @@
       ]
     },
     {
-      "sourceHash": "31cdc7c8d31ec1d7880a127ee9a890ebdbbc2555b1d746f7cbd250b9f338fc21",
+      "sourceHash": "87d4d0b2185c13a345b616e0209aa8160200a6e2e1f1f51fd2b3cc46741aa736",
       "outputs": []
     },
     {
-      "sourceHash": "b00f7ac210ec2631e8814d4c239bdd8673fc1d4695515881f89a19a253bc6ddb",
+      "sourceHash": "b85b32c7b4dcbb3f9ae6a1b77df56aaec785d7ce06dd57a800544ef25799beb4",
       "outputs": [
         {
           "output_type": "stream",
@@ -132,11 +132,11 @@
       ]
     },
     {
-      "sourceHash": "8522bc0dbda40e181c501511a69ff85f3e8be3c2eee0981081b22b14193d1919",
+      "sourceHash": "40fce683ffb597e5140939c6ff91ccf3147222c9e5d27afa3686ead0e3ac8245",
       "outputs": []
     },
     {
-      "sourceHash": "fc0dc3e9b9f7bd3acc39d95551e410041599f221055ffcedb1eee2489ecc1c41",
+      "sourceHash": "58a4c43f15ef0f548d83237cc7a7bbabd7b4a2c3c16ad79033b7375e5a7f6f9e",
       "outputs": [
         {
           "output_type": "stream",

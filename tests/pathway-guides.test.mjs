@@ -89,8 +89,11 @@ test('planned capstones have valid preparation and stay outside runnable availab
     for (const id of plan.lessonIds) assert(lessonIds.has(id), `${plan.id}: unknown lesson ${id}`);
     for (const id of plan.trackIds) assert(trackIds.has(id));
     const content = projectGuide(plan, course, ids);
-    assert(content.body.includes('class="katex"'), `${plan.id}: math not rendered`);
-    assert(content.body.includes('project-plans/'), `${plan.id}: missing sibling plan navigation`);
+    const source = readFileSync(plan.source, 'utf8');
+    if (/\\\(|\\\[/.test(source)) assert(content.body.includes('class="katex"'), `${plan.id}: math not rendered`);
+    for (const match of source.matchAll(/\]\(\.\.\/([^/]+)\/README\.md\)/g)) {
+      if (ids.includes(match[1])) assert(content.body.includes(`project-plans/${match[1]}.html`), `${plan.id}: missing sibling plan navigation`);
+    }
     assert(!content.body.includes('href="../'), `${plan.id}: unresolved source link`);
   }
 });

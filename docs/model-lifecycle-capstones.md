@@ -1,6 +1,6 @@
 # Model lifecycle capstones
 
-Status: **ten planned project specifications**, 2026-10-06. The existing course still has 19 registered executable projects. These plans are additional work; no new large model, score, cloud run or public release is claimed.
+Status: **ten planned project specifications**, 2026-10-06. The original specification accompanied 19 executable projects; see [current registry counts](course-status.md) for the latest edition. These plans are additional work; no new large model, score, cloud run or public release is claimed.
 
 Every capstone starts from an existing harness and follows a complete model-development cycle: task/data contract → architecture and input representation → pretraining → task-specific adaptation → evaluation → precision/conversion → service qualification → Hugging Face publication → operation. The model's task determines its objectives. Masked language modeling is one route, not a universal first phase.
 

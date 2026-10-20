@@ -1,16 +1,15 @@
 ---
 import { inlineMath, renderMath } from '../../lib/math.js';
 import Prose from './Prose.astro';
-import {
-  renderBuildStepCodeBreakdown,
-  renderExerciseCodeTeacher,
-} from '../../lib/code-teaching.js';
+import { renderBuildStepCodeBreakdown } from '../../lib/code-teaching.js';
 import { codePanel as sharedCodePanel } from '../../lib/lesson-content.js';
 import { lessonVisual, lessonExecution, lessonMechanism } from '../../lib/lesson-visuals.js';
+import { embeddedImage } from '../../lib/server/reader-assets.js';
 import type { authoredLessons } from '../../lib/course-data.js';
 interface Props {
   lesson: (typeof authoredLessons)[number];
   index: number;
+  offline?: boolean;
 }
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
@@ -19,11 +18,7 @@ const codePanel = (source: string, label: string) =>
     '<pre ',
     '<pre tabindex="0" aria-label="Scrollable code" ',
   );
-const codeTeacher = (source: string, title: string) =>
-  renderExerciseCodeTeacher(source, title).replace(
-    '<pre ',
-    '<pre tabindex="0" aria-label="Scrollable starter code" ',
-  );
+const { offline = false } = Astro.props;
 ---
 
 <article id={`chapter-${index}`}>
@@ -54,7 +49,9 @@ const codeTeacher = (source: string, title: string) =>
     <>
       <h2 set:html={inlineMath(section.title)} />
       <Prose text={section.body} />
-      {section.id === 'guided-reasoning' && <Fragment set:html={lessonMechanism(lesson)} />}
+      {section.id === 'guided-reasoning' && (
+        <Fragment set:html={lessonMechanism(lesson, { offline, imageResolver: embeddedImage })} />
+      )}
       {section.check && (
         <aside class="reasoning-check">
           <h3>Pause and reason</h3>
@@ -82,7 +79,7 @@ const codeTeacher = (source: string, title: string) =>
       ><code>{section.formula}</code></pre>}
     </>
   ))}
-  <Fragment set:html={lessonVisual(lesson)} />
+  <Fragment set:html={lessonVisual(lesson, { offline, imageResolver: embeddedImage })} />
   {c.buildSteps?.map((step) => (
     <>
       <h2 set:html={inlineMath(step.title)} />
@@ -95,12 +92,18 @@ const codeTeacher = (source: string, title: string) =>
   {c.buildCode && (
     <>
       <h2>Build a numerical estimate</h2>
-      <Fragment set:html={codePanel(c.buildCode, 'Python · numerical estimate')} />
+      <details class="solution-reveal">
+        <summary>Reveal the complete numerical estimate code</summary>
+        <Fragment set:html={codePanel(c.buildCode, 'Python · numerical estimate')} />
+      </details>
       <Prose text={c.buildOutput} />
     </>
   )}
   <h2>Run the example</h2>
-  <Fragment set:html={codePanel(c.code, 'Python · complete example')} />
+  <details class="solution-reveal">
+    <summary>Reveal the assembled example code</summary>
+    <Fragment set:html={codePanel(c.code, 'Python · complete example')} />
+  </details>
   <div class="expected-output">
     <p class="output-label">Expected result</p>
     <Prose text={c.output} />
@@ -123,9 +126,10 @@ const codeTeacher = (source: string, title: string) =>
   ))}
   <h2>Your exercise</h2>
   <Prose text={c.exercise} />
-  <Fragment set:html={codeTeacher(c.solution, 'How to write this exercise')} />
-  <h3>Reference solution</h3>
-  <Fragment set:html={codePanel(c.solution, 'Python · reference solution')} />
+  <details class="solution-reveal">
+    <summary>Reveal the reference solution</summary>
+    <Fragment set:html={codePanel(c.solution, 'Python · reference solution')} />
+  </details>
   {c.practice?.map((practice) => (
     <>
       <h2 set:html={inlineMath(practice.title)} />
@@ -133,10 +137,11 @@ const codeTeacher = (source: string, title: string) =>
       <Prose text={practice.prompt} />
       <h3>Hint</h3>
       <Prose text={practice.hint} />
-      <Fragment set:html={codeTeacher(practice.solution, `How to write: ${practice.title}`)} />
-      <h3>Reference solution</h3>
-      <Fragment set:html={codePanel(practice.solution, 'Python · practice solution')} />
-      <Prose text={practice.explanation} />
+      <details class="solution-reveal">
+        <summary>Reveal the reference solution</summary>
+        <Fragment set:html={codePanel(practice.solution, 'Python · practice solution')} />
+        <Prose text={practice.explanation} />
+      </details>
     </>
   ))}
   <h2>Checkpoint</h2>
@@ -146,9 +151,12 @@ const codeTeacher = (source: string, title: string) =>
       <li set:html={inlineMath(option)} />
     ))}
   </ol>
-  <p>
-    <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
-  </p>
+  <details class="solution-reveal">
+    <summary>Reveal the checkpoint answer and explanation</summary>
+    <p>
+      <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
+    </p>
+  </details>
   {c.diagnosis && (
     <>
       <h2>Diagnose the result</h2>

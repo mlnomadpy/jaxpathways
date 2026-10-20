@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-02",
-  "contentHash": "e5229078f1b2a4222e05512ea8131638b6941ab867fcd59e457bca7a31037d2d",
-  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "contentHash": "81334e7f41bd4ff3205536759c986bf631b1fb32e7e2a387c45df4c8f6cbe8f7",
+  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-09T12:23:08.861469+00:00",
+  "generatedAt": "2026-10-20T10:45:33.696240+00:00",
+  "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

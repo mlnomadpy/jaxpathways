@@ -6,7 +6,7 @@ Train small masked-token, hidden-patch and paired-view models. Audit information
 
 Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
 
-**Prerequisites:** 07: Transformers & language models; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 07: Transformers & language models.
 
 **Hardware:** Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate.
 
@@ -108,6 +108,6 @@ An audited pretraining and adaptation objective toolkit.
 
 Project status: implemented staged practice · [Open source](../../projects/training-methods/README.md). Use stages 1, 2, 3 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 1` from the top-level folder to verify stages 1, 2, 3.
 
-
+Additional project: [Trace a tiny bidirectional encoder from pretraining to retrieval](../../projects/embedding-lineage/README.md).
 
 [Primary documentation](https://docs.jax.dev/en/latest/).

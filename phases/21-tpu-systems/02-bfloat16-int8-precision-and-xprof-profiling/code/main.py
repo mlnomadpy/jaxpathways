@@ -4,6 +4,7 @@
 # Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
 # Import pathlib (Path) for this computation.
 from pathlib import Path
+import os
 import tempfile
 import time
 import jax
@@ -30,8 +31,9 @@ def evaluate_precision_policies(seed=0):
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
     ).astype(jnp.float32)
     # Reduce across the target axis to summarize `scale`.
-    scale = jnp.max(jnp.abs(w), axis=0, keepdims=True) / 127.0
-    # Combine or mask array elements to form `w_int8`.
+    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
+    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
+    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
@@ -52,13 +54,17 @@ def evaluate_precision_policies(seed=0):
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
+            "weight_bytes": int(w_int8.size),
+            "scale_bytes": int(scale.size * 4),
         })
     # Return `results` to the caller.
     return results
 
+
+
 # Capture a warmed XProf trace and verify *.xplane.pb output
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
-def capture_warmed_trace(steps=4):
+def capture_warmed_trace(steps=4, trace_dir=None):
     # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
@@ -70,23 +76,24 @@ def capture_warmed_trace(steps=4):
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     # Enter managed runtime/context scope for this block:
-    with tempfile.TemporaryDirectory(prefix="tpu-course-trace-") as trace_dir:
-        # Enter managed runtime/context scope for this block:
-        with jax.profiler.trace(trace_dir):
-            # Record execution timing or profiler trace in `t1`.
-            t1 = time.perf_counter()
-            # Repeat the update loop over `range(steps)` steps:
-            for _ in range(steps):
-                # Run `step_fn` to compute `x`.
-                x = step_fn(x)
-            # Synchronize host execution until asynchronous device computation completes.
-            jax.block_until_ready(x)
-            # Record execution timing or profiler trace in `steady_ms`.
-            steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-        # Read or serialize artifact data on disk (`xplane_files`).
-        xplane_files = list(Path(trace_dir).rglob("*.xplane.pb"))
-        # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
-        return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files)}
+    trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    with jax.profiler.trace(str(trace_dir)):
+        # Record execution timing or profiler trace in `t1`.
+        t1 = time.perf_counter()
+        # Repeat the update loop over `range(steps)` steps:
+        for _ in range(steps):
+            # Run `step_fn` to compute `x`.
+            x = step_fn(x)
+        # Synchronize host execution until asynchronous device computation completes.
+        jax.block_until_ready(x)
+        # Record execution timing or profiler trace in `steady_ms`.
+        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
+    # Collect files from the retained trace directory.
+    xplane_files = list(trace_dir.rglob("*.xplane.pb"))
+    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
+    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+
 
 
 # Run `evaluate_precision_policies` to compute `prec_table`.
@@ -109,7 +116,7 @@ assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 # Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
 # Import pathlib (Path) for this computation.
 from pathlib import Path
-import tempfile
+import os
 import time
 import jax
 import jax.numpy as jnp
@@ -135,8 +142,9 @@ def evaluate_precision_policies(seed=0):
         x.astype(jnp.bfloat16), w.astype(jnp.bfloat16), preferred_element_type=jnp.bfloat16
     ).astype(jnp.float32)
     # Reduce across the target axis to summarize `scale`.
-    scale = jnp.max(jnp.abs(w), axis=0, keepdims=True) / 127.0
-    # Combine or mask array elements to form `w_int8`.
+    column_max = jnp.max(jnp.abs(w), axis=0, keepdims=True)
+    scale = jnp.where(column_max == 0, 1.0, column_max / 127.0)
+    # The scale of 1 for a zero column avoids division by zero; its quantized values remain zero.
     w_int8 = jnp.clip(jnp.round(w / scale), -127, 127).astype(jnp.int8)
     # Cast or evaluate `out_int8_fp32acc` in explicit floating-point precision.
     out_int8_fp32acc = jnp.dot(x, w_int8.astype(jnp.float32) * scale, preferred_element_type=jnp.float32)
@@ -157,13 +165,16 @@ def evaluate_precision_policies(seed=0):
             "policy": label,
             "max_abs_err": round(float(jnp.max(diff)), 5),
             "mean_abs_err": round(float(jnp.mean(diff)), 5),
+            "weight_bytes": int(w_int8.size),
+            "scale_bytes": int(scale.size * 4),
         })
     # Return `results` to the caller.
     return results
 
 
+
 # Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
-def capture_warmed_trace(steps=4):
+def capture_warmed_trace(steps=4, trace_dir=None):
     # Construct `x` via `jnp.ones((256, 256), dtype=jnp.bfloat16)`
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
@@ -175,23 +186,24 @@ def capture_warmed_trace(steps=4):
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     # Enter managed runtime/context scope for this block:
-    with tempfile.TemporaryDirectory(prefix="tpu-course-trace-") as trace_dir:
-        # Enter managed runtime/context scope for this block:
-        with jax.profiler.trace(trace_dir):
-            # Record execution timing or profiler trace in `t1`.
-            t1 = time.perf_counter()
-            # Repeat the update loop over `range(steps)` steps:
-            for _ in range(steps):
-                # Run `step_fn` to compute `x`.
-                x = step_fn(x)
-            # Synchronize host execution until asynchronous device computation completes.
-            jax.block_until_ready(x)
-            # Record execution timing or profiler trace in `steady_ms`.
-            steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
-        # Read or serialize artifact data on disk (`xplane_files`).
-        xplane_files = list(Path(trace_dir).rglob("*.xplane.pb"))
-        # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
-        return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files)}
+    trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
+    trace_dir.mkdir(parents=True, exist_ok=True)
+    with jax.profiler.trace(str(trace_dir)):
+        # Record execution timing or profiler trace in `t1`.
+        t1 = time.perf_counter()
+        # Repeat the update loop over `range(steps)` steps:
+        for _ in range(steps):
+            # Run `step_fn` to compute `x`.
+            x = step_fn(x)
+        # Synchronize host execution until asynchronous device computation completes.
+        jax.block_until_ready(x)
+        # Record execution timing or profiler trace in `steady_ms`.
+        steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
+    # Collect files from the retained trace directory.
+    xplane_files = list(trace_dir.rglob("*.xplane.pb"))
+    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
+    return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
+
 
 
 # Run `evaluate_precision_policies` to compute `prec_table`.
@@ -205,6 +217,7 @@ assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 # Print the observed values to compare against the expected result.
 print("Precision comparison:", prec_table)
 # Print diagnostic summary of the computed outputs.
+print("Retained trace directory:", trace_info["trace_dir"])
 print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_ms:", round(trace_info["steady_ms"], 4))
 
 # Figure data experiment

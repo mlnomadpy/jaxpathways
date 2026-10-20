@@ -47,7 +47,8 @@
   color: var(--stage-build-accent);
   border-color: var(--stage-build-border);
 }
-.course-type-pill[data-course-kind='tpu-specialization'] {
+.course-type-pill[data-course-kind='tpu-specialization'],
+.course-type-pill[data-course-kind='systems-specialization'] {
   background: var(--stage-experiment-banner);
   color: var(--stage-experiment-accent);
   border-color: var(--stage-experiment-border);

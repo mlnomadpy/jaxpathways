@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-03",
-  "contentHash": "3c6d86827cd66da7d0bc2754cfad070e2c845f0e7d80de4f74868d23cf4189f1",
-  "executedAt": "2026-10-13T09:01:04.949744+00:00",
+  "contentHash": "16c3fd20cd983fed1236cd2f8b1589b5edf49f3be77e784652c254b20578c51a",
+  "executedAt": "2026-10-20T10:50:14.579922+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]\nLogsumexp gradient: [0.09085944 0.30166396 0.60747661]\nStable extreme values: [0.00000000e+00 6.93147181e-01 1.00000000e+03] naive positive extreme: inf\nSoftplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]\nLogsumexp gradient: [0.09085944 0.30166396 0.60747661]\nStable extreme values: [0.00000000e+00 6.93147181e-01 1.00000000e+03] naive positive extreme: inf\nWrong/correct/finite-difference derivative: 0.29934383005622606 0.5986876601124521 0.5986876601138391\nExpected custom_vjp forward-mode boundary: can't apply forward-mode autodiff (jvp) to a custom_vjp function.\nOrdinary JAX common-shift JVP: 1.0\nChanged-size gradient and cotangent scaling verified\nStable shift invariance and zero common-direction curvature verified\nNonlinear seed rule rejected by its contract; repaired JVP is linear\nPASS: internals-03\n",
   "notebookCells": [
     {
-      "sourceHash": "08353c50952e94c0db3584706e0e593a42fa3385c215282646f48ef5745ced4d",
+      "sourceHash": "70e6189a6b0085dacd2c5988185333f12ed3e58b9cd3f0ec33a9d86462ee19a3",
       "outputs": []
     },
     {
-      "sourceHash": "8491eee69747bf7d2847a1047cc472977a6491485077e7965c174398319596f8",
+      "sourceHash": "13c201151ed97e2c1d43c49e3776fdcc63ae1ed2a4ceb91122103c1b7e0f709b",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "7d6261e85da7de91a4d127186e7988a440b008a9945ad31dd7bfd87b86c82651",
+      "sourceHash": "c327f4c0cc6339b47549c7650fd948defb1897684efd972fa18529049cb03ce5",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "7b5ca4db2babf9b324ba263e5afb1e23118ee94ce756021b1590d0c1e2630e25",
+      "sourceHash": "8ce4e0cadfbd02c8cba11728160ae2edc2aee5fa3616e873c20980e07622ec42",
       "outputs": [
         {
           "output_type": "stream",
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "523e63dc3d32b307cbff4fda17d03d022545de82836fa5cfa0a4af7099790fb4",
+      "sourceHash": "458674eba920a1b0a7380343cd5b3dc7a1bddee1495e97e44c72808b474c7242",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "14265e7ecb7b37e8d569db40070be26ed132bddbf6f087c012b3009713f37c71",
+      "sourceHash": "fd002013272cdddceaf0b38816fdecc9cf6d2897c517776c7f1c41539def4f84",
       "outputs": [
         {
           "output_type": "stream",
@@ -101,11 +101,11 @@
       ]
     },
     {
-      "sourceHash": "f33545ae422cbc5a2af1d9f797975d4f0ca211e71ad333a82c40cc528e49e843",
+      "sourceHash": "0b463cd9066c890916fc62e4e6db4504ab556d74c6f934be2859f20af890630b",
       "outputs": []
     },
     {
-      "sourceHash": "ba41443f9e984b3f24745812b2fe736ba2b7fda7901a97da9ccbf980440c1e78",
+      "sourceHash": "1623edcce5cfc20d09c11944f934fe0ba2a1ec583d8cde9e6c5b6ce2acda2dd2",
       "outputs": [
         {
           "output_type": "stream",
@@ -117,11 +117,11 @@
       ]
     },
     {
-      "sourceHash": "4b9f0f0fd88f1e9b3ea6079bf3eaa400f7f228a928ac6ff9259804ccbc9d9a54",
+      "sourceHash": "e6b146e19d33a65c6979eac1aa0508e61a368cb02a8dcc14615ff4a4b3919606",
       "outputs": []
     },
     {
-      "sourceHash": "315d90cc9580a594a207477dd71b93b3203460fcb9c90647f2188ad3056adcad",
+      "sourceHash": "02dd1137dfc614c4dbe1b986bf5786d70c00754c4e6fafd429d51917a5762714",
       "outputs": [
         {
           "output_type": "stream",
@@ -133,11 +133,11 @@
       ]
     },
     {
-      "sourceHash": "2b2b98cc07b6ad96212a7045996ec15386f0377f2326e1f6f5f40637fce329ab",
+      "sourceHash": "c33456c4e7a445ba88692546f2bf0bc24593d6ff054865f47a9d5a12126017ea",
       "outputs": []
     },
     {
-      "sourceHash": "8dc890e511c1dcc804ea48355d39a9f4038abfe3758cf652dd1446ec98ae5620",
+      "sourceHash": "98be0302873df0795b5f97dd9fcc258a1584ee200957ddbadf3b3a2f6eec6016",
       "outputs": [
         {
           "output_type": "stream",

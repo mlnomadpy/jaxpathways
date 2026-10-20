@@ -271,15 +271,7 @@ Check that the resulting arrays satisfy the expected shape, dtype, and numerical
 
 ```python
 import numpy as np
-# Print the observed values to compare against the expected result.
-# Print diagnostic summary of the computed outputs.
-# Print diagnostic summary of the computed outputs.
-# Print diagnostic summary of the computed outputs.
-# Print diagnostic summary of the computed outputs.
-# Run `jax.numpy.arange` to compute `x`.
 x = jax.numpy.arange(4, dtype=jax.numpy.float32)
-# Print the observed values to compare against the expected result.
-# Assert invariant `float(x.sum()) == 6.0` holds
 assert float(x.sum()) == 6.0
 ```
 
@@ -289,7 +281,6 @@ These assertions lock in the exact numerical contract before you run the full ex
 
 ```python
 # Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...
-# Import os for this computation.
 import os
 # Choose CPU before importing JAX for this first experiment.
 os.environ["JAX_PLATFORMS"] = "cpu"
@@ -297,21 +288,13 @@ os.environ["JAX_PLATFORMS"] = "cpu"
 import platform
 import jax
 import numpy as np
-# Print the observed values to compare against the expected result.
 print("Python:", platform.python_version())
-# Print diagnostic summary of the computed outputs.
 print("JAX:", jax.__version__)
-# Print diagnostic summary of the computed outputs.
 print("NumPy:", np.__version__)
-# Print diagnostic summary of the computed outputs.
 print("Backend:", jax.default_backend())
-# Print diagnostic summary of the computed outputs.
 print("Devices:", jax.devices())
-# Run `jax.numpy.arange` to compute `x`.
 x = jax.numpy.arange(4, dtype=jax.numpy.float32)
-# Print the observed values to compare against the expected result.
 print("Sum:", float(x.sum()))
-# Assert invariant `float(x.sum()) == 6.0` holds
 assert float(x.sum()) == 6.0
 ```
 
@@ -341,7 +324,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:55:56.939389+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:05.346444+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -365,17 +348,15 @@ Edit the starter as shown in Step $6$: change the array length from $4$ to $6$ a
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Print the observed values to compare against the expected result.
-2. Assert invariant `float(x.sum()) == 15.0` holds
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
 x = jax.numpy.arange(...)  # TODO: compute x
-# Print the observed values to compare against the expected result.
 print("Changed experiment sum:", float(x.sum()))
-# Assert invariant `float(x.sum()) == 15.0` holds
 assert float(x.sum())  # TODO: complete assertion check
 ```
 
@@ -384,9 +365,7 @@ assert float(x.sum())  # TODO: complete assertion check
 ```python
 # Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
 x = jax.numpy.arange(6, dtype=jax.numpy.float32)
-# Print the observed values to compare against the expected result.
 print("Changed experiment sum:", float(x.sum()))
-# Assert invariant `float(x.sum()) == 15.0` holds
 assert float(x.sum()) == 15.0
 ```
 

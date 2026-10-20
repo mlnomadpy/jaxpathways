@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.7.0",
+    "date": "2026-10-20",
+    "title": "Book quality repairs and connected model experiments",
+    "summary": "Repair misleading project and TPU contracts, make the illustrated book portable, and connect career and model-learning evidence.",
+    "changes": [
+      "Replaced nine cloned encoder projects with distinct staged CPU contracts, changed-condition checks and learner-owned evidence; untouched starters fail the learner commands.",
+      "Corrected calculated versus observed figure provenance, checkpoint restore boundaries, TPU execution instructions, precision byte accounting and persistent profiler artifacts.",
+      "Removed mandatory TPU and unrelated language/RL work from the image-classifier route, exposed optional preparation and mapped every career skill to lesson and project-stage evidence.",
+      "Embedded standalone HTML figures; added phase and project handoffs, practical appendices, separate solutions, current EPUB metadata and meaningful image alternatives.",
+      "Removed mechanical syntax-narration comments while preserving numerical, shape and state explanations.",
+      "Split full verification into CPU lesson, sharded project, logger and site jobs; deployment now depends on their completion.",
+      "Made all ten separately planned lifecycle briefs discoverable and generated current course counts from canonical registries.",
+      "Added an actual 70,765-parameter CPU embedding lineage pilot on chapter-held-out public-domain text, with objective monitoring, independent loss checks, lineage validation, held-out retrieval versus BM25 and fresh-process export; its poor measured retrieval is retained."
+    ]
+  },
+  {
     "version": "0.6.0",
     "date": "2026-10-13",
     "title": "Reproducible JAX/Flax experiments workshop",

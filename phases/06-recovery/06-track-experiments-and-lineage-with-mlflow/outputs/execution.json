@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "0a441bdc68539ca3439d6d80abe888f42fec18d2102b06e76d3c2b65373d9a7e",
-  "executedAt": "2026-10-13T08:58:23.804381+00:00",
+  "contentHash": "2045fd46cce599b92c2b22fca98a4f64f22b5ca7fa8a52502d6adfac11e0dfdc",
+  "executedAt": "2026-10-20T10:47:02.065912+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -18,28 +18,28 @@
       "outputs": []
     },
     {
-      "sourceHash": "034caca2ecfa3bb4f734e227c1f73114a35dcd68e19fa54465d4a4674e9ba78e",
+      "sourceHash": "08c17a6f0ccf71815524cff1da739f8017efc48107dac044947e7f836068efc2",
       "outputs": []
     },
     {
-      "sourceHash": "84146a6d8e864b49f6f780bff6cbe4c6787034c860f40c014a2ffecf82cc96f3",
+      "sourceHash": "09fcb9a8db35f3885a178ba33ca15fb44b27b51bb17e95c25c5a9a98d376d4d8",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/13 01:58:21 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/13 01:58:21 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/20 03:46:59 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 03:46:59 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 3701.95it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1547.71it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 3545.48it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1506.03it/s]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "c46075e0ecfcd140950746885b3553aeee401a119eff92dd6662e1c2931e9d93",
+      "sourceHash": "4c8f0208e6942dde2f61c5dd64725e232cffccd5d36bcd945312a3512ec66f58",
       "outputs": [
         {
           "output_type": "stream",
@@ -53,18 +53,18 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/13 01:58:22 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/13 01:58:22 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/20 03:47:00 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 03:47:00 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2083.61it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1371.58it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2542.00it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1636.48it/s]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "850c313eb097efe3cb907d20bc06199ab9d96b9ea92195b8a5059aa0a8abb066",
+      "sourceHash": "8e111bfbe3de57625acbef7ec10f7cf54236b832fdde7ee060b1776c72801d18",
       "outputs": []
     },
     {
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "3b8f26245c4edcecc224d8c5f603eb896a5d40672fe6b190bd329cd25cc14f35",
+      "sourceHash": "f08438cee4e08d6dc2910bdf7d6c735e13d8add6e559254f08256c38d0450d12",
       "outputs": [
         {
           "output_type": "stream",
@@ -95,11 +95,11 @@
       ]
     },
     {
-      "sourceHash": "07754830219d37873f1e31857387342cb6a964fdf7342d9b674873bceafdac7e",
+      "sourceHash": "8a57ba90a09257ccd2c1510b2b4f86e5e66545c7033a191c2e86519fe6bb8a6f",
       "outputs": []
     },
     {
-      "sourceHash": "8d7e53211a25176c5a14f45be0793ba64f3c970026ad6c61b41d73c3e30a9075",
+      "sourceHash": "17412229c42e4d7f3ee44b9028f41c71b40b3d0226ede120281195b9c19d8229",
       "outputs": [
         {
           "output_type": "stream",
@@ -111,11 +111,11 @@
       ]
     },
     {
-      "sourceHash": "a71d732b88be1c23f05451f0ac77cb2ae6404753f762b8b427b8fa234985126d",
+      "sourceHash": "9fb4d76ca10de99ee4924e29707c206bea7928cd33b6582c4b465fe05b18cd56",
       "outputs": []
     },
     {
-      "sourceHash": "48a235fb2fcea7363b48daa3d7b763b56496fbba074a647895d5177fd5cce4d5",
+      "sourceHash": "0a95030ff379904c45623e243fa2916fe9e93a773b91c4a9d110cad619dd2f91",
       "outputs": [
         {
           "output_type": "stream",

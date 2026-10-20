@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "156ade8d485fd822a76d02ee156798e4934f7ca3c1c632b6f00f3de5a058af16",
-  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "contentHash": "bd985f582fbaea197458e4dfca2d3965c26d712bb05b83aca5893f9c7b19969e",
+  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:36:43.359441+00:00",
+  "generatedAt": "2026-10-20T10:47:12.783181+00:00",
+  "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "measured local job seconds: [0.4813765827566385, 0.4829662498086691, 0.48102462477982044]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.08049437496811152, 'load_fraction': 0.04024718748405576, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002012359374202788, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
+  "stdout": "measured local job seconds: [0.7591391247697175, 0.7720800838433206, 0.8201061254367232]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.13668435423945388, 'load_fraction': 0.06834217711972694, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003417108855986347, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
   "data": {
     "panels": [
       {
@@ -29,9 +30,9 @@
           {
             "label": "wall time",
             "y": [
-              0.4813765827566385,
-              0.4829662498086691,
-              0.48102462477982044
+              0.7591391247697175,
+              0.7720800838433206,
+              0.8201061254367232
             ]
           }
         ]
@@ -50,9 +51,9 @@
           {
             "label": "update time",
             "y": [
-              0.00022587645798921585,
-              0.0007221680134534836,
-              0.0013461676426231861
+              0.0005409577861428261,
+              0.0020060003735125065,
+              0.0037159998901188374
             ]
           }
         ]

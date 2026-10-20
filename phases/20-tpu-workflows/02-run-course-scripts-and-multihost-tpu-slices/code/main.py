@@ -24,36 +24,47 @@ for entry in SLICE_CATALOG:
     entry["multi_host"] = entry["hosts"] > 1
 
 # Generate single-host and multi-host gcloud command pipelines
-# Step 2 — Generate single-host and multi-host gcloud command pipelines: Generating the stage, run, and fetch commands from the host count...
-def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
-    # Compute `worker_flag` from `" --worker=all" if hosts > 1 else ""`
+def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1, execution_class="review-required"):
+    if execution_class == "review-required":
+        raise ValueError("classify and review the script before generating a TPU launch command")
+    if execution_class == "cpu-only":
+        if hosts != 1:
+            raise ValueError("CPU-only scripts must use the CPU route")
+        return {"run": f"python public/exercises/{lesson_id}.py", "multi_host": False}
+    if execution_class not in {"single-host-compatible", "multi-host-qualified"}:
+        raise ValueError("unknown execution class")
+    if execution_class == "single-host-compatible" and hosts != 1:
+        raise ValueError("single-host scripts cannot run across a TPU Pod")
+    if hosts > 1 and execution_class != "multi-host-qualified":
+        raise ValueError("multi-host launch requires a qualified training program")
+    if hosts < 1:
+        raise ValueError("hosts must be positive")
     worker_flag = " --worker=all" if hosts > 1 else ""
-    # Compute `scp_stage` from `f"gcloud compute tpus tpu-vm scp public/exercises/{l...`
     scp_stage = f"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}"
-    # Compute `ssh_run` from `f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={...`
-    ssh_run = f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'"
-    # Compute `scp_fetch` from `f"gcloud compute tpus tpu-vm scp --recurse {tpu_name...`
-    scp_fetch = f"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}"
-    # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.
+    ssh_run = f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='set -o pipefail; JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py | tee ~/jax-tpu-lab/{lesson_id}-tpu.txt'"
+    scp_fetch = f"gcloud compute tpus tpu-vm scp {tpu_name}:~/jax-tpu-lab/{lesson_id}-tpu.txt ./ --zone={zone}"
     return {"scp_stage": scp_stage, "ssh_run": ssh_run, "scp_fetch": scp_fetch, "multi_host": hosts > 1}
 
-
-# Run `build_tpu_experiment_commands` to compute `single_cmds`.
-single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1)
-# Run `build_tpu_experiment_commands` to compute `pod_cmds`.
-pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
-# Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
-assert "--worker=all" not in single_cmds["ssh_run"]
-# Assert that `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]`.
-assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
-# Print the observed values to compare against the expected result.
-print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
-# Print diagnostic summary of the computed outputs.
-print("Pod SSH command:", pod_cmds["ssh_run"])
+single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1, execution_class="cpu-only")
+assert single_cmds["run"] == "python public/exercises/distributed-02.py"
+for kwargs in ({}, {"hosts": 4, "execution_class": "cpu-only"}):
+    try:
+        build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", **kwargs)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("unreviewed or CPU-only work must not be routed to a TPU Pod")
+print("CPU route:", single_cmds["run"])
 
 # Step 3: Verify invariants on the completed state
-assert "--worker=all" not in single_cmds["ssh_run"]
-assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
+assert single_cmds["run"] == "python public/exercises/distributed-02.py"
+assert single_cmds["multi_host"] is False
+try:
+    build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4, execution_class="cpu-only")
+except ValueError:
+    print("CPU-only route remains excluded from TPU Pod execution")
+else:
+    raise AssertionError("CPU-only work must not be routed to a TPU Pod")
 
 # Run course scripts and multi-host TPU Pod slices: Every lesson in this course generates a self-contained script in...
 # Import json for this computation.
@@ -79,38 +90,40 @@ for entry in SLICE_CATALOG:
 
 
 # Function `build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts)` implementing this stage's computation:
-def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1):
-    # Compute `worker_flag` from `" --worker=all" if hosts > 1 else ""`
+def build_tpu_experiment_commands(tpu_name, zone, lesson_id, hosts=1, execution_class="review-required"):
+    if execution_class == "review-required":
+        raise ValueError("classify and review the script before generating a TPU launch command")
+    if execution_class == "cpu-only":
+        if hosts != 1:
+            raise ValueError("CPU-only scripts must use the CPU route")
+        return {"run": f"python public/exercises/{lesson_id}.py", "multi_host": False}
+    if execution_class == "single-host-compatible" and hosts != 1:
+        raise ValueError("single-host scripts cannot run across a TPU Pod")
+    if hosts > 1 and execution_class != "multi-host-qualified":
+        raise ValueError("multi-host launch requires a qualified training program")
     worker_flag = " --worker=all" if hosts > 1 else ""
-    # Compute `dist_init` from `"import jax; jax.distributed.initialize(); " if host...`
-    dist_init = "import jax; jax.distributed.initialize(); " if hosts > 1 else ""
-    # Compute `scp_stage` from `f"gcloud compute tpus tpu-vm scp public/exercises/{l...`
     scp_stage = f"gcloud compute tpus tpu-vm scp public/exercises/{lesson_id}.py {tpu_name}:~/jax-tpu-lab/ --zone={zone}{worker_flag}"
-    # Read or serialize artifact data on disk (`ssh_run`).
-    ssh_run = (
-        f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} "
-        f"--command=\"JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python -c '{dist_init}exec(open(\\\"PosixPath\\\"))'\""
-        if False
-        else f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py'"
-    )
-    # Compute `scp_fetch` from `f"gcloud compute tpus tpu-vm scp --recurse {tpu_name...`
-    scp_fetch = f"gcloud compute tpus tpu-vm scp --recurse {tpu_name}:~/jax-tpu-lab/ ./tpu-runs/{lesson_id}/ --zone={zone}"
-    # Return `{'scp_stage': scp_stage, 'ssh_run': ssh_run, 'scp_fetch': scp_fetch, 'multi_host': hosts > 1}` to the caller.
+    ssh_run = f"gcloud compute tpus tpu-vm ssh {tpu_name} --zone={zone}{worker_flag} --command='set -o pipefail; JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/{lesson_id}.py | tee ~/jax-tpu-lab/{lesson_id}-tpu.txt'"
+    scp_fetch = f"gcloud compute tpus tpu-vm scp {tpu_name}:~/jax-tpu-lab/{lesson_id}-tpu.txt ./ --zone={zone}"
     return {"scp_stage": scp_stage, "ssh_run": ssh_run, "scp_fetch": scp_fetch, "multi_host": hosts > 1}
 
-
 # Run `build_tpu_experiment_commands` to compute `single_cmds`.
-single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1)
+single_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1, execution_class="cpu-only")
 # Run `build_tpu_experiment_commands` to compute `pod_cmds`.
-pod_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4)
-# Assert invariant `"--worker=all" not in single_cmds["ssh_run"]` holds
-assert "--worker=all" not in single_cmds["ssh_run"]
+pod_cmds = None  # This lesson has no multi-host-qualified training program.
+# Assert the CPU route does not request TPU execution.
+assert single_cmds["run"] == "python public/exercises/distributed-02.py"
 # Assert that `"--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]`.
-assert "--worker=all" in pod_cmds["scp_stage"] and "--worker=all" in pod_cmds["ssh_run"]
+try:
+    build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", hosts=4, execution_class="cpu-only")
+except ValueError:
+    print("Correctly rejected CPU-only lesson for TPU Pod execution")
+else:
+    raise AssertionError("CPU-only lesson must not be routed to TPU Pod")
 # Print the observed values to compare against the expected result.
 print("Slice catalog global chips:", {s["slice"]: s["global_chips"] for s in SLICE_CATALOG})
 # Print diagnostic summary of the computed outputs.
-print("Pod SSH command:", pod_cmds["ssh_run"])
+print("CPU route:", single_cmds["run"])
 
 # Figure data experiment
 # Compute figure data for: Host count, per-host local chips, and global TPU chips across single-host and Pod slices
@@ -146,14 +159,16 @@ print("Total HBM GiB by slice:", hbm_by_slice)
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Call build_tpu_experiment_commands('jax-tpu-pod', 'us-east5-a',...
-tx_cmds = build_tpu_experiment_commands("jax-tpu-pod", "us-east5-a", "transformers-04", hosts=4)
-# Print the observed values to compare against the expected result.
-print("Stage:", tx_cmds["scp_stage"])
-# Print diagnostic summary of the computed outputs.
-print("Run:", tx_cmds["ssh_run"])
-# Assert that `"--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transfo`.
-assert "--worker=all" in tx_cmds["scp_stage"] and "--worker=all" in tx_cmds["ssh_run"] and "transformers-04.py" in tx_cmds["ssh_run"]
+cpu_cmds = build_tpu_experiment_commands("jax-tpu-course", "us-west1-c", "distributed-02", hosts=1, execution_class="cpu-only")
+print("CPU route:", cpu_cmds["run"])
+assert cpu_cmds["run"] == "python public/exercises/distributed-02.py"
+for kwargs in ({}, {"hosts": 4, "execution_class": "cpu-only"}):
+    try:
+        build_tpu_experiment_commands("jax-tpu-pod", "us-west1-c", "distributed-02", **kwargs)
+    except ValueError:
+        print("Rejected unsafe route:", kwargs)
+    else:
+        raise AssertionError("unreviewed or CPU-only work must not be routed to a TPU Pod")
 
 # Reference practice: Filter multi-host slices from the catalog
 # Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...

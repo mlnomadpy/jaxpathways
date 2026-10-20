@@ -1,7 +1,7 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.6.0",
+  "version": "0.7.0",
   "scripts": {
     "dev": "npm run content:build && astro dev",
     "check": "npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && python3 scripts/check-distribution.py && npm run check:site",
@@ -28,7 +28,8 @@
     "test:tpu-launcher": "python3 resources/tpu-gcp/check.py",
     "test:tpu-precision": "python3 resources/tpu-gcp/check_precision.py",
     "test:experiments": "python3 projects/reproducible-experiments/tests/check.py --implementation solution --stage all",
-    "test:experiment-loggers": "python3 projects/reproducible-experiments/tests/loggers_check.py"
+    "test:experiment-loggers": "python3 projects/reproducible-experiments/tests/loggers_check.py",
+    "test:tpu-lessons": "node scripts/check-tpu-lessons.mjs"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",

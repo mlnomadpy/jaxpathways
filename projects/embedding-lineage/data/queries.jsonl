@@ -1,0 +1,12 @@
+{"id":"train-01","split":"train","text":"What animal runs by Alice and worries that it will be late?"}
+{"id":"train-02","split":"train","text":"What object does Alice find on the glass table?"}
+{"id":"train-03","split":"train","text":"What does Alice read on the bottle before tasting it?"}
+{"id":"train-04","split":"train","text":"What food is marked with the words EAT ME?"}
+{"id":"train-05","split":"train","text":"What does the Rabbit ask Mary Ann to fetch?"}
+{"id":"val-01","split":"validation","text":"What does Alice say about feeling changed since waking up?"}
+{"id":"val-02","split":"validation","text":"How tall does Alice ask to become?"}
+{"id":"test-01","split":"test","text":"What animal does the baby become after Alice takes it outside?"}
+{"id":"test-02","split":"test","text":"What direction should Alice take when she asks the Cheshire Cat?"}
+{"id":"test-03","split":"test","text":"Why does the tea party remain at six o'clock?"}
+{"id":"test-04","split":"test","text":"What mistake did the gardeners make with the Queen's rose tree?"}
+{"id":"test-05","split":"test","text":"How do the croquet players handle the hedgehogs?"}

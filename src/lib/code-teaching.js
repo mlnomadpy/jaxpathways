@@ -268,8 +268,8 @@ export function renderExerciseCodeTeacher(solutionCode, title = 'How to write th
   const apis = extractCodeApis(solutionCode);
   const steps = extractCodingSteps(solutionCode);
   const scaffold = buildStarterScaffold(solutionCode);
-  return `<div class="code-teaching-guide">
-    <p class="code-guide-kicker">${escapeHtml(title)} — Step-by-step recipe &amp; starter scaffold</p>
+  return `<details class="code-teaching-guide"><summary>Show a writing guide and starter scaffold</summary>
+    <p class="code-guide-kicker">${escapeHtml(title)}: step-by-step recipe &amp; starter scaffold</p>
     ${
       apis.length
         ? `<p class="code-guide-subhead"><strong>1. Key functions &amp; syntax to use:</strong></p>
@@ -286,5 +286,5 @@ export function renderExerciseCodeTeacher(solutionCode, title = 'How to write th
       </div>
       <pre data-language="python"><code>${CourseCode.highlight(scaffold, 'python')}</code></pre>
     </div>
-  </div>`;
+  </details>`;
 }

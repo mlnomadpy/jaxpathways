@@ -1,18 +1,27 @@
-# Verify multi-slice TPU scaling efficiency and asynchronous checkpoints
+# Estimate optimizer-state bytes and interpret a scaling rate
 
-Phase 21 dedicated integration project ([Phase 21](../../phases/21-tpu-systems/README.md)). See also the cross-phase companion project [`text-harness`](../text-harness/README.md).
+A memory estimate is only as complete as its named tensors. This project accounts for weights, FP32 master weights and two FP32 optimizer moments. It then calculates ideal throughput from a supplied single-worker rate and worker count. It does not inspect device memory or measure TPU scaling.
 
-## Mathematical contract
+## Before you start
 
-Given input batch $X \in \mathbb{R}^{B \times d_\text{in}}$ and projection weights $W_\text{enc}, P$, the normalized representation is:
+Complete the TPU systems lessons on memory budgets and precision. Know that BF16 weights use two bytes per parameter while FP32 masters and Adam moments use four bytes each. Run from the repository root with `requirements-cpu.txt` installed, and edit `projects/tpu-systems-audit/starter/model.py`.
 
-$$
-H = \tanh(X W_\text{enc} + b_\text{enc}) P, \qquad \hat{H}_i = \frac{H_i}{\max(\|H_i\|_2, 10^{-6})}
-$$
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-cpu.txt
+python3 projects/tpu-systems-audit/tests/check.py --implementation starter --stage 1
+python3 projects/tpu-systems-audit/tests/check.py --implementation starter --stage 2
+python3 projects/tpu-systems-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/tpu-systems-audit
+python3 projects/tpu-systems-audit/tests/check.py --implementation starter --stage 4
+```
 
-## Stage verification
+On Windows PowerShell, activate `.venv\Scripts\Activate.ps1` and use `python` rather than `python3`.
 
-1. **Stage 1 — Parameter and state contract:** `python3 projects/tpu-systems-audit/tests/check.py --stage 1`
-2. **Stage 2 — Masked forward pass:** `python3 projects/tpu-systems-audit/tests/check.py --stage 2`
-3. **Stage 3 — Gradient verification:** `python3 projects/tpu-systems-audit/tests/check.py --stage 3`
-4. **Stage 4 — Compiled scan qualification:** `python3 projects/tpu-systems-audit/tests/check.py --stage 4`
+Stage 1 uses 100 parameters, two bytes per stored weight, four bytes per master weight, and two FP32 moments. The ledger is 200 + 400 + 800 = 1400 bytes. With a supplied single-worker rate of 50 examples/second and four workers, the ideal reference is 200 examples/second. A supplied measured rate of 160 gives a calculated ratio of 0.8.
+
+Stage 2 changes the parameter count to 50 and the supplied rate to 300 with two workers. The state estimate is 700 bytes and the ideal rate is 100, so the ratio is 3.0. Treat this as a ratio of supplied values, not proof of superlinear device speedup. The stage also rejects zero throughput. If the ledger is wrong, check whether moment bytes use four bytes per moment rather than the stored weight dtype.
+
+Stage 3 writes the byte ledger, rate calculation and scope note to `runs/tpu-systems-audit/tpu-systems-audit.json`. The report says that no device memory or TPU scaling was measured. Without `--evidence-dir`, evidence is temporary. Stage 4 runs all checks. Passing output begins `PASS tpu-systems-audit stage N`.
+
+The estimate excludes gradients, activations, communication buffers, temporary copies and allocator overhead. Add those before making a capacity decision. Reference command: `python3 projects/tpu-systems-audit/tests/check.py --implementation solution --stage 4`.

@@ -8,7 +8,7 @@ Keep a first-run log that another learner can reproduce, then pair each phase's 
 
 **Prerequisites:** Basic Python; no previous JAX experience.
 
-**Hardware:** CPU reference and executable TPU bridge; TPU execution unverified.
+**Hardware:** CPU; the TPU bridge is optional accelerator practice.
 
 ## Study guide: Can someone else reproduce your first result?
 
@@ -110,11 +110,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-A reproducible environment report.
+Check the CPU environment and a saved matrix arithmetic identity.
 
 **Demonstrate:** Explain which device ran your code and reproduce the result in a fresh environment.
 
-Project status: implemented staged practice · [Open source](../../projects/welcome-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` from the top-level folder to verify stage 1.
+Project status: implemented staged practice · [Open source](../../projects/welcome-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/welcome-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/welcome-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Connect arrays, transformations and explicit state](../../projects/foundation-toolkit/README.md).
 

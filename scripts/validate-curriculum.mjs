@@ -44,6 +44,15 @@ for(const route of course.pathways) {
 const authored=[...lessons.values()].filter(l=>l.status==='authored');
 for(const lesson of authored){
   const c=lesson.content;
+  if (c.visual) {
+    assert.ok(['executed','analytic','conceptual'].includes(c.visual.kind), `${lesson.id}: unknown visual provenance kind`);
+    if (c.visual.kind === 'analytic') {
+      assert.ok(c.visual.code, `${lesson.id}: analytic figure needs reproducible calculation code`);
+      const scope = `${c.visual.title} ${c.visual.reading} ${c.visual.connection}`.toLowerCase();
+      assert.ok(/analytic|calculated|calculation/.test(scope), `${lesson.id}: analytic figure scope must be explicit`);
+      assert.ok(/not an observed|not a recorded|does not read a .*receipt|no device result|not device measurements/.test(scope), `${lesson.id}: analytic figure must distinguish itself from device evidence`);
+    }
+  }
   function validateMath(value,key=''){
     if(['code','solution','buildCode','formula'].includes(key))return;
     if(typeof value==='string'){if(key==='math')renderMath(value,true);else inlineMath(value);}
@@ -113,6 +122,17 @@ for(const role of course.roles){
   assert.deepEqual(role.startingPointChecks.map(c=>c.phaseId),route.phaseIds.slice(0,5),'Starting checks must follow the route foundation');
 }
 console.log('OK: career milestones and starting-point checks reference their required route phases.');
+for (const role of course.roles) {
+  assert.deepEqual(role.skillEvidence.map(item=>item.skill),role.skills,role.id+': every career skill needs an evidence map');
+  for (const item of role.skillEvidence) {
+    assert(item.evidence && item.reviewCriterion && item.scope);
+    assert(course.projectIds.includes(item.projectId));
+    const project=JSON.parse(readFileSync(new URL(`../projects/${item.projectId}/project.json`,import.meta.url)));
+    assert(item.stageIds.length && item.stageIds.every(id=>project.stages.some(stage=>stage.id===id)),role.id+': unknown capability project stage');
+    for (const id of item.lessonIds) assert(lessons.has(id),role.id+': missing capability lesson '+id);
+  }
+}
+
 for(const project of JSON.parse(readFileSync(new URL('../public/api/v1/projects.json',import.meta.url))).projects){
   assert.ok(routes.has(project.pathwayId),`${project.id}: unknown project pathway ${project.pathwayId}`);
   for(const id of project.requiredLessonIds)assert.ok(authored.some(l=>l.id===id),`${project.id}: unavailable project prerequisite ${id}`);

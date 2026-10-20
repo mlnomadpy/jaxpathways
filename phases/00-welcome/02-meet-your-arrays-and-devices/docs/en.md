@@ -80,7 +80,6 @@ Create main.py in your lesson workspace. Add this first block; use the environme
 
 ```python
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -105,17 +104,12 @@ Append the checks, save main.py, and run python main.py from this folder using y
 
 ```python
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Print the observed values to compare against the expected result.
 print("Shape:", x.shape)
-# Print diagnostic summary of the computed outputs.
 print("Dtype:", x.dtype)
-# Print diagnostic summary of the computed outputs.
 print("Devices:", x.devices())
-# Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -125,24 +119,18 @@ Compare the output to the expected result below before making the exercise chang
 
 ```python
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: x has two observations and three features.
 # Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Print the observed values to compare against the expected result.
 print("Shape:", x.shape)
-# Print diagnostic summary of the computed outputs.
 print("Dtype:", x.dtype)
-# Print diagnostic summary of the computed outputs.
 print("Devices:", x.devices())
-# Print diagnostic summary of the computed outputs.
 print("Row sums:", x.sum(axis=1))
 # Check tensor shape invariant: `x.shape == (2, 3)`
 assert x.shape == (2, 3)
-# Assert that `jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))`.
 assert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))
 ```
 
@@ -170,13 +158,12 @@ The row labels are positions, not times or class labels. The darker lower row te
 
 ```python
 # Compute figure data for: Rows are groups of observations
-# Compute `visual_data` from `{'kind': 'heatmap', 'values': x.tolist(), 'rows': ['...`
 visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:55:58.997438+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:06.782121+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -204,15 +191,11 @@ PASS: welcome-02
 # Experiment — Center each measurement: The calculation reuses one mean per column.
 # Reduce along axis=0 to compute `means`.
 means=x.mean(axis=0,keepdims=True)
-# Compute `centered` from `x-means`
 centered=x-means
-# Print the observed values to compare against the expected result.
 print("Means:",means)
-# Print diagnostic summary of the computed outputs.
 print("Centered:",centered)
 # Check tensor shape invariant: `means.shape==(1,3)`
 assert means.shape==(1,3)
-# Assert that `jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))`.
 assert jnp.allclose(centered,jnp.array([[-1.5,-1.5,-1.5],[1.5,1.5,1.5]]))
 ```
 
@@ -226,7 +209,6 @@ The calculation reuses one mean per column. An explicit hand calculation verifie
 
 ```python
 # Experiment — Keep a host reference: The host reference is an inspection copy.
-# Import numpy for this computation.
 import numpy as np
 # Convert `host` to a host NumPy array for inspection or verification.
 host=np.asarray(x)
@@ -234,7 +216,6 @@ host=np.asarray(x)
 assert host.shape==(2,3)
 # Create evenly spaced index values in ``.
 np.testing.assert_array_equal(host,np.arange(6).reshape(2,3))
-# Print the observed values to compare against the expected result.
 print("Host dtype:",host.dtype)
 ```
 
@@ -256,7 +237,6 @@ Compute column sums instead. State the resulting shape before running the code.
 **Step-by-step implementation plan:**
 1. Reduce along axis=0 to compute `column_sums`.
 2. Check tensor shape invariant: `column_sums.shape == (3,)`
-3. Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -266,7 +246,6 @@ Compute column sums instead. State the resulting shape before running the code.
 column_sums = x.sum(...)  # TODO: compute column_sums
 # Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape  # TODO: complete assertion check
-# Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete assertion check
 ```
 
@@ -278,7 +257,6 @@ assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete asse
 column_sums = x.sum(axis=0)
 # Check tensor shape invariant: `column_sums.shape == (3,)`
 assert column_sums.shape == (3,)
-# Assert that `jnp.allclose(column_sums, jnp.array([3., 5., 7.]))`.
 assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))
 ```
 
@@ -306,8 +284,6 @@ Keep observation rows and measurement columns.
 
 **Step-by-step implementation plan:**
 1. Construct and reshape `table` into the target tensor dimensions.
-2. Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
-3. Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -315,9 +291,7 @@ Keep observation rows and measurement columns.
 # Add a new observation (Practice): Changing the observation count changes axis 0, while the...
 # Construct and reshape `table` into the target tensor dimensions.
 table = jnp.arange(...)  # TODO: compute table
-# Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
-# Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
 ```
 
@@ -327,9 +301,7 @@ assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete 
 # Add a new observation (Practice): Changing the observation count changes axis 0, while the...
 # Construct and reshape `table` into the target tensor dimensions.
 table=jnp.arange(9,dtype=jnp.float32).reshape(3,3)
-# Assert that `jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))`.
 assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))
-# Assert that `jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))`.
 assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))
 ```
 
@@ -356,7 +328,6 @@ Count required elements before changing the code.
 
 **Step-by-step implementation plan:**
 1. Run the boundary check and catch the expected exception:
-2. Assert invariant `x.reshape(2,3).size==6` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -369,7 +340,6 @@ except TypeError:
     print("Expected element-count mismatch")
 else:
     raise AssertionError("Expected reshape to fail")
-# Assert invariant `x.reshape(2,3).size==6` holds
 assert x.reshape(2,3).size  # TODO: complete assertion check
 ```
 
@@ -384,7 +354,6 @@ except TypeError:
     print("Expected element-count mismatch")
 else:
     raise AssertionError("Expected reshape to fail")
-# Assert invariant `x.reshape(2,3).size==6` holds
 assert x.reshape(2,3).size==6
 ```
 

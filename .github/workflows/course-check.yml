@@ -1,9 +1,14 @@
 name: Course checks
-on: [push, pull_request, workflow_dispatch]
+on:
+  pull_request:
+  push:
+    branches-ignore: [main]
+  workflow_dispatch:
+  workflow_call:
 permissions:
   contents: read
 jobs:
-  cpu-course:
+  site:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -13,19 +18,76 @@ jobs:
       - uses: actions/setup-node@v7
         with:
           node-version: '24'
-          package-manager-cache: false
+          cache: npm
       - uses: actions/setup-python@v7
         with:
           python-version: '3.14'
+      - run: python -m pip install numpy==2.4.4
+      - run: npm ci
+      - run: npm run check
+  lessons:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: requirements-cpu.txt
       - run: python -m pip install -r requirements-cpu.txt
       - run: npm ci
       - run: npm run build
       - run: npm run smoke:cpu
+      - run: npm run test:tpu-lessons
+      - run: npm run test:tpu-launcher
       - run: npm run test:tpu-precision
       - run: npm run test:math
-      - run: npm run test:project
-      - run: python -m pip install -r projects/reproducible-experiments/requirements-loggers.txt
-      - run: npm run test:experiment-loggers
-      - run: npm run build
-      - run: npm run check
-      - run: npm run check:deployment
+      - uses: actions/upload-artifact@v6
+        with:
+          name: lesson-cpu-receipt
+          path: curriculum/validation.json
+  projects:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3]
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: requirements-cpu.txt
+      - run: python -m pip install -r requirements-cpu.txt
+      - run: python scripts/check-projects.py --shard ${{ matrix.shard }}/4 --receipt /tmp/projects-${{ matrix.shard }}.json
+      - uses: actions/upload-artifact@v6
+        with:
+          name: project-cpu-receipt-${{ matrix.shard }}
+          path: /tmp/projects-${{ matrix.shard }}.json
+  loggers:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: |
+            requirements-cpu.txt
+            projects/reproducible-experiments/requirements-loggers.txt
+      - run: python -m pip install -r requirements-cpu.txt -r projects/reproducible-experiments/requirements-loggers.txt
+      - run: python projects/reproducible-experiments/tests/loggers_check.py

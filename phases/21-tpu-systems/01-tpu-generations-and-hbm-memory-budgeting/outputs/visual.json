@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "06acd342a6bc8c755a79c8b595b7089a5e348484b9c1e3a716820c0fb9515346",
-  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
-  "kind": "executed",
-  "generatedAt": "2026-10-08T10:31:59.255787+00:00",
+  "contentHash": "e6dd2b245a8dfadb2626f5ecca9e89c0a274b8b8c32b51ec9ce69dffaefa00f9",
+  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
+  "kind": "analytic",
+  "generatedAt": "2026-10-20T10:58:50.515621+00:00",
+  "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,31 +13,48 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n",
+  "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n",
   "data": {
     "kind": "bar",
-    "labels": [
-      "v5e",
-      "v5p",
-      "v6e"
-    ],
-    "xlabel": "Cloud TPU generation",
-    "ylabel": "GiB / (FLOP per byte)",
-    "series": [
+    "panels": [
       {
-        "label": "HBM per chip (GiB)",
-        "y": [
-          16.0,
-          95.0,
-          32.0
+        "kind": "bar",
+        "labels": [
+          "v5e",
+          "v5p",
+          "v6e"
+        ],
+        "xlabel": "Cloud TPU generation",
+        "ylabel": "HBM per chip (GiB)",
+        "series": [
+          {
+            "label": "HBM capacity",
+            "y": [
+              16.0,
+              95.0,
+              32.0
+            ]
+          }
         ]
       },
       {
-        "label": "BF16 ridge point (FLOP/byte)",
-        "y": [
-          240.5,
-          166.0,
-          573.8
+        "kind": "bar",
+        "labels": [
+          "v5e",
+          "v5p",
+          "v6e"
+        ],
+        "xlabel": "Cloud TPU generation",
+        "ylabel": "theoretical BF16 ridge point (FLOP/byte)",
+        "series": [
+          {
+            "label": "peak BF16 FLOP/s \u00f7 HBM bytes/s",
+            "y": [
+              240.5,
+              166.0,
+              573.8
+            ]
+          }
         ]
       }
     ]

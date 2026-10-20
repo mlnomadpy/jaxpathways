@@ -87,13 +87,11 @@ Create main.py in your course workspace. Paste this block first. If using a note
 
 ```python
 # Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
-# Import jax for this computation.
 import jax
 # Run this file in a fresh process; in a notebook restart the kernel first.
 jax.config.update("jax_platforms", "cpu")
 # Update state in place with the new values.
 jax.config.update("jax_num_cpu_devices", 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
@@ -118,9 +116,7 @@ Append this block in the same file. Predict the shapes and values before running
 
 ```python
 # Step 2 — Place and compute: Mesh axis names describe placement.
-# Compute `host_x` from `np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],...`
 host_x = np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2]],dtype=np.float32)
-# Compute `true_w` from `np.array([2.,-1.],dtype=np.float32)`
 true_w = np.array([2.,-1.],dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `host_y`.
 host_y = host_x @ true_w
@@ -132,19 +128,15 @@ x = jax.device_put(host_x, rows)
 y = jax.device_put(host_y, labels_sharding)
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
-# Function `loss(weights, features, labels)` implementing this stage's computation:
 def loss(weights, features, labels):
-    # Return `jnp.mean((features @ weights - labels) ** 2)` to the caller.
     return jnp.mean((features @ weights-labels)**2)
 # Define `update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def update(weights, features, labels):
     # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
-    # Return `(weights - 0.1 * gradient, value, gradient)` to the caller.
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
 train_step = jax.jit(update, in_shardings=(replicated,rows,labels_sharding),out_shardings=(replicated,replicated,replicated))
-# Run `train_step` to compute `(new_w, before, gradient)`.
 new_w, before, gradient = train_step(w,x,y)
 ```
 
@@ -165,17 +157,12 @@ np.testing.assert_allclose(np.asarray(new_w),-0.1*expected_gradient,rtol=1e-6,at
 expected_loss = np.mean(host_y**2)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(before), expected_loss,rtol=1e-6)
-# Assert invariant `float(loss(new_w,x,y)) < float(before)` holds
 assert float(loss(new_w,x,y)) < float(before)
-# Iterate over `shard` to step through the computation:
 for shard in new_w.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(shard.data),np.asarray(new_w))
-# Print the observed values to compare against the expected result.
 print("Initial loss:",float(before))
-# Print diagnostic summary of the computed outputs.
 print("Gradient:",np.asarray(gradient),"updated weights:",np.asarray(new_w))
-# Print diagnostic summary of the computed outputs.
 print("Updated loss:",float(loss(new_w,x,y)))
 ```
 
@@ -185,13 +172,11 @@ Assertions compare against host calculations or hand-derived values; printing a 
 
 ```python
 # Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
-# Import jax for this computation.
 import jax
 # Run this file in a fresh process; in a notebook restart the kernel first.
 jax.config.update("jax_platforms", "cpu")
 # Update state in place with the new values.
 jax.config.update("jax_num_cpu_devices", 4)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
@@ -208,9 +193,7 @@ rows = NamedSharding(mesh, P("data", None))
 replicated = NamedSharding(mesh, P())
 
 # Step 2 — Place and compute: Mesh axis names describe placement.
-# Compute `host_x` from `np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],...`
 host_x = np.array([[1,0],[0,1],[1,1],[2,0],[0,2],[2,1],[1,2],[2,2]],dtype=np.float32)
-# Compute `true_w` from `np.array([2.,-1.],dtype=np.float32)`
 true_w = np.array([2.,-1.],dtype=np.float32)
 # Perform matrix / vector contraction (`@`) to compute `host_y`.
 host_y = host_x @ true_w
@@ -222,19 +205,15 @@ x = jax.device_put(host_x, rows)
 y = jax.device_put(host_y, labels_sharding)
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
-# Function `loss(weights, features, labels)` implementing this stage's computation:
 def loss(weights, features, labels):
-    # Return `jnp.mean((features @ weights - labels) ** 2)` to the caller.
     return jnp.mean((features @ weights-labels)**2)
 # Define `update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def update(weights, features, labels):
     # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
-    # Return `(weights - 0.1 * gradient, value, gradient)` to the caller.
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
 train_step = jax.jit(update, in_shardings=(replicated,rows,labels_sharding),out_shardings=(replicated,replicated,replicated))
-# Run `train_step` to compute `(new_w, before, gradient)`.
 new_w, before, gradient = train_step(w,x,y)
 
 # Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
@@ -247,17 +226,12 @@ np.testing.assert_allclose(np.asarray(new_w),-0.1*expected_gradient,rtol=1e-6,at
 expected_loss = np.mean(host_y**2)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(before), expected_loss,rtol=1e-6)
-# Assert invariant `float(loss(new_w,x,y)) < float(before)` holds
 assert float(loss(new_w,x,y)) < float(before)
-# Iterate over `shard` to step through the computation:
 for shard in new_w.addressable_shards:
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(shard.data),np.asarray(new_w))
-# Print the observed values to compare against the expected result.
 print("Initial loss:",float(before))
-# Print diagnostic summary of the computed outputs.
 print("Gradient:",np.asarray(gradient),"updated weights:",np.asarray(new_w))
-# Print diagnostic summary of the computed outputs.
 print("Updated loss:",float(loss(new_w,x,y)))
 ```
 
@@ -291,7 +265,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:59:03.887914+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:47:46.399473+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875
@@ -317,13 +291,11 @@ PASS: distributed-02
 reverse_x = jax.device_put(host_x[::-1].copy(),rows)
 # Place `reverse_y` explicitly onto the target JAX device.
 reverse_y = jax.device_put(host_y[::-1].copy(),labels_sharding)
-# Run `train_step` to compute `(reverse_w, reverse_loss, reverse_gradient)`.
 reverse_w,reverse_loss,reverse_gradient = train_step(w,reverse_x,reverse_y)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reverse_gradient),expected_gradient,rtol=1e-6,atol=1e-6)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(reverse_w),np.asarray(new_w),rtol=1e-6,atol=1e-6)
-# Print the observed values to compare against the expected result.
 print("Permutation preserves the global update")
 ```
 
@@ -340,17 +312,13 @@ The global mean is invariant to row order. This check exposes accidental depende
 cpu_weights = w
 # Allocate initialized array `reference_weights` with the specified shape and dtype.
 reference_weights = np.zeros(2,dtype=np.float32)
-# Iterate over `step_index` to step through the computation:
 for step_index in range(10):
-    # Run `train_step` to compute `(cpu_weights, _, _)`.
     cpu_weights,_,_ = train_step(cpu_weights,x,y)
-    # Perform matrix contraction / projection to compute `residual`.
     residual = host_x @ reference_weights-host_y
     # Accumulate the next contribution into `reference_weights`.
     reference_weights -= 0.1*(2*host_x.T @ residual/len(host_y))
     # Convert `` to a host NumPy array for inspection or verification.
     np.testing.assert_allclose(np.asarray(cpu_weights),reference_weights,rtol=1e-5,atol=1e-6)
-# Print the observed values to compare against the expected result.
 print("Ten-step weights:",np.asarray(cpu_weights))
 ```
 
@@ -371,54 +339,42 @@ Run a changed target/initial-state update, then diagnose the factor-of-four loca
 - `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
 
 **Step-by-step implementation plan:**
-1. Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
-2. Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
-3. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
-4. Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
-5. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
+1. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
+2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
+3. Place `result` explicitly onto the target JAX device.
+4. Convert `` to a host NumPy array for inspection or verification.
+5. Reduce along axis=0 to compute `wrong`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Run a changed target/initial-state update, then diagnose the...
-# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = ...  # TODO: compute changed_y
-# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array(...)  # TODO: compute start
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
-    # Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
     return ...  # TODO: return computed result
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 changed_step = jax.jit(...)  # TODO: compute changed_step
 # Place `result` explicitly onto the target JAX device.
 result = changed_step(...)  # TODO: compute result
-# Perform matrix contraction / projection to compute `reference_gradient`.
 reference_gradient = ...  # TODO: compute reference_gradient
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
 
-# Compute `local_gradients` from `[]`
 local_gradients = ...  # TODO: compute local_gradients
-# Iterate over `(features, labels)` to step through the computation:
 for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    # Perform matrix contraction / projection to compute ``.
     local_gradients.append(2*features.T @ (-labels)/len(labels))
 # Reduce along axis=0 to compute `wrong`.
 wrong = np.sum(...)  # TODO: compute wrong
 # Reduce along axis=0 to compute `right`.
 right = np.mean(...)  # TODO: compute right
-# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(right,expected_gradient,rtol
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = ...  # TODO: compute parts
-# Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(...)  # TODO: compute weighted
-# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,expected_gradient,rtol
-# Print diagnostic summary of the computed outputs.
 print("Summed local means are four times too large; weighted aggregation repaired")
 ```
 
@@ -426,44 +382,32 @@ print("Summed local means are four times too large; weighted aggregation repaire
 
 ```python
 # Exercise solution: Run a changed target/initial-state update, then diagnose the...
-# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
-# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array([0.2,-0.1],dtype=np.float32)
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
-    # Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 changed_step = jax.jit(changed_update,in_shardings=(replicated,rows,labels_sharding),out_shardings=replicated)
 # Place `result` explicitly onto the target JAX device.
 result = changed_step(jax.device_put(start,replicated),x,jax.device_put(changed_y,labels_sharding))
-# Perform matrix contraction / projection to compute `reference_gradient`.
 reference_gradient = 2*host_x.T @ (host_x@start-changed_y)/len(changed_y)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
 
-# Compute `local_gradients` from `[]`
 local_gradients = []
-# Iterate over `(features, labels)` to step through the computation:
 for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    # Perform matrix contraction / projection to compute ``.
     local_gradients.append(2*features.T @ (-labels)/len(labels))
 # Reduce along axis=0 to compute `wrong`.
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
-# Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
-# Print diagnostic summary of the computed outputs.
 print("Summed local means are four times too large; weighted aggregation repaired")
 ```
 
@@ -490,29 +434,24 @@ The original train_step hardcodes $0.1$; define a new step with the changed rate
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
-2. Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
-3. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
-4. Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
-5. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
+1. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
+2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
+3. Place `result` explicitly onto the target JAX device.
+4. Convert `` to a host NumPy array for inspection or verification.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
-# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = ...  # TODO: compute changed_y
-# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array(...)  # TODO: compute start
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
-    # Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
     return ...  # TODO: return computed result
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 changed_step = jax.jit(...)  # TODO: compute changed_step
 # Place `result` explicitly onto the target JAX device.
 result = changed_step(...)  # TODO: compute result
-# Perform matrix contraction / projection to compute `reference_gradient`.
 reference_gradient = ...  # TODO: compute reference_gradient
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
@@ -522,19 +461,15 @@ np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol
 
 ```python
 # Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
-# Compute `changed_y` from `host_x @ np.array([-1.,3.],dtype=np.float32)`
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
-# Compute `start` from `np.array([0.2,-0.1],dtype=np.float32)`
 start = np.array([0.2,-0.1],dtype=np.float32)
 # Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
-    # Return `weights - 0.05 * jax.grad(loss)(weights, features, labels)` to the caller.
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 changed_step = jax.jit(changed_update,in_shardings=(replicated,rows,labels_sharding),out_shardings=replicated)
 # Place `result` explicitly onto the target JAX device.
 result = changed_step(jax.device_put(start,replicated),x,jax.device_put(changed_y,labels_sharding))
-# Perform matrix contraction / projection to compute `reference_gradient`.
 reference_gradient = 2*host_x.T @ (host_x@start-changed_y)/len(changed_y)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol=1e-6,atol=1e-6)
@@ -563,36 +498,27 @@ A mean of equal-size local means works; unequal sizes require weighting by local
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Iterate over `(features, labels)` to step through the computation:
-2. Perform matrix contraction / projection to compute ``.
-3. Reduce along axis=0 to compute `wrong`.
-4. Reduce along axis=0 to compute `right`.
-5. Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
+1. Reduce along axis=0 to compute `wrong`.
+2. Reduce along axis=0 to compute `right`.
+3. Unequal partitions: weight local mean gradients by their observation counts.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Diagnose summed local means (Challenge): Each local gradient already divides by its local count.
 local_gradients = ...  # TODO: compute local_gradients
-# Iterate over `(features, labels)` to step through the computation:
 for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    # Perform matrix contraction / projection to compute ``.
     local_gradients.append(2*features.T @ (-labels)/len(labels))
 # Reduce along axis=0 to compute `wrong`.
 wrong = np.sum(...)  # TODO: compute wrong
 # Reduce along axis=0 to compute `right`.
 right = np.mean(...)  # TODO: compute right
-# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(right,expected_gradient,rtol
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = ...  # TODO: compute parts
-# Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(...)  # TODO: compute weighted
-# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol = ...  # TODO: compute np.testing.assert_allclose(weighted,expected_gradient,rtol
-# Print the observed values to compare against the expected result.
 print("Summed local means are four times too large; weighted aggregation repaired")
 ```
 
@@ -601,25 +527,18 @@ print("Summed local means are four times too large; weighted aggregation repaire
 ```python
 # Diagnose summed local means (Challenge): Each local gradient already divides by its local count.
 local_gradients = []
-# Iterate over `(features, labels)` to step through the computation:
 for features,labels in zip(np.split(host_x,4),np.split(host_y,4)):
-    # Perform matrix contraction / projection to compute ``.
     local_gradients.append(2*features.T @ (-labels)/len(labels))
 # Reduce along axis=0 to compute `wrong`.
 wrong = np.sum(local_gradients,axis=0)
 # Reduce along axis=0 to compute `right`.
 right = np.mean(local_gradients,axis=0)
-# Compute `np.testing.assert_allclose(wrong,4*expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(wrong,4*expected_gradient,rtol=1e-6)
-# Compute `np.testing.assert_allclose(right,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(right,expected_gradient,rtol=1e-6)
 # Unequal partitions: weight local mean gradients by their observation counts.
 parts = [(host_x[:3],host_y[:3]),(host_x[3:],host_y[3:])]
-# Perform matrix contraction / projection to compute `weighted`.
 weighted = sum(len(b)*(2*a.T @ (-b)/len(b)) for a,b in parts)/len(host_y)
-# Compute `np.testing.assert_allclose(weighted,expected_gradient,rtol` as `1e-6)`.
 np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
-# Print the observed values to compare against the expected result.
 print("Summed local means are four times too large; weighted aggregation repaired")
 ```
 

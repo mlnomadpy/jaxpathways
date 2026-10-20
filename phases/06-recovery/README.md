@@ -138,11 +138,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-An interrupted run restored with its full state.
+Resume optimizer and PRNG state across an interrupted training update.
 
 **Demonstrate:** Compare resumed and uninterrupted runs under a stated determinism tolerance.
 
-Project status: implemented staged practice · [Open source](../../projects/recovery-audit/README.md). Use stages 1, 2, 3, 4 for this phase. This connected project also uses performance and distributed lessons. Work through its prerequisites before the full integration check; return here with the completed evidence. Copy `projects/sharded-training/starter/model.py` to `projects/sharded-training/my_model.py` and write your code in `projects/sharded-training/my_model.py`. Run `python3 projects/sharded-training/tests/check.py --implementation projects/sharded-training/my_model.py --stage 1` from the top-level folder to verify stages 1, 2, 3.
+Project status: implemented staged practice · [Open source](../../projects/recovery-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/recovery-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/recovery-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Ship a tracked and containerized model release](../../projects/engineering-release/README.md).
 Additional project: [Resume and profile a sharded training run](../../projects/sharded-training/README.md).

@@ -79,25 +79,16 @@ Create a fresh main.py. Our target is an exactly known Gaussian so approximation
 
 ```python
 # Step 1 — 1. Specify a correlated target and a simpler approximation: KL here means KL(q || p).
-# Import numpy for this computation.
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Construct `mu` via `jnp.array([1.,-1.])`
 mu=jnp.array([1.,-1.])
-# Construct `Sigma` via `jnp.array([[1.,.8],[.8,1.]])`
 Sigma=jnp.array([[1.,.8],[.8,1.]])
-# Compute `P` from `jnp.linalg.solve(Sigma,jnp.eye(2))`
 P=jnp.linalg.solve(Sigma,jnp.eye(2))
-# Function `kl(params)` implementing this stage's computation:
 def kl(params):
-    # Compute `location,log_scale` from `params`
     location,log_scale=params
-    # Run `jnp.exp` to compute `variance`.
     variance=jnp.exp(2*log_scale)
-    # Compute `delta` from `location-mu`
     delta=location-mu
-    # Return `0.5 * (jnp.sum(jnp.diag(P) * variance) + delta @ P @ delta - 2 + jnp.linalg.slogdet(Sigma)[1] - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))
 ```
 
@@ -115,23 +106,15 @@ def update(params,_):
     grads=jax.grad(kl)(params)
     # Transform every leaf of the parameter PyTree (`new`).
     new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)
-    # Return `(new, kl(new))` to the caller.
     return new,kl(new)
 # Run compiled structured control flow via `jax.lax` (`(params, history)`).
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
-# Compute `location,log_scale` from `params`
 location,log_scale=params
-# Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
-# Assert that `jnp.allclose(location,mu,atol=1e-4)`.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Assert that `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`.
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Assert that `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`.
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
-# Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
-# Print the observed values to compare against the expected result.
 print('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))
 ```
 
@@ -143,25 +126,16 @@ Append an explicit model-mismatch experiment. The fitted line predicts zero, but
 
 ```python
 # Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
-# Construct `x` via `jnp.linspace(-2,2,9)`
 x=jnp.linspace(-2,2,9)
-# Construct `linear_mean` via `jnp.zeros_like(x)`
 linear_mean=jnp.zeros_like(x)
-# Compute `noise_scale` from `.25`
 noise_scale=.25
-# Compute `curved_targets` from `x**2-1.`
 curved_targets=x**2-1.
-# Compute `standardized_residual` from `(curved_targets-linear_mean)/noise_scale`
 standardized_residual=(curved_targets-linear_mean)/noise_scale
 # Aggregate array values to compute `coverage`.
 coverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)
-# Assert invariant `coverage<.4` holds
 assert coverage<.4
-# Assert invariant `standardized_residual[0]>10` holds
 assert standardized_residual[0]>10
-# Print the observed values to compare against the expected result.
 print('synthetic nominal-95% interval coverage:',float(coverage))
-# Print diagnostic summary of the computed outputs.
 print('standardized residuals:',standardized_residual)
 ```
 
@@ -171,25 +145,16 @@ This is a deterministic stress fixture with nine targets, not an estimate of pop
 
 ```python
 # Step 1 — 1. Specify a correlated target and a simpler approximation: KL here means KL(q || p).
-# Import numpy for this computation.
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Construct `mu` via `jnp.array([1.,-1.])`
 mu=jnp.array([1.,-1.])
-# Construct `Sigma` via `jnp.array([[1.,.8],[.8,1.]])`
 Sigma=jnp.array([[1.,.8],[.8,1.]])
-# Compute `P` from `jnp.linalg.solve(Sigma,jnp.eye(2))`
 P=jnp.linalg.solve(Sigma,jnp.eye(2))
-# Function `kl(params)` implementing this stage's computation:
 def kl(params):
-    # Compute `location,log_scale` from `params`
     location,log_scale=params
-    # Run `jnp.exp` to compute `variance`.
     variance=jnp.exp(2*log_scale)
-    # Compute `delta` from `location-mu`
     delta=location-mu
-    # Return `0.5 * (jnp.sum(jnp.diag(P) * variance) + delta @ P @ delta - 2 + jnp.linalg.slogdet(Sigma)[1] - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))
 
 # Step 2 — 2. Optimize and compare to the exact variational optimum: Optimization has found the best diagonal Gaussian in this KL...
@@ -199,45 +164,28 @@ def update(params,_):
     grads=jax.grad(kl)(params)
     # Transform every leaf of the parameter PyTree (`new`).
     new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)
-    # Return `(new, kl(new))` to the caller.
     return new,kl(new)
 # Run compiled structured control flow via `jax.lax` (`(params, history)`).
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
-# Compute `location,log_scale` from `params`
 location,log_scale=params
-# Run `jnp.exp` to compute `variance`.
 variance=jnp.exp(2*log_scale)
-# Assert that `jnp.allclose(location,mu,atol=1e-4)`.
 assert jnp.allclose(location,mu,atol=1e-4)
-# Assert that `jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)`.
 assert jnp.allclose(variance,1/jnp.diag(P),atol=1e-5)
-# Assert that `jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)`.
 assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
-# Assert invariant `kl(params)>0.4` holds
 assert kl(params)>0.4
-# Print the observed values to compare against the expected result.
 print('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))
 
 # Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
-# Construct `x` via `jnp.linspace(-2,2,9)`
 x=jnp.linspace(-2,2,9)
-# Construct `linear_mean` via `jnp.zeros_like(x)`
 linear_mean=jnp.zeros_like(x)
-# Compute `noise_scale` from `.25`
 noise_scale=.25
-# Compute `curved_targets` from `x**2-1.`
 curved_targets=x**2-1.
-# Compute `standardized_residual` from `(curved_targets-linear_mean)/noise_scale`
 standardized_residual=(curved_targets-linear_mean)/noise_scale
 # Aggregate array values to compute `coverage`.
 coverage=jnp.mean(jnp.abs(standardized_residual)<=1.96)
-# Assert invariant `coverage<.4` holds
 assert coverage<.4
-# Assert invariant `standardized_residual[0]>10` holds
 assert standardized_residual[0]>10
-# Print the observed values to compare against the expected result.
 print('synthetic nominal-95% interval coverage:',float(coverage))
-# Print diagnostic summary of the computed outputs.
 print('standardized residuals:',standardized_residual)
 ```
 
@@ -261,13 +209,12 @@ The code checks that the optimizer reaches the analytic variational optimum. The
 
 ```python
 # Compute figure data for: An accurate mean can coexist with underestimated uncertainty
-# Reduce across the target axis to summarize `visual_data`.
 visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of weights"],"xlabel":"quantity","ylabel":"variance (squared parameter units)","series":[{"label":"exact target","y":[1.,1.,3.6]},{"label":"optimized diagonal q","y":[float(variance[0]),float(variance[1]),float(variance.sum())]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:00:07.124798+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:48:56.444623+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855
@@ -290,19 +237,14 @@ PASS: probability-04
 # Experiment — Monte Carlo KL through reparameterization: Matching the exact KL validates this estimator on the fixture;...
 # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
 eps=jax.random.normal(jax.random.key(52),(40000,2))
-# Compute `z` from `location+jnp.exp(log_scale)*eps`
 z=location+jnp.exp(log_scale)*eps
-# Compute `delta` from `z-mu`
 delta=z-mu
-# Perform matrix contraction / projection to compute `logp`.
 logp=-.5*(jnp.einsum('ni,ij,nj->n',delta,P,delta)+2*jnp.log(2*jnp.pi)+jnp.linalg.slogdet(Sigma)[1])
 # Reduce along axis=1 to compute `logq`.
 logq=-.5*jnp.sum(eps**2,axis=1)-jnp.sum(log_scale)-jnp.log(2*jnp.pi)
 # Aggregate array values to compute `estimate`.
 estimate=jnp.mean(logq-logp)
-# Assert that `abs(float(estimate-kl(params)))<.03`.
 assert abs(float(estimate-kl(params)))<.03
-# Print the observed values to compare against the expected result.
 print('Monte Carlo KL:',float(estimate))
 ```
 
@@ -320,9 +262,7 @@ Matching the exact KL validates this estimator on the fixture; it does not imply
 replicated=.25*jax.random.normal(jax.random.key(83),(40000,))
 # Aggregate array values to compute `model_coverage`.
 model_coverage=jnp.mean(jnp.abs(replicated)<=1.96*.25)
-# Assert invariant `.94<model_coverage<.96` holds
 assert .94<model_coverage<.96
-# Print the observed values to compare against the expected result.
 print("model self-coverage:",float(model_coverage))
 ```
 
@@ -342,17 +282,15 @@ Replace the target correlation by zero and rederive the optimal diagonal varianc
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Return `0.5 * (jnp.sum(jnp.exp(2 * log_scale)) + jnp.sum((location - mu) ** 2) - 2 - jnp.sum(2 * log_scale))` to the caller.
-2. Assert that `jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Replace the target correlation by zero and rederive the optimal...
 def independent_kl(location,log_scale):
-    # Return `0.5 * (jnp.sum(jnp.exp(2 * log_scale)) + jnp.sum((location - mu) ** 2) - 2 - jnp.sum(2 * log_scale))` to the caller.
     return ...  # TODO: return computed result
-# Assert that `jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)`.
 assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assertion check
 ```
 
@@ -361,9 +299,7 @@ assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assert
 ```python
 # Exercise solution: Replace the target correlation by zero and rederive the optimal...
 def independent_kl(location,log_scale):
-    # Return `0.5 * (jnp.sum(jnp.exp(2 * log_scale)) + jnp.sum((location - mu) ** 2) - 2 - jnp.sum(2 * log_scale))` to the caller.
     return .5*(jnp.sum(jnp.exp(2*log_scale))+jnp.sum((location-mu)**2)-2-jnp.sum(2*log_scale))
-# Assert that `jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)`.
 assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)
 ```
 
@@ -389,25 +325,19 @@ Retain the off-diagonal covariance terms in the target calculation.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Construct `direction` via `jnp.ones(2)`
-2. Perform matrix / vector contraction (`@`) to compute `true_sum_var`.
-3. Aggregate array values to compute `approx_sum_var`.
-4. Assert that `jnp.allclose(true_sum_var,3.6)`.
-5. Assert that `jnp.allclose(approx_sum_var,.72,atol=1e-5)`.
+1. Perform matrix / vector contraction (`@`) to compute `true_sum_var`.
+2. Aggregate array values to compute `approx_sum_var`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # A correct diagonal is not a correct covariance (Transfer / diagnosis): Joint predictions can reveal approximation error that...
-# Construct `direction` via `jnp.ones(2)`
 direction = jnp.ones(...)  # TODO: compute direction
 # Perform matrix / vector contraction (`@`) to compute `true_sum_var`.
 true_sum_var = ...  # TODO: compute true_sum_var
 # Aggregate array values to compute `approx_sum_var`.
 approx_sum_var = jnp.sum(...)  # TODO: compute approx_sum_var
-# Assert that `jnp.allclose(true_sum_var,3.6)`.
 assert jnp.allclose(true_sum_var,3.6)  # TODO: complete assertion check
-# Assert that `jnp.allclose(approx_sum_var,.72,atol=1e-5)`.
 assert jnp.allclose(approx_sum_var,.72,atol=1e-5)  # TODO: complete assertion check
 ```
 
@@ -415,15 +345,12 @@ assert jnp.allclose(approx_sum_var,.72,atol=1e-5)  # TODO: complete assertion ch
 
 ```python
 # A correct diagonal is not a correct covariance (Transfer / diagnosis): Joint predictions can reveal approximation error that...
-# Construct `direction` via `jnp.ones(2)`
 direction=jnp.ones(2)
 # Perform matrix / vector contraction (`@`) to compute `true_sum_var`.
 true_sum_var=direction@Sigma@direction
 # Aggregate array values to compute `approx_sum_var`.
 approx_sum_var=jnp.sum(variance)
-# Assert that `jnp.allclose(true_sum_var,3.6)`.
 assert jnp.allclose(true_sum_var,3.6)
-# Assert that `jnp.allclose(approx_sum_var,.72,atol=1e-5)`.
 assert jnp.allclose(approx_sum_var,.72,atol=1e-5)
 ```
 
@@ -451,25 +378,17 @@ The fixture supplies the true curvature; real data would require fitting and hel
 - `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
 
 **Step-by-step implementation plan:**
-1. Construct `truth` via `jnp.linspace(-2,2,20000)**2-1`
-2. Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
-3. Compute `residual` from `fresh-truth`
-4. Assert that `abs(float(residual.std())-.25)<.01`.
-5. Assert that `abs(float(residual.mean()))<.01`.
+1. Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Repair the changed mean without hiding noise (Transfer / diagnosis): Correcting the mean removes systematic residual structure in...
-# Construct `truth` via `jnp.linspace(-2,2,20000)**2-1`
 truth = jnp.linspace(...)  # TODO: compute truth
 # Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 fresh = ...  # TODO: compute fresh
-# Compute `residual` from `fresh-truth`
 residual = ...  # TODO: compute residual
-# Assert that `abs(float(residual.std())-.25)<.01`.
 assert abs(float(residual.std())-.25)  # TODO: complete assertion check
-# Assert that `abs(float(residual.mean()))<.01`.
 assert abs(float(residual.mean()))  # TODO: complete assertion check
 ```
 
@@ -477,15 +396,11 @@ assert abs(float(residual.mean()))  # TODO: complete assertion check
 
 ```python
 # Repair the changed mean without hiding noise (Transfer / diagnosis): Correcting the mean removes systematic residual structure in...
-# Construct `truth` via `jnp.linspace(-2,2,20000)**2-1`
 truth=jnp.linspace(-2,2,20000)**2-1
 # Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 fresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))
-# Compute `residual` from `fresh-truth`
 residual=fresh-truth
-# Assert that `abs(float(residual.std())-.25)<.01`.
 assert abs(float(residual.std())-.25)<.01
-# Assert that `abs(float(residual.mean()))<.01`.
 assert abs(float(residual.mean()))<.01
 ```
 

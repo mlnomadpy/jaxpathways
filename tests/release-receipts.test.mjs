@@ -14,13 +14,17 @@ test('rerunning execution receipts preserves a release while canonical source ch
     write('package.json', { version: '1.0.0' });
     write('curriculum/releases.json', [{ version: '1.0.0', date: '2026-10-13', title: 'Fixture' }]);
     write('curriculum/course.json', { phases: [] });
+    write('curriculum/projects.json', ['projects/fixture/project.json']);
+    mkdirSync(path.join(directory, 'projects/fixture'));
+    write('projects/fixture/project.json', {id:'fixture'});
+    writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 1\n');
     write('curriculum/project-validation.json', { executedAt: 'first run', projects: [] });
     const run = (...args) => spawnSync(process.execPath, ['release.mjs', ...args], { cwd: directory, encoding: 'utf8' });
     assert.equal(run('--prepare').status, 0);
     write('curriculum/project-validation.json', { executedAt: 'later run', projects: [{ status: 'passed' }] });
     write('curriculum/validation.json', { executedAt: 'later lesson run' });
     assert.equal(run().status, 0, 'Execution timestamps are not canonical course revisions');
-    write('learning-paths/fixture.json', { title: 'New learning material' });
+    writeFileSync(path.join(directory, 'projects/fixture/model.py'), 'value = 2\n');
     const changed = run();
     assert.notEqual(changed.status, 0);
     assert.match(changed.stderr, /Course sources changed/);

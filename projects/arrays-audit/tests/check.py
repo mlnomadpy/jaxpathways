@@ -1,84 +1,23 @@
-"""Verification runner for Audit tensor shapes, dtypes, broadcasting, and reductions (arrays-audit)."""
-import argparse
-import importlib.util
+import argparse,importlib.util,json,tempfile
 from pathlib import Path
-import sys
-import jax
-import jax.numpy as jnp
 import numpy as np
-
-ROOT = Path(__file__).resolve().parents[1]
-
-
-def load_module(implementation: str):
-    if implementation in ("starter", "solution"):
-        path = ROOT / implementation / "model.py"
-    else:
-        path = Path(implementation).resolve()
-    spec = importlib.util.spec_from_file_location("capstone_model", path)
-    module = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module)
-    return module
-
-
-def check_stage_1(mod):
-    params = mod.init_params(seed=7, d_model=16, d_out=8)
-    assert set(params.keys()) >= {"w_enc", "b_enc", "temperature"}
-    assert params["w_enc"].shape == (16, 8)
-    assert params["b_enc"].shape == (8,)
-    print("PASS stage 1: parameter initialization and shape contract (arrays-audit)")
-
-
-def check_stage_2(mod):
-    params = mod.init_params(seed=7, d_model=16, d_out=8)
-    x = jnp.ones((4, 16), dtype=jnp.float32)
-    mask = jnp.array([True, True, False, True])
-    out = mod.forward_batch(params, x, mask=mask)
-    assert out["embeddings"].shape == (4, 8)
-    assert np.allclose(np.asarray(out["embeddings"][2]), 0.0, atol=1e-6)
-    norms = np.linalg.norm(np.asarray(out["embeddings"])[[0, 1, 3]], axis=-1)
-    assert np.allclose(norms, 1.0, atol=1e-5)
-    print("PASS stage 2: masked forward representation and unit normalization (arrays-audit)")
-
-
-def check_stage_3(mod):
-    params = mod.init_params(seed=7, d_model=16, d_out=8)
-    x = jax.random.normal(jax.random.key(3), (5, 16), dtype=jnp.float32)
-    targets = jax.random.normal(jax.random.key(4), (5, 8), dtype=jnp.float32)
-    loss_val, grads = mod.compute_loss_and_grads(params, x, targets)
-    assert jnp.isfinite(loss_val)
-    assert grads["w_enc"].shape == (16, 8)
-    eps = 1e-3
-    plus = {**params, "b_enc": params["b_enc"].at[0].add(eps)}
-    minus = {**params, "b_enc": params["b_enc"].at[0].add(-eps)}
-    l_plus, _ = mod.compute_loss_and_grads(plus, x, targets)
-    l_minus, _ = mod.compute_loss_and_grads(minus, x, targets)
-    fd = float((l_plus - l_minus) / (2.0 * eps))
-    assert np.allclose(float(grads["b_enc"][0]), fd, atol=1e-3, rtol=1e-2)
-    print("PASS stage 3: autodiff vs finite-difference gradient check (arrays-audit)")
-
-
-def check_stage_4(mod):
-    rep = mod.qualification_report(seed=7, steps=25, lr=0.1)
-    assert rep["finite"] is True
-    assert rep["final_loss"] < rep["initial_loss"]
-    assert np.isfinite(rep["eval_loss"])
-    print("PASS stage 4: compiled scan training and held-out qualification (arrays-audit)")
-
-
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--implementation", default="solution")
-    parser.add_argument("--stage", default="all")
-    args = parser.parse_args()
-    mod = load_module(args.implementation)
-    stages = {"1": check_stage_1, "2": check_stage_2, "3": check_stage_3, "4": check_stage_4}
-    if args.stage == "all":
-        for fn in stages.values():
-            fn(mod)
-    else:
-        stages[args.stage](mod)
-
-
-if __name__ == "__main__":
-    main()
+ROOT=Path(__file__).resolve().parents[1]
+def load(w):
+ p=ROOT/w/'model.py';s=importlib.util.spec_from_file_location('m',p);m=importlib.util.module_from_spec(s);s.loader.exec_module(m);return m
+def stage1(m):
+ x=np.array([[1.,3.],[5.,7.],[100.,200.]],np.float32);r=m.masked_moments(x,[1,1,0]);np.testing.assert_allclose(r['mean'],[3,5]);np.testing.assert_allclose(r['variance'],[4,4]);assert r['count']==2
+def stage2(m):
+ x=np.array([[1.,3.],[5.,7.],[100.,200.]],np.float32);r=m.masked_moments(x,[1,0,1]);np.testing.assert_allclose(r['mean'],[50.5,101.5]);np.testing.assert_allclose(r['variance'],[2450.25,9702.25])
+ for bad,mask in [(x,[0,0,0]),(x[:2],[1,0,1])]:
+  try:m.masked_moments(bad,mask);raise AssertionError('invalid batch accepted')
+  except ValueError:pass
+def stage3(m,output=None):
+ r=m.masked_moments([[2.,4.],[8.,10.]],[1,0]);payload={'count':r['count'],'mean':np.asarray(r['mean']).tolist(),'variance':np.asarray(r['variance']).tolist()}
+ p=(Path(output) if output else Path(tempfile.gettempdir()))/'arrays-audit-evidence.json';p.parent.mkdir(parents=True,exist_ok=True);p.write_text(json.dumps(payload));saved=json.loads(p.read_text());assert saved=={'count':1,'mean':[2.,4.],'variance':[0.,0.]}
+def run(m,n,output=None):
+ f={'1':stage1,'2':stage2,'3':stage3};[ (stage3(m,output) if k=='3' else f[k](m)) for k in (('1','2','3') if n in ('4','all') else (n,))];print('PASS arrays-audit stage '+n+': masked reductions, changed masks, and saved evidence')
+if __name__=='__main__':
+ p=argparse.ArgumentParser();p.add_argument('--implementation',default='starter');p.add_argument('--evidence-dir');p.add_argument('--stage',choices=('1','2','3','4','all'),default='all');a=p.parse_args();
+ if a.evidence_dir: Path(a.evidence_dir).mkdir(parents=True,exist_ok=True);run(load(a.implementation),a.stage,a.evidence_dir)
+ else:
+  with tempfile.TemporaryDirectory(prefix='arrays-audit-') as td: run(load(a.implementation),a.stage,td)

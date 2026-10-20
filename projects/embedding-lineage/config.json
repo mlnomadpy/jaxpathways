@@ -1,0 +1,26 @@
+{
+  "seed": 20261020,
+  "max_length": 48,
+  "width": 24,
+  "attention_heads": 2,
+  "mlp_width": 48,
+  "batch_size": 16,
+  "pretrain_epochs": 2,
+  "contrastive_updates": 16,
+  "adaptation_updates": 16,
+  "mask_probability": 0.15,
+  "view_mask_probability": 0.12,
+  "temperature": 0.2,
+  "pretrain_learning_rate": 0.003,
+  "contrastive_learning_rate": 0.001,
+  "adaptation_learning_rate": 0.001,
+  "tokenizer": {
+    "name": "lowercase-regex-word-v1",
+    "fit_split": "train",
+    "normalization": "Unicode lower(), punctuation retained as tokens, no stemming",
+    "special_tokens": {"pad": 0, "mask": 1, "unk": 2, "bos": 3, "eos": 4},
+    "max_vocabulary": 3000
+  },
+  "optimizer_boundary": "Adam state is reset at each objective transition; encoder parameters continue from the parent checkpoint.",
+  "claims": {"model_scale": "tiny CPU pilot", "benchmark_claim": false, "300m_parameter_claim": false}
+}

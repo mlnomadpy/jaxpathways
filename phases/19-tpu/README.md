@@ -86,11 +86,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-A provisioned Cloud TPU VM and a cryptographically hashed JAX runtime receipt.
+Inspect CPU device inventory, BF16 storage, and collective participant arithmetic.
 
 **Demonstrate:** Select a single-host TPU topology, provision a Cloud TPU VM (or Colab TPU), bootstrap jax[tpu] in an isolated .venv, verify pmap execution, and confirm clean VM deletion.
 
-Project status: implemented staged practice · [Open source](../../projects/tpu-runtime-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Verify the runtime receipt locally on CPU first, then run the exact same check on your Cloud TPU VM and copy back tpu-receipt.txt before deleting the VM. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` from the top-level folder to verify stage 1.
+Project status: implemented staged practice · [Open source](../../projects/tpu-runtime-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/tpu-runtime-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-runtime-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Operate and recover a local JAX workload](../../projects/workload-operations/README.md).
 

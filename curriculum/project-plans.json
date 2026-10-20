@@ -1,7 +1,7 @@
 [
   {
     "id": "clip-model",
-    "title": "Train a CLIP image–text model",
+    "title": "Train a CLIP image\u2013text model",
     "summary": "Learn paired representations, test zero-shot classification, and qualify both retrieval directions before releasing the encoders.",
     "trackIds": [
       "image",
@@ -58,5 +58,121 @@
     ],
     "status": "planned",
     "source": "projects/retrieval-system/README.md"
+  },
+  {
+    "id": "embedding-model-300m",
+    "title": "Build a staged embedding model",
+    "summary": "MLM to contrastive pretraining and retrieval fine-tuning, with frozen data, MTEB evaluation and release gates.",
+    "trackIds": [
+      "text"
+    ],
+    "harnessId": "text-harness",
+    "lessonIds": [
+      "pretraining-01",
+      "pretraining-03",
+      "recovery-04",
+      "deployment-05"
+    ],
+    "status": "planned",
+    "source": "projects/embedding-model-300m/README.md"
+  },
+  {
+    "id": "causal-model-300m",
+    "title": "Build a causal language model",
+    "summary": "Connect tokenizer/data preparation, next-token pretraining, adaptation, generation evaluation and model publication.",
+    "trackIds": [
+      "text"
+    ],
+    "harnessId": "text-harness",
+    "lessonIds": [
+      "transformers-04",
+      "posttraining-01",
+      "recovery-04"
+    ],
+    "status": "planned",
+    "source": "projects/causal-model-300m/README.md"
+  },
+  {
+    "id": "image-model-300m",
+    "title": "Build an image understanding model",
+    "summary": "Carry a frozen image recipe through representation learning, task adaptation and measured evaluation.",
+    "trackIds": [
+      "image"
+    ],
+    "harnessId": "image-harness",
+    "lessonIds": [
+      "networks-04",
+      "pretraining-02",
+      "pretraining-03"
+    ],
+    "status": "planned",
+    "source": "projects/image-model-300m/README.md"
+  },
+  {
+    "id": "image-generation-model",
+    "title": "Build an image generation pipeline",
+    "summary": "Qualify image representations, denoising training, conditioning and sampling with separate quality and runtime evidence.",
+    "trackIds": [
+      "image"
+    ],
+    "harnessId": "image-harness",
+    "lessonIds": [
+      "networks-04",
+      "state-03",
+      "optimization-04"
+    ],
+    "status": "planned",
+    "source": "projects/image-generation-model/README.md"
+  },
+  {
+    "id": "audio-model-300m",
+    "title": "Build an audio understanding model",
+    "summary": "Version waveform and acoustic representations through training, recognition or event adaptation and robustness evaluation.",
+    "trackIds": [
+      "audio"
+    ],
+    "harnessId": "audio-harness",
+    "lessonIds": [
+      "state-03",
+      "networks-03",
+      "recovery-04"
+    ],
+    "status": "planned",
+    "source": "projects/audio-model-300m/README.md"
+  },
+  {
+    "id": "audio-generation-model",
+    "title": "Build an audio generation pipeline",
+    "summary": "Connect codec qualification, sequence or denoising training, conditioning and waveform evaluation.",
+    "trackIds": [
+      "audio"
+    ],
+    "harnessId": "audio-harness",
+    "lessonIds": [
+      "state-03",
+      "transformers-04",
+      "recovery-04"
+    ],
+    "status": "planned",
+    "source": "projects/audio-generation-model/README.md"
+  },
+  {
+    "id": "multimodal-model",
+    "title": "Build a grounded multimodal model",
+    "summary": "Qualify encoders, connector alignment, instruction adaptation and grounded evaluation, keeping retrieval a distinct outcome.",
+    "trackIds": [
+      "image",
+      "audio",
+      "text",
+      "cross-modal"
+    ],
+    "harnessId": "cross-modal-harness",
+    "lessonIds": [
+      "pretraining-03",
+      "transformers-04",
+      "posttraining-01"
+    ],
+    "status": "planned",
+    "source": "projects/multimodal-model/README.md"
   }
 ]

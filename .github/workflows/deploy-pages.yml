@@ -9,7 +9,10 @@ concurrency:
   group: github-pages
   cancel-in-progress: false
 jobs:
+  verify:
+    uses: ./.github/workflows/course-check.yml
   build:
+    needs: verify
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

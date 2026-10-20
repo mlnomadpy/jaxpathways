@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-02",
-  "contentHash": "5e5ca64afe37564c6b9c7e89e5adbee0f42e0c1314b29a988558a2e9ddb4a1e9",
-  "executedAt": "2026-10-13T08:59:15.207266+00:00",
+  "contentHash": "234d7211d2bf84a53616cb343de4501461839ddc5882b35fa1fe0f6f3f80225e",
+  "executedAt": "2026-10-20T10:47:57.386723+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]\nscan(vectors) transposed equals vmap(scan)\nShape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]\nscan(vectors) transposed equals vmap(scan)\nRK4 polynomial maximum difference: 1.4432899320127035e-15\nPaired-rate endpoints: [0.33516002 0.24659697 0.22160636]\nPermutation preserves trajectory identity\nOnly final states returned: [0.12329848 0.24659697 0.49319394]\nGrid axes: rate, initial condition, time (3, 3, 41)\nPASS: science-02\n",
   "notebookCells": [
     {
-      "sourceHash": "d625e485c77c4430624d813754d12b74f30f7feeee535f5133c18e63366e06f7",
+      "sourceHash": "7ddc589c0f66e631fbea63882c0255ffbf7bc5a5e992f2645e610657b0fa2126",
       "outputs": []
     },
     {
-      "sourceHash": "1f030a3a848e0695cf215cd59d3ba268305b95b556fbad65311fa7b224ef1d30",
+      "sourceHash": "c19cd08221bd4bec973f9a9c3e0f9f6dd66b5583031e63495b069591b6fbae68",
       "outputs": [
         {
           "output_type": "stream",
@@ -30,7 +30,7 @@
       ]
     },
     {
-      "sourceHash": "560deba6f0d034d4a54cd657b11f67081213a678af8d9c798ca53e9a5e3b9dec",
+      "sourceHash": "ab130a6cd3a018c4f3292069a93f3e422c5c58d49d60d518fa1b82f91d8ff970",
       "outputs": [
         {
           "output_type": "stream",
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "sourceHash": "91b96befc7acd053b286a112fa5e98181efbf4f10ab00e3a499b3b7d6fd3f803",
+      "sourceHash": "13728cb060687c1df2caf54021252b63803b0935853ca8e684bbb841fd4560f7",
       "outputs": [
         {
           "output_type": "stream",
@@ -74,7 +74,7 @@
       ]
     },
     {
-      "sourceHash": "fdb21813240d51044b868410c51030c654b93cb6d572a74ab763d3013a5f9ee4",
+      "sourceHash": "100d6d2730fb50344f1cf4b9d809740f51b3e07c0c37b4999a5a23d3b84a396d",
       "outputs": [
         {
           "output_type": "stream",
@@ -86,7 +86,7 @@
       ]
     },
     {
-      "sourceHash": "fd03fd29ad3f564a8794a52006ce332b5a27ad30ff68c5d5e6f3c8b70083ee11",
+      "sourceHash": "ea306c25e4a76a73b4bc3b5655284c59a53c7095f915acfc3cb3f62039928c03",
       "outputs": [
         {
           "output_type": "stream",
@@ -98,11 +98,11 @@
       ]
     },
     {
-      "sourceHash": "6cd3eff63bd9ce3f14afc3356168b3084ed375752a86dde83ad9ed99500d93b5",
+      "sourceHash": "2eee6e63d23da2dddd31263bdbe61d89c25fe2f89301f2f0d7c7a2115792eaf7",
       "outputs": []
     },
     {
-      "sourceHash": "786b922b0fb6fea7481385074b2e399cf12f094dc6076bdddf0a66c3a14520dc",
+      "sourceHash": "f03412064cbc0b038febd51b570f3b6ff5a9f5e061a804b34d2b8ae8ffc0621d",
       "outputs": [
         {
           "output_type": "stream",
@@ -114,11 +114,11 @@
       ]
     },
     {
-      "sourceHash": "ef37cb7756e26e8ca8cc895c337256554ea063e56e42a0f7ba1561e0480a0471",
+      "sourceHash": "10f9dbd10d2b96d53d75d34c3f4d67fb1014e13aec31f2be96ba36fbbdcbaa38",
       "outputs": []
     },
     {
-      "sourceHash": "ccf03b8b3912dcbfb3a99975aabadf35a5b7a45a5869c2175ad314dc559a147b",
+      "sourceHash": "6ded2160d67b0389ac12f549d40be34958b400c2fe47d61aa0afcc91054b4809",
       "outputs": [
         {
           "output_type": "stream",
@@ -130,11 +130,11 @@
       ]
     },
     {
-      "sourceHash": "f221f2adc9197dd1a35e18187939d09f366200024767cea26b735950af9f9659",
+      "sourceHash": "4588053a04b66254b9b976c2aa9b5f45c232566837717368102fa90097aee90b",
       "outputs": []
     },
     {
-      "sourceHash": "f5962bb9941bcd6765ce60d60b0ff5a27f0f2b09c53d0d600d0082882ca981d1",
+      "sourceHash": "a844409d041e48914891de4ca298e56bfab6c5fac8af44105f2deaf48d5981b3",
       "outputs": [
         {
           "output_type": "stream",

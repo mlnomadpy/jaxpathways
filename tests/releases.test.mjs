@@ -51,6 +51,7 @@ test('a release snapshot detects changed content, retains unchanged revisions an
  try {
  for(const name of ['projects','learning-paths'])fs.mkdirSync(path.join(dir,name));
  const lessons=['one','two'].map(id=>({id,title:id,status:'authored',path:'phases/'+id}));
+ write('curriculum/projects.json',[]);
  write('curriculum/course.json',{phases:lessons.map(lesson=>({id:lesson.id,title:lesson.title,lessons:[lesson]}))});
  for(const lesson of lessons)write(lesson.path+'/lesson.json',{content:{idea:'First explanation'}});
  const notes=version=>[{version,date:'2026-10-06',title:'Test release',changes:['A change']}];

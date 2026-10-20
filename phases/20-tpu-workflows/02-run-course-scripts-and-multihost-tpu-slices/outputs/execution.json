@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-05",
-  "contentHash": "39a340f547fdeb5cb92e33eff2a0b3e2f161f906aa7780661730222945745c98",
-  "executedAt": "2026-10-13T09:03:42.320874+00:00",
+  "contentHash": "09cbfe2aa061d9ab3329236f15e12a6bbbdb04609765c10fc42a27e3e277a585",
+  "executedAt": "2026-10-20T10:58:54.082998+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,38 +11,46 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nPod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\nSlice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nPod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\nv5litepod-16 global chips: 16 Idle chips without --worker=all: 12\nTotal HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}\nStage: gcloud compute tpus tpu-vm scp public/exercises/transformers-04.py jax-tpu-pod:~/jax-tpu-lab/ --zone=us-east5-a --worker=all\nRun: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-east5-a --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/transformers-04.py'\nMulti-host Pod slices: ['v5litepod-16', 'v6e-16']\nPer-host batch: 32 Global batch: 128\nPASS: tpu-05\n",
+  "stdout": "CPU route: python public/exercises/distributed-02.py\nCPU-only route remains excluded from TPU Pod execution\nCorrectly rejected CPU-only lesson for TPU Pod execution\nSlice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nCPU route: python public/exercises/distributed-02.py\nv5litepod-16 global chips: 16 Idle chips without --worker=all: 12\nTotal HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}\nCPU route: python public/exercises/distributed-02.py\nRejected unsafe route: {}\nRejected unsafe route: {'hosts': 4, 'execution_class': 'cpu-only'}\nMulti-host Pod slices: ['v5litepod-16', 'v6e-16']\nPer-host batch: 32 Global batch: 128\nPASS: tpu-05\n",
   "notebookCells": [
     {
       "sourceHash": "77f3da7cffc7d81ed999279bb91040fbfef93d7613ce716ae197201c6dbd645a",
       "outputs": []
     },
     {
-      "sourceHash": "9ad8571c05855796bcad63e670ae7389237c6e9d6907b0b227ade6814ecaa980",
+      "sourceHash": "062a7faa73ee22818a117f5335542dd4af4aa8aa1cf27a0264537c68303df9b9",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\n",
-            "Pod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\n"
+            "CPU route: python public/exercises/distributed-02.py\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "da78c1f8c67ccc8f70a8906c549bcb2ddaec7d734784f2e0b692a5875c340571",
-      "outputs": []
-    },
-    {
-      "sourceHash": "d5bc189b536279a9b43f2b584b68b637c4b7649ee34acca79c88505bd546effb",
+      "sourceHash": "36543657f21d86e4542c1f101d199f5a031bfb041ab61cc173b3d236432e816b",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
+            "CPU-only route remains excluded from TPU Pod execution\n"
+          ]
+        }
+      ]
+    },
+    {
+      "sourceHash": "9703e166736326061d9159209199afd371e181b2e56296b93bf5741f1624f2f0",
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "Correctly rejected CPU-only lesson for TPU Pod execution\n",
             "Slice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\n",
-            "Pod SSH command: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-west1-c --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/distributed-02.py'\n"
+            "CPU route: python public/exercises/distributed-02.py\n"
           ]
         }
       ]
@@ -91,18 +99,19 @@
       ]
     },
     {
-      "sourceHash": "a0b0ab11fe83828d091fb0cc1f5fcece5291f7432fcb9bd588db738a6cfb28eb",
+      "sourceHash": "62a941fa163ed0db0f94279196fa8dc589dc5eb7b19205b5afcad5f7ec334e3a",
       "outputs": []
     },
     {
-      "sourceHash": "ba7d1e8932b2926f65b660fdfb7600d09938f7eac47aac1447703d9c3b85964e",
+      "sourceHash": "38dfa73b09558d9a6a05394935106f0bb8e0802b812072171cbb41e3b4dd9b03",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Stage: gcloud compute tpus tpu-vm scp public/exercises/transformers-04.py jax-tpu-pod:~/jax-tpu-lab/ --zone=us-east5-a --worker=all\n",
-            "Run: gcloud compute tpus tpu-vm ssh jax-tpu-pod --zone=us-east5-a --worker=all --command='JAX_PLATFORMS=tpu ~/jax-tpu-lab/.venv/bin/python ~/jax-tpu-lab/transformers-04.py'\n"
+            "CPU route: python public/exercises/distributed-02.py\n",
+            "Rejected unsafe route: {}\n",
+            "Rejected unsafe route: {'hosts': 4, 'execution_class': 'cpu-only'}\n"
           ]
         }
       ]

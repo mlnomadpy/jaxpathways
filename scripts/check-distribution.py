@@ -8,6 +8,7 @@ ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/downloads'
 course=json.loads((ROOT/'public/curriculum.json').read_text())
 authored=[l for p in course['phases'] for l in p['lessons'] if l['status']=='authored']
+release=json.loads((ROOT/'curriculum/releases.json').read_text())[0]
 def assert_narrative(source, text, chapter):
     # Visible prose and code survive; each TeX token survives in MathML annotation.
     pattern = re.compile(r"(`+)([^\n]*?)\1|\\\((.*?)\\\)|\\\[(.*?)\\\]|\$\$(.*?)\$\$", re.S)
@@ -28,28 +29,38 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
     for name in book.namelist():
         if name.endswith(('.xhtml','.xml','.opf')): ET.fromstring(book.read(name))
     package=ET.fromstring(book.read('OEBPS/package.opf'))
-    ns={'o':'http://www.idpf.org/2007/opf'}
+    ns={'o':'http://www.idpf.org/2007/opf','dc':'http://purl.org/dc/elements/1.1/'}
     items={item.attrib['id']:item for item in package.findall('o:manifest/o:item',ns)}
     for item in items.values(): assert 'OEBPS/'+item.attrib['href'] in book.namelist()
     for item in package.findall('o:spine/o:itemref',ns): assert item.attrib['idref'] in items
     assert len([name for name in book.namelist() if name.startswith('OEBPS/chapter-')])==len(authored)
+    assert f'course reader {release["version"]}' in ''.join(package.find('o:metadata/dc:title',ns).itertext())
+    assert package.find('o:metadata/o:meta[@property="dcterms:modified"]',ns).text==release['date']+'T00:00:00Z'
+    assert all(f'OEBPS/{name}.xhtml' in book.namelist() for name in ['solutions','appendix-workflow','appendix-experiments'])
+    solutions_text=''.join(ET.fromstring(book.read('OEBPS/solutions.xhtml')).itertext())
+    assert all(lesson['content']['solution'] in solutions_text and lesson['content']['code'] in solutions_text for lesson in authored)
     for index, lesson in enumerate(authored):
         chapter=ET.fromstring(book.read(f'OEBPS/chapter-{index}.xhtml'))
         text=''.join(chapter.itertext())
+        assert chapter.find('.//{http://www.w3.org/1999/xhtml}head/{http://www.w3.org/1999/xhtml}title').text==lesson['title']
+        assert lesson['content']['solution'] not in text, f'{lesson["id"]}: solution must be in separate appendix'
+        assert lesson['content']['code'] not in text, f'{lesson["id"]}: assembled example must be in separate appendix'
         annotations={node.text for node in chapter.iter('{http://www.w3.org/1998/Math/MathML}annotation')}
         if annotations: assert 'mathml' in items[f'c{index}'].attrib.get('properties','').split()
         if lesson['content'].get('visual'):
             v=lesson['content']['visual']
             image=chapter.find('.//{http://www.w3.org/1999/xhtml}img[@src="figures/'+lesson['id']+'.png"]')
             assert image is not None and image.attrib['src']=='figures/'+lesson['id']+'.png'
+            assert image.attrib.get('alt')==v.get('alt',v['title'])
             assert book.read('OEBPS/'+image.attrib['src'])==(ROOT/lesson['path']/'outputs/figure.png').read_bytes()
             for field in ['prediction','reading','connection']:
                 for paragraph in v[field].split('\n\n'):assert_narrative(paragraph,text,chapter)
-            assert lesson['execution']['stdout'] in text
+            assert lesson['execution']['stdout'] in solutions_text
         if lesson['content'].get('diagram'):
             diagram=lesson['content']['diagram']
             image=chapter.find('.//{http://www.w3.org/1999/xhtml}img[@src="figures/'+lesson['id']+'-mechanism.png"]')
             assert image is not None, lesson['id']+': missing mechanism image'
+            assert image.attrib.get('alt')==diagram.get('alt',diagram['title'])
             assert book.read('OEBPS/'+image.attrib['src'])==(ROOT/lesson['path']/'outputs/mechanism.png').read_bytes()
             for field in ['prediction','reading']:
                 for paragraph in diagram[field].split('\n\n'): assert_narrative(paragraph,text,chapter)
@@ -63,7 +74,9 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
                 assert_narrative(paragraph, text, chapter)
         for section in lesson['content'].get('sections',[]):
             for command in section.get('commands',[]):
-                assert command['code'] in text and command['expected'] in text
+                assert command['code'] in text, f'{lesson["id"]}: missing literal shell command'
+                for paragraph in command['expected'].split('\n\n'):
+                    assert_narrative(paragraph, text, chapter)
         for step in lesson['content'].get('buildSteps',[]):
             assert step['code'] in text
             for field in ['instruction','explanation']:
@@ -71,8 +84,7 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
                     assert_narrative(paragraph, text, chapter)
         for experiment in lesson['content'].get('experiments',[]):
             assert experiment['code'] in text, f'{lesson["id"]}: missing book experiment'
-        for practice in lesson['content'].get('practice',[]):
-            assert practice['solution'] in text, f'{lesson["id"]}: missing book practice'
+        assert all(practice['solution'] in solutions_text for practice in lesson['content'].get('practice',[]))
     for name in book.namelist():
         if name.endswith('.xhtml'):
             for a in ET.fromstring(book.read(name)).iter('{http://www.w3.org/1999/xhtml}a'):
@@ -95,6 +107,14 @@ project=json.loads((ROOT/'projects/regression-audit/project.json').read_text())
 assert project in projects['projects']
 assert set(project['requiredLessonIds'])<=set(l['id'] for l in authored)
 print(f'OK: {len(authored)} offline chapters, EPUB XML/references, project/tutor bundle fidelity, authored project prerequisites.')
+
+html_book=(ROOT/'dist/downloads/jax-foundations.html').read_text()
+assert all('src="'+value+'"' in html_book for value in re.findall(r'<img\b[^>]*\bsrc="([^"]+)"',html_book))
+assert not re.search(r'<img\b[^>]*\bsrc="(?!data:image/)',html_book), 'standalone book has an external image dependency'
+assert '<link rel="stylesheet"' not in html_book, 'standalone book has an external stylesheet dependency'
+assert 'appendix-project-workflow' in html_book and 'appendix-experiments' in html_book
+assert f'v{release["version"]}' in html_book
+print('OK: standalone HTML has embedded figure assets and course appendices.')
 
 with ZipFile(OUT/'jax-start-here.zip') as bundle:
     setup=next(l for l in authored if l['id']=='welcome-01')

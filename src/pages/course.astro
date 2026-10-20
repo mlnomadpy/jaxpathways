@@ -16,18 +16,20 @@ const eraOrder = ['era-onboarding', 'era-foundations', 'era-training', 'era-scal
 const orderedPhases = eraOrder.flatMap((eraId) =>
   course.phases.filter((phase) => courseTypeCue(phase).eraId === eraId),
 );
-const eraSections = eraOrder.map((eraId) => {
-  const phases = orderedPhases.filter((phase) => courseTypeCue(phase).eraId === eraId);
-  const firstCue = courseTypeCue(phases[0]);
-  return {
-    eraId,
-    eraTitle: firstCue.eraTitle,
-    eraSubtitle: firstCue.eraSubtitle,
-    filterGroup: firstCue.filterGroup,
-    badge: firstCue.badge,
-    phases,
-  };
-});
+const eraSections = eraOrder
+  .filter((eraId) => orderedPhases.some((phase) => courseTypeCue(phase).eraId === eraId))
+  .map((eraId) => {
+    const phases = orderedPhases.filter((phase) => courseTypeCue(phase).eraId === eraId);
+    const firstCue = courseTypeCue(phases[0]);
+    return {
+      eraId,
+      eraTitle: firstCue.eraTitle,
+      eraSubtitle: firstCue.eraSubtitle,
+      filterGroup: firstCue.filterGroup,
+      badge: firstCue.badge,
+      phases,
+    };
+  });
 ---
 
 <SiteLayout {...pages.course}>
@@ -61,13 +63,14 @@ const eraSections = eraOrder.map((eraId) => {
           <span class="course-type-pill" data-course-kind="tpu-core">
             3-Step Cloud TPU Mini-Course · 6 bite-sized lessons
           </span>
-          <h2 id="tpu-course-title">Required before any TPU-dependent course</h2>
+          <h2 id="tpu-course-title">Optional TPU specialization</h2>
           <p>
             Instead of one long block, the Cloud TPU track is split into three short 2-lesson
-            courses (~45 minutes each). Complete them right after{' '}
-            <strong>00: Setup &amp; first steps</strong> so you can provision a TPU VM, launch
-            checkpointed jobs over SSH, and inspect HBM &amp; XProf traces in parallel with the rest
-            of the curriculum.
+            courses (~45 minutes each). Use them when you are ready to qualify accelerator execution
+            after <strong>00: Setup &amp; first steps</strong> while the main learning routes remain
+            CPU-completable. Practice provisioning a TPU VM, launching checkpointed jobs over SSH,
+            and inspecting HBM budgets and XProf traces. Actual TPU results require their own
+            execution evidence.
           </p>
           <div class="tpu-mini-course-strip">
             <a class="tpu-step-card" data-phase="tpu" href="#phase-tpu">

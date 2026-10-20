@@ -86,11 +86,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-A TPU generation, HBM capacity, BF16/INT8 precision, and XProf profiling dossier.
+Estimate optimizer-state bytes and calculate supplied-rate scaling efficiency.
 
 **Demonstrate:** Compare TPU v5e, v5p, and v6e ridge points, budget training and KV-cache HBM, measure BF16/INT8 matmul error with FP32 accumulation, and capture a warmed XProf trace.
 
-Project status: implemented staged practice · [Open source](../../projects/tpu-systems-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Compute your HBM budget and test precision/profiling locally first, then capture a warmed XProf trace on your Cloud TPU VM and copy it back with gcloud compute tpus tpu-vm scp --recurse. Copy `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py` and write your code in `projects/workload-operations/my_model.py`. Run `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 5` from the top-level folder to verify stage 5.
+Project status: implemented staged practice · [Open source](../../projects/tpu-systems-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/tpu-systems-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/tpu-systems-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Operate and recover a local JAX workload](../../projects/workload-operations/README.md).
 

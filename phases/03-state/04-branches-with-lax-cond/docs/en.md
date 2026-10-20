@@ -76,7 +76,6 @@ Create main.py in your lesson workspace. Add this first block; use the environme
 
 ```python
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 ```
@@ -91,9 +90,7 @@ Append this block below the inputs in the same file.
 # Step 2 — Build the computation: Both branches return the same scalar type.
 # Define and JIT-compile `magnitude(x)` so XLA traces and fuses the operations:
 @jax.jit
-# Function `magnitude(x)` implementing this stage's computation:
 def magnitude(x):
-    # Return `jax.lax.cond(x >= 0.0, lambda v: v, lambda v: -v, x)` to the caller.
     return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)
 ```
 
@@ -105,11 +102,8 @@ Append the checks, save main.py, and run python main.py from this folder using y
 
 ```python
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Print the observed values to compare against the expected result.
 print(float(magnitude(-3.)))
-# Assert that `jnp.allclose(magnitude(-3.), 3.)`.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Assert that `jnp.allclose(magnitude(2.), 2.)`.
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -119,22 +113,16 @@ Compare the output to the expected result below before making the exercise chang
 
 ```python
 # Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: Both branches return the same scalar type.
 # Define and JIT-compile `magnitude(x)` so XLA traces and fuses the operations:
 @jax.jit
-# Function `magnitude(x)` implementing this stage's computation:
 def magnitude(x):
-    # Return `jax.lax.cond(x >= 0.0, lambda v: v, lambda v: -v, x)` to the caller.
     return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Print the observed values to compare against the expected result.
 print(float(magnitude(-3.)))
-# Assert that `jnp.allclose(magnitude(-3.), 3.)`.
 assert jnp.allclose(magnitude(-3.), 3.)
-# Assert that `jnp.allclose(magnitude(2.), 2.)`.
 assert jnp.allclose(magnitude(2.), 2.)
 ```
 
@@ -170,7 +158,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T08:56:34.904644+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:45:31.964561+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -188,12 +176,9 @@ PASS: state-04
 ```python
 # Experiment — Reproduce the Python truth-test failure: The repair changes where the decision is represented.
 def eager_branch(v):
-    # Branch on condition `v >= 0.0`:
     if v>=0.:
         return v
-    # Return `-v` to the caller.
     return -v
-# Assert invariant `eager_branch(-3.)==3.` holds
 assert eager_branch(-3.)==3.
 # Run the boundary check and catch the expected exception:
 try:
@@ -202,9 +187,7 @@ except jax.errors.TracerBoolConversionError:
     print("Expected traced Python Boolean failure")
 else:
     raise AssertionError("Expected branch error")
-# Iterate over `v` to step through the computation:
 for v in [-3.,0.,2.]:
-    # Assert that `jnp.allclose(magnitude(v),abs(v))`.
     assert jnp.allclose(magnitude(v),abs(v))
 ```
 
@@ -218,11 +201,8 @@ The repair changes where the decision is represented. It does not make $x$ stati
 
 ```python
 # Experiment — Check a batched numerical selection: Correct values under batching do not imply a conditional branch...
-# Construct `values` via `jnp.array([-3.,-1.,2.,4.])`
 values=jnp.array([-3.,-1.,2.,4.])
-# Assert that `jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))`.
 assert jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))
-# Assert that `jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))`.
 assert jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))
 ```
 
@@ -242,10 +222,6 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 
 **Step-by-step implementation plan:**
 1. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
-2. Function `choose_update(x)` implementing this stage's computation:
-3. Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
-4. Assert that `jnp.allclose(choose_update(3.), 6.)`.
-5. Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -253,15 +229,10 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 # Exercise solution: Write a compiled function that applies 2x when x is positive and x-2...
 # Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 @jax.jit
-# Function `choose_update(x)` implementing this stage's computation:
 def choose_update(x):
-    # Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
     return ...  # TODO: return computed result
-# Assert that `jnp.allclose(choose_update(3.), 6.)`.
 assert jnp.allclose(choose_update(3.), 6.)  # TODO: complete assertion check
-# Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 assert jnp.allclose(choose_update(-3.), -5.)  # TODO: complete assertion check
-# Assert that `jnp.allclose(choose_update(0.), -2.)`.
 assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 ```
 
@@ -271,15 +242,10 @@ assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 # Exercise solution: Write a compiled function that applies 2x when x is positive and x-2...
 # Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 @jax.jit
-# Function `choose_update(x)` implementing this stage's computation:
 def choose_update(x):
-    # Return `jax.lax.cond(x > 0.0, lambda v: v * 2.0, lambda v: v - 2.0, x)` to the caller.
     return jax.lax.cond(x > 0., lambda v: v * 2., lambda v: v - 2., x)
-# Assert that `jnp.allclose(choose_update(3.), 6.)`.
 assert jnp.allclose(choose_update(3.), 6.)
-# Assert that `jnp.allclose(choose_update(-3.), -5.)`.
 assert jnp.allclose(choose_update(-3.), -5.)
-# Assert that `jnp.allclose(choose_update(0.), -2.)`.
 assert jnp.allclose(choose_update(0.), -2.)
 ```
 
@@ -306,23 +272,17 @@ At $x=1$ the false branch is selected.
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
-2. Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
-3. Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
-4. Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Match a changed piecewise rule (Practice): The values check the exact boundary and both formulas; the...
 def piecewise(v):
-    # Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
     return ...  # TODO: return computed result
-# Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))  # TODO: complete assertion check
-# Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)  # TODO: complete assertion check
-# Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion check
 ```
 
@@ -331,13 +291,9 @@ assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion chec
 ```python
 # Match a changed piecewise rule (Practice): The values check the exact boundary and both formulas; the...
 def piecewise(v):
-    # Return `jax.lax.cond(v > 1.0, lambda z: z * z, lambda z: 2 * z, v)` to the caller.
     return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)
-# Assert that `jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))`.
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))
-# Assert that `jnp.allclose(jax.grad(piecewise)(-1.),2.)`.
 assert jnp.allclose(jax.grad(piecewise)(-1.),2.)
-# Assert that `jnp.allclose(jax.grad(piecewise)(2.),4.)`.
 assert jnp.allclose(jax.grad(piecewise)(2.),4.)
 ```
 
@@ -365,9 +321,6 @@ Decide what each output component means before padding.
 
 **Step-by-step implementation plan:**
 1. Run the boundary check and catch the expected exception:
-2. Function `pair(v)` implementing this stage's computation:
-3. Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
-4. Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -380,11 +333,8 @@ except TypeError:
     print("Expected branch shape mismatch")
 else:
     raise AssertionError("Expected result type error")
-# Function `pair(v)` implementing this stage's computation:
 def pair(v):
-    # Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
     return ...  # TODO: return computed result
-# Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))  # TODO: complete assertion check
 ```
 
@@ -399,11 +349,8 @@ except TypeError:
     print("Expected branch shape mismatch")
 else:
     raise AssertionError("Expected result type error")
-# Function `pair(v)` implementing this stage's computation:
 def pair(v):
-    # Return `jax.lax.cond(v >= 0.0, lambda x: jnp.stack([x, x * x]), lambda x: jnp.stack([-x, x * x]), v)` to the caller.
     return jax.lax.cond(v>=0.,lambda x:jnp.stack([x,x*x]),lambda x:jnp.stack([-x,x*x]),v)
-# Assert that `jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))`.
 assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))
 ```
 

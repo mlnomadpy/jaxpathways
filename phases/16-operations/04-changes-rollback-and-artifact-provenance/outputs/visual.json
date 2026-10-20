@@ -1,10 +1,11 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-04",
-  "contentHash": "d9d832ea713d6bf104d52f995d2989e02246422d37c4959fbfe31825606c6ede",
-  "rendererHash": "cfd4886cdfc466f57d2873f10153b69a130b45e3ed397963fac230af949e13cd",
+  "contentHash": "e4af015be92bf0b2b6ccb5343222cd5de15b9dbdef7fbc0df0a5e892c717717c",
+  "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-06T15:41:33.892665+00:00",
+  "generatedAt": "2026-10-20T10:47:09.407572+00:00",
+  "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -12,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "first / second content IDs: 26e4f003f57a71591febf8e34642c883762a0e82a49bd5beb92870d383f9a4d9 3a0b0f0490ee487522db673747bee44c4fbdeb9c2828686a5db5fce19ca7a3e4\nfailed gate kept selection: True rollback restored first: True\n",
+  "stdout": "first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990\nfailed gate kept selection: True rollback restored first: True\n",
   "data": {
     "kind": "bar",
     "labels": [

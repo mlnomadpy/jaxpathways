@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-05",
-  "contentHash": "bbfaa90adea8cbb8d46bb3337e06ee73f23f31fe86d9c4dffaee49fbf74b1631",
-  "executedAt": "2026-10-13T08:58:15.011525+00:00",
+  "contentHash": "53af93b1c6c37ad3ae60af050b3fbce1aec596ad453fe6c06ad32042e883b6b8",
+  "executedAt": "2026-10-20T10:46:54.698510+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,27 +11,27 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-d2z9fzpp\n{\n  \"save_call_seconds\": 0.0034878337755799294,\n  \"remaining_work_and_wait_seconds\": 0.015905458014458418,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-5py4v0hb\n{\n  \"save_call_seconds\": 0.002052625175565481,\n  \"remaining_work_and_wait_seconds\": 0.010445499792695045,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
+  "stdout": "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-9ibeu4bo\n{\n  \"save_call_seconds\": 0.0035320832394063473,\n  \"remaining_work_and_wait_seconds\": 0.017399583011865616,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nCheckpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-xq01n_nx\n{\n  \"save_call_seconds\": 0.0024104579351842403,\n  \"remaining_work_and_wait_seconds\": 0.009226541966199875,\n  \"accepted_step\": 1,\n  \"live_step\": 2\n}\nUnpublished step 2 exists; application recovery still selects verified step 1.\nExpected background failure surfaced: injected finalization callback failure\nStep two verified and accepted; next transition agrees.\nMissing target rejected; accepted checkpoint unchanged.\nPASS: recovery-05\n",
   "notebookCells": [
     {
-      "sourceHash": "ca451e684a37b5e4171bc3670b1e5fe5657837277778ecd8457bf5b5397ff879",
+      "sourceHash": "0dcc4f3bb149a884182f537fcfa52f2cfe36ab19536027a9b4725c28b77ecf46",
       "outputs": []
     },
     {
-      "sourceHash": "987ce80d5e56c756682fef0a0416ecd36d934b770659f22faea84845915aba34",
+      "sourceHash": "cc09625a3d1884683201fde08fa3e04c770e0a04cde85656d17a36a082d47f16",
       "outputs": []
     },
     {
-      "sourceHash": "4930c5fbffba5d9af2cb643db567850140349a969ade8feab166c43bc123a0d1",
+      "sourceHash": "5809d538fea550451089375fb5fa091598587397f38e39cf8b7550c4957ff338",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-2n3dfyzo\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-uymdp95k\n",
             "{\n",
-            "  \"save_call_seconds\": 0.0035374583676457405,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.01573445787653327,\n",
+            "  \"save_call_seconds\": 0.0035863746888935566,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.016371500212699175,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",
@@ -41,16 +41,16 @@
       ]
     },
     {
-      "sourceHash": "e47624f605ae3558ce6ef2117abbe85fb07fdbb386acb367ab51ffbf0612bfb4",
+      "sourceHash": "f93dc5604fd5502c6f580d8255891bd01a9022870220599716c0bd03b2f4f16b",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-zr1lii0e\n",
+            "Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-tye9awlc\n",
             "{\n",
-            "  \"save_call_seconds\": 0.001999999862164259,\n",
-            "  \"remaining_work_and_wait_seconds\": 0.008404375053942204,\n",
+            "  \"save_call_seconds\": 0.002461958210915327,\n",
+            "  \"remaining_work_and_wait_seconds\": 0.0092058340087533,\n",
             "  \"accepted_step\": 1,\n",
             "  \"live_step\": 2\n",
             "}\n",
@@ -60,7 +60,7 @@
       ]
     },
     {
-      "sourceHash": "ccee45ac69a43c4bd2afe61518ef53fd3b894b4647b36ec9cc1c50d9d6937812",
+      "sourceHash": "8f926cf6730c8a62c2d616594b5c92a0cfa8d51af2ab2e554d4b54a0b2d13435",
       "outputs": []
     },
     {
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "181205784ea932c36d5af70723065dbfbf6aa55c6bf7739ce78c775a2b4aaedd",
+      "sourceHash": "15d785502495cf7afd39b11f48e4d9d2f56ae08e5c7f9cdcf3a9486b77962e37",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "301324afd9b4fc153aee01e31613e2813ff3479ad04daff76051fd52c0abd2a8",
+      "sourceHash": "e7852da2712b40bee9e98f915d3c043eae0883f885a6360cdeb47b656cc39451",
       "outputs": []
     },
     {
-      "sourceHash": "076997234e214b8e4fdaaf8d5b39cc6c54c1661519aa2b384616d610156f903b",
+      "sourceHash": "193d5beb3e27d975d6d537f18ba541eb582802ed3226dc4deb6bc24d318b2bce",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "caada9cf84d107f366fcbfce3c744e3a2028fea8b55e73a2cc6b44c9f0cf575d",
+      "sourceHash": "be097e4cef609c684e9c6d1767804298108dcb948f81fb702f2904ec50c3d42b",
       "outputs": []
     },
     {
-      "sourceHash": "8148fc7b51dc2734755254d2259de79d8eff694ead57258a13a7cd7978d9390d",
+      "sourceHash": "45386a6cb99124e42081ad9ef69c57df0b5759ab3466d0b4e5b2224c29592fc0",
       "outputs": [
         {
           "output_type": "stream",

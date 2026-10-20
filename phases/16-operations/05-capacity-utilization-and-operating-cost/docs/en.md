@@ -73,7 +73,6 @@ Create main.py with this block. Run python3 main.py in the CPU course environmen
 ```python
 # Step 1: Create the local artifact helpers
 """Bounded local JAX subprocess supervisor and lifecycle verifier."""
-# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -85,19 +84,14 @@ import tempfile
 import time
 
 
-# Function `digest(value)` implementing this stage's computation:
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
-# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
     try:
@@ -219,13 +213,11 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
-    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
     # Update state in place with the new values.
     cfg.update(changes)
-    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
@@ -233,32 +225,23 @@ def default_config(**changes):
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
-    # Return `cfg` to the caller.
     return cfg
 
 
-# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
-    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
-    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -270,14 +253,10 @@ def launch(root, config=None, timeout=10.):
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
-    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Compute `events` from `[]`
     events=[]
     malformed=[]
-    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
-        # Branch on condition `not line.strip()`:
         if not line.strip():
             continue
         try:
@@ -287,14 +266,11 @@ def launch(root, config=None, timeout=10.):
             events.append(event)
         except (ValueError,TypeError):
             malformed.append(line)
-    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
-    # Return `result` to the caller.
     return result
 ```
 
@@ -307,29 +283,20 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
 def summarize(result):
-    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    # Run `sum` to compute `count`.
-    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates)
     update_s=sum(e['update_s'] for e in updates)
-    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
-    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
-    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
                 job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
-# Function `capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, ...)` implementing this stage's computation:
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
-    # Compute `values` from `[measured_job_s,arrivals_per_hour,hourly_rate,reserv...`
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
     # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
@@ -337,13 +304,9 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
-    # Compute `offered` from `arrivals_per_hour*measured_job_s/3600`
     offered=arrivals_per_hour*measured_job_s/3600
-    # Compute `load` from `offered/workers`
     load=offered/workers
-    # Run `max` to compute `required`.
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
-    # Return `dict(offered_worker_hours_per_hour=offered, load_fraction=load, minimum_workers_with_reserve=required, hourly_budget=workers * hourly_rate, hypothetical_cost_per_job=measured_job_s * hourly_rate / 3600, within_reserve=load <= 1 - reserve_fraction)` to the caller.
     return dict(offered_worker_hours_per_hour=offered,load_fraction=load,
                 minimum_workers_with_reserve=required,hourly_budget=workers*hourly_rate,
                 hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
@@ -361,25 +324,15 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 samples=[]
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
-    # Loop over `steps` in `[8, 32, 64]`:
     for steps in [8,32,64]:
-        # Read or serialize artifact data on disk (`run`).
         run=launch(Path(folder)/str(steps),dict(steps=steps))
-        # Assert invariant `run['status']=='completed'` holds
         assert run['status']=='completed'
-        # Append the current step result to `samples`.
         samples.append((steps,run,summarize(run)))
-# Run `max` to compute `measured`.
 measured=max(run['wall_s'] for _,run,_ in samples)
-# Run `capacity` to compute `plan`.
 plan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)
-# Assert invariant `plan['hourly_budget']==3.` holds
 assert plan['hourly_budget']==3.
-# Print the observed values to compare against the expected result.
 print('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])
-# Print diagnostic summary of the computed outputs.
 print('illustrative capacity plan:',plan)
-# Print diagnostic summary of the computed outputs.
 print('assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve')
 ```
 
@@ -390,7 +343,6 @@ Every duration comes from a completed child; arrival and price inputs are labele
 ```python
 # Complete runnable example (operations-05)
 """Bounded local JAX subprocess supervisor and lifecycle verifier."""
-# Import pathlib (Path) for this computation.
 from pathlib import Path
 import hashlib
 import json
@@ -402,19 +354,14 @@ import tempfile
 import time
 
 
-# Function `digest(value)` implementing this stage's computation:
 def digest(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()` to the caller.
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 
-# Function `atomic_json(path, value)` implementing this stage's computation:
 def atomic_json(path, value):
     """Replace one local JSON file only after its bytes have been flushed."""
-    # Compute `path` as `Path(path)`.
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `tempfile.mkstemp` to compute `(fd, temporary)`.
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
     # Run the boundary check and catch the expected exception:
     try:
@@ -520,13 +467,11 @@ except Exception as error:
 
 # Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
 def default_config(**changes):
-    # Evaluate `seed=3, learning_rate=0.04, momentum=0.8, batch_size=8, steps=8, checkpoint_every=2, backend='cpu', min_devices=1, resume=False, fail_after=None, stall_at=None, stall_seconds=10.0` and convert the result into Python scalar/collection `cfg`.
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
     # Update state in place with the new values.
     cfg.update(changes)
-    # Iterate over `name` to step through the computation:
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
         # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
@@ -534,32 +479,23 @@ def default_config(**changes):
     # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
-    # Return `cfg` to the caller.
     return cfg
 
 
-# Function `launch(root, config, timeout)` implementing this stage's computation:
 def launch(root, config=None, timeout=10.):
-    # Compute `root` as `Path(root)`.
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
-    # Run `default_config` to compute `cfg`.
     cfg=default_config(**(config or {}))
     # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'config.json',cfg)
-    # Compute `worker` as `root/'worker.py'`.
     worker=root/'worker.py'
     worker.write_text(WORKER)
     # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
-    # Record execution timing or profiler trace in `started`.
     started=time.perf_counter()
-    # Read or serialize artifact data on disk (`process`).
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
-    # Compute `timed_out` as `False`.
     timed_out=False
     try:
         stdout,stderr=process.communicate(timeout=timeout)
@@ -571,14 +507,10 @@ def launch(root, config=None, timeout=10.):
         except subprocess.TimeoutExpired:
             process.kill()
             stdout,stderr=process.communicate(timeout=1.)
-    # Record execution timing or profiler trace in `wall`.
     wall=time.perf_counter()-started
-    # Compute `events` from `[]`
     events=[]
     malformed=[]
-    # Loop over `line` in `stdout.splitlines()`:
     for line in stdout.splitlines():
-        # Branch on condition `not line.strip()`:
         if not line.strip():
             continue
         try:
@@ -588,41 +520,29 @@ def launch(root, config=None, timeout=10.):
             events.append(event)
         except (ValueError,TypeError):
             malformed.append(line)
-    # Compute `status` from `'timed_out' if timed_out else 'completed' if process...`
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
     # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
-    # Run `atomic_json` to perform the next check or state transition.
     atomic_json(root/'run.json',result)
-    # Return `result` to the caller.
     return result
 
 # Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
 def summarize(result):
-    # Compute `updates` from `[e for e in result['events'] if e['event']=='progress']`
     updates=[e for e in result['events'] if e['event']=='progress']
-    # Compute `checkpoints` from `[e['step'] for e in result['events'] if e['event']==...`
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
-    # Run `sum` to compute `count`.
-    # Run `sum` to compute `update_s`.
     count=sum(e['examples'] for e in updates)
     update_s=sum(e['update_s'] for e in updates)
-    # Run `max` to compute `latest`.
     latest=max((e['step'] for e in updates),default=0)
-    # Run `max` to compute `checkpoint`.
     checkpoint=max(checkpoints,default=0)
-    # Return `dict(status=result['status'], updates=len(updates), examples=count, last_step=latest, checkpoint_step=checkpoint, uncheckpointed_updates=max(0, latest - checkpoint), update_s=update_s, update_examples_per_s=count / update_s if update_s else 0.0, job_examples_per_s=count / result['wall_s'] if result['wall_s'] else 0.0, update_duty_fraction=update_s / result['wall_s'] if result['wall_s'] else 0.0)` to the caller.
     return dict(status=result['status'],updates=len(updates),examples=count,last_step=latest,checkpoint_step=checkpoint,
                 uncheckpointed_updates=max(0,latest-checkpoint),update_s=update_s,
                 update_examples_per_s=count/update_s if update_s else 0.,
                 job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
-# Function `capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, ...)` implementing this stage's computation:
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
-    # Compute `values` from `[measured_job_s,arrivals_per_hour,hourly_rate,reserv...`
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
     # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
@@ -630,13 +550,9 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
     # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
-    # Compute `offered` from `arrivals_per_hour*measured_job_s/3600`
     offered=arrivals_per_hour*measured_job_s/3600
-    # Compute `load` from `offered/workers`
     load=offered/workers
-    # Run `max` to compute `required`.
     required=max(1,math.ceil(offered/(1-reserve_fraction)))
-    # Return `dict(offered_worker_hours_per_hour=offered, load_fraction=load, minimum_workers_with_reserve=required, hourly_budget=workers * hourly_rate, hypothetical_cost_per_job=measured_job_s * hourly_rate / 3600, within_reserve=load <= 1 - reserve_fraction)` to the caller.
     return dict(offered_worker_hours_per_hour=offered,load_fraction=load,
                 minimum_workers_with_reserve=required,hourly_budget=workers*hourly_rate,
                 hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
@@ -646,25 +562,15 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
 samples=[]
 # Create an isolated temporary directory to run and inspect artifacts safely:
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
-    # Loop over `steps` in `[8, 32, 64]`:
     for steps in [8,32,64]:
-        # Read or serialize artifact data on disk (`run`).
         run=launch(Path(folder)/str(steps),dict(steps=steps))
-        # Assert invariant `run['status']=='completed'` holds
         assert run['status']=='completed'
-        # Append the current step result to `samples`.
         samples.append((steps,run,summarize(run)))
-# Run `max` to compute `measured`.
 measured=max(run['wall_s'] for _,run,_ in samples)
-# Run `capacity` to compute `plan`.
 plan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)
-# Assert invariant `plan['hourly_budget']==3.` holds
 assert plan['hourly_budget']==3.
-# Print the observed values to compare against the expected result.
 print('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])
-# Print diagnostic summary of the computed outputs.
 print('illustrative capacity plan:',plan)
-# Print diagnostic summary of the computed outputs.
 print('assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve')
 ```
 
@@ -688,22 +594,21 @@ The lower-panel values are much smaller than the complete-job values because sta
 
 ```python
 # Compute figure data for: Short jobs spend time outside the update loop
-# Compute `visual_data` from `{'panels':[{'kind':'bar','labels':[str(n) for n,_,_ ...`
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:02:50.728321+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:51:47.444738+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.6997332503087819, 0.7041556253097951, 0.7108614579774439]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11847690966290732, 'load_fraction': 0.05923845483145366, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002961922741572683, 'within_reserve': True}
+measured local job seconds: [0.543132500257343, 0.5599589156918228, 0.5557856247760355]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.09332648594863713, 'load_fraction': 0.046663242974318564, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002333162148715928, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.7015819172374904, 0.6995829590596259, 0.7016148748807609]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11693581248012681, 'load_fraction': 0.05846790624006341, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00029233953120031704, 'within_reserve': True}
+measured local job seconds: [0.6144686662591994, 0.5638747080229223, 0.5770753328688443]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.10241144437653323, 'load_fraction': 0.05120572218826661, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00025602861094133306, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.05846790624006341 0.11693581248012681
+nominal load at two demand scenarios: 0.05120572218826661 0.10241144437653323
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -716,15 +621,10 @@ PASS: operations-05
 ```python
 # Experiment — Check units with known arithmetic: This independent arithmetic checks the calculator without...
 known=capacity(90.,80.,4,2.,.25)
-# Assert invariant `known['offered_worker_hours_per_hour']==2.` holds
 assert known['offered_worker_hours_per_hour']==2.
-# Assert invariant `known['load_fraction']==.5` holds
 assert known['load_fraction']==.5
-# Assert invariant `known['minimum_workers_with_reserve']==3` holds
 assert known['minimum_workers_with_reserve']==3
-# Assert invariant `known['hypothetical_cost_per_job']==.05` holds
 assert known['hypothetical_cost_per_job']==.05
-# Assert invariant `known['hourly_budget']==8.` holds
 assert known['hourly_budget']==8.
 ```
 
@@ -739,13 +639,9 @@ This independent arithmetic checks the calculator without treating invented inpu
 ```python
 # Experiment — Double the arrivals without changing the job: Demand changes the required capacity; it does not automatically...
 one=capacity(measured,600,2,1.5,.25)
-# Run `capacity` to compute `two`.
 two=capacity(measured,1200,2,1.5,.25)
-# Assert that `abs(two['load_fraction']-2*one['load_fraction'])<1e-12`.
 assert abs(two['load_fraction']-2*one['load_fraction'])<1e-12
-# Assert invariant `two['hypothetical_cost_per_job']==one['hypothetical_cost_per_job']` holds
 assert two['hypothetical_cost_per_job']==one['hypothetical_cost_per_job']
-# Print the observed values to compare against the expected result.
 print('nominal load at two demand scenarios:',one['load_fraction'],two['load_fraction'])
 ```
 
@@ -764,26 +660,18 @@ Using the measured service-time input, calculate the minimum worker count for $1
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Compute `required` from `changed['minimum_workers_with_reserve']`
-2. Compute `demand` from `1200*measured/3600`
-3. Assert invariant `demand/required <= .6 + 1e-12` holds
-4. Branch on condition `required > 1`:
-5. Print the observed values to compare against the expected result.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Using the measured service-time input, calculate the minimum worker...
 changed = capacity(...)  # TODO: compute changed
-# Compute `required` from `changed['minimum_workers_with_reserve']`
 required = ...  # TODO: compute required
-# Compute `demand` from `1200*measured/3600`
 demand = ...  # TODO: compute demand
-# Assert invariant `demand/required <= .6 + 1e-12` holds
 assert demand/required  # TODO: complete assertion check
-# Branch on condition `required > 1`:
 if required>1: assert demand/(required-1) > .6
-# Print the observed values to compare against the expected result.
 print('required workers under changed hypothetical reserve:',required)
 ```
 
@@ -792,15 +680,10 @@ print('required workers under changed hypothetical reserve:',required)
 ```python
 # Exercise solution: Using the measured service-time input, calculate the minimum worker...
 changed=capacity(measured,1200,2,1.5,.4)
-# Compute `required` from `changed['minimum_workers_with_reserve']`
 required=changed['minimum_workers_with_reserve']
-# Compute `demand` from `1200*measured/3600`
 demand=1200*measured/3600
-# Assert invariant `demand/required <= .6 + 1e-12` holds
 assert demand/required <= .6 + 1e-12
-# Branch on condition `required > 1`:
 if required>1: assert demand/(required-1) > .6
-# Print the observed values to compare against the expected result.
 print('required workers under changed hypothetical reserve:',required)
 ```
 
@@ -826,17 +709,15 @@ Every attempt consumes resources under this hypothetical model.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Compute `per_completion` from `125*per_attempt/100`
-2. Assert that `abs(per_completion-1.25*per_attempt)<1e-12`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
 per_attempt = ...  # TODO: compute per_attempt
-# Compute `per_completion` from `125*per_attempt/100`
 per_completion = ...  # TODO: compute per_completion
-# Assert that `abs(per_completion-1.25*per_attempt)<1e-12`.
 assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
 ```
 
@@ -845,9 +726,7 @@ assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
 ```python
 # Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
 per_attempt=measured*1.5/3600
-# Compute `per_completion` from `125*per_attempt/100`
 per_completion=125*per_attempt/100
-# Assert that `abs(per_completion-1.25*per_attempt)<1e-12`.
 assert abs(per_completion-1.25*per_attempt)<1e-12
 ```
 
@@ -874,19 +753,13 @@ A plan should not silently divide by zero or emit a meaningless worker count.
 - `inputs.update(...)` — Call `inputs.update` with your updated parameters or inputs from this lesson's workspace.
 
 **Step-by-step implementation plan:**
-1. Iterate over `change` to step through the computation:
-2. Evaluate `measured_job_s=measured, arrivals_per_hour=600, workers=2, hourly_rate=1.5` and convert the result into Python scalar/collection `inputs`.
-3. Compute `inputs` as `dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)`.
-4. Run the boundary check and catch the expected exception:
+1. Run the boundary check and catch the expected exception:
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject impossible capacity inputs (Transfer / diagnosis): Input validation makes the assumptions visible and prevents...
-# Iterate over `change` to step through the computation:
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
-    # Evaluate `measured_job_s=measured, arrivals_per_hour=600, workers=2, hourly_rate=1.5` and convert the result into Python scalar/collection `inputs`.
-    # Compute `inputs` as `dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)`.
     inputs = dict(...)  # TODO: compute inputs
     inputs.update(change)
     # Run the boundary check and catch the expected exception:
@@ -899,10 +772,7 @@ for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=flo
 
 ```python
 # Reject impossible capacity inputs (Transfer / diagnosis): Input validation makes the assumptions visible and prevents...
-# Iterate over `change` to step through the computation:
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
-    # Evaluate `measured_job_s=measured, arrivals_per_hour=600, workers=2, hourly_rate=1.5` and convert the result into Python scalar/collection `inputs`.
-    # Compute `inputs` as `dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)`.
     inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)
     inputs.update(change)
     # Run the boundary check and catch the expected exception:

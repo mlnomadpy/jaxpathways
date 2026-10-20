@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-07",
-  "contentHash": "effb6eddc80ddbc7e710833b3ade12380da3dbc3e094fe30bb56a570b620f2e9",
-  "executedAt": "2026-10-13T09:01:32.994500+00:00",
+  "contentHash": "93a1f10568b65730bcac178c53015434c5c5d86e436c7219598fee4a97ea04ba",
+  "executedAt": "2026-10-20T10:50:42.914381+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Fresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nFresh-process valid requests: 2 rejected boundaries: 3\nThis companion tests the process/artifact contract. Run the Docker lab for container evidence.\nIndependent three-input predictions: 0.5, 2.5, 5.0\nMatching digest did not bypass model validation.\nChanged artifact requires a new recorded digest.\nNonfinite input rejected before output.\nNew artifact loads, but the old behavioral expectation no longer passes.\nPASS: deployment-07\n",
   "notebookCells": [
     {
-      "sourceHash": "10f8019e178ff68a4c2794f28eb842c882839d5b6d6a8dde4cb202e1ac618021",
+      "sourceHash": "6ea075edc4df071aae23d8d4c130f7681d9e468ab96c82e2bc448328a7057113",
       "outputs": []
     },
     {
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "8c20aa11e5aa12691b025e1fd128b6b03109319b0e378c0fb44bc4815e7a9d4d",
+      "sourceHash": "5a9b7ee1f1ae83f3f533753dc40d776b061a4247f3becddbdf10240e2fe1eac3",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "ce758cb6c161ba1cacb3b23230451350b752b35cb1f641db67514417be837f4d",
+      "sourceHash": "0e94c76deb07ebc7780cb4354f69763463b7264d206c1bbcc4c10ecc3ccc58af",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "3efb0cdac91776f94a8f9bb401021f329149f8248a8ea51063914970a93bc678",
+      "sourceHash": "6a94d74ce81970a6637525628b2a5b586e7b85c096e7d240900646ff96de7409",
       "outputs": []
     },
     {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "sourceHash": "d119061ee146435bb551493428290e80732dbc645a25bea8ec77b0cff6db2702",
+      "sourceHash": "2f0ae7545ddc4e0c1b02637389c6ce44d798b63c0e1709c8901d22e1877f9d7e",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "8917a8db5e5ee83dd3c3d79b5a6bd9575b9863efa5e90d2793a05a48ce06d125",
+      "sourceHash": "e9eea2880f21de0880f46df02491f3f93d6c91c72adce7f45cbd6185f67a5652",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "f25172f978fee8e30ac468762381287fe3b310c49cf16347706003844563c0c2",
+      "sourceHash": "8eee7b0abeb726b029ddf9d620e33cc5073301ffd70bef852b41a01bad6eb875",
       "outputs": []
     },
     {
-      "sourceHash": "6d59c60d6e7e8dd18424c9c86d2d97625bfe572e822c6bcc351ff820314e3589",
+      "sourceHash": "a05c0caf91836a9832c09905596ae27347381e2fb30a25524374cd6511b4b69a",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "19d4d487fecd9f93ce23c33a0982afbd50622a3fc17620dbafe24247533701bf",
+      "sourceHash": "b08508c70f6ad4b495f75a2236697bd4d3f2350b77988730de6b8e1d589043b5",
       "outputs": []
     },
     {
-      "sourceHash": "cd50616c81fb4e7a31c15b50f703ffca3236baf08956008d5cc0e577d7897828",
+      "sourceHash": "a8e1e92726adf2fe6e345f01dc0456a4990eb2b760120a20a5200a98ac62e17f",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "b3c75c00df230665c31f7104431ade5ccec696552a81cb4ba0b56083fd3699ed",
+      "sourceHash": "d43643411d7af606e4a9f41681d94f3b22648dae3fef0f4fc1deb774631427e9",
       "outputs": []
     },
     {
-      "sourceHash": "0d26550598257e34709838c37a8c53e4b16d40799add65277f1612c3ac76641a",
+      "sourceHash": "351309a5b0231442e0685d7f5744f07784ae079e7794410435bc1bc9e2744d4d",
       "outputs": [
         {
           "output_type": "stream",

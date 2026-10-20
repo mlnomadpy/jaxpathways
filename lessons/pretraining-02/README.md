@@ -98,33 +98,26 @@ Create main.py in your activated course environment. Paste this block, then run 
 
 ```python
 # Step 1 — 1. Define patch layout and masked error: Trace the transpose against the numbered top-left patch.
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Function `patchify(images, patch)` implementing this stage's computation:
 def patchify(images, patch=2):
-    # Compute `b, h, w, c` from `images.shape`
     b, h, w, c = images.shape
     # Guard input contract (`h % patch or w % patch`) and fail fast if violated.
     if h % patch or w % patch:
         raise ValueError('image dimensions must be divisible by patch size')
-    # Return `images.reshape(b, h // patch, patch, w // patch, patch, c).transpose(0, 1, 3, 2, 4, 5).reshape(b, h // patch * (w // patch), patch * patch * c)` to the caller.
     return (
         images.reshape(b, h // patch, patch, w // patch, patch, c)
         .transpose(0, 1, 3, 2, 4, 5)
         .reshape(b, (h // patch) * (w // patch), patch * patch * c)
     )
 
-# Function `masked_mse(prediction, target, hidden)` implementing this stage's computation:
 def masked_mse(prediction, target, hidden):
     # Reduce along axis=-1 to compute `per_patch`.
     per_patch = jnp.mean((prediction - target) ** 2, axis=-1)
-    # Return `jnp.sum(jnp.where(hidden, per_patch, 0.0)) / jnp.sum(hidden)` to the caller.
     return jnp.sum(jnp.where(hidden, per_patch, 0.0)) / jnp.sum(hidden)
 
-# Function `validate_mask(selected, shape)` implementing this stage's computation:
 def validate_mask(selected, shape):
     # Convert `a` to a host NumPy array for inspection or verification.
     a = np.asarray(selected)
@@ -144,23 +137,17 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 amplitude = jnp.array([0.1, 0.3, 0.6, 0.8])
 # Construct and reshape `base_image` into the target tensor dimensions.
 base_image = jnp.arange(16, dtype=jnp.float32).reshape(4, 4, 1) / 32
-# Compute `images` from `amplitude[:, None, None, None] + base_image[None]`
 images = amplitude[:, None, None, None] + base_image[None]
-# Run `patchify` to compute `patches`.
 patches = patchify(images)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(patches[0, 0], np.asarray(images[0, :2, :2, :]).reshape(-1))
-# Construct `hidden` via `jnp.array([[False, True, True, False]] * 4)`
 hidden = jnp.array([[False, True, True, False]] * 4)
-# Run `validate_mask` to perform the next check or state transition.
 validate_mask(hidden, patches.shape[:2])
 # The encoder receives only visible patches; original hidden pixels are targets only.
 visible = patches[:, [0, 3], :]
 # Construct and reshape `features` into the target tensor dimensions.
 features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
-# Construct `w` via `jnp.zeros((9, 16))`
 w = jnp.zeros((9, 16))
-# Compute `history` from `[]`
 history = []
 # Construct and reshape `loss` into the target tensor dimensions.
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
@@ -177,16 +164,12 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 ```python
 # Step 3 — 3. Fit the decoder and audit the reconstruction: The host loop checks the reduction independently.
 for _ in range(100):
-    # Run `step` to compute `(value, g)`.
     value, g = step(w)
-    # Append the current step result to `history`.
     history.append(float(value))
-    # Compute `w` from `w - 0.15 * g`
     w = w - 0.15 * g
 
 # Construct and reshape `prediction` into the target tensor dimensions.
 prediction = (features @ w).reshape(4, 4, 4)
-# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
 # A scalar host loop is independent of the vectorized reduction.
 expected = np.mean(
@@ -196,17 +179,13 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
-# Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)
 # Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     masked_mse(visible_changed, patches, hidden), loss(w), atol=1e-7
 )
-# Construct `held_images` via `jnp.array([0.2, 0.5])[:, None, None, None] + base_im...`
 held_images = jnp.array([0.2, 0.5])[:, None, None, None] + base_image[None]
-# Run `patchify` to compute `held_patches`.
 held_patches = patchify(held_images)
 # Construct and reshape `held_features` into the target tensor dimensions.
 held_features = jnp.concatenate(
@@ -216,9 +195,7 @@ held_features = jnp.concatenate(
 held_loss = float(
     masked_mse((held_features @ w).reshape(2, 4, 4), held_patches, hidden[:2])
 )
-# Assert invariant `held_loss < 0.02` holds
 assert held_loss < 0.02
-# Print diagnostic summary of the computed outputs.
 print(
     'Masked pixel MSE initial/final/held amplitudes:',
     history[0],
@@ -233,33 +210,26 @@ The host loop checks the reduction independently. Corrupting visible outputs che
 
 ```python
 # Step 1 — 1. Define patch layout and masked error: Trace the transpose against the numbered top-left patch.
-# Import jax for this computation.
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Function `patchify(images, patch)` implementing this stage's computation:
 def patchify(images, patch=2):
-    # Compute `b, h, w, c` from `images.shape`
     b, h, w, c = images.shape
     # Guard input contract (`h % patch or w % patch`) and fail fast if violated.
     if h % patch or w % patch:
         raise ValueError('image dimensions must be divisible by patch size')
-    # Return `images.reshape(b, h // patch, patch, w // patch, patch, c).transpose(0, 1, 3, 2, 4, 5).reshape(b, h // patch * (w // patch), patch * patch * c)` to the caller.
     return (
         images.reshape(b, h // patch, patch, w // patch, patch, c)
         .transpose(0, 1, 3, 2, 4, 5)
         .reshape(b, (h // patch) * (w // patch), patch * patch * c)
     )
 
-# Function `masked_mse(prediction, target, hidden)` implementing this stage's computation:
 def masked_mse(prediction, target, hidden):
     # Reduce along axis=-1 to compute `per_patch`.
     per_patch = jnp.mean((prediction - target) ** 2, axis=-1)
-    # Return `jnp.sum(jnp.where(hidden, per_patch, 0.0)) / jnp.sum(hidden)` to the caller.
     return jnp.sum(jnp.where(hidden, per_patch, 0.0)) / jnp.sum(hidden)
 
-# Function `validate_mask(selected, shape)` implementing this stage's computation:
 def validate_mask(selected, shape):
     # Convert `a` to a host NumPy array for inspection or verification.
     a = np.asarray(selected)
@@ -271,23 +241,17 @@ def validate_mask(selected, shape):
 amplitude = jnp.array([0.1, 0.3, 0.6, 0.8])
 # Construct and reshape `base_image` into the target tensor dimensions.
 base_image = jnp.arange(16, dtype=jnp.float32).reshape(4, 4, 1) / 32
-# Compute `images` from `amplitude[:, None, None, None] + base_image[None]`
 images = amplitude[:, None, None, None] + base_image[None]
-# Run `patchify` to compute `patches`.
 patches = patchify(images)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_array_equal(patches[0, 0], np.asarray(images[0, :2, :2, :]).reshape(-1))
-# Construct `hidden` via `jnp.array([[False, True, True, False]] * 4)`
 hidden = jnp.array([[False, True, True, False]] * 4)
-# Run `validate_mask` to perform the next check or state transition.
 validate_mask(hidden, patches.shape[:2])
 # The encoder receives only visible patches; original hidden pixels are targets only.
 visible = patches[:, [0, 3], :]
 # Construct and reshape `features` into the target tensor dimensions.
 features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
-# Construct `w` via `jnp.zeros((9, 16))`
 w = jnp.zeros((9, 16))
-# Compute `history` from `[]`
 history = []
 # Construct and reshape `loss` into the target tensor dimensions.
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
@@ -296,16 +260,12 @@ step = jax.jit(jax.value_and_grad(loss))
 
 # Step 3 — 3. Fit the decoder and audit the reconstruction: The host loop checks the reduction independently.
 for _ in range(100):
-    # Run `step` to compute `(value, g)`.
     value, g = step(w)
-    # Append the current step result to `history`.
     history.append(float(value))
-    # Compute `w` from `w - 0.15 * g`
     w = w - 0.15 * g
 
 # Construct and reshape `prediction` into the target tensor dimensions.
 prediction = (features @ w).reshape(4, 4, 4)
-# Assert invariant `history[-1] < history[0] * 0.02` holds
 assert history[-1] < history[0] * 0.02
 # A scalar host loop is independent of the vectorized reduction.
 expected = np.mean(
@@ -315,17 +275,13 @@ expected = np.mean(
         for k in [1, 2]
     ]
 )
-# Compute `np.testing.assert_allclose(loss(w), expected, rtol` as `1e-5)`.
 np.testing.assert_allclose(loss(w), expected, rtol=1e-5)
-# Compute `visible_changed` from `prediction.at[:, [0, 3], :].set(999.0)`
 visible_changed = prediction.at[:, [0, 3], :].set(999.0)
 # Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     masked_mse(visible_changed, patches, hidden), loss(w), atol=1e-7
 )
-# Construct `held_images` via `jnp.array([0.2, 0.5])[:, None, None, None] + base_im...`
 held_images = jnp.array([0.2, 0.5])[:, None, None, None] + base_image[None]
-# Run `patchify` to compute `held_patches`.
 held_patches = patchify(held_images)
 # Construct and reshape `held_features` into the target tensor dimensions.
 held_features = jnp.concatenate(
@@ -335,9 +291,7 @@ held_features = jnp.concatenate(
 held_loss = float(
     masked_mse((held_features @ w).reshape(2, 4, 4), held_patches, hidden[:2])
 )
-# Assert invariant `held_loss < 0.02` holds
 assert held_loss < 0.02
-# Print diagnostic summary of the computed outputs.
 print(
     'Masked pixel MSE initial/final/held amplitudes:',
     history[0],
@@ -368,24 +322,19 @@ Each image contains an amplitude and a fixed spatial pattern. Visible patches re
 
 ```python
 # Compute figure data for: Masked image modeling: reconstruct missing patches — recorded experiment
-# Compute `visual_data` from `{'kind':'line','xlabel':'completed parameter updates...`
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'hidden-pixel MSE (squared input units)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
-# Loop over `panel` in `visual_data.get('panels', [visual_data])`:
 for panel in visual_data.get('panels',[visual_data]):
-    # Compute `panel['x']` from `panel['series'][0]['x']`
     panel['x']=panel['series'][0]['x']
 
 # Convert `patch_comparison` to a host NumPy array for inspection or verification.
 patch_comparison=np.concatenate([np.asarray(patches[0,[1,2],:]),np.asarray(prediction[0,[1,2],:])],axis=0)
-# Compute `extra_panel` from `{'kind':'heatmap','values':patch_comparison.tolist()...`
 extra_panel={'kind':'heatmap','values':patch_comparison.tolist(),'rows':['target patch 1','target patch 2','predicted patch 1','predicted patch 2'],'columns':['pixel 0','pixel 1','pixel 2','pixel 3'],'unit':'raw pixel value','xlabel':'within-patch pixel order','ylabel':'hidden patch and source','title':'Hidden targets and final predictions for the first image'}
-# Compute `visual_data` from `{"panels":[*visual_data.get("panels",[visual_data]),...`
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:09.675769+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:52:02.405713+00:00. JAX 0.9.2.
 
 ```text
 Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464
@@ -411,9 +360,7 @@ np.testing.assert_allclose(
     masked_mse(bad_visible, patches, hidden),
     masked_mse(prediction, patches, hidden),
 )
-# Assert invariant `float(jnp.mean((bad_visible - patches) ** 2)) > 1000` holds
 assert float(jnp.mean((bad_visible - patches) ** 2)) > 1000
-# Print the observed values to compare against the expected result.
 print('Hidden MSE unchanged; full-image MSE is large.')
 ```
 
@@ -427,14 +374,10 @@ The disagreement identifies the reduction contract. Neither metric is universall
 
 ```python
 # Experiment — Make hidden information impossible to recover: The experiment isolates missing information.
-# Construct `ambiguous_targets` via `jnp.array([[[0.0]], [[2.0]]])`
 ambiguous_targets = jnp.array([[[0.0]], [[2.0]]])
-# Construct `ambiguous_mask` via `jnp.ones((2, 1), dtype=bool)`
 ambiguous_mask = jnp.ones((2, 1), dtype=bool)
 
-# Function `ambiguity_loss(value)` implementing this stage's computation:
 def ambiguity_loss(value):
-    # Return `masked_mse(jnp.full_like(ambiguous_targets, value), ambiguous_targets, ambiguous_mask)` to the caller.
     return masked_mse(
         jnp.full_like(ambiguous_targets, value), ambiguous_targets, ambiguous_mask
     )
@@ -445,7 +388,6 @@ np.testing.assert_allclose(
 )
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(ambiguity_loss)(1.0), 0.0, atol=1e-7)
-# Print the observed values to compare against the expected result.
 print('Ambiguous target MSE at predictions 0, 1, 2: 2, 1, 2')
 ```
 
@@ -463,7 +405,8 @@ Verify the bottom-right patch against a direct slice and explain why a whole-arr
 - `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
 
 **Step-by-step implementation plan:**
-1. Print the observed values to compare against the expected result.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -472,7 +415,6 @@ Verify the bottom-right patch against a direct slice and explain why a whole-arr
 np.testing.assert_array_equal(
     patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
 )
-# Print the observed values to compare against the expected result.
 print('Bottom-right patch order verified.')
 ```
 
@@ -483,7 +425,6 @@ print('Bottom-right patch order verified.')
 np.testing.assert_array_equal(
     patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
 )
-# Print the observed values to compare against the expected result.
 print('Bottom-right patch order verified.')
 ```
 
@@ -509,20 +450,16 @@ Measure the shortcut, then inspect which function inputs contain hidden pixels.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Assert invariant `float(masked_mse(shortcut, patches, hidden)) == 0.0` holds
-2. Check tensor shape invariant: `features.shape[1] == 9`
-3. Print the observed values to compare against the expected result.
+1. Check tensor shape invariant: `features.shape[1] == 9`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Expose the leakage shortcut (Transfer): An information-flow check is necessary because the leaked...
 shortcut = ...  # TODO: compute shortcut
-# Assert invariant `float(masked_mse(shortcut, patches, hidden)) == 0.0` holds
 assert float(masked_mse(shortcut, patches, hidden))  # TODO: complete assertion check
 # Check tensor shape invariant: `features.shape[1] == 9`
 assert features.shape[1]  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print('The zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.')
 ```
 
@@ -531,11 +468,9 @@ print('The zero-loss shortcut receives hidden pixels; the real features contain 
 ```python
 # Expose the leakage shortcut (Transfer): An information-flow check is necessary because the leaked...
 shortcut = patches
-# Assert invariant `float(masked_mse(shortcut, patches, hidden)) == 0.0` holds
 assert float(masked_mse(shortcut, patches, hidden)) == 0.0
 # Check tensor shape invariant: `features.shape[1] == 9`
 assert features.shape[1] == 9
-# Print the observed values to compare against the expected result.
 print('The zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.')
 ```
 
@@ -564,8 +499,7 @@ Use explicit image slices inside the oracle; do not copy the reshape/transpose i
 1. Construct and reshape `numbered` into the target tensor dimensions.
 2. Construct and reshape `oracle` into the target tensor dimensions.
 3. Create device-backed JAX array ``.
-4. Compute `changed_images` from `images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].a...`
-5. Run `patchify` to compute `changed_patches`.
+4. Execute `np.testing.assert_array_equal(changed_patches[:, [0, 3], :],`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -588,17 +522,13 @@ oracle = np.stack(...)  # TODO: compute oracle
 )
 # Create device-backed JAX array ``.
 np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
-# Compute `changed_images` from `images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].a...`
 changed_images = ...  # TODO: compute changed_images
-# Run `patchify` to compute `changed_patches`.
 changed_patches = patchify(...)  # TODO: compute changed_patches
 # Execute `np.testing.assert_array_equal(changed_patches[:, [0, 3], :],`
 np.testing.assert_array_equal(changed_patches[:, [0, 3], :], visible)
-# Assert invariant `not np.array_equal(` holds
 assert not np.array_equal(  # TODO: complete assertion check
     np.asarray(changed_patches[:, [1, 2], :]), np.asarray(patches[:, [1, 2], :])
 )
-# Print the observed values to compare against the expected result.
 print('All rectangular RGB patches agree; hidden-pixel intervention preserves visible features.')
 ```
 
@@ -623,17 +553,13 @@ oracle = np.stack(
 )
 # Create device-backed JAX array ``.
 np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
-# Compute `changed_images` from `images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].a...`
 changed_images = images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].add(-9.0)
-# Run `patchify` to compute `changed_patches`.
 changed_patches = patchify(changed_images)
 # Execute `np.testing.assert_array_equal(changed_patches[:, [0, 3], :],`
 np.testing.assert_array_equal(changed_patches[:, [0, 3], :], visible)
-# Assert invariant `not np.array_equal(` holds
 assert not np.array_equal(
     np.asarray(changed_patches[:, [1, 2], :]), np.asarray(patches[:, [1, 2], :])
 )
-# Print the observed values to compare against the expected result.
 print('All rectangular RGB patches agree; hidden-pixel intervention preserves visible features.')
 ```
 

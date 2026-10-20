@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-01",
-  "contentHash": "53d4250a21b46a4773f2b54e55803a4b52587ec636e128318ac6aa9c99297b26",
-  "executedAt": "2026-10-13T09:00:57.197305+00:00",
+  "contentHash": "4605e7019f566f40efc6dba64e28ee6d18610e761aabe9e5eb3e84c46d3896c2",
+  "executedAt": "2026-10-20T10:50:05.982947+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Forward program:\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nOperation: add output shapes: [(3,)]\nOperation: mul output shapes: [(3,)]\nOperation: reduce_sum output shapes: [()]\nValue / gradient: 29.0 [4. 6. 8.]\nForward program:\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nOperation: add output shapes: [(3,)]\nOperation: mul output shapes: [(3,)]\nOperation: reduce_sum output shapes: [()]\nValue / gradient: 29.0 [4. 6. 8.]\nDerivative program: { lambda ; a:f32[3]. let\n    b:f32[3] = add a 1.0:f32[]\n    c:f32[3] = mul b b\n    _:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n    d:f32[3] = broadcast_in_dim 1.0:f32[]\n    e:f32[3] = mul b d\n    f:f32[3] = mul d b\n    g:f32[3] = add_any e f\n  in (g,) }\nCaptured: { lambda a:f32[3]; b:f32[3]. let\n    c:f32[3] = add b a\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nExplicit: { lambda ; a:f32[3] b:f32[3]. let\n    c:f32[3] = add a b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\n{ lambda ; a:f32[3]. let\n    b:f32[3] = add a 2.0:f32[]\n    c:f32[3] = mul b b\n    d:f32[] = reduce_sum[axes=(0,) out_sharding=None] c\n  in (d,) }\nUnrolled: { lambda ; a:f32[]. let\n    b:f32[] = mul 0.5:f32[] a\n    c:f32[] = add b 1.0:f32[]\n    d:f32[] = mul 0.5:f32[] c\n    e:f32[] = add d 1.0:f32[]\n    f:f32[] = mul 0.5:f32[] e\n    g:f32[] = add f 1.0:f32[]\n    h:f32[] = mul 0.5:f32[] g\n    i:f32[] = add h 1.0:f32[]\n  in (i,) }\nScanned: { lambda ; a:f32[]. let\n    b:f32[] _:f32[4] = scan[\n      _split_transpose=False\n      jaxpr={ lambda ; c:f32[]. let\n          d:f32[] = mul 0.5:f32[] c\n          e:f32[] = add d 1.0:f32[]\n        in (e, e) }\n      length=4\n      linear=(False,)\n      num_carry=1\n      num_consts=0\n      reverse=False\n      unroll=1\n    ] a\n  in (b,) }\nExpected failure: traced boolean used by Python if\nRepaired: { lambda ; a:f32[3]. let\n    b:f32[1] = slice[limit_indices=(1,) start_indices=(0,) strides=None] a\n    c:f32[] = squeeze[dimensions=(0,)] b\n    d:bool[] = gt c 0.0:f32[]\n    e:i32[] = convert_element_type[new_dtype=int32 weak_type=False] d\n    f:f32[] = cond[\n      branches=(\n        { lambda ; g:f32[3]. let\n            h:f32[] = reduce_sum[axes=(0,) out_sharding=None] g\n            i:f32[] = neg h\n          in (i,) }\n        { lambda ; j:f32[3]. let\n            k:f32[] = reduce_sum[axes=(0,) out_sharding=None] j\n          in (k,) }\n      )\n    ] e a\n  in (f,) }\nPASS: internals-01\n",
   "notebookCells": [
     {
-      "sourceHash": "1d7649603855f8ac255c047fa1caefa1790fdbecb54625324236b81059f29649",
+      "sourceHash": "eff86fe9ed3ae9b747934b9c15bab4156bda9956ea65399d0f2ee2f08e0ed2b5",
       "outputs": []
     },
     {
-      "sourceHash": "4f74b576e8c7597cecb2467aad311add4cbf6bb80aa48f3a5cd0377668962e81",
+      "sourceHash": "e087dc00fe168c32364aeadae08cd3050d042d53892969996b2731e1986ff3d8",
       "outputs": []
     },
     {
-      "sourceHash": "d04f1e22ae6bef2f63ebf47f3e040ecdd2041dc5c2cc64eedcb0dbdea20090cf",
+      "sourceHash": "a615d23f3018ed9f5dd084feda2e27daf19d43bd8e6e6634fd56e26c3caa8454",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "9722335906e3ecd48fed842cb3c29eab4156f36e6ed695e9544f76e4fc0134ac",
+      "sourceHash": "e1d218b4956f823303958dce3c0fd521045a216791f2e28ef6113abc9c4d5b37",
       "outputs": [
         {
           "output_type": "stream",
@@ -83,7 +83,7 @@
       ]
     },
     {
-      "sourceHash": "340e02fbc8d60159446e2e8548b8bb4c6d82b1015c3f5b787e1a993847dd848b",
+      "sourceHash": "938d5bd95ef982c99d4d5e4715e22d7f0111f7d5ac67c81a6977d1c1001ba0f5",
       "outputs": [
         {
           "output_type": "stream",
@@ -103,7 +103,7 @@
       ]
     },
     {
-      "sourceHash": "2de81932b30e6520c65ba979eb91c583e79bd745e30835daf17906c22a77fbaf",
+      "sourceHash": "7e1b59af8469418c61b7cc4ab3c03604bb60672dbb60114bb83c8b5cd7843dcc",
       "outputs": [
         {
           "output_type": "stream",
@@ -122,11 +122,11 @@
       ]
     },
     {
-      "sourceHash": "1805df4f08ef0fe5a4ba8dbe6c712c237ecfeed6d1932195b1f64b9757a50861",
+      "sourceHash": "258970a50282e6cf8c7a1f066d744327b6dea81fceb70501cf42e4f1922a4063",
       "outputs": []
     },
     {
-      "sourceHash": "a6ac66f5df3d9c08753392a2a36d1a9cf7c98c41610b964dd8e880183ebffc3b",
+      "sourceHash": "9eb88d230fa5d4a0f7dfc3b51f3a0f2d6163618f504439d8004e376560644505",
       "outputs": [
         {
           "output_type": "stream",
@@ -142,11 +142,11 @@
       ]
     },
     {
-      "sourceHash": "0abb43f6cb89fe829c44b84b5004275ee6e2506742f8b5e74208df799a068db7",
+      "sourceHash": "9298ea2324e8e481d7f09bdb46a90a02dbbfb8cf401f0066354e5c2c66a5183e",
       "outputs": []
     },
     {
-      "sourceHash": "c3bcd5ce4a1b8352225bfafde50a0eeceb411279e1513a5ea6452fd6ab031888",
+      "sourceHash": "6822abe7758b4b5601eddbb8a5afacccb292a01e2c0759d4c476c4982eb79173",
       "outputs": [
         {
           "output_type": "stream",
@@ -182,11 +182,11 @@
       ]
     },
     {
-      "sourceHash": "b098171be8822c803a86849d939cb7e1f44e558ee0d2371777295a66765b2f6e",
+      "sourceHash": "f846f840f506d7a7dd6da696c6c2f8f165591851d7557de772c17e864a86c22c",
       "outputs": []
     },
     {
-      "sourceHash": "e578a20a5d3f1442a8690ad1a1d8cb5a68de1899a1d6ac63207c4897ab395ad0",
+      "sourceHash": "91df3cffec8b6f1a93c205e5aa8670a9f6c607898457ca62931a41e873b53195",
       "outputs": [
         {
           "output_type": "stream",

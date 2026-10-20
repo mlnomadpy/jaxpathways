@@ -1,7 +1,7 @@
 {
   "schemaVersion": 1,
   "id": "recovery-audit",
-  "title": "Verify checkpoint integrity, NaN guards, and deterministic replay",
+  "title": "Resume optimizer and PRNG state across an interrupted training update",
   "pathwayId": "ship",
   "status": "authored",
   "hardware": "CPU",
@@ -17,56 +17,49 @@
   "stages": [
     {
       "id": "1",
-      "title": "Parameter and state contract",
-      "command": "python3 projects/recovery-audit/tests/check.py --stage 1",
-      "evidence": "Deterministic PRNG key split and explicit tensor shapes",
-      "expected": "PASS stage 1: parameter initialization and shape contract (recovery-audit)",
-      "diagnosis": "Verify that PRNG keys are split before parameter initialization and shapes match (d_model, d_out).",
-      "codeGuide": "In `projects/recovery-audit/starter/model.py`, implement `init_params(...)` with explicit `jax.random.split` and float32 arrays.",
-      "starterSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    # Step 1: Split PRNG key from `seed` into weight and projection subkeys.\n    # Step 2: Initialize `w_enc` of shape `(d_model, d_out)` and zero `b_enc`.\n    raise NotImplementedError('Stage 1: implement init_params')",
-      "solutionSnippet": "def init_params(seed: int = 0, d_model: int = 16, d_out: int = 8) -> dict:\n    key = jax.random.key(seed)\n    k_w, k_p = jax.random.split(key)\n    scale = 1.0 / jnp.sqrt(jnp.float32(d_model))\n    return {\n        'w_enc': jax.random.normal(k_w, (d_model, d_out), dtype=jnp.float32) * scale,\n        'b_enc': jnp.zeros((d_out,), dtype=jnp.float32),\n        'proj': jax.random.normal(k_p, (d_out, d_out), dtype=jnp.float32) / jnp.sqrt(jnp.float32(d_out)),\n        'temperature': jnp.float32(0.07),\n    }"
+      "title": "Contract and independent calculation",
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation starter --stage 1",
+      "evidence": "Run one update and inspect weight, momentum, cursor, and key changes.",
+      "expected": "PASS recovery-audit stage 1",
+      "diagnosis": "Run one update and inspect weight, momentum, cursor, and key changes.",
+      "codeGuide": "Implement the relevant contract in `projects/recovery-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence.",
+      "starterSnippet": "\"\"\"Starter: preserve optimizer and RNG state across an interrupted update.\"\"\"\nimport hashlib, json, os, tempfile\nfrom pathlib import Path\nimport numpy as np\n\ndef train_step(state, batch, config):\n    raise NotImplementedError(\"update weight, momentum, cursor, and RNG key deterministically\")\ndef save_checkpoint(path, step, config, arrays):\n    raise NotImplementedError(\"write an integrity-bound atomic checkpoint\")\ndef load_checkpoint(path, expected_config):\n    raise NotImplementedError(\"verify checkpoint bytes and configuration before restore\")",
+      "solutionSnippet": "\"\"\"Training cursor checkpoint with optimizer momentum and explicit PRNG continuation.\"\"\"\nimport hashlib, json, os, tempfile\nfrom pathlib import Path\nimport numpy as np\n\ndef _digest(step, config, arrays):\n    h=hashlib.sha256(json.dumps({\"step\":step,\"config\":config},sort_keys=True).encode())\n    for name in sorted(arrays): h.update(name.encode()); h.update(np.asarray(arrays[name]).tobytes())\n    return h.hexdigest()\ndef train_step(state, batch, config):\n    w=np.asarray(state[\"weight\"]); velocity=np.asarray(state[\"velocity\"]); key=np.asarray(state[\"rng_key\"],dtype=np.uint32)\n    seed=int(key[0]) | (int(key[1])<<32); rng=np.random.default_rng(seed)\n    noise=rng.normal(size=w.shape).astype(np.float32)*config[\"noise_scale\"]\n    grad=(w-batch)+noise\n    next_velocity=config[\"momentum\"]*velocity+grad\n    return {\"weight\":w-config[\"lr\"]*next_velocity,\"velocity\":next_velocity,\"rng_key\":rng.bit_generator.random_raw(2).astype(np.uint32),\"cursor\":np.asarray(state[\"cursor\"]+1,dtype=np.int64)}\ndef save_checkpoint(path, step, config, arrays):\n    arrays={k:np.asarray(v) for k,v in arrays.items()}; digest=_digest(step,config,arrays); path=Path(path); path.parent.mkdir(parents=True,exist_ok=True)\n    fd,tmp=tempfile.mkstemp(prefix=path.name+\".\",suffix=\".tmp\",dir=path.parent)\n    try:\n        with os.fdopen(fd,\"wb\") as f:\n            np.savez(f,step=np.int64(step),config=np.array(json.dumps(config,sort_keys=True)),digest=np.array(digest),**arrays); f.flush(); os.fsync(f.fileno())\n        os.replace(tmp,path)\n    finally:\n        if os.path.exists(tmp): os.unlink(tmp)\ndef load_checkpoint(path, expected_config):\n    with np.load(path,allow_pickle=False) as z:\n        step=int(z[\"step\"]); config=json.loads(str(z[\"config\"])); digest=str(z[\"digest\"]); arrays={k:z[k] for k in z.files if k not in {\"step\",\"config\",\"digest\"}}\n    if config != expected_config: raise ValueError(\"checkpoint configuration mismatch\")\n    if digest != _digest(step,config,arrays): raise ValueError(\"checkpoint integrity failure\")\n    return {\"step\":step,\"config\":config,\"arrays\":arrays}"
     },
     {
       "id": "2",
-      "title": "Masked forward pass and normalization",
-      "command": "python3 projects/recovery-audit/tests/check.py --stage 2",
-      "evidence": "Unit-norm embeddings on valid rows and exact zeros on masked rows",
-      "expected": "PASS stage 2: masked forward representation and unit normalization (recovery-audit)",
-      "diagnosis": "Guard division by zero with jnp.maximum(norms, 1e-6) and apply the row mask both before and after normalization.",
-      "codeGuide": "In `projects/recovery-audit/starter/model.py`, implement `forward_batch(...)` with input shape validation and L2 normalization.",
-      "starterSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    # Step 1: Guard input rank and feature dimension.\n    # Step 2: Compute projections and unit-normalize valid rows.\n    raise NotImplementedError('Stage 2: implement forward_batch')",
-      "solutionSnippet": "def forward_batch(params: dict, x: jnp.ndarray, mask: jnp.ndarray | None = None) -> dict:\n    raw = jnp.tanh(x @ params['w_enc'] + params['b_enc']) @ params['proj']\n    norms = jnp.linalg.norm(raw, axis=-1, keepdims=True)\n    embeddings = raw / jnp.maximum(norms, 1e-6)\n    return {'raw': raw, 'embeddings': embeddings, 'norms': jnp.squeeze(norms, axis=-1)}"
+      "title": "Changed condition and diagnosis",
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation starter --stage 2",
+      "evidence": "Compare uninterrupted training with a checkpointed resume at the next update.",
+      "expected": "PASS recovery-audit stage 2",
+      "diagnosis": "Compare uninterrupted training with a checkpointed resume at the next update.",
+      "codeGuide": "Implement the relevant contract in `projects/recovery-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "3",
-      "title": "Autodiff and finite-difference verification",
-      "command": "python3 projects/recovery-audit/tests/check.py --stage 3",
-      "evidence": "Agreement between jax.value_and_grad and central finite differences",
-      "expected": "PASS stage 3: autodiff vs finite-difference gradient check (recovery-audit)",
-      "diagnosis": "Ensure the loss function is pure and normalizes target vectors consistently.",
-      "codeGuide": "In `projects/recovery-audit/starter/model.py`, implement `compute_loss_and_grads(...)` using `jax.value_and_grad`.",
-      "starterSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    # Step 1: Differentiate the scalar alignment objective with `jax.value_and_grad`.\n    raise NotImplementedError('Stage 3: implement compute_loss_and_grads')",
-      "solutionSnippet": "def compute_loss_and_grads(params: dict, x: jnp.ndarray, targets: jnp.ndarray):\n    return jax.value_and_grad(_objective)(params, x, targets)"
+      "title": "Retained evidence",
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/recovery-audit",
+      "evidence": "Reject incompatible configuration and corrupted checkpoint contents.",
+      "expected": "PASS recovery-audit stage 3",
+      "diagnosis": "Reject incompatible configuration and corrupted checkpoint contents.",
+      "codeGuide": "Implement the relevant contract in `projects/recovery-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     },
     {
       "id": "4",
-      "title": "Compiled scan loop and held-out qualification",
-      "command": "python3 projects/recovery-audit/tests/check.py --stage 4",
-      "evidence": "Monotonic training loss reduction and finite held-out evaluation",
-      "expected": "PASS stage 4: compiled scan training and held-out qualification (recovery-audit)",
-      "diagnosis": "Check that jax.lax.scan carries updated parameters forward on every step.",
-      "codeGuide": "In `projects/recovery-audit/starter/model.py`, implement `qualification_report(...)` using `jax.lax.scan`.",
-      "starterSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    # Step 1: Run `jax.lax.scan` over `steps` updates and evaluate held-out loss.\n    raise NotImplementedError('Stage 4: implement qualification_report')",
-      "solutionSnippet": "def qualification_report(seed: int = 0, steps: int = 25, lr: float = 0.1) -> dict:\n    fitted, history = jax.lax.scan(step_fn, params, None, length=steps)\n    return {'initial_loss': float(history[0]), 'final_loss': float(history[-1]), 'finite': True}"
+      "title": "Integrated project check",
+      "command": "python3 projects/recovery-audit/tests/check.py --implementation starter --stage 4",
+      "evidence": "Run all prior checks and preserve their failure boundaries.",
+      "expected": "PASS recovery-audit stage 4",
+      "diagnosis": "Run all prior checks and preserve their failure boundaries.",
+      "codeGuide": "Implement the relevant contract in `projects/recovery-audit/starter/model.py`. Stage 2 changes a condition; stage 3 writes inspectable evidence."
     }
   ],
   "rubric": [
-    "Initialize parameters deterministically from explicit PRNG keys",
-    "Enforce input shape contracts and masked row normalization",
-    "Verify automatic gradients against central finite differences",
-    "Compile the multi-step update with jax.lax.scan and report held-out metrics"
+    "Run one update and inspect weight, momentum, cursor, and key changes.",
+    "Compare uninterrupted training with a checkpointed resume at the next update.",
+    "Reject incompatible configuration and corrupted checkpoint contents."
   ],
-  "setupNote": "Open `projects/recovery-audit/starter/model.py` and implement each stage, verifying with `python3 projects/recovery-audit/tests/check.py --stage 1` through `--stage 4`.",
+  "setupNote": "Run stages 1 through 4 using the commands shown. Stage 3 writes persistent evidence under `runs/recovery-audit/` when using its documented `--evidence-dir`; without that option, evidence stays in a temporary directory. The untouched starter deliberately fails.",
   "workspaceFile": "projects/recovery-audit/starter/model.py",
-  "referenceCommand": "python3 projects/recovery-audit/tests/check.py --implementation solution --stage all"
+  "referenceCommand": "python3 projects/recovery-audit/tests/check.py --implementation solution --stage 4"
 }

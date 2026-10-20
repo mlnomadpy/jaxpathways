@@ -1,0 +1,74 @@
+{
+  "schemaVersion": 1,
+  "id": "embedding-lineage",
+  "title": "Trace a tiny bidirectional encoder from pretraining to retrieval",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU only; tiny Flax Linen model; accelerator behavior is untested",
+  "source": "projects/embedding-lineage/README.md",
+  "requiredLessonIds": [
+    "transformers-01",
+    "transformers-02",
+    "pretraining-01",
+    "pretraining-03",
+    "recovery-04"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Masked-token pretraining",
+      "command": "python3 projects/embedding-lineage/tests/check.py --implementation projects/embedding-lineage/my_model.py --stage 1",
+      "evidence": "Selected-token cross-entropy agrees with independent NumPy calculation; train history and validation NLL are saved.",
+      "expected": "PASS embedding-lineage stages 1",
+      "diagnosis": "Check the target IDs, selected-position mask and denominator before changing the optimizer.",
+      "codeGuide": "In my_model.py implement encode and masked_lm_loss. Keep padding, input corruption and selected target positions separate. Check the independent token-loss calculation before training."
+    },
+    {
+      "id": "2",
+      "title": "Contrastive continuation",
+      "command": "python3 projects/embedding-lineage/tests/check.py --implementation projects/embedding-lineage/my_model.py --stage 2",
+      "evidence": "Symmetric two-view InfoNCE agrees with independent NumPy calculation and inherits the verified stage-1 checkpoint.",
+      "expected": "PASS embedding-lineage stages 2",
+      "diagnosis": "Check that the positive is the same passage across independently corrupted views and that both score directions are included.",
+      "codeGuide": "In my_model.py implement contrastive_loss for both score directions. The two views share passage identity but receive independent masks. Load the verified stage-1 handoff before updating parameters."
+    },
+    {
+      "id": "3",
+      "title": "Supervised query-positive adaptation",
+      "command": "python3 projects/embedding-lineage/tests/check.py --implementation projects/embedding-lineage/my_model.py --stage 3",
+      "evidence": "Standard multi-positive objective agrees with independent NumPy calculation; only curated training query-positive pairs are used.",
+      "expected": "PASS embedding-lineage stages 3",
+      "diagnosis": "Check the positive set and per-anchor averaging; a difference of logsumexp totals is not the standard mean-positive SupCon loss.",
+      "codeGuide": "In my_model.py implement supervised_contrastive_loss using the mean positive log-probability for each eligible anchor. Train only on the curated training query-positive pairs and keep validation judgments out of the update."
+    },
+    {
+      "id": "4",
+      "title": "Held-out retrieval and export",
+      "command": "python3 projects/embedding-lineage/tests/check.py --implementation projects/embedding-lineage/my_model.py --stage 4",
+      "evidence": "Test-chapter dense retrieval is compared with BM25; checksum/config corruption is rejected; two fresh processes reproduce the in-process probe.",
+      "expected": "PASS embedding-lineage stages 4",
+      "diagnosis": "Inspect the exact query, qrel, ranking and checkpoint lineage. Five judgments are a pilot, not a benchmark.",
+      "codeGuide": "Use the supplied evaluator and export verifier. Inspect the complete query inventory, compare dense retrieval with BM25, explain the poor result and retain the actual lineage/reload evidence. This stage does not claim production qualification."
+    }
+  ],
+  "rubric": [
+    "All four objective implementations pass independent NumPy checks.",
+    "No query or judged passage crosses a source-group split.",
+    "Checkpoint parent, data/config/tokenizer hashes and parameter bytes are verified at each transition.",
+    "Held-out metrics and weak results remain visible with pilot limitations.",
+    "Fresh-process exported inference is deterministic and altered artifacts are rejected."
+  ],
+  "workspaceFile": "projects/embedding-lineage/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/embedding-lineage/starter/model.py projects/embedding-lineage/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/embedding-lineage/starter/model.py projects/embedding-lineage/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/embedding-lineage/tests/check.py --implementation solution --stage all --output runs/embedding-lineage/reference",
+  "setupNote": "Run from the course workspace root with the repository CPU Python environment. The corpus and hand-authored judgments are frozen locally; there is no runtime data download, cloud service, credential, or upload. The checker defaults to the learner starter. Pass --implementation solution explicitly to run the answer key. Execute stages in order using the same output directory."
+}

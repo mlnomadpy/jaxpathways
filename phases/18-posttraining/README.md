@@ -6,7 +6,7 @@ Connect supervised demonstrations, frozen-base LoRA, reward modeling, sampled PP
 
 Predict the mask, denominator or preference direction before training. Keep independent objective checks and changed-condition evidence.
 
-**Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning; 12: Reinforcement learning; 19: TPU Setup: Provisioning & Runtime Verification; 20: TPU Workflows: Launching Jobs & Checkpointed Experiments; 21: TPU Systems: Generations, Memory, Precision & XProf.
+**Prerequisites:** 17: Self-supervised pretraining: masked and contrastive learning.
 
 **Hardware:** Executed CPU synthetic objectives; large-scale and human-feedback evaluation remain separate.
 
@@ -68,7 +68,7 @@ Complete stages 4–8 of training-methods. Retain shifted token-mask checks, fro
 
 ### Further work
 
-The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work.
+The PPO lab is a terminal synthetic preference bandit, not full language-model RLHF. Human preference collection, sequence PPO/value models, large-model PEFT and held-out human evaluation remain separate work. For the learned-reward PPO lesson, complete rl-01 through rl-04 first. Response-only SFT and dense LoRA do not require the RL phase.
 
 ## Lesson sequence
 
@@ -134,11 +134,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-An audited pretraining and adaptation objective toolkit.
+Audit response-token SFT masking and preference-pair loss.
 
 **Demonstrate:** Complete stages 4–8 of training-methods. Retain shifted token-mask checks, frozen-base/merge evidence, preference oracles, signed PPO clipping and fixed-reference DPO comparisons.
 
-Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Copy `projects/training-methods/starter/methods.py` to `projects/training-methods/my_methods.py` and write your code in `projects/training-methods/my_methods.py`. Run `python3 projects/training-methods/tests/check.py --implementation projects/training-methods/my_methods.py --stage 4` from the top-level folder to verify stages 4, 5, 6, 7, 8.
+Project status: implemented staged practice · [Open source](../../projects/posttraining-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/posttraining-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/posttraining-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Audit pretraining and post-training objectives](../../projects/training-methods/README.md).
 

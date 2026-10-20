@@ -82,31 +82,21 @@ Create main.py for the first block, then append subsequent blocks in order using
 
 ```python
 # Step 1 — Define a small vector map and derive its Jacobian: The map has two inputs and two outputs.
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
-# Function `mapping(x)` implementing this stage's computation:
 def mapping(x):
-    # Compute `a,b` from `x`
     a,b=x
-    # Return `jnp.array([a * b, jnp.sin(a) + b * b])` to the caller.
     return jnp.array([a*b,jnp.sin(a)+b*b])
-# Construct `x` via `jnp.array([0.4,-0.7])`
 x=jnp.array([0.4,-0.7])
-# Construct `v` via `jnp.array([1.2,-0.3])`
 v=jnp.array([1.2,-0.3])
-# Construct `u` via `jnp.array([0.5,2.0])`
 u=jnp.array([0.5,2.0])
 # Convert `(a, b)` to a host NumPy array for inspection or verification.
 a,b=np.asarray(x)
-# Compute `jacobian` from `np.array([[b,a],[np.cos(a),2*b]])`
 jacobian=np.array([[b,a],[np.cos(a),2*b]])
-# Compute `expected_value` from `np.array([a*b,np.sin(a)+b*b])`
 expected_value=np.array([a*b,np.sin(a)+b*b])
 ```
 
@@ -122,23 +112,16 @@ Create main.py for the first block, then append subsequent blocks in order using
 value,jvp=jax.jvp(mapping,(x,),(v,))
 # Compute exact directional derivative / Jacobian / Hessian (`(value_again, pullback)`).
 value_again,pullback=jax.vjp(mapping,x)
-# Run `pullback` to compute `(vjp,)`.
 vjp,=pullback(u)
-# Compute `np.testing.assert_allclose(value,expected_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(value,expected_value,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)
-# Evaluate `jnp.vdot(u, jvp)` and convert the result into Python scalar/collection `left`.
-# Evaluate `jnp.vdot(vjp, v)` and convert the result into Python scalar/collection `right`.
 left=float(jnp.vdot(u,jvp))
 right=float(jnp.vdot(vjp,v))
-# Compute `np.testing.assert_allclose(left,right,rtol` as `1e-12)`.
 np.testing.assert_allclose(left,right,rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Jacobian:",jacobian)
-# Print diagnostic summary of the computed outputs.
 print("JVP:",np.asarray(jvp),"VJP:",np.asarray(vjp),"adjoint pair:",left,right)
 ```
 
@@ -151,27 +134,19 @@ Create main.py for the first block, then append subsequent blocks in order using
 ```python
 # Step 3 — Compute curvature without materializing a Hessian: For squared residuals, the Hessian includes a...
 def objective(z):
-    # Return `0.5 * jnp.vdot(mapping(z), mapping(z))` to the caller.
     return 0.5*jnp.vdot(mapping(z),mapping(z))
 # Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient=jax.grad(objective)(x)
 # Differentiate the objective to obtain `hvp` via automatic differentiation.
 hvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]
-# Compute `y` from `expected_value`
 y=expected_value
-# Compute `hessian_0` from `np.array([[0.,1.],[1.,0.]])`
 hessian_0=np.array([[0.,1.],[1.,0.]])
-# Compute `hessian_1` from `np.array([[-np.sin(a),0.],[0.,2.]])`
 hessian_1=np.array([[-np.sin(a),0.],[0.,2.]])
-# Perform matrix contraction / projection to compute `hessian`.
 hessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)
-# Compute `np.testing.assert_allclose(hessian,hessian.T,atol` as `1e-12)`.
 np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)
-# Print diagnostic summary of the computed outputs.
 print("Hessian-vector product:",np.asarray(hvp))
 ```
 
@@ -181,31 +156,21 @@ For squared residuals, the Hessian includes a Jacobian-transpose-Jacobian term a
 
 ```python
 # Step 1 — Define a small vector map and derive its Jacobian: The map has two inputs and two outputs.
-# Import jax for this computation.
 import jax
 # Update state in place with the new values.
 jax.config.update("jax_enable_x64", True)
-# Import jax.numpy for this computation.
 import jax.numpy as jnp
 import numpy as np
 
-# Function `mapping(x)` implementing this stage's computation:
 def mapping(x):
-    # Compute `a,b` from `x`
     a,b=x
-    # Return `jnp.array([a * b, jnp.sin(a) + b * b])` to the caller.
     return jnp.array([a*b,jnp.sin(a)+b*b])
-# Construct `x` via `jnp.array([0.4,-0.7])`
 x=jnp.array([0.4,-0.7])
-# Construct `v` via `jnp.array([1.2,-0.3])`
 v=jnp.array([1.2,-0.3])
-# Construct `u` via `jnp.array([0.5,2.0])`
 u=jnp.array([0.5,2.0])
 # Convert `(a, b)` to a host NumPy array for inspection or verification.
 a,b=np.asarray(x)
-# Compute `jacobian` from `np.array([[b,a],[np.cos(a),2*b]])`
 jacobian=np.array([[b,a],[np.cos(a),2*b]])
-# Compute `expected_value` from `np.array([a*b,np.sin(a)+b*b])`
 expected_value=np.array([a*b,np.sin(a)+b*b])
 
 # Step 2 — Push a direction forward and pull a measurement backward: The VJP returns one cotangent per input argument, hence the...
@@ -213,48 +178,33 @@ expected_value=np.array([a*b,np.sin(a)+b*b])
 value,jvp=jax.jvp(mapping,(x,),(v,))
 # Compute exact directional derivative / Jacobian / Hessian (`(value_again, pullback)`).
 value_again,pullback=jax.vjp(mapping,x)
-# Run `pullback` to compute `(vjp,)`.
 vjp,=pullback(u)
-# Compute `np.testing.assert_allclose(value,expected_value,rtol` as `1e-12)`.
 np.testing.assert_allclose(value,expected_value,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(jvp,jacobian@np.asarray(v),rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(vjp,jacobian.T@np.asarray(u),rtol=1e-12)
-# Evaluate `jnp.vdot(u, jvp)` and convert the result into Python scalar/collection `left`.
-# Evaluate `jnp.vdot(vjp, v)` and convert the result into Python scalar/collection `right`.
 left=float(jnp.vdot(u,jvp))
 right=float(jnp.vdot(vjp,v))
-# Compute `np.testing.assert_allclose(left,right,rtol` as `1e-12)`.
 np.testing.assert_allclose(left,right,rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Jacobian:",jacobian)
-# Print diagnostic summary of the computed outputs.
 print("JVP:",np.asarray(jvp),"VJP:",np.asarray(vjp),"adjoint pair:",left,right)
 
 # Step 3 — Compute curvature without materializing a Hessian: For squared residuals, the Hessian includes a...
 def objective(z):
-    # Return `0.5 * jnp.vdot(mapping(z), mapping(z))` to the caller.
     return 0.5*jnp.vdot(mapping(z),mapping(z))
 # Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient=jax.grad(objective)(x)
 # Differentiate the objective to obtain `hvp` via automatic differentiation.
 hvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]
-# Compute `y` from `expected_value`
 y=expected_value
-# Compute `hessian_0` from `np.array([[0.,1.],[1.,0.]])`
 hessian_0=np.array([[0.,1.],[1.,0.]])
-# Compute `hessian_1` from `np.array([[-np.sin(a),0.],[0.,2.]])`
 hessian_1=np.array([[-np.sin(a),0.],[0.,2.]])
-# Perform matrix contraction / projection to compute `hessian`.
 hessian=jacobian.T@jacobian+y[0]*hessian_0+y[1]*hessian_1
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(gradient,jacobian.T@y,rtol=1e-12)
 # Convert `` to a host NumPy array for inspection or verification.
 np.testing.assert_allclose(hvp,hessian@np.asarray(v),rtol=1e-12)
-# Compute `np.testing.assert_allclose(hessian,hessian.T,atol` as `1e-12)`.
 np.testing.assert_allclose(hessian,hessian.T,atol=1e-12)
-# Print diagnostic summary of the computed outputs.
 print("Hessian-vector product:",np.asarray(hvp))
 ```
 
@@ -288,7 +238,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:01:00.291152+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:50:09.725259+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]
@@ -314,17 +264,13 @@ PASS: internals-02
 
 ```python
 # Experiment — Reconstruct columns and rows independently: The transpose in the forward construction is necessary: vmap...
-# Compute `basis` from `jnp.eye(2)`
 basis=jnp.eye(2)
 # Compute exact directional derivative / Jacobian / Hessian (`columns`).
 columns=jax.vmap(lambda direction:jax.jvp(mapping,(x,),(direction,))[1])(basis).T
 # Vectorize across the batch dimension with `jax.vmap` (`rows`).
 rows=jax.vmap(lambda weighting:pullback(weighting)[0])(basis)
-# Compute `np.testing.assert_allclose(columns,jacobian,rtol` as `1e-12)`.
 np.testing.assert_allclose(columns,jacobian,rtol=1e-12)
-# Compute `np.testing.assert_allclose(rows,jacobian,rtol` as `1e-12)`.
 np.testing.assert_allclose(rows,jacobian,rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Forward columns and reverse rows agree")
 ```
 
@@ -342,15 +288,11 @@ The transpose in the forward construction is necessary: vmap first stacks one di
 gauss_newton=jacobian.T@jacobian
 # Perform matrix / vector contraction (`@`) to compute `approximation`.
 approximation=gauss_newton@np.asarray(v)
-# Assert invariant `np.linalg.norm(np.asarray(hvp)-approximation)>0.1` holds
 assert np.linalg.norm(np.asarray(hvp)-approximation)>0.1
-# Compute `eps` from `1e-4`
 eps=1e-4
 # Differentiate the objective to obtain `fd` via automatic differentiation.
 fd=(np.asarray(jax.grad(objective)(x+eps*v))-np.asarray(jax.grad(objective)(x-eps*v)))/(2*eps)
-# Compute `np.testing.assert_allclose(hvp,fd,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hvp,fd,rtol=1e-7,atol=1e-8)
-# Print the observed values to compare against the expected result.
 print("Exact HVP:",np.asarray(hvp),"Gauss-Newton product:",approximation)
 ```
 
@@ -370,35 +312,27 @@ Repeat the Jacobian, JVP, VJP and adjoint checks at $x=(-0.2,0.8)$ with $v=(-0.5
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
 
 **Step-by-step implementation plan:**
-1. Construct `changed_x` via `jnp.array([-0.2,0.8])`
-2. Convert `(a2, b2)` to a host NumPy array for inspection or verification.
-3. Compute `j2` from `np.array([[b2,a2],[np.cos(a2),2*b2]])`
-4. Compute exact directional derivative / Jacobian / Hessian (`fj`).
-5. Compute exact directional derivative / Jacobian / Hessian (`rj`).
+1. Convert `(a2, b2)` to a host NumPy array for inspection or verification.
+2. Compute exact directional derivative / Jacobian / Hessian (`fj`).
+3. Compute exact directional derivative / Jacobian / Hessian (`rj`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Repeat the Jacobian, JVP, VJP and adjoint checks at x=(-0.2,0.8) with...
-# Construct `changed_x` via `jnp.array([-0.2,0.8])`
 changed_x = jnp.array(...)  # TODO: compute changed_x
 changed_v = jnp.array(...)  # TODO: compute changed_v
 changed_u = jnp.array(...)  # TODO: compute changed_u
 # Convert `(a2, b2)` to a host NumPy array for inspection or verification.
 a2,b2 = np.asarray(...)  # TODO: compute a2,b2
-# Compute `j2` from `np.array([[b2,a2],[np.cos(a2),2*b2]])`
 j2 = np.array(...)  # TODO: compute j2
 # Compute exact directional derivative / Jacobian / Hessian (`fj`).
 fj = jax.jvp(...)  # TODO: compute fj
 # Compute exact directional derivative / Jacobian / Hessian (`rj`).
 rj = jax.vjp(...)  # TODO: compute rj
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-# Compute `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol
-# Print the observed values to compare against the expected result.
 print("Changed-point adjoint verified")
 ```
 
@@ -406,25 +340,19 @@ print("Changed-point adjoint verified")
 
 ```python
 # Exercise solution: Repeat the Jacobian, JVP, VJP and adjoint checks at x=(-0.2,0.8) with...
-# Construct `changed_x` via `jnp.array([-0.2,0.8])`
 changed_x=jnp.array([-0.2,0.8])
 changed_v=jnp.array([-0.5,1.3])
 changed_u=jnp.array([1.1,-0.4])
 # Convert `(a2, b2)` to a host NumPy array for inspection or verification.
 a2,b2=np.asarray(changed_x)
-# Compute `j2` from `np.array([[b2,a2],[np.cos(a2),2*b2]])`
 j2=np.array([[b2,a2],[np.cos(a2),2*b2]])
 # Compute exact directional derivative / Jacobian / Hessian (`fj`).
 fj=jax.jvp(mapping,(changed_x,),(changed_v,))[1]
 # Compute exact directional derivative / Jacobian / Hessian (`rj`).
 rj=jax.vjp(mapping,changed_x)[1](changed_u)[0]
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(fj,j2@changed_v,rtol=1e-12)
-# Perform matrix contraction / projection to compute ``.
 np.testing.assert_allclose(rj,j2.T@changed_u,rtol=1e-12)
-# Compute `np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(changed_u,fj),jnp.vdot(rj,changed_v),rtol=1e-12)
-# Print the observed values to compare against the expected result.
 print("Changed-point adjoint verified")
 ```
 
@@ -450,27 +378,20 @@ A derivative is linear in its direction at a fixed base point.
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
 
 **Step-by-step implementation plan:**
-1. Construct `w` via `jnp.array([-0.6,0.9])`
-2. Compute exact directional derivative / Jacobian / Hessian (`product`).
-3. Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
-4. Compute exact directional derivative / Jacobian / Hessian (`shifted`).
-5. Assert invariant `np.linalg.norm(np.asarray(shifted-product(v)))>0.1` holds
+1. Compute exact directional derivative / Jacobian / Hessian (`product`).
+2. Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.
-# Construct `w` via `jnp.array([-0.6,0.9])`
 w = jnp.array(...)  # TODO: compute w
 # Compute exact directional derivative / Jacobian / Hessian (`product`).
 product = ...  # TODO: compute product
-# Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
 np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
 # Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 shifted = jax.jvp(...)  # TODO: compute shifted
-# Assert invariant `np.linalg.norm(np.asarray(shifted-product(v)))>0.1` holds
 assert np.linalg.norm(np.asarray(shifted-product(v)))  # TODO: complete assertion check
-# Print the observed values to compare against the expected result.
 print("Direction linearity holds; the Jacobian changes with the base point")
 ```
 
@@ -478,17 +399,13 @@ print("Direction linearity holds; the Jacobian changes with the base point")
 
 ```python
 # Test linearity at a fixed point (Practice): Linearity in the tangent is a local property.
-# Construct `w` via `jnp.array([-0.6,0.9])`
 w=jnp.array([-0.6,0.9])
 # Compute exact directional derivative / Jacobian / Hessian (`product`).
 product=lambda direction:jax.jvp(mapping,(x,),(direction,))[1]
-# Compute `np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol` as `1e-12)`.
 np.testing.assert_allclose(product(2*v-w),2*product(v)-product(w),rtol=1e-12)
 # Compute exact directional derivative / Jacobian / Hessian (`shifted`).
 shifted=jax.jvp(mapping,(x+w,),(v,))[1]
-# Assert invariant `np.linalg.norm(np.asarray(shifted-product(v)))>0.1` holds
 assert np.linalg.norm(np.asarray(shifted-product(v)))>0.1
-# Print the observed values to compare against the expected result.
 print("Direction linearity holds; the Jacobian changes with the base point")
 ```
 
@@ -517,29 +434,21 @@ Compose jvp with grad and compare scalar products.
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
 
 **Step-by-step implementation plan:**
-1. Construct `w` via `jnp.array([0.2,0.9])`
-2. Differentiate the objective to obtain `hw` via automatic differentiation.
-3. Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
-4. Compute `eps` from `1e-4`
-5. Differentiate the objective to obtain `fdw` via automatic differentiation.
+1. Differentiate the objective to obtain `hw` via automatic differentiation.
+2. Differentiate the objective to obtain `fdw` via automatic differentiation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
-# Construct `w` via `jnp.array([0.2,0.9])`
 w = jnp.array(...)  # TODO: compute w
 # Differentiate the objective to obtain `hw` via automatic differentiation.
 hw = jax.jvp(...)  # TODO: compute hw
-# Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol
-# Compute `eps` from `1e-4`
 eps = ...  # TODO: compute eps
 # Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw = ...  # TODO: compute fdw
-# Compute `np.testing.assert_allclose(hw,fdw,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hw,fdw,rtol = ...  # TODO: compute np.testing.assert_allclose(hw,fdw,rtol
-# Print the observed values to compare against the expected result.
 print("Bilinear Hessian symmetry and finite-difference product verified")
 ```
 
@@ -547,19 +456,14 @@ print("Bilinear Hessian symmetry and finite-difference product verified")
 
 ```python
 # Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
-# Construct `w` via `jnp.array([0.2,0.9])`
 w=jnp.array([0.2,0.9])
 # Differentiate the objective to obtain `hw` via automatic differentiation.
 hw=jax.jvp(jax.grad(objective),(x,),(w,))[1]
-# Compute `np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol` as `1e-12)`.
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)
-# Compute `eps` from `1e-4`
 eps=1e-4
 # Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)
-# Compute `np.testing.assert_allclose(hw,fdw,rtol` as `1e-7,atol=1e-8)`.
 np.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)
-# Print the observed values to compare against the expected result.
 print("Bilinear Hessian symmetry and finite-difference product verified")
 ```
 

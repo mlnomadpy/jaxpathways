@@ -122,11 +122,11 @@ Status: authored lesson with CPU exercise.
 
 ## Phase project
 
-A compiled batch of gradients.
+Compare scalar, vmap, autodiff, and changed-shape JIT behavior.
 
 **Demonstrate:** Compose grad, vmap, and jit; explain what each transformation changes.
 
-Project status: implemented staged practice · [Open source](../../projects/transforms-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Copy `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py` and write your code in `projects/foundation-toolkit/my_toolkit.py`. Run `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 3` from the top-level folder to verify stage 3.
+Project status: implemented staged practice · [Open source](../../projects/transforms-audit/README.md). Use stages 1, 2, 3, 4 for this phase. Work in projects/transforms-audit/starter/model.py. Complete stages 1 and 2 for independent calculations and changed-condition diagnosis, then retain the stage 3 evidence with --evidence-dir runs/transforms-audit. Stage 4 integrates the checks. Learner commands explicitly select the starter; --implementation solution is instructor reference execution. This bounded practice does not certify the entire phase or target hardware.
 
 Additional project: [Connect arrays, transformations and explicit state](../../projects/foundation-toolkit/README.md).
 

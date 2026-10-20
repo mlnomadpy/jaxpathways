@@ -1,6 +1,6 @@
 # Content quality standards and review history
 
-> Historical counts in the dated findings below are snapshots. Current coverage and priorities are recorded in the [2026-10-06 full audit](full-course-audit-2026-10-06.md), [course expansion plan](course-roadmap-2026-10-06.md) and regenerated [content audit](content-audit.md). The authoring requirements remain applicable.
+> Historical counts in the dated findings below are snapshots. Current coverage is generated in [course status](course-status.md); the [2026-10-20 book audit](book-audit-2026-10-20.md) and [repair record](book-repairs-2026-10-20.md) describe the latest review. The [2026-10-06 audit](full-course-audit-2026-10-06.md) and [course expansion plan](course-roadmap-2026-10-06.md) are historical snapshots. The authoring requirements remain applicable.
 
 ## Current teaching-depth repair
 

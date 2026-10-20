@@ -7,7 +7,7 @@ All canonical lesson entries and every existing lesson.json; source/companion av
 - 1 setup walkthrough
 - 102 teaching structure present
 
-28 staged integration project manifests and 11 synthesis assessments are active.
+30 staged integration project manifests and 11 synthesis assessments are active.
 
 ## Every entry
 

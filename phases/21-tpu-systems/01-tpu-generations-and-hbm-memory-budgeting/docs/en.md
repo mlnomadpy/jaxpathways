@@ -6,7 +6,7 @@ Phase 21: TPU Systems: Generations, Memory, Precision & XProf · about 25 minute
 
 - Compare Google Cloud TPU generations (`v5e`, `v5p`, `v6e` Trillium, and Ironwood) by HBM capacity, HBM bandwidth, and MXU BF16 throughput.
 - Calculate the Roofline ridge point (`bf16_tflops / bw_gbs`) in FLOPs per byte for each TPU generation.
-- Compute training HBM (weights + gradients + Adam moments) and inference KV-cache HBM across `fp32`, `bfloat16`, and `int8`.
+- Compute training-state and KV-cache HBM from explicit tensor byte counts, including master weights, compute weights, gradients, and Adam moments.
 - Select the minimum single-host or Pod TPU slice that fits a given model's training state with activation headroom.
 
 ## The problem
@@ -15,19 +15,13 @@ Provisioning and launching a TPU VM is only half the engineering job: if you pic
 
 ## The idea
 
-Before scaling a Transformer or distributed job on TPU, compare per-chip HBM capacity and the BF16 compute-to-memory ridge point (`FLOP/byte`) across TPU generations (`v5e`, `v5p`, `v6e` Trillium, and Ironwood), and calculate the exact GiB budget for training state (weights, gradients, Adam moments) and inference KV cache across `fp32`, `bfloat16`, and `int8`.
+Budget capacity with a byte ledger before selecting a TPU slice, and treat the roofline ridge point as a theoretical screening estimate. GiB capacity and FLOP/byte ridge points are different quantities and must be read in separate panels. The worked training-state estimates state their tensor dtypes and exclusions; they are not observed runtime memory.
 
 ## Connect MXU arithmetic intensity and HBM capacity to TPU slice sizing
 
-Each TPU chip pairs a Matrix Multiply Unit (MXU) designed for high-throughput `bfloat16` / `int8` matrix multiplications with High Bandwidth Memory (HBM). A TPU v5e chip provides $16$ GiB of HBM at $819$ GB/s and $197$ TFLOP/s of `bfloat16` compute, giving a ridge-point balance of:
-$$
+The ridge point is peak BF16 FLOP/s divided by HBM bandwidth. It is a theoretical balance point for a roofline model, not a measured bottleneck; use a target workload profile to investigate utilization. HBM capacity is a separate quantity.
 
-\text{Ridge}_{\text{v5e}} = \frac{197 \times 10^{12}\text{ FLOP/s}}{819 \times 10^9\text{ B/s}} \approx 240.5\text{ FLOP/byte}
-
-$$
-Operations whose arithmetic intensity is below this ridge point (such as batch-$1$ autoregressive token decoding) are HBM-bandwidth bound; operations above it (such as large batched matmuls) are MXU-compute bound.
-
-Before launching a run, you also need to verify HBM capacity. In mixed-precision Adam training, each parameter typically requires $12$ to $16$ bytes of persistent state (master `fp32` weights + `fp32` first and second Adam moments + `bf16` or `fp32` gradients), plus activation memory and any KV cache.
+For this lesson, the full-FP32 training-state ledger is 4 bytes/parameter for weights + 4 for gradients + 4 each for Adam first and second moments = 16 bytes/parameter. The mixed-BF16 ledger assumes an FP32 master weight (4), a BF16 compute copy (2), an FP32 gradient buffer (4), and two FP32 moments (8), totaling 18 bytes/parameter. This deliberately conservative case includes the compute copy and does not include activations, communication buffers, allocator overhead, or temporary copies. If gradients are kept in BF16, subtract 2 bytes/parameter and state that assumption.
 
 $$
 \text{Throughput}_{\text{tok/s}} = \frac{B_{\text{global}} \times L_{\text{seq}}}{T_{\text{step}}}
@@ -45,11 +39,11 @@ Read top to bottom: HBM stores master `fp32` parameters and Adam moments (`m`, `
 
 ### Pause and reason
 
-Why does a $7$B-parameter model's mixed-precision Adam training state (`~78.2` GiB before activations) fail with OOM on a single-host `v5litepod-4` (`64` GiB total HBM)?
+For 7 billion parameters, how many GiB does the stated 18-byte mixed-BF16 ledger require before activations, and why is a ridge point not a measured bottleneck?
 
 <details><summary>Compare your reasoning</summary>
 
-`4` TPU v5e chips provide `4 * 16 = 64` GiB of total HBM, which is smaller than the `~78.2` GiB needed just for parameters, gradients, and Adam moments. You need at least `v5litepod-8` (`128` GiB) or `v6e-4` (`128` GiB) with sharding across chips.
+The estimate is 7e9 × 18 / 2^30 ≈ 117.4 GiB. It excludes activations, communication buffers, allocator overhead and temporary copies, so it is only a capacity lower bound. The ridge point compares published peak compute and bandwidth; only a workload measurement and profile can identify an observed bottleneck.
 
 </details>
 
@@ -111,14 +105,15 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     # Evaluate `1024 ** 3` and convert the result into Python scalar/collection `gib`.
     gib = float(1024 ** 3)
-    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 12.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
+    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 18.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
     return {
         "fp32_train_state_gib": round((n_params * 16.0) / gib, 3),
-        "mixed_bf16_train_state_gib": round((n_params * 12.0) / gib, 3),
+        "mixed_bf16_train_state_gib": round((n_params * 18.0) / gib, 3),
         "kv_fp32_gib": round((kv_elements * 4.0) / gib, 3),
         "kv_bf16_gib": round((kv_elements * 2.0) / gib, 3),
         "kv_int8_gib": round((kv_elements * 1.0) / gib, 3),
     }
+
 
 
 # Run `estimate_memory_gib` to compute `budget_7b`.
@@ -137,7 +132,7 @@ print("7B memory budget (GiB):", budget_7b)
 print("1.5B memory budget (GiB):", budget_1p5b)
 ```
 
-Computing both training state and KV-cache GiB upfront prevents OOM surprises when selecting between `v5litepod-4` (`64` GiB) and `v5litepod-8` / `v6e-4` (`128` GiB).
+Computing the named-tensor ledger identifies whether a topology has enough total HBM, but usable capacity must also reserve room for activations, communication buffers, temporary copies and allocator overhead. The 7B estimate exceeds the 80%-usable budget of a 4-chip v6e slice; it is an estimate, not a fit guarantee.
 
 ## Step 3: Verify invariants on the completed state
 
@@ -179,14 +174,15 @@ def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     # Evaluate `1024 ** 3` and convert the result into Python scalar/collection `gib`.
     gib = float(1024 ** 3)
-    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 12.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
+    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 18.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
     return {
         "fp32_train_state_gib": round((n_params * 16.0) / gib, 3),
-        "mixed_bf16_train_state_gib": round((n_params * 12.0) / gib, 3),
+        "mixed_bf16_train_state_gib": round((n_params * 18.0) / gib, 3),
         "kv_fp32_gib": round((kv_elements * 4.0) / gib, 3),
         "kv_bf16_gib": round((kv_elements * 2.0) / gib, 3),
         "kv_int8_gib": round((kv_elements * 1.0) / gib, 3),
     }
+
 
 
 # Run `estimate_memory_gib` to compute `budget_7b`.
@@ -207,53 +203,51 @@ print("1.5B memory budget (GiB):", budget_1p5b)
 
 Expected: Prints the ridge-point FLOP/byte ratios for v5e (240.5), v5p (166.0), and v6e (573.8) along with the 7B and 1.5B memory budgets in GiB.
 
-## Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations
+## Calculated TPU memory capacity and theoretical ridge point
 
 **Predict:** How do per-chip HBM capacity (GiB) and the compute-to-memory ridge point (FLOP/byte) change across TPU `v5e`, `v5p`, and `v6e`?
 
-![Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations](../outputs/figure.svg)
+![Calculated TPU memory capacity and theoretical ridge point](../outputs/figure.svg)
 
-**Recorded CPU computation**
+**Analytic calculation; no device result recorded**
 
 ### Read the figure
 
-The horizontal axis compares three Cloud TPU generations (`v5e`, `v5p`, and `v6e`). For each generation, the two bars show per-chip HBM capacity in GiB and the BF16 ridge point in FLOPs per byte (`bf16_tflops / bw_gbs`).
+Two panels show per-chip HBM capacity in GiB and theoretical BF16 ridge point in FLOP/byte for the same TPU generations. Read the panels independently; their heights are not comparable.
 
 ### Connect it to the computation
 
-`v5p` maximizes HBM capacity per chip (`95` GiB) and lowers the ridge point (`166` FLOP/byte), while `v6e` doubles `v5e`'s HBM (`32` GiB vs `16` GiB) and reaches `918` BF16 TFLOP/s (`573.8` FLOP/byte ridge point), rewarding fused kernels and batch sizes that keep the MXU fed.
+These bars are calculations from published specifications and stated tensor byte assumptions. They are not device measurements or a workload profile.
 
 ```python
-# Compute figure data for: Per-chip HBM capacity and ridge-point arithmetic intensity across TPU generations
-# Construct dictionary `visual_data` with the structured fields for this stage.
+# Compute separate panels for quantities with different units.
 visual_data = {
     'kind': 'bar',
-    'labels': [s['gen'] for s in TPU_SPECS],
-    'xlabel': 'Cloud TPU generation',
-    'ylabel': 'GiB / (FLOP per byte)',
-    'series': [
-        {'label': 'HBM per chip (GiB)', 'y': [float(s['hbm_gib']) for s in TPU_SPECS]},
-        {'label': 'BF16 ridge point (FLOP/byte)', 'y': [float(s['ridge_flops_per_byte']) for s in TPU_SPECS]},
+    'panels': [
+        {'kind': 'bar', 'labels': [s['gen'] for s in TPU_SPECS], 'xlabel': 'Cloud TPU generation', 'ylabel': 'HBM per chip (GiB)',
+         'series': [{'label': 'HBM capacity', 'y': [float(s['hbm_gib']) for s in TPU_SPECS]}]},
+        {'kind': 'bar', 'labels': [s['gen'] for s in TPU_SPECS], 'xlabel': 'Cloud TPU generation', 'ylabel': 'theoretical BF16 ridge point (FLOP/byte)',
+         'series': [{'label': 'peak BF16 FLOP/s ÷ HBM bytes/s', 'y': [float(s['ridge_flops_per_byte']) for s in TPU_SPECS]}]},
     ],
 }
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-13T09:03:43.546952+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T10:58:55.101094+00:00. JAX 0.9.2.
 
 ```text
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}
-7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
-1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
+7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
+1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
 TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}
-7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 78.231, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
-1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
+7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}
+1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
 KV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5
-7B mixed train state GiB: 78.231 Min v5e chips (at 80% HBM budget): 7
-1.5B budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 16.764, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}
-Matmul N=1024 intensity: 341.3 v5e ridge: 240.5
-v6e-4 80% usable GiB: 102.4 Fits 7B state: True
+7B mixed train state GiB: 117.347 Minimum chips at 80% usable HBM: 10
+1.5B state plus BF16 KV cache (GiB): 25.646
+Arithmetic intensity: 341.3333333333333 FLOPs/byte
+v6e-4 80% usable GiB: 102.4 Fits 7B state estimate: False
 PASS: tpu-03
 
 ```
@@ -278,58 +272,56 @@ Halving bytes per element halves both the HBM capacity consumed by the KV cache 
 
 ## Verify how many v5e chips are needed to hold a 7B mixed-precision training state
 
-**Predict before running:** Can a 4-chip TPU v5e slice (`64` GiB) hold a 7B parameter model's mixed-precision training state?
+**Predict before running:** How many v5e chips are needed for the 7B mixed-precision training-state estimate if only 80% of HBM is available for that state?
 
 ```python
-# Experiment — Verify how many v5e chips are needed to hold a 7B mixed-precision training state: Calculating state GiB upfront tells you immediately whether you...
 v5e_chip_gib = 16.0
-# Evaluate `np.ceil(budget_7b['mixed_bf16_train_state_gib'] / (v5e_chip_gib * 0.8))` and convert the result into Python scalar/collection `min_v5e_chips`.
-min_v5e_chips = int(np.ceil(budget_7b["mixed_bf16_train_state_gib"] / (v5e_chip_gib * 0.8)))
-# Print the observed values to compare against the expected result.
-print("7B mixed train state GiB:", budget_7b["mixed_bf16_train_state_gib"], "Min v5e chips (at 80% HBM budget):", min_v5e_chips)
-# Assert invariant `min_v5e_chips > 4 and min_v5e_chips <= 8` holds
-assert min_v5e_chips > 4 and min_v5e_chips <= 8
+usable_fraction = 0.8
+min_v5e_chips = int(np.ceil(budget_7b["mixed_bf16_train_state_gib"] / (v5e_chip_gib * usable_fraction)))
+print("7B mixed train state GiB:", budget_7b["mixed_bf16_train_state_gib"], "Minimum chips at 80% usable HBM:", min_v5e_chips)
+assert min_v5e_chips == 10
+assert min_v5e_chips > 8 and min_v5e_chips <= 16
 ```
 
-**Expected:** A 7B mixed-precision state takes ~78.23 GiB, requiring at least an 8-chip v5litepod-8 slice (128 GiB HBM) when leaving 20% headroom for activations.
+**Expected:** The 18-byte-per-parameter ledger estimates 117.347 GiB. At 16 GiB per chip and 80% usable HBM, at least 10 chips are needed; the listed 16-chip v5litepod-16 is the first listed topology large enough.
 
-Calculating state GiB upfront tells you immediately whether you need `v5litepod-4` (`64` GiB) or `v5litepod-8` (`128` GiB) and FSDP sharding.
+The estimate includes 2-byte BF16 weights, 4-byte FP32 master weights, 4-byte gradients and two 4-byte FP32 Adam moments, for 18 bytes per parameter. This is a named-tensor ledger, not a complete fit guarantee: activations, communication buffers, temporary copies and allocator overhead need additional headroom.
 
 ## Make it yours
 
-Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens and verify that its mixed-precision training state fits comfortably inside a single-host `v5litepod-4` (`64` GiB total HBM).
+Compute `estimate_memory_gib` for a `1.5`B parameter model with `4096` KV tokens and verify that its mixed-precision training-state estimate is below `30` GiB and that state plus BF16 KV cache is below `80%` of a single-host `v5litepod-4` (`64` GiB total HBM).
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
 - `estimate_memory_gib(...)` — Call `estimate_memory_gib` with your updated parameters or inputs from this lesson's workspace.
-- `budget(...)` — Call `budget` with your updated parameters or inputs from this lesson's workspace.
+- `cache(...)` — Call `cache` with your updated parameters or inputs from this lesson's workspace.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Print the observed values to compare against the expected result.
-2. Assert that `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV...
 budget_check = estimate_memory_gib(...)  # TODO: compute budget_check
-# Print the observed values to compare against the expected result.
-print("1.5B budget (GiB):", budget_check)
-# Assert that `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_`.
+usable_hbm_gib = ...  # TODO: compute usable_hbm_gib
+state_and_kv_gib = ...  # TODO: compute state_and_kv_gib
+print("1.5B state plus BF16 KV cache (GiB):", state_and_kv_gib)
 assert budget_check["mixed_bf16_train_state_gib"]  # TODO: complete assertion check
+assert state_and_kv_gib  # TODO: complete assertion check
 ```
 
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute estimate_memory_gib for a 1.5B parameter model with 4096 KV...
 budget_check = estimate_memory_gib(params_billions=1.5, kv_tokens=4096)
-# Print the observed values to compare against the expected result.
-print("1.5B budget (GiB):", budget_check)
-# Assert that `budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_`.
-assert budget_check["mixed_bf16_train_state_gib"] < 20.0 and (budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]) < 64.0
+usable_hbm_gib = 4 * 16.0 * 0.8
+state_and_kv_gib = budget_check["mixed_bf16_train_state_gib"] + budget_check["kv_bf16_gib"]
+print("1.5B state plus BF16 KV cache (GiB):", state_and_kv_gib)
+assert budget_check["mixed_bf16_train_state_gib"] < 30.0
+assert state_and_kv_gib < usable_hbm_gib
 ```
 
 </details>
@@ -349,48 +341,33 @@ For two `N x N` BF16 inputs and one BF16 output, arithmetic intensity simplifies
 ### How to write: Compare arithmetic intensity against the TPU v5e and v6e ridge points — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `points(...)` — Call `points` with your updated parameters or inputs from this lesson's workspace.
-- `next(...)` — Call `next` with your updated parameters or inputs from this lesson's workspace.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
-2. Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
-3. Run `next` to compute `v5e_ridge`.
-4. Print the observed values to compare against the expected result.
-5. Assert invariant `arith_intensity > v5e_ridge` holds
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
 n = ...  # TODO: compute n
-# Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
-arith_intensity = ...  # TODO: compute arith_intensity
-# Run `next` to compute `v5e_ridge`.
-v5e_ridge = next(...)  # TODO: compute v5e_ridge
-# Print the observed values to compare against the expected result.
-print("Matmul N = ...  # TODO: compute print("Matmul N
-# Assert invariant `arith_intensity > v5e_ridge` holds
-assert arith_intensity  # TODO: complete assertion check
+intensity = ...  # TODO: compute intensity
+print("Arithmetic intensity:", intensity, "FLOPs/byte")
+assert intensity  # TODO: complete assertion check
+assert intensity  # TODO: complete assertion check
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compare arithmetic intensity against the TPU v5e and v6e ridge points (Foundations): At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which...
 n = 1024
-# Compute `arith_intensity` from `(2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))`
-arith_intensity = (2.0 * (n ** 3)) / (3.0 * 2.0 * (n ** 2))
-# Run `next` to compute `v5e_ridge`.
-v5e_ridge = next(s["ridge_flops_per_byte"] for s in TPU_SPECS if s["gen"] == "v5e")
-# Print the observed values to compare against the expected result.
-print("Matmul N=1024 intensity:", round(arith_intensity, 1), "v5e ridge:", v5e_ridge)
-# Assert invariant `arith_intensity > v5e_ridge` holds
-assert arith_intensity > v5e_ridge
+intensity = (2 * n**3) / (3 * 2 * n**2)
+print("Arithmetic intensity:", intensity, "FLOPs/byte")
+assert intensity == n / 3.0
+assert intensity > TPU_SPECS[0]["ridge_flops_per_byte"]
 ```
 
-At N=1024, arithmetic intensity is ~341.3 FLOP/byte, which is above TPU v5e's ~240.5 FLOP/byte ridge point (compute-bound).
+The matrix multiply performs about 341.3 FLOPs per byte. That exceeds the v5e ridge point of 240.5 FLOPs/byte, so this idealized operation is compute-bound by the Roofline comparison. Actual kernels may have different data reuse and overhead.
 
 </details>
 
@@ -409,42 +386,31 @@ Compare `budget_7b['mixed_bf16_train_state_gib']` with `4 * 32.0 * 0.8`.
 ### How to write: Size a Trillium v6e-4 slice for a 7B training state — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `state(...)` — Call `state` with your updated parameters or inputs from this lesson's workspace.
-- `GiB(...)` — Call `GiB` with your updated parameters or inputs from this lesson's workspace.
 - `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
-1. Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
-2. Print the observed values to compare against the expected result.
-3. Assert invariant `fits_v6e4 is True` holds
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Size a Trillium v6e-4 slice for a 7B training state (Transfer / diagnosis): Because v6e doubles per-chip HBM to 32 GiB (128 GiB across 4...
 v6e4_usable_gib = ...  # TODO: compute v6e4_usable_gib
-# Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
 fits_v6e4 = ...  # TODO: compute fits_v6e4
-# Print the observed values to compare against the expected result.
-print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state:", fits_v6e4)
-# Assert invariant `fits_v6e4 is True` holds
-assert fits_v6e4 is True  # TODO: complete assertion check
+print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state estimate:", fits_v6e4)
+assert fits_v6e4 is False  # TODO: complete assertion check
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Size a Trillium v6e-4 slice for a 7B training state (Transfer / diagnosis): Because v6e doubles per-chip HBM to 32 GiB (128 GiB across 4...
 v6e4_usable_gib = 4 * 32.0 * 0.8
-# Compute `fits_v6e4` from `budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usab...`
 fits_v6e4 = budget_7b["mixed_bf16_train_state_gib"] <= v6e4_usable_gib
-# Print the observed values to compare against the expected result.
-print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state:", fits_v6e4)
-# Assert invariant `fits_v6e4 is True` holds
-assert fits_v6e4 is True
+print("v6e-4 80% usable GiB:", v6e4_usable_gib, "Fits 7B state estimate:", fits_v6e4)
+assert fits_v6e4 is False
 ```
 
-Because `v6e` doubles per-chip HBM to `32` GiB (`128` GiB across 4 chips, `102.4` GiB at 80% budget), a 7B sharded training state fits on a 4-chip `v6e-4` slice.
+A 4-chip v6e slice has 128 GiB total HBM and 102.4 GiB at an 80% budget. The 117.347 GiB named-tensor estimate exceeds that budget, before activations and other excluded allocations.
 
 </details>
 

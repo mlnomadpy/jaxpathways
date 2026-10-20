@@ -1,18 +1,27 @@
-# Verify checkpoint integrity, NaN guards, and deterministic replay
+# Resume the complete training cursor
 
-Phase 06 dedicated integration project ([Phase 06](../../phases/06-recovery/README.md)). See also the cross-phase companion project [`engineering-release`](../engineering-release/README.md).
+A checkpoint that restores only model weights can still change the next update. Momentum and the random-number state affect training too. This project trains a two-value parameter with a momentum buffer, a random perturbation and a cursor, then checks that resuming produces the same next state as uninterrupted execution.
 
-## Mathematical contract
+## Before you start
 
-Given input batch $X \in \mathbb{R}^{B \times d_\text{in}}$ and projection weights $W_\text{enc}, P$, the normalized representation is:
+Complete the state and recovery lessons, especially the lessons on optimizer state, PRNG key ownership and checkpoint identity. Use Python with NumPy from `requirements-cpu.txt`. Edit `projects/recovery-audit/starter/model.py` from the repository root.
 
-$$
-H = \tanh(X W_\text{enc} + b_\text{enc}) P, \qquad \hat{H}_i = \frac{H_i}{\max(\|H_i\|_2, 10^{-6})}
-$$
+```sh
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements-cpu.txt
+python3 projects/recovery-audit/tests/check.py --implementation starter --stage 1
+python3 projects/recovery-audit/tests/check.py --implementation starter --stage 2
+python3 projects/recovery-audit/tests/check.py --implementation starter --stage 3 --evidence-dir runs/recovery-audit
+python3 projects/recovery-audit/tests/check.py --implementation starter --stage 4
+```
 
-## Stage verification
+On Windows PowerShell, activate `.venv\Scripts\Activate.ps1` and use `python` in place of `python3`.
 
-1. **Stage 1 — Parameter and state contract:** `python3 projects/recovery-audit/tests/check.py --stage 1`
-2. **Stage 2 — Masked forward pass:** `python3 projects/recovery-audit/tests/check.py --stage 2`
-3. **Stage 3 — Gradient verification:** `python3 projects/recovery-audit/tests/check.py --stage 3`
-4. **Stage 4 — Compiled scan qualification:** `python3 projects/recovery-audit/tests/check.py --stage 4`
+Stage 1 checks that one update changes the weight and advances the cursor. The velocity starts nonzero, so the update must carry existing momentum as well as the current gradient. The random perturbation is sampled from the saved key and a new key is returned in the state.
+
+Stage 2 compares two updates in one process with one update, a saved checkpoint, restore, and the next update. Every field, including velocity, cursor and RNG key, must match exactly for this deterministic NumPy fixture. A weight-only restore or a key that is not advanced will fail this comparison.
+
+Stage 3 rejects a changed learning-rate configuration and altered checkpoint bytes, then writes the diagnosis to `runs/recovery-audit/recovery-audit-evidence.json`. Checkpoints are replaced atomically within the destination directory. This local example does not claim power-loss durability or distributed checkpoint safety. Stage 4 runs all checks. Passing output begins `PASS recovery-audit stage N`.
+
+Without `--evidence-dir`, evidence uses a temporary directory. Reference command: `python3 projects/recovery-audit/tests/check.py --implementation solution --stage 4`.
