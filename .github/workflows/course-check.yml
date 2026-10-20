@@ -19,9 +19,10 @@ jobs:
           cache: pip
           cache-dependency-path: resources/tpu-gcp/requirements-*.txt
       - run: python -m pip install -r resources/tpu-gcp/requirements-multihost.txt --find-links https://storage.googleapis.com/jax-releases/libtpu_releases.html
-      - run: python -c "import jax, flax, orbax.checkpoint, tensorstore, gcsfs, fsspec; fsspec.get_filesystem_class('gs')"
+      - run: python -c "import jax, flax, orbax.checkpoint, tensorstore, gcsfs, fsspec; assert fsspec.get_filesystem_class('gs').__module__ == 'gcsfs.core'"
         env:
           JAX_PLATFORMS: cpu
+          GCSFS_EXPERIMENTAL_ZB_HNS_SUPPORT: 'false'
       - run: python resources/tpu-gcp/check_multihost_target.py
   site:
     runs-on: ubuntu-latest

@@ -97,11 +97,16 @@ def assert_array_equal(actual, expected, name, np):
 
 
 def run(args, jax):
+    import gcsfs
     import jax.numpy as jnp
     import numpy as np
     import orbax.checkpoint as ocp
     from jax.experimental import multihost_utils
     from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
+
+    storage_client = f"{gcsfs.GCSFileSystem.__module__}.{gcsfs.GCSFileSystem.__name__}"
+    if storage_client != "gcsfs.core.GCSFileSystem":
+        raise RuntimeError("flat-bucket test requires the standard GCSFS client")
 
     process_index = jax.process_index()
     process_count = jax.process_count()
@@ -393,6 +398,8 @@ def run(args, jax):
             "checkpointUriScheme": "gs",
             "checkpointIdentitySha256": checkpoint_identity,
             "checkpointUriIncluded": False,
+            "storageClient": storage_client,
+            "bucketNamespace": "flat",
             "orbaxCheckpointSavedAndWaited": True,
             "abstractShardedRestoreSucceeded": True,
             "restoredStateMatchesSavedStep": True,
@@ -436,6 +443,10 @@ def run(args, jax):
 def main():
     args = arguments()
     require_tpu_environment()
+    # This test uses a standard flat-namespace bucket and object-only IAM.
+    # Select the documented standard client before Orbax imports GCSFS;
+    # hierarchical/zonal bucket-layout discovery is outside this test's scope.
+    os.environ["GCSFS_EXPERIMENTAL_ZB_HNS_SUPPORT"] = "false"
     import jax
 
     # TPU cluster detection is supported when initialize() arguments are omitted.
