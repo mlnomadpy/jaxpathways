@@ -27,7 +27,7 @@ test('catalog filters are keyboard reachable and have accessible names', async (
   await page.goto('/course.html');
   await expect(page.locator('#course-view-status')).toContainText('available lesson drafts');
   const filters = page.locator('[data-course-filter]');
-  await expect(filters.first()).toHaveAccessibleName();
+  await expect(filters.first()).toHaveAccessibleName(/^All\s*\(\d+\)$/);
   await page.keyboard.press('Tab');
   await expect(page.locator(':focus')).toBeVisible();
   const before = await page.locator('.phase-card:visible').count();
@@ -96,6 +96,7 @@ test('mobile reader places its outline before the article and stage jumps clear 
   });
   expect(followsOutline).toBe(true);
   const build = page.locator('#lesson-stage-bar [data-stage-pill="Build"]');
+  await expect(build).toHaveAttribute('href', /#section-\d+/);
   await build.click();
   const target = page.locator(`${await build.getAttribute('href')}`);
   await expect(target).toBeVisible();

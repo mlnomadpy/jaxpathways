@@ -25,7 +25,7 @@
     "test:math": "python3 assessments/math-reference.py",
     "release:prepare": "node scripts/release.mjs --prepare",
     "release:check": "node scripts/release.mjs",
-    "check:types": "tsc -p tsconfig.domain.json",
+    "check:types": "tsc -p tsconfig.domain.json && tsc -p tsconfig.browser-tests.json",
     "test:tpu-launcher": "python3 resources/tpu-gcp/check.py",
     "test:tpu-precision": "python3 resources/tpu-gcp/check_precision.py",
     "test:experiments": "python3 projects/reproducible-experiments/tests/check.py --implementation solution --stage all",
