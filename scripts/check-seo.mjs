@@ -36,7 +36,7 @@ for(const phase of course.phases)for(const lesson of phase.lessons.filter(l=>l.s
 assert(fs.readFileSync('dist/robots.txt','utf8').includes(site+base+'sitemap.xml'));
 assert(!locations.some(url=>/\/(lesson|notebook|project|organizer)\.html/.test(url)));
 // Every public destination must describe itself in initial HTML.
-const titles=new Set();
+const titles=new Set(), linksByPage=new Map();
 for(const location of locations){
  const file=new URL(location).pathname.slice(base.length)||'index.html';
  const w=read(file),doc=w.document;
@@ -44,6 +44,7 @@ for(const location of locations){
  assert(!titles.has(doc.title),`duplicate title: ${file}`);titles.add(doc.title);
  assert(doc.querySelector('meta[name="description"]')?.content.trim(),`missing description: ${file}`);
  assert.equal(doc.querySelectorAll('h1').length,1,`heading count: ${file}`);
+ linksByPage.set(location,[...doc.querySelectorAll('a[href]')].map(anchor=>{const url=new URL(anchor.getAttribute('href'),location);url.hash='';url.search='';if(url.pathname.endsWith('/index.html'))url.pathname=url.pathname.slice(0,-10);return url.href;}).filter(url=>locations.includes(url)));
  const data=JSON.parse(doc.querySelector('script[type="application/ld+json"]')?.textContent||'null');
  assert.equal(data?.['@context'],'https://schema.org',file);
  const graph=data['@graph'];assert(Array.isArray(graph),`missing schema graph: ${file}`);
@@ -65,6 +66,9 @@ for(const location of locations){
  }
  await w.happyDOM.close();
 }
+const depths=new Map([[site+base,0]]), queue=[site+base];
+for(let index=0;index<queue.length;index++)for(const link of linksByPage.get(queue[index])||[])if(!depths.has(link)){depths.set(link,depths.get(queue[index])+1);queue.push(link);}
+for(const location of locations){assert(depths.has(location),`orphan page: ${location}`);assert(depths.get(location)<=3,`more than three clicks from home: ${location}`);}
 const catalog=read('course.html');
 const list=JSON.parse(catalog.document.querySelector('script[type="application/ld+json"]').textContent)['@graph'].find(item=>item['@type']==='ItemList');
 assert.equal(list.itemListElement.length,course.phases.length);
@@ -83,4 +87,4 @@ assert.equal(reader.document.querySelector('link[rel="canonical"]')?.href,site+b
 assert(reader.document.querySelector('meta[name="robots"]')?.content.includes('noindex'));
 assert.equal(reader.document.querySelector('meta[property="og:type"]')?.content,'book');
 await reader.happyDOM.close();
-console.log(`PASS: ${checked} pre-rendered lessons; ${locations.length} canonical sitemap URLs; structured data, share metadata, revisions and feedback at ${base}`);
+console.log(`PASS: ${checked} pre-rendered lessons; ${locations.length} canonical sitemap URLs reachable within three clicks; structured data, share metadata, revisions and feedback at ${base}`);

@@ -70,6 +70,18 @@ const { route } = Astro.props;
       </a>
     </p>
   )}
+  {route.capstone.assessmentDraft && (
+    <p>
+      <a href={siteUrl(route.capstone.assessmentDraft.url)}>
+        Work through the synthesis assessment
+      </a>
+    </p>
+  )}
+  {(route.assessmentExtensions || []).map((assessment) => (
+    <p>
+      <a href={siteUrl(assessment.url)}>{assessment.title}</a>
+    </p>
+  ))}
   <p>
     <a class="button primary" href={siteUrl(`pathways.html?path=${route.id}`)}>
       Use this path in your learning workspace
