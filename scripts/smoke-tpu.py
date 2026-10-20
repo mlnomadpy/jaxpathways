@@ -15,15 +15,44 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    # Select before importing JAX. The TPU backend must exist; CPU fallback fails.
-    os.environ["JAX_PLATFORMS"] = "tpu"
-    import jax
-
-    if jax.default_backend() != "tpu":
-        raise RuntimeError("physical TPU qualification requires the TPU backend")
     root = Path(__file__).resolve().parents[1]
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
+    # The probe exits before a runner starts, releasing its TPU client. Holding
+    # a client in this supervisor would prevent a child from acquiring the chip.
+    probe = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            """
+import json
+import jax
+if jax.default_backend() != 'tpu':
+    raise RuntimeError('physical TPU qualification requires the TPU backend')
+print('TPU_RUNTIME:' + json.dumps({
+    'backend': jax.default_backend(),
+    'devices': [str(d) for d in jax.devices()],
+    'deviceKinds': sorted({d.device_kind for d in jax.devices()}),
+    'jax': jax.__version__,
+}))
+""",
+        ],
+        cwd=root,
+        env={**os.environ, "JAX_PLATFORMS": "tpu"},
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
+    (output / "runtime-probe.stdout.txt").write_text(probe.stdout)
+    (output / "runtime-probe.stderr.txt").write_text(probe.stderr)
+    probe.check_returncode()
+    runtime = json.loads(
+        next(
+            line.removeprefix("TPU_RUNTIME:")
+            for line in probe.stdout.splitlines()
+            if line.startswith("TPU_RUNTIME:")
+        )
+    )
     runners = [
         (
             "training",
@@ -67,11 +96,8 @@ def main():
     receipt = {
         "schemaVersion": 1,
         "executedAt": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-        "backend": jax.default_backend(),
-        "devices": [str(d) for d in jax.devices()],
-        "deviceKinds": sorted({d.device_kind for d in jax.devices()}),
+        **runtime,
         "python": platform.python_version(),
-        "jax": jax.__version__,
         "commit": subprocess.check_output(
             ["git", "rev-parse", "HEAD"], cwd=root, text=True
         ).strip(),
