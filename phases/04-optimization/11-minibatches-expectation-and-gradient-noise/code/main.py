@@ -72,15 +72,12 @@ print('full gradient / single variance / pair variance:', full, jnp.var(per), jn
 print('sample indices / sample gradient:', indices, jnp.mean(per[indices]))
 
 # Figure data experiment
-# Compute figure data for: Averaging independent gradients reduces variance
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
 
 # Experiment: Combine unequal batches
 # Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.
-# Aggregate array values to compute `first`.
 first = jnp.mean(per[:3])
-# Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
 wrong = (first + last) / 2
 correct = (3 * first + last) / 4
@@ -89,7 +86,6 @@ assert jnp.allclose(correct, full)
 
 # Experiment: Take a noisy step at the full optimum
 # Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
-# Aggregate array values to compute `full_loss`.
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
 optimum = jnp.array(2.5)
 # Differentiate the objective to obtain `noisy` via automatic differentiation.

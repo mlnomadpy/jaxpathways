@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep synthetic label provenance, stable preference-loss and gradient references, offset/scale tests and the learned ordering.
 
 - Command: `python3 phases/18-posttraining/03-reward/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

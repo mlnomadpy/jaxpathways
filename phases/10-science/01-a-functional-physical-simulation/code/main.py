@@ -3,7 +3,7 @@
 # Define a state transition
 # Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -16,7 +16,6 @@ def euler_solve(rate, initial, steps, dt):
     def advance(value, unused):
         updated = euler_step(rate, value, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -43,7 +42,7 @@ print("Last refinement ratio:", endpoint_errors[-2]/endpoint_errors[-1])
 
 # Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -56,7 +55,6 @@ def euler_solve(rate, initial, steps, dt):
     def advance(value, unused):
         updated = euler_step(rate, value, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -80,10 +78,9 @@ print("Endpoint errors:", endpoint_errors)
 print("Last refinement ratio:", endpoint_errors[-2]/endpoint_errors[-1])
 
 # Figure data experiment
-# Compute figure data for: A correct Euler program still has time-step error
 # Create device-backed JAX array `fine`.
 fine = np.asarray(euler_solve(0.7, jnp.array(2.0), 8, 0.25))[::2]
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':'Euler h=0.5','y':np.asarray(trajectory).tolist()},{'label':'Euler h=0.25 (sampled)','y':fine.tolist()},{'label':'analytic exponential','y':continuous.tolist()}]}
 
 # Experiment: Stable does not mean physically positive

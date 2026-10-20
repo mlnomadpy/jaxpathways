@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep Grain sampler configuration and exact example IDs for full and partial batches; save iterator bytes, recreate the loader, and compare the next batch before/after restore. Record the incompatible configuration failure.
 
 - Command: `python3 phases/06-recovery/02-load-batch-and-prefetch-with-grain/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

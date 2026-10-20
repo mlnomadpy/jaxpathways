@@ -92,7 +92,6 @@ def run(rate,steps,features=x,targets=y,clip=None):
         history.append([float(w),float(value),float(jnp.abs(grad))])
         # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
-        # Combine or mask array elements to form `update`.
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
     return float(w),np.asarray(history)
@@ -136,7 +135,6 @@ np.testing.assert_allclose(loss(0.),56/3,rtol=1e-6)
 np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 
 # Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
-# Define `run(rate, steps, features, targets...)` to evaluate the objective and its automatic derivatives:
 def run(rate,steps,features=x,targets=y,clip=None):
     w=jnp.array(0.)
     history=[]
@@ -147,7 +145,6 @@ def run(rate,steps,features=x,targets=y,clip=None):
         history.append([float(w),float(value),float(jnp.abs(grad))])
         # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
-        # Combine or mask array elements to form `update`.
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
     return float(w),np.asarray(history)
@@ -188,13 +185,12 @@ The loss here has curvature $28/3$. A step multiplies the weight error by $1-\et
 The derivative can be correct while the update is unstable. That is the diagnosis this comparison isolates: change the step size before assuming a rising loss proves broken autodiff. The loss curve itself hides the sign alternation; the update equation explains it.
 
 ```python
-# Compute figure data for: Correct gradients can still produce unstable training
 visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-update step', 'ylabel': 'mean squared loss', 'yscale': 'log', 'series': [{'label': 'rate 0.1', 'y': good[:, 1].tolist()}, {'label': 'rate 0.3', 'y': bad[:, 1].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:28.762700+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:50:42.171076+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep source checkpoint and architecture identity, complete parameter mapping, per-layer max-absolute/relative-L2 errors, elementwise tolerances, input-gradient comparisons, wrong-epsilon diagnosis and a fresh-process converted-artifact receipt.
 
 - Command: `python3 phases/15-deployment/08-pytorch-to-flax-numerical-parity/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

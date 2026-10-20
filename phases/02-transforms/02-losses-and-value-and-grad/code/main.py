@@ -1,16 +1,16 @@
 """Losses and value_and_grad: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX differentiation and array operations
 import jax
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Define the three-example squared-error loss
 x = jnp.array([1., 2., 3.])
 y = 2. * x
 def loss(weight):
     return jnp.mean((weight * x - y) ** 2)
 
-# Step 3: Verify shapes and numerical invariants
+# Compute loss and gradient in one evaluation
 value, gradient = jax.value_and_grad(loss)(1.0)
 assert jnp.allclose(value, 14./3.)
 assert jnp.allclose(gradient, -28./3.)
@@ -29,7 +29,6 @@ assert jnp.allclose(value, 14./3.)
 assert jnp.allclose(gradient, -28./3.)
 
 # Figure data experiment
-# Compute figure data for: Loss and slope answer different questions
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 4.0, 81)
 # Differentiate the objective to obtain gradients `visual_data`.

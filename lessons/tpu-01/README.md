@@ -161,7 +161,6 @@ Create main.py with verify_runtime_contract so the same function validates CPU l
 
 ```python
 # Step 1 — Write the runtime contract and synchronized pmap verifier: The verifier checks both device discovery and a synchronized pmap...
-# Import hashlib for this computation.
 import hashlib
 import json
 import os
@@ -171,31 +170,25 @@ import jax.numpy as jnp
 import numpy as np
 
 
-# Function `verify_runtime_contract(expected_backend, min_devices)` implementing this stage's computation:
 def verify_runtime_contract(expected_backend=None, min_devices=1):
     # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `backend`.
     backend = jax.default_backend()
-    # Query the active JAX devices into `devices`.
     devices = jax.devices()
-    # Query the active JAX devices into `local_devices`.
     local_devices = jax.local_devices()
-    # Compute `target` from `expected_backend or backend`
     target = expected_backend or backend
     # Create evenly spaced index values in `x`.
     x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)
     # Reduce across the target axis to summarize `per_device`.
     per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     total = float(jax.block_until_ready(jnp.sum(per_device)))
     # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Evaluate the compound expression for `contract_ok`.
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Construct dictionary `receipt` with the structured fields for this stage.
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -230,20 +223,15 @@ topologies = [
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_gib_per_chip": 16},
     {"slice": "v6e-4", "hosts": 1, "chips_per_host": 4, "hbm_gib_per_chip": 32},
 ]
-# Iterate over `spec` to step through the computation:
 for spec in topologies:
-    # Compute `spec["total_chips"]` from `spec["hosts"] * spec["chips_per_host"]`
     spec["total_chips"] = spec["hosts"] * spec["chips_per_host"]
-    # Compute `spec["total_hbm_gib"]` from `spec["total_chips"] * spec["hbm_gib_per_chip"]`
     spec["total_hbm_gib"] = spec["total_chips"] * spec["hbm_gib_per_chip"]
 
 # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.
 receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
 # Assert invariant `receipt["contract_ok"] is True` holds
 assert receipt["contract_ok"] is True
-# Print the observed values to compare against the expected result.
 print("Verified runtime receipt:", json.dumps(receipt, sort_keys=True))
-# Print diagnostic summary of the computed outputs.
 print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"] for t in topologies})
 ```
 
@@ -264,7 +252,6 @@ Checking these invariants confirms the computation is ready for the full worked 
 
 ```python
 # Step 1 — Write the runtime contract and synchronized pmap verifier: The verifier checks both device discovery and a synchronized pmap...
-# Import hashlib for this computation.
 import hashlib
 import json
 import os
@@ -274,31 +261,24 @@ import jax.numpy as jnp
 import numpy as np
 
 
-# Function `verify_runtime_contract(expected_backend, min_devices)` implementing this stage's computation:
 def verify_runtime_contract(expected_backend=None, min_devices=1):
-    # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `backend`.
+    # Record the backend selected by this JAX process.
     backend = jax.default_backend()
-    # Query the active JAX devices into `devices`.
     devices = jax.devices()
-    # Query the active JAX devices into `local_devices`.
     local_devices = jax.local_devices()
-    # Compute `target` from `expected_backend or backend`
     target = expected_backend or backend
-    # Create evenly spaced index values in `x`.
+    # Build one eight-value row for each local device.
     x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)
-    # Reduce across the target axis to summarize `per_device`.
+    # Each device reduces its eight values to one local sum of squares.
     per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     total = float(jax.block_until_ready(jnp.sum(per_device)))
-    # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
-    # Evaluate the compound expression for `contract_ok`.
     contract_ok = (
         backend == target
         and len(devices) >= min_devices
         and np.isclose(total, expected_total)
     )
-    # Construct dictionary `receipt` with the structured fields for this stage.
     receipt = {
         "python": platform.python_version(),
         "jax": jax.__version__,
@@ -326,20 +306,15 @@ topologies = [
     {"slice": "v5litepod-8", "hosts": 1, "chips_per_host": 8, "hbm_gib_per_chip": 16},
     {"slice": "v6e-4", "hosts": 1, "chips_per_host": 4, "hbm_gib_per_chip": 32},
 ]
-# Iterate over `spec` to step through the computation:
 for spec in topologies:
-    # Compute `spec["total_chips"]` from `spec["hosts"] * spec["chips_per_host"]`
     spec["total_chips"] = spec["hosts"] * spec["chips_per_host"]
-    # Compute `spec["total_hbm_gib"]` from `spec["total_chips"] * spec["hbm_gib_per_chip"]`
     spec["total_hbm_gib"] = spec["total_chips"] * spec["hbm_gib_per_chip"]
 
-# Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `receipt`.
+# Record the backend selected by this JAX process in the receipt.
 receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
 # Assert invariant `receipt["contract_ok"] is True` holds
 assert receipt["contract_ok"] is True
-# Print the observed values to compare against the expected result.
 print("Verified runtime receipt:", json.dumps(receipt, sort_keys=True))
-# Print diagnostic summary of the computed outputs.
 print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"] for t in topologies})
 ```
 
@@ -362,8 +337,6 @@ The horizontal axis lists four single-host Cloud TPU VM slice types. The two bar
 Moving from `v5litepod-1` (`16` GiB) to `v5litepod-4` (`64` GiB) or `v6e-4` (`128` GiB) multiplies HBM capacity while keeping a single VM host, so you can test `jax.pmap` and `NamedSharding` across `4` or `8` chips from one SSH command.
 
 ```python
-# Compute figure data for: Single-host Cloud TPU slice chip counts and total HBM capacity
-# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'bar',
     'labels': [t['slice'] for t in topologies],
@@ -378,7 +351,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:22.243997+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:56:33.486976+00:00. JAX 0.9.2.
 
 ```text
 Verified runtime receipt: {"contract_ok": true, "device_count": 1, "device_kinds": ["cpu"], "expected_backend": "cpu", "expected_sum_of_squares": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_backend": "cpu", "pmap_sum_of_squares": 140.0, "python": "3.14.3", "receipt_sha256": "4ddc0cbb323fe3bd"}
@@ -401,9 +374,7 @@ PASS: tpu-01
 ```python
 # Experiment — Reject a mismatched backend or missing TPU devices immediately: Failing the contract check explicitly prevents a script from...
 mismatch = verify_runtime_contract(expected_backend="tpu", min_devices=4)
-# Print the observed values to compare against the expected result.
 print("Mismatch contract_ok:", mismatch["contract_ok"], "observed:", mismatch["observed_backend"], "devices:", mismatch["device_count"])
-# Assert that `mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)`.
 assert mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)
 ```
 
@@ -418,11 +389,8 @@ Failing the contract check explicitly prevents a script from silently running on
 ```python
 # Experiment — Verify single-host vs multi-host process counts: Single-host TPU VMs attach all chips to one Linux VM; multi-host...
 slice_hosts = {"v5litepod-1": 1, "v5litepod-4": 1, "v5litepod-8": 1, "v5litepod-16": 4}
-# Compute `needs_multi_host` from `{k: (v > 1) for k, v in slice_hosts.items()}`
 needs_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}
-# Print the observed values to compare against the expected result.
 print("Requires --worker=all and jax.distributed.initialize():", needs_multi_host)
-# Assert that `needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True`.
 assert needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True
 ```
 
@@ -436,26 +404,17 @@ Call `verify_runtime_contract` for the active backend with `min_devices=1`, then
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `verify_runtime_contract(...)` — Call `verify_runtime_contract` with your updated parameters or inputs from this lesson's workspace.
-- `jax.default_backend(...)` — Call `jax.default_backend` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Run `next` to compute `v5e4`.
-2. Print the observed values to compare against the expected result.
-3. Assert that `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Call verify_runtime_contract for the active backend with...
 checked = verify_runtime_contract(...)  # TODO: compute checked
-# Run `next` to compute `v5e4`.
 v5e4 = next(...)  # TODO: compute v5e4
-# Print the observed values to compare against the expected result.
 print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-# Assert that `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64`.
 assert checked["contract_ok"] is True  # TODO: complete assertion check
 ```
 
@@ -464,11 +423,8 @@ assert checked["contract_ok"] is True  # TODO: complete assertion check
 ```python
 # Exercise solution: Call verify_runtime_contract for the active backend with...
 checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
-# Run `next` to compute `v5e4`.
 v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
-# Print the observed values to compare against the expected result.
 print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
-# Assert that `checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64`.
 assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
 ```
 
@@ -488,21 +444,15 @@ Filter `topologies` by `t['total_hbm_gib'] >= 48`.
 
 ### How to write: Check whether a model state fits on a single-host TPU slice — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `slice(...)` — Call `slice` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Check whether a model state fits on a single-host TPU slice (Foundations): A single v5litepod-1 chip has 16 GiB HBM, whereas...
-2. Print the observed values to compare against the expected result.
-3. Assert invariant `fitting_slices == ["v5litepod-4"` holds
+2. Assert invariant `fitting_slices == ["v5litepod-4"` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check whether a model state fits on a single-host TPU slice (Foundations): A single v5litepod-1 chip has 16 GiB HBM, whereas...
 fitting_slices = ...  # TODO: compute fitting_slices
-# Print the observed values to compare against the expected result.
 print("Slices fitting 48 GiB:", fitting_slices)
 # Assert invariant `fitting_slices == ["v5litepod-4"` holds
 assert fitting_slices  # TODO: complete assertion check
@@ -513,7 +463,6 @@ assert fitting_slices  # TODO: complete assertion check
 ```python
 # Check whether a model state fits on a single-host TPU slice (Foundations): A single v5litepod-1 chip has 16 GiB HBM, whereas...
 fitting_slices = [t["slice"] for t in topologies if t["total_hbm_gib"] >= 48]
-# Print the observed values to compare against the expected result.
 print("Slices fitting 48 GiB:", fitting_slices)
 # Assert invariant `fitting_slices == ["v5litepod-4"` holds
 assert fitting_slices == ["v5litepod-4", "v5litepod-8", "v6e-4"]
@@ -542,17 +491,13 @@ Sum `np.arange(32, dtype=np.float64) ** 2`.
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `four_device_expected`.
-2. Print the observed values to compare against the expected result.
-3. Assert invariant `four_device_expected == 10416.0` holds
+1. Assert invariant `four_device_expected == 10416.0` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis): On a 4-chip TPU VM (v5litepod-4 or v6e-4), x has shape (4,...
-# Aggregate array values to compute `four_device_expected`.
 four_device_expected = float(...)  # TODO: compute four_device_expected
-# Print the observed values to compare against the expected result.
 print("Expected 4-device pmap sum of squares:", four_device_expected)
 # Assert invariant `four_device_expected == 10416.0` holds
 assert four_device_expected  # TODO: complete assertion check
@@ -562,9 +507,7 @@ assert four_device_expected  # TODO: complete assertion check
 
 ```python
 # Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis): On a 4-chip TPU VM (v5litepod-4 or v6e-4), x has shape (4,...
-# Aggregate array values to compute `four_device_expected`.
 four_device_expected = float(np.sum(np.arange(4 * 8, dtype=np.float64) ** 2))
-# Print the observed values to compare against the expected result.
 print("Expected 4-device pmap sum of squares:", four_device_expected)
 # Assert invariant `four_device_expected == 10416.0` holds
 assert four_device_expected == 10416.0

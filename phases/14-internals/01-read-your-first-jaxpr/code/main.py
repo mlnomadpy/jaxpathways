@@ -57,8 +57,6 @@ assert jnp.allclose(value, 29.)
 assert jnp.allclose(gradient, jnp.array([4., 6., 8.]))
 
 # Figure data experiment
-# Compute figure data for: Follow values through the jaxpr operations
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}
 
 # Experiment: Trace and verify the derivative
@@ -120,7 +118,6 @@ def bad_branch(z):
     if z[0] > 0:
         return jnp.sum(z)
     return -jnp.sum(z)
-# Run the boundary check and catch the expected exception:
 try:
     jax.make_jaxpr(bad_branch)(x)
 except jax.errors.TracerBoolConversionError:

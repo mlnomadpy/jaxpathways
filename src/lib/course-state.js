@@ -6,6 +6,76 @@ import {
   validateReadingState,
 } from './learner-records.js';
 
+/** @param {unknown} value */
+function courseRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Unsupported course data');
+  }
+  const course = /** @type {Record<string, unknown>} */ (value);
+  if (
+    typeof course.title !== 'string' ||
+    !Array.isArray(course.phases) ||
+    !Array.isArray(course.pathways) ||
+    !Array.isArray(course.projectIds) ||
+    !Array.isArray(course.roles) ||
+    !Array.isArray(course.domains)
+  ) {
+    throw new Error('Unsupported course data');
+  }
+  for (const phase of course.phases) {
+    if (
+      !phase ||
+      typeof phase !== 'object' ||
+      !('id' in phase) ||
+      typeof phase.id !== 'string' ||
+      !('lessons' in phase) ||
+      !Array.isArray(phase.lessons) ||
+      phase.lessons.some(
+        /** @param {unknown} lesson */
+        (lesson) =>
+          !lesson ||
+          typeof lesson !== 'object' ||
+          !('id' in lesson) ||
+          typeof lesson.id !== 'string' ||
+          !('title' in lesson) ||
+          typeof lesson.title !== 'string' ||
+          !('status' in lesson) ||
+          !['authored', 'planned'].includes(String(lesson.status)),
+      )
+    ) {
+      throw new Error('Unsupported course phase data');
+    }
+  }
+  return /** @type {import('../types/course').Course} */ (value);
+}
+
+/** @param {unknown} value */
+function currentLessonRecord(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Current lesson data is missing');
+  }
+  const payload = /** @type {Record<string, unknown>} */ (value);
+  if (
+    typeof payload.phaseId !== 'string' ||
+    !payload.lesson ||
+    typeof payload.lesson !== 'object' ||
+    Array.isArray(payload.lesson)
+  ) {
+    throw new Error('Unsupported current lesson data');
+  }
+  const lesson = /** @type {Record<string, unknown>} */ (payload.lesson);
+  if (
+    typeof lesson.id !== 'string' ||
+    typeof lesson.title !== 'string' ||
+    lesson.status !== 'authored' ||
+    !lesson.content ||
+    typeof lesson.content !== 'object'
+  ) {
+    throw new Error('Unsupported current lesson data');
+  }
+  return /** @type {{ phaseId: string; lesson: import('../types/course').Lesson }} */ (value);
+}
+
 /** @param {string} id */
 function phaseById(id) {
   return courseState.course?.phases.find((p) => p.id === id);
@@ -35,9 +105,10 @@ function authoredIds() {
  *   activePath: string;
  *   courseQuery: string;
  *   courseHardware: string;
+ *   courseTypeFilter: string;
  *   completed: boolean;
  *   readingState: {
- *     version: number;
+ *     version: 1;
  *     lastLessonId?: string;
  *     path?: string;
  *     sectionId?: string;
@@ -46,7 +117,7 @@ function authoredIds() {
  *   };
  *   readingFrame: number;
  *   lessonProgress: {
- *     version: number;
+ *     version: 1;
  *     lessons: Record<string, { checkpointPassed: boolean; evidenceSaved: boolean }>;
  *   };
  * }} CourseState
@@ -60,6 +131,7 @@ const courseState = {
   activePath: 'all',
   courseQuery: '',
   courseHardware: 'all',
+  courseTypeFilter: 'all',
   completed: false,
   readingState: { version: 1, lessons: {} },
   readingFrame: 0,
@@ -72,9 +144,25 @@ const progressKey = learnerStorageKeys.lessonProgress;
 
 async function loadCourse() {
   courseState.standalone = Boolean(document.querySelector('#lesson-page'));
-  const loadedCourse = /** @type {import('../types/course').Course} */ (
-    await fetchJson('curriculum.json')
-  );
+  let loadedCourse;
+  if (courseState.standalone) {
+    loadedCourse = courseRecord(await fetchJson('api/v1/course-navigation.json'));
+    const payloadNode = document.querySelector('#current-lesson-data');
+    if (payloadNode?.textContent) {
+      const payload = currentLessonRecord(JSON.parse(payloadNode.textContent));
+      const phase = loadedCourse.phases.find((item) => item.id === payload.phaseId);
+      if (!phase || !phase.lessons.some((lesson) => lesson.id === payload.lesson.id)) {
+        throw new Error('Current lesson does not match course navigation');
+      }
+      phase.lessons = phase.lessons.map((lesson) =>
+        lesson.id === payload.lesson.id ? payload.lesson : lesson,
+      );
+    } else {
+      throw new Error('The current lesson was not embedded in this page');
+    }
+  } else {
+    loadedCourse = courseRecord(await fetchJson('curriculum.json'));
+  }
   courseState.course = loadedCourse;
   courseState.curriculum = loadedCourse.pathways.map((route) => ({
     ...route,

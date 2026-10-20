@@ -1,14 +1,40 @@
 """Check downloadable books and bundles, including EPUB internal references."""
 import json
+import os
 import re
+from html.parser import HTMLParser
 from pathlib import Path
 from zipfile import ZipFile, ZIP_STORED
 import xml.etree.ElementTree as ET
+from urllib.parse import urlsplit
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'public/downloads'
 course=json.loads((ROOT/'public/curriculum.json').read_text())
 authored=[l for p in course['phases'] for l in p['lessons'] if l['status']=='authored']
 release=json.loads((ROOT/'curriculum/releases.json').read_text())[0]
+base=(os.environ.get('BASE_PATH','/') or '/').rstrip('/')+'/'
+site_hosts={'www.tahabouhsine.com','tahabouhsine.com'}
+
+class IdCollector(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.ids=set()
+    def handle_starttag(self, tag, attrs):
+        self.ids.update(value for key,value in attrs if key=='id' and value)
+
+def check_published_link(href, source):
+    link=urlsplit(href)
+    if link.scheme not in ('http','https') or link.hostname not in site_hosts:
+        return
+    site_prefix='/jaxpathways/'
+    assert link.path.startswith(site_prefix), f'{source}: same-site URL outside deployment prefix: {href}'
+    mapped=base+link.path[len(site_prefix):]
+    target=ROOT/'dist'/mapped.lstrip('/')
+    assert target.is_file(), f'{source}: same-site target missing from built site: {href}'
+    if link.fragment and target.suffix=='.html':
+        parser=IdCollector()
+        parser.feed(target.read_text())
+        assert link.fragment in parser.ids, f'{source}: same-site fragment missing from built site: {href}'
 def assert_narrative(source, text, chapter):
     # Visible prose and code survive; each TeX token survives in MathML annotation.
     pattern = re.compile(r"(`+)([^\n]*?)\1|\\\((.*?)\\\)|\\\[(.*?)\\\]|\$\$(.*?)\$\$", re.S)
@@ -92,16 +118,20 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
     for name in book.namelist():
         if name.endswith('.xhtml'):
             for a in ET.fromstring(book.read(name)).iter('{http://www.w3.org/1999/xhtml}a'):
-                if not a.attrib['href'].startswith('https://'):
-                    assert 'OEBPS/'+a.attrib['href'].split('#')[0] in book.namelist()
+                href=a.attrib['href']
+                check_published_link(href, f'EPUB {name}')
+                if not urlsplit(href).scheme and not href.startswith('//'):
+                    assert 'OEBPS/'+href.split('#')[0] in book.namelist()
 for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     project_path=ROOT/manifest
     project=json.loads(project_path.read_text())
     with ZipFile(OUT/(project['id']+'.zip')) as bundle:
+        assert len(bundle.namelist())==len(set(bundle.namelist())), f'{project["id"]}: duplicate archive paths'
         for path in project_path.parent.rglob('*'):
             if path.is_file() and '__pycache__' not in path.parts:
                 assert bundle.read(str(path.relative_to(ROOT)))==path.read_bytes()
-        assert bundle.read('requirements-cpu.txt')==(ROOT/'requirements-cpu.txt').read_bytes()
+        requirements=project['environment']['requirementsPath']
+        assert bundle.read(requirements)==(ROOT/requirements).read_bytes()
         assert set(project['requiredLessonIds'])<=set(l['id'] for l in authored)
 with ZipFile(OUT/'jax-tutor-skills.zip') as bundle:
     for path in (ROOT/'skills').rglob('*.md'):
@@ -122,14 +152,16 @@ print('OK: standalone HTML has embedded figure assets and course appendices.')
 
 with ZipFile(OUT/'jax-start-here.zip') as bundle:
     setup=next(l for l in authored if l['id']=='welcome-01')
-    expected={'jax-start-here/first_experiment.py','jax-start-here/requirements-cpu.txt','jax-start-here/START-HERE.md','jax-start-here/figure.svg'}
+    expected={'jax-start-here/first_experiment.py','jax-start-here/requirements-beginner.txt','jax-start-here/START-HERE.md','jax-start-here/figure.svg'}
     if setup['content'].get('diagram'):
         expected.add('jax-start-here/mechanism.svg')
         assert bundle.read('jax-start-here/mechanism.svg')==(ROOT/setup['path']/'outputs/mechanism.svg').read_bytes()
     assert set(bundle.namelist())==expected
     assert bundle.read('jax-start-here/first_experiment.py').decode()==setup['content']['code']+'\n'
-    assert bundle.read('jax-start-here/requirements-cpu.txt')==(ROOT/'requirements-cpu.txt').read_bytes()
-    assert bundle.read('jax-start-here/START-HERE.md').decode()==(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg').replace('../outputs/mechanism.svg','mechanism.svg')
+    assert bundle.read('jax-start-here/requirements-beginner.txt')==(ROOT/'requirements-beginner.txt').read_bytes()
+    setup_guide = bundle.read('jax-start-here/START-HERE.md').decode()
+    assert 'requirements-beginner.txt' in setup_guide
+    assert setup_guide==(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg').replace('../outputs/mechanism.svg','mechanism.svg')
     assert bundle.read('jax-start-here/figure.svg')==(ROOT/setup['path']/'outputs/figure.svg').read_bytes()
 print('OK: beginner workspace source/package/instruction fidelity.')
 

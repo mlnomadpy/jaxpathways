@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep StableHLO, synchronized CPU samples and independent output parity. Derive the byte/FLOP model and label the roofline peak and bandwidth as hypothetical.
 
 - Command: `python3 phases/08-performance/04-reason-with-hlo-and-the-roofline-model/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

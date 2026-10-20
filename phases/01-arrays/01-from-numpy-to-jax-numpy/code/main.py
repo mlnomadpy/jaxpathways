@@ -1,21 +1,21 @@
 """From NumPy to jax.numpy: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Create a three-example, two-feature array
 import jax.numpy as jnp
 x = jnp.array([[1., 10.], [3., 14.], [5., 18.]])
 
-# Step 2: Apply the core JAX transformation
+# Center each feature using its column mean
 mean = x.mean(axis=0)
 centered = x - mean
 
-# Step 3: Verify shapes and numerical invariants
+# Check the hand-computed means and centering invariant
 assert jnp.allclose(mean, jnp.array([3., 14.]))
 assert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))
 
 # From NumPy to jax.numpy: Feature preprocessing answers a specific question: how does each...
 import jax.numpy as jnp
 x = jnp.array([[1., 10.], [3., 14.], [5., 18.]])
-# Reduce along axis=0 to compute `mean`.
+# Average across examples, leaving one mean for each feature column.
 mean = x.mean(axis=0)
 centered = x - mean
 print("Mean:", mean)
@@ -24,7 +24,6 @@ assert jnp.allclose(mean, jnp.array([3., 14.]))
 assert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))
 
 # Figure data experiment
-# Compute figure data for: Center each feature around its own mean
 visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'ylabel': 'feature value', 'series': [{'label': 'original feature 0', 'y': x[:, 0].tolist()}, {'label': 'centered feature 0', 'y': centered[:, 0].tolist()}, {'label': 'original feature 1', 'y': x[:, 1].tolist()}, {'label': 'centered feature 1', 'y': centered[:, 1].tolist()}]}
 
 # Experiment: Check the normalization arithmetic
@@ -46,7 +45,6 @@ def fit_standardizer(training_data):
     fitted_mean = training_data.mean(axis=0)
     # Reduce along axis=0 to compute `fitted_std`.
     fitted_std = training_data.std(axis=0)
-    # Combine or mask array elements to form `fitted_scale`.
     fitted_scale = jnp.where(fitted_std == 0., 1., fitted_std)
     return fitted_mean, fitted_scale
 def apply_standardizer(data, statistics):
@@ -79,7 +77,6 @@ assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistic
 # Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...
 new_rows = jnp.array([[7., 22.], [9., 26.]])
 together = apply_standardizer(new_rows, statistics)
-# Combine or mask array elements to form `separately`.
 separately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])
 assert jnp.allclose(together, separately)
 refitted = apply_standardizer(new_rows, fit_standardizer(new_rows))

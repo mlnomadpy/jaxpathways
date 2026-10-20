@@ -107,7 +107,6 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     update, state = adam.update(g, state, params)
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
-    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
     print('step / update:', t, update)
 ```
@@ -155,7 +154,6 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     update, state = adam.update(g, state, params)
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
-    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
     print('step / update:', t, update)
 
@@ -196,7 +194,6 @@ The dash-dot Adam curve makes the same caution especially clear. It reaches abou
 At update $50$, the losses are approximately $1.28\times10^{-4}$ for Adam, $2.96\times10^{-3}$ for SGD, and $2.49\times10^{-2}$ for momentum. Adam finishes lowest under these settings, although it was not lowest at every earlier update. Compare the same update budget, read the endpoint as well as the dips, and remember that equal update counts do not imply equal runtime. This figure uses fixed rates without clipping or a schedule; the later experiments examine those separate choices.
 
 ```python
-# Compute figure data for: Compare optimizer paths under a fixed update budget
 def plot_bowl(z):
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
 series = []
@@ -208,7 +205,6 @@ for name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05
     for _ in range(50):
         # Differentiate the objective to obtain gradients `(delta, s_plot)`.
         delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)
-        # Apply the computed gradient updates to update the model parameters.
         p_plot = optax.apply_updates(p_plot, delta)
         vals.append(float(plot_bowl(p_plot)))
     series.append({'label': name, 'y': vals})
@@ -217,7 +213,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:04.755758+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:49:47.570599+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -280,7 +276,6 @@ for name, tx in optimizers.items():
         # Configure or step the Optax optimizer state (`p`).
         p = optax.apply_updates(p, delta)
         return ((p, s), bowl(p))
-    # Run compiled structured control flow via `jax.lax` (`((_, _), history)`).
     (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)
     # Confirm that all computed values remain finite (no NaN or Inf).
     assert jnp.all(jnp.isfinite(history))

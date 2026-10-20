@@ -93,9 +93,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -216,13 +214,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -232,13 +228,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -267,7 +261,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -298,10 +291,8 @@ def summarize(result):
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
-    # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
         raise ValueError('invalid finite capacity inputs')
-    # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
     offered=arrivals_per_hour*measured_job_s/3600
@@ -322,7 +313,7 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 ```python
 # Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
 samples=[]
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
     for steps in [8,32,64]:
         run=launch(Path(folder)/str(steps),dict(steps=steps))
@@ -363,9 +354,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -470,13 +459,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -486,13 +473,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -521,7 +506,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -544,10 +528,8 @@ def summarize(result):
 def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fraction=.25):
     """Illustrative one-job-per-worker plan; inputs are not cloud price discovery."""
     values=[measured_job_s,arrivals_per_hour,hourly_rate,reserve_fraction]
-    # Guard input contract (`any((not math.isfinite(x) for x in values)) or measured_job_s <= 0 or arrivals_per_hour < 0 or (hourly_rate < 0)`) and fail fast if violated.
     if any(not math.isfinite(x) for x in values) or measured_job_s <= 0 or arrivals_per_hour < 0 or hourly_rate < 0:
         raise ValueError('invalid finite capacity inputs')
-    # Guard input contract (`not isinstance(workers, int) or isinstance(workers, bool) or workers < 1 or (not 0 <= reserve_fraction < 1)`) and fail fast if violated.
     if not isinstance(workers,int) or isinstance(workers,bool) or workers < 1 or not 0 <= reserve_fraction < 1:
         raise ValueError('invalid workers or reserve')
     offered=arrivals_per_hour*measured_job_s/3600
@@ -560,7 +542,7 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
 
 # Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
 samples=[]
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
     for steps in [8,32,64]:
         run=launch(Path(folder)/str(steps),dict(steps=steps))
@@ -593,22 +575,21 @@ The horizontal categories in both panels are actual jobs with $8$, $32$ and $64$
 The lower-panel values are much smaller than the complete-job values because startup, compilation, logging and checkpoint writes are outside the update timer. Calculate each pair’s ratio from its labels to see how much of the short job is spent in measured updates. The ratio can be large for such small workloads. Host scheduling and filesystem work vary, so close wall-time values need not increase monotonically with update count. This figure explains timing boundaries and startup amortization; it does not measure hardware utilization or prove scaling on an accelerator.
 
 ```python
-# Compute figure data for: Short jobs spend time outside the update loop
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:47.444738+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:28.742624+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.543132500257343, 0.5599589156918228, 0.5557856247760355]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.09332648594863713, 'load_fraction': 0.046663242974318564, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002333162148715928, 'within_reserve': True}
+measured local job seconds: [0.514636832755059, 0.4996092077344656, 0.5204760837368667]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08674601395614445, 'load_fraction': 0.043373006978072226, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021686503489036114, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.6144686662591994, 0.5638747080229223, 0.5770753328688443]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.10241144437653323, 'load_fraction': 0.05120572218826661, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00025602861094133306, 'within_reserve': True}
+measured local job seconds: [0.5069865840487182, 0.5080082495696843, 0.5672803330235183]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.09454672217058639, 'load_fraction': 0.047273361085293196, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00023636680542646598, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.05120572218826661 0.10241144437653323
+nominal load at two demand scenarios: 0.047273361085293196 0.09454672217058639
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -655,10 +636,6 @@ Using the measured service-time input, calculate the minimum worker count for $1
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `capacity(...)` — Call `capacity` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -703,11 +680,6 @@ Every attempt consumes resources under this hypothetical model.
 
 ### How to write: Account for failed attempts — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `attempts(...)` — Call `attempts` with your updated parameters or inputs from this lesson's workspace.
-- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -748,12 +720,9 @@ A plan should not silently divide by zero or emit a meaningless worker count.
 
 ### How to write: Reject impossible capacity inputs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `inputs(...)` — Call `inputs` with your updated parameters or inputs from this lesson's workspace.
-- `inputs.update(...)` — Call `inputs.update` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -762,7 +731,6 @@ A plan should not silently divide by zero or emit a meaningless worker count.
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     inputs = dict(...)  # TODO: compute inputs
     inputs.update(change)
-    # Run the boundary check and catch the expected exception:
     try:capacity(**inputs)
     except ValueError:pass
     else:raise AssertionError('invalid plan accepted')
@@ -775,7 +743,6 @@ for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=flo
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)
     inputs.update(change)
-    # Run the boundary check and catch the expected exception:
     try:capacity(**inputs)
     except ValueError:pass
     else:raise AssertionError('invalid plan accepted')

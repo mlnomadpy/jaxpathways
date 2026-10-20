@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep both parameter configurations, their known predictions, a container-alias experiment, a non-mutating update, and an evaluation loss checked by hand. Explain which state the caller owns.
 
 - Command: `python3 phases/01-arrays/03-pure-functions-and-explicit-inputs/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

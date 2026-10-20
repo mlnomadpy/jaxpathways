@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-03",
-  "contentHash": "ffafe87d6ffe3d1dddcd0ab058e87d4adff0aae938e053a9460b4bb5cbe3f3b6",
-  "executedAt": "2026-10-20T10:49:49.884306+00:00",
+  "contentHash": "f972b684ec2c99a270b232bd6f16b23ca0bdbfad63f57447bfae03d134c62bfc",
+  "executedAt": "2026-10-20T19:26:27.544898+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Actual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nActual backend: cpu simulated layout: TPU v5 lite\nSynchronous/buffered endpoints: -1.75 2.25\nprograms, padded elements, modeled data-buffer bytes: [(9, 9216, 24576), (6, 12288, 49152), (4, 16384, 98304)]\nThree-buffer schedule matches the two-buffer result\nSingle-tile pipeline checked\nChanged shape, dtype and schedules verified\nUnsupported pipeline tile rejected\nTile, two/three-input-slot modeled bytes: (8, 128) 24576 32768\nTile, two/three-input-slot modeled bytes: (16, 128) 49152 65536\nTile, two/three-input-slot modeled bytes: (16, 256) 98304 131072\nPASS: kernels-03\n",
   "notebookCells": [
     {
-      "sourceHash": "258634076b7219c38952d73ef0d77fb04d9f527edd48928d65d420018ad3fb6d",
+      "sourceHash": "c5d3df614f93bafefc85a59585466ae976e1d717a907cb9e7d8feb468afa0a6d",
       "outputs": []
     },
     {
-      "sourceHash": "47e177697d4ec6e7261caff191832c228d9357c25067a03740e8170270bb4458",
+      "sourceHash": "72542bfd9bff92cbc4e3eac8d6f93188461c3c31cdb719b33735670163c2ad69",
       "outputs": [
         {
           "output_type": "stream",
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "e8abff9e5c1dae606210cc25bbb8e544b1a9a3c17898e56c7c2d14959da72a52",
+      "sourceHash": "7843f0cc2927a8071739d7d4e5b764776ba8441674ec137975b0224fcd9483b6",
       "outputs": [
         {
           "output_type": "stream",
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "17756ae1f7d651fff6470204554a27190add755e4e65b3a5d775a239c476aa83",
+      "sourceHash": "e6b043613d1616d002ab002db0157d8737d8ebdbd15f0d2d6b85e1c824a3934c",
       "outputs": [
         {
           "output_type": "stream",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "sourceHash": "47e19d40395783992b07407a98dbe9ea56143cd9aff9484a2c1548d2726313b0",
+      "sourceHash": "527d646307c147af4af3094e0e9db35920d82b837dcaac9799f06bae32984795",
       "outputs": []
     },
     {
@@ -76,7 +76,7 @@
       ]
     },
     {
-      "sourceHash": "e10e7fa7e67cd32cb913343f3cbae0f3f51420fb0a8f2e80483d6c73e7f07dd9",
+      "sourceHash": "730d0218d512bb0b42856229044f9e6d0cbdc1fb028c7ec7a3bb1b53be92de12",
       "outputs": [
         {
           "output_type": "stream",
@@ -88,7 +88,7 @@
       ]
     },
     {
-      "sourceHash": "1b36a026e72aa576f815588814ac46b3e980c3611d8b5e7a97a1df259011edf2",
+      "sourceHash": "c752397a24afa4d631f7e6b182c6eb374ceddb901c129f40ee1fb740f937a7fc",
       "outputs": [
         {
           "output_type": "stream",
@@ -100,11 +100,11 @@
       ]
     },
     {
-      "sourceHash": "44b9155c0a2e8ef3d4b394472d4210ffabc8ed1d8ad26e180cf41bed6e38842f",
+      "sourceHash": "d753117fa3e6c37fa9ae42f77c54dcdc339de611117b1da83d304ca2520d942a",
       "outputs": []
     },
     {
-      "sourceHash": "91c49b024c4fb35f4accbc28837cb44caaed81ef14fe879fa75326d6aaaf66da",
+      "sourceHash": "33ab8d7e383fd7089b3ac76cbcfdda4a2fe164d29a498a709077504f4b52d0a7",
       "outputs": [
         {
           "output_type": "stream",
@@ -116,11 +116,11 @@
       ]
     },
     {
-      "sourceHash": "87d4d0b2185c13a345b616e0209aa8160200a6e2e1f1f51fd2b3cc46741aa736",
+      "sourceHash": "216a01ee0c6e59c8eb9b08749680782d9e8db965989a1291b2e0f882c09ef93b",
       "outputs": []
     },
     {
-      "sourceHash": "b85b32c7b4dcbb3f9ae6a1b77df56aaec785d7ce06dd57a800544ef25799beb4",
+      "sourceHash": "b55202e5dcbeff096457736bbff408b3600c2e4843cbb7484e8f99cef8f8cab7",
       "outputs": [
         {
           "output_type": "stream",

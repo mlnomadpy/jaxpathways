@@ -381,7 +381,8 @@ Turn a dataset and model idea into a reproducible experiment. You define the obj
 1. Build the shared CPU foundation: A reproducible regression fit with checked gradients and explicit random state.
 2. Train and evaluate a small model: A reproducible classifier
 3. Prove full-state recovery: An interrupted run restored with its full state
-4. Diagnose and improve training speed: A trace-backed before-and-after performance report
+4. Export and verify an inference release: A portable model artifact with a checked prediction contract and a CPU inference capacity report.
+5. Diagnose and improve training speed: A trace-backed before-and-after performance report
 
 ### Research engineer
 
@@ -489,7 +490,8 @@ Make model workloads observable and recoverable. Track progress and resource use
 3. Verify a recovery point: An interrupted run restored with its full state
 4. Observe and diagnose workload behavior: A trace-backed before-and-after performance report
 5. Operate a sharded job: A resilient sharded training experiment
-6. Rehearse failure and recovery: An observable local job, a deliberate worker failure and a tested restore/rollback runbook; accelerator transfer needs a separate target run.
+6. Package and verify a serving release: A containerized inference service with verified artifact identity, readiness and request checks.
+7. Rehearse failure and recovery: An observable local job, a deliberate worker failure and a tested restore/rollback runbook; accelerator transfer needs a separate target run.
 
 ## Goal-based pathways
 

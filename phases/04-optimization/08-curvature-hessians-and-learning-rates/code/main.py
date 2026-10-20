@@ -53,10 +53,8 @@ hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 
 # Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
-# Define `run(rate, steps)` to evaluate the objective and its automatic derivatives:
 def run(rate, steps=20):
 
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
         # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
@@ -68,13 +66,11 @@ assert jnp.all(jnp.diff(history) <= 1e-06)
 print('final weights / loss:', final, history[-1])
 
 # Figure data experiment
-# Compute figure data for: Unequal curvature produces unequal progress
 # Create device-backed JAX array `points`.
 points = [jnp.array([1.0, 1.0])]
 for _ in range(20):
     # Differentiate the objective to obtain gradients ``.
     points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))
-# Combine or mask array elements to form `trace`.
 trace = jnp.stack(points)
 visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}
 

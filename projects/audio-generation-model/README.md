@@ -39,3 +39,9 @@ Required explained artifacts: waveform/spectrogram codec comparisons, codebook o
 Release generator weights, codec/decoder or immutable component references, condition tokenizer/processor, generation schedule and defaults, input/output bounds and the tested consumer pipeline. Follow the [Hub workflow](../embedding-model-300m/RELEASE.md), substituting waveform canaries and audio quality gates. A Transformers/Diffusers/AudioCraft interface is advertised only after a compatible implementation is verified.
 
 Service tests cover duration limits, chunk continuity, cancellation, concurrent state isolation, output sample-rate correctness and resource bounds. Quantize/evaluate the complete pipeline where supported, identifying unquantized stages. Rollback restores codec, generator, conditioner and decoder together. The learner's final report distinguishes component quality, task quality and operational readiness.
+
+## Implementation gate and real-data lineage
+
+Do not promote until real waveform source/license, speaker or recording groups, sample rate, resampling, codec/decoder revisions and train/validation/test membership are recorded. Keep codec, generator and decoder checkpoints linked through full-state resumes; synthetic waveforms only verify tensor and codec boundaries.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

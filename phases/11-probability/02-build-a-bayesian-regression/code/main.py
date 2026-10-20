@@ -23,7 +23,6 @@ assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 # 3. Predict both the latent mean and a new observation
 # Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
 def predictive(design,mean,cov,sigma):
-    # Perform matrix / vector contraction (`@`) to compute `center`.
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     return center,latent_variance,latent_variance+sigma**2
@@ -54,7 +53,6 @@ assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 
 # Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
 def predictive(design,mean,cov,sigma):
-    # Perform matrix / vector contraction (`@`) to compute `center`.
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
     return center,latent_variance,latent_variance+sigma**2
@@ -66,10 +64,8 @@ print('posterior mean:',mean,'covariance:',cov)
 print('latent variance:',latent_var,'observation variance:',observation_var)
 
 # Figure data experiment
-# Compute figure data for: Prediction uncertainty grows away from the observed center
 # Generate a uniform grid of points in `grid`.
 grid=jnp.linspace(-3,3,61)
-# Allocate initialized array `(_, lv, ov)` with the specified shape and dtype.
 _,lv,ov=predictive(jnp.stack([jnp.ones_like(grid),grid],axis=1),mean,cov,sigma)
 visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"predictive standard deviation (target units)","series":[{"label":"latent line","y":jnp.sqrt(lv).tolist()},{"label":"new observation","y":jnp.sqrt(ov).tolist()}]}
 
@@ -95,11 +91,10 @@ assert jnp.all(jnp.diag(strong_cov)<jnp.diag(cov))
 # Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
 shift_X = jnp.array([[1.,0.],[1.,1.],[1.,2.]])
 shift_m,shift_c = posterior(shift_X,y,sigma,prior_scale)
-# Convert `host_X` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host_X=np.asarray(shift_X,dtype=np.float64)
-# Construct an identity matrix `host_P`.
 host_P=np.eye(2)/4+host_X.T@host_X
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
 assert shift_c[0,1]<0
 

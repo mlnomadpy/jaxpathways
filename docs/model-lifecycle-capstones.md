@@ -36,6 +36,21 @@ Each linked specification inherits these requirements and supplies its own objec
 9. **Publish a usable system.** Package model plus processors/configuration/required auxiliary components, model card and canaries; verify an immutable Hub download. A hosted weight file alone is insufficient.
 10. **Rehearse operation.** Exercise concurrency, timeouts, failure recovery, monitoring and rollback appropriate to the product. Production readiness is conditional on the declared task/runtime gates.
 
+## Promotion gate for the ten planned specifications
+
+These directories contain plans, not executable model projects. The generic copied `starter/model.py`, `solution/model.py` and `tests/check.py` files were removed because they did not implement the advertised modality. Each project README now names its own implementation gate. Keep all ten entries marked **planned** until a project-specific starter, reference implementation and independent stage checks exist.
+
+Before an individual plan can be marked authored, its evidence bundle must include:
+
+- A real-data recipe manifest with source revisions and checksums, rights/attribution, group and duplicate policy, filtering, split membership, exposure counts and contamination checks. Synthetic fixtures remain correctness cases and do not count as a real-data pilot.
+- A frozen input/processor and evaluation contract, including versions, preprocessing, task inventory, metric definitions, baselines and held-out boundaries.
+- Parent-to-child stage records naming the exact checkpoint, objective/reduction, configuration and data revision. Within-stage resume must restore optimizer, schedule, PRNG, sampler/data cursor and other mutable state; intentional phase resets must be explicit.
+- Raw held-out evaluation outputs with failures, slice counts, uncertainty where relevant, and an independent numerical or metric reference. Do not promote a recipe based on the final test set.
+- Clean-process reload and canary evidence for the complete advertised model/pipeline, with actual hardware, precision, memory and synchronized timing receipts where those claims are made.
+- Plan-specific runnable teaching code, independent checks, an exercised changed condition, diagnosis evidence and source-bound execution records. A small CPU result does not establish approximately-300M training, accelerator correctness, production quality or readiness.
+
+The ten project READMEs define additional acceptance gates for text embeddings, causal language modeling, image understanding and generation, audio understanding and generation, CLIP, SigLIP, grounded multimodal generation and retrieval.
+
 Use the [tooling guide](model-lifecycle-tooling.md) for MLflow, Weights & Biases and focused ecosystem choices. Tracking backends receive a common local metric/artifact record; changing dashboards must not change the training algorithm or require a hosted account for core learning.
 
 ## Shared publishing and monitoring lessons
@@ -65,7 +80,7 @@ The CLIP and SigLIP projects extend MULTI-1 with distinct objective derivations,
 
 Teach CLIP's symmetric softmax baseline before the SigLIP comparison. Reuse identical data, processors, towers and development budgets where the experiment calls for control. Then carry qualified encoder artifacts into retrieval. Define a common score/embedding contract, but preserve each model's normalization, scale, bias and input semantics.
 
-The [public plan registry](../curriculum/project-plans.json) makes these three new specifications discoverable from Projects and the relevant modality guides. The other seven lifecycle specifications remain repository planning documents. All ten remain outside the executable project registry.
+The [public plan registry](../curriculum/project-plans.json) makes these three new specifications discoverable from Projects and the relevant modality guides. All ten specifications are discoverable from the public plan catalog and remain outside the executable project registry. Two separate tiny CPU pilots, [embedding lineage](../projects/embedding-lineage/README.md) and [causal lineage](../projects/causal-lineage/README.md), demonstrate real-text phase handoffs and retain their weak measured outcomes. Neither completes a target-scale capstone.
 
 ## Implementation sequence
 

@@ -38,14 +38,12 @@ for _ in range(60):
     w = w - 0.03 * g
 
 assert history[-1] < history[0]
-# Perform matrix / vector contraction (`@`) to compute `zi`.
 zi = left @ w
-# Perform matrix / vector contraction (`@`) to compute `zt`.
 zt = right @ w
 zi = zi / jnp.linalg.norm(zi, axis=1, keepdims=True)
 zt = zt / jnp.linalg.norm(zt, axis=1, keepdims=True)
 scores = zi @ zt.T / 0.2
-# Convert `host` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host = np.asarray(scores, dtype=np.float64)
 
 def host_ce(a):
@@ -108,14 +106,12 @@ for _ in range(60):
     w = w - 0.03 * g
 
 assert history[-1] < history[0]
-# Perform matrix / vector contraction (`@`) to compute `zi`.
 zi = left @ w
-# Perform matrix / vector contraction (`@`) to compute `zt`.
 zt = right @ w
 zi = zi / jnp.linalg.norm(zi, axis=1, keepdims=True)
 zt = zt / jnp.linalg.norm(zt, axis=1, keepdims=True)
 scores = zi @ zt.T / 0.2
-# Convert `host` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 host = np.asarray(scores, dtype=np.float64)
 
 def host_ce(a):
@@ -144,12 +140,11 @@ print(
 )
 
 # Figure data experiment
-# Compute figure data for: Contrastive learning: views, positives and negatives — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'symmetric contrastive loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `extra_panel` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 extra_panel={'kind':'heatmap','values':np.asarray(zi@zt.T).tolist(),'rows':['left 0','left 1','left 2','left 3'],'columns':['right 0','right 1','right 2','right 3'],'unit':'cosine similarity','diverging':True,'xlabel':'right-view source ID','ylabel':'left-view source ID','title':'Final cross-view similarities before temperature scaling'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
@@ -166,7 +161,7 @@ orthogonal = jnp.eye(2)
 for tau in [0.2, 1.0, 2.0]:
     observed = float(paired_contrastive(orthogonal, orthogonal, tau))
     np.testing.assert_allclose(observed, np.logaddexp(0.0, -1.0 / tau), atol=1e-6)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_array_equal(
         np.argmax(np.asarray(orthogonal @ orthogonal.T) / tau, axis=1), [0, 1]
     )

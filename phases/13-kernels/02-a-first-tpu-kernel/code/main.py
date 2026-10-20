@@ -9,17 +9,13 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
-    # Guard input contract (`x.ndim != 2 or bias.ndim != 1 or bias.shape[0] != x.shape[1] or (min(x.shape) < 1)`) and fail fast if violated.
     if x.ndim!=2 or bias.ndim!=1 or bias.shape[0]!=x.shape[1] or min(x.shape)<1:
         raise ValueError("x must be (M,N), bias must be (N,), and dimensions nonempty")
-    # Guard input contract (`x.dtype != bias.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=bias.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 required")
     bm,bn=block
-    # Guard input contract (`not isinstance(bm, int) or not isinstance(bn, int) or bm < 1 or (bn < 1)`) and fail fast if violated.
     if not isinstance(bm,int) or not isinstance(bn,int) or bm<1 or bn<1:
         raise ValueError("positive integer block sizes required")
-    # Guard input contract (`mode not in ('interpret', 'tpu')`) and fail fast if violated.
     if mode not in ("interpret","tpu"):
         raise ValueError("mode must explicitly be interpret or tpu")
     if mode=="tpu":
@@ -30,18 +26,13 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
     m,n=x.shape
     pm=(m+bm-1)//bm*bm
     pn=(n+bn-1)//bn*bn
-    # Combine or mask array elements to form `px`.
     px=jnp.pad(x,((0,pm-m),(0,pn-n)))
-    # Combine or mask array elements to form `pb`.
     pb=jnp.pad(bias,(0,pn-n))[None,:]
     def kernel(x_ref,bias_ref,out_ref):
         value=x_ref[...].astype(jnp.float32)+bias_ref[...].astype(jnp.float32)
         out_ref[...]=jnp.maximum(value,0).astype(out_ref.dtype)
-    # Invoke custom Pallas kernel or tile specification (`matrix_spec`).
     matrix_spec=pl.BlockSpec((bm,bn),lambda i,j:(i,j))
-    # Invoke custom Pallas kernel or tile specification (`bias_spec`).
     bias_spec=pl.BlockSpec((1,bn),lambda i,j:(0,j))
-    # Invoke custom Pallas kernel or tile specification (`output`).
     output=pl.pallas_call(kernel,
         out_shape=jax.ShapeDtypeStruct((pm,pn),x.dtype),
         grid=(pm//bm,pn//bn),in_specs=(matrix_spec,bias_spec),out_specs=matrix_spec,
@@ -51,11 +42,10 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
 
 # Execute the kernel semantics on CPU
 # Step 2 — Execute the kernel semantics on CPU: The matrix and column bias use different BlockSpecs.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-2,2,9*129,dtype=jnp.float32).reshape(9,129)
 bias=jnp.linspace(-.3,.4,129,dtype=jnp.float32)
 actual=fused_bias_relu(x,bias)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=np.maximum(np.asarray(x)+np.asarray(bias)[None,:],0)
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Check tensor shape invariant: `actual.shape==(9,129)`
@@ -83,17 +73,13 @@ from jax.experimental import pallas as pl
 from jax.experimental.pallas import tpu as pltpu
 
 def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
-    # Guard input contract (`x.ndim != 2 or bias.ndim != 1 or bias.shape[0] != x.shape[1] or (min(x.shape) < 1)`) and fail fast if violated.
     if x.ndim!=2 or bias.ndim!=1 or bias.shape[0]!=x.shape[1] or min(x.shape)<1:
         raise ValueError("x must be (M,N), bias must be (N,), and dimensions nonempty")
-    # Guard input contract (`x.dtype != bias.dtype or x.dtype not in (jnp.float32, jnp.bfloat16)`) and fail fast if violated.
     if x.dtype!=bias.dtype or x.dtype not in (jnp.float32,jnp.bfloat16):
         raise ValueError("matching float32 or bfloat16 required")
     bm,bn=block
-    # Guard input contract (`not isinstance(bm, int) or not isinstance(bn, int) or bm < 1 or (bn < 1)`) and fail fast if violated.
     if not isinstance(bm,int) or not isinstance(bn,int) or bm<1 or bn<1:
         raise ValueError("positive integer block sizes required")
-    # Guard input contract (`mode not in ('interpret', 'tpu')`) and fail fast if violated.
     if mode not in ("interpret","tpu"):
         raise ValueError("mode must explicitly be interpret or tpu")
     if mode=="tpu":
@@ -104,18 +90,13 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
     m,n=x.shape
     pm=(m+bm-1)//bm*bm
     pn=(n+bn-1)//bn*bn
-    # Combine or mask array elements to form `px`.
     px=jnp.pad(x,((0,pm-m),(0,pn-n)))
-    # Combine or mask array elements to form `pb`.
     pb=jnp.pad(bias,(0,pn-n))[None,:]
     def kernel(x_ref,bias_ref,out_ref):
         value=x_ref[...].astype(jnp.float32)+bias_ref[...].astype(jnp.float32)
         out_ref[...]=jnp.maximum(value,0).astype(out_ref.dtype)
-    # Invoke custom Pallas kernel or tile specification (`matrix_spec`).
     matrix_spec=pl.BlockSpec((bm,bn),lambda i,j:(i,j))
-    # Invoke custom Pallas kernel or tile specification (`bias_spec`).
     bias_spec=pl.BlockSpec((1,bn),lambda i,j:(0,j))
-    # Invoke custom Pallas kernel or tile specification (`output`).
     output=pl.pallas_call(kernel,
         out_shape=jax.ShapeDtypeStruct((pm,pn),x.dtype),
         grid=(pm//bm,pn//bn),in_specs=(matrix_spec,bias_spec),out_specs=matrix_spec,
@@ -124,11 +105,10 @@ def fused_bias_relu(x,bias,block=(8,128),mode="interpret"):
     return output[:m,:n]
 
 # Step 2 — Execute the kernel semantics on CPU: The matrix and column bias use different BlockSpecs.
-# Construct and reshape `x` into the target tensor dimensions.
 x=jnp.linspace(-2,2,9*129,dtype=jnp.float32).reshape(9,129)
 bias=jnp.linspace(-.3,.4,129,dtype=jnp.float32)
 actual=fused_bias_relu(x,bias)
-# Convert `reference` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 reference=np.maximum(np.asarray(x)+np.asarray(bias)[None,:],0)
 np.testing.assert_allclose(actual,reference,rtol=1e-6,atol=1e-6)
 # Check tensor shape invariant: `actual.shape==(9,129)`
@@ -148,8 +128,7 @@ else:
     print("Reference lesson is intended for CPU; target execution uses the separate project runner")
 
 # Figure data experiment
-# Compute figure data for: Bias and ReLU alter the values, not the tile ownership contract
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabel':'output activation','series':[{'label':'first row, CPU interpretation','y':np.asarray(actual)[0].tolist()},{'label':'last row, CPU interpretation','y':np.asarray(actual)[-1].tolist()}]}
 
 # Experiment: Check the represented bfloat16 contract
@@ -158,7 +137,7 @@ bx=x.astype(jnp.bfloat16)
 bb=bias.astype(jnp.bfloat16)
 bactual=fused_bias_relu(bx,bb)
 bref=jnp.maximum(bx.astype(jnp.float32)+bb.astype(jnp.float32)[None,:],0).astype(jnp.bfloat16)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(bactual),np.asarray(bref))
 assert bactual.dtype==jnp.bfloat16
 print("bfloat16 represented-input reference matched exactly")
@@ -168,7 +147,7 @@ print("bfloat16 represented-input reference matched exactly")
 edge_x=jnp.array([[-1.,0.,1.],[1.,-2.,.5]],dtype=jnp.float32)
 edge_bias=jnp.array([1.,0.,-1.],dtype=jnp.float32)
 edge=fused_bias_relu(edge_x,edge_bias)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(edge,np.array([[0.,0.,0.],[2.,0.,0.]],dtype=np.float32))
 print("Boundary fixture:",np.asarray(edge))
 
@@ -179,7 +158,7 @@ rng=np.random.default_rng(5)
 changed_x=jnp.asarray(rng.normal(size=(17,257)),dtype=jnp.float32)
 # Create device-backed JAX array `changed_bias`.
 changed_bias=jnp.asarray(rng.normal(size=257),dtype=jnp.float32)
-# Convert `expected` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)
 for block in [(8,128),(16,256)]:
     result=fused_bias_relu(changed_x,changed_bias,block)
@@ -190,7 +169,6 @@ print("Changed tails and two TPU-compatible blocks verified in interpretation")
 # Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
     rejected=False
-    # Run the boundary check and catch the expected exception:
     try:fused_bias_relu(x,malformed)
     except ValueError:rejected=True
     assert rejected

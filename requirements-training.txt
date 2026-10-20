@@ -1,0 +1,4 @@
+# Optional Flax and optimizer layer for neural-network projects.
+-r requirements-beginner.txt
+optax==0.2.8
+flax==0.12.6

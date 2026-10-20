@@ -83,7 +83,6 @@ Append this eager helper. Keep the input check outside any jitted function in th
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
     denominator = jnp.dot(a, a)
-    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
     return jnp.dot(a, u) / denominator * a
@@ -120,7 +119,6 @@ assert jnp.allclose(jnp.dot(u, a), 3.0)
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
     denominator = jnp.dot(a, a)
-    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
     return jnp.dot(a, u) / denominator * a
@@ -157,13 +155,12 @@ We projected onto the horizontal direction. The residual is perpendicular to tha
 The lengths form a familiar check: $\lVert p\rVert=3$, $\lVert r\rVert=4$, and $\lVert u\rVert=5$, with $3^2+4^2=5^2$. Projection separates the part represented by the chosen direction from the part that direction cannot represent.
 
 ```python
-# Compute figure data for: Projection and leftover form a right triangle
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:33.435928+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:15.899012+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -255,19 +252,14 @@ Use a try/except block; a silent successful result should fail the check.
 
 ### How to write: Handle an undefined direction — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `direction(...)` — Call `direction` with your updated parameters or inputs from this lesson's workspace.
-- `project(...)` — Call `project` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
-# Run the boundary check and catch the expected exception:
 try:
     project(u, jnp.zeros_like(a))
 except ValueError as exc:
@@ -280,7 +272,6 @@ else:
 
 ```python
 # Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
-# Run the boundary check and catch the expected exception:
 try:
     project(u, jnp.zeros_like(a))
 except ValueError as exc:

@@ -65,6 +65,13 @@ Publish a model card, immutable Hub revision, complete consumer configuration an
 
 Required outputs are a data/label manifest, independent loss/gradient oracle, dense/chunked parity, distributed equivalence if claimed, resumed training, controlled CLIP comparison, interpreted figures, precision checks, cold-load package and service qualification. Create starter, reference and adversarial stage checks before marking the project authored. SigLIP 2 and additional objectives are future extensions and must be named separately.
 
+
+## Implementation gate and real-data lineage
+
+Do not promote until pair IDs, multiple-positive policy, source split, label audit and parent encoder revisions are recorded. Compare against CLIP under matched data, processors and compute on a real held-out pair set, with loss/gradient oracle and source-level results; synthetic logits only validate the objective.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
 ## Primary references
 
 - [Sigmoid Loss for Language Image Pre-Training](https://arxiv.org/abs/2303.15343): objective, learned bias and experimental reference.

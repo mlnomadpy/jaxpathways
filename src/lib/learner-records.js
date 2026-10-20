@@ -1,50 +1,13 @@
 /**
- * @typedef {{ checkpointPassed: boolean; evidenceSaved: boolean }} LessonProgressEntry
- * @typedef {{ version: number; lessons: Record<string, LessonProgressEntry> }} LessonProgressState
- * @typedef {{
- *   id: string;
- *   route: string;
- *   title: string;
- *   note: string;
- *   url: string;
- *   date: string;
- *   updatedAt?: string;
- *   lessonId?: string;
- *   projectId?: string;
- *   stageId?: string;
- * }} EvidenceEntry
- * @typedef {{ version: number; route: string; evidence: EvidenceEntry[] }} LearnerNotebook
- * @typedef {{ sectionId: string; updatedAt: string }} ReadingPosition
- * @typedef {{
- *   version: number;
- *   lastLessonId: string;
- *   path: string;
- *   sectionId: string;
- *   updatedAt: string;
- *   lessons: Record<string, ReadingPosition>;
- * }} ReadingState
- * @typedef {{
- *   version: number;
- *   roleId: string;
- *   pathwayId: string;
- *   startPhaseId: string;
- *   knownPhaseIds: string[];
- * }} CareerPlan
- * @typedef {{
- *   lessonIds: string[];
- *   routeIds: string[];
- *   roleIds: string[];
- *   phaseIds: string[];
- * }} ValidationContext
- * @typedef {{
- *   version: number;
- *   notebook: LearnerNotebook;
- *   sampleCompleted: boolean;
- *   lessonProgress: LessonProgressState;
- *   projects: Record<string, string[]>;
- *   careerPlan: CareerPlan | null;
- *   reading: ReadingState | null;
- * }} LearnerBackup
+ * @typedef {import('../types/learner-records').LessonProgressEntry} LessonProgressEntry
+ * @typedef {import('../types/learner-records').LessonProgressState} LessonProgressState
+ * @typedef {import('../types/learner-records').EvidenceEntry} EvidenceEntry
+ * @typedef {import('../types/learner-records').LearnerNotebook} LearnerNotebook
+ * @typedef {import('../types/learner-records').ReadingPosition} ReadingPosition
+ * @typedef {import('../types/learner-records').ReadingState} ReadingState
+ * @typedef {import('../types/learner-records').CareerPlan} CareerPlan
+ * @typedef {import('../types/learner-records').ValidationContext} ValidationContext
+ * @typedef {import('../types/learner-records').LearnerBackup} LearnerBackup
  */
 
 /**
@@ -156,7 +119,7 @@ function validateLearnerNotebook(value, context) {
 /**
  * @param {any} value
  * @param {{ lessonIds: string[]; routeIds: string[] }} context
- * @returns {boolean}
+ * @returns {value is ReadingState | null | undefined}
  */
 function validateReadingState(value, context) {
   if (value === null || value === undefined) return true;
@@ -180,7 +143,7 @@ function validateReadingState(value, context) {
 /**
  * @param {any} value
  * @param {ValidationContext} context
- * @returns {boolean}
+ * @returns {value is CareerPlan | null | undefined}
  */
 function validateCareerPlan(value, context) {
   return Boolean(

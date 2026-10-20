@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-03",
-  "contentHash": "6b175d90141c2052127d85736ccf34c11f3f035c2884507fed92e387b08e7e68",
-  "executedAt": "2026-10-20T10:48:03.834483+00:00",
+  "contentHash": "be90a81f6f42c654a0120a561636faa8b39b04c2c88c23de75134ca1822a2d91",
+  "executedAt": "2026-10-20T18:52:45.225885+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257\nLoss: 0.04837454286198381 gradient: 0.2686922266772409 finite difference: 0.26869222316237146\nAutodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257\nLoss: 0.04837454286198381 gradient: 0.2686922266772409 finite difference: 0.26869222316237146\nSensitivity errors: [np.float64(0.0002448795513753099), np.float64(1.3192617195456613e-05), np.float64(7.654351459329689e-07), np.float64(4.6091481076260266e-08)]\nFinite-difference absolute errors: [3.515348206362123e-05, 3.5151551858181307e-07, 3.514869451048952e-09, 3.5118241648035564e-11, 1.1179057679555626e-11]\nRate and initial-state sensitivities: -2.695973769291141 0.44932896460456245\nWeighted derivative reference: 0.30367311533053687\nDetached autodiff is zero; actual value sensitivity: 0.26869222316237146\nPASS: science-03\n",
   "notebookCells": [
     {
-      "sourceHash": "c75fd70bba537eafa6b6bbedbdbfcb8846ccdbe9383784950ea7176829859197",
+      "sourceHash": "5e472ad1f2e5538d166817b182fbd55ebda72e9a1bf49a5e25c592d8a3516a8b",
       "outputs": []
     },
     {
@@ -42,7 +42,7 @@
       ]
     },
     {
-      "sourceHash": "e85e6134c8dd893270958d3b8520186cc2e876b9746d3fc442dbcf82042fbea3",
+      "sourceHash": "2acb99102c9cddda80e32b3ab7be538a925bd6992c74f0805e52e455f1d23b2e",
       "outputs": [
         {
           "output_type": "stream",
@@ -55,7 +55,7 @@
       ]
     },
     {
-      "sourceHash": "90c707833cf24edf7a706df2903aceb2c9402c39344bce6e73753722898ab0a0",
+      "sourceHash": "d19f13413e9f5b464baf68a8cf38b7eb1281eec5588d875162e0b0bad3640f23",
       "outputs": []
     },
     {
@@ -114,11 +114,11 @@
       ]
     },
     {
-      "sourceHash": "88c3ce506576b084e7e2843758f88f562d6d7f0bfa00879c4316d9c9db4d2844",
+      "sourceHash": "b7c707c52e07b09128c0c39b3f532893ab742884b18f4ed9b74f2b8cc3ef3674",
       "outputs": []
     },
     {
-      "sourceHash": "9e4e8c04c813fe97c2559fff51819f907333ae1f99ec826bf425b302c454df8b",
+      "sourceHash": "bf91205e307d17281914ee3269f94f91a970e103657f16b4445bd9685da8e655",
       "outputs": [
         {
           "output_type": "stream",

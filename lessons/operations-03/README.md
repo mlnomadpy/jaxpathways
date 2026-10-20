@@ -89,9 +89,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -212,13 +210,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -228,13 +224,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -263,7 +257,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -278,7 +271,7 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
 # Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
     uninterrupted=launch(base/'full')
@@ -325,9 +318,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -432,13 +423,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -448,13 +437,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -483,14 +470,13 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
     return result
 
 # Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
     uninterrupted=launch(base/'full')
@@ -529,13 +515,12 @@ The horizontal axis is completed training step; the vertical axis is that update
 The overlap is supported by equality checks of the complete state hashes, not inferred merely from a visually similar curve. The loss can move unevenly because each update samples a minibatch. Restart timing is deliberately absent: compilation, process startup and checkpoint reading add overhead even when the numerical continuation is exact.
 
 ```python
-# Compute figure data for: Resumed loss follows the same continuation
 visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training step','ylabel':'sampled minibatch mean squared error','series':[{'label':'uninterrupted continuation','y':[full_events[i]['loss'] for i in range(3,9)]},{'label':'restored continuation (overlaps)','y':[e['loss'] for e in resume_events]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:36.597024+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:18.330202+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]
@@ -569,7 +554,7 @@ Loss is a scalar projection of a much larger state; equal loss alone would not p
 
 ```python
 # Experiment — Reject a changed training rule: A deliberate branch experiment is valid when explicitly labeled,...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
     incompatible=launch(folder,dict(steps=8,resume=True,learning_rate=.05))
@@ -587,19 +572,14 @@ Repeat the recovery drill with seed $9$, checkpoint cadence $3$ and failure afte
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `Path(...)` — Call `Path` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Repeat the recovery drill with seed 9, checkpoint cadence 3 and...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     base = Path(...)  # TODO: compute base
     cfg = dict(...)  # TODO: compute cfg
@@ -616,7 +596,7 @@ with tempfile.TemporaryDirectory() as folder:
 
 ```python
 # Exercise solution: Repeat the recovery drill with seed 9, checkpoint cadence 3 and...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     base=Path(folder)
     cfg=dict(seed=9,checkpoint_every=3)
@@ -645,20 +625,15 @@ The expected outcome is a failed restore; preserve the failure event.
 
 ### How to write: Reject accidental checkpoint corruption — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `corruption(...)` — Call `corruption` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 2. Accumulate the next contribution into `state['velocity'][0]`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject accidental checkpoint corruption (Transfer / diagnosis): Rejecting corruption is safer and more inspectable than...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps = ...  # TODO: compute launch(folder,dict(steps
     path = Path(...)  # TODO: compute path
@@ -675,7 +650,7 @@ assert any(e['event']  # TODO: complete assertion check
 
 ```python
 # Reject accidental checkpoint corruption (Transfer / diagnosis): Rejecting corruption is safer and more inspectable than...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
     path=Path(folder)/'checkpoint.json'
@@ -705,11 +680,6 @@ Apply the recurrence before multiplying by the learning rate.
 </details>
 
 ### How to write: Explain a weights-only mismatch by hand — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `hand(...)` — Call `hand` with your updated parameters or inputs from this lesson's workspace.
-- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.

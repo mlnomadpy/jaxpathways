@@ -137,10 +137,8 @@ hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 
 # Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
-# Define `run(rate, steps)` to evaluate the objective and its automatic derivatives:
 def run(rate, steps=20):
 
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
         # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
@@ -175,20 +173,18 @@ For a quadratic direction with curvature $\lambda$, gradient descent multiplies 
 The steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.
 
 ```python
-# Compute figure data for: Unequal curvature produces unequal progress
 # Create device-backed JAX array `points`.
 points = [jnp.array([1.0, 1.0])]
 for _ in range(20):
     # Differentiate the objective to obtain gradients ``.
     points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))
-# Combine or mask array elements to form `trace`.
 trace = jnp.stack(points)
 visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:46.372064+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:46.439563+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395

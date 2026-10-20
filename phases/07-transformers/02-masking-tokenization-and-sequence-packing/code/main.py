@@ -9,9 +9,7 @@ import numpy as np
 # 2. Implement the mechanism
 # Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...
 def masked_mean(values, allowed):
-    # Combine or mask array elements to form `scores`.
     scores = jnp.where(allowed, 0., -jnp.inf)
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
     return weights @ values, weights
 
@@ -37,9 +35,7 @@ import numpy as np
 
 # Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...
 def masked_mean(values, allowed):
-    # Combine or mask array elements to form `scores`.
     scores = jnp.where(allowed, 0., -jnp.inf)
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(scores, axis=-1)
     return weights @ values, weights
 
@@ -58,7 +54,6 @@ assert jnp.allclose(jnp.triu(weights, 1), 0.)
 print("Causal means:", out[:, 0])
 
 # Figure data experiment
-# Compute figure data for: A causal mask blocks future information
 visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' + str(i) for i in range(4)], 'columns': ['key ' + str(i) for i in range(4)], 'unit': 'attention weight'}
 
 # Experiment: Perturb the future
@@ -90,14 +85,11 @@ assert jnp.array_equal(loss_valid, jnp.array([True,True,False,True]))
 # Repair padding-query NaNs (Transfer / diagnosis): A fallback makes normalization defined; zeroing and loss...
 pad_valid = jnp.array([True,True,False,False])
 pad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)
-# Combine or mask array elements to form `(bad_pad, _)`.
 bad_pad, _ = masked_mean(values, pad_mask)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert not jnp.all(jnp.isfinite(bad_pad))
 fallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)
-# Combine or mask array elements to form `(pad_out, _)`.
 pad_out, _ = masked_mean(values, pad_mask | fallback)
-# Combine or mask array elements to form `pad_out`.
 pad_out = jnp.where(pad_valid[:, None], pad_out, 0.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(pad_out))

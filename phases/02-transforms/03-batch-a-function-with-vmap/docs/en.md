@@ -90,20 +90,20 @@ The gradient of the mean loss has shape $(D,)$. For independent example losses a
 
 Choose the mathematical quantity first and the transformation order second. Do not copy a composition from a tutorial without checking whether it returns predictions, sensitivities, per-example gradients, or a reduced parameter update.
 
-## Step 1: Set up imports and input tensors
+## Import JAX array and transformation APIs
 
-Import the required JAX modules and define the initial inputs for batch a function with vmap.
+Import jax for vmap and jax.numpy for vectors and batches.
 
 ```python
 import jax
 import jax.numpy as jnp
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The predictor will handle one feature vector; vmap will supply the batch axis.
 
-## Step 2: Apply the core JAX transformation
+## Write a single-example dot-product predictor
 
-Write the core computation and transformation step over the initialized inputs.
+Define a function that contracts a length-two weight with one length-two input.
 
 ```python
 def predict(weight, x):
@@ -111,11 +111,11 @@ def predict(weight, x):
 weight = jnp.array([2., -1.])
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+For one example, the two products are summed to produce one scalar prediction.
 
-## Step 3: Verify shapes and numerical invariants
+## Map the predictor over three input rows
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Create a batch of three feature vectors, map over input axis 0 while sharing weights, and check the predictions.
 
 ```python
 batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
@@ -124,7 +124,7 @@ batched = jax.vmap(predict, in_axes=(None, 0))
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The expected outputs [1, 1, 8] are hand-computed row by row. The leading output axis corresponds to the three input examples.
 
 ## Run the example
 
@@ -165,13 +165,12 @@ The same weights $(2,-1)$ are used for every row. The first input $(1,1)$ gives 
 There are three outputs because there are three observations. Summing across the whole batch would instead collapse these answers into one scalar. The figure verifies what vectorization computes; the bar heights say nothing about how long it takes.
 
 ```python
-# Compute figure data for: Vectorization keeps one result per row
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:21.429738+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:47:36.130768+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]
@@ -188,7 +187,6 @@ PASS: transforms-03
 # Experiment — Verify against a loop and a matrix product: The loop makes example selection explicit; the matrix product...
 loop_predictions = jnp.stack([predict(weight, row) for row in batch])
 vector_predictions = batched(weight, batch)
-# Perform matrix / vector contraction (`@`) to compute `matrix_predictions`.
 matrix_predictions = batch @ weight
 # Check tensor shape invariant: `vector_predictions.shape == (3,)`
 assert vector_predictions.shape == (3,)

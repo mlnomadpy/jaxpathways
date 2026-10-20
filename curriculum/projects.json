@@ -28,5 +28,6 @@
   "projects/tpu-workflow-audit/project.json",
   "projects/tpu-systems-audit/project.json",
   "projects/reproducible-experiments/project.json",
-  "projects/embedding-lineage/project.json"
+  "projects/embedding-lineage/project.json",
+  "projects/causal-lineage/project.json"
 ]

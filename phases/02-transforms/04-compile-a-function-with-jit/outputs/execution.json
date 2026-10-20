@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "2bde24a4e956087fd03b0c6123d05749b5932e233dfd3164bb8d2674884aa209",
-  "executedAt": "2026-10-20T10:45:23.194590+00:00",
+  "contentHash": "a1d6c997d9d6dc5b901aebc3bc35142d2df4edfb27071c791061ff5627ca4d48",
+  "executedAt": "2026-10-20T18:47:41.827744+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,35 +11,35 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.013900000136345625 1.920759677886963e-05\neager median / min / max seconds: 2.6375288143754005e-05 2.3334287106990814e-05 7.895799353718758e-05\ncompiled median / min / max seconds: 4.312489181756973e-06 3.874767571687698e-06 5.416106432676315e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 6.770249456167221e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.042516165878623724 4.8582907766103745e-05\neager median / min / max seconds: 5.647912621498108e-05 5.233287811279297e-05 0.001787582878023386\ncompiled median / min / max seconds: 8.854083716869354e-06 8.334405720233917e-06 1.1375173926353455e-05\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 1.485389657318592e-05\nPASS: transforms-04\n",
   "notebookCells": [
     {
-      "sourceHash": "2e5c35b62cbdc60f40a90674e91b2dd9d38d5dbd833b175721a1070426836eaa",
+      "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
       "outputs": []
     },
     {
-      "sourceHash": "b788e8fe92bdbcb8a56af07053b761ac37ee875a927f0b83ac4f392f3b2da918",
+      "sourceHash": "abc671f79a1464b8d17654f2af2365d8c95d0f09182b65484071867fcd1cc57b",
       "outputs": []
     },
     {
-      "sourceHash": "bdf3943bc2cd0fe745537609f625b965e5e07dd37e7972c28ffd2b1e0d769765",
+      "sourceHash": "64dcb03a5d80c8282a2108b43962ef091a62916fa26805050ed8692f95f0ca7c",
       "outputs": []
     },
     {
-      "sourceHash": "3f8fdee1add7294f89c8332bc24fe09694f97c4e00246ca1e44b1c61c84399c8",
+      "sourceHash": "31f9155f84ce434df82788dde4bca629500e6c19ff61ae10f1966b2529780da0",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.013769499957561493 1.9249971956014633e-05\n"
+            "First/repeat seconds: 0.03497433289885521 5.737505853176117e-05\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "0b389274c92d886af03f86fe3b2d2428bfda544c504b4eb4754acb71001d2a81",
+      "sourceHash": "be8c3da63d0506e4ed514eb6b49bc33f8407b397fc81fe9d86d367146f46d927",
       "outputs": []
     },
     {
@@ -58,18 +58,18 @@
       ]
     },
     {
-      "sourceHash": "2a0773bce72daa407f6f79d4123aebbdfc5b6f40d18a63e6a4e53513022aeda7",
+      "sourceHash": "5d20c5a2a9e08c0110cb14fdca002744d81386d25b9390873b5681ae814c1d12",
       "outputs": []
     },
     {
-      "sourceHash": "2aa9333814ecf4c63fe728f8d6e15cf90581f599606739f1006137d18f5f0290",
+      "sourceHash": "08bfb3f83a584ade862b791bff4b679f77f519c8f40f67621b5e18f3fb73cb1b",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 2.2624386474490166e-05 2.1582935005426407e-05 3.470759838819504e-05\n",
-            "compiled median / min / max seconds: 3.7499703466892242e-06 3.582797944545746e-06 4.875008016824722e-06\n",
+            "eager median / min / max seconds: 5.474942736327648e-05 5.254102870821953e-05 8.933339267969131e-05\n",
+            "compiled median / min / max seconds: 8.999835699796677e-06 8.124858140945435e-06 1.1750031262636185e-05\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
@@ -84,11 +84,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "c5514b388e5c3e3b5c3404378d06ce42943cb02f617b57bc08102f20b34253d7",
+      "sourceHash": "6d5f51b4b41e3769d303a54d461fda96fe7724ad01d33f2e926784edc451cfaf",
       "outputs": []
     },
     {
-      "sourceHash": "20da53fa4a1ee66d8c044cc2a21d8dbc9a6b84162c4f6c266f921e3d1853e1e0",
+      "sourceHash": "534c2ed02f00c1ace4ee3f8fa694904b1d00b7fe9659183ceab1fa6833cf1726",
       "outputs": []
     },
     {
@@ -102,7 +102,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 6.4999330788850784e-06\n"
+            "compiled value-and-grad median seconds: 1.687486656010151e-05\n"
           ]
         }
       ]

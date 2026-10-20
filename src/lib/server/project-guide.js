@@ -2,9 +2,10 @@ import path from 'node:path';
 import { existsSync } from 'node:fs';
 import { assessmentContent } from './assessment-content.js';
 import { siteUrl } from '../urls.js';
+import projectPlans from '../../../curriculum/project-plans.json' with { type: 'json' };
 
 /** Resolve repository Markdown links into the static course, including Pages bases. */
-export function projectGuide(project, course, plannedIds = []) {
+export function projectGuide(project, course, plannedIds = projectPlans.map((plan) => plan.id)) {
   return assessmentContent(project.source, (href) => {
     if (/^(https?:|#)/.test(href)) return href;
     const target = path.posix.normalize(path.posix.join(path.posix.dirname(project.source), href));

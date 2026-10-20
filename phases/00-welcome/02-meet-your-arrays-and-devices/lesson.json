@@ -4,7 +4,7 @@
   "minutes": 45,
   "content": {
     "idea": "An array is a collection of values with a shape, a dtype and a device. Shape tells us how to index the values; dtype tells us how they are represented; device tells us where the computation lives. Start by predicting a small reduction before asking JAX to perform it.",
-    "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: x has two observations and three features.\n# Construct and reshape `x` into the target tensor dimensions.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)\n# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
+    "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)\n# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\nprint(\"Shape:\", x.shape)\nprint(\"Dtype:\", x.dtype)\nprint(\"Devices:\", x.devices())\nprint(\"Row sums:\", x.sum(axis=1))\n# Check tensor shape invariant: `x.shape == (2, 3)`\nassert x.shape == (2, 3)\nassert jnp.allclose(x.sum(axis=1), jnp.array([3., 12.]))",
     "output": "Shape: \\((2, 3)\\); Dtype: float32; Row sums: [ \\(3\\). \\(12\\).]. Device names vary.",
     "exercise": "Compute column sums instead. State the resulting shape before running the code.",
     "solution": "# Exercise solution: Compute column sums instead.\n# Reduce along axis=0 to compute `column_sums`.\ncolumn_sums = x.sum(axis=0)\n# Check tensor shape invariant: `column_sums.shape == (3,)`\nassert column_sums.shape == (3,)\nassert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))",
@@ -58,7 +58,7 @@
       {
         "title": "Keep a host reference",
         "prediction": "Will copying to NumPy preserve values and shape? Does that copy describe device-resident computation?",
-        "code": "# Experiment — Keep a host reference: The host reference is an inspection copy.\nimport numpy as np\n# Convert `host` to a host NumPy array for inspection or verification.\nhost=np.asarray(x)\n# Check tensor shape invariant: `host.shape==(2,3)`\nassert host.shape==(2,3)\n# Create evenly spaced index values in ``.\nnp.testing.assert_array_equal(host,np.arange(6).reshape(2,3))\nprint(\"Host dtype:\",host.dtype)",
+        "code": "# Experiment — Keep a host reference: The host reference is an inspection copy.\nimport numpy as np\n# Transfer the device result to the host for an independent NumPy comparison.\nhost=np.asarray(x)\n# Check tensor shape invariant: `host.shape==(2,3)`\nassert host.shape==(2,3)\n# Create evenly spaced index values in ``.\nnp.testing.assert_array_equal(host,np.arange(6).reshape(2,3))\nprint(\"Host dtype:\",host.dtype)",
         "output": "A NumPy array with the same two-by-three values.",
         "explanation": "The host reference is an inspection copy. Its existence says nothing about accelerator throughput."
       }
@@ -68,7 +68,7 @@
         "title": "Add a new observation",
         "prompt": "Append \\([6,7,8]\\). Predict row sums and column means, then check both.",
         "hint": "Keep observation rows and measurement columns.",
-        "solution": "# Add a new observation (Practice): Changing the observation count changes axis 0, while the...\n# Construct and reshape `table` into the target tensor dimensions.\ntable=jnp.arange(9,dtype=jnp.float32).reshape(3,3)\nassert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))\nassert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))",
+        "solution": "# Add a new observation (Practice): Changing the observation count changes axis 0, while the...\ntable=jnp.arange(9,dtype=jnp.float32).reshape(3,3)\nassert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))\nassert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))",
         "explanation": "Changing the observation count changes axis \\(0\\), while the measurement count stays three.",
         "difficulty": "Practice"
       },
@@ -76,7 +76,7 @@
         "title": "Diagnose an impossible reshape",
         "prompt": "Try reshaping six values to \\((2,4)\\). Explain the failure and repair the intended three-measurement table.",
         "hint": "Count required elements before changing the code.",
-        "solution": "# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.\n# Run the boundary check and catch the expected exception:\ntry:\n    x.reshape(2,4)\nexcept TypeError:\n    print(\"Expected element-count mismatch\")\nelse:\n    raise AssertionError(\"Expected reshape to fail\")\nassert x.reshape(2,3).size==6",
+        "solution": "# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.\ntry:\n    x.reshape(2,4)\nexcept TypeError:\n    print(\"Expected element-count mismatch\")\nelse:\n    raise AssertionError(\"Expected reshape to fail\")\nassert x.reshape(2,3).size==6",
         "explanation": "An incompatible reshape is an element-count error. Changing a dtype or moving devices cannot fix it. Choose a shape whose product matches six.",
         "difficulty": "Challenge"
       }
@@ -112,7 +112,7 @@
       {
         "title": "Build the computation",
         "instruction": "Append this block below the inputs in the same file.",
-        "code": "# Step 2 — Build the computation: x has two observations and three features.\n# Construct and reshape `x` into the target tensor dimensions.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)",
+        "code": "# Step 2 — Build the computation: x has two observations and three features.\nx = jnp.arange(6, dtype=jnp.float32).reshape(2, 3)",
         "explanation": "\\(x\\) has two observations and three features. `axis=0` removes the observation dimension, so the means describe features; the centered result retains both axes."
       },
       {
@@ -129,7 +129,7 @@
       "reading": "The horizontal axis selects a feature column; the vertical axis selects an observation row. Each cell contains one array value. The color bar maps larger numbers to darker purple: the bottom-right cell is darkest because it contains \\(5\\).\n\nRead across the top row to find \\((0,1,2)\\), then across the bottom row to find \\((3,4,5)\\). The picture therefore represents an array with shape \\((2,3)\\): two observations, each with three features.",
       "connection": "Now connect the picture to a reduction. Summing the feature columns within each row gives \\(0+1+2=3\\) and \\(3+4+5=12\\). That is why summing along axis \\(1\\) returns two values. Summing down rows instead would return \\((3,5,7)\\), one value per feature.\n\nThe row labels are positions, not times or class labels. The darker lower row tells us its stored values are larger; it does not imply that the observation is more important.",
       "alt": "Rows are groups of observations. The horizontal axis selects a feature column; the vertical axis selects an observation row. Each cell contains one array value. The color bar maps larger numbers to darker purple: the bottom-right cell is darkest because it contains \\(5\\). Read across the top row to find \\((0,1,2)\\), then across the bottom row to find \\((3,4,5)\\). The picture therefore represents an array with shape \\((2,3)\\): two observations, each with three features.",
-      "code": "# Compute figure data for: Rows are groups of observations\nvisual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}"
+      "code": "visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}"
     }
   }
 }

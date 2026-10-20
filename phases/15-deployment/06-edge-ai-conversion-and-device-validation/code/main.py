@@ -22,25 +22,21 @@ assert weights.shape == (3, 2) and bias.shape == (2,)
 payload = json.dumps({"features": [[255., 128., 0.]]})
 def validate_sensor_payload(payload):
     document = json.loads(payload)
-    # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
     rows = document['features']
-    # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
         raise ValueError('expected one row of three sensor values')
-    # Guard input contract (`any((type(value) not in (int, float) or not 0 <= value <= 255 or (not np.isfinite(value)) for value in rows[0]))`) and fail fast if violated.
     if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
         raise ValueError('expected numeric sensor values in the range 0 through 255')
     return np.asarray(rows, dtype=np.float32)
 def request(payload):
     decoded = validate_sensor_payload(payload)
     features = decoded / 255.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
     return json.dumps({"scores": output.tolist()})
 
-# Execute `np.testing.assert_array_equal(validate_sensor_payload(payloa`
 np.testing.assert_array_equal(validate_sensor_payload(payload), [[255., 128., 0.]])
 
 # Measure cold and warm requests separately
@@ -66,7 +62,7 @@ report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
 assert len(samples) == 30 and all(t >= 0 for t in samples)
 print(json.dumps(report, indent=2))
 
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)
 
 # Deploy at the edge: conversion, budgets and device checks: An edge deployment includes input decoding, preprocessing,...
@@ -84,21 +80,18 @@ def infer(features):
 payload = json.dumps({"features": [[255., 128., 0.]]})
 def validate_sensor_payload(payload):
     document = json.loads(payload)
-    # Guard input contract (`not isinstance(document, dict) or set(document) != {'features'}`) and fail fast if violated.
     if not isinstance(document, dict) or set(document) != {'features'}:
         raise ValueError('expected features object')
     rows = document['features']
-    # Guard input contract (`not isinstance(rows, list) or len(rows) != 1 or (not isinstance(rows[0], list)) or (len(rows[0]) != 3)`) and fail fast if violated.
     if not isinstance(rows, list) or len(rows) != 1 or not isinstance(rows[0], list) or len(rows[0]) != 3:
         raise ValueError('expected one row of three sensor values')
-    # Guard input contract (`any((type(value) not in (int, float) or not 0 <= value <= 255 or (not np.isfinite(value)) for value in rows[0]))`) and fail fast if violated.
     if any(type(value) not in (int, float) or not 0 <= value <= 255 or not np.isfinite(value) for value in rows[0]):
         raise ValueError('expected numeric sensor values in the range 0 through 255')
     return np.asarray(rows, dtype=np.float32)
 def request(payload):
     decoded = validate_sensor_payload(payload)
     features = decoded / 255.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     output = np.asarray(infer(jnp.asarray(features)).block_until_ready())
     return json.dumps({"scores": output.tolist()})
 start = time.perf_counter()
@@ -109,7 +102,7 @@ for _ in range(30):
     start = time.perf_counter()
     response = request(payload)
     samples.append((time.perf_counter() - start) * 1000)
-# Convert `expected` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
@@ -121,15 +114,14 @@ assert len(samples) == 30 and all(t >= 0 for t in samples)
 print(json.dumps(report, indent=2))
 
 # Figure data experiment
-# Compute figure data for: An end-to-end boundary includes more than inference
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
 
 # Experiment: A normalization mismatch survives conversion
 # Experiment — A normalization mismatch survives conversion: Conversion checks must start at the raw input boundary when...
 raw = np.array([[255., 128., 0.]], np.float32)
-# Convert `wrong` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 wrong = np.asarray(infer(raw))
-# Convert `right` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 right = np.asarray(infer(raw / 255.))
 assert not np.allclose(wrong, right)
 print("Preprocessing mismatch max error", float(np.max(np.abs(wrong-right))))
@@ -144,7 +136,7 @@ for invalid in invalid_payloads:
         pass
     else:
         raise AssertionError('invalid sensor payload accepted')
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'],np.asarray(bias)[None,:],atol=1e-6)
 print('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')
 
@@ -152,7 +144,7 @@ print('Seven malformed or out-of-domain requests rejected; zero input returns th
 # Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
 changed_raw = np.array([[0., 255., 128.]], np.float32)
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
-# Convert `expected_changed` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected_changed = (changed_raw / 255.) @ np.asarray(weights) + np.asarray(bias)
 np.testing.assert_allclose(changed_response["scores"], expected_changed, atol=1e-6)
 print("Changed end-to-end request verified")
@@ -173,7 +165,6 @@ model_ms=8.
 deadline_ms=19.
 before_ms=fixed_ms+model_ms
 after_ms=fixed_ms+model_ms/2
-# Execute `np.testing.assert_allclose([before_ms,after_ms,before_ms/aft`
 np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
 assert after_ms>deadline_ms and fixed_ms==16.
 print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)

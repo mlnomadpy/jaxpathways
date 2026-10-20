@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep separate CPU and TPU reports with requested/observed platform, package versions, completed predictions, NumPy error and changed-bias and row-permutation checks. Until the target command succeeds, TPU execution remains unverified.
 
 - Command: `python3 phases/00-welcome/03-move-your-experiment-to-a-tpu/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

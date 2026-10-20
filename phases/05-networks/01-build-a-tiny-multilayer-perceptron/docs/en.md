@@ -95,9 +95,8 @@ def logits(p, batch):
     return (jnp.tanh(batch@p['w1']+p['b1'])@p['w2']+p['b2']).squeeze(-1)
 def loss(p, batch, labels):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(logits(p,batch),labels))
-# Convert `scores` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores = np.asarray(logits(params,x))
-# Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
 # Transform every leaf of the parameter PyTree (`zeros`).
@@ -129,11 +128,10 @@ initial = float(loss(params,x,y))
 for _ in range(200): params,state,_ = step(params,state)
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(12)
-# Convert `held_x` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_x = np.repeat(np.asarray(x),8,axis=0)+rng.normal(0,.12,(32,2))
 held_y = (held_x[:,0]*held_x[:,1]<0).astype(np.float32)
 held_scores = np.asarray(logits(params,jnp.array(held_x)))
-# Aggregate array values to compute `accuracy`.
 accuracy = np.mean((held_scores>0)==held_y)
 final = float(loss(params,x,y))
 assert final < .03 and accuracy >= .95
@@ -164,9 +162,8 @@ def logits(p, batch):
     return (jnp.tanh(batch@p['w1']+p['b1'])@p['w2']+p['b2']).squeeze(-1)
 def loss(p, batch, labels):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(logits(p,batch),labels))
-# Convert `scores` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores = np.asarray(logits(params,x))
-# Aggregate array values to compute `expected`.
 expected = np.mean(np.logaddexp(0.,scores)-np.asarray(y)*scores)
 np.testing.assert_allclose(loss(params,x,y), expected, rtol=1e-6)
 # Transform every leaf of the parameter PyTree (`zeros`).
@@ -190,11 +187,10 @@ initial = float(loss(params,x,y))
 for _ in range(200): params,state,_ = step(params,state)
 # Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(12)
-# Convert `held_x` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 held_x = np.repeat(np.asarray(x),8,axis=0)+rng.normal(0,.12,(32,2))
 held_y = (held_x[:,0]*held_x[:,1]<0).astype(np.float32)
 held_scores = np.asarray(logits(params,jnp.array(held_x)))
-# Aggregate array values to compute `accuracy`.
 accuracy = np.mean((held_scores>0)==held_y)
 final = float(loss(params,x,y))
 assert final < .03 and accuracy >= .95
@@ -224,11 +220,9 @@ A single straight boundary cannot separate these alternating corners. The hidden
 Most colored locations are grid queries, not additional labeled observations. Their colors show how this trained model extends its predictions between and beyond the examples. A dark region alone is separate from calibrated confidence or accuracy there; those claims need appropriate held-out data.
 
 ```python
-# Compute figure data for: A tiny MLP separates the XOR regions
 # Generate a uniform grid of points in `axis`.
 axis = jnp.linspace(-1.6, 1.6, 61)
 gx, gy = jnp.meshgrid(axis, axis)
-# Combine or mask array elements to form `grid`.
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
 # Rearrange tensor axes to match the required layout for `prob`.
 prob = jax.nn.sigmoid(logits(params, grid)).reshape(gx.shape)
@@ -237,7 +231,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:11.350755+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:50:08.243448+00:00. JAX 0.9.2.
 
 ```text
 Training loss: 0.7047799825668335 -> 0.0015878621488809586 held-out accuracy: 1.0
@@ -276,7 +270,6 @@ Averaging normalizes repeated identical data. Summing would change the learning-
 def affine_stack(batch):return (batch@params['w1']+params['b1'])@params['w2']+params['b2']
 midpoint=jnp.array([[.2,-.3]])
 delta=jnp.array([[.4,.1]])
-# Combine or mask array elements to form ``.
 np.testing.assert_allclose(affine_stack(midpoint),.5*(affine_stack(midpoint+delta)+affine_stack(midpoint-delta)),atol=1e-6)
 ```
 
@@ -295,7 +288,7 @@ Swap class zero and one. Transform only the trained output layer to preserve the
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Convert `expected_labels` to a host NumPy array for inspection or verification.
+1. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -304,7 +297,7 @@ Swap class zero and one. Transform only the trained output layer to preserve the
 complemented = dict(...)  # TODO: compute complemented
 changed_x = jnp.array(...)  # TODO: compute changed_x
 np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
-# Convert `expected_labels` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected_labels = ...  # TODO: compute expected_labels
 assert np.array_equal(np.asarray(logits(complemented,changed_x)  # TODO: complete assertion check
 ```
@@ -316,7 +309,7 @@ assert np.array_equal(np.asarray(logits(complemented,changed_x)  # TODO: complet
 complemented=dict(params,w2=-params['w2'],b2=-params['b2'])
 changed_x=jnp.array([[-.8,.7],[.7,.9],[-1.1,-.8]])
 np.testing.assert_allclose(logits(complemented,changed_x),-logits(params,changed_x),atol=1e-6)
-# Convert `expected_labels` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected_labels=(np.asarray(changed_x)[:,0]*np.asarray(changed_x)[:,1]>0)
 assert np.array_equal(np.asarray(logits(complemented,changed_x)>0),expected_labels)
 ```

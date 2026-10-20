@@ -33,7 +33,7 @@ model,optimizer=initialize()
 def train_step(m,o,x,y):
     # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
-    # Update state in place with the new values.
+    # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
     return value
 # Define and JIT-compile `evaluate(m, x, y)` so XLA traces and fuses the operations:
@@ -43,7 +43,6 @@ def evaluate(m,x,y):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(scores,y)),jnp.mean((scores>0)==y)
 def snapshot(m):return [np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(m))]
 before_loss=float(objective(model,train_x,train_y))
-# Execute `for _ in range(80):train_step(model,optimizer,train_x,train_y)`.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
 assert int(optimizer.step[...])==80
 
@@ -54,8 +53,8 @@ step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
 assert int(optimizer.step[...])==step_count
-# Convert `scores` to a host NumPy array for inspection or verification.
-# Convert `labels` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores=np.asarray(model(test_x))
 labels=np.asarray(test_y)
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
@@ -94,7 +93,7 @@ model,optimizer=initialize()
 def train_step(m,o,x,y):
     # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
-    # Update state in place with the new values.
+    # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
     return value
 # Define and JIT-compile `evaluate(m, x, y)` so XLA traces and fuses the operations:
@@ -104,7 +103,6 @@ def evaluate(m,x,y):
     return jnp.mean(optax.sigmoid_binary_cross_entropy(scores,y)),jnp.mean((scores>0)==y)
 def snapshot(m):return [np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(m))]
 before_loss=float(objective(model,train_x,train_y))
-# Execute `for _ in range(80):train_step(model,optimizer,train_x,train_y)`.
 for _ in range(80):train_step(model,optimizer,train_x,train_y)
 assert int(optimizer.step[...])==80
 
@@ -114,8 +112,8 @@ step_count=int(optimizer.step[...])
 test_loss,test_accuracy=evaluate(model,test_x,test_y)
 for a,b in zip(frozen,snapshot(model)):np.testing.assert_array_equal(a,b)
 assert int(optimizer.step[...])==step_count
-# Convert `scores` to a host NumPy array for inspection or verification.
-# Convert `labels` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
+# Transfer the device result to the host for an independent NumPy comparison.
 scores=np.asarray(model(test_x))
 labels=np.asarray(test_y)
 np.testing.assert_allclose(test_loss,np.mean(np.logaddexp(0.,scores)-labels*scores),rtol=1e-5,atol=1e-6)
@@ -124,11 +122,9 @@ assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<befo
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
 
 # Figure data experiment
-# Compute figure data for: Inspect predictions on held-out inputs
 # Generate a uniform grid of points in `axis`.
 axis = jnp.linspace(-3.0, 3.0, 61)
 gx, gy = jnp.meshgrid(axis, axis)
-# Combine or mask array elements to form `grid`.
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
 # Rearrange tensor axes to match the required layout for `prob`.
 prob = jax.nn.sigmoid(model(grid)).reshape(gx.shape)
@@ -137,7 +133,6 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 # Experiment: Replay the complete update sequence
 # Experiment — Replay the complete update sequence: Replay reconstructs optimizer state from the start.
 replay,replay_optimizer=initialize()
-# Execute `for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)`.
 for _ in range(80):train_step(replay,replay_optimizer,train_x,train_y)
 for a,b in zip(snapshot(model),snapshot(replay)):np.testing.assert_allclose(a,b,rtol=1e-6,atol=1e-6)
 np.testing.assert_allclose(evaluate(replay,test_x,test_y),evaluate(model,test_x,test_y),rtol=1e-6)
@@ -153,23 +148,21 @@ old=snapshot(model)
 pieces=[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i in range(0,48,16)]
 # Reduce along axis=0 to compute `aggregate`.
 aggregate=np.mean(np.asarray(pieces),axis=0)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(aggregate,np.asarray(evaluate(model,test_x,test_y)),rtol=1e-5,atol=1e-6)
 for a,b in zip(old,snapshot(model)):np.testing.assert_array_equal(a,b)
 
 # Reference practice: Aggregate unequal batches
-# Aggregate unequal batches (Transfer): A batch is a packaging choice, not a unit of evidence.
 sizes=np.array([7,41])
-# Convert `metrics` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 metrics=np.asarray([evaluate(model,test_x[:7],test_y[:7]),evaluate(model,test_x[7:],test_y[7:])])
 # Reduce along axis=0 to compute `weighted`.
 weighted=(metrics*sizes[:,None]).sum(axis=0)/sizes.sum()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol=1e-5,atol=1e-6)
 correct=np.array([6,20])
 counts=np.array([7,41])
 expected=26/48
-# Execute `np.testing.assert_allclose(correct.sum()/counts.sum(),expected)`.
 np.testing.assert_allclose(correct.sum()/counts.sum(),expected)
 assert not np.isclose(np.mean(correct/counts),expected)
 print('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expected)

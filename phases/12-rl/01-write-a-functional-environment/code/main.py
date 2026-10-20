@@ -12,11 +12,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -32,14 +29,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -71,11 +65,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -91,14 +82,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -115,8 +103,6 @@ assert int(s.elapsed) == 2
 print('positions:', positions, 'rewards:', rewards)
 
 # Figure data experiment
-# Compute figure data for: One goal reward, then absorbing padding
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':'reward per transition','series':[{'label':'right, right, padded, padded','y':rewards}]}
 
 # Experiment: A goal at the deadline

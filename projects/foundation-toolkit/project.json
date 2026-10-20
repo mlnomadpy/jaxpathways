@@ -83,5 +83,13 @@
     }
   ],
   "referenceCommand": "python3 projects/foundation-toolkit/tests/check.py --implementation solution --stage all",
-  "setupNote": "Run from the extracted bundle’s top folder with requirements-cpu.txt installed. Four stages connect the first four phases before the regression capstone. Copy the starter scaffold `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py`, implement the stage functions in `projects/foundation-toolkit/my_toolkit.py`, and verify each stage with `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` (through `--stage 4`)."
+  "setupNote": "Run from the extracted bundle’s top folder with requirements-cpu.txt installed. Four stages connect the first four phases before the regression capstone. Copy the starter scaffold `projects/foundation-toolkit/starter/toolkit.py` to `projects/foundation-toolkit/my_toolkit.py`, implement the stage functions in `projects/foundation-toolkit/my_toolkit.py`, and verify each stage with `python3 projects/foundation-toolkit/tests/check.py --implementation projects/foundation-toolkit/my_toolkit.py --stage 1` (through `--stage 4`).",
+  "environment": {
+    "requirementsPath": "requirements-figures.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-figures.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-figures.txt"
+    }
+  }
 }

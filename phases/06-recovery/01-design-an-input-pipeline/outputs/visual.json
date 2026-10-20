@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-01",
-  "contentHash": "01efd384f4d1b167b7564b54c62321b1138e40d4d092dcc9975d133f0321e6ce",
+  "contentHash": "a11590118167970698c04721a32b18b77c612e61de2eb36d575ec988895f41dc",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:45:39.678672+00:00",
+  "generatedAt": "2026-10-20T18:48:30.622113+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.012689332943409681\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n",
+  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.01837991690263152\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n",
   "data": {
     "kind": "line",
     "x": [

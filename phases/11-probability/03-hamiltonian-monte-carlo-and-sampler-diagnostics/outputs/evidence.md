@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Reversibility check, four traces, two-dimensional moments, key replay and classical split R-hat with limitations. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/11-probability/03-hamiltonian-monte-carlo-and-sampler-diagnostics/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

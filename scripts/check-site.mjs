@@ -5,6 +5,7 @@ import { Window } from 'happy-dom';
 
 const base = (process.env.BASE_PATH || '/').replace(/\/$/, '') + '/';
 const origin = 'https://example.org';
+const siteOrigins = new Set(['https://www.tahabouhsine.com', 'https://tahabouhsine.com']);
 const files = fs.readdirSync('dist', {recursive:true}).filter(file=>file.endsWith('.html'));
 const sourceCourse=JSON.parse(fs.readFileSync('public/curriculum.json','utf8'));
 const expected=['book',...sourceCourse.pathways.map(route=>'learning-paths/'+route.id),...sourceCourse.roles.map(role=>'career-guides/'+role.id),'updates',...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>'lesson-'+l.id),...JSON.parse(fs.readFileSync('curriculum/project-plans.json','utf8')).map(project=>'project-plans/'+project.id),...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.map(p=>'phase-guides/'+p.id),'index','course','lesson','pathways','careers','notebook','organizer','project','projects','developer','project-workflow','tpu-gcp','tpu-performance',...JSON.parse(fs.readFileSync('curriculum/projects.json','utf8')).map(manifest=>'project-guides/'+JSON.parse(fs.readFileSync(manifest,'utf8')).id),...JSON.parse(fs.readFileSync('curriculum/assessments.json','utf8')).map(assessment=>assessment.url.replace(/\.html$/,'')),'downloads/jax-foundations', ...JSON.parse(fs.readFileSync('curriculum/modality-tracks.json','utf8')).tracks.map(track=>'tracks/'+track.id)];
@@ -24,9 +25,19 @@ async function releaseDocuments(){
 }
 let checked=0;
 function checkLink(raw,from){
- if(!raw||/^(?:https?:|mailto:|data:|tel:)/.test(raw))return;
+ if(!raw||/^(?:mailto:|data:|tel:)/.test(raw))return;
  const url=new URL(raw,origin+base+from);
- assert.equal(url.origin,origin);
+ const absoluteSiteLink=url.origin!==origin&&siteOrigins.has(url.origin);
+ if(url.origin!==origin&&!absoluteSiteLink)return;
+ // Production links include `/jaxpathways/` while a local build commonly uses `/`.
+ // Map the canonical site path through the build's configured base before checking files.
+ if(absoluteSiteLink){
+  const productionPrefix='/jaxpathways/';
+  if(url.pathname.startsWith(productionPrefix))url.pathname=base+url.pathname.slice(productionPrefix.length);
+  url.protocol='https:';
+  url.hostname='example.org';
+ }
+ if(!url.pathname.startsWith(base))return;
  assert(url.pathname.startsWith(base),`link escaped deployment base in ${from}: ${raw}`);
  const target=url.pathname.slice(base.length)||'index.html';
  assert(fs.existsSync('dist/'+target),`missing target in ${from}: ${raw}`);

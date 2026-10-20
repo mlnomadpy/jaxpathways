@@ -107,7 +107,6 @@ state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)
 snapshot=transition(state)
 path=root/'step_1'
 t0=time.perf_counter()
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     returned=time.perf_counter()
@@ -116,7 +115,6 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.wait_until_finished()
     committed=time.perf_counter()
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
     assert int(restored['step'])==1 and int(live['step'])==2
     publish(path,1)
@@ -134,20 +132,16 @@ Create a Python file in the course environment. Add this block after the precedi
 ```python
 # A deliberately interrupted application publication leaves the previous commit selected.
 unpublished=root/'step_2'
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(unpublished,args=ocp.args.StandardSave(live))
     cp.wait_until_finished()
-    # Run the boundary check and catch the expected exception:
     try:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
 assert accepted()['step']==1
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
 assert int(previous['step'])==1
 print('Checkpoint workspace:',root)
@@ -185,7 +179,6 @@ state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)
 snapshot=transition(state)
 path=root/'step_1'
 t0=time.perf_counter()
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     returned=time.perf_counter()
@@ -194,7 +187,6 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.wait_until_finished()
     committed=time.perf_counter()
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
     assert int(restored['step'])==1 and int(live['step'])==2
     publish(path,1)
@@ -204,20 +196,16 @@ assert report['accepted_step']==1
 
 # A deliberately interrupted application publication leaves the previous commit selected.
 unpublished=root/'step_2'
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(unpublished,args=ocp.args.StandardSave(live))
     cp.wait_until_finished()
-    # Run the boundary check and catch the expected exception:
     try:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
 assert accepted()['step']==1
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
 assert int(previous['step'])==1
 print('Checkpoint workspace:',root)
@@ -248,27 +236,26 @@ The code verifies the saved vector and then injects an interruption before publi
 This plot is a local controlled failure experiment. It does not measure checkpoint bandwidth, simulate power loss or establish multi-host atomicity. Inspect the separately recorded timing intervals and exception output for those different questions.
 
 ```python
-# Compute figure data for: A live step can be ahead of the accepted checkpoint
 visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted checkpoint'],'ylabel':'completed step','series':[{'label':'local publication experiment','y':[int(snapshot["step"]),int(live["step"]),report["accepted_step"]]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:54.698510+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:51:17.997839+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-9ibeu4bo
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-gdtdp41c
 {
-  "save_call_seconds": 0.0035320832394063473,
-  "remaining_work_and_wait_seconds": 0.017399583011865616,
+  "save_call_seconds": 0.003559208009392023,
+  "remaining_work_and_wait_seconds": 0.01838504197075963,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-xq01n_nx
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-m8dmlkko
 {
-  "save_call_seconds": 0.0024104579351842403,
-  "remaining_work_and_wait_seconds": 0.009226541966199875,
+  "save_call_seconds": 0.003066000062972307,
+  "remaining_work_and_wait_seconds": 0.01094033382833004,
   "accepted_step": 1,
   "live_step": 2
 }
@@ -290,10 +277,8 @@ def injected_failure():
     raise RuntimeError('injected finalization callback failure')
 failed_path=root/'callback_failure'
 cp=ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler(),async_options=ocp.options.AsyncOptions(post_finalization_callback=injected_failure))
-# Run the boundary check and catch the expected exception:
 try:
     cp.save(failed_path,args=ocp.args.StandardSave(live))
-    # Run the boundary check and catch the expected exception:
     try:
         cp.wait_until_finished()
     except RuntimeError as error:
@@ -316,28 +301,19 @@ Verify and publish the already written second checkpoint. Restore it and compare
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `ocp.StandardCheckpointer(...)` — Call `ocp.StandardCheckpointer` with your updated parameters or inputs from this lesson's workspace.
-- `cp.restore(...)` — Call `cp.restore` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Enter `ocp.StandardCheckpointer()` context block:
-2. Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
-3. Execute `np.testing.assert_array_equal(transition(verified)['weight']`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Verify and publish the already written second checkpoint.
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     verified = cp.restore(...)  # TODO: compute verified
-# Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
 np.testing.assert_array_equal(verified['weight'],live['weight'])
 assert int(verified['step'])  # TODO: complete assertion check
 publish(unpublished,2)
-# Execute `np.testing.assert_array_equal(transition(verified)['weight']`
 np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
 assert accepted()['step']  # TODO: complete assertion check
 print('Step two verified and accepted; next transition agrees.')
@@ -347,14 +323,11 @@ print('Step two verified and accepted; next transition agrees.')
 
 ```python
 # Exercise solution: Verify and publish the already written second checkpoint.
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     verified=cp.restore(unpublished,target=live)
-# Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
 np.testing.assert_array_equal(verified['weight'],live['weight'])
 assert int(verified['step'])==2
 publish(unpublished,2)
-# Execute `np.testing.assert_array_equal(transition(verified)['weight']`
 np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
 assert accepted()['step']==2 and int(snapshot['step'])==1
 print('Step two verified and accepted; next transition agrees.')
@@ -376,26 +349,19 @@ Check path existence and the declared step before restoration; still compare res
 
 ### How to write: Keep only a genuinely accepted target — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `target(...)` — Call `target` with your updated parameters or inputs from this lesson's workspace.
-- `preflight(...)` — Call `preflight` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Guard input contract (`not Path(record['path']).is_dir() or int(record['step']) < 0`) and fail fast if violated.
-2. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
 def preflight(record):
-    # Guard input contract (`not Path(record['path']).is_dir() or int(record['step']) < 0`) and fail fast if violated.
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')
     return ...  # TODO: return computed result
 before = accepted(...)  # TODO: compute before
-# Run the boundary check and catch the expected exception:
 try:preflight({'path':str(root/'never_saved'),'step':99})
 except ValueError:pass
 else:raise AssertionError('missing target accepted')
@@ -409,12 +375,10 @@ print('Missing target rejected; accepted checkpoint unchanged.')
 ```python
 # Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
 def preflight(record):
-    # Guard input contract (`not Path(record['path']).is_dir() or int(record['step']) < 0`) and fail fast if violated.
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')
     return record
 before=accepted()
-# Run the boundary check and catch the expected exception:
 try:preflight({'path':str(root/'never_saved'),'step':99})
 except ValueError:pass
 else:raise AssertionError('missing target accepted')

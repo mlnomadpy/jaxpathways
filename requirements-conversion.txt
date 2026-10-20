@@ -1,0 +1,4 @@
+# Optional PyTorch-to-Flax conversion layer.
+-r requirements-beginner.txt
+flax==0.12.6
+torch==2.11.0

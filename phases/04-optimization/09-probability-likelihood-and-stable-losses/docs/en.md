@@ -171,7 +171,6 @@ A large positive logit strongly favors label $1$. That confidence is rewarded on
 Loss is not a probability or classification accuracy, so values above $1$ are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.
 
 ```python
-# Compute figure data for: Confidence is rewarded only when it matches the label
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-10.0, 10.0, 81)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
@@ -179,7 +178,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:52.039722+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:49:03.868881+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0
@@ -214,9 +213,7 @@ A stable final answer requires stable intermediate computations.
 # Experiment — Shift every class score: Only relative class scores matter.
 scores = jnp.array([1.0, 2.0, 3.0])
 target = 2
-# Evaluate numerically stable log-space cross-entropy/likelihood (`nll`).
 nll = -jax.nn.log_softmax(scores)[target]
-# Evaluate numerically stable log-space cross-entropy/likelihood (`shifted`).
 shifted = -jax.nn.log_softmax(scores + 1000.0)[target]
 assert jnp.allclose(nll, shifted, atol=1e-06)
 reference_loss = jnp.log(jnp.exp(-2.0) + jnp.exp(-1.0) + 1.0)
@@ -284,14 +281,14 @@ The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `constant_loss`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
 ys = jnp.array(...)  # TODO: compute ys
-# Aggregate array values to compute `constant_loss`.
 constant_loss = ...  # TODO: compute constant_loss
 optimum = jnp.log(...)  # TODO: compute optimum
 assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)  # TODO: complete assertion check
@@ -303,7 +300,6 @@ assert constant_loss(optimum)  # TODO: complete assertion check
 ```python
 # Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
 ys = jnp.array([1.0, 1.0, 1.0, 0.0])
-# Aggregate array values to compute `constant_loss`.
 constant_loss = lambda z: jnp.mean(binary_loss(z, ys))
 optimum = jnp.log(3.0)
 assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)

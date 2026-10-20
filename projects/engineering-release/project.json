@@ -79,5 +79,13 @@
     }
   ],
   "referenceCommand": "python3 projects/engineering-release/tests/check.py --implementation solution --stage all",
-  "setupNote": "Install the course requirements including MLflow 3.16.1. The four-stage reference runs locally without Docker or cloud credentials. Run container_check.py separately with a local Docker engine. The generated service is a teaching fixture, not a production web stack. Copy the starter scaffold `projects/engineering-release/starter/engineering.py` to `projects/engineering-release/my_engineering.py`, implement the stage functions in `projects/engineering-release/my_engineering.py`, and verify each stage with `python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 1` (through `--stage 4`)."
+  "setupNote": "Install the course requirements including MLflow 3.16.1. The four-stage reference runs locally without Docker or cloud credentials. Run container_check.py separately with a local Docker engine. The generated service is a teaching fixture, not a production web stack. Copy the starter scaffold `projects/engineering-release/starter/engineering.py` to `projects/engineering-release/my_engineering.py`, implement the stage functions in `projects/engineering-release/my_engineering.py`, and verify each stage with `python3 projects/engineering-release/tests/check.py --implementation projects/engineering-release/my_engineering.py --stage 1` (through `--stage 4`).",
+  "environment": {
+    "requirementsPath": "requirements-tracking.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-tracking.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-tracking.txt"
+    }
+  }
 }

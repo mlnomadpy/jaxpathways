@@ -149,7 +149,6 @@ The branches together implement $|x|$. Moving right along the negative side decr
 Continuity at the join does not imply differentiability: the classical derivative is undefined at zero because the two slopes disagree. A branch-selected autodiff value there must not be confused with a derivative of a smooth curve. The picture helps separate correct branch outputs from assumptions about gradients.
 
 ```python
-# Compute figure data for: Both branches form one magnitude function
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-3.0, 3.0, 25)
 # Vectorize across the batch dimension without a Python loop (`visual_data`).
@@ -158,7 +157,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:31.964561+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:12.184332+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -180,7 +179,6 @@ def eager_branch(v):
         return v
     return -v
 assert eager_branch(-3.)==3.
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(eager_branch)(jnp.array(-3.))
 except jax.errors.TracerBoolConversionError:
@@ -218,7 +216,7 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 
 **Key functions & syntax to use:**
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
 1. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
@@ -320,13 +318,13 @@ Decide what each output component means before padding.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Repair incompatible branch shapes (Challenge): A branch mismatch is a result-contract error even when the...
-# Run the boundary check and catch the expected exception:
 try:
     jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
 except TypeError:
@@ -342,7 +340,6 @@ assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))  # TODO: complete a
 
 ```python
 # Repair incompatible branch shapes (Challenge): A branch mismatch is a result-contract error even when the...
-# Run the boundary check and catch the expected exception:
 try:
     jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
 except TypeError:

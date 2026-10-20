@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep shifted target/role masks, valid response-token counts, gradient support and the changed target-selection result.
 
 - Command: `python3 phases/18-posttraining/01-sft/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

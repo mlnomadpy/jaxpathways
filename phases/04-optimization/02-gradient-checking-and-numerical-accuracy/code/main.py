@@ -46,7 +46,6 @@ assert jnp.allclose(automatic, analytic)
 assert jnp.allclose(finite, automatic, atol=2e-4, rtol=2e-4)
 
 # Figure data experiment
-# Compute figure data for: Smaller perturbations eventually lose accuracy
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
 for h_plot in steps:

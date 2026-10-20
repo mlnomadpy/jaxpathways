@@ -146,7 +146,6 @@ class FlaxModel(nnx.Module):
         self.norm=nnx.LayerNorm(5,epsilon=eps,use_fast_variance=False,rngs=nnx.Rngs(1))
         self.out=nnx.Linear(5,2,rngs=nnx.Rngs(2))
     def __call__(self,x):
-        # Apply nonlinear activation or probability normalization to compute `a`.
         h=self.hidden(x)
         n=self.norm(h)
         a=jax.nn.gelu(n,approximate=False)
@@ -165,12 +164,10 @@ Append this block to the same main.py and rerun the whole file. Copy checked sou
 # Step 3 — Map each parameter and declare tolerances: The hidden-layer check passes after transposing the source kernel.
 def convert(state,eps=1e-5):
     shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
-    # Guard input contract (`set(state) != set(shapes)`) and fail fast if violated.
     if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
     arrays={}
     for name,shape in shapes.items():
         value=state[name].detach().cpu().numpy()
-        # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
         if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
             raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)
         arrays[name]=value.copy()
@@ -190,14 +187,12 @@ def convert(state,eps=1e-5):
     return target
 
 def error_report(reference,actual,atol=2e-6,rtol=2e-5):
-    # Convert `reference` to a host NumPy array for inspection or verification.
-    # Convert `actual` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
+    # Transfer the device result to the host for an independent NumPy comparison.
     reference=np.asarray(reference,dtype=np.float64)
     actual=np.asarray(actual,dtype=np.float64)
-    # Guard input contract (`reference.shape != actual.shape or not np.isfinite(reference).all() or (not np.isfinite(actual).all())`) and fail fast if violated.
     if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
         raise ValueError('shape or finite-value mismatch')
-    # Guard input contract (`min(atol, rtol) < 0 or not np.isfinite([atol, rtol]).all()`) and fail fast if violated.
     if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
     absolute=np.abs(actual-reference)
     budget=atol+rtol*np.abs(reference)
@@ -221,7 +216,7 @@ Append this block to the same main.py and rerun the whole file. Store architectu
 ```python
 # Step 4 — Save and reload the converted state: The temporary round trip preserves a probe output.
 def save_flax(model,path):
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.savez(path,hidden_kernel=np.asarray(model.hidden.kernel[...]),hidden_bias=np.asarray(model.hidden.bias[...]),
              norm_scale=np.asarray(model.norm.scale[...]),norm_bias=np.asarray(model.norm.bias[...]),
              out_kernel=np.asarray(model.out.kernel[...]),out_bias=np.asarray(model.out.bias[...]),
@@ -229,21 +224,15 @@ def save_flax(model,path):
 
 def load_flax(path):
     shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
-    # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path,allow_pickle=False) as archive:
-        # Guard input contract (`set(archive.files) != set(shapes) | {'epsilon', 'schema'}`) and fail fast if violated.
         if set(archive.files)!=set(shapes)|{'epsilon','schema'}:raise ValueError('unexpected archive schema')
-        # Guard input contract (`archive['schema'].shape != () or int(archive['schema']) != 1`) and fail fast if violated.
         if archive['schema'].shape!=() or int(archive['schema'])!=1:raise ValueError('unknown schema')
-        # Guard input contract (`archive['epsilon'].shape != ()`) and fail fast if violated.
         if archive['epsilon'].shape!=():raise ValueError('epsilon must be scalar')
         eps=float(archive['epsilon'])
-        # Guard input contract (`not np.isfinite(eps) or eps <= 0`) and fail fast if violated.
         if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
         arrays={}
         for key,shape in shapes.items():
             value=archive[key]
-            # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
             if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)
             arrays[key]=value.copy()
     model=FlaxModel(eps)
@@ -254,7 +243,7 @@ def load_flax(path):
 
 import tempfile
 from pathlib import Path
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as step_folder:
     step_path = Path(step_folder) / 'roundtrip.npz'
     save_flax(step_target, step_path)
@@ -297,7 +286,6 @@ with tempfile.TemporaryDirectory() as folder:
             report=error_report(torch_values[name].detach().numpy(),flax_values[name])
             assert report['passed'],(name,report)
             errors[name].append(report['max_abs'])
-        # Execute `torch_values['output'].sum().backward()`.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
@@ -348,7 +336,6 @@ class FlaxModel(nnx.Module):
         self.norm=nnx.LayerNorm(5,epsilon=eps,use_fast_variance=False,rngs=nnx.Rngs(1))
         self.out=nnx.Linear(5,2,rngs=nnx.Rngs(2))
     def __call__(self,x):
-        # Apply nonlinear activation or probability normalization to compute `a`.
         h=self.hidden(x)
         n=self.norm(h)
         a=jax.nn.gelu(n,approximate=False)
@@ -356,12 +343,10 @@ class FlaxModel(nnx.Module):
 
 def convert(state,eps=1e-5):
     shapes={'hidden.weight':(5,3),'hidden.bias':(5,),'norm.weight':(5,),'norm.bias':(5,),'out.weight':(2,5),'out.bias':(2,)}
-    # Guard input contract (`set(state) != set(shapes)`) and fail fast if violated.
     if set(state)!=set(shapes):raise ValueError('missing or unexpected state key')
     arrays={}
     for name,shape in shapes.items():
         value=state[name].detach().cpu().numpy()
-        # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
         if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():
             raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)
         arrays[name]=value.copy()
@@ -381,14 +366,12 @@ def convert(state,eps=1e-5):
     return target
 
 def error_report(reference,actual,atol=2e-6,rtol=2e-5):
-    # Convert `reference` to a host NumPy array for inspection or verification.
-    # Convert `actual` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
+    # Transfer the device result to the host for an independent NumPy comparison.
     reference=np.asarray(reference,dtype=np.float64)
     actual=np.asarray(actual,dtype=np.float64)
-    # Guard input contract (`reference.shape != actual.shape or not np.isfinite(reference).all() or (not np.isfinite(actual).all())`) and fail fast if violated.
     if reference.shape!=actual.shape or not np.isfinite(reference).all() or not np.isfinite(actual).all():
         raise ValueError('shape or finite-value mismatch')
-    # Guard input contract (`min(atol, rtol) < 0 or not np.isfinite([atol, rtol]).all()`) and fail fast if violated.
     if min(atol,rtol)<0 or not np.isfinite([atol,rtol]).all():raise ValueError('invalid tolerances')
     absolute=np.abs(actual-reference)
     budget=atol+rtol*np.abs(reference)
@@ -396,7 +379,7 @@ def error_report(reference,actual,atol=2e-6,rtol=2e-5):
             'passed':bool(np.all(absolute<=budget))}
 
 def save_flax(model,path):
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.savez(path,hidden_kernel=np.asarray(model.hidden.kernel[...]),hidden_bias=np.asarray(model.hidden.bias[...]),
              norm_scale=np.asarray(model.norm.scale[...]),norm_bias=np.asarray(model.norm.bias[...]),
              out_kernel=np.asarray(model.out.kernel[...]),out_bias=np.asarray(model.out.bias[...]),
@@ -404,21 +387,15 @@ def save_flax(model,path):
 
 def load_flax(path):
     shapes={'hidden_kernel':(3,5),'hidden_bias':(5,),'norm_scale':(5,),'norm_bias':(5,),'out_kernel':(5,2),'out_bias':(2,)}
-    # Enter `np.load(path, allow_pickle=False)` context block:
     with np.load(path,allow_pickle=False) as archive:
-        # Guard input contract (`set(archive.files) != set(shapes) | {'epsilon', 'schema'}`) and fail fast if violated.
         if set(archive.files)!=set(shapes)|{'epsilon','schema'}:raise ValueError('unexpected archive schema')
-        # Guard input contract (`archive['schema'].shape != () or int(archive['schema']) != 1`) and fail fast if violated.
         if archive['schema'].shape!=() or int(archive['schema'])!=1:raise ValueError('unknown schema')
-        # Guard input contract (`archive['epsilon'].shape != ()`) and fail fast if violated.
         if archive['epsilon'].shape!=():raise ValueError('epsilon must be scalar')
         eps=float(archive['epsilon'])
-        # Guard input contract (`not np.isfinite(eps) or eps <= 0`) and fail fast if violated.
         if not np.isfinite(eps) or eps<=0:raise ValueError('invalid epsilon')
         arrays={}
         for key,shape in shapes.items():
             value=archive[key]
-            # Guard input contract (`value.shape != shape or value.dtype != np.float32 or (not np.isfinite(value).all())`) and fail fast if violated.
             if value.shape!=shape or value.dtype!=np.float32 or not np.isfinite(value).all():raise ValueError('invalid array '+key)
             arrays[key]=value.copy()
     model=FlaxModel(eps)
@@ -453,7 +430,6 @@ with tempfile.TemporaryDirectory() as folder:
             report=error_report(torch_values[name].detach().numpy(),flax_values[name])
             assert report['passed'],(name,report)
             errors[name].append(report['max_abs'])
-        # Execute `torch_values['output'].sum().backward()`.
         torch_values['output'].sum().backward()
         # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
@@ -490,13 +466,12 @@ The horizontal categories follow execution order: hidden linear, normalization, 
 All weights are identical between the correct and wrong-epsilon target models. A parameter-file comparison alone would miss the changed operation. Later error may grow or shrink through nonlinearities and the output projection, so the largest bar is not necessarily the location of the original bug. The per-element tolerance and gradient checks are reported separately from this plot.
 
 ```python
-# Compute figure data for: Locate the first divergent layer
 visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution order','ylabel':'maximum absolute output error','series':[{'label':'matched architecture (max across inputs)','y':[max(v) for v in errors.values()]},{'label':'wrong epsilon (last input batch)','y':[wrong_reports[k]['max_abs'] for k in errors]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:37.934658+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:41:20.372760+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
@@ -550,10 +525,6 @@ Compare a near-zero reference against two candidate errors. Verify that the abso
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `error_report(...)` — Call `error_report` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -592,12 +563,9 @@ The first weight is rectangular, so validate its source shape before applying th
 
 ### How to write: Reject a plausible but wrong tensor layout — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `layout(...)` — Call `layout` with your updated parameters or inputs from this lesson's workspace.
-- `convert(...)` — Call `convert` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -605,7 +573,6 @@ The first weight is rectangular, so validate its source shape before applying th
 # Reject a plausible but wrong tensor layout (Transfer): Asymmetric dimensions expose orientation errors that square...
 bad_state = dict(...)  # TODO: compute bad_state
 bad_state['hidden.weight'] = ...  # TODO: compute bad_state['hidden.weight']
-# Run the boundary check and catch the expected exception:
 try:convert(bad_state)
 except ValueError:print('Wrong source layout rejected')
 else:raise AssertionError('layout mismatch accepted')
@@ -617,7 +584,6 @@ else:raise AssertionError('layout mismatch accepted')
 # Reject a plausible but wrong tensor layout (Transfer): Asymmetric dimensions expose orientation errors that square...
 bad_state=dict(state)
 bad_state['hidden.weight']=state['hidden.weight'].T
-# Run the boundary check and catch the expected exception:
 try:convert(bad_state)
 except ValueError:print('Wrong source layout rejected')
 else:raise AssertionError('layout mismatch accepted')
@@ -646,8 +612,7 @@ Form the same scalar weighted output in each framework. Create a fresh PyTorch i
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `weighted_source`.
-2. Differentiate the objective to obtain `weighted_target` via automatic differentiation.
+1. Differentiate the objective to obtain `weighted_target` via automatic differentiation.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -656,7 +621,6 @@ Form the same scalar weighted output in each framework. Create a fresh PyTorch i
 probe_inputs = np.array(...)  # TODO: compute probe_inputs
 cotangent = np.array(...)  # TODO: compute cotangent
 probe_torch = torch.tensor(...)  # TODO: compute probe_torch
-# Aggregate array values to compute `weighted_source`.
 weighted_source = ...  # TODO: compute weighted_source
 weighted_source.backward()
 # Differentiate the objective to obtain `weighted_target` via automatic differentiation.
@@ -673,7 +637,6 @@ print('Nonuniform cotangent input-gradient parity:', vjp_report)
 probe_inputs = np.array([[.2, -.7, 1.1], [1., .4, -.5]], np.float32)
 cotangent = np.array([[1., -.5], [2., .25]], np.float32)
 probe_torch = torch.tensor(probe_inputs, requires_grad=True)
-# Aggregate array values to compute `weighted_source`.
 weighted_source = (source(probe_torch)['output'] * torch.tensor(cotangent)).sum()
 weighted_source.backward()
 # Differentiate the objective to obtain `weighted_target` via automatic differentiation.

@@ -19,7 +19,7 @@ assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 # Compare independent references
 # Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
@@ -40,19 +40,17 @@ assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
 # Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
 
 # Figure data experiment
-# Compute figure data for: Least squares balances unavoidable residuals
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'least-squares fit', 'y': (X @ w).tolist()}]}
 
 # Experiment: Duplicate a feature
 # Experiment — Duplicate a feature: Fit quality and coefficient uniqueness are different questions.
 a = jnp.array([1.0, 2.0, 3.0])
-# Combine or mask array elements to form `duplicate`.
 duplicate = jnp.stack([a, a], axis=1)
 w_dup, _, rank_dup, _ = jnp.linalg.lstsq(duplicate, 3 * a, rcond=None)
 assert int(rank_dup) == 1

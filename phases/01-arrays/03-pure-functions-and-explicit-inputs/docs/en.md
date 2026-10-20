@@ -74,19 +74,19 @@ Calling a function twice with fixed inputs checks a useful property, but it does
 
 Keep the evidence proportional to the claim: these tests establish the behavior of this predictor and update pattern, not the replay of an entire distributed training job.
 
-## Step 1: Set up imports and input tensors
+## Import JAX array operations
 
-Import the required JAX modules and define the initial inputs for pure functions and explicit inputs.
+Import jax.numpy for the prediction function and its inputs.
 
 ```python
 import jax.numpy as jnp
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The import supplies array arithmetic; model parameters and observations will be passed explicitly.
 
-## Step 2: Apply the core JAX transformation
+## Define a prediction from explicit parameters
 
-Write the core computation and transformation step over the initialized inputs.
+Write the affine predictor and store its weight and bias in a parameter dictionary.
 
 ```python
 def predict(params, x):
@@ -94,18 +94,18 @@ def predict(params, x):
 params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+The function has no hidden mutable state: the same parameters and input produce the same output.
 
-## Step 3: Verify shapes and numerical invariants
+## Evaluate the predictor on three inputs
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Use inputs [0, 1, 2] and compare predictions against the hand-calculated values.
 
 ```python
 x = jnp.array([0., 1., 2.])
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+With weight 2 and bias 1, the predictions are [1, 3, 5]. This check verifies both parameter lookup and broadcasting.
 
 ## Run the example
 
@@ -143,7 +143,6 @@ In $y=wx+b$, changing the explicit bias changes the vertical offset, while the u
 This makes the function’s inputs inspectable: the change in the output follows the change in the passed parameter. As a check, setting the bias to $0$ would move the solid line down by $1$ and make it pass through the origin. It would not flatten the line.
 
 ```python
-# Compute figure data for: Explicit parameters make predictions inspectable
 # Create device-backed JAX array `changed`.
 changed = {**params, 'bias': jnp.array(3.0)}
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}
@@ -151,7 +150,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:13.515971+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:47:13.327888+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]

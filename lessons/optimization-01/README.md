@@ -174,13 +174,12 @@ The matrix-vector product produces one value per observation, and the scalar bia
 For bias $0$, the prediction-minus-target residual is $-1$ on every row. Squaring and averaging gives $(1+1+1)/3=1$. With bias $1$, all residuals are zero and the mean squared loss is zero. Read the gaps between bars to understand the loss; do not average the bar heights themselves.
 
 ```python
-# Compute figure data for: A scalar bias shifts every prediction
 visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:35.408082+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:20.282346+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]
@@ -346,19 +345,17 @@ Compare shapes before subtraction; reshape only this known scalar-target dataset
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
-2. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
 def checked_loss(prediction, target):
-    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")
     return ...  # TODO: return computed result
-# Run the boundary check and catch the expected exception:
 try:
     checked_loss(predict(w, 1., X), column_targets)
 except ValueError:
@@ -373,11 +370,9 @@ assert checked_loss(predict(w, 1., X), column_targets[:, 0])  # TODO: complete a
 ```python
 # Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
 def checked_loss(prediction, target):
-    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")
     return jnp.mean((prediction-target)**2)
-# Run the boundary check and catch the expected exception:
 try:
     checked_loss(predict(w, 1., X), column_targets)
 except ValueError:

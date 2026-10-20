@@ -92,5 +92,13 @@
   ],
   "referenceCommand": "python3 projects/workload-operations/tests/check.py --stage 5 --implementation solution",
   "setupNote": "Work from the extracted top folder containing requirements-cpu.txt and projects/workload-operations. The checks use bounded local subprocesses and temporary directories; no cloud allocation occurs. Copy the starter scaffold `projects/workload-operations/starter/model.py` to `projects/workload-operations/my_model.py`, implement the stage functions in `projects/workload-operations/my_model.py`, and verify each stage with `python3 projects/workload-operations/tests/check.py --implementation projects/workload-operations/my_model.py --stage 1` (through `--stage 5`).",
-  "assessmentId": "ops"
+  "assessmentId": "ops",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

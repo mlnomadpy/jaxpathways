@@ -159,13 +159,12 @@ For the input $(2,1)$, the initial prediction is $1$, below the target $3$. The 
 The updated prediction is $2.2$, so squared error falls from $4$ to $0.64$. The tree structure lets each gradient reach its corresponding parameter leaf. The chart’s vertical axis is parameter value, not loss; you need the prediction calculation to establish improvement.
 
 ```python
-# Compute figure data for: A gradient tree matches parameter leaves
 visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'ylabel': 'parameter value', 'series': [{'label': 'before', 'y': [float(params['weight'][0]), float(params['weight'][1]), float(params['bias'])]}, {'label': 'after', 'y': [float(updated['weight'][0]), float(updated['weight'][1]), float(updated['bias'])]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:28.661784+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:01.985938+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405
@@ -221,7 +220,6 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 
 **Step-by-step implementation plan:**
 1. Transform every leaf of the parameter PyTree (`norm_squared`).
-2. Aggregate array values to compute `manual`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -229,7 +227,6 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 # Exercise solution: Compute the squared norm of all gradient leaves.
 # Transform every leaf of the parameter PyTree (`norm_squared`).
 norm_squared = sum(...)  # TODO: compute norm_squared
-# Aggregate array values to compute `manual`.
 manual = jnp.sum(...)  # TODO: compute manual
 assert jnp.allclose(norm_squared, manual)  # TODO: complete assertion check
 assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
@@ -241,7 +238,6 @@ assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
 # Exercise solution: Compute the squared norm of all gradient leaves.
 # Transform every leaf of the parameter PyTree (`norm_squared`).
 norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
-# Aggregate array values to compute `manual`.
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
 assert jnp.allclose(norm_squared, manual)
 assert jnp.allclose(norm_squared, 96.)
@@ -322,14 +318,12 @@ Matching leaf counts is not enough; key paths matter.
 - `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
-2. Transform every leaf of the parameter PyTree (`fixed`).
+1. Transform every leaf of the parameter PyTree (`fixed`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.
-# Run the boundary check and catch the expected exception:
 try:
     jax.tree.map(lambda p,g:p-0.05*g,params,{"weight":grads["weight"]})
 except ValueError:
@@ -345,7 +339,6 @@ assert jnp.allclose(loss(fixed),0.64,atol=1e-6)  # TODO: complete assertion chec
 
 ```python
 # Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.
-# Run the boundary check and catch the expected exception:
 try:
     jax.tree.map(lambda p,g:p-0.05*g,params,{"weight":grads["weight"]})
 except ValueError:

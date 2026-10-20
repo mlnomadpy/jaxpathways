@@ -96,7 +96,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -128,14 +127,14 @@ times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -188,7 +187,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -212,14 +210,14 @@ times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -254,7 +252,6 @@ The independent reverse recurrence checks the numerical derivative for both poli
 These are not measurements of peak accelerator allocation or total training memory. The runtime samples are recorded separately, and a meaningful policy decision needs representative model size, optimizer state and actual target-device measurements. If a backend lacks memory analysis, the plot explicitly substitutes a labeled availability panel rather than treating missing bytes as zero.
 
 ```python
-# Compute figure data for: Changed autodiff storage does not guarantee changed compiled buffers
 panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]
 if all(m is not None for m in memory):
     panels.append({'kind':'bar','title':'Compiler memory estimate','labels':['ordinary','layer remat'],'ylabel':'estimated temporary bytes','series':[{'label':'compiler temporaries','y':[m['temp_size_in_bytes'] for m in memory]}]})
@@ -265,7 +262,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:42.865487+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:20.391939+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -287,7 +284,7 @@ f32[16] output of tanh from <string>:17:20 (layer)
 f32[16] output of tanh from <string>:17:20 (layer)
 f32[16] output of tanh from <string>:17:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[0.0001016668975353241, 8.600018918514252e-05, 0.00013170810416340828, 5.487492308020592e-05, 3.0375085771083832e-05], [3.7041958421468735e-05, 2.6874709874391556e-05, 1.2292061001062393e-05, 9.582843631505966e-06, 9.292270988225937e-06]]
+Synchronized gradient samples: [[3.108428791165352e-05, 2.3042317479848862e-05, 1.6041100025177002e-05, 1.529185101389885e-05, 1.7208047211170197e-05], [5.370797589421272e-05, 5.154171958565712e-05, 2.16667540371418e-05, 1.9624829292297363e-05, 1.7041806131601334e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -307,27 +304,27 @@ f32[16] output of tanh from <string>:17:20 (layer)
 f32[16] output of tanh from <string>:17:20 (layer)
 f32[16] output of tanh from <string>:17:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[0.0001016668975353241, 8.600018918514252e-05, 0.00013170810416340828, 5.487492308020592e-05, 3.0375085771083832e-05], [3.7041958421468735e-05, 2.6874709874391556e-05, 1.2292061001062393e-05, 9.582843631505966e-06, 9.292270988225937e-06]]
+Synchronized gradient samples: [[3.108428791165352e-05, 2.3042317479848862e-05, 1.6041100025177002e-05, 1.529185101389885e-05, 1.7208047211170197e-05], [5.370797589421272e-05, 5.154171958565712e-05, 2.16667540371418e-05, 1.9624829292297363e-05, 1.7041806131601334e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of sub from <string>:89:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of sub from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of sub from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of sub from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of sub from <string>:88:20 (layer)
 remat 
 f32[16,16] from a constant
 f32[16] from the argument v
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
-f32[16] output of tanh from <string>:89:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
+f32[16] output of tanh from <string>:88:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[3.495905548334122e-05, 2.570822834968567e-05, 1.4999881386756897e-05, 1.4166813343763351e-05, 1.6415957361459732e-05], [2.570776268839836e-05, 2.408307045698166e-05, 8.791731670498848e-05, 7.383385673165321e-05, 5.5417418479919434e-05]]
+Synchronized gradient samples: [[9.27923247218132e-05, 6.679166108369827e-05, 6.562471389770508e-05, 4.99580055475235e-05, 4.587508738040924e-05], [3.9958395063877106e-05, 2.5709159672260284e-05, 1.9541941583156586e-05, 1.9459053874015808e-05, 1.8875114619731903e-05]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)

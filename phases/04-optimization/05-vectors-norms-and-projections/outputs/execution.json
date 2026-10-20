@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-05",
-  "contentHash": "d4f1f65e9be5e5231003b756f6a7dcaefb895c32fab266192c9e5f10120a7db0",
-  "executedAt": "2026-10-20T10:45:33.435928+00:00",
+  "contentHash": "ca747e1eb0d4d613ca63e766552975d1e2cc601b994105af5ffe0ec22dadcdb8",
+  "executedAt": "2026-10-20T18:48:15.899012+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -18,7 +18,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "e8d743febda0de9b926deb0aa41e0d9aed52efe4f8c16946c488cca708e969f7",
+      "sourceHash": "7c5f7045a456d4fb19120bdf1d53eca3721825a7c204b894deeb3bffe0c620de",
       "outputs": []
     },
     {
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "ff9b427003117879fae5a0631d9c43d54d75bf49eda3aa675291f903cc472ffd",
+      "sourceHash": "de6f86d04561b461843075d501beb16348ef54487b44357a6b6fc2e263b2de55",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "bb9bd8b9896a845acd93f52e17e3d755fa0ae4bc754d06b7f5c4adfb0a775287",
+      "sourceHash": "ef69dfe4992bfbfad6fd45bde3791ed7fc369af1d3e84358b200a4886c3b1235",
       "outputs": []
     },
     {
@@ -81,11 +81,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "62bba43fb07c8f5e61d3acc92d5f7ec921ed4a2d69077961bb4ff48ff3ecdfc4",
+      "sourceHash": "58243306d19804ac5f5b31ab8049148ebcc99ed2a5873e3f3a4147f176b45d34",
       "outputs": []
     },
     {
-      "sourceHash": "2797b9e2895680b200dc303d84b15ba90fdbfdb6632884b54441fe2fcf148fc3",
+      "sourceHash": "3faef578a1a89335e4fe66acd5a65fec977bfbfc876faec726e7625e1fddc315",
       "outputs": []
     },
     {

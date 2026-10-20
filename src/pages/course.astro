@@ -11,10 +11,20 @@ import SiteLayout from '../layouts/SiteLayout.astro';
 import SiteFooter from '../components/shared/SiteFooter.astro';
 import { lessonLink, siteUrl } from '../lib/urls.js';
 import pages from '../data/pages.json';
+import assessmentRegistry from '../../curriculum/assessments.json';
 
 const eraOrder = ['era-onboarding', 'era-foundations', 'era-training', 'era-scale', 'era-domains'];
+const isOptionalTpu = (phase: { id: string }) =>
+  ['tpu', 'tpu-workflows', 'tpu-systems'].includes(phase.id);
 const orderedPhases = eraOrder.flatMap((eraId) =>
-  course.phases.filter((phase) => courseTypeCue(phase).eraId === eraId),
+  course.phases.filter((phase) => !isOptionalTpu(phase) && courseTypeCue(phase).eraId === eraId),
+);
+const optionalTpuPhases = course.phases.filter(isOptionalTpu);
+const filterCounts = Object.fromEntries(
+  ['onboarding-tpu', 'foundation', 'training', 'tpu-scale', 'domain'].map((group) => [
+    group,
+    course.phases.filter((phase) => courseTypeCue(phase).filterGroup === group).length,
+  ]),
 );
 const eraSections = eraOrder
   .filter((eraId) => orderedPhases.some((phase) => courseTypeCue(phase).eraId === eraId))
@@ -43,12 +53,26 @@ const eraSections = eraOrder
         {course.phases.length} phases · {inventory.authored} lessons available
         {inventory.planned ? ` · ${inventory.planned} planned` : ''}
       </p>
+      <nav class="course-core-sequence" aria-label="First CPU course steps">
+        <a href={siteUrl('lesson-welcome-01.html')}>00 · Set up Python</a>
+        <span aria-hidden="true">→</span>
+        <a href={siteUrl('course.html?phase=arrays#phase-arrays')}>
+          01 · Arrays &amp; pure functions
+        </a>
+        <span aria-hidden="true">→</span>
+        <a href={siteUrl('course.html?phase=transforms#phase-transforms')}>
+          02 · JAX transformations
+        </a>
+      </nav>
     </PageIntro>
     <section id="curriculum">
       <div class="course-access">
         <div>
           <p id="progress" class="soft" aria-live="polite"></p>
-          <p>Open a step to see its lessons. You can start anywhere.</p>
+          <p>
+            Start on CPU setup, continue through foundations and training, then choose a deployment
+            or research branch.
+          </p>
         </div>
         <div class="actions">
           <a class="button primary" id="course-start" href={siteUrl(lessonLink('welcome-01'))}>
@@ -58,59 +82,10 @@ const eraSections = eraOrder
           <a href={siteUrl('projects.html#modality-tracks')}>Connect lessons in a project guide</a>
         </div>
       </div>
-      <aside class="course-access tpu-track-banner" aria-labelledby="tpu-course-title">
-        <div>
-          <span class="course-type-pill" data-course-kind="tpu-core">
-            3-Step Cloud TPU Mini-Course · 6 bite-sized lessons
-          </span>
-          <h2 id="tpu-course-title">Optional TPU specialization</h2>
-          <p>
-            Instead of one long block, the Cloud TPU track is split into three short 2-lesson
-            courses (~45 minutes each). Use them when you are ready to qualify accelerator execution
-            after <strong>00: Setup &amp; first steps</strong> while the main learning routes remain
-            CPU-completable. Practice provisioning a TPU VM, launching checkpointed jobs over SSH,
-            and inspecting HBM budgets and XProf traces. Actual TPU results require their own
-            execution evidence.
-          </p>
-          <div class="tpu-mini-course-strip">
-            <a class="tpu-step-card" data-phase="tpu" href="#phase-tpu">
-              <span class="tpu-step-kicker">Step 1 of 3 · ~45m</span>
-              <strong>19: TPU Setup</strong>
-              <span>Slice selection, gcloud VM provisioning, .venv &amp; pmap receipt</span>
-            </a>
-            <a class="tpu-step-card" data-phase="tpu-workflows" href="#phase-tpu-workflows">
-              <span class="tpu-step-kicker">Step 2 of 3 · ~45m</span>
-              <strong>20: TPU Workflows</strong>
-              <span>Staging scripts, warmup vs step timing, checkpoints &amp; --worker=all</span>
-            </a>
-            <a class="tpu-step-card" data-phase="tpu-systems" href="#phase-tpu-systems">
-              <span class="tpu-step-kicker">Step 3 of 3 · ~50m</span>
-              <strong>21: TPU Systems</strong>
-              <span>v5e/v5p/v6e ridge points, HBM budgets, BF16/INT8 &amp; XProf</span>
-            </a>
-          </div>
-        </div>
-        <div class="actions">
-          <a class="button primary" data-phase="tpu" href="#phase-tpu">
-            Start Step 1: TPU Setup
-          </a>
-          <a class="button" href={siteUrl('pathways.html?path=tpu')}>
-            TPU learning path
-          </a>
-        </div>
-      </aside>
-      <aside class="course-access" aria-labelledby="workflow-title">
-        <div>
-          <h2 id="workflow-title">Before your first project</h2>
-          <p>
-            Organize code, data and experiment runs. Practice with a small CLI, then choose tools as
-            your project grows.
-          </p>
-        </div>
-        <a class="button" href={siteUrl('project-workflow.html')}>
-          Tools &amp; project structure
-        </a>
-      </aside>
+      <p class="course-tools-link">
+        Starting a project?{' '}
+        <a href={siteUrl('project-workflow.html')}>Tools &amp; folder structure</a>.
+      </p>
       <div id="path-summary" class="path-summary" hidden></div>
       <div
         id="course-scroll-bar"
@@ -120,7 +95,7 @@ const eraSections = eraOrder
       >
         <div class="course-scroll-status">
           <span class="scroll-kicker">Current section</span>
-          <strong id="active-era-indicator">Start Here · Setup &amp; Cloud TPU Track</strong>
+          <strong id="active-era-indicator">Start Here · CPU Setup</strong>
         </div>
         <div class="course-type-filters" role="group" aria-label="Filter by course type">
           <button
@@ -137,7 +112,7 @@ const eraSections = eraOrder
             data-course-filter="onboarding-tpu"
             aria-pressed="false"
           >
-            Setup &amp; Cloud TPU (4)
+            Setup + TPU ({filterCounts['onboarding-tpu']})
           </button>
           <button
             type="button"
@@ -145,7 +120,7 @@ const eraSections = eraOrder
             data-course-filter="foundation"
             aria-pressed="false"
           >
-            CPU Foundations (4)
+            CPU Foundations ({filterCounts.foundation})
           </button>
           <button
             type="button"
@@ -153,7 +128,7 @@ const eraSections = eraOrder
             data-course-filter="training"
             aria-pressed="false"
           >
-            Training Systems (6)
+            Training Systems ({filterCounts.training})
           </button>
           <button
             type="button"
@@ -161,7 +136,7 @@ const eraSections = eraOrder
             data-course-filter="tpu-scale"
             aria-pressed="false"
           >
-            TPU Scale &amp; Ops (4)
+            TPU Scale &amp; Ops ({filterCounts['tpu-scale']})
           </button>
           <button
             type="button"
@@ -169,10 +144,51 @@ const eraSections = eraOrder
             data-course-filter="domain"
             aria-pressed="false"
           >
-            Research &amp; Domains (4)
+            Research &amp; Domains ({filterCounts.domain})
           </button>
         </div>
       </div>
+      <div class="catalog-search-actions">
+        <button type="button" class="button" id="course-search-open" aria-haspopup="dialog">
+          Search lessons <kbd>/</kbd>
+        </button>
+        <button type="button" class="button" id="course-search-clear" hidden>
+          Clear search
+        </button>
+      </div>
+      <dialog
+        id="course-search-dialog"
+        class="course-search-dialog"
+        aria-labelledby="course-search-title"
+      >
+        <form method="dialog" class="course-search-form">
+          <div class="course-search-heading">
+            <div>
+              <p class="edition">Course search</p>
+              <h2 id="course-search-title">Find a lesson or concept</h2>
+            </div>
+            <button type="submit" class="course-search-close" aria-label="Close search">
+              ×
+            </button>
+          </div>
+          <label for="course-search-input">Search lesson explanations, code and practice</label>
+          <input
+            id="course-search-input"
+            type="search"
+            autocomplete="off"
+            placeholder="Try “checkpoint”, “vmap” or an error message"
+          />
+          <p class="course-search-hint">Press Enter to apply · Escape to close</p>
+          <div class="actions">
+            <button type="button" class="button primary" id="course-search-apply">
+              Show matches
+            </button>
+            <button type="button" class="button" id="course-search-cancel">
+              Cancel
+            </button>
+          </div>
+        </form>
+      </dialog>
       <p id="course-view-status" class="edition" aria-live="polite"></p>
       <div id="phases" class="phase-grid">
         {eraSections.map((era, eraIdx) => (
@@ -198,6 +214,29 @@ const eraSections = eraOrder
             ))}
           </Fragment>
         ))}
+        <details class="optional-tpu-track" id="optional-tpu-track">
+          <summary>Optional Cloud TPU specialization · 3 steps · 6 lessons</summary>
+          <div class="tpu-track-banner" aria-labelledby="tpu-course-title">
+            <div>
+              <span class="course-type-pill" data-course-kind="tpu-core">
+                Optional accelerator branch
+              </span>
+              <h2 id="tpu-course-title">Qualify a TPU workflow when you need it</h2>
+              <p>
+                Work through provisioning, checkpointed jobs and TPU system profiling after the
+                laptop CPU foundations. Cloud access is not needed for the core course.
+              </p>
+              <div class="actions">
+                <a class="button" href={siteUrl('pathways.html?path=tpu')}>
+                  TPU learning path
+                </a>
+              </div>
+            </div>
+          </div>
+          {optionalTpuPhases.map((phase) => (
+            <PhaseCard phase={phase} />
+          ))}
+        </details>
       </div>
       <details class="course-jump-disclosure">
         <summary>Jump to a course step</summary>
@@ -209,8 +248,10 @@ const eraSections = eraOrder
         </label>
       </div>
       <p id="content-status" class="soft">
-        {inventory.authored} lesson drafts with CPU companions
-        {inventory.planned ? `; ${inventory.planned} topics are planned.` : '.'}
+        {inventory.authored} authored lessons with CPU companions
+        {inventory.planned ? ` · ${inventory.planned} topics planned` : ''} ·{' '}
+        {course.projectIds.length} staged projects · {assessmentRegistry.length} synthesis
+        assessments
       </p>
       <p id="empty" hidden>
         No available lessons in this view.

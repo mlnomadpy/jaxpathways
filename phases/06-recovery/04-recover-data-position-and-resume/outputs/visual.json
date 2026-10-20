@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "24da684f527e7b04d4809cc6a23ec0be5882e57eed5b0bb5aa7f9b6ded984682",
+  "contentHash": "bc64c1c816552987626821b8d8b00c14b81c1f1dce39126baca9a555966377d6",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:45:45.668045+00:00",
+  "generatedAt": "2026-10-20T18:48:43.772963+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-06",
-  "contentHash": "2045fd46cce599b92c2b22fca98a4f64f22b5ca7fa8a52502d6adfac11e0dfdc",
-  "executedAt": "2026-10-20T10:47:02.065912+00:00",
+  "contentHash": "c6b5a20d7a65135f428f096afbaca49a7bf27111ff69e368470244f7fdf5dd60",
+  "executedAt": "2026-10-20T21:47:39.248250+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}\nVerified 30 logged steps per run; selected and reloaded the better validation candidate.\nValidation difference: 0.11994461664726686\nWrong zero model validation MSE: 6.0\nChanged target changes dataset identity.\nPASS: recovery-06\n",
   "notebookCells": [
     {
-      "sourceHash": "f6b66379262f139d1d7eefafa6fe078fe7bf899ed96a33aabcc903ed8596a629",
+      "sourceHash": "40d50d8761077082bf78fe5b00b2c0a5c40917b8ddbfe1cb783f19ec0a725a7d",
       "outputs": []
     },
     {
@@ -22,24 +22,24 @@
       "outputs": []
     },
     {
-      "sourceHash": "09fcb9a8db35f3885a178ba33ca15fb44b27b51bb17e95c25c5a9a98d376d4d8",
+      "sourceHash": "95604e14604a0364a070b9b2a5697e7183c254630dfa672060f67b26c24e41b3",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:46:59 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:46:59 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/20 14:47:36 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 14:47:36 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 3545.48it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1506.03it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 8422.30it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2178.86it/s]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "4c8f0208e6942dde2f61c5dd64725e232cffccd5d36bcd945312a3512ec66f58",
+      "sourceHash": "d0c9d8dc45b423a13e3f759d4e4cbf3c876f008f5761086358a7e23f0184207a",
       "outputs": [
         {
           "output_type": "stream",
@@ -53,18 +53,18 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:47:00 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:47:00 INFO mlflow.store.db.utils: Updating database tables\n",
+            "2026/10/20 14:47:37 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 14:47:37 INFO mlflow.store.db.utils: Updating database tables\n",
             "\r",
             "Downloading artifacts:   0%|          | 0/1 [00:00<?, ?it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2542.00it/s]\r",
-            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1636.48it/s]\n"
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 2326.29it/s]\r",
+            "Downloading artifacts: 100%|##########| 1/1 [00:00<00:00, 1510.37it/s]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "8e111bfbe3de57625acbef7ec10f7cf54236b832fdde7ee060b1776c72801d18",
+      "sourceHash": "5e056379b8a2fa6a4f48f34bf458ffc55990a9bb19dd2e672a95c473408ba188",
       "outputs": []
     },
     {
@@ -111,11 +111,11 @@
       ]
     },
     {
-      "sourceHash": "9fb4d76ca10de99ee4924e29707c206bea7928cd33b6582c4b465fe05b18cd56",
+      "sourceHash": "42eb736c6dd3f6a20e41cc0d47b902156798af1f509452a2882941120bbe7f15",
       "outputs": []
     },
     {
-      "sourceHash": "0a95030ff379904c45623e243fa2916fe9e93a773b91c4a9d110cad619dd2f91",
+      "sourceHash": "fc55f2d2ca4a5df17473620d92f0461cabcd9bd611478e0c2c830ab7dc7b5b7d",
       "outputs": [
         {
           "output_type": "stream",

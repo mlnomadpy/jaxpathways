@@ -31,7 +31,6 @@ actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
-# Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
@@ -67,7 +66,6 @@ actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
-# Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
@@ -76,8 +74,7 @@ print('sample mean, variance:',float(a.mean()),float(a.var()))
 print('stable equal-mixture log density:',float(stable))
 
 # Figure data experiment
-# Compute figure data for: A precise mean does not remove observation noise
-# Convert `sizes` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 sizes = np.array([1,4,16,64,100,400])
 visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observations N","ylabel":"standard deviation (reading units)","xscale":"log","series":[{"label":"individual reading","y":[3.]*len(sizes)},{"label":"average of N readings","y":(3/np.sqrt(sizes)).tolist()}]}
 
@@ -90,9 +87,7 @@ print("peak density:",float(peak))
 # Experiment: Separate sum and mixture
 # Experiment — Separate sum and mixture: Independence multiplies probabilities, while alternative mixture...
 values = jnp.array([-2.,-3.])
-# Aggregate array values to compute `independent_log`.
 independent_log = values.sum()
-# Evaluate numerically stable log-space cross-entropy/likelihood (`mixture_log`).
 mixture_log = logsumexp(values)-jnp.log(2.)
 assert jnp.allclose(independent_log,-5.)
 assert mixture_log > -3.

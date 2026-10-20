@@ -9,14 +9,10 @@ ids = np.arange(11,dtype=np.int64)
 features = (ids/10).astype(np.float32)
 labels = (2*features-1).astype(np.float32)
 def dataset_digest(x,y):
-    # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest = hashlib.sha256()
     for array in (x,y):
-        # Update state in place with the new values.
         digest.update(str(array.dtype).encode())
-        # Update state in place with the new values.
         digest.update(str(array.shape).encode())
-        # Update state in place with the new values.
         digest.update(array.tobytes())
     return digest.hexdigest()
 fingerprint = dataset_digest(features,labels)
@@ -26,7 +22,6 @@ def epoch_order(seed,epoch):
 # Build the pipeline or state transition
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
-    # Guard input contract (`batch_size <= 0`) and fail fast if violated.
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
     order = epoch_order(seed,epoch)
@@ -34,25 +29,20 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         chosen = order[start:start+batch_size]
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 start_time = time.perf_counter()
 batches = list(make_batches(seed=17,epoch=0))
 elapsed = time.perf_counter()-start_time
-# Combine or mask array elements to form `seen`.
 seen = np.concatenate([b["id"] for b in batches])
 
 # Run the comparison
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 assert [len(b["id"]) for b in batches] == [4,4,3]
-# Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 for batch in batches:
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
-# Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
-# Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
 print("Batch sizes:",[len(b["id"]) for b in batches])
 print("Example order:",seen.tolist())
@@ -67,14 +57,10 @@ ids = np.arange(11,dtype=np.int64)
 features = (ids/10).astype(np.float32)
 labels = (2*features-1).astype(np.float32)
 def dataset_digest(x,y):
-    # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest = hashlib.sha256()
     for array in (x,y):
-        # Update state in place with the new values.
         digest.update(str(array.dtype).encode())
-        # Update state in place with the new values.
         digest.update(str(array.shape).encode())
-        # Update state in place with the new values.
         digest.update(array.tobytes())
     return digest.hexdigest()
 fingerprint = dataset_digest(features,labels)
@@ -83,7 +69,6 @@ def epoch_order(seed,epoch):
 
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
-    # Guard input contract (`batch_size <= 0`) and fail fast if violated.
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
     order = epoch_order(seed,epoch)
@@ -91,24 +76,19 @@ def make_batches(seed,epoch,batch_size=4,drop_last=False):
         chosen = order[start:start+batch_size]
         if drop_last and len(chosen) < batch_size:
             break
-        # Execute `yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}`.
         yield {"id":ids[chosen],"x":features[chosen],"y":labels[chosen]}
 start_time = time.perf_counter()
 batches = list(make_batches(seed=17,epoch=0))
 elapsed = time.perf_counter()-start_time
-# Combine or mask array elements to form `seen`.
 seen = np.concatenate([b["id"] for b in batches])
 
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 assert [len(b["id"]) for b in batches] == [4,4,3]
-# Execute `np.testing.assert_array_equal(np.sort(seen),ids)`
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
 for batch in batches:
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
-# Combine or mask array elements to form `repeated`.
 repeated = np.concatenate([b["id"] for b in make_batches(17,0)])
-# Execute `np.testing.assert_array_equal(seen,repeated)`
 np.testing.assert_array_equal(seen,repeated)
 print("Batch sizes:",[len(b["id"]) for b in batches])
 print("Example order:",seen.tolist())
@@ -116,13 +96,11 @@ print("Preparation seconds (local observation only):",elapsed)
 print("Dataset SHA256:",fingerprint)
 
 # Figure data experiment
-# Compute figure data for: Shuffling changes order, not dataset membership
 visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}
 
 # Experiment: Compare epochs without a hard-coded order
 # Experiment — Compare epochs without a hard-coded order: Coverage is an invariant; ordering is a deterministic...
 epoch_one = np.concatenate([b["id"] for b in make_batches(17,1)])
-# Execute `np.testing.assert_array_equal(np.sort(epoch_one),ids)`
 np.testing.assert_array_equal(np.sort(epoch_one),ids)
 assert not np.array_equal(epoch_one,seen)
 print("Epoch one order:",epoch_one.tolist())
@@ -130,7 +108,6 @@ print("Epoch one order:",epoch_one.tolist())
 # Experiment: Expose dropped records
 # Experiment — Expose dropped records: Logging just the number of batches hides exclusions.
 dropped = list(make_batches(17,0,drop_last=True))
-# Combine or mask array elements to form `dropped_ids`.
 dropped_ids = np.concatenate([b["id"] for b in dropped])
 assert len(dropped_ids)==8
 omitted = np.setdiff1d(ids,dropped_ids)
@@ -140,10 +117,8 @@ print("Omitted IDs:",omitted.tolist())
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Pad the final three-label batch to four elements with zero.
 last = batches[-1]["y"]
-# Combine or mask array elements to form `padded_labels`.
 padded_labels = np.pad(last,(0,4-len(last)))
 mask = np.array([1]*len(last)+[0]*(4-len(last)),dtype=np.float32)
-# Aggregate array values to compute `masked`.
 masked = (padded_labels*mask).sum()/mask.sum()
 np.testing.assert_allclose(masked,last.mean(),atol=1e-7)
 assert not np.isclose(padded_labels.mean(),last.mean())

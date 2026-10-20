@@ -64,7 +64,7 @@ Reading model.hidden.kernel[...] retrieves its array contents in the tested Flax
 
 ## 1. Define typed state and the model
 
-Create main.py. From the repository root, run python3 -m pip install -$r$ requirements-cpu.txt in your activated environment; the course pins Flax 0.12.6. Copy the model before adding any optimizer.
+Create `main.py`. From the repository root, run `python3 -m pip install -r requirements-cpu.txt` in your activated environment; the course pins Flax `0.12.6`. Copy the model before adding any optimizer.
 
 ```python
 # Step 1 — 1. Define typed state and the model: nnx.Rngs manages initializer keys.
@@ -96,9 +96,9 @@ Append an independent NumPy computation. Count only `nnx.Param` leaves, not the 
 ```python
 # Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
-# Convert `h` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
-# Convert `expected` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)
 np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)
 param_state=nnx.state(model,nnx.Param)
@@ -155,9 +155,9 @@ batch=jnp.array([[1.,2.],[-1.,.5],[0.,0.]])
 
 # Step 2 — 2. Verify equations and inspect the filters: The matching forward pass verifies the network wiring.
 scores=model(batch,record=True)
-# Convert `h` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 h=np.tanh(np.asarray(batch)@np.asarray(model.hidden.kernel[...])+np.asarray(model.hidden.bias[...]))
-# Convert `expected` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 expected=(h@np.asarray(model.out.kernel[...])+np.asarray(model.out.bias[...])).squeeze(-1)
 np.testing.assert_allclose(scores,expected,rtol=1e-5,atol=1e-6)
 param_state=nnx.state(model,nnx.Param)
@@ -206,7 +206,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'le
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:15.263948+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:50:18.557643+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2
@@ -241,7 +241,6 @@ An affine output bias changes the decision threshold uniformly; the hidden repre
 # Experiment — Repeated construction reproduces state: Replay is checked in one pinned environment.
 replay=TinyMLP(0)
 for a,b in zip(jax.tree.leaves(nnx.state(replay,nnx.Param)),jax.tree.leaves(param_state)):
-    # Execute `np.testing.assert_array_equal(a,b)`
     np.testing.assert_array_equal(a,b)
 different=TinyMLP(1)
 assert not np.array_equal(np.asarray(different.hidden.kernel[...]),np.asarray(model.hidden.kernel[...]))
@@ -311,8 +310,7 @@ Snapshot the original parameters before editing clone.out.bias.
 
 **Step-by-step implementation plan:**
 1. Transform every leaf of the parameter PyTree (`original_leaves`).
-2. Convert `old_clone` to a host NumPy array for inspection or verification.
-3. Execute `np.testing.assert_array_equal(before,after)`
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -320,12 +318,11 @@ Snapshot the original parameters before editing clone.out.bias.
 # Change a clone without changing its source (Transfer): The bias is broadcast over observations, so every logit...
 # Transform every leaf of the parameter PyTree (`original_leaves`).
 original_leaves = ...  # TODO: compute original_leaves
-# Convert `old_clone` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 old_clone = np.asarray(...)  # TODO: compute old_clone
 clone.out.bias[...] = ...  # TODO: compute clone.out.bias[...]
 np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
 for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
-    # Execute `np.testing.assert_array_equal(before,after)`
     np.testing.assert_array_equal(before,after)
 print('Clone logits shifted by one; original parameters unchanged.')
 ```
@@ -336,12 +333,11 @@ print('Clone logits shifted by one; original parameters unchanged.')
 # Change a clone without changing its source (Transfer): The bias is broadcast over observations, so every logit...
 # Transform every leaf of the parameter PyTree (`original_leaves`).
 original_leaves=[np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(model,nnx.Param))]
-# Convert `old_clone` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 old_clone=np.asarray(clone(batch)).copy()
 clone.out.bias[...] = clone.out.bias[...] + 1.
 np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
 for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
-    # Execute `np.testing.assert_array_equal(before,after)`
     np.testing.assert_array_equal(before,after)
 print('Clone logits shifted by one; original parameters unchanged.')
 ```

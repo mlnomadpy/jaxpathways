@@ -1,14 +1,14 @@
 """Immutable updates and indexing: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Create the original four-element array
 import jax.numpy as jnp
 x = jnp.array([1., 2., 3., 4.])
 
-# Step 2: Apply the core JAX transformation
+# Set one index and add to two others
 y = x.at[1].set(20.)
 z = x.at[jnp.array([0, 2])].add(5.)
 
-# Step 3: Verify shapes and numerical invariants
+# Check both updated values and the unchanged input
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
 assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
@@ -26,8 +26,6 @@ assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 
 # Figure data experiment
-# Compute figure data for: An update returns a new array
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows': ['original', 'set index 1', 'add at 0 and 2'], 'columns': ['0', '1', '2', '3'], 'unit': 'stored value'}
 
 # Experiment: See name rebinding without old-value mutation
@@ -48,7 +46,6 @@ indices = jnp.array([1, 1, 3])
 contributions = jnp.array([2, 3, 7], dtype=jnp.int32)
 base_counts = jnp.zeros(4, dtype=jnp.int32)
 counts = base_counts.at[indices].add(contributions)
-# Allocate initialized array `reference_counts` with the specified shape and dtype.
 reference_counts = np.zeros(4, dtype=np.int32)
 for index, contribution in zip([1, 1, 3], [2, 3, 7]):
     # Accumulate the next contribution into `reference_counts[index]`.
@@ -65,7 +62,6 @@ assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
 
 # Reference practice: Replace a region of a matrix
 # Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
-# Construct and reshape `matrix` into the target tensor dimensions.
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
 updated_matrix = matrix.at[:, -1].set(-1.)
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))

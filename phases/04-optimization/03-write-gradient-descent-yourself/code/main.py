@@ -33,9 +33,7 @@ import jax.numpy as jnp
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
 def loss(w):
     return (w - 2.) ** 2
-# Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:
 def train(initial, rate, steps):
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
         # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
@@ -50,7 +48,6 @@ assert history[-1] < 1e-8
 assert jnp.all(jnp.diff(history) <= 1e-7)
 
 # Figure data experiment
-# Compute figure data for: Gradient descent trades step size for stability
 rates = [0.1, 0.5, 1.1]
 series = []
 for rate_plot in rates:
@@ -102,7 +99,6 @@ def scaled_step(w, _):
     # Differentiate the objective to obtain `new` via automatic differentiation.
     new = w-0.1*jax.grad(scaled_loss)(w)
     return new, scaled_loss(new)
-# Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
 assert jnp.allclose(scaled_w, 3., atol=1e-5)
 assert jnp.all(jnp.diff(scaled_history) <= 1e-6)

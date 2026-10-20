@@ -62,7 +62,7 @@ const API_CATALOG = [
     pattern: /\bjax\.(?:jvp|vjp|linearize|jacfwd|jacrev|hessian)\b/,
     token: 'jax.jvp / jax.vjp / jax.jacfwd / jax.hessian',
     summary:
-      'Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.',
+      'Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.',
   },
   {
     pattern: /\bjax\.vmap\b/,
@@ -74,7 +74,7 @@ const API_CATALOG = [
     pattern: /\b(?:jax|nnx)\.jit\b/,
     token: 'jax.jit(fn) / @jax.jit',
     summary:
-      'Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.',
+      'Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.',
   },
   {
     pattern: /\bjax\.lax\.scan\b/,
@@ -92,7 +92,7 @@ const API_CATALOG = [
     pattern: /\bjax\.random\.(?:PRNGKey|key|split|normal|uniform|choice|bernoulli|randint)\b/,
     token: 'jax.random.PRNGKey(seed) & jax.random.split(key)',
     summary:
-      'Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.',
+      'Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.',
   },
   {
     pattern: /\bnnx\.(?:Module|Linear|Rngs|Optimizer|Param)\b/,
@@ -129,41 +129,9 @@ export function extractCodeApis(code) {
   const matches = API_CATALOG.filter((item) => item.pattern.test(code));
   if (matches.length > 0) return matches.slice(0, 4);
 
-  /** @type {Array<{ token: string; summary: string }>} */
-  const fallback = [];
-  const fnCalls = [...code.matchAll(/\b([a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)?)\s*\(/g)]
-    .map((m) => m[1])
-    .filter(
-      (name) =>
-        ![
-          'print',
-          'len',
-          'range',
-          'dict',
-          'list',
-          'tuple',
-          'float',
-          'int',
-          'str',
-          'bool',
-          'set',
-        ].includes(name),
-    );
-  const uniqueCalls = [...new Set(fnCalls)].slice(0, 2);
-  for (const fn of uniqueCalls) {
-    fallback.push({
-      token: `${fn}(...)`,
-      summary: `Call \`${fn}\` with your updated parameters or inputs from this lesson's workspace.`,
-    });
-  }
-  if (/\bassert\b/.test(code)) {
-    fallback.push({
-      token: 'assert condition',
-      summary:
-        'Verify that the observed output shape, status, or numerical value satisfies the contract.',
-    });
-  }
-  return fallback;
+  // Only explain APIs with an authored description. A guessed call name does
+  // not tell a learner what the computation means.
+  return [];
 }
 
 /**

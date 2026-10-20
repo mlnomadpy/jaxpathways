@@ -12,7 +12,6 @@ assert jnp.allclose(jnp.dot(u, a), 3.0)
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
     denominator = jnp.dot(a, a)
-    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
     return jnp.dot(a, u) / denominator * a
@@ -36,7 +35,6 @@ assert jnp.allclose(jnp.dot(u, a), 3.0)
 # Step 2 — Build the projection: The leftover r contains what the chosen direction cannot explain.
 def project(u, a):
     denominator = jnp.dot(a, a)
-    # Guard input contract (`float(denominator) == 0.0`) and fail fast if violated.
     if float(denominator) == 0.0:
         raise ValueError('Projection needs a nonzero direction')
     return jnp.dot(a, u) / denominator * a
@@ -50,7 +48,6 @@ assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
 print('projection / residual:', p, r)
 
 # Figure data experiment
-# Compute figure data for: Projection and leftover form a right triangle
 visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}
 
 # Experiment: Rescale the direction
@@ -76,7 +73,6 @@ assert jnp.allclose(jnp.dot(a3, u3 - p3), 0.0)
 
 # Reference practice: Handle an undefined direction
 # Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.
-# Run the boundary check and catch the expected exception:
 try:
     project(u, jnp.zeros_like(a))
 except ValueError as exc:

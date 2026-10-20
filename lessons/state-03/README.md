@@ -110,7 +110,6 @@ Append the checks, save main.py, and run python main.py from this folder using y
 
 ```python
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Run compiled structured control flow via `jax.lax` (`(final, history)`).
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
@@ -132,7 +131,6 @@ def step(carry, increment):
     return next_value, next_value
 increments = jnp.array([1., 1., 1., 1.])
 # Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Run compiled structured control flow via `jax.lax` (`(final, history)`).
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
@@ -163,13 +161,12 @@ The update is $c_{t+1}=0.5c_t+1$. Subtracting it from the fixed point gives $2-c
 The shrinking gaps are $1$, $0.5$, $0.25$, and $0.125$. `scan` carries the evolving value forward while collecting this history. One more step would produce $1.9375$; it would not add another full unit or restart from the initial carry.
 
 ```python
-# Compute figure data for: The carry approaches a fixed point
 visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:30.167199+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:06.824349+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]
@@ -193,7 +190,6 @@ reference=[]
 for inc in [1.,-1.,2.,0.]:
     state=0.5*state+inc
     reference.append(state)
-# Run compiled structured control flow via `jax.lax` (`(last, observed)`).
 last,observed=jax.lax.scan(step,jnp.array(0.),inputs)
 assert jnp.allclose(observed,jnp.array([1.,-0.5,1.75,0.875]))
 assert jnp.allclose(observed,jnp.array(reference))
@@ -287,13 +283,13 @@ The second returned value is only the recorded output.
 - `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
 
 **Step-by-step implementation plan:**
-1. Run compiled structured control flow via `jax.lax` (`(last, energy)`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Record a different output (Practice): Carry and history need not have the same interpretation.
-# Run compiled structured control flow via `jax.lax` (`(last, energy)`).
 last,energy = jax.lax.scan(...)  # TODO: compute last,energy
 assert jnp.allclose(last,1.875)  # TODO: complete assertion check
 assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))  # TODO: complete assertion check
@@ -303,7 +299,6 @@ assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))  # TODO: comple
 
 ```python
 # Record a different output (Practice): Carry and history need not have the same interpretation.
-# Run compiled structured control flow via `jax.lax` (`(last, energy)`).
 last,energy=jax.lax.scan(lambda c,u:(0.5*c+u,(0.5*c+u)**2),jnp.array(0.),increments)
 assert jnp.allclose(last,1.875)
 assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))
@@ -333,8 +328,8 @@ The carry shape is part of the loop type.
 - `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
-2. Run compiled structured control flow via `jax.lax` (`(_, saved)`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -342,14 +337,12 @@ The carry shape is part of the loop type.
 # Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.
 def growing(c,u):
     return ...  # TODO: return computed result
-# Run the boundary check and catch the expected exception:
 try:
     jax.lax.scan(growing,jnp.zeros((0,)),increments)
 except TypeError:
     print("Expected carry-shape mismatch")
 else:
     raise AssertionError("Expected scan type failure")
-# Run compiled structured control flow via `jax.lax` (`(_, saved)`).
 _,saved = jax.lax.scan(...)  # TODO: compute _,saved
 assert jnp.array_equal(saved,increments)  # TODO: complete assertion check
 ```
@@ -360,14 +353,12 @@ assert jnp.array_equal(saved,increments)  # TODO: complete assertion check
 # Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.
 def growing(c,u):
     return jnp.concatenate([c,u[None]]),u
-# Run the boundary check and catch the expected exception:
 try:
     jax.lax.scan(growing,jnp.zeros((0,)),increments)
 except TypeError:
     print("Expected carry-shape mismatch")
 else:
     raise AssertionError("Expected scan type failure")
-# Run compiled structured control flow via `jax.lax` (`(_, saved)`).
 _,saved=jax.lax.scan(lambda c,u:(c,u),jnp.array(0.),increments)
 assert jnp.array_equal(saved,increments)
 ```

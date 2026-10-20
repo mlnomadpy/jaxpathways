@@ -56,7 +56,6 @@ assert jnp.allclose(jax.grad(binary_loss)(jnp.array(-100.0), jnp.array(1.0)), -1
 print('uncertain loss / confident-wrong loss:', binary_loss(z, y), binary_loss(-100.0, 1.0))
 
 # Figure data experiment
-# Compute figure data for: Confidence is rewarded only when it matches the label
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-10.0, 10.0, 81)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
@@ -74,9 +73,7 @@ assert jnp.isfinite(stable) and jnp.allclose(stable, 100.0)
 # Experiment — Shift every class score: Only relative class scores matter.
 scores = jnp.array([1.0, 2.0, 3.0])
 target = 2
-# Evaluate numerically stable log-space cross-entropy/likelihood (`nll`).
 nll = -jax.nn.log_softmax(scores)[target]
-# Evaluate numerically stable log-space cross-entropy/likelihood (`shifted`).
 shifted = -jax.nn.log_softmax(scores + 1000.0)[target]
 assert jnp.allclose(nll, shifted, atol=1e-06)
 reference_loss = jnp.log(jnp.exp(-2.0) + jnp.exp(-1.0) + 1.0)
@@ -92,7 +89,6 @@ assert binary_loss(z_from_p[0], 1.0) < binary_loss(z_from_p[1], 1.0)
 # Reference practice: Fit a constant probability
 # Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
 ys = jnp.array([1.0, 1.0, 1.0, 0.0])
-# Aggregate array values to compute `constant_loss`.
 constant_loss = lambda z: jnp.mean(binary_loss(z, ys))
 optimum = jnp.log(3.0)
 assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)

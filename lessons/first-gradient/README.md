@@ -75,20 +75,20 @@ Both $x^2$ and $x^3$ have derivative zero at $x=0$. The square has a minimum the
 
 When a model produces a surprising zero gradient, ask whether the loss actually depends on the parameter, whether you differentiated the intended argument, and whether the chosen point is stationary. Checking nearby points and a simple analytic case is often more informative than immediately changing the optimizer.
 
-## Step 1: Set up imports and input tensors
+## Import JAX automatic differentiation
 
-Import the required JAX modules and define the initial inputs for your first gradient.
+Import jax and jax.numpy for the scalar function and derivative.
 
 ```python
 import jax
 import jax.numpy as jnp
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The differentiation API will operate on the function defined in the next block.
 
-## Step 2: Apply the core JAX transformation
+## Define the square and differentiate it
 
-Write the core computation and transformation step over the initialized inputs.
+Write $f(x) = x^2$ and create a callable derivative with `jax.grad`.
 
 ```python
 def f(x):
@@ -97,18 +97,18 @@ def f(x):
 derivative = jax.grad(f)
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+The derivative is $2x$. `jax.grad` transforms the scalar-output function, so `derivative(3)` should return $6$.
 
-## Step 3: Verify shapes and numerical invariants
+## Check the derivative at two points
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Evaluate the derivative at 3 and at the minimum x=0.
 
 ```python
 assert jnp.allclose(derivative(3.0), 6.)
 assert jnp.allclose(derivative(0.0), 0.)
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The values 6 and 0 test the rule at a nonzero point and at the stationary point.
 
 ## Build a numerical estimate
 
@@ -165,7 +165,6 @@ The derivative at $x=3$ is $6$, so the local prediction is $f(3+\Delta x)\approx
 The negative part of the dashed line does not mean a square became negative. It means a local linear approximation was extended beyond the neighborhood where it is useful. A gradient describes local change, not the complete function.
 
 ```python
-# Compute figure data for: A tangent describes local change
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-4.0, 4.0, 81)
 point = 3.0
@@ -177,7 +176,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:17.292166+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:47:25.514894+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339

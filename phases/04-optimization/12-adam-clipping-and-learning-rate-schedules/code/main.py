@@ -21,7 +21,6 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     update, state = adam.update(g, state, params)
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
-    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
     print('step / update:', t, update)
 
@@ -56,7 +55,6 @@ for t, g in enumerate(gradients, start=1):
     expected = -0.1 * (m / (1 - 0.9 ** t)) / (jnp.sqrt(v / (1 - 0.99 ** t)) + 1e-08)
     update, state = adam.update(g, state, params)
     assert jnp.allclose(update, expected, atol=2e-06, rtol=2e-06)
-    # Apply the computed gradient updates to update the model parameters.
     params = optax.apply_updates(params, update)
     print('step / update:', t, update)
 
@@ -72,7 +70,6 @@ update, _ = chain.update(g, chain.init(jnp.zeros(2)))
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
 
 # Figure data experiment
-# Compute figure data for: Compare optimizer paths under a fixed update budget
 def plot_bowl(z):
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
 series = []
@@ -84,7 +81,6 @@ for name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05
     for _ in range(50):
         # Differentiate the objective to obtain gradients `(delta, s_plot)`.
         delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)
-        # Apply the computed gradient updates to update the model parameters.
         p_plot = optax.apply_updates(p_plot, delta)
         vals.append(float(plot_bowl(p_plot)))
     series.append({'label': name, 'y': vals})
@@ -125,7 +121,6 @@ for name, tx in optimizers.items():
         # Configure or step the Optax optimizer state (`p`).
         p = optax.apply_updates(p, delta)
         return ((p, s), bowl(p))
-    # Run compiled structured control flow via `jax.lax` (`((_, _), history)`).
     (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)
     # Confirm that all computed values remain finite (no NaN or Inf).
     assert jnp.all(jnp.isfinite(history))

@@ -56,3 +56,9 @@ Follow the [shared publication workflow](../embedding-model-300m/RELEASE.md), su
 ## Learner review
 
 Retain all stage manifests/checkpoints, one data/objective ablation, a recovery failure/repair, independent mask/loss checks, benchmark inventory including failures, actual W&B/MLflow artifacts, generation/service evidence and release canaries. A reviewer should be able to explain why each phase exists and reproduce the selected model's behavior without the training workspace.
+
+## Implementation gate and real-data lineage
+
+Do not promote until corpus/source rights, document hashes, deduplication, contamination checks, tokenizer revision and stream ordering are frozen. Each pretraining/adaptation checkpoint must name its parent and retain optimizer, RNG and data cursor; held-out perplexity and fixed generation tasks must use separate real data, while toy next-token tables remain mechanics checks.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

@@ -67,6 +67,13 @@ Record loss denominators, source exposure, positive/negative similarity, embeddi
 
 Deliver the source manifest, objective oracle, resumed-state comparison, pilot ablations, both retrieval directions, zero-shot protocol, interpreted plots, precision/runtime table, cold-load canaries and release/rollback rehearsal. Authored status requires staged starter/solution/check files and executed evidence for each stage. Natural-image quality, accelerator performance and production readiness remain unverified until the corresponding gates pass.
 
+
+## Implementation gate and real-data lineage
+
+Do not promote until image and caption IDs, duplicate groups, rights, split assignment, processors and paired-checkpoint ancestry are frozen. The real pilot must include a caption-shuffle negative control, both retrieval directions and zero-shot protocol receipts; tensor fixtures only validate the loss and data contract.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
 ## Primary references
 
 - [CLIP paper](https://arxiv.org/abs/2103.00020): source for the dual-encoder softmax objective and zero-shot transfer formulation.

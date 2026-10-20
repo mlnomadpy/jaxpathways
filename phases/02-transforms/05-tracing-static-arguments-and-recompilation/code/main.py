@@ -1,10 +1,10 @@
 """Tracing, static arguments, and recompilation: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX tracing and array operations
 import jax
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Make the reduction mode static during tracing
 def reduce_values(x, mode):
     if mode == "sum":
         return x.sum()
@@ -14,7 +14,7 @@ def reduce_values(x, mode):
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(reduce_values, static_argnames=("mode",))
 
-# Step 3: Verify shapes and numerical invariants
+# Run and check both compiled specializations
 x = jnp.array([1., 2., 3.])
 assert jnp.allclose(compiled(x, mode="sum"), 6.)
 assert jnp.allclose(compiled(x, mode="mean"), 2.)
@@ -60,7 +60,6 @@ def python_branch(value):
         return value ** 2
     return -value
 assert python_branch(-2.) == 2.
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(python_branch)(jnp.array(-2.))
 except jax.errors.TracerBoolConversionError:
@@ -89,7 +88,6 @@ choose = jax.jit(choose_reduction, static_argnames=("mode",))
 for values in (x, jnp.array([-4., -1., -2.])):
     for mode, reference in (("sum", jnp.sum), ("mean", jnp.mean), ("max", jnp.max)):
         assert jnp.allclose(choose(values, mode=mode), reference(values))
-# Run the boundary check and catch the expected exception:
 try:
     choose(x, mode="typo")
 except ValueError:

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep token/target alignment, the two masks, future perturbation, segment-leakage comparison and all-masked-row repair. Verify that masks and ignored loss positions enforce the same boundaries.
 
 - Command: `python3 phases/07-transformers/02-masking-tokenization-and-sequence-packing/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

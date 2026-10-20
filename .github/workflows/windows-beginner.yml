@@ -1,0 +1,42 @@
+name: Windows beginner workspace
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  powershell:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+          cache: npm
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+      - run: npm ci
+      - run: npm run content:build
+      - name: Run the downloaded workspace using its PowerShell commands
+        shell: pwsh
+        run: |
+          Expand-Archive public/downloads/jax-start-here.zip -DestinationPath "$env:RUNNER_TEMP/beginner"
+          Set-Location "$env:RUNNER_TEMP/beginner/jax-start-here"
+          py -3 -m venv .venv
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe -m pip install -r requirements-beginner.txt
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          .\.venv\Scripts\python.exe first_experiment.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $source = Get-Content first_experiment.py -Raw
+          if (-not $source.Contains('jax.numpy.arange(4,')) { throw 'Beginner exercise source contract changed' }
+          $source = $source.Replace('jax.numpy.arange(4,', 'jax.numpy.arange(6,').Replace('== 6', '== 15')
+          Set-Content first_experiment.py -Value $source
+          .\.venv\Scripts\python.exe first_experiment.py
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }

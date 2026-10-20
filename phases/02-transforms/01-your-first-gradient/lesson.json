@@ -117,26 +117,26 @@
       "reading": "The solid curve is \\(f(x)=x^2\\). The dashed line is its tangent at the marked point \\((3,9)\\). The horizontal axis measures the input; the vertical axis shows either the function value or the tangent’s predicted value.\n\nNear the marked point the two almost coincide. Farther away they separate: at \\(x=2\\), the curve is \\(4\\) and the tangent is \\(3\\). At \\(x=0\\), the curve is \\(0\\), but the tangent has fallen to \\(-9\\).",
       "connection": "The derivative at \\(x=3\\) is \\(6\\), so the local prediction is \\(f(3+\\Delta x)\\approx9+6\\Delta x\\). The exact value also contains \\((\\Delta x)^2\\). That omitted term explains why the approximation is good for small changes and increasingly poor for large ones.\n\nThe negative part of the dashed line does not mean a square became negative. It means a local linear approximation was extended beyond the neighborhood where it is useful. A gradient describes local change, not the complete function.",
       "alt": "A tangent describes local change. The solid curve is \\(f(x)=x^2\\). The dashed line is its tangent at the marked point \\((3,9)\\). The horizontal axis measures the input; the vertical axis shows either the function value or the tangent’s predicted value. Near the marked point the two almost coincide. Farther away they separate: at \\(x=2\\), the curve is \\(4\\) and the tangent is \\(3\\). At \\(x=0\\), the curve is \\(0\\), but the tangent has fallen to \\(-9\\).",
-      "code": "# Compute figure data for: A tangent describes local change\n# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(-4.0, 4.0, 81)\npoint = 3.0\nslope = derivative(point)\n# Vectorize across the batch dimension without a Python loop (`visual_data`).\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input x', 'ylabel': 'function / tangent value', 'series': [{'label': 'f(x) = x squared', 'y': jax.vmap(f)(grid).tolist()}, {'label': 'tangent at x = 3', 'y': (f(point) + slope * (grid - point)).tolist()}]}\nvisual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected input'}]"
+      "code": "# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(-4.0, 4.0, 81)\npoint = 3.0\nslope = derivative(point)\n# Vectorize across the batch dimension without a Python loop (`visual_data`).\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input x', 'ylabel': 'function / tangent value', 'series': [{'label': 'f(x) = x squared', 'y': jax.vmap(f)(grid).tolist()}, {'label': 'tangent at x = 3', 'y': (f(point) + slope * (grid - point)).tolist()}]}\nvisual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected input'}]"
     },
     "buildSteps": [
       {
-        "title": "Step 1: Set up imports and input tensors",
-        "instruction": "Import the required JAX modules and define the initial inputs for your first gradient.",
+        "title": "Import JAX automatic differentiation",
+        "instruction": "Import jax and jax.numpy for the scalar function and derivative.",
         "code": "import jax\nimport jax.numpy as jnp",
-        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+        "explanation": "The differentiation API will operate on the function defined in the next block."
       },
       {
-        "title": "Step 2: Apply the core JAX transformation",
-        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "title": "Define the square and differentiate it",
+        "instruction": "Write \\(f(x) = x^2\\) and create a callable derivative with `jax.grad`.",
         "code": "def f(x):\n    return x ** 2\n# Differentiate the objective to obtain `derivative` via automatic differentiation.\nderivative = jax.grad(f)",
-        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+        "explanation": "The derivative is \\(2x\\). `jax.grad` transforms the scalar-output function, so `derivative(3)` should return \\(6\\)."
       },
       {
-        "title": "Step 3: Verify shapes and numerical invariants",
-        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "title": "Check the derivative at two points",
+        "instruction": "Evaluate the derivative at 3 and at the minimum x=0.",
         "code": "assert jnp.allclose(derivative(3.0), 6.)\nassert jnp.allclose(derivative(0.0), 0.)",
-        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+        "explanation": "The values 6 and 0 test the rule at a nonzero point and at the stationary point."
       }
     ]
   }

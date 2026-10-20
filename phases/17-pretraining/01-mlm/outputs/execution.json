@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-01",
-  "contentHash": "e44d399501edc9669f44321bf1190105f65df97b7153323d41a087617b8458b3",
-  "executedAt": "2026-10-20T10:51:59.021149+00:00",
+  "contentHash": "89952345187d7c2380d0fc6c12678bed38ca0fdc01a8462da90c50f961354bcc",
+  "executedAt": "2026-10-20T21:42:39.886019+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nMLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112\nUnselected output logits have zero direct loss gradient.\nToken-weighted / sequence-weighted: 0.6577723026275635 0.51289606\nChanged position loss: 0.010457751341164112\nEmpty mask rejected\nIndependent masked softmax gradient agrees.\nPASS: pretraining-01\n",
   "notebookCells": [
     {
-      "sourceHash": "bc10f22e3f02438656c2c363b639dd2c1eb6c9b95d2fe6583b390e9504ef33ec",
+      "sourceHash": "07c55a587e034650fe7909626a74f191501d2fe1829070dc5e23cf75e0dce71c",
       "outputs": []
     },
     {
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "d298b1bb1f94e7812e72875a704b2318ed06229788f8814fd3561476c3619437",
+      "sourceHash": "e7d2521ada9bf38443256daf53cb94b77c2caa035bf5a610bb0ac8c9c0c0693f",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "c8880e2111f56f016e20c1cbd23314a47e23af0ea25d402e619b17386172b562",
+      "sourceHash": "4cd59d9a5c61dcce0d5ee669e561602454137d9e310a77e5b2e1817cd7691081",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "ef08a9353cabc1b2e7d6f3393b713626c000d4531ff67e82b33094d3daa07752",
+      "sourceHash": "3cdd899ded6c85e6a142d76c7e4c441ed40f722519e480ac2eecf8718391bf53",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "0ba43e78d639e6439022f43de3dd8505b20ad86d5a78925a94ef693eb63083fc",
+      "sourceHash": "698d4a8cc6a568c209e8ab5486bb2d4128350763ebc84ebf70780495709a9a1e",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "649fa467cdeaa76a1d952549d7eeaedb9068607a10a6592b0009615c35ab5a55",
+      "sourceHash": "23b47309ed70f878ca923b82ea215b9e0b23a0053ecfc1d35d6f3b9c7d023f57",
       "outputs": []
     },
     {
-      "sourceHash": "d99431d3607f8f149cd0f73ce8e3ce9213b00bc3b80d3ea613810b55c263d1d8",
+      "sourceHash": "d367989043c63745a3ec37e32cdd6408bb415daa46082186aba2f447cf32238c",
       "outputs": [
         {
           "output_type": "stream",

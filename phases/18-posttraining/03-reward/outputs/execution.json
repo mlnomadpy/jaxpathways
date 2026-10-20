@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-03",
-  "contentHash": "1f49dabb4b7fd72624bfb2aaf2c1b85347f1283ee4498dbb44b6602a861bbbd7",
-  "executedAt": "2026-10-20T10:52:15.398245+00:00",
+  "contentHash": "82e1a29e71eedfc4d177c60935cef2898f510f65966d103ed1aaf28f0baa334f",
+  "executedAt": "2026-10-20T21:42:54.686301+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nSynthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]\nForward/reversed preference NLL: 0.08596369624137878 2.94565486907959\nBalanced conflicting labels prefer a zero margin.\nTied baseline and preference directions verified.\nRanking unchanged; confidence and downstream reward scale change.\nIndependent reward gradients agree in both label directions.\nPASS: posttraining-03\n",
   "notebookCells": [
     {
-      "sourceHash": "2351f5467471d651c05c0c9160643ce54a7a1e5af6b4fee233cccbfe293ceb5a",
+      "sourceHash": "04677b1f4c5fa102e5f91b5074bfea13f993e143e5c2eb181d586377e7db49b3",
       "outputs": []
     },
     {
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "eafdbcd924710069ac98fe887ff0ad89841cb60a7905f623016d0e890c421030",
+      "sourceHash": "e1efb2870cd0854c19ebc876247e4ee02c080b80944d39a6dac62b2babac624b",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "be4e52f3705d6af2179e9cf0f88d89ae4e5f09813bb8f027aa9d0a0c7075505d",
+      "sourceHash": "25620e120a144bdbdbcdb83482f1f99a2b0ebfef7d9dcfacc87eefacac645188",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "71480dd2836526f5be900d2292aaa99c6c5a000506af3d62dc514251789ef5c1",
+      "sourceHash": "e5e05da189fed29595a3adf199beac459abb7a9a732d75b7791ecc64bf8f5377",
       "outputs": []
     },
     {
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "d6890aedae29a57aed0df81c8b9f7564cb47f0d0072cdc53e0ad334b0861f836",
+      "sourceHash": "06d978c774643355225c081ddd4704e240320c755782c6a91d31ddc3c17ef53d",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "b74d9994dcbe1e325143f6f28f74a549ab1a9b467b3739e15a7e3626f8296438",
+      "sourceHash": "1a4f7300e34b5c970b9e937bb591de6e3170a57c6dd5dbf53a3b65c271843d68",
       "outputs": []
     },
     {
-      "sourceHash": "42f1ef7b3dba64ee4e0976c39e1c2aced9ffc7794d7c8f67669007dae5164e3c",
+      "sourceHash": "54427b9c1517bf38f70b02360db5dd3b9312b3c3c05508ca216792c66051d7ee",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "60e896eedc9cfcc51205790a1a8a60f52d58081df82788cbe345fefffddb031a",
+      "sourceHash": "5b8999c17c3a33682493317b50ae25ab1a456d52730551e9bd96be8d58092580",
       "outputs": []
     },
     {
-      "sourceHash": "9f9429a40efa4f30d67fc920f02eb25693ac55ff2633a74976cceaf7dee6017f",
+      "sourceHash": "ba782d5ff97952cdb6e5763d84587f626d66b5e77e8ec8046ebca13e7b765c1d",
       "outputs": [
         {
           "output_type": "stream",

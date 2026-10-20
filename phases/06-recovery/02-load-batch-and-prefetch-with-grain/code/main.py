@@ -37,7 +37,6 @@ replayed_batch = next(restored_iterator)
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
-    # Execute `np.testing.assert_array_equal(second_batch[key],replayed_bat`
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
@@ -83,7 +82,6 @@ replayed_batch = next(restored_iterator)
 # Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
-    # Execute `np.testing.assert_array_equal(second_batch[key],replayed_bat`
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
@@ -96,13 +94,11 @@ print("Iterator state bytes:",len(snapshot))
 print("Restored next batch matches")
 
 # Figure data experiment
-# Compute figure data for: Restoring the iterator repeats the next batch
 visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3'], 'ylabel': 'example ID', 'series': [{'label': 'first batch', 'y': first_batch['id'].tolist()}, {'label': 'next batch', 'y': second_batch['id'].tolist()}, {'label': 'restored next', 'y': replayed_batch['id'].tolist()}]}
 
 # Experiment: A fresh iterator restarts
 # Experiment — A fresh iterator restarts: The seed fixes ordering.
 fresh_first = next(iter(make_loader()))
-# Execute `np.testing.assert_array_equal(fresh_first["id"],first_batch[`
 np.testing.assert_array_equal(fresh_first["id"],first_batch["id"])
 assert not np.array_equal(fresh_first["id"],second_batch["id"])
 print("Same seed restarts; it does not resume")
@@ -112,7 +108,6 @@ print("Same seed restarts; it does not resume")
 two_epochs = list(make_loader())
 assert len(two_epochs)==6
 for start in (0,3):
-    # Combine or mask array elements to form `values`.
     values = np.concatenate([b["id"] for b in two_epochs[start:start+3]])
     # Create evenly spaced index values in ``.
     np.testing.assert_array_equal(np.sort(values),np.arange(12))
@@ -127,13 +122,11 @@ later_state = later.get_state()
 expected_third = next(later)
 new_iterator = iter(make_loader())
 new_iterator.set_state(later_state)
-# Execute `np.testing.assert_array_equal(next(new_iterator)["id"],expec`
 np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
 
 # Reference practice: Replay through an epoch boundary
 # Replay through an epoch boundary (Transfer): An epoch boundary changes the sampling context.
 boundary=iter(make_loader())
-# Execute `for _ in range(3):next(boundary)`.
 for _ in range(3):next(boundary)
 boundary_state=boundary.get_state()
 expected=[next(boundary) for _ in range(2)]
@@ -147,7 +140,6 @@ print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
 # Reference practice: Reject a changed sampler
 # Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
 incompatible = iter(make_loader(seed=99))
-# Run the boundary check and catch the expected exception:
 try:
     incompatible.set_state(snapshot)
 except ValueError:
@@ -156,6 +148,5 @@ else:
     raise AssertionError("Expected changed sampler rejection")
 compatible = iter(make_loader(seed=42))
 compatible.set_state(snapshot)
-# Execute `np.testing.assert_array_equal(next(compatible)["id"],second_`
 np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
 print("PASS: recovery-02")

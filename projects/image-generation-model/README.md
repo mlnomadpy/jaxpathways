@@ -39,3 +39,9 @@ Required figures: noise-level progression, timestep-binned error, actual fixed-s
 Release denoiser plus required autoencoder/conditioning components or immutable references, tokenizer/processor, latent scale, scheduler, guidance convention, supported shapes, dtype and tested loader. [Diffusers](https://github.com/huggingface/diffusers) is an optional reference/consumer path only after an implemented mapping is qualified. Compare intermediate latents and final outputs for numerical conversion; compare distributions/task quality as well for changed precision/samplers.
 
 Follow the [Hub workflow](../embedding-model-300m/RELEASE.md) with fixed-seed image canaries and a clean pipeline download. Service qualification covers bounded resolution/steps, concurrency, deadlines/cancellation and actual peak memory. Rollback restores the compatible pipeline configuration and all components. The final dossier reports measured capability and limits rather than claiming that a denoiser weight file is a production generator.
+
+## Implementation gate and real-data lineage
+
+Do not promote until source image/caption rights, entity/near-duplicate groups, preprocessing, condition inventory and holdout prompts are frozen. Record VAE/encoder, denoiser, EMA, optimizer, RNG and sampler lineage; evaluate fixed real holdouts and report memorization/nearest-neighbor checks, while synthetic images only validate schedule arithmetic.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.

@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save analytic and numerical derivatives, the step-size/error table with dtype, the nonquadratic transfer check, and the omitted-term failure/repair. Add the one-sided slopes showing why a symmetric probe cannot certify differentiability at a kink.
 
 - Command: `python3 phases/04-optimization/02-gradient-checking-and-numerical-accuracy/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

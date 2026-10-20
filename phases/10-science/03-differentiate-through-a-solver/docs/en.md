@@ -70,7 +70,7 @@ Append this block to main.py in your CPU course environment; for the first block
 ```python
 # Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -87,7 +87,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 ```
@@ -144,7 +143,7 @@ The candidate rate is too large. Its predictions decay too quickly. A positive l
 ```python
 # Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -161,7 +160,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -218,7 +216,6 @@ The plotted derivatives come from JAX differentiating scan. The reference is the
 The downward trend does not prove convergence for a stiff or discontinuous system, and it cannot continue indefinitely at fixed precision. It shows why checking only autodiff against another differentiation of the same program would miss solver bias.
 
 ```python
-# Compute figure data for: A solver gradient converges toward the physical sensitivity
 counts=[5,10,20,40]
 # Create device-backed JAX array `errors`.
 errors=[abs(float(jax.grad(lambda k: solve(k,jnp.array(2.0),n,2.0/n)[-1])(0.7))+4*np.exp(-1.4)) for n in counts]
@@ -227,7 +224,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:03.834483+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:45.225885+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257
@@ -349,8 +346,7 @@ Weights change the observation importance and must be normalized explicitly.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `reference`.
-2. Differentiate the objective to obtain gradients ``.
+1. Differentiate the objective to obtain gradients ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -368,7 +364,6 @@ r = ...  # TODO: compute r
 dr = ...  # TODO: compute dr
 u = ...  # TODO: compute u
 sensitivity = ...  # TODO: compute sensitivity
-# Aggregate array values to compute `reference`.
 reference = np.sum(...)  # TODO: compute reference
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol = ...  # TODO: compute np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol
@@ -391,7 +386,6 @@ r=1+z+z*z/2+z**3/6+z**4/24
 dr=-h*(1+z+z*z/2+z**3/6)
 u=2*r**n
 sensitivity=2*n*r**np.maximum(n-1,0)*dr
-# Aggregate array values to compute `reference`.
 reference=np.sum(2*weights*(u-np.asarray(observations))*sensitivity)/weights.sum()
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol=1e-11,atol=1e-12)

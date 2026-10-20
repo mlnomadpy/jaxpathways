@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep pre/post parameter snapshots around evaluation, optimizer step count 80, independent held-out loss and accuracy, complete replay comparison, and a deliberately bad held-out update on an isolated clone.
 
 - Command: `python3 phases/05-networks/03-a-compiled-train-and-evaluation-step/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

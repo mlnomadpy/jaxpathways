@@ -98,45 +98,34 @@ def digest(value):
 
 def validate_rows(rows):
     """An observation has a stable identity, split, group, input and target."""
-    # Guard input contract (`not rows`) and fail fast if violated.
     if not rows:
         raise ValueError('empty dataset')
     ids = set()
     groups = {}
     for row in rows:
-        # Guard input contract (`set(row) != {'id', 'group', 'split', 'x', 'y'}`) and fail fast if violated.
         if set(row) != {'id', 'group', 'split', 'x', 'y'}:
             raise ValueError('schema mismatch')
-        # Guard input contract (`not isinstance(row['id'], str) or not row['id'] or row['id'] in ids`) and fail fast if violated.
         if not isinstance(row['id'], str) or not row['id'] or row['id'] in ids:
             raise ValueError('duplicate or empty ID')
-        # Guard input contract (`not isinstance(row['group'], str) or not row['group']`) and fail fast if violated.
         if not isinstance(row['group'], str) or not row['group']:
             raise ValueError('missing source group')
-        # Guard input contract (`row['split'] not in {'train', 'validation', 'test'}`) and fail fast if violated.
         if row['split'] not in {'train', 'validation', 'test'}:
             raise ValueError('unknown split')
         for name in ['x', 'y']:
-            # Guard input contract (`isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or (not math.isfinite(row[name]))`) and fail fast if violated.
             if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):
                 raise ValueError('nonfinite or nonnumeric observation')
-        # Guard input contract (`row['group'] in groups and groups[row['group']] != row['split']`) and fail fast if violated.
         if row['group'] in groups and groups[row['group']] != row['split']:
             raise ValueError('source group leaks between splits')
-        # Execute `ids.add(row['id'])`
         ids.add(row['id'])
         groups[row['group']] = row['split']
     return digest(rows)
 
 def gate_metrics(errors, slices, limit):
     """Count-weighted MSE plus every required slice; no empty-slice pass."""
-    # Guard input contract (`len(errors) != len(slices) or not errors or (not math.isfinite(limit)) or (limit < 0)`) and fail fast if violated.
     if len(errors) != len(slices) or not errors or not math.isfinite(limit) or limit < 0:
         raise ValueError('invalid metric contract')
-    # Guard input contract (`any((not math.isfinite(e) or e < 0 for e in errors))`) and fail fast if violated.
     if any(not math.isfinite(e) or e < 0 for e in errors):
         raise ValueError('invalid squared error')
-    # Guard input contract (`not set(slices) <= {'low', 'high'}`) and fail fast if violated.
     if not set(slices) <= {'low', 'high'}:
         raise ValueError('unknown slice')
     result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}
@@ -155,7 +144,6 @@ changed[-1]['x'] += 1
 assert validate_rows(changed) != fingerprint
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
-# Run the boundary check and catch the expected exception:
 try:
     validate_rows(leaked)
 except ValueError:
@@ -203,45 +191,34 @@ def digest(value):
 
 def validate_rows(rows):
     """An observation has a stable identity, split, group, input and target."""
-    # Guard input contract (`not rows`) and fail fast if violated.
     if not rows:
         raise ValueError('empty dataset')
     ids = set()
     groups = {}
     for row in rows:
-        # Guard input contract (`set(row) != {'id', 'group', 'split', 'x', 'y'}`) and fail fast if violated.
         if set(row) != {'id', 'group', 'split', 'x', 'y'}:
             raise ValueError('schema mismatch')
-        # Guard input contract (`not isinstance(row['id'], str) or not row['id'] or row['id'] in ids`) and fail fast if violated.
         if not isinstance(row['id'], str) or not row['id'] or row['id'] in ids:
             raise ValueError('duplicate or empty ID')
-        # Guard input contract (`not isinstance(row['group'], str) or not row['group']`) and fail fast if violated.
         if not isinstance(row['group'], str) or not row['group']:
             raise ValueError('missing source group')
-        # Guard input contract (`row['split'] not in {'train', 'validation', 'test'}`) and fail fast if violated.
         if row['split'] not in {'train', 'validation', 'test'}:
             raise ValueError('unknown split')
         for name in ['x', 'y']:
-            # Guard input contract (`isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or (not math.isfinite(row[name]))`) and fail fast if violated.
             if isinstance(row[name], bool) or not isinstance(row[name], (float, int)) or not math.isfinite(row[name]):
                 raise ValueError('nonfinite or nonnumeric observation')
-        # Guard input contract (`row['group'] in groups and groups[row['group']] != row['split']`) and fail fast if violated.
         if row['group'] in groups and groups[row['group']] != row['split']:
             raise ValueError('source group leaks between splits')
-        # Execute `ids.add(row['id'])`
         ids.add(row['id'])
         groups[row['group']] = row['split']
     return digest(rows)
 
 def gate_metrics(errors, slices, limit):
     """Count-weighted MSE plus every required slice; no empty-slice pass."""
-    # Guard input contract (`len(errors) != len(slices) or not errors or (not math.isfinite(limit)) or (limit < 0)`) and fail fast if violated.
     if len(errors) != len(slices) or not errors or not math.isfinite(limit) or limit < 0:
         raise ValueError('invalid metric contract')
-    # Guard input contract (`any((not math.isfinite(e) or e < 0 for e in errors))`) and fail fast if violated.
     if any(not math.isfinite(e) or e < 0 for e in errors):
         raise ValueError('invalid squared error')
-    # Guard input contract (`not set(slices) <= {'low', 'high'}`) and fail fast if violated.
     if not set(slices) <= {'low', 'high'}:
         raise ValueError('unknown slice')
     result = {name: {'count': slices.count(name), 'mse': None} for name in ['low', 'high']}
@@ -260,7 +237,6 @@ changed[-1]['x'] += 1
 assert validate_rows(changed) != fingerprint
 leaked = [dict(r) for r in rows]
 leaked[-1]['group'] = rows[0]['group']
-# Run the boundary check and catch the expected exception:
 try:
     validate_rows(leaked)
 except ValueError:
@@ -303,13 +279,12 @@ The categories are the overall set, the low-input slice and the high-input slice
 The plot comes from the exact errors checked by gate_metrics. The changed-mix exercise makes the overall bar rise while preserving the two slice bars. Counts, uncertainty and domain-specific acceptance rules are necessary before using a similar policy on real data.
 
 ```python
-# Compute figure data for: An average can conceal the failing slice
 visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel':'evaluation group (count)','ylabel':'mean squared error','series':[{'label':'observed MSE','y':[metrics[k]['mse'] for k in ['overall','low','high']]},{'label':'illustrative limit','y':[.5,.5,.5]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:48.399230+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:29.633566+00:00. JAX 0.9.2.
 
 ```text
 Overall MSE: 0.409 high-slice MSE: 4.0 release: False
@@ -343,10 +318,6 @@ A policy must define both aggregation and required slice evidence. The threshold
 Show that averaging slice means without counts changes the overall error.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `math.isclose(...)` — Call `math.isclose` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -385,11 +356,6 @@ Change counts rather than the model errors.
 </details>
 
 ### How to write: Change the population mix — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `mix(...)` — Call `mix` with your updated parameters or inputs from this lesson's workspace.
-- `gate_metrics(...)` — Call `gate_metrics` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Change the population mix (transfer): Aggregate performance changes with population mix even when...

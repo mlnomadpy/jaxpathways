@@ -81,5 +81,13 @@
   ],
   "referenceCommand": "python3 projects/policy-evaluation/tests/check.py --stage 4 --implementation solution",
   "setupNote": "Extract the project ZIP and work from its top folder, which contains requirements-cpu.txt and projects/policy-evaluation. A full checkout is optional. Copy the starter scaffold `projects/policy-evaluation/starter/model.py` to `projects/policy-evaluation/my_model.py`, implement the stage functions in `projects/policy-evaluation/my_model.py`, and verify each stage with `python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 1` (through `--stage 4`).",
-  "assessmentId": "rl"
+  "assessmentId": "rl",
+  "environment": {
+    "requirementsPath": "requirements-beginner.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-beginner.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-beginner.txt"
+    }
+  }
 }

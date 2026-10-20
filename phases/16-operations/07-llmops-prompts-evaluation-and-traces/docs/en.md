@@ -83,13 +83,12 @@ Create main.py and add this setup block. Continue with the next block in the sam
 ```python
 # Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
@@ -123,9 +122,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -164,13 +162,12 @@ Checking these invariants confirms the computation is ready for the full worked 
 ```python
 # Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
@@ -196,9 +193,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -239,13 +235,12 @@ The horizontal axis names the aggregate, answerable and unsupported groups. The 
 The plot reports evaluator outputs from controlled answer objects recorded in real traces. It does not report accuracy of a live language model. In a real suite, expand critical cases and preserve sample counts and model-version evidence before making a release claim.
 
 ```python
-# Compute figure data for: The unsupported case changes the release decision
 visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported (1)'],'xlabel':'fixture group (count)','ylabel':'fixture pass fraction','series':[{'label':name,'y':[r[k] for k in ['overall','answerable','unanswerable']]} for name,r in zip(['always-answer','contract-aware'],results)]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:53.818799+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:34.978995+00:00. JAX 0.9.2.
 
 ```text
 Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]
@@ -285,10 +280,8 @@ The extra gate encodes a required behavior that the overall average hides. One u
 def score_replay(inventory, replies, allowed_citations):
     ids = [case['id'] for case in inventory]
     reply_ids = [reply['id'] for reply in replies]
-    # Guard input contract (`not ids or len(set(ids)) != len(ids)`) and fail fast if violated.
     if not ids or len(set(ids)) != len(ids):
         raise ValueError('empty or duplicate case inventory')
-    # Guard input contract (`len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids)`) and fail fast if violated.
     if len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids):
         raise ValueError('missing, duplicate or unknown response IDs')
     by_id = {reply['id']: reply['response'] for reply in replies}
@@ -318,10 +311,6 @@ The case inventory defines the denominator. In particular, losing the unsupporte
 Add a response with an invented citation and require the evaluator to fail it.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `llm_case(...)` — Call `llm_case` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -361,11 +350,6 @@ The fixture contract requires both empty answer text and no citations.
 
 ### How to write: Check abstention structure — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `structure(...)` — Call `structure` with your updated parameters or inputs from this lesson's workspace.
-- `llm_case(...)` — Call `llm_case` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Check abstention structure (transfer): Validate the full response object; a boolean alone cannot...
 
@@ -404,11 +388,6 @@ Use the contract-aware replies as the starting point. An empty abstention is cor
 </details>
 
 ### How to write: Keep failed work in the evaluation inventory — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `inventory(...)` — Call `inventory` with your updated parameters or inputs from this lesson's workspace.
-- `zip(...)` — Call `zip` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.

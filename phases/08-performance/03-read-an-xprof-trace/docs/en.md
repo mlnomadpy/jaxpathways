@@ -118,7 +118,7 @@ weights=rng.normal(size=(32,16)).astype(np.float32)
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 ```
 
@@ -130,7 +130,6 @@ Create a Python file in the course environment. Add this block after the precedi
 
 ```python
 # Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
-# Enter `jax.profiler.trace(trace_root, create_perfett` context block:
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -138,7 +137,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
             with jax.profiler.TraceAnnotation('model_and_wait'):
                 result=compiled(x,w)
-                # Synchronize host execution until asynchronous device computation completes.
+                # Wait for device work to finish before timing it or comparing its result on the host.
                 result.block_until_ready()
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
@@ -200,11 +199,10 @@ weights=rng.normal(size=(32,16)).astype(np.float32)
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 
 # Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
-# Enter `jax.profiler.trace(trace_root, create_perfett` context block:
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -212,7 +210,7 @@ with jax.profiler.trace(trace_root,create_perfetto_trace=True):
                 time.sleep(.001)  # injected host delay; not a measured real input pipeline
             with jax.profiler.TraceAnnotation('model_and_wait'):
                 result=compiled(x,w)
-                # Synchronize host execution until asynchronous device computation completes.
+                # Wait for device work to finish before timing it or comparing its result on the host.
                 result.block_until_ready()
 np.testing.assert_allclose(result,np.tanh(host@weights),rtol=2e-5,atol=2e-5)
 traces=sorted(trace_root.rglob('perfetto_trace.json.gz'),key=lambda p:p.stat().st_mtime_ns)
@@ -260,62 +258,61 @@ Both plotted series are child regions within a learner_step annotation. They do 
 The outer step also contains small amounts of other host work. Do not add the outer duration to these inner durations, or call the injected sleep a measured production data stall. Replace the sleep with a real input fetch to investigate an actual pipeline.
 
 ```python
-# Compute figure data for: Where four annotated steps spent host time
 visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host annotation duration (microseconds)','series':[{'label':'injected input wait','y':input_us},{'label':'model call and completion wait','y':model_us}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:37.536684+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:15.382695+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-l3tdro07
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-v1gem5qm
 {
   "input_wait_us": [
-    1263,
-    1253,
-    1269,
-    1271
+    1513,
+    1064,
+    1452,
+    1507
   ],
   "model_and_wait_us": [
-    108,
-    137,
-    74,
-    140
+    102,
+    59,
+    54,
+    48
   ],
   "step_us": [
-    1393,
-    1406,
-    1354,
-    1423
+    1626,
+    1133,
+    1515,
+    1561
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-g8x32sim
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-2twr8e2w
 {
   "input_wait_us": [
-    1263,
-    1279,
-    1265,
-    1275
+    1514,
+    1328,
+    1196,
+    1512
   ],
   "model_and_wait_us": [
-    82,
-    136,
-    62,
-    122
+    73,
+    64,
+    50,
+    61
   ],
   "step_us": [
-    1350,
-    1429,
-    1335,
-    1407
+    1595,
+    1416,
+    1252,
+    1580
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [5, 14, 8, 10]
-Wrong double-counted totals: [2695, 2844, 2662, 2804]
-{'minimum_ms': 0.062, 'median_ms': 0.10200000000000001, 'maximum_ms': 0.136}
+Unattributed outer time, microseconds: [8, 24, 6, 7]
+Wrong double-counted totals: [3182, 2808, 2498, 3153]
+{'minimum_ms': 0.05, 'median_ms': 0.0625, 'maximum_ms': 0.073}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 
@@ -329,7 +326,7 @@ PASS: performance-03
 # Experiment — Account for the enclosing step: Outer and child intervals describe nested boundaries.
 overhead=np.asarray(step_us)-np.asarray(input_us)-np.asarray(model_us)
 assert np.all(overhead>=-2)
-# Convert `wrong` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 wrong=np.asarray(step_us)+np.asarray(input_us)+np.asarray(model_us)
 assert np.all(wrong>=np.asarray(step_us))
 print('Unattributed outer time, microseconds:',overhead.tolist())
@@ -350,18 +347,16 @@ Convert every model interval to milliseconds and summarize its minimum, median a
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `summary`.
-2. Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Convert every model interval to milliseconds and summarize its...
 model_ms = np.asarray(...)  # TODO: compute model_ms
-# Aggregate array values to compute `summary`.
 summary = ...  # TODO: compute summary
 assert summary['minimum_ms']  # TODO: complete assertion check
-# Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
 print(summary)
 ```
@@ -371,10 +366,8 @@ print(summary)
 ```python
 # Exercise solution: Convert every model interval to milliseconds and summarize its...
 model_ms=np.asarray(model_us)/1000
-# Aggregate array values to compute `summary`.
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']
-# Execute `np.testing.assert_allclose(model_ms*1000,model_us)`
 np.testing.assert_allclose(model_ms*1000,model_us)
 print(summary)
 ```
@@ -395,23 +388,17 @@ Sort endpoints and merge intervals that intersect.
 
 ### How to write: Compute a union instead of summing overlap — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `overlap(...)` — Call `overlap` with your updated parameters or inputs from this lesson's workspace.
-- `union_duration(...)` — Call `union_duration` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Guard input contract (`end < start`) and fail fast if violated.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
     total = ...  # TODO: compute total
     left = ...  # TODO: compute left
     for start,end in sorted(intervals):
-        # Guard input contract (`end < start`) and fail fast if violated.
         if end<start:raise ValueError('negative interval')
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)
@@ -427,12 +414,10 @@ print('Hypothetical union: 12 microseconds; summed duration: 19.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compute a union instead of summing overlap (Transfer): A union describes time covered by any interval.
 def union_duration(intervals):
     total=0
     left=right=None
     for start,end in sorted(intervals):
-        # Guard input contract (`end < start`) and fail fast if violated.
         if end<start:raise ValueError('negative interval')
         if right is None:left,right=start,end
         elif start<=right:right=max(right,end)

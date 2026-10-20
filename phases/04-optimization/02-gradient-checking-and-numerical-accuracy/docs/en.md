@@ -161,7 +161,6 @@ At very small steps, float32 rounding makes the two nearby function evaluations 
 This particular objective is quadratic, so a central difference has no truncation error in exact arithmetic. Do not expect a pronounced U-shaped error curve on the right of this example. For a general nonlinear objective, overly large steps can introduce truncation error too. Check several step sizes and look for agreement across a useful range, rather than choosing the smallest available step.
 
 ```python
-# Compute figure data for: Smaller perturbations eventually lose accuracy
 steps = jnp.logspace(-8.0, -1.0, 22)
 errors = []
 for h_plot in steps:
@@ -174,7 +173,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:42.659689+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:35.405520+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]

@@ -23,7 +23,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -48,14 +47,14 @@ times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -95,7 +94,6 @@ plain=lambda v:objective(v,False)
 remat=lambda v:objective(v,True)
 def residual_report(fn):
     stream=io.StringIO()
-    # Enter `contextlib.redirect_stdout(stream)` context block:
     with contextlib.redirect_stdout(stream):print_saved_residuals(fn,x)
     lines=[line for line in stream.getvalue().splitlines() if line.strip()]
     return lines
@@ -119,14 +117,14 @@ times=[]
 for executable in executables:
     analysis=executable.memory_analysis()
     memory.append(None if analysis is None else {name:getattr(analysis,name) for name in ('argument_size_in_bytes','output_size_in_bytes','temp_size_in_bytes','alias_size_in_bytes')})
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     executable(x).block_until_ready()
     samples=[]
     for _ in range(5):
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         start=time.perf_counter()
         executable(x).block_until_ready()
         samples.append(time.perf_counter()-start)
@@ -138,7 +136,6 @@ print('Synchronized gradient samples:',times)
 print('Independent reverse recurrence agrees with both gradients.')
 
 # Figure data experiment
-# Compute figure data for: Changed autodiff storage does not guarantee changed compiled buffers
 panels=[{'kind':'bar','title':'Autodiff residual descriptions','labels':['ordinary','layer remat'],'ylabel':'saved entries (not bytes)','series':[{'label':'residual descriptions','y':[len(r) for r in reports]}]}]
 if all(m is not None for m in memory):
     panels.append({'kind':'bar','title':'Compiler memory estimate','labels':['ordinary','layer remat'],'ylabel':'estimated temporary bytes','series':[{'label':'compiler temporaries','y':[m['temp_size_in_bytes'] for m in memory]}]})

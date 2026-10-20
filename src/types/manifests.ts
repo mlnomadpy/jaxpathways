@@ -25,6 +25,11 @@ export interface ProjectManifest {
   referenceCommand?: string;
   assessmentId?: string;
   prepare?: { command: string; label: string }[];
+  environment: {
+    requirementsPath: string;
+    pythonCompatibility: string;
+    setupCommands: { unix: string; windows: string };
+  };
 }
 
 export interface ValidationReceipt {

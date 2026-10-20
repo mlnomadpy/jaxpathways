@@ -87,7 +87,7 @@
         "difficulty": "Challenge",
         "prompt": "Write an MSE function that requires prediction and target shapes to match. Test zero loss for matching vectors and rejection of a column target. Explain why an automatic reshape might hide a data-ordering problem.",
         "hint": "Raise a descriptive ValueError before subtracting. The check is based on shape metadata, not array truth values.",
-        "solution": "# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...\ndef aligned_mse(prediction, target):\n    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.\n    if prediction.shape != target.shape:\n        raise ValueError(\"aligned prediction and target shapes must match\")\n    return jnp.mean((prediction - target) ** 2)\nassert jnp.allclose(aligned_mse(predictions, targets), 0.)\n# Run the boundary check and catch the expected exception:\ntry:\n    aligned_mse(predictions, targets[:, None])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Column targets must be rejected\")",
+        "solution": "# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...\ndef aligned_mse(prediction, target):\n    if prediction.shape != target.shape:\n        raise ValueError(\"aligned prediction and target shapes must match\")\n    return jnp.mean((prediction - target) ** 2)\nassert jnp.allclose(aligned_mse(predictions, targets), 0.)\ntry:\n    aligned_mse(predictions, targets[:, None])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Column targets must be rejected\")",
         "explanation": "Fix shapes at the data/model interface according to the intended example order. Blindly reshaping inside a loss can conceal mismatched semantics."
       }
     ],
@@ -115,7 +115,7 @@
       "reading": "This heatmap shows the added amount, computed as the output minus the input batch. It does not show the final output array. Rows are observations and columns are features; the cell values and color bar measure added bias.\n\nBoth rows read \\((10,20,30)\\). The repeated vertical bands show that feature \\(0\\) receives \\(10\\) in every observation, feature \\(1\\) receives \\(20\\), and feature \\(2\\) receives \\(30\\).",
       "connection": "The bias has shape \\((3,)\\), which aligns with the last axis of the \\((2,3)\\) batch. Broadcasting applies the same feature-wise addition to both rows. For example, the input \\((1,2,3)\\) becomes \\((11,22,33)\\), while \\((4,5,6)\\) becomes \\((14,25,36)\\).\n\nIdentical rows in this picture mean identical additions, not identical predictions. If you intended a different offset for each observation, you would need a row-wise bias with a compatible shape, such as \\((2,1)\\); this figure would then have horizontal bands.",
       "alt": "Broadcasting repeats the bias across rows. This heatmap shows the added amount, computed as the output minus the input batch. It does not show the final output array. Rows are observations and columns are features; the cell values and color bar measure added bias. Both rows read \\((10,20,30)\\). The repeated vertical bands show that feature \\(0\\) receives \\(10\\) in every observation, feature \\(1\\) receives \\(20\\), and feature \\(2\\) receives \\(30\\).",
-      "code": "# Compute figure data for: Broadcasting repeats the bias across rows\nvisual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['observation 0', 'observation 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'added bias'}"
+      "code": "visual_data = {'kind': 'heatmap', 'values': (y - batch).tolist(), 'rows': ['observation 0', 'observation 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'added bias'}"
     },
     "diagram": {
       "title": "Align axes before reducing",
@@ -162,22 +162,22 @@
     },
     "buildSteps": [
       {
-        "title": "Step 1: Set up imports and input tensors",
-        "instruction": "Import the required JAX modules and define the initial inputs for shapes, broadcasting, and dtypes.",
+        "title": "Define two examples with three float32 features",
+        "instruction": "Create a (2, 3) batch whose rows are examples and columns are features.",
         "code": "import jax.numpy as jnp\nbatch = jnp.array([[1., 2., 3.], [4., 5., 6.]], dtype=jnp.float32)",
-        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+        "explanation": "The named axes tell us that a length-three bias should align with the last, feature axis."
       },
       {
-        "title": "Step 2: Apply the core JAX transformation",
-        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "title": "Broadcast one feature bias across both rows",
+        "instruction": "Add the length-three bias to the (2, 3) batch.",
         "code": "bias = jnp.array([10., 20., 30.], dtype=jnp.float32)\ny = batch + bias",
-        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+        "explanation": "JAX aligns the bias with the trailing dimension, so each feature receives the same offset in both examples."
       },
       {
-        "title": "Step 3: Verify shapes and numerical invariants",
-        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "title": "Verify the resulting shape and one concrete row",
+        "instruction": "Check that the batch remains (2, 3) and that the second row has the expected offsets.",
         "code": "assert y.shape == (2, 3)\nassert jnp.allclose(y[1], jnp.array([14., 25., 36.]))",
-        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+        "explanation": "The shape check catches accidental expansion; the row values independently confirm which axis received the bias."
       }
     ]
   }

@@ -202,14 +202,12 @@ The final reduction adds the bottom row to obtain $4+9+16=29$. That scalar is no
 A jaxpr describes operations and abstract values. The figure supplies concrete intermediate values for this one input, making that program easier to trace by hand. Changing the input changes these numbers without necessarily changing the jaxpr’s structure.
 
 ```python
-# Compute figure data for: Follow values through the jaxpr operations
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).tolist(), 'rows': ['input', 'add 1', 'multiply by self'], 'columns': ['coordinate 0', 'coordinate 1', 'coordinate 2'], 'unit': 'intermediate value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:05.982947+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:27:23.730656+00:00. JAX 0.9.2.
 
 ```text
 Forward program:
@@ -471,10 +469,11 @@ Both cond branches must return matching scalar types.
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` with abstract shapes and compiles a fused XLA executable cached by input shape and dtype.
+- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -484,7 +483,6 @@ def bad_branch(z):
     if z[0] > 0:
         return ...  # TODO: return computed result
     return ...  # TODO: return computed result
-# Run the boundary check and catch the expected exception:
 try:
     jax.make_jaxpr(bad_branch)(x)
 except jax.errors.TracerBoolConversionError:
@@ -506,7 +504,6 @@ def bad_branch(z):
     if z[0] > 0:
         return jnp.sum(z)
     return -jnp.sum(z)
-# Run the boundary check and catch the expected exception:
 try:
     jax.make_jaxpr(bad_branch)(x)
 except jax.errors.TracerBoolConversionError:

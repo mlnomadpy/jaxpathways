@@ -89,9 +89,7 @@ Append these two transformations; predict both products first.
 
 ```python
 # Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
-# Compute exact directional derivative / Jacobian / Hessian (`(out, jv)`).
 out, jv = jax.jvp(f, (x,), (v,))
-# Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
 c = out
 jt_c = pullback(c)[0]
@@ -132,9 +130,7 @@ J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
 # Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
-# Compute exact directional derivative / Jacobian / Hessian (`(out, jv)`).
 out, jv = jax.jvp(f, (x,), (v,))
-# Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
 c = out
 jt_c = pullback(c)[0]
@@ -173,14 +169,12 @@ For a joint input change in direction $v=(1,-1)$, multiply the whole matrix by t
 These are local sensitivities, not model weights, probabilities, or final output values. The entries can change at another input. To check the interpretation, take a small step $\epsilon v$ and compare the output change with $\epsilon Jv$.
 
 ```python
-# Compute figure data for: A Jacobian maps inputs to output sensitivities
-# Compute higher-order Jacobian or Hessian curvature matrix `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1'], 'unit': 'partial derivative'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:39.979446+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:30.891212+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]
@@ -325,11 +319,10 @@ The reference is $A^\mathsf{T}c$, not $Ac$.
 **Key functions & syntax to use:**
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes exact forward-mode JVP, reverse-mode VJP, full Jacobians, or second-order curvature.
+- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
 
 **Step-by-step implementation plan:**
-1. Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
-2. Check tensor shape invariant: `back(c3)[0].shape == (2,)`
+1. Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -337,7 +330,6 @@ The reference is $A^\mathsf{T}c$, not $Ac$.
 # Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...
 A = jnp.array(...)  # TODO: compute A
 c3 = jnp.array(...)  # TODO: compute c3
-# Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
 _, back = jax.vjp(...)  # TODO: compute _, back
 # Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape  # TODO: complete assertion check
@@ -350,7 +342,6 @@ assert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))  # TODO: complete assert
 # Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...
 A = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
 c3 = jnp.array([1.0, -1.0, 2.0])
-# Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
 _, back = jax.vjp(lambda z: A @ z, x)
 # Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape == (2,)

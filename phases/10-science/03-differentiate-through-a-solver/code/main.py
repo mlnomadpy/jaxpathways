@@ -3,7 +3,7 @@
 # Rebuild the differentiable solver
 # Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -20,7 +20,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -57,7 +56,7 @@ print("Loss:",float(value),"gradient:",float(derivative),"finite difference:",fi
 
 # Step 1 — Rebuild the differentiable solver: The solver remains a pure JAX function with a static number of...
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -74,7 +73,6 @@ def solve(rate, initial, steps=40, dt=0.05):
     def advance(value, unused):
         next_value = rk4_step(rate, value, dt)
         return next_value, next_value
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -108,7 +106,6 @@ assert float(objective(probe-0.1*derivative)) < float(value)
 print("Loss:",float(value),"gradient:",float(derivative),"finite difference:",finite_difference)
 
 # Figure data experiment
-# Compute figure data for: A solver gradient converges toward the physical sensitivity
 counts=[5,10,20,40]
 # Create device-backed JAX array `errors`.
 errors=[abs(float(jax.grad(lambda k: solve(k,jnp.array(2.0),n,2.0/n)[-1])(0.7))+4*np.exp(-1.4)) for n in counts]
@@ -161,7 +158,6 @@ r=1+z+z*z/2+z**3/6+z**4/24
 dr=-h*(1+z+z*z/2+z**3/6)
 u=2*r**n
 sensitivity=2*n*r**np.maximum(n-1,0)*dr
-# Aggregate array values to compute `reference`.
 reference=np.sum(2*weights*(u-np.asarray(observations))*sensitivity)/weights.sum()
 # Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(weighted_objective)(k),reference,rtol=1e-11,atol=1e-12)

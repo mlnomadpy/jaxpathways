@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep multiple trained seeds, fixed held-out streams, exact versus sampled returns and failed trajectories. Explain uncertainty and demonstrate evaluation leaves the policy unchanged.
 
 - Command: `python3 phases/12-rl/04-evaluate-agents-across-seeds/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

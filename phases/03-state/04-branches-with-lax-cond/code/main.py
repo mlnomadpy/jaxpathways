@@ -32,7 +32,6 @@ assert jnp.allclose(magnitude(-3.), 3.)
 assert jnp.allclose(magnitude(2.), 2.)
 
 # Figure data experiment
-# Compute figure data for: Both branches form one magnitude function
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-3.0, 3.0, 25)
 # Vectorize across the batch dimension without a Python loop (`visual_data`).
@@ -45,7 +44,6 @@ def eager_branch(v):
         return v
     return -v
 assert eager_branch(-3.)==3.
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(eager_branch)(jnp.array(-3.))
 except jax.errors.TracerBoolConversionError:
@@ -81,7 +79,6 @@ assert jnp.allclose(jax.grad(piecewise)(2.),4.)
 
 # Reference practice: Repair incompatible branch shapes
 # Repair incompatible branch shapes (Challenge): A branch mismatch is a result-contract error even when the...
-# Run the boundary check and catch the expected exception:
 try:
     jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
 except TypeError:

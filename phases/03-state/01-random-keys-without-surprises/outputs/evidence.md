@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep a key-ownership tree, two-step replay including the final key, the per-ID reorder check, and the broken/repaired repeated-noise loop.
 
 - Command: `python3 phases/03-state/01-random-keys-without-surprises/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -119,7 +119,6 @@ def block_forward(p, x):
     scores = q@k.T / jnp.sqrt(x.shape[-1])
     # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
@@ -138,7 +137,6 @@ Append this block and run python main.py. Compare its output with your predictio
 # Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
 output = block_forward(p, x)
 # Check tensor shape invariant: `output.shape == x.shape`
@@ -164,9 +162,9 @@ import numpy as np
 
 # Step 2 — 2. Implement the mechanism: x → norm → Q/K/V → causal attention → output projection...
 def layer_norm(x):
-    # Reduce along axis=-1 to compute `mean`.
+    # Normalize each token over its feature channels by computing its mean.
     mean = jnp.mean(x, axis=-1, keepdims=True)
-    # Reduce along axis=-1 to compute `variance`.
+    # Measure each token’s variance across its feature channels.
     variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)
     return (x-mean) / jnp.sqrt(variance + 1e-5)
 
@@ -183,7 +181,6 @@ def block_forward(p, x):
     scores = q@k.T / jnp.sqrt(x.shape[-1])
     # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
@@ -191,7 +188,6 @@ def block_forward(p, x):
 # Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
 output = block_forward(p, x)
 # Check tensor shape invariant: `output.shape == x.shape`
@@ -228,13 +224,12 @@ Why do the rows look identical? The example builds input rows that differ only b
 The block therefore adds almost the same correction to different input rows; the final rows themselves are still different. This repeated pattern comes from the chosen input, not a rule that transformers treat every token identically. Change one feature of one token, rather than shifting the entire row, to break the symmetry and inspect how the correction changes.
 
 ```python
-# Compute figure data for: A residual block adds a correction to its input
 visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['token ' + str(i) for i in range(4)], 'columns': ['f' + str(i) for i in range(8)], 'unit': 'output minus input', 'diverging': True}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:18.530225+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:51:50.264978+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)
@@ -271,7 +266,6 @@ Masking and per-token operations preserve causal independence through both subla
 low_p = jax.tree.map(lambda z:z.astype(jnp.bfloat16), p)
 low_x = x.astype(jnp.bfloat16)
 low_out = block_forward(low_p, low_x).astype(jnp.float32)
-# Aggregate array values to compute `error`.
 error = jnp.max(jnp.abs(low_out-output))
 print("bfloat16 max absolute error:", float(error))
 # Confirm that all computed values remain finite (no NaN or Inf).
@@ -291,7 +285,6 @@ def mixed_block(p, x):
     return residual + activation@p["down"]
 
 mixed_out = mixed_block(low_p,low_x).astype(jnp.float32)
-# Aggregate array values to compute `mixed_error`.
 mixed_error = jnp.max(jnp.abs(mixed_out-output))
 print("Float32 reduction policy max absolute error:",float(mixed_error))
 # Ensure all array elements remain finite: `jnp.all(jnp.isfinite(mixed_out))`
@@ -375,14 +368,14 @@ Use population variance over features and epsilon $10^{-5}$.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `reference`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check normalization without autodiff (Transfer / diagnosis): The independent reduction and constant-row case check the...
 row = np.asarray(...)  # TODO: compute row
-# Aggregate array values to compute `reference`.
 reference = ...  # TODO: compute reference
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol = ...  # TODO: compute np.testing.assert_allclose(layer_norm(x)[0],reference,atol
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion check
@@ -393,7 +386,6 @@ assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion 
 ```python
 # Check normalization without autodiff (Transfer / diagnosis): The independent reduction and constant-row case check the...
 row = np.asarray(x[0])
-# Aggregate array values to compute `reference`.
 reference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)
@@ -417,15 +409,9 @@ The expanded tensor has twice the model width.
 
 ### How to write: Repair a residual width mismatch — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `mismatch(...)` — Call `mismatch` with your updated parameters or inputs from this lesson's workspace.
-- `nn.gelu(...)` — Call `nn.gelu` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Check tensor shape invariant: `expanded.shape == (4,16)`
-2. Run the boundary check and catch the expected exception:
-3. Check tensor shape invariant: `(x + expanded@p["down"]).shape == x.shape`
+2. Check tensor shape invariant: `(x + expanded@p["down"]).shape == x.shape`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -434,7 +420,6 @@ The expanded tensor has twice the model width.
 expanded = jax.nn.gelu(...)  # TODO: compute expanded
 # Check tensor shape invariant: `expanded.shape == (4,16)`
 assert expanded.shape  # TODO: complete assertion check
-# Run the boundary check and catch the expected exception:
 try:
     _ = ...  # TODO: compute _
 except TypeError:
@@ -452,7 +437,6 @@ assert (x + expanded@p["down"]).shape  # TODO: complete assertion check
 expanded = jax.nn.gelu(layer_norm(x)@p["up"])
 # Check tensor shape invariant: `expanded.shape == (4,16)`
 assert expanded.shape == (4,16)
-# Run the boundary check and catch the expected exception:
 try:
     _ = x + expanded
 except TypeError:

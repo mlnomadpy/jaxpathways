@@ -179,14 +179,13 @@ Each batch averages independent, uniformly sampled per-example gradients with re
 The bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.
 
 ```python
-# Compute figure data for: Averaging independent gradients reduces variance
 triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3
 visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:58.425895+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:49:26.360679+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -203,9 +202,7 @@ PASS: optimization-11
 
 ```python
 # Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.
-# Aggregate array values to compute `first`.
 first = jnp.mean(per[:3])
-# Aggregate array values to compute `last`.
 last = jnp.mean(per[3:])
 wrong = (first + last) / 2
 correct = (3 * first + last) / 4
@@ -223,7 +220,6 @@ Batch means require example-count weights when batch sizes differ.
 
 ```python
 # Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...
-# Aggregate array values to compute `full_loss`.
 full_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)
 optimum = jnp.array(2.5)
 # Differentiate the objective to obtain `noisy` via automatic differentiation.

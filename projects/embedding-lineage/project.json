@@ -70,5 +70,13 @@
     }
   ],
   "referenceCommand": "python3 projects/embedding-lineage/tests/check.py --implementation solution --stage all --output runs/embedding-lineage/reference",
-  "setupNote": "Run from the course workspace root with the repository CPU Python environment. The corpus and hand-authored judgments are frozen locally; there is no runtime data download, cloud service, credential, or upload. The checker defaults to the learner starter. Pass --implementation solution explicitly to run the answer key. Execute stages in order using the same output directory."
+  "setupNote": "Run from the course workspace root with the repository CPU Python environment. The corpus and hand-authored judgments are frozen locally; there is no runtime data download, cloud service, credential, or upload. The checker defaults to the learner starter. Pass --implementation solution explicitly to run the answer key. Execute stages in order using the same output directory.",
+  "environment": {
+    "requirementsPath": "requirements-research.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-research.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-research.txt"
+    }
+  }
 }

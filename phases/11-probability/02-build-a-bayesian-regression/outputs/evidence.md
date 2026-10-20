@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Precision derivation, exact fractional reference, host solve and predictive variance plot. Keep the environment, observed outputs and your explanation of the figure.
 
 - Command: `python3 phases/11-probability/02-build-a-bayesian-regression/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

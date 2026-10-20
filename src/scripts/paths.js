@@ -5,17 +5,23 @@ import { renderDomains } from '../lib/views/domains.js';
 import { initCareers } from './careers.js';
 import { initPathways } from './pathways.js';
 
+/** Render the domain cards when course data and their page container are available. */
 export function setupChoices() {
-  if ($('#domain-cards')) $('#domain-cards').innerHTML = renderDomains(courseState.course);
+  const course = courseState.course;
+  const domainCards = $('#domain-cards');
+  if (course && domainCards) domainCards.innerHTML = renderDomains(course);
   initCareers();
   initPathways();
 }
 
+/** @param {string} id */
 function startPath(id) {
-  const route = courseState.course.pathways.find((r) => r.id === id);
+  const course = courseState.course;
+  if (!course) return;
+  const route = course.pathways.find((r) => r.id === id);
   if (!route) return;
   const lesson = route.phaseIds
-    .flatMap((id) => phaseById(id).lessons)
+    .flatMap((phaseId) => phaseById(phaseId)?.lessons ?? [])
     .find((l) => l.status === 'authored');
   location.href = lesson
     ? lessonLink(lesson.id, id)

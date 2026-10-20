@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-01",
-  "contentHash": "8486d3e81207351a75dfa4705d96508dd920bb659388c6ab92450b3530072db8",
-  "executedAt": "2026-10-20T10:47:54.140127+00:00",
+  "contentHash": "1bf65f0e228f703523d2011e014b2e486ba863b15eb08527e9d407a4fc4e57ae",
+  "executedAt": "2026-10-20T18:52:32.499907+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Euler final: 0.3570125000000001 analytic final: 0.493193927883213\nEndpoint errors: [0.13618143 0.06399208 0.03107265 0.0153167 ]\nLast refinement ratio: 2.0286780018480166\nEuler final: 0.3570125000000001 analytic final: 0.493193927883213\nEndpoint errors: [0.13618143 0.06399208 0.03107265 0.0153167 ]\nLast refinement ratio: 2.0286780018480166\nStable but sign-alternating: [ 2.     -0.8     0.32   -0.128   0.0512]\nUnstable numerical endpoint: 3.543121999999993\nChanged rate, initial state and grid verified\nEnergy checks distinguish growth, but not sign preservation\nSame-horizon errors: [np.float64(0.050590770107151406), np.float64(0.02471618055802971), np.float64(0.012218898970361547)]\nPASS: science-01\n",
   "notebookCells": [
     {
-      "sourceHash": "da20c1cdf42d035c6210174664985aaac30c72093677a60e626222339af3464e",
+      "sourceHash": "4b0061cebd25202270c3637912bd48e0516dac5c631935e3fdd9a1d753c181c5",
       "outputs": []
     },
     {
@@ -43,7 +43,7 @@
       ]
     },
     {
-      "sourceHash": "6f0717d1eea748c25cf1900500c14e9b14fb092988780e37281553e1b1e6d5fc",
+      "sourceHash": "a978aa943f5d65681036801913ba2ed40501b83a0ac1eae9e05ddaec91efee98",
       "outputs": [
         {
           "output_type": "stream",
@@ -57,7 +57,7 @@
       ]
     },
     {
-      "sourceHash": "df54e0f78861b98c3eefa42c48b97cadf97f8f3031be3312d602c70ea84d1859",
+      "sourceHash": "035b29e9a1040b748ac2662299ab6dc0516b5124c494398d5cd82c02a5578398",
       "outputs": []
     },
     {

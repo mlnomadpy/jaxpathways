@@ -93,9 +93,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -216,13 +214,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -232,13 +228,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -267,7 +261,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -304,7 +297,7 @@ Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
 # Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
     observed=launch(Path(folder)/'healthy',dict(steps=12))
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
@@ -346,9 +339,7 @@ def atomic_json(path, value):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     fd, temporary = tempfile.mkstemp(prefix=path.name+'.', suffix='.tmp', dir=path.parent)
-    # Run the boundary check and catch the expected exception:
     try:
-        # Enter `os.fdopen(fd, 'w')` context block:
         with os.fdopen(fd, 'w') as stream:
             json.dump(value, stream, sort_keys=True, allow_nan=False)
             stream.flush()
@@ -453,13 +444,11 @@ def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
              fail_after=None,stall_at=None,stall_seconds=10.)
-    # Update state in place with the new values.
+    # Apply configuration overrides before validating the resulting fields.
     cfg.update(changes)
     for name in ('steps','checkpoint_every','batch_size','min_devices'):
-        # Guard input contract (`not isinstance(cfg[name], int) or isinstance(cfg[name], bool) or cfg[name] < 1`) and fail fast if violated.
         if not isinstance(cfg[name],int) or isinstance(cfg[name],bool) or cfg[name] < 1:
             raise ValueError(name+' must be a positive integer')
-    # Guard input contract (`cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or (not 0 < cfg['learning_rate'] < 1)`) and fail fast if violated.
     if cfg['batch_size'] > 64 or not 0 <= cfg['momentum'] < 1 or not 0 < cfg['learning_rate'] < 1:
         raise ValueError('invalid training configuration')
     return cfg
@@ -469,13 +458,11 @@ def launch(root, config=None, timeout=10.):
     root=Path(root)
     root.mkdir(parents=True,exist_ok=True)
     cfg=default_config(**(config or {}))
-    # Guard input contract (`timeout <= 0`) and fail fast if violated.
     if timeout <= 0:
         raise ValueError('timeout must be positive')
     atomic_json(root/'config.json',cfg)
     worker=root/'worker.py'
     worker.write_text(WORKER)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,JAX_PLATFORMS=cfg['backend'],PYTHONUNBUFFERED='1')
     started=time.perf_counter()
     process=subprocess.Popen([sys.executable,str(worker),str(root)],stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,env=env)
@@ -504,7 +491,6 @@ def launch(root, config=None, timeout=10.):
         except (ValueError,TypeError):
             malformed.append(line)
     status='timed_out' if timed_out else 'completed' if process.returncode == 0 and not malformed and events and events[-1]['event']=='completed' else 'failed'
-    # Compute deterministic cryptographic digest `result` for provenance verification.
     result=dict(status=status,returncode=process.returncode,wall_s=wall,events=events,stderr=stderr,
                 worker_hash=hashlib.sha256(WORKER.encode()).hexdigest(),config=cfg,malformed_stdout=malformed)
     atomic_json(root/'run.json',result)
@@ -525,7 +511,7 @@ def summarize(result):
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
 # Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
     observed=launch(Path(folder)/'healthy',dict(steps=12))
     interrupted=launch(Path(folder)/'failed',dict(steps=12,fail_after=5))
@@ -559,7 +545,6 @@ The horizontal axis is completed update number for the failed run. The vertical 
 The staircase records when state becomes available for recovery. A gap is expected between checkpoints; it becomes operationally relevant when the process fails. Resuming from step $4$ repeats update $5$ using its restored optimizer and random state. This plot does not show elapsed recovery time or prove power-loss durability.
 
 ```python
-# Compute figure data for: Observed progress and committed progress diverge before failure
 committed=0
 points=[]
 saved=[]
@@ -576,15 +561,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:22.258741+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:04.224802+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0003859163261950016, 'update_examples_per_s': 248758.58698834025, 'job_examples_per_s': 176.72946936655072, 'update_duty_fraction': 0.0007104457036284513}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00017587607726454735, 'update_examples_per_s': 227432.86421969283, 'job_examples_per_s': 69.44720752337886, 'update_duty_fraction': 0.0003053525609047209}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0003807488828897476, 'update_examples_per_s': 252134.68591527935, 'job_examples_per_s': 174.31857639191733, 'update_duty_fraction': 0.0006913708669599339}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00018524983897805214, 'update_examples_per_s': 215924.61413550316, 'job_examples_per_s': 70.63820657474201, 'update_duty_fraction': 0.0003271429098417335}
-examples / synchronized seconds: 96 0.0003807488828897476
-measured update duty fraction, not hardware utilization: 0.0006913708669599339
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0006842939183115959, 'update_examples_per_s': 140290.59360467095, 'job_examples_per_s': 186.84414503362623, 'update_duty_fraction': 0.0013318365845691688}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00018191849812865257, 'update_examples_per_s': 219878.68419907492, 'job_examples_per_s': 80.71736904259595, 'update_duty_fraction': 0.00036709956372813125}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00031537609174847603, 'update_examples_per_s': 304398.47062523535, 'job_examples_per_s': 182.3155642523171, 'update_duty_fraction': 0.0005989371887376451}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0001850421540439129, 'update_examples_per_s': 216166.96047813777, 'job_examples_per_s': 77.26277939294994, 'update_duty_fraction': 0.0003574217781572775}
+examples / synchronized seconds: 96 0.00031537609174847603
+measured update duty fraction, not hardware utilization: 0.0005989371887376451
 PASS: operations-02
 
 ```
@@ -628,11 +613,6 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
-- `abs(...)` — Call `abs` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -672,11 +652,6 @@ Sum examples and seconds first.
 </details>
 
 ### How to write: Catch an average-of-rates error — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `error(...)` — Call `error` with your updated parameters or inputs from this lesson's workspace.
-- `sum(...)` — Call `sum` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -722,19 +697,14 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 
 ### How to write: Change the checkpoint cadence — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `cadence(...)` — Call `cadence` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     changed = launch(...)  # TODO: compute changed
 stats = summarize(...)  # TODO: compute stats
@@ -745,7 +715,7 @@ assert stats['checkpoint_step']  # TODO: complete assertion check
 
 ```python
 # Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     changed=launch(folder,dict(checkpoint_every=3,fail_after=5))
 stats=summarize(changed)

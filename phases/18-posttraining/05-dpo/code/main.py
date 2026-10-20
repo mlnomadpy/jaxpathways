@@ -20,7 +20,6 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
@@ -36,14 +35,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -62,7 +59,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Define `dpo_loss(policy_logps, reference_logps, chosen, rejected...)` to evaluate the objective and its automatic derivatives:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=0.2):
     margin = (policy_logps[chosen] - policy_logps[rejected]) - jax.lax.stop_gradient(
         reference_logps[chosen] - reference_logps[rejected]
@@ -75,7 +71,6 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
@@ -90,14 +85,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -112,7 +105,6 @@ print(
 )
 
 # Figure data experiment
-# Compute figure data for: Direct preference optimization and reference-corrected margins — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'DPO preference loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
@@ -124,7 +116,6 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 # Experiment — Verify the reference cancellation: The initial policy is not uniform.
 initial = dpo_loss(reference, reference, chosen, rejected, 0.3)
 np.testing.assert_allclose(initial, np.log(2), atol=1e-6)
-# Aggregate array values to compute `uncorrected`.
 uncorrected = jnp.mean(
     jax.nn.softplus(-0.3 * (reference[chosen] - reference[rejected]))
 )
@@ -157,7 +148,6 @@ print('Reversed-label loss:', reverse)
 reference_grad = jax.grad(dpo_loss, argnums=1)(
     policy, reference, chosen, rejected, 0.3
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(
     reference_grad, np.zeros(reference_grad.shape)
 )
@@ -169,7 +159,6 @@ probe = jnp.array([0.6, -0.3, 0.1])
 choice = jnp.array([0])
 reject = jnp.array([1])
 beta = 0.3
-# Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
 one_pair = lambda logits: dpo_loss(
     jax.nn.log_softmax(logits), reference, choice, reject, beta
 )

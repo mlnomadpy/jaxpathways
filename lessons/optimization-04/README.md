@@ -115,7 +115,6 @@ initial_loss = loss(params)
 for _ in range(120):
     # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
-    # Apply the computed gradient updates to update the model parameters.
     updates, state = optimizer.update(grads, state, params)
     # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
@@ -149,7 +148,6 @@ initial_loss = loss(params)
 for _ in range(120):
     # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
-    # Apply the computed gradient updates to update the model parameters.
     updates, state = optimizer.update(grads, state, params)
     # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
@@ -183,14 +181,12 @@ Read the learned parameters from the geometry: the intercept is $1$, and increas
 This picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.
 
 ```python
-# Compute figure data for: The fitted line recovers slope and bias
-# Allocate initialized array `visual_data` with the specified shape and dtype.
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:46:01.015273+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:49:35.187975+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}
@@ -211,7 +207,6 @@ PASS: optimization-04
 p0 = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
 # Differentiate the objective to obtain `g0` via automatic differentiation.
 g0 = jax.grad(loss)(p0)
-# Apply the computed gradient updates to update the model parameters.
 u0, s0 = optimizer.update(g0, optimizer.init(p0), p0)
 # Configure or step the Optax optimizer state (`p1`).
 p1 = optax.apply_updates(p0, u0)
@@ -281,9 +276,8 @@ At the original zero parameters, compare the first Optax SGD update with an expl
 
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `grads` via automatic differentiation.
-2. Apply the computed gradient updates to update the model parameters.
-3. Configure or step the Optax optimizer state (`actual`).
-4. Transform every leaf of the parameter PyTree (`expected`).
+2. Configure or step the Optax optimizer state (`actual`).
+3. Transform every leaf of the parameter PyTree (`expected`).
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -292,7 +286,6 @@ At the original zero parameters, compare the first Optax SGD update with an expl
 start = ...  # TODO: compute start
 # Differentiate the objective to obtain `grads` via automatic differentiation.
 grads = jax.grad(...)  # TODO: compute grads
-# Apply the computed gradient updates to update the model parameters.
 updates, _ = optimizer.update(...)  # TODO: compute updates, _
 # Configure or step the Optax optimizer state (`actual`).
 actual = optax.apply_updates(...)  # TODO: compute actual
@@ -308,7 +301,6 @@ assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
 start = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
 # Differentiate the objective to obtain `grads` via automatic differentiation.
 grads = jax.grad(loss)(start)
-# Apply the computed gradient updates to update the model parameters.
 updates, _ = optimizer.update(grads, optimizer.init(start), start)
 # Configure or step the Optax optimizer state (`actual`).
 actual = optax.apply_updates(start, updates)

@@ -70,14 +70,14 @@
       {
         "title": "Combine unequal batches",
         "prediction": "Will an unweighted mean of the two batch means recover the full gradient?",
-        "code": "# Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.\n# Aggregate array values to compute `first`.\nfirst = jnp.mean(per[:3])\n# Aggregate array values to compute `last`.\nlast = jnp.mean(per[3:])\nwrong = (first + last) / 2\ncorrect = (3 * first + last) / 4\nassert jnp.allclose(wrong, -3.0)\nassert jnp.allclose(correct, full)",
+        "code": "# Experiment — Combine unequal batches: Batch means require example-count weights when batch sizes differ.\nfirst = jnp.mean(per[:3])\nlast = jnp.mean(per[3:])\nwrong = (first + last) / 2\ncorrect = (3 * first + last) / 4\nassert jnp.allclose(wrong, -3.0)\nassert jnp.allclose(correct, full)",
         "output": "The unweighted result is \\(-3\\), while count weighting recovers \\(-2.5\\).",
         "explanation": "Batch means require example-count weights when batch sizes differ."
       },
       {
         "title": "Take a noisy step at the full optimum",
         "prediction": "At the full-data optimum \\(w=2.5\\), does a step toward target \\(1\\) improve the full loss?",
-        "code": "# Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...\n# Aggregate array values to compute `full_loss`.\nfull_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)\noptimum = jnp.array(2.5)\n# Differentiate the objective to obtain `noisy` via automatic differentiation.\nnoisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])\nassert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)\nassert full_loss(noisy) > full_loss(optimum)",
+        "code": "# Experiment — Take a noisy step at the full optimum: A noisy gradient may point away from the full optimum on a...\nfull_loss = lambda w: jnp.mean(0.5 * (w - y) ** 2)\noptimum = jnp.array(2.5)\n# Differentiate the objective to obtain `noisy` via automatic differentiation.\nnoisy = optimum - 0.1 * jax.grad(example_loss)(optimum, y[0])\nassert jnp.allclose(jax.grad(full_loss)(optimum), 0.0)\nassert full_loss(noisy) > full_loss(optimum)",
         "output": "The single-example step increases the full-data loss.",
         "explanation": "A noisy gradient may point away from the full optimum on a particular draw."
       }
@@ -132,7 +132,7 @@
       "reading": "The horizontal categories are batch sizes \\(1\\), \\(2\\), and \\(3\\). The vertical axis is the variance of the estimated gradient at one fixed weight. The bar heights are \\(1.25\\), \\(0.625\\), and approximately \\(0.417\\), respectively.\n\nDoubling the batch size from \\(1\\) to \\(2\\) halves the variance. Tripling it divides the variance by \\(3\\). These are exact enumerations of the possible sampled batches in this small example, rather than noisy estimates from a handful of trials.",
       "connection": "Each batch averages independent, uniformly sampled per-example gradients with replacement. Under those assumptions, the variance of the average is the single-example variance divided by batch size. Its expected gradient remains \\(-2.5\\) for all three sizes; the estimate becomes less variable without changing its mean.\n\nThe bar heights are squared gradient units, not loss or gradient magnitude. A shorter bar does not mean a smaller learning rate or a faster overall training run. Sampling without replacement, correlated examples, and changing parameters require a different variance analysis.",
       "alt": "Averaging independent gradients reduces variance. The horizontal categories are batch sizes \\(1\\), \\(2\\), and \\(3\\). The vertical axis is the variance of the estimated gradient at one fixed weight. The bar heights are \\(1.25\\), \\(0.625\\), and approximately \\(0.417\\), respectively. Doubling the batch size from \\(1\\) to \\(2\\) halves the variance. Tripling it divides the variance by \\(3\\). These are exact enumerations of the possible sampled batches in this small example, rather than noisy estimates from a handful of trials.",
-      "code": "# Compute figure data for: Averaging independent gradients reduces variance\ntriples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3\nvisual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}"
+      "code": "triples = (per[:, None, None] + per[None, :, None] + per[None, None, :]) / 3\nvisual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylabel': 'gradient variance', 'series': [{'label': 'exact enumeration', 'y': [float(jnp.var(per)), float(jnp.var(pairs)), float(jnp.var(triples))]}]}"
     }
   }
 }

@@ -7,7 +7,6 @@ import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
 trace_events = []
 def score(x, gain):
@@ -19,7 +18,7 @@ def score(x, gain):
 compiled_score = jax.jit(score)
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
 
 # Record call signatures and observed traces
@@ -29,11 +28,11 @@ def observed_call(label, x, gain):
     before = len(trace_events)
     # Place `result` explicitly onto the target JAX device.
     result = compiled_score(x, jax.device_put(np.float32(gain), cpu))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     result.block_until_ready()
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected = np.sum((np.asarray(x) * np.float32(gain))**2)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)
     call_rows.append({"label": label, "shape": list(x.shape), "dtype": str(x.dtype),
                       "observed_trace_delta": len(trace_events) - before,
@@ -58,7 +57,6 @@ import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Query the active JAX devices into `cpu`.
 cpu = jax.devices("cpu")[0]
 trace_events = []
 def score(x, gain):
@@ -70,7 +68,7 @@ def score(x, gain):
 compiled_score = jax.jit(score)
 x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
 # Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
 call_rows = []
@@ -78,11 +76,11 @@ def observed_call(label, x, gain):
     before = len(trace_events)
     # Place `result` explicitly onto the target JAX device.
     result = compiled_score(x, jax.device_put(np.float32(gain), cpu))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     result.block_until_ready()
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected = np.sum((np.asarray(x) * np.float32(gain))**2)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected, rtol=2e-5, atol=2e-5)
     call_rows.append({"label": label, "shape": list(x.shape), "dtype": str(x.dtype),
                       "observed_trace_delta": len(trace_events) - before,
@@ -100,7 +98,6 @@ assert call_rows[2]["result"] == 560.
 assert call_rows[3]["result"] == 506.
 
 # Figure data experiment
-# Compute figure data for: A new value is not necessarily a new trace
 visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}
 
 # Experiment: Contrast static branch metadata with a dynamic gain
@@ -113,7 +110,7 @@ def branch_score(x, square):
 static_score = jax.jit(branch_score, static_argnames=("square",))
 for square in [True, True, False]:
     out = static_score(x8, square=square)
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(out), 140. if square else 28.)
 print("Static branch trace observations:", branch_events)
 
@@ -123,7 +120,7 @@ print("Static branch trace observations:", branch_events)
 update = jax.jit(lambda value: 0.9 * value + 1.)
 # Place `initial` explicitly onto the target JAX device.
 initial = jax.device_put(np.float32(0.), cpu)
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 update(initial).block_until_ready()
 def metric_run(read_each):
     value = initial
@@ -133,16 +130,16 @@ def metric_run(read_each):
         value = update(value)
         if read_each:
             observed.append(float(value))
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     value.block_until_ready()
     elapsed = time.perf_counter() - start
     return value, elapsed, observed
 read_result, read_seconds, metrics = metric_run(True)
 final_result, final_seconds, _ = metric_run(False)
 reference_value = 10. * (1. - 0.9**6)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(read_result), reference_value, rtol=2e-5)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(final_result), reference_value, rtol=2e-5)
 assert len(metrics) == 6
 print("Per-step host reads seconds:", read_seconds)
@@ -163,11 +160,9 @@ five = np.arange(5, dtype=np.float32)
 # Place `padded` explicitly onto the target JAX device.
 padded = jax.device_put(np.pad(five, (0, 3)), cpu)
 mask = jax.device_put(np.arange(8) < 5, cpu)
-# Combine or mask array elements to form `masked`.
 masked = masked_score(padded, mask)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(masked), sum((i+1)**2 for i in range(5)))
-# Aggregate array values to compute `wrong`.
 wrong = jnp.sum((padded + 1.)**2)
 assert float(wrong) == float(masked) + 3.
 print("Masked versus unmasked padded objective:", float(masked), float(wrong))
@@ -178,7 +173,6 @@ def broken_branch(values, gain):
     if gain > 1.:
         return jnp.sum(values**2)
     return jnp.sum(values)
-# Run the boundary check and catch the expected exception:
 try:
     jax.jit(broken_branch)(x8, jax.device_put(np.float32(2.), cpu))
 except jax.errors.TracerBoolConversionError:
@@ -190,6 +184,6 @@ repaired = jax.jit(lambda values, gain: jax.lax.cond(gain > 1., lambda v:jnp.sum
 for gain, expected in [(0.5, 28.), (2., 140.)]:
     # Place `result` explicitly onto the target JAX device.
     result = repaired(x8, jax.device_put(np.float32(gain), cpu))
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), expected)
 print("PASS: performance-02")

@@ -98,9 +98,7 @@ Create a Python file in the course environment. Add this block after the precedi
 ```python
 # Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
 def workload(a,b):return jnp.tanh(a@b)
-# Construct and reshape `a` into the target tensor dimensions.
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
-# Construct and reshape `b` into the target tensor dimensions.
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(workload).lower(a,b)
@@ -109,7 +107,7 @@ stablehlo=str(lowered.compiler_ir(dialect='stablehlo'))
 assert 'dot_general' in stablehlo and 'tanh' in stablehlo
 # Trace or lower the function to inspect its compiler representation (`executable`).
 executable=lowered.compile()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(executable(a,b),np.tanh(np.asarray(a)@np.asarray(b)),rtol=2e-5,atol=2e-5)
 print('StableHLO operations present: dot_general and tanh')
 print('Compiler estimates (backend-specific):',executable.cost_analysis())
@@ -124,20 +122,17 @@ Create a Python file in the course environment. Add this block after the precedi
 ```python
 # An analytic traffic model, not a measurement of this CPU.
 def contract(m,k,n,itemsize=4):
-    # Guard input contract (`min(m, k, n, itemsize) <= 0`) and fail fast if violated.
     if min(m,k,n,itemsize)<=0:raise ValueError('positive dimensions and itemsize required')
     flops=2*m*k*n  # conventional multiply-add count; excludes tanh
     minimum_bytes=itemsize*(m*k+k*n+m*n)
     return flops,minimum_bytes,flops/minimum_bytes
 sizes=np.array([8,16,32,64,128])
 intensity=np.array([contract(int(n),int(n),int(n))[2] for n in sizes])
-# Execute `np.testing.assert_allclose(intensity,sizes/6)`
 np.testing.assert_allclose(intensity,sizes/6)
 peak=100e9
 bandwidth=20e9  # hypothetical budgets, not device specifications
 memory_ceiling=bandwidth*intensity
 roofline=np.minimum(peak,memory_ceiling)
-# Execute `np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])`
 np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])
 assert np.all(roofline[2:]==peak)
 ```
@@ -153,9 +148,9 @@ Create a Python file in the course environment. Add this block after the precedi
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     start=time.perf_counter()
     executable(a,b).block_until_ready()
     times.append(time.perf_counter()-start)
@@ -178,9 +173,7 @@ import jax.numpy as jnp
 
 # Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
 def workload(a,b):return jnp.tanh(a@b)
-# Construct and reshape `a` into the target tensor dimensions.
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
-# Construct and reshape `b` into the target tensor dimensions.
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(workload).lower(a,b)
@@ -189,27 +182,24 @@ stablehlo=str(lowered.compiler_ir(dialect='stablehlo'))
 assert 'dot_general' in stablehlo and 'tanh' in stablehlo
 # Trace or lower the function to inspect its compiler representation (`executable`).
 executable=lowered.compile()
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(executable(a,b),np.tanh(np.asarray(a)@np.asarray(b)),rtol=2e-5,atol=2e-5)
 print('StableHLO operations present: dot_general and tanh')
 print('Compiler estimates (backend-specific):',executable.cost_analysis())
 
 # An analytic traffic model, not a measurement of this CPU.
 def contract(m,k,n,itemsize=4):
-    # Guard input contract (`min(m, k, n, itemsize) <= 0`) and fail fast if violated.
     if min(m,k,n,itemsize)<=0:raise ValueError('positive dimensions and itemsize required')
     flops=2*m*k*n  # conventional multiply-add count; excludes tanh
     minimum_bytes=itemsize*(m*k+k*n+m*n)
     return flops,minimum_bytes,flops/minimum_bytes
 sizes=np.array([8,16,32,64,128])
 intensity=np.array([contract(int(n),int(n),int(n))[2] for n in sizes])
-# Execute `np.testing.assert_allclose(intensity,sizes/6)`
 np.testing.assert_allclose(intensity,sizes/6)
 peak=100e9
 bandwidth=20e9  # hypothetical budgets, not device specifications
 memory_ceiling=bandwidth*intensity
 roofline=np.minimum(peak,memory_ceiling)
-# Execute `np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])`
 np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])
 assert np.all(roofline[2:]==peak)
 
@@ -217,9 +207,9 @@ assert np.all(roofline[2:]==peak)
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     start=time.perf_counter()
     executable(a,b).block_until_ready()
     times.append(time.perf_counter()-start)
@@ -252,24 +242,23 @@ Each intensity comes from counting the elements in square input/output matrices 
 Actual small CPU measurements are recorded separately and include dispatch and completion waiting. Do not plot them against these invented hardware budgets as a measured efficiency claim. A real roofline study needs appropriate hardware limits and traffic evidence.
 
 ```python
-# Compute figure data for: A hypothetical roofline bends at the compute budget
 plot_intensity=np.sort(np.append(intensity,peak/bandwidth))
 visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic operations per byte','ylabel':'hypothetical ceiling (GFLOP/s)','series':[{'label':'bandwidth budget','y':(bandwidth*plot_intensity/1e9).tolist()},{'label':'compute budget','y':[peak/1e9]*len(plot_intensity)},{'label':'combined ceiling','y':(np.minimum(peak,bandwidth*plot_intensity)/1e9).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:39.421946+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:17.223660+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0}
-Local CPU samples seconds: [2.1084211766719818e-05, 7.845880463719368e-05, 5.645817145705223e-05, 4.0166545659303665e-05, 3.654090687632561e-05]
+Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'bytes accessed': 5632.0}
+Local CPU samples seconds: [2.8500333428382874e-05, 1.8625054508447647e-05, 1.4499761164188385e-05, 1.291697844862938e-05, 1.2500211596488953e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'bytes accessed1{}': 512.0, 'flops': 8192.0, 'bytes accessed': 5632.0}
-Local CPU samples seconds: [2.9209069907665253e-05, 2.4625100195407867e-05, 1.6333069652318954e-05, 1.2042000889778137e-05, 1.1958181858062744e-05]
+Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0}
+Local CPU samples seconds: [2.1167099475860596e-05, 1.6707926988601685e-05, 1.1874828487634659e-05, 1.2584030628204346e-05, 1.2124888598918915e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]
@@ -287,7 +276,6 @@ PASS: performance-04
 # Experiment — Double the assumed data movement: The work is unchanged; doubling transferred bytes halves intensity.
 reduced=intensity/2
 revised=np.minimum(peak,bandwidth*reduced)
-# Execute `np.testing.assert_allclose(revised[:2],roofline[:2]/2)`
 np.testing.assert_allclose(revised[:2],roofline[:2]/2)
 assert revised[-1]==peak
 print('Ceilings with twice minimum traffic GFLOP/s:',(revised/1e9).tolist())
@@ -307,7 +295,8 @@ Derive the work and minimum traffic for shapes $(48,24)$ and $(24,12)$. Compare 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_allclose(ratio,24/7)`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -315,7 +304,6 @@ Derive the work and minimum traffic for shapes $(48,24)$ and $(24,12)$. Compare 
 # Exercise solution: Derive the work and minimum traffic for shapes (48,24) and (24,12).
 work,traffic,ratio = contract(...)  # TODO: compute work,traffic,ratio
 assert work  # TODO: complete assertion check
-# Execute `np.testing.assert_allclose(ratio,24/7)`
 np.testing.assert_allclose(ratio,24/7)
 assert bandwidth*ratio  # TODO: complete assertion check
 print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypothetical model')
@@ -327,7 +315,6 @@ print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypotheti
 # Exercise solution: Derive the work and minimum traffic for shapes (48,24) and (24,12).
 work,traffic,ratio=contract(48,24,12)
 assert work==27648 and traffic==8064
-# Execute `np.testing.assert_allclose(ratio,24/7)`
 np.testing.assert_allclose(ratio,24/7)
 assert bandwidth*ratio<peak
 print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypothetical model')
@@ -353,7 +340,8 @@ The model assumes both inputs and output use that element size; real accumulatio
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_allclose(i16,2*i32)`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -362,7 +350,6 @@ The model assumes both inputs and output use that element size; real accumulatio
 f32,b32,i32 = contract(...)  # TODO: compute f32,b32,i32
 f16,b16,i16 = contract(...)  # TODO: compute f16,b16,i16
 assert f32  # TODO: complete assertion check
-# Execute `np.testing.assert_allclose(i16,2*i32)`
 np.testing.assert_allclose(i16,2*i32)
 print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
 ```
@@ -374,7 +361,6 @@ print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
 f32,b32,i32=contract(32,16,8,4)
 f16,b16,i16=contract(32,16,8,2)
 assert f32==f16 and b32==2*b16
-# Execute `np.testing.assert_allclose(i16,2*i32)`
 np.testing.assert_allclose(i16,2*i32)
 print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
 ```

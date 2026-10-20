@@ -46,7 +46,6 @@ assert jnp.allclose(predict(w, 1., X), targets)
 assert jnp.allclose(mse(w, 1.), 0.)
 
 # Figure data experiment
-# Compute figure data for: A scalar bias shifts every prediction
 visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'observation 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': targets.tolist()}, {'label': 'bias 1', 'y': predict(w, 1.0, X).tolist()}, {'label': 'bias 0', 'y': predict(w, 0.0, X).tolist()}]}
 
 # Experiment: Verify the gradient by hand
@@ -94,11 +93,9 @@ assert jnp.allclose(predict(w, 1., X_new), y_new)
 # Reference practice: Reject and repair a column target
 # Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
 def checked_loss(prediction, target):
-    # Guard input contract (`prediction.shape != target.shape`) and fail fast if violated.
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")
     return jnp.mean((prediction-target)**2)
-# Run the boundary check and catch the expected exception:
 try:
     checked_loss(predict(w, 1., X), column_targets)
 except ValueError:

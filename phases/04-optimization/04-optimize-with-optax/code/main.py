@@ -23,7 +23,6 @@ initial_loss = loss(params)
 for _ in range(120):
     # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
-    # Apply the computed gradient updates to update the model parameters.
     updates, state = optimizer.update(grads, state, params)
     # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
@@ -51,7 +50,6 @@ initial_loss = loss(params)
 for _ in range(120):
     # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
-    # Apply the computed gradient updates to update the model parameters.
     updates, state = optimizer.update(grads, state, params)
     # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
@@ -62,8 +60,6 @@ assert jnp.allclose(params["weight"], 2., atol=1e-4)
 assert jnp.allclose(params["bias"], 1., atol=1e-4)
 
 # Figure data experiment
-# Compute figure data for: The fitted line recovers slope and bias
-# Allocate initialized array `visual_data` with the specified shape and dtype.
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}
 
 # Experiment: Check the first update against arithmetic
@@ -71,7 +67,6 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 p0 = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
 # Differentiate the objective to obtain `g0` via automatic differentiation.
 g0 = jax.grad(loss)(p0)
-# Apply the computed gradient updates to update the model parameters.
 u0, s0 = optimizer.update(g0, optimizer.init(p0), p0)
 # Configure or step the Optax optimizer state (`p1`).
 p1 = optax.apply_updates(p0, u0)
@@ -109,7 +104,6 @@ assert jnp.allclose(coast_second,-0.18)
 start = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
 # Differentiate the objective to obtain `grads` via automatic differentiation.
 grads = jax.grad(loss)(start)
-# Apply the computed gradient updates to update the model parameters.
 updates, _ = optimizer.update(grads, optimizer.init(start), start)
 # Configure or step the Optax optimizer state (`actual`).
 actual = optax.apply_updates(start, updates)

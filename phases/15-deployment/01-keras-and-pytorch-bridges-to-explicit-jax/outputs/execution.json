@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-01",
-  "contentHash": "996b7ae3906cffdb498add59edb1b30dc571162f999c431c441f51793de81f2c",
-  "executedAt": "2026-10-20T10:50:26.277718+00:00",
+  "contentHash": "627b092d79a93b1d510ab68451f85864212612a14f040df0928a4da122a781b4",
+  "executedAt": "2026-10-20T21:41:10.842094+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -18,7 +18,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "681ca79e1ce8eda5291aa460e747e62e9cb87c602d893b88f6043453eeae3d39",
+      "sourceHash": "daed178819819ebf3ee4d4f7a392b2ac8e73a046f0c36d113718d3a069ea018c",
       "outputs": []
     },
     {
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "82d9d587367d44b0656b4250b8c5d3428b1be7f019e21e2c3c3a7307905bf659",
+      "sourceHash": "e0a447d68555e600dbb3670ddbd6b02cf865bd2532d5d81f66b9892b772b8819",
       "outputs": []
     },
     {
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "e979eed7fd0c83851333cea8a3365b4e6dbce81f3b8da83212c1a93b9e8d94de",
+      "sourceHash": "fe17bff35ae42919b14d52dc2646100c9c0dfeba8d4b8df36638ab97e34b93c3",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "991a2eb2af14cdff0c0a1008e299079a0351d9cc9bfaa75c2967a55c23d7dcfb",
+      "sourceHash": "fed11912ddeee63aab991c8f6f3339a52efaa33adde0da16567e33de73719938",
       "outputs": []
     },
     {
-      "sourceHash": "0015690d963c3eef783cb2072f41832a51179bc72a3895c842bd777a69cdf8c8",
+      "sourceHash": "20da1044dabb2ddfb9084de6f41ccea357dba02c3177fd864f038147f2ac89d5",
       "outputs": [
         {
           "output_type": "stream",
@@ -115,11 +115,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "0cb4ae9ca2cad7a56aca8fcf3415b10b7f295f869139693e7603bdbed4ef3da2",
+      "sourceHash": "59dc87bd552a0532b1d35633b09d4bab855156c6f388421282658ea634aa264e",
       "outputs": []
     },
     {
-      "sourceHash": "e462bafb06b4066234af3d2d8999e29095a1995583f6902692e58dee6eb88c0f",
+      "sourceHash": "f786baec7ebdd2a42e1eb5bf063e68ca969d0908fd696650168aae11fc0cfdec",
       "outputs": [
         {
           "output_type": "stream",

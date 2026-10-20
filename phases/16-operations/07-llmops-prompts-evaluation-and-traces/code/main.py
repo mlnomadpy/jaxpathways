@@ -3,13 +3,12 @@
 # Prepare the explicit contract
 # Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
@@ -36,9 +35,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -64,13 +62,12 @@ assert not llm_case(cases[0],dict(answer='CPU',citations=['invented'],abstain=Fa
 
 # Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
 import os
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_ASYNC_TRACE_LOGGING before importing its runtime.
 os.environ["MLFLOW_ENABLE_ASYNC_TRACE_LOGGING"]="false"
-# Configure environment variable before initializing the runtime.
+# Set MLFLOW_ENABLE_TELEMETRY before importing its runtime.
 os.environ["MLFLOW_ENABLE_TELEMETRY"]="false"
-# Import required JAX, NumPy, and standard-library modules.
 import tempfile
 from pathlib import Path
 import mlflow
@@ -96,9 +93,8 @@ answer = dict(answer='CPU', citations=['course-v1'], abstain=False)
 unsafe = [dict(answer) for _ in cases]
 guarded = [dict(answer) for _ in cases[:-1]] + [dict(answer='', citations=[], abstain=True)]
 results = []
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='llmops-') as folder:
-    # Execute `mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))`.
     mlflow.set_tracking_uri('sqlite:///' + str(Path(folder) / 'traces.db'))
     client = MlflowClient()
     experiment = client.create_experiment('replay-evaluation', artifact_location=(Path(folder)/'artifacts').as_uri())
@@ -119,7 +115,6 @@ print('Observed replay scores:', results)
 print('Two real MLflow traces; no LLM API was called and no general model quality was evaluated.')
 
 # Figure data experiment
-# Compute figure data for: The unsupported case changes the release decision
 visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported (1)'],'xlabel':'fixture group (count)','ylabel':'fixture pass fraction','series':[{'label':name,'y':[r[k] for k in ['overall','answerable','unanswerable']]} for name,r in zip(['always-answer','contract-aware'],results)]}
 
 # Experiment: Separate aggregate and critical-case behavior
@@ -133,10 +128,8 @@ print('Release decisions:',release)
 def score_replay(inventory, replies, allowed_citations):
     ids = [case['id'] for case in inventory]
     reply_ids = [reply['id'] for reply in replies]
-    # Guard input contract (`not ids or len(set(ids)) != len(ids)`) and fail fast if violated.
     if not ids or len(set(ids)) != len(ids):
         raise ValueError('empty or duplicate case inventory')
-    # Guard input contract (`len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids)`) and fail fast if violated.
     if len(set(reply_ids)) != len(reply_ids) or set(reply_ids) != set(ids):
         raise ValueError('missing, duplicate or unknown response IDs')
     by_id = {reply['id']: reply['response'] for reply in replies}

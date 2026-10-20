@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "pretraining-02",
-  "contentHash": "546d7b69e5cbe151e99542665025a7bbfdd507e951bcde81b5c981400f065eab",
-  "executedAt": "2026-10-20T10:52:02.405713+00:00",
+  "contentHash": "0fb44f2c52da021e2eb226ab078c83963ac8ebbeef107c9b5732fc153e92a083",
+  "executedAt": "2026-10-20T21:42:42.975020+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nMasked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464\nHidden MSE unchanged; full-image MSE is large.\nAmbiguous target MSE at predictions 0, 1, 2: 2, 1, 2\nBottom-right patch order verified.\nThe zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.\nAll rectangular RGB patches agree; hidden-pixel intervention preserves visible features.\nPASS: pretraining-02\n",
   "notebookCells": [
     {
-      "sourceHash": "642f2943e4227f895e2bc22dcb8165f9254d5d67daaeca5d903ad19ca55d6d24",
+      "sourceHash": "03903b2a4d9f849f4fe7d08a234558a43f9536d0934e700820268d2cbdb16963",
       "outputs": []
     },
     {
-      "sourceHash": "722b38eeb869e1eba84511605ff5eda1504e181e45167524375bde863bc14168",
+      "sourceHash": "097fd1dbf7d931fc0040a301c9e0750b2d6059c4013202e406df7d1ba0daaa8e",
       "outputs": []
     },
     {
-      "sourceHash": "67904fc53e5169d024a4968041324263be09e9ead2bb75650134fd67a2edf4d1",
+      "sourceHash": "0fa31a6764319de7dd224b6cd553af8454ff386d3d861fac592e7960687efa9c",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "e752eae67601d630225841e69368ef4afbbd243de91575ea94eaa8e59917ef99",
+      "sourceHash": "1d718d8c1dcaba86dec1f5dd640ba7dc637fb5b8278702b01b0d8dd9959a425a",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "2bd39b3195d7381fd0923d63f81b9a0fa6fd1360d1c1354c691b706751d82742",
+      "sourceHash": "0ee3e3f327c6e8141428668efbf36b08758a2fa885f3469e1ce452f2db299a89",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "3b657e5ce3e094a7f3116d8508320c0af35c3e739864fda20f6d2636ba5ce5a8",
+      "sourceHash": "66b152c22dc0d2ddb1dc3cb7bf91143b9f0afc5f916ba0866a3d20dad19eae31",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "7074cefd3bcd046613ce84dab1caab1762f203025cba81341b94c71f0ca17876",
+      "sourceHash": "3d1214c2f793536ce983e502e80eb627c726549e3060895cb3312224a96c1ea1",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "460148f67aef079d50d9fc5ee1a7eb6722232cfa5013a6b8270559b848f2202d",
+      "sourceHash": "e9ac403c9bf6cd7387ac46bc2c9dd66e804a7ae8641bdf1c689cef4052532f9c",
       "outputs": []
     },
     {
-      "sourceHash": "f998be538adc77451248902525712959223a83ac4adee001b1a2594939f02103",
+      "sourceHash": "42dfffb8977609ccc411d9af2f2d0e4074d551d807a9df0bdc463fc768446670",
       "outputs": [
         {
           "output_type": "stream",

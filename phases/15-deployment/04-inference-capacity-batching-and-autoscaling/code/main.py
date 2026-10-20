@@ -22,16 +22,16 @@ def measure(batch_size,repeats=40):
     # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     first=infer(device).block_until_ready()
     first_ms=(time.perf_counter()-began)*1000
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     samples=[]
     for _ in range(repeats):
         began=time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         infer(device).block_until_ready()
         samples.append((time.perf_counter()-began)*1000)
     p50=float(np.percentile(samples,50))
@@ -52,12 +52,10 @@ service_ms=measurements[0]['p50_ms']
 # 3. Model a queue with an independent hand-check
 # Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
 def simulate_queue(arrival_ms,service_ms):
-    # Convert `arrivals` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
-    # Guard input contract (`arrivals.ndim != 1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals) < 0)`) and fail fast if violated.
     if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):
         raise ValueError('arrivals must be a finite ordered vector')
-    # Guard input contract (`not np.isfinite(service_ms) or service_ms <= 0`) and fail fast if violated.
     if not np.isfinite(service_ms) or service_ms<=0:
         raise ValueError('service duration must be positive milliseconds')
     ready=0.
@@ -70,11 +68,8 @@ def simulate_queue(arrival_ms,service_ms):
         finishes.append(ready)
     return np.array(starts),np.array(finishes),np.array(finishes)-arrivals
 hand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)
-# Execute `np.testing.assert_allclose(hand_start,[0.,2.,4.])`
 np.testing.assert_allclose(hand_start,[0.,2.,4.])
-# Execute `np.testing.assert_allclose(hand_finish,[2.,4.,6.])`
 np.testing.assert_allclose(hand_finish,[2.,4.,6.])
-# Execute `np.testing.assert_allclose(hand_latency,[2.,3.,2.])`
 np.testing.assert_allclose(hand_latency,[2.,3.,2.])
 request_index=np.arange(60)
 stable_arrivals=request_index*1.5*service_ms
@@ -107,16 +102,16 @@ def measure(batch_size,repeats=40):
     # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     first=infer(device).block_until_ready()
     first_ms=(time.perf_counter()-began)*1000
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     samples=[]
     for _ in range(repeats):
         began=time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         infer(device).block_until_ready()
         samples.append((time.perf_counter()-began)*1000)
     p50=float(np.percentile(samples,50))
@@ -135,12 +130,10 @@ service_ms=measurements[0]['p50_ms']
 
 # Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
 def simulate_queue(arrival_ms,service_ms):
-    # Convert `arrivals` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
-    # Guard input contract (`arrivals.ndim != 1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals) < 0)`) and fail fast if violated.
     if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):
         raise ValueError('arrivals must be a finite ordered vector')
-    # Guard input contract (`not np.isfinite(service_ms) or service_ms <= 0`) and fail fast if violated.
     if not np.isfinite(service_ms) or service_ms<=0:
         raise ValueError('service duration must be positive milliseconds')
     ready=0.
@@ -153,11 +146,8 @@ def simulate_queue(arrival_ms,service_ms):
         finishes.append(ready)
     return np.array(starts),np.array(finishes),np.array(finishes)-arrivals
 hand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)
-# Execute `np.testing.assert_allclose(hand_start,[0.,2.,4.])`
 np.testing.assert_allclose(hand_start,[0.,2.,4.])
-# Execute `np.testing.assert_allclose(hand_finish,[2.,4.,6.])`
 np.testing.assert_allclose(hand_finish,[2.,4.,6.])
-# Execute `np.testing.assert_allclose(hand_latency,[2.,3.,2.])`
 np.testing.assert_allclose(hand_latency,[2.,3.,2.])
 request_index=np.arange(60)
 stable_arrivals=request_index*1.5*service_ms
@@ -170,7 +160,6 @@ print('measured batch-one service proxy (ms):',service_ms)
 print('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])
 
 # Figure data experiment
-# Compute figure data for: Measured batch computation and a separately simulated queue
 visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batch 1","batch 8","batch 32"],"xlabel":"resident-input batch shape","ylabel":"measured CPU milliseconds per batch","series":[{"label":"warm p50","y":[r["p50_ms"] for r in measurements]},{"label":"warm p95","y":[r["p95_ms"] for r in measurements]}]},{"kind":"line","x":request_index.tolist(),"xlabel":"request index (simulation)","ylabel":"simulated response / measured service","series":[{"label":"spaced arrivals","y":(stable_latency/service_ms).tolist()},{"label":"overloaded arrivals","y":(overloaded_latency/service_ms).tolist()}]}]}
 
 # Experiment: Compute a replica estimate with explicit units
@@ -201,15 +190,12 @@ print('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Simulate a burst of four requests arriving at time zero with a...
 _,burst_finish,burst_latency=simulate_queue([0.,0.,0.,0.],2.)
-# Execute `np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
-# Execute `np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 
 # Reference practice: Expose burst sensitivity
 # Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
 _,_,smooth=simulate_queue(np.arange(5)*3.,2.)
-# Allocate initialized array `(_, _, burst)` with the specified shape and dtype.
 _,_,burst=simulate_queue(np.zeros(5),2.)
 assert smooth.max()==2. and burst.max()==10.
 
@@ -226,7 +212,6 @@ for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
 # Reference practice: Measure the margin below a response deadline
 # Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.
 _,_,deadline_latencies=simulate_queue(np.zeros(5),2.)
-# Execute `np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8`
 np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
 missed_deadlines=int(np.count_nonzero(deadline_latencies>6.))
 assert missed_deadlines==2

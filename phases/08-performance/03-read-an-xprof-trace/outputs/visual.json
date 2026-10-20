@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-03",
-  "contentHash": "8035a6f01d72cddc68632f648e4e09b96b1e34f69f29a1d0bd99144f3f418f5f",
+  "contentHash": "867f778e3f904205f678f6aa9e3423396d5f9c7ff51dded845344cf9838e9b6e",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:46:00.292509+00:00",
+  "generatedAt": "2026-10-20T18:49:30.723078+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-aocqwa5x\n{\n  \"input_wait_us\": [\n    1257,\n    1260,\n    1258,\n    1259\n  ],\n  \"model_and_wait_us\": [\n    49,\n    42,\n    30,\n    30\n  ],\n  \"step_us\": [\n    1312,\n    1306,\n    1290,\n    1292\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
+  "stdout": "Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-jr7z_tn3\n{\n  \"input_wait_us\": [\n    1283,\n    19864,\n    5258,\n    1928\n  ],\n  \"model_and_wait_us\": [\n    209,\n    4490,\n    1058,\n    246\n  ],\n  \"step_us\": [\n    1512,\n    24372,\n    6333,\n    2190\n  ]\n}\nFour named steps verified; host annotations are not isolated device kernels.\n",
   "data": {
     "kind": "line",
     "x": [
@@ -28,19 +28,19 @@
       {
         "label": "injected input wait",
         "y": [
-          1257,
-          1260,
-          1258,
-          1259
+          1283,
+          19864,
+          5258,
+          1928
         ]
       },
       {
         "label": "model call and completion wait",
         "y": [
-          49,
-          42,
-          30,
-          30
+          209,
+          4490,
+          1058,
+          246
         ]
       }
     ]

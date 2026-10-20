@@ -12,11 +12,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -32,14 +29,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -73,7 +67,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -108,11 +101,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -128,14 +118,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -168,7 +155,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -186,13 +172,12 @@ assert records['reward'].shape == (8, 64)
 assert bool(final.done.all())
 assert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))
 assert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))
-# Reduce along axis=0 to compute `episode_returns`.
+# Sum rewards over rollout time while retaining one return per environment.
 episode_returns = records['reward'].sum(axis=0)
 print('return mean:', float(episode_returns.mean()))
 print('active environments by transition:', records['active'].sum(axis=1))
 
 # Figure data experiment
-# Compute figure data for: The live batch shrinks while the array shape stays fixed
 visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','ylabel':'active environments before transition','series':[{'label':'uniform random policy','y':records['active'].sum(1).tolist()}]}
 
 # Experiment: Replay the entire collector
@@ -240,7 +225,6 @@ assert abs(broken+.01) < 1e-6
 # Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
-# Combine or mask array elements to form `expected`.
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])

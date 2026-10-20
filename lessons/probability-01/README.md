@@ -108,7 +108,6 @@ actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
-# Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
@@ -150,7 +149,6 @@ actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
-# Evaluate numerically stable log-space cross-entropy/likelihood (`stable`).
 stable = logsumexp(components)-jnp.log(2.)
 # Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
@@ -178,15 +176,14 @@ The horizontal axis is the number of independent observations on a logarithmic s
 The two curves explain the mean test in our code. A large simulation can estimate the distribution mean accurately while predictions for new sensor values remain noisy. Correlated draws, such as the Markov chains later in this phase, do not satisfy the same independent-sample calculation unchanged.
 
 ```python
-# Compute figure data for: A precise mean does not remove observation noise
-# Convert `sizes` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 sizes = np.array([1,4,16,64,100,400])
 visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observations N","ylabel":"standard deviation (reading units)","xscale":"log","series":[{"label":"individual reading","y":[3.]*len(sizes)},{"label":"average of N readings","y":(3/np.sqrt(sizes)).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:48:36.575595+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T19:25:27.237704+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766
@@ -221,9 +218,7 @@ A narrow continuous density can exceed one; its area, not its height at a point,
 ```python
 # Experiment — Separate sum and mixture: Independence multiplies probabilities, while alternative mixture...
 values = jnp.array([-2.,-3.])
-# Aggregate array values to compute `independent_log`.
 independent_log = values.sum()
-# Evaluate numerically stable log-space cross-entropy/likelihood (`mixture_log`).
 mixture_log = logsumexp(values)-jnp.log(2.)
 assert jnp.allclose(independent_log,-5.)
 assert mixture_log > -3.
@@ -242,7 +237,7 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 
 **Key functions & syntax to use:**
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
@@ -326,7 +321,7 @@ Split before use; compare arrays with the same shape.
 ### How to write: Demonstrate key ownership — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.

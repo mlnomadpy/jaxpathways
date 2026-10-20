@@ -163,7 +163,6 @@ The fitted weight is $w=3/(1+\lambda)$. The training targets favor slope $3$, wh
 Select the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is $0.5$. A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.
 
 ```python
-# Compute figure data for: Training error and validation error select different penalties
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 2.0, 41)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
@@ -171,7 +170,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:55.153882+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:49:15.837378+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0
@@ -188,7 +187,6 @@ PASS: optimization-10
 ```python
 # Experiment — Sweep the penalty: Regularization deliberately trades training fit against a...
 candidates = jnp.array([0.0, 0.5, 2.0])
-# Combine or mask array elements to form `fits`.
 fits = jnp.stack([ridge(X, y, float(a)) for a in candidates])
 training = jnp.array([mse(a, X, y) for a in fits])
 validation = jnp.array([mse(a, Xv, yv) for a in fits])
@@ -330,8 +328,8 @@ Fit the mean on training data; do not refit it on validation data.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Aggregate array values to compute `train_mean`.
-2. Aggregate array values to compute `leaked_mean`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -339,9 +337,7 @@ Fit the mean on training data; do not refit it on validation data.
 # Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.
 train_x = jnp.array(...)  # TODO: compute train_x
 val_x = jnp.array(...)  # TODO: compute val_x
-# Aggregate array values to compute `train_mean`.
 train_mean = jnp.mean(...)  # TODO: compute train_mean
-# Aggregate array values to compute `leaked_mean`.
 leaked_mean = jnp.mean(...)  # TODO: compute leaked_mean
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))  # TODO: complete assertion check
 assert not jnp.allclose(train_mean, leaked_mean)  # TODO: complete assertion check
@@ -354,9 +350,7 @@ assert jnp.allclose(jnp.mean(train_x - train_mean), 0.0)  # TODO: complete asser
 # Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.
 train_x = jnp.array([0.0, 2.0])
 val_x = jnp.array([100.0])
-# Aggregate array values to compute `train_mean`.
 train_mean = jnp.mean(train_x)
-# Aggregate array values to compute `leaked_mean`.
 leaked_mean = jnp.mean(jnp.concatenate([train_x, val_x]))
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))
 assert not jnp.allclose(train_mean, leaked_mean)

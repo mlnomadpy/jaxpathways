@@ -113,9 +113,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -127,7 +126,6 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 ```
@@ -203,9 +201,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -217,7 +214,6 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 
@@ -281,12 +277,11 @@ The second panel shows final class probabilities at the hidden position: rows ar
 The zero vocabulary head makes initial predictions uniform. Falling loss shows the trained attention/embedding/head system can use the remaining repeated tokens. A held mask position is checked separately; the plot does not show a held-out corpus or establish transfer quality.
 
 ```python
-# Compute figure data for: Masked language modeling: predict hidden tokens — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'selected-token cross-entropy (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `final_probabilities` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 final_probabilities=np.asarray(jax.nn.softmax(mlm_logits(p,corrupted)[:,1,:],axis=-1))
 extra_panel={'kind':'heatmap','values':final_probabilities.tolist(),'rows':['target 0','target 1','target 2'],'columns':['class 0','class 1','class 2'],'unit':'masked-token probability','xlabel':'predicted vocabulary class','ylabel':'masked example','title':'Final predictions at the selected position'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
@@ -294,7 +289,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:59.021149+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:39.886019+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
@@ -318,7 +313,6 @@ logits = mlm_logits(p, corrupted)
 changed_logits = jnp.where(
     selected[..., None], logits, logits + jnp.array([100.0, -50.0, 7.0])
 )
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     masked_ce(changed_logits, tokens, selected),
     masked_ce(logits, tokens, selected),
@@ -326,7 +320,7 @@ np.testing.assert_allclose(
 )
 # Differentiate the objective to obtain `grad_logits` via automatic differentiation.
 grad_logits = jax.grad(masked_ce)(logits, tokens, selected)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(grad_logits)[~np.asarray(selected)], 0.0)
 print('Unselected output logits have zero direct loss gradient.')
 ```
@@ -353,11 +347,9 @@ host_losses = -np.log(
         np.arange(2)[:, None], np.arange(3)[None, :], np.asarray(audit_targets)
     ]
 )
-# Aggregate array values to compute `expected`.
 expected = host_losses[np.asarray(audit_mask)].mean()
 observed = float(masked_ce(audit_logits, audit_targets, audit_mask))
 np.testing.assert_allclose(observed, expected, atol=1e-6)
-# Aggregate array values to compute `sequence_mean`.
 sequence_mean = np.mean(
     [host_losses[i][np.asarray(audit_mask[i])].mean() for i in range(2)]
 )
@@ -422,18 +414,14 @@ Validate outside the transformed objective before dividing by a count.
 
 ### How to write: Reject a missing learning signal — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `signal(...)` — Call `signal` with your updated parameters or inputs from this lesson's workspace.
-- `corrupt_tokens(...)` — Call `corrupt_tokens` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-# Run the boundary check and catch the expected exception:
 try:
     corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype = ...  # TODO: compute corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype
 except ValueError:
@@ -446,7 +434,6 @@ else:
 
 ```python
 # Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-# Run the boundary check and catch the expected exception:
 try:
     corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype=bool), 3)
 except ValueError:

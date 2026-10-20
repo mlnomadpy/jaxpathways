@@ -96,5 +96,13 @@
     }
   ],
   "referenceCommand": "python3 projects/optimizer-audit/tests/check.py --implementation solution --stage all",
-  "setupNote": "Run from the extracted bundle’s top folder with requirements-cpu.txt installed. Complete the initial regression audit before this deeper five-stage optimization audit. Copy the starter scaffold `projects/optimizer-audit/starter/optimization.py` to `projects/optimizer-audit/my_optimization.py`, implement the stage functions in `projects/optimizer-audit/my_optimization.py`, and verify each stage with `python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1` (through `--stage 5`)."
+  "setupNote": "Run from the extracted bundle’s top folder with requirements-cpu.txt installed. Complete the initial regression audit before this deeper five-stage optimization audit. Copy the starter scaffold `projects/optimizer-audit/starter/optimization.py` to `projects/optimizer-audit/my_optimization.py`, implement the stage functions in `projects/optimizer-audit/my_optimization.py`, and verify each stage with `python3 projects/optimizer-audit/tests/check.py --implementation projects/optimizer-audit/my_optimization.py --stage 1` (through `--stage 5`).",
+  "environment": {
+    "requirementsPath": "requirements-figures.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-figures.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-figures.txt"
+    }
+  }
 }

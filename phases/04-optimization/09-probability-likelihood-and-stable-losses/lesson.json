@@ -79,7 +79,7 @@
       {
         "title": "Shift every class score",
         "prediction": "Will adding \\(1000\\) to all class scores change the predicted probabilities?",
-        "code": "# Experiment — Shift every class score: Only relative class scores matter.\nscores = jnp.array([1.0, 2.0, 3.0])\ntarget = 2\n# Evaluate numerically stable log-space cross-entropy/likelihood (`nll`).\nnll = -jax.nn.log_softmax(scores)[target]\n# Evaluate numerically stable log-space cross-entropy/likelihood (`shifted`).\nshifted = -jax.nn.log_softmax(scores + 1000.0)[target]\nassert jnp.allclose(nll, shifted, atol=1e-06)\nreference_loss = jnp.log(jnp.exp(-2.0) + jnp.exp(-1.0) + 1.0)\nassert jnp.allclose(nll, reference_loss, atol=1e-06)",
+        "code": "# Experiment — Shift every class score: Only relative class scores matter.\nscores = jnp.array([1.0, 2.0, 3.0])\ntarget = 2\nnll = -jax.nn.log_softmax(scores)[target]\nshifted = -jax.nn.log_softmax(scores + 1000.0)[target]\nassert jnp.allclose(nll, shifted, atol=1e-06)\nreference_loss = jnp.log(jnp.exp(-2.0) + jnp.exp(-1.0) + 1.0)\nassert jnp.allclose(nll, reference_loss, atol=1e-06)",
         "output": "Both losses are about \\(0.4076\\).",
         "explanation": "Only relative class scores matter. Stable log-softmax respects this invariance."
       }
@@ -92,7 +92,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "A dataset contains labels \\((1,1,1,0)\\). For a model with one constant logit, show that \\(p=3/4\\) is stationary and has less mean loss than \\(p=1/2\\).",
         "hint": "The mean gradient is \\(p-\\bar y\\). Convert the desired probability to log-odds.",
-        "solution": "# Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.\nys = jnp.array([1.0, 1.0, 1.0, 0.0])\n# Aggregate array values to compute `constant_loss`.\nconstant_loss = lambda z: jnp.mean(binary_loss(z, ys))\noptimum = jnp.log(3.0)\nassert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)\nassert constant_loss(optimum) < constant_loss(jnp.array(0.0))",
+        "solution": "# Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.\nys = jnp.array([1.0, 1.0, 1.0, 0.0])\nconstant_loss = lambda z: jnp.mean(binary_loss(z, ys))\noptimum = jnp.log(3.0)\nassert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)\nassert constant_loss(optimum) < constant_loss(jnp.array(0.0))",
         "explanation": "The constant model matches the observed class frequency. It has learned no feature-dependent discrimination."
       },
       {
@@ -134,7 +134,7 @@
       "reading": "The horizontal axis is a logit, which becomes the predicted probability of label \\(1\\) after a sigmoid. The vertical axis is binary cross-entropy loss. The solid curve assumes the observed label is \\(1\\); the dashed curve assumes it is \\(0\\).\n\nAt logit \\(0\\), the predicted probability is \\(0.5\\), and both losses are \\(\\log 2\\approx0.693\\). Moving right lowers the loss for observed label \\(1\\) but raises it for observed label \\(0\\). At logit \\(10\\), the latter loss is about \\(10\\), while the former is close to zero.",
       "connection": "A large positive logit strongly favors label \\(1\\). That confidence is rewarded only if label \\(1\\) is actually observed. For label \\(0\\), the same confidence is a large mistake. The mirror-image curves make the dependence on the target explicit.\n\nLoss is not a probability or classification accuracy, so values above \\(1\\) are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.",
       "alt": "Confidence is rewarded only when it matches the label. The horizontal axis is a logit, which becomes the predicted probability of label \\(1\\) after a sigmoid. The vertical axis is binary cross-entropy loss. The solid curve assumes the observed label is \\(1\\); the dashed curve assumes it is \\(0\\). At logit \\(0\\), the predicted probability is \\(0.5\\), and both losses are \\(\\log 2\\approx0.693\\). Moving right lowers the loss for observed label \\(1\\) but raises it for observed label \\(0\\). At logit \\(10\\), the latter loss is about \\(10\\), while the former is close to zero.",
-      "code": "# Compute figure data for: Confidence is rewarded only when it matches the label\n# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(-10.0, 10.0, 81)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}"
+      "code": "# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(-10.0, 10.0, 81)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}"
     }
   }
 }

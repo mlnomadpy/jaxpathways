@@ -60,7 +60,6 @@ assert jnp.allclose(jnp.array([train, validation, penalized]), jnp.array([1.0, 0
 print('train / validation / objective:', train, validation, penalized)
 
 # Figure data experiment
-# Compute figure data for: Training error and validation error select different penalties
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 2.0, 41)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
@@ -68,7 +67,6 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'y
 # Experiment: Sweep the penalty
 # Experiment — Sweep the penalty: Regularization deliberately trades training fit against a...
 candidates = jnp.array([0.0, 0.5, 2.0])
-# Combine or mask array elements to form `fits`.
 fits = jnp.stack([ridge(X, y, float(a)) for a in candidates])
 training = jnp.array([mse(a, X, y) for a in fits])
 validation = jnp.array([mse(a, Xv, yv) for a in fits])
@@ -105,9 +103,7 @@ assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))
 # Catch preprocessing leakage (Transfer / diagnosis): Validation data must not influence fitted preprocessing.
 train_x = jnp.array([0.0, 2.0])
 val_x = jnp.array([100.0])
-# Aggregate array values to compute `train_mean`.
 train_mean = jnp.mean(train_x)
-# Aggregate array values to compute `leaked_mean`.
 leaked_mean = jnp.mean(jnp.concatenate([train_x, val_x]))
 assert jnp.allclose(val_x - train_mean, jnp.array([99.0]))
 assert not jnp.allclose(train_mean, leaked_mean)

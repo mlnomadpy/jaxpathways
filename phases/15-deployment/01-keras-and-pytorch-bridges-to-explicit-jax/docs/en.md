@@ -136,7 +136,6 @@ params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
 def predict(params, inputs):
     return inputs @ params["kernel"] + params["bias"]
 
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_allclose(predict(params, jnp.zeros((2,3))), np.tile(bias,(2,1)), atol=1e-6)
 ```
 
@@ -205,13 +204,12 @@ With the first convention, a row batch computes $XW+b$. With the transposed stor
 The picture explains this layout contract using an explicit numerical reference. It does not demonstrate that every layer or serialized model can be transferred between frameworks by one transpose. Check activations, bias, preprocessing, and layer-specific conventions against an independent output reference as well.
 
 ```python
-# Compute figure data for: A transpose changes storage layout, not the intended model
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input × output layout', 'values': keras_kernel.tolist(), 'rows': ['input 0', 'input 1', 'input 2'], 'columns': ['output 0', 'output 1'], 'unit': 'weight'}, {'kind': 'heatmap', 'title': 'Output × input layout', 'values': torch_weight.tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1', 'input 2'], 'unit': 'weight'}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:26.277718+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:41:10.842094+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
@@ -252,7 +250,7 @@ Check asymmetric values and independently known outputs, not just tensor dimensi
 # Experiment — Reorder features without changing tensor dimensions: The repair changes the pairing of features and coefficients.
 permutation = [2, 1, 0]
 reordered = x[:, permutation]
-# Convert `wrong_order` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 wrong_order = np.asarray(predict(params, reordered))
 np.testing.assert_allclose(wrong_order[0], [-.9, 4.05], atol=1e-6)
 assert not np.allclose(wrong_order, actual)
@@ -276,16 +274,14 @@ Add a batch with four rows and preserve the same parameters. Verify each row ind
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Construct and reshape `changed` into the target tensor dimensions.
-2. Combine or mask array elements to form `expected`.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Add a batch with four rows and preserve the same parameters.
-# Construct and reshape `changed` into the target tensor dimensions.
 changed = np.arange(...)  # TODO: compute changed
-# Combine or mask array elements to form `expected`.
 expected = np.stack(...)  # TODO: compute expected
 np.testing.assert_allclose(predict(params, changed), expected, atol = ...  # TODO: compute np.testing.assert_allclose(predict(params, changed), expected, atol
 print("Changed batch verified")
@@ -295,9 +291,7 @@ print("Changed batch verified")
 
 ```python
 # Exercise solution: Add a batch with four rows and preserve the same parameters.
-# Construct and reshape `changed` into the target tensor dimensions.
 changed = np.arange(12, dtype=np.float32).reshape(4, 3) / 4
-# Combine or mask array elements to form `expected`.
 expected = np.stack([sum(row[i] * keras_kernel[i] for i in range(3)) + bias for row in changed])
 np.testing.assert_allclose(predict(params, changed), expected, atol=2e-6)
 print("Changed batch verified")
@@ -370,9 +364,8 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Convert `hidden` to a host NumPy array for inspection or verification.
-2. Convert `omitted_relu` to a host NumPy array for inspection or verification.
-3. Execute `np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)`.
+1. Transfer the device result to the host for an independent NumPy comparison.
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -380,15 +373,14 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 # Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
 second_kernel = np.array(...)  # TODO: compute second_kernel
 second_bias = np.array(...)  # TODO: compute second_bias
-# Convert `hidden` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 hidden = np.maximum(...)  # TODO: compute hidden
 bridged_scores = ...  # TODO: compute bridged_scores
 np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
-# Convert `omitted_relu` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 omitted_relu = np.asarray(...)  # TODO: compute omitted_relu
 assert not np.allclose(omitted_relu, bridged_scores)  # TODO: complete assertion check
 positive_probe = np.array(...)  # TODO: compute positive_probe
-# Execute `np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)`.
 np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
 print('Two-layer reference scores:', bridged_scores[:, 0])
 ```
@@ -399,15 +391,14 @@ print('Two-layer reference scores:', bridged_scores[:, 0])
 # Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
 second_kernel = np.array([[2.], [-1.]], np.float32)
 second_bias = np.array([.3], np.float32)
-# Convert `hidden` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 hidden = np.maximum(np.asarray(predict(params, x)), 0.)
 bridged_scores = hidden @ second_kernel + second_bias
 np.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)
-# Convert `omitted_relu` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 omitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias
 assert not np.allclose(omitted_relu, bridged_scores)
 positive_probe = np.array([[1., 2.]], np.float32)
-# Execute `np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)`.
 np.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)
 print('Two-layer reference scores:', bridged_scores[:, 0])
 ```

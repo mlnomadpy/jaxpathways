@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep a precision table listing weight, activation, accumulator and output dtypes; max error and clipping counts on changed inputs; calibration provenance; and storage estimates that include scales and packing.
 
 - Command: `python3 phases/15-deployment/05-weight-activation-and-accumulation-precision/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

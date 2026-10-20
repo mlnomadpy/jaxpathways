@@ -94,29 +94,23 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 def approval_for(bundle, actor, now, expires):
-    # Guard input contract (`not actor or expires <= now`) and fail fast if violated.
     if not actor or expires <= now:
         raise ValueError('invalid reviewer or expiry')
     return {'bundle_hash': digest(bundle), 'reviewer': actor, 'approved_at': now, 'expires_at': expires}
 
 def verify_release(bundle, approval, now, target):
     required = {'model_hash', 'data_hash', 'evaluation_hash', 'image_digest', 'owner', 'target', 'passed'}
-    # Guard input contract (`set(bundle) != required or bundle['passed'] is not True or (not bundle['owner']) or (bundle['target'] != target)`) and fail fast if violated.
     if set(bundle) != required or bundle['passed'] is not True or not bundle['owner'] or bundle['target'] != target:
         raise ValueError('release contract rejected')
     for key in ['model_hash', 'data_hash', 'evaluation_hash']:
         value = bundle[key]
-        # Guard input contract (`not isinstance(value, str) or len(value) != 64 or any((c not in '0123456789abcdef' for c in value))`) and fail fast if violated.
         if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
             raise ValueError('invalid content digest')
     image = bundle['image_digest']
-    # Guard input contract (`not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any((c not in '0123456789abcdef' for c in image[7:]))`) and fail fast if violated.
     if not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any(c not in '0123456789abcdef' for c in image[7:]):
         raise ValueError('resolve a real container digest before approval')
-    # Guard input contract (`approval.get('bundle_hash') != digest(bundle) or not approval.get('reviewer')`) and fail fast if violated.
     if approval.get('bundle_hash') != digest(bundle) or not approval.get('reviewer'):
         raise ValueError('approval belongs to another release')
-    # Guard input contract (`not approval['approved_at'] <= now < approval['expires_at']`) and fail fast if violated.
     if not approval['approved_at'] <= now < approval['expires_at']:
         raise ValueError('approval is not currently valid')
     return True
@@ -134,18 +128,16 @@ def activate(store, version, bundle, approval, now, target):
     temporary.replace(pointer)
     return selected
 
-# Compute deterministic cryptographic digest `bundle` for provenance verification.
 bundle = dict(model_hash=digest({'weight':2,'bias':1}), data_hash=digest(['fixture-v1']), evaluation_hash=digest({'high_slice_mse':.01}), image_digest='sha256:'+'1'*64, owner='course-team', target='cpu-demo', passed=True)
 # This image digest is a format-valid fixture. Real releases must use the observed build digest.
 approval = approval_for(bundle,'reviewer-fixture',now=100,expires=200)
 checks = [True]
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='modelops-') as folder:
     active = activate(folder,'model-v1',bundle,approval,150,'cpu-demo')
     pointer = Path(folder)/'active.json'
     before = pointer.read_bytes()
     for candidate,at,target in [(dict(bundle,model_hash=digest({'weight':3})),150,'cpu-demo'), (bundle,200,'cpu-demo'), (bundle,150,'edge-device')]:
-        # Run the boundary check and catch the expected exception:
         try:
             activate(folder,'rejected-v2',candidate,approval,at,target)
         except ValueError:
@@ -184,29 +176,23 @@ def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
 def approval_for(bundle, actor, now, expires):
-    # Guard input contract (`not actor or expires <= now`) and fail fast if violated.
     if not actor or expires <= now:
         raise ValueError('invalid reviewer or expiry')
     return {'bundle_hash': digest(bundle), 'reviewer': actor, 'approved_at': now, 'expires_at': expires}
 
 def verify_release(bundle, approval, now, target):
     required = {'model_hash', 'data_hash', 'evaluation_hash', 'image_digest', 'owner', 'target', 'passed'}
-    # Guard input contract (`set(bundle) != required or bundle['passed'] is not True or (not bundle['owner']) or (bundle['target'] != target)`) and fail fast if violated.
     if set(bundle) != required or bundle['passed'] is not True or not bundle['owner'] or bundle['target'] != target:
         raise ValueError('release contract rejected')
     for key in ['model_hash', 'data_hash', 'evaluation_hash']:
         value = bundle[key]
-        # Guard input contract (`not isinstance(value, str) or len(value) != 64 or any((c not in '0123456789abcdef' for c in value))`) and fail fast if violated.
         if not isinstance(value, str) or len(value) != 64 or any(c not in '0123456789abcdef' for c in value):
             raise ValueError('invalid content digest')
     image = bundle['image_digest']
-    # Guard input contract (`not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any((c not in '0123456789abcdef' for c in image[7:]))`) and fail fast if violated.
     if not isinstance(image, str) or not image.startswith('sha256:') or len(image) != 71 or any(c not in '0123456789abcdef' for c in image[7:]):
         raise ValueError('resolve a real container digest before approval')
-    # Guard input contract (`approval.get('bundle_hash') != digest(bundle) or not approval.get('reviewer')`) and fail fast if violated.
     if approval.get('bundle_hash') != digest(bundle) or not approval.get('reviewer'):
         raise ValueError('approval belongs to another release')
-    # Guard input contract (`not approval['approved_at'] <= now < approval['expires_at']`) and fail fast if violated.
     if not approval['approved_at'] <= now < approval['expires_at']:
         raise ValueError('approval is not currently valid')
     return True
@@ -224,18 +210,16 @@ def activate(store, version, bundle, approval, now, target):
     temporary.replace(pointer)
     return selected
 
-# Compute deterministic cryptographic digest `bundle` for provenance verification.
 bundle = dict(model_hash=digest({'weight':2,'bias':1}), data_hash=digest(['fixture-v1']), evaluation_hash=digest({'high_slice_mse':.01}), image_digest='sha256:'+'1'*64, owner='course-team', target='cpu-demo', passed=True)
 # This image digest is a format-valid fixture. Real releases must use the observed build digest.
 approval = approval_for(bundle,'reviewer-fixture',now=100,expires=200)
 checks = [True]
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='modelops-') as folder:
     active = activate(folder,'model-v1',bundle,approval,150,'cpu-demo')
     pointer = Path(folder)/'active.json'
     before = pointer.read_bytes()
     for candidate,at,target in [(dict(bundle,model_hash=digest({'weight':3})),150,'cpu-demo'), (bundle,200,'cpu-demo'), (bundle,150,'edge-device')]:
-        # Run the boundary check and catch the expected exception:
         try:
             activate(folder,'rejected-v2',candidate,approval,at,target)
         except ValueError:
@@ -268,13 +252,12 @@ The horizontal categories are four attempted transitions. Height $1$ means the l
 This is a deterministic policy test, not a model-performance comparison or proof of authenticated approval. Use the real model/image identities and a trusted review process when transferring it to deployment.
 
 ```python
-# Compute figure data for: Only the reviewed release passes
 visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong target'],'xlabel':'attempted transition','ylabel':'accepted (1) or rejected (0)','series':[{'label':'observed policy result','y':[int(v) for v in checks]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:51:54.787441+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:42:35.834918+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
@@ -296,7 +279,6 @@ PASS: operations-08
 ```python
 # Experiment — Test the exact expiry boundary: Boundary conventions must be explicit.
 assert verify_release(bundle,approval,199,'cpu-demo')
-# Run the boundary check and catch the expected exception:
 try:
     verify_release(bundle,approval,200,'cpu-demo')
 except ValueError:
@@ -315,19 +297,15 @@ Change the evaluation hash while keeping the model unchanged, and prove the old 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `digest(...)` — Call `digest` with your updated parameters or inputs from this lesson's workspace.
-- `verify_release(...)` — Call `verify_release` with your updated parameters or inputs from this lesson's workspace.
-
 **Step-by-step implementation plan:**
-1. Run the boundary check and catch the expected exception:
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
 rechecked = dict(...)  # TODO: compute rechecked
-# Run the boundary check and catch the expected exception:
 try:
     verify_release(rechecked,approval,150,'cpu-demo')
 except ValueError:
@@ -341,7 +319,6 @@ else:
 ```python
 # Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
 rechecked=dict(bundle,evaluation_hash=digest({'high_slice_mse':9.}))
-# Run the boundary check and catch the expected exception:
 try:
     verify_release(rechecked,approval,150,'cpu-demo')
 except ValueError:
@@ -366,14 +343,8 @@ The owner is part of the reviewed release identity.
 
 ### How to write: Review a changed owner — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `owner(...)` — Call `owner` with your updated parameters or inputs from this lesson's workspace.
-- `digest(...)` — Call `digest` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
-2. Run the boundary check and catch the expected exception:
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -381,7 +352,6 @@ The owner is part of the reviewed release identity.
 # Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
 changed_owner = dict(...)  # TODO: compute changed_owner
 assert digest(changed_owner)  # TODO: complete assertion check
-# Run the boundary check and catch the expected exception:
 try:
     verify_release(changed_owner,approval,150,'cpu-demo')
 except ValueError:
@@ -396,7 +366,6 @@ else:
 # Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
 changed_owner=dict(bundle,owner='different-team')
 assert digest(changed_owner)!=approval['bundle_hash']
-# Run the boundary check and catch the expected exception:
 try:
     verify_release(changed_owner,approval,150,'cpu-demo')
 except ValueError:

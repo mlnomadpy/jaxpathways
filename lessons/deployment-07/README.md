@@ -166,16 +166,14 @@ Append this block to the same main.py and rerun the whole file. Materialize the 
 ```python
 # Step 3 — Launch fresh processes and check both outcomes: Two valid batches pass and three deliberately invalid cases fail.
 accepted, rejected = 0, 0
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     root = Path(folder)
     artifact = root / 'model.json'
     service = root / 'service.py'
     artifact.write_text(json.dumps(MODEL, sort_keys=True))
     service.write_text(SERVICE)
-    # Compute deterministic cryptographic digest `sha` for provenance verification.
     sha = hashlib.sha256(artifact.read_bytes()).hexdigest()
-    # Configure environment variable before initializing the runtime.
     env = dict(os.environ, MODEL_PATH=str(artifact), MODEL_SHA256=sha)
     for values in [[-.5], [-2., 0., 1.5]]:
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps({'inputs': values}), text=True, capture_output=True, env=env, check=True)
@@ -222,16 +220,14 @@ if any(type(v) not in (int,float) or not math.isfinite(v) for v in x):
 print(json.dumps({'predictions':[m['weight']*v+m['bias'] for v in x]},allow_nan=False))
 '''
 accepted, rejected = 0, 0
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
     root = Path(folder)
     artifact = root / 'model.json'
     service = root / 'service.py'
     artifact.write_text(json.dumps(MODEL, sort_keys=True))
     service.write_text(SERVICE)
-    # Compute deterministic cryptographic digest `sha` for provenance verification.
     sha = hashlib.sha256(artifact.read_bytes()).hexdigest()
-    # Configure environment variable before initializing the runtime.
     env = dict(os.environ, MODEL_PATH=str(artifact), MODEL_SHA256=sha)
     for values in [[-.5], [-2., 0., 1.5]]:
         completed = subprocess.run([sys.executable, str(service)], input=json.dumps({'inputs': values}), text=True, capture_output=True, env=env, check=True)
@@ -269,13 +265,12 @@ The horizontal categories separate the two valid request shapes from three delib
 A container must preserve this contract. The Docker lab supplies additional engine, user and readiness evidence; this plot comes from ordinary Python processes and cannot prove image behavior by itself.
 
 ```python
-# Compute figure data for: Observe the process boundary before containerizing it
 visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'xlabel':'local process contract','ylabel':'observed case count','series':[{'label':'executed CPU cases','y':[accepted,rejected]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:42.914381+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:41:25.411099+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3
@@ -313,16 +308,14 @@ Batching changes transport shape, not the per-observation prediction contract. A
 ```python
 # Experiment — Rehash an invalid model and watch validation reject it: Python accepts the nonstandard Infinity token in this fixture...
 invalid_model = dict(MODEL, weight=float('inf'))
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
     invalid_path = Path(directory)/'model.json'
     runner_path = Path(directory)/'service.py'
     # Write the serialized artifact payload to disk.
     invalid_path.write_text(json.dumps(invalid_model))
     runner_path.write_text(SERVICE)
-    # Compute deterministic cryptographic digest `matching_digest` for provenance verification.
     matching_digest = hashlib.sha256(invalid_path.read_bytes()).hexdigest()
-    # Configure environment variable before initializing the runtime.
     invalid_result = subprocess.run([sys.executable,str(runner_path)], input=json.dumps({'inputs':[0.]}), text=True,capture_output=True,env=dict(os.environ,MODEL_PATH=str(invalid_path),MODEL_SHA256=matching_digest),timeout=30)
     assert invalid_result.returncode != 0 and 'invalid coefficient' in invalid_result.stderr
 print('Matching digest did not bypass model validation.')
@@ -337,11 +330,6 @@ Python accepts the nonstandard Infinity token in this fixture JSON; the explicit
 Reject an artifact whose bytes changed after its expected digest was recorded.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `json.dumps(...)` — Call `json.dumps` with your updated parameters or inputs from this lesson's workspace.
-- `encode(...)` — Call `encode` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -383,26 +371,19 @@ The validation boundary should reject before producing JSON predictions.
 
 ### How to write: Reject a nonfinite request — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `request(...)` — Call `request` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
-2. Create an isolated temporary directory to run and inspect artifacts safely:
-3. Configure environment variable before initializing the runtime.
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as tmp:
     p = Path(...)  # TODO: compute p
     (p/'model').write_text(json.dumps(MODEL))
     (p/'service.py').write_text(SERVICE)
-    # Configure environment variable before initializing the runtime.
     env = dict(...)  # TODO: compute env
     bad = subprocess.run(...)  # TODO: compute bad
     assert bad.returncode  # TODO: complete assertion check
@@ -413,12 +394,11 @@ print('Nonfinite input rejected before output.')
 
 ```python
 # Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as tmp:
     p=Path(tmp)
     (p/'model').write_text(json.dumps(MODEL))
     (p/'service.py').write_text(SERVICE)
-    # Configure environment variable before initializing the runtime.
     env=dict(os.environ,MODEL_PATH=str(p/'model'),MODEL_SHA256=hashlib.sha256((p/'model').read_bytes()).hexdigest())
     bad=subprocess.run([sys.executable,str(p/'service.py')],input=json.dumps({'inputs':[float('inf')]}),text=True,capture_output=True,env=env)
     assert bad.returncode != 0
@@ -443,29 +423,20 @@ A legitimate new digest permits loading. Independent expected predictions decide
 
 ### How to write: Check changed behavior after a legitimate artifact replacement — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `replacement(...)` — Call `replacement` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
-2. Compute deterministic cryptographic digest `digest` for provenance verification.
-3. Configure environment variable before initializing the runtime.
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check changed behavior after a legitimate artifact replacement (Transfer / diagnosis): The old model produced 5; the new one produces 7.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
     model_path = Path(...)  # TODO: compute model_path
     runner_path = Path(...)  # TODO: compute runner_path
     model_path.write_text(json.dumps(dict(MODEL,weight = ...  # TODO: compute model_path.write_text(json.dumps(dict(MODEL,weight
     runner_path.write_text(SERVICE)
-    # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest = hashlib.sha256(...)  # TODO: compute digest
-    # Configure environment variable before initializing the runtime.
     changed = subprocess.run(...)  # TODO: compute changed
     values = json.loads(...)  # TODO: compute values
     assert values  # TODO: complete assertion check
@@ -476,15 +447,13 @@ print('New artifact loads, but the old behavioral expectation no longer passes.'
 
 ```python
 # Check changed behavior after a legitimate artifact replacement (Transfer / diagnosis): The old model produced 5; the new one produces 7.
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
     model_path=Path(directory)/'model.json'
     runner_path=Path(directory)/'service.py'
     model_path.write_text(json.dumps(dict(MODEL,weight=3.)))
     runner_path.write_text(SERVICE)
-    # Compute deterministic cryptographic digest `digest` for provenance verification.
     digest=hashlib.sha256(model_path.read_bytes()).hexdigest()
-    # Configure environment variable before initializing the runtime.
     changed=subprocess.run([sys.executable,str(runner_path)],input=json.dumps({'inputs':[2.]}),text=True,capture_output=True,check=True,env=dict(os.environ,MODEL_PATH=str(model_path),MODEL_SHA256=digest),timeout=30)
     values=json.loads(changed.stdout)['predictions']
     assert values==[7.] and values!=[5.]

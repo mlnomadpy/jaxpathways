@@ -3,7 +3,7 @@
 # Prepare the data and state
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
 import numpy as np
@@ -21,23 +21,20 @@ def initial_state():
             "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
             "step":jnp.array(0,jnp.int32)}
 def pack_bytes(raw,capacity=4096):
-    # Guard input contract (`len(raw) > capacity`) and fail fast if violated.
     if len(raw)>capacity:
         raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    # Allocate initialized array `buffer` with the specified shape and dtype.
     buffer = np.zeros(capacity,dtype=np.uint8)
     buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
     return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
 def unpack_bytes(packed):
     length = int(packed["length"])
-    # Guard input contract (`not 0 <= length <= len(packed['buffer'])`) and fail fast if violated.
     if not 0 <= length <= len(packed["buffer"]):
         raise ValueError("Invalid snapshot length")
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 def same_tree(left,right):
     assert jax.tree.structure(left)==jax.tree.structure(right)
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         host_a,host_b = np.asarray(a),np.asarray(b)
         # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
@@ -56,10 +53,8 @@ def step(state,x,y):
     def objective(params):
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         return jnp.mean(residual**2)
-    # Evaluate both scalar loss and parameter gradients in one pass (`(value, gradient)`).
     value,gradient = jax.value_and_grad(objective)(state["params"])
     updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    # Initialize explicit deterministic PRNG key `next_state`.
     next_state = {"params":optax.apply_updates(state["params"],updates),
                   "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
                   "step":state["step"]+1}
@@ -71,7 +66,6 @@ def encode_contract(contract):
     return pack_bytes(json.dumps(contract,sort_keys=True).encode())
 def validate_contract(saved,expected):
     actual = json.loads(unpack_bytes(saved))
-    # Guard input contract (`actual != expected`) and fail fast if violated.
     if actual != expected:
         raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
 workspace = tempfile.TemporaryDirectory()
@@ -81,7 +75,7 @@ root = Path(workspace.name)
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
-# Convert `contract` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
             "key_impl":"threefry2x32","versions":package_versions(),
             "data_sha256":hashlib.sha256(np.asarray(x).tobytes()+np.asarray(y).tobytes()).hexdigest()}
@@ -90,7 +84,6 @@ for _ in range(3):
     state,_ = step(state,x,y)
 checkpoint_path = root/"step_3"
 payload = {"training":state,"contract":encode_contract(contract)}
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as checkpointer:
     checkpointer.save(checkpoint_path,payload)
     checkpointer.wait_until_finished()
@@ -103,7 +96,7 @@ same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
 same_tree(expected_next,restored_next)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
 assert int(restored_next["step"])==4
 print("Restored step:",int(restored["training"]["step"]))
@@ -112,7 +105,7 @@ print("Next update and loss agree; checkpoint exists:",checkpoint_path.exists())
 
 # Step 1 — Prepare the data and state: This setup makes the dataset and software assumptions explicit.
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update("jax_platforms","cpu")
 import jax.numpy as jnp
 import numpy as np
@@ -130,23 +123,20 @@ def initial_state():
             "key_data":jax.random.key_data(jax.random.key(7,impl="threefry2x32")),
             "step":jnp.array(0,jnp.int32)}
 def pack_bytes(raw,capacity=4096):
-    # Guard input contract (`len(raw) > capacity`) and fail fast if violated.
     if len(raw)>capacity:
         raise ValueError("Snapshot exceeds tutorial fixed-byte capacity")
-    # Allocate initialized array `buffer` with the specified shape and dtype.
     buffer = np.zeros(capacity,dtype=np.uint8)
     buffer[:len(raw)] = np.frombuffer(raw,dtype=np.uint8)
     return {"buffer":buffer,"length":np.array(len(raw),dtype=np.int32)}
 def unpack_bytes(packed):
     length = int(packed["length"])
-    # Guard input contract (`not 0 <= length <= len(packed['buffer'])`) and fail fast if violated.
     if not 0 <= length <= len(packed["buffer"]):
         raise ValueError("Invalid snapshot length")
     return np.asarray(packed["buffer"],dtype=np.uint8)[:length].tobytes()
 def same_tree(left,right):
     assert jax.tree.structure(left)==jax.tree.structure(right)
     for a,b in zip(jax.tree.leaves(left),jax.tree.leaves(right)):
-        # Convert `(host_a, host_b)` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         host_a,host_b = np.asarray(a),np.asarray(b)
         # Check tensor shape invariant: `host_a.shape==host_b.shape and host_a.dtype==host_b.dtype`
         assert host_a.shape==host_b.shape and host_a.dtype==host_b.dtype
@@ -154,7 +144,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -165,10 +154,8 @@ def step(state,x,y):
     def objective(params):
         residual = params["weight"]*x+params["bias"]-(y+target_noise)
         return jnp.mean(residual**2)
-    # Evaluate both scalar loss and parameter gradients in one pass (`(value, gradient)`).
     value,gradient = jax.value_and_grad(objective)(state["params"])
     updates,opt_state = tx.update(gradient,state["optimizer"],state["params"])
-    # Initialize explicit deterministic PRNG key `next_state`.
     next_state = {"params":optax.apply_updates(state["params"],updates),
                   "optimizer":opt_state,"key_data":jax.random.key_data(next_key),
                   "step":state["step"]+1}
@@ -180,7 +167,6 @@ def encode_contract(contract):
     return pack_bytes(json.dumps(contract,sort_keys=True).encode())
 def validate_contract(saved,expected):
     actual = json.loads(unpack_bytes(saved))
-    # Guard input contract (`actual != expected`) and fail fast if violated.
     if actual != expected:
         raise ValueError("Checkpoint contract differs: verify dataset, optimizer configuration, key implementation and package versions")
 workspace = tempfile.TemporaryDirectory()
@@ -189,7 +175,7 @@ root = Path(workspace.name)
 # Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
-# Convert `contract` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 contract = {"schema":1,"learning_rate":0.05,"optimizer":"adam",
             "key_impl":"threefry2x32","versions":package_versions(),
             "data_sha256":hashlib.sha256(np.asarray(x).tobytes()+np.asarray(y).tobytes()).hexdigest()}
@@ -198,7 +184,6 @@ for _ in range(3):
     state,_ = step(state,x,y)
 checkpoint_path = root/"step_3"
 payload = {"training":state,"contract":encode_contract(contract)}
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as checkpointer:
     checkpointer.save(checkpoint_path,payload)
     checkpointer.wait_until_finished()
@@ -210,7 +195,7 @@ same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
 same_tree(expected_next,restored_next)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(expected_loss),np.asarray(restored_loss),rtol=1e-6)
 assert int(restored_next["step"])==4
 print("Restored step:",int(restored["training"]["step"]))
@@ -245,7 +230,6 @@ print("Reset key changes the noisy objective and continuation stream")
 # Exercise solution: Advance to step five, save to a new directory, restore and verify step...
 later = state
 for _ in range(2):later,_=step(later,x,y)
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     later_path = Path(tempfile.mkdtemp(dir=root))/"step_5"
     cp.save(later_path,{"training":later,"contract":encode_contract(contract)})
@@ -271,7 +255,6 @@ print('Full restore Adam count: 4; reset memory count: 1; next parameters differ
 # Reference practice: Reject an incompatible update configuration
 # Reject an incompatible update configuration (Challenge): Array restoration does not verify that a learning rate, data...
 changed_contract = dict(contract,learning_rate=0.1)
-# Run the boundary check and catch the expected exception:
 try:
     validate_contract(restored["contract"],changed_contract)
 except ValueError:
@@ -285,7 +268,6 @@ for a,b in zip(jax.tree.leaves(state["params"]),jax.tree.leaves(restored["traini
 # Integer PRNG words must be checked exactly, not with relative float tolerance.
 changed_key = dict(state)
 changed_key["key_data"] = state["key_data"].at[0].add(np.uint32(1))
-# Run the boundary check and catch the expected exception:
 try:
     same_tree(state,changed_key)
 except AssertionError:

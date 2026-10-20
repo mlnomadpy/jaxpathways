@@ -22,7 +22,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -39,10 +38,8 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
         # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 
@@ -55,7 +52,6 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
     # Reduce along axis=1 to compute `within`.
     within=jnp.var(split,axis=1,ddof=1).mean()
@@ -64,7 +60,6 @@ def split_rhat(values):
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -92,7 +87,6 @@ def leapfrog(q,p,step_size,steps):
     def step(i,state):
         q,p=state
         q=q+step_size*p
-        # Combine or mask array elements to form `p`.
         p=p-jnp.where(i<steps-1,step_size,.5*step_size)*force(q)
         return q,p
     return jax.lax.fori_loop(0,steps,step,(q,p))
@@ -109,10 +103,8 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
         # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
-        # Combine or mask array elements to form `next_q`.
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
-    # Run compiled structured control flow via `jax.lax` (`(_, record)`).
     _,record=jax.lax.scan(transition,(initial,key),None,length=draws)
     return record
 
@@ -124,16 +116,14 @@ samples=records[0][:,400:,:]
 def split_rhat(values):
     # Classical split R-hat for one scalar coordinate; not rank-normalized.
     half=values.shape[1]//2
-    # Combine or mask array elements to form `split`.
     split=jnp.concatenate([values[:,:half],values[:,-half:]],axis=0)
-    # Reduce along axis=1 to compute `within`.
+    # Average the sample variance within each split chain.
     within=jnp.var(split,axis=1,ddof=1).mean()
-    # Reduce along axis=1 to compute `between`.
+    # Measure how far split-chain means vary from one another, scaled by half the draws.
     between=half*jnp.var(split.mean(axis=1),ddof=1)
     return jnp.sqrt(((half-1)*within/half+between/half)/within)
 # Vectorize across the batch dimension with `jax.vmap` (`rhats`).
 rhats=jax.vmap(split_rhat,in_axes=2)(samples)
-# Construct and reshape `pooled` into the target tensor dimensions.
 pooled=samples.reshape(-1,2)
 assert jnp.max(jnp.abs(pooled.mean(0)-target_mean))<.15
 assert jnp.max(jnp.abs(jnp.cov(pooled.T)-target_cov))<.2
@@ -142,10 +132,9 @@ print('mean:',pooled.mean(0),'covariance:',jnp.cov(pooled.T))
 print('classical split R-hat:',rhats,'acceptance:',records[1].mean(axis=1))
 
 # Figure data experiment
-# Compute figure data for: Four HMC traces around a known posterior mean
 # Create evenly spaced index values in `indices`.
 indices=np.arange(0,400,10)
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (after fixed discard)","ylabel":"first parameter coordinate","series":[{"label":"chain "+str(i+1),"y":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}
 
 # Experiment: Reverse one trajectory
@@ -187,9 +176,7 @@ assert split_rhat(fake)>5
 q=jnp.array([.4,.8])
 v=jnp.array([.7,-.2])
 eps=.001
-# Perform matrix / vector contraction (`@`) to compute `analytic`.
 analytic=(precision@(q-target_mean))@v
-# Perform matrix / vector contraction (`@`) to compute `auto`.
 auto=force(q)@v
 finite=(potential(q+eps*v)-potential(q-eps*v))/(2*eps)
 np.testing.assert_allclose(auto,analytic,rtol=1e-6)

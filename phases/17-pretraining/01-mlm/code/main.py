@@ -13,9 +13,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -27,7 +26,6 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 
@@ -83,9 +81,8 @@ def masked_ce(logits, targets, selected):
     return jnp.sum(jnp.where(selected, nll, 0.0)) / jnp.sum(selected)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -97,7 +94,6 @@ def mlm_logits(p, corrupted):
     h = p['embedding'][corrupted]
     # Bidirectional single-head attention, deliberately no causal mask.
     scores = h @ jnp.swapaxes(h, -1, -2) / jnp.sqrt(h.shape[-1])
-    # Perform matrix / vector contraction (`@`) to compute `context`.
     context = jax.nn.softmax(scores, axis=-1) @ h
     return context @ p['head']
 
@@ -140,12 +136,11 @@ assert held_loss < 0.2
 print('MLM initial/final/changed-mask:', history[0], history[-1], held_loss)
 
 # Figure data experiment
-# Compute figure data for: Masked language modeling: predict hidden tokens — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'selected-token cross-entropy (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Convert `final_probabilities` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 final_probabilities=np.asarray(jax.nn.softmax(mlm_logits(p,corrupted)[:,1,:],axis=-1))
 extra_panel={'kind':'heatmap','values':final_probabilities.tolist(),'rows':['target 0','target 1','target 2'],'columns':['class 0','class 1','class 2'],'unit':'masked-token probability','xlabel':'predicted vocabulary class','ylabel':'masked example','title':'Final predictions at the selected position'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
@@ -156,7 +151,6 @@ logits = mlm_logits(p, corrupted)
 changed_logits = jnp.where(
     selected[..., None], logits, logits + jnp.array([100.0, -50.0, 7.0])
 )
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     masked_ce(changed_logits, tokens, selected),
     masked_ce(logits, tokens, selected),
@@ -164,7 +158,7 @@ np.testing.assert_allclose(
 )
 # Differentiate the objective to obtain `grad_logits` via automatic differentiation.
 grad_logits = jax.grad(masked_ce)(logits, tokens, selected)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(grad_logits)[~np.asarray(selected)], 0.0)
 print('Unselected output logits have zero direct loss gradient.')
 
@@ -182,11 +176,9 @@ host_losses = -np.log(
         np.arange(2)[:, None], np.arange(3)[None, :], np.asarray(audit_targets)
     ]
 )
-# Aggregate array values to compute `expected`.
 expected = host_losses[np.asarray(audit_mask)].mean()
 observed = float(masked_ce(audit_logits, audit_targets, audit_mask))
 np.testing.assert_allclose(observed, expected, atol=1e-6)
-# Aggregate array values to compute `sequence_mean`.
 sequence_mean = np.mean(
     [host_losses[i][np.asarray(audit_mask[i])].mean() for i in range(2)]
 )
@@ -204,7 +196,6 @@ print('Changed position loss:', first_loss)
 
 # Reference practice: Reject a missing learning signal
 # Reject a missing learning signal (Transfer): A skipped batch requires an explicit training policy.
-# Run the boundary check and catch the expected exception:
 try:
     corrupt_tokens(tokens, jnp.zeros_like(tokens, dtype=bool), 3)
 except ValueError:

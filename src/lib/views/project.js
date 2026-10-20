@@ -69,9 +69,10 @@ export function projectFileLayout(p) {
     ? p.workspaceFile.slice(prefix.length)
     : p.workspaceFile;
   const copiesStarter = starterFile !== p.workspaceFile;
+  const requirementsPath = p.environment.requirementsPath;
   const treeLines = [
     '<extracted-zip-or-repo-root>/          # 1. Run all terminal commands from here',
-    '├── requirements-cpu.txt               # 2. Install pinned CPU dependencies in .venv',
+    `├── ${requirementsPath} # 2. Install this project's pinned CPU dependencies in .venv`,
     `└── projects/${p.id}/`,
     '    ├── README.md                      # Full specification, math contracts & figures',
     ...(copiesStarter
@@ -88,6 +89,8 @@ export function projectFileLayout(p) {
   return {
     starterFile,
     workspaceFile: p.workspaceFile,
+    requirementsPath,
+    pythonCompatibility: p.environment.pythonCompatibility,
     solutionFile,
     checkerFile,
     readmeFile,
@@ -134,7 +137,7 @@ export function renderProject(p) {
     </div>
     </div>
     <ol class="project-workflow-strip">
-    <li><strong>Step 1 · Unpack &amp; activate</strong><span>Extract <code>downloads/${escape(p.id)}.zip</code> (or open the repository root) and activate your <code>.venv</code> with <code>requirements-cpu.txt</code>.</span></li>
+    <li><strong>Step 1 · Unpack &amp; activate</strong><span>Extract <code>downloads/${escape(p.id)}.zip</code> (or open the repository root) and install <code>${escape(layout.requirementsPath)}</code> in your <code>.venv</code>.</span></li>
     <li><strong>Step 2 · Prepare your file</strong><span>${layout.copiesStarter ? `Copy <code>${escape(layout.starterFile)}</code> to <code>${escape(layout.workspaceFile)}</code> and open <code>${escape(layout.workspaceFile)}</code> in your editor.` : `Open <code>${escape(layout.workspaceFile)}</code> in your editor and locate the Stage 1 function.`}</span></li>
     <li><strong>Step 3 · Implement &amp; check each stage</strong><span>Write the code for Stage 1 in <code>${escape(layout.workspaceFile)}</code>, run <code>${escape(layout.checkerFile)}</code> from the top folder, and repeat through Stage ${p.stages.length}.</span></li>
     <li><strong>Step 4 · Record evidence</strong><span>Save the passing terminal output and changed-condition diagnosis in your <a href="notebook.html?project=${escape(p.id)}&route=${escape(p.pathwayId)}#portfolio">Notebook Portfolio</a>.</span></li>
@@ -159,7 +162,7 @@ export function renderProject(p) {
     <option value="windows">Windows PowerShell</option>
     </select>
     <div id="project-environment"></div>
-    <p>Work in <code>${escape(p.workspaceFile)}</code>. Implement the TODO functions before running the stage checks. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
+    <p>Use Python ${escape(layout.pythonCompatibility)} for this environment. Work in <code>${escape(p.workspaceFile)}</code>. Implement the TODO functions before running the stage checks. The untouched starter deliberately fails.</p>${p.prepare ? `<h3>Prepare your own file</h3>${p.prepare.map((c) => command(c.command, c.label)).join('')}` : ''}<details class="project-reference">
     <summary>Check the reference implementation separately</summary>${command(p.referenceCommand || `python3 projects/${p.id}/tests/check.py --implementation solution --stage all`, 'Reference command')}<p>Run this command to inspect the reference solution output before testing your own implementation in <code>${escape(p.workspaceFile)}</code>.</p>
     </details>
     </details>

@@ -1,15 +1,15 @@
 """Batch a function with vmap: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX array and transformation APIs
 import jax
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Write a single-example dot-product predictor
 def predict(weight, x):
     return jnp.dot(weight, x)
 weight = jnp.array([2., -1.])
 
-# Step 3: Verify shapes and numerical invariants
+# Map the predictor over three input rows
 batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])
 # Vectorize across the batch dimension with `jax.vmap` (`batched`).
 batched = jax.vmap(predict, in_axes=(None, 0))
@@ -28,14 +28,12 @@ print(batched(weight, batch))
 assert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))
 
 # Figure data experiment
-# Compute figure data for: Vectorization keeps one result per row
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'prediction', 'series': [{'label': 'vmap output', 'y': batched(weight, batch).tolist()}]}
 
 # Experiment: Verify against a loop and a matrix product
 # Experiment — Verify against a loop and a matrix product: The loop makes example selection explicit; the matrix product...
 loop_predictions = jnp.stack([predict(weight, row) for row in batch])
 vector_predictions = batched(weight, batch)
-# Perform matrix / vector contraction (`@`) to compute `matrix_predictions`.
 matrix_predictions = batch @ weight
 # Check tensor shape invariant: `vector_predictions.shape == (3,)`
 assert vector_predictions.shape == (3,)

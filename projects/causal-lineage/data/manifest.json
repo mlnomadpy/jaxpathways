@@ -1,0 +1,33 @@
+{
+  "source_id": "gutenberg-11",
+  "title": "Alice's Adventures in Wonderland",
+  "author": "Lewis Carroll",
+  "edition": "Project Gutenberg eBook 11, Millennium Fulcrum Edition 3.0",
+  "source_url": "https://www.gutenberg.org/cache/epub/11/pg11.txt",
+  "metadata_url": "https://www.gutenberg.org/ebooks/11",
+  "retrieved_at": "2026-10-20",
+  "rights": "Project Gutenberg lists this text as public domain in the United States. The included source file retains its terms. Check local copyright law before reuse.",
+  "source_sha256": "01b38ea4c710a84bc18d0bd41271a5a1a92b94e97b2812f4dece97d4a694725e",
+  "split_unit": "chapter",
+  "split_map": {
+    "I": "train",
+    "II": "train",
+    "III": "train",
+    "IV": "train",
+    "V": "validation",
+    "VI": "test",
+    "VII": "test",
+    "VIII": "test"
+  },
+  "passage_selection": "At most 32 evenly spaced eligible paragraphs per chapter, matching embedding-lineage.",
+  "instruction_selection": "First eight adjacent eligible paragraph pairs in each train chapter; adaptation only; no validation/test examples.",
+  "data_files": {
+    "corpus.jsonl": "1f6ec9eb2251c589f1e00ba5fcddadb476d4a81d506520f08dacf6fb46d08aee",
+    "instructions.jsonl": "c17fb512b37948794de1ddc93222482fb67071429a47751523b9741e3b6ba4aa"
+  },
+  "limitations": [
+    "One public-domain English novel; held-out chapters share author, characters, setting and style with train chapters.",
+    "The continuation records are derived from narrative adjacency and are not human preference labels or evidence of general instruction following.",
+    "The pilot is small CPU training and makes no 300M-scale or production claim."
+  ]
+}

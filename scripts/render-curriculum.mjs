@@ -19,8 +19,23 @@ for(const phase of course.phases)for(const lesson of phase.lessons)if(lesson.sta
   loadLessonEvidence(lesson);
 }
 writeFileSync(new URL('public/curriculum.json',root),JSON.stringify(course,null,2)+'\n');
+const navigationCourse = {
+  ...course,
+  phases: course.phases.map((phase) => ({
+    ...phase,
+    lessons: phase.lessons.map(({ content, artifacts, execution, visualArtifact, ...lesson }) => lesson),
+  })),
+};
+mkdirSync(new URL('public/api/v1/',root),{recursive:true});
+writeFileSync(new URL('public/api/v1/course-navigation.json',root),JSON.stringify(navigationCourse)+'\n');
 const currentPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.json',root)));
 const currentRelease=JSON.parse(readFileSync(new URL('curriculum/releases.json',root)))[0];
+const assessmentRegistry=JSON.parse(readFileSync(new URL('curriculum/assessments.json',root)));
+const readmePath=new URL('README.md',root);
+const readme=readFileSync(readmePath,'utf8');
+const currentStatus=`<!-- COURSE-STATUS:START -->\nCurrent registry: **${course.phases.length} phases, ${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').length} authored lessons, ${course.pathways.length} pathways, ${course.roles.length} career routes, ${course.projectIds.length} registered practice projects, ${assessmentRegistry.length} synthesis assessments, and ${currentPlans.length} planned model-lifecycle capstones.** Read the [curriculum](CURRICULUM.md) and [current status](docs/course-status.md) for scope and evidence boundaries.\n<!-- COURSE-STATUS:END -->`;
+if(!/<!-- COURSE-STATUS:START -->[\s\S]*?<!-- COURSE-STATUS:END -->/.test(readme))throw Error('README current status markers are missing');
+writeFileSync(readmePath,readme.replace(/<!-- COURSE-STATUS:START -->[\s\S]*?<!-- COURSE-STATUS:END -->/,currentStatus));
 writeFileSync(new URL('docs/course-status.md',root),`# Current course status\n\nGenerated from canonical registries for version ${currentRelease.version} (${currentRelease.date}). Historical audits describe their own inspected revisions.\n\n- ${course.phases.length} phases and ${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').length} authored lessons.\n- ${course.pathways.length} pathways and ${course.roles.length} career routes.\n- ${course.projectIds.length} registered practice projects.\n- ${currentPlans.length} separately labeled planned model-lifecycle capstones.\n\nAuthored means teaching sources exist. Recorded CPU reference execution, named accelerator qualification, learner work and independent review are separate evidence. Read [the book audit](book-audit-2026-10-20.md) and [repair record](book-repairs-2026-10-20.md) for findings and verification limits.\n`);
 const phaseName=id=>{const p=course.phases.find(p=>p.id===id);return `${p.number}: ${p.title}`;};
 let text=`# JAX Pathways curriculum\n\n${course.title}.\n\nLearn the shared foundation, build complete systems, then specialize. Notebooks are runnable companions to lessons. The course manifest is [curriculum/course.json](curriculum/course.json); authored content lives in each lesson folder; this document is generated with \`npm run curriculum:docs\`.\n\n## Start here\n\nIf you know basic Python, begin at phase 00. If you already use NumPy, use the foundations route to translate that experience into transformed functions. Math is introduced when needed, with optimization providing the common bridge to applications.\n\nA CPU is sufficient for the early lessons. TPU and multi-device exercises declare their hardware explicitly.\n\n## The course\n\n`;
@@ -75,7 +90,14 @@ for(const phase of course.phases)for(const lesson of phase.lessons){
   for(const [local,source] of [['script','scriptSource'],['notebook','notebookSource']])writeFileSync(new URL(lesson.artifacts[source],root),readFileSync(new URL('public/'+lesson.artifacts[local],root)));
   const c=lesson.content;
   writeFileSync(new URL(lesson.artifacts.quizSource,root),JSON.stringify({schemaVersion:1,lessonId:lesson.id,questions:[{stage:'post',question:c.question,options:c.options,correct:c.answer,explanation:c.explanation}]},null,2)+'\n');
-  const evidence=`# Evidence: ${lesson.title}\n\nCopy this template into your own portfolio and fill it after running your modified exercise.\n\n## Evidence required\n\n${lesson.evidence}\n\n- Command: \`python3 ${lesson.artifacts.scriptSource}\`\n- Working directory: repository root\n- Python / JAX / NumPy versions: \n- Hardware and device: \n- My prediction before running: \n- My change to the exercise: \n- Exit code and meaningful output: \n- Why the result supports or contradicts my prediction: \n- Checkpoint result: \n- Artifact link or saved filename: \n- Portfolio status: saved in local workspace\n`;
+  const beginnerWorkspace = lesson.content?.setupBundle;
+  const evidenceCommand = beginnerWorkspace
+    ? 'macOS / Linux: `source .venv/bin/activate && python first_experiment.py`; PowerShell: `.\\.venv\\Scripts\\python.exe first_experiment.py`'
+    : `\`python3 ${lesson.artifacts.scriptSource}\``;
+  const evidenceFolder = beginnerWorkspace
+    ? 'Extracted `jax-start-here` beginner workspace'
+    : 'Repository root';
+  const evidence=`# Evidence: ${lesson.title}\n\nCopy this template into your own portfolio and fill it after running your modified exercise.\n\n## Evidence required\n\n${lesson.evidence}\n\n- Command: ${evidenceCommand}\n- Working directory: ${evidenceFolder}\n- Python / JAX / NumPy versions: \n- Hardware and device: \n- My prediction before running: \n- My change to the exercise: \n- Exit code and meaningful output: \n- Why the result supports or contradicts my prediction: \n- Checkpoint result: \n- Artifact link or saved filename: \n- Portfolio status: saved in local workspace\n`;
   writeFileSync(new URL(lesson.artifacts.evidenceSource,root),evidence);
   writeFileSync(new URL('public/'+lesson.artifacts.evidence,root),evidence);
   writeFileSync(new URL(lesson.path+'/README.md',root),`# ${lesson.title}\n\n[Read](docs/en.md) · [Code](code/main.py) · [Notebook](notebooks/exercise.ipynb) · [Quiz](quiz.json) · [Evidence template](outputs/evidence.md)\n\nRun from the repository root: \`python3 ${lesson.artifacts.scriptSource}\`\n\nEdit lesson.json to update this lesson, then run \`npm run build\`. Other files in this bundle are generated.\n`);

@@ -88,11 +88,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -108,14 +105,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 ```
@@ -156,7 +150,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -204,11 +197,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -224,14 +214,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -264,7 +251,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -282,7 +268,7 @@ assert records['reward'].shape == (8, 64)
 assert bool(final.done.all())
 assert bool(jnp.all(jnp.sum(records['terminated'] | records['truncated'], axis=0) == 1))
 assert bool(jnp.all(jnp.where(records['active'], 0., records['reward']) == 0.))
-# Reduce along axis=0 to compute `episode_returns`.
+# Sum rewards over rollout time while retaining one return per environment.
 episode_returns = records['reward'].sum(axis=0)
 print('return mean:', float(episode_returns.mean()))
 print('active environments by transition:', records['active'].sum(axis=1))
@@ -307,13 +293,12 @@ The horizontal axis is the transition index; the vertical axis counts environmen
 This curve is not reward or policy quality: a fast-ending policy could succeed, fail or exploit a termination bug in a different task. Here the transition tests establish that early endings are goals. The fixed $(8,64)$ reward array retains later rows, but their active flags are false. Changing the seed can move individual counts while preserving these invariants.
 
 ```python
-# Compute figure data for: The live batch shrinks while the array shape stays fixed
 visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','ylabel':'active environments before transition','series':[{'label':'uniform random policy','y':records['active'].sum(1).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:49:07.271650+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T19:25:57.489742+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716
@@ -369,7 +354,7 @@ Change the batch to $7$ environments and the horizon to $5$. Verify array shapes
 **Key functions & syntax to use:**
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
@@ -416,11 +401,6 @@ Record the mask before calling step; the successful transition still belongs to 
 </details>
 
 ### How to write: Catch a shifted mask — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `mask(...)` — Call `mask` with your updated parameters or inputs from this lesson's workspace.
-- `State(...)` — Call `State` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Accumulate the next contribution into `correct`.
@@ -482,11 +462,10 @@ The two start states need different numbers of actions. Compare each return agai
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
-2. Combine or mask array elements to form `expected`.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -494,7 +473,6 @@ The two start states need different numbers of actions. Compare each return agai
 # Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(...)  # TODO: compute _, easy
-# Combine or mask array elements to form `expected`.
 expected = jnp.where(...)  # TODO: compute expected
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)  # TODO: complete assertion check
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: complete assertion check
@@ -506,7 +484,6 @@ assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: 
 # Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
-# Combine or mask array elements to form `expected`.
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)
 assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)
 assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])

@@ -42,7 +42,6 @@ assert grads.keys() == params.keys()
 assert loss(updated) < value
 
 # Figure data experiment
-# Compute figure data for: A gradient tree matches parameter leaves
 visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'ylabel': 'parameter value', 'series': [{'label': 'before', 'y': [float(params['weight'][0]), float(params['weight'][1]), float(params['bias'])]}, {'label': 'after', 'y': [float(updated['weight'][0]), float(updated['weight'][1]), float(updated['bias'])]}]}
 
 # Experiment: Verify every gradient leaf
@@ -65,7 +64,6 @@ assert jnp.array_equal(rebuilt["bias"],params["bias"])
 # Exercise solution: Compute the squared norm of all gradient leaves.
 # Transform every leaf of the parameter PyTree (`norm_squared`).
 norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
-# Aggregate array values to compute `manual`.
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
 assert jnp.allclose(norm_squared, manual)
 assert jnp.allclose(norm_squared, 96.)
@@ -83,7 +81,6 @@ assert jnp.allclose(g["scale"],-4.)
 
 # Reference practice: Repair a mismatched update tree
 # Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.
-# Run the boundary check and catch the expected exception:
 try:
     jax.tree.map(lambda p,g:p-0.05*g,params,{"weight":grads["weight"]})
 except ValueError:

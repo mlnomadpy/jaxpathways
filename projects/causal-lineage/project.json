@@ -1,0 +1,73 @@
+{
+  "schemaVersion": 1,
+  "id": "causal-lineage",
+  "title": "Trace a tiny causal Transformer from pretraining to instruction-style adaptation",
+  "pathwayId": "models",
+  "status": "authored",
+  "hardware": "CPU-only tiny Transformer pilot; physical accelerator execution is not tested",
+  "source": "projects/causal-lineage/README.md",
+  "requiredLessonIds": [
+    "state-01",
+    "optimization-02",
+    "optimization-04",
+    "networks-03",
+    "recovery-03",
+    "recovery-04",
+    "transformers-01",
+    "transformers-02",
+    "transformers-03",
+    "pretraining-01",
+    "posttraining-01"
+  ],
+  "stages": [
+    {
+      "id": "1",
+      "title": "Causal next-token pretraining",
+      "command": "python3 projects/causal-lineage/tests/check.py --implementation projects/causal-lineage/my_model.py --stage 1 --output runs/causal-lineage/learner-run",
+      "evidence": "Independent causal mask, shifted target and token-normalized CE checks; train-only tokenizer; chapter-held-out validation; source/config/model/tokenizer-bound base checkpoint.",
+      "expected": "PASS causal-lineage stage 1: causal checks, next-token pretraining, and held-out validation receipt",
+      "diagnosis": "Inspect query/key mask orientation, PAD-key exclusion, one-token shift and the valid-target denominator before changing model capacity.",
+      "codeGuide": "Implement causal_attention_mask, shift_tokens, masked_causal_cross_entropy, and sample_next_token in projects/causal-lineage/my_model.py. The independent verifier checks NumPy loss, target alignment, future-token invariance and an empty target mask."
+    },
+    {
+      "id": "2",
+      "title": "Instruction-style continuation, held-out perplexity and export",
+      "command": "python3 projects/causal-lineage/tests/check.py --implementation projects/causal-lineage/my_model.py --stage 2 --output runs/causal-lineage/learner-run",
+      "evidence": "Requires the exact stage-1 predecessor; adapts only response targets from train chapters; compares pretrained/adapted next-token perplexity with a unigram baseline on identical validation/test tokens; checks parent tampering and fresh-process export sampling.",
+      "expected": "PASS causal-lineage all: independent causal checks, real-data stages, checkpoint predecessor rejection, held-out unigram comparison, and fresh-process export sampling",
+      "diagnosis": "Verify that only continuation response tokens contribute to adaptation loss and that the stage-2 manifest names the actual stage-1 checkpoint hash.",
+      "codeGuide": "Use the same output directory from stage 1. Inspect the train-only adaptation labels, exact checkpoint predecessor, target counts, baseline comparison, source hashes and exported sample; the narrow passage-continuation exercise does not establish general instruction following."
+    }
+  ],
+  "rubric": [
+    "Causal attention excludes all future keys and padding keys, with a perturbation test on the real decoder.",
+    "Shifted next-token targets and token-normalized cross-entropy agree with an independent NumPy oracle.",
+    "Tokenizer and adaptation examples use only training chapters; chapter groups remain isolated.",
+    "Adaptation is a response-masked next-token objective with source continuation text, not preference optimization or RLHF.",
+    "Stage 2 inherits and validates the actual pretraining checkpoint, and rejects a substituted parent.",
+    "Held-out pretraining and adapted perplexity are compared against a unigram baseline on identical tokens.",
+    "A fresh process reloads verified export bytes and performs seeded next-token sampling.",
+    "The result is labeled a small CPU pilot and is kept distinct from the planned approximately-300M capstone."
+  ],
+  "workspaceFile": "projects/causal-lineage/my_model.py",
+  "prepare": [
+    {
+      "label": "macOS / Linux",
+      "command": "cp projects/causal-lineage/starter/model.py projects/causal-lineage/my_model.py"
+    },
+    {
+      "label": "Windows PowerShell",
+      "command": "Copy-Item projects/causal-lineage/starter/model.py projects/causal-lineage/my_model.py"
+    }
+  ],
+  "referenceCommand": "python3 projects/causal-lineage/tests/check.py --implementation solution --stage all",
+  "setupNote": "Use the extracted workspace root and requirements-research.txt with Python >=3.11,<3.15. The checker defaults to the starter, which raises until implemented. Reuse one output directory for stages 1 then 2; no runtime data download, hosted service, upload or accelerator is required.",
+  "environment": {
+    "requirementsPath": "requirements-research.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-research.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-research.txt"
+    }
+  }
+}

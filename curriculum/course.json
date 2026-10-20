@@ -20798,6 +20798,17 @@
           ]
         },
         {
+          "title": "Export and verify an inference release",
+          "phaseIds": [
+            "deployment"
+          ],
+          "deliverable": "A portable model artifact with a checked prediction contract and a CPU inference capacity report.",
+          "criteria": [
+            "Verify framework conversion and exported predictions against an independent reference.",
+            "Compare precision error and report measured batch latency separately from accelerator or edge qualification."
+          ]
+        },
+        {
           "title": "Diagnose and improve training speed",
           "phaseIds": [
             "performance"
@@ -21827,6 +21838,17 @@
           ]
         },
         {
+          "title": "Package and verify a serving release",
+          "phaseIds": [
+            "deployment"
+          ],
+          "deliverable": "A containerized inference service with verified artifact identity, readiness and request checks.",
+          "criteria": [
+            "Reject an incompatible request and verify readiness across process and container boundaries.",
+            "Record CPU capacity measurements and identify which device or network claims need separate target evidence."
+          ]
+        },
+        {
           "title": "Rehearse failure and recovery",
           "phaseIds": [
             "operations"
@@ -22063,6 +22085,7 @@
     "tpu-workflow-audit",
     "tpu-systems-audit",
     "reproducible-experiments",
-    "embedding-lineage"
+    "embedding-lineage",
+    "causal-lineage"
   ]
 }

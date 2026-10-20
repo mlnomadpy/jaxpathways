@@ -29,10 +29,6 @@ Now suppose Python finds the file but cannot import JAX. That is a different bou
 
 Once the calculation runs, retain the command and printed result together. Tomorrow, the command tells you how to reproduce the result; a screenshot of the number alone cannot identify the file or environment that produced it.
 
-$$
-\text{shape}(X) = (B, D), \qquad \text{dtype}(X) \in \{\text{float32}, \text{int32}\}
-$$
-
 ### Where the first result comes from
 
 **Predict:** The notebook imports JAX, but the terminal script does not. What should you compare first?
@@ -57,7 +53,7 @@ Compare the Python executables used by the notebook kernel and terminal. They ca
 
 Use the “Download the beginner workspace” button above. Open your Downloads folder and unzip jax-start-here.zip. On Windows, right-click it and choose Extract All; on macOS, double-click it. Open the extracted jax-start-here folder. Do not work inside the ZIP preview.
 
-You should see first_experiment.py, requirements-cpu.txt, and START-HERE.md. first_experiment.py is the program you will run. requirements-cpu.txt lists the package versions to install. START-HERE.md is a copy of these instructions. Keep your own files alongside them, outside .venv. You do not need to clone the repository for this lesson.
+You should see first_experiment.py, requirements-beginner.txt, and START-HERE.md. first_experiment.py is the program you will run. requirements-beginner.txt lists the package versions to install. START-HERE.md is a copy of these instructions. Keep your own files alongside them, outside .venv. You do not need to clone the repository for this lesson.
 
 ## 2. Check that Python is installed
 
@@ -65,7 +61,7 @@ Open a terminal. On macOS, press Command–Space, type Terminal, and press Retur
 
 Choose the command for your operating system below. Type or paste one line, then press Enter. Do not type a prompt symbol such as $ or PS>. If you see >>>, you are already inside the Python interpreter; type `exit()` and press Enter to return to the terminal before using these commands.
 
-The course CPU examples were checked with Python 3.14.3. These commands select Python $3.14$. If you get “command not found” or “not recognized,” Python $3.14$ is not available through that command yet. Open the official Python downloads link in the references, select a Python $3.14$ installer for macOS or Windows, and follow the installer. On Windows, the launcher/install manager supplies py; on macOS, the Python installer supplies python3.14. Close and reopen the terminal after installing, then retry the version check. Linux installation depends on the distribution: use its Python $3.14$ installation instructions and return here once the version check works. Do not continue by substituting an old system Python without checking compatibility.
+The course setup supports Python >=3.11,<3.15. The CPU example was checked with Python 3.14.3, and the commands below use Python 3.14. If Python 3.14 is unavailable, choose another supported release in that range and replace `3.14` in the commands below with its major and minor version, such as `3.12`. Open the official Python downloads link in the references, select a supported installer for macOS or Windows, and follow the installer. On Windows, the launcher or install manager supplies `py`; on macOS, the Python installer supplies `python3.14`. Close and reopen the terminal after installing, then retry the version check. Linux installation depends on the distribution: use its matching Python installation instructions and return here once the version check works. Do not continue with a Python version outside the supported range.
 
 **macOS / Linux — terminal**
 
@@ -74,7 +70,7 @@ The course CPU examples were checked with Python 3.14.3. These commands select P
 python3.14 --version
 ```
 
-**Expected:** A line beginning Python 3.14. The last patch number may differ from the tested 3.14.3.
+**Expected:** A line beginning Python 3.14. The patch number may differ from the tested 3.14.3.
 
 **Windows — PowerShell**
 
@@ -83,7 +79,7 @@ python3.14 --version
 py -3.14 --version
 ```
 
-**Expected:** A line beginning Python 3.14. If py exists but cannot find 3.14, install that Python version first.
+**Expected:** A line beginning Python 3.14. If `py` cannot find it, install Python 3.14 first.
 
 ## 3. Put the terminal in the right folder
 
@@ -91,7 +87,7 @@ The program and requirements file are in the extracted workspace. A command usin
 
 macOS: type cd followed by a space, drag the extracted jax-start-here folder from Finder into the terminal, then press Enter. Dragging inserts its actual path, including spaces correctly. Linux: use cd with the actual folder path in quotes; your file manager may offer “Open in Terminal.” Windows: open the extracted folder in File Explorer, click its address bar, type powershell, and press Enter. That opens PowerShell in this folder.
 
-Run the appropriate check below. If requirements-cpu.txt is missing, move into the extracted folder containing that file before continuing. “Repository root” in later lessons means the top folder of the full course checkout; this beginner workspace is enough for the current experiment.
+Run the appropriate check below. If requirements-beginner.txt is missing, move into the extracted folder containing that file before continuing. “Repository root” in later lessons means the top folder of the full course checkout; this beginner workspace is enough for the current experiment.
 
 **macOS / Linux — check folder and files**
 
@@ -101,7 +97,7 @@ pwd
 ls
 ```
 
-**Expected:** The path ends with your extracted workspace folder, and the file list includes first_experiment.py and requirements-cpu.txt.
+**Expected:** The path ends with your extracted workspace folder, and the file list includes first_experiment.py and requirements-beginner.txt.
 
 **Windows — check folder and files**
 
@@ -111,7 +107,7 @@ Get-Location
 Get-ChildItem
 ```
 
-**Expected:** The displayed folder contains first_experiment.py and requirements-cpu.txt.
+**Expected:** The displayed folder contains first_experiment.py and requirements-beginner.txt.
 
 ## 4. Create the environment and install the packages
 
@@ -119,7 +115,7 @@ Run the lines for your operating system in order, staying in the workspace folde
 
 On macOS/Linux, source loads the activation script into this terminal. You may see (.venv) at the start of the prompt. The important check is sys.executable: it should point inside this workspace’s .venv/bin. On Windows we use .venv\Scripts\python.exe explicitly, so no activation script or execution-policy change is needed.
 
-The pip command is the package installer. -$r$ means “read the package list from this file.” It downloads and installs packages into the selected environment. Let it finish. Download messages are normal; a traceback or an ERROR means the step did not succeed. The final import check below is more useful than guessing from the download log. The pins describe the tested CPU course setup; accelerator installation is a later lesson.
+The pip command is the package installer. `-r` means “read the package list from this file.” It downloads and installs packages into the selected environment. Let it finish. Download messages are normal; a traceback or an ERROR means the step did not succeed. The final import check below is more useful than guessing from the download log. The pins in requirements-beginner.txt describe the minimal tested JAX/NumPy CPU setup; accelerator installation is a later lesson.
 
 **macOS / Linux — run one line at a time**
 
@@ -128,11 +124,11 @@ The pip command is the package installer. -$r$ means “read the package list fr
 python3.14 -m venv .venv
 source .venv/bin/activate
 python -c "import sys; print(sys.executable)"
-python -m pip install -r requirements-cpu.txt
-python -c "import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)"
+python -m pip install -r requirements-beginner.txt
+python -c "import jax, numpy; print(jax.__version__, numpy.__version__)"
 ```
 
-**Expected:** The interpreter path includes .venv/bin/python. The final line is 0.9.2 2.4.4 0.2.8.
+**Expected:** The interpreter path includes .venv/bin/python. The final line is 0.9.2 2.4.4.
 
 **Windows — run one line at a time**
 
@@ -140,11 +136,11 @@ python -c "import jax, numpy, optax; print(jax.__version__, numpy.__version__, o
 # Windows — run one line at a time
 py -3.14 -m venv .venv
 .\.venv\Scripts\python.exe -c "import sys; print(sys.executable)"
-.\.venv\Scripts\python.exe -m pip install -r requirements-cpu.txt
-.\.venv\Scripts\python.exe -c "import jax, numpy, optax; print(jax.__version__, numpy.__version__, optax.__version__)"
+.\.venv\Scripts\python.exe -m pip install -r requirements-beginner.txt
+.\.venv\Scripts\python.exe -c "import jax, numpy; print(jax.__version__, numpy.__version__)"
 ```
 
-**Expected:** The interpreter path includes .venv\Scripts\python.exe. The final line is 0.9.2 2.4.4 0.2.8. These PowerShell instructions have not been executed on Windows in this project.
+**Expected:** The interpreter path includes .venv\Scripts\python.exe. The final line is 0.9.2 2.4.4. These PowerShell instructions have not been executed on Windows in this project.
 
 ## 5. Run your first saved program
 
@@ -181,7 +177,7 @@ Sum: 6.0
 
 In the editor, find `arange(4, ...)` in first_experiment.py and change $4$ to $6$. The array now contains $0$ through $5$. Predict their sum before running. Also change the final assert from `== 6.0` to `== 15.0`, because that assertion is the program’s expected-result check. Save the file with its .py extension; a filename such as first_experiment.py.txt will not match the run command.
 
-Run it again using the Step $5$ command. The final line should be Sum: $15.0$. If it still says $6.0$, check that you saved the file and that the terminal is in the same workspace folder you edited.
+Run it again using the Step 5 command. The final line should be Sum: $15.0$. If it still says $6.0$, check that you saved the file and that the terminal is in the same workspace folder you edited.
 
 After that successful run, the commands below run it once more and save its printed output to my-first-run.txt. Open that text file and check that the versions, CPU information, and sum are present. Add a note in your editor explaining the one change and your prediction. The > symbol saves output to a file and replaces its previous contents; choose another filename when you want to keep multiple runs.
 
@@ -205,7 +201,7 @@ python first_experiment.py > my-first-run.txt
 
 ## 7. Resume when you open a new terminal
 
-The .venv folder stays on disk when you close the terminal. On macOS/Linux, activation only applied to the terminal you used; a new terminal needs it again. Move into the workspace folder using Step $3$, then use the commands below. You do not need to reinstall the packages on every session.
+The .venv folder stays on disk when you close the terminal. On macOS/Linux, activation only applied to the terminal you used; a new terminal needs it again. Move into the workspace folder using Step 3, then use the commands below. You do not need to reinstall the packages on every session.
 
 On Windows, move into the workspace and use the environment’s full Python path again. To leave an activated macOS/Linux environment, type deactivate. That changes the terminal’s command selection; it does not delete your code or installed packages.
 
@@ -230,21 +226,21 @@ python first_experiment.py
 
 ## When a step fails: match the symptom
 
-“No such file” / “Cannot find path” for requirements-cpu.txt: check Step $3$. The file must be in the current folder. Do not create an empty replacement file.
+“No such file” / “Cannot find path” for requirements-beginner.txt: check Step 3. The file must be in the current folder. Do not create an empty replacement file.
 
-“No module named jax”: first check which Python is running. Repeat the interpreter-path check in Step $4$, then install using that exact environment interpreter. A different terminal or editor may be selecting a different environment.
+“No module named jax”: first check which Python is running. Repeat the interpreter-path check in Step 4, then install using that exact environment interpreter. A different terminal or editor may be selecting a different environment.
 
 “No module named venv” or a message that ensurepip is unavailable: your Python distribution is missing its environment component. On Linux, use the distribution’s matching Python/venv package instructions; package names vary. This needs fixing before the environment can be created.
 
-“No matching distribution found” or a failed jaxlib wheel download: record the Python version, operating system, CPU architecture, and full error. Check the JAX installation support table linked below. Do not remove the version pins or switch to TPU packages as a blind workaround. CPU platform support is not identical across operating systems; this repository’s Windows walkthrough is documented but not execution-validated.
+“No matching distribution found” or a failed jaxlib wheel download: record the Python version, operating system, CPU architecture, and full error. Check the JAX installation support table linked below. Keep the version pins and use only a Python release in the supported range; do not switch to TPU packages as a blind workaround. CPU platform support is not identical across operating systems; this repository’s Windows walkthrough is documented but not execution-validated.
 
 A SyntaxError after pasting a terminal command: check whether you pasted it into a Python file or at the >>> prompt. Terminal commands and Python statements have different places to run.
 
 Sum: $15.0$ followed by AssertionError: you changed the array length but left the old expected sum in the assertion. Update the expectation after deriving the new result; do not delete the check merely to hide the failure.
 
-## Step 1: Set up imports and input tensors
+## Select the CPU backend before JAX loads
 
-Import the required JAX modules and define the initial inputs for set up your learning workspace.
+Set JAX_PLATFORMS before importing JAX so this starter uses the CPU runtime.
 
 ```python
 import os
@@ -252,30 +248,36 @@ import os
 os.environ["JAX_PLATFORMS"] = "cpu"
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The environment variable must be set before the JAX import: JAX reads platform selection while initializing its runtime.
 
-## Step 2: Apply the core JAX transformation
+## Print the interpreter and JAX runtime details
 
-Write the core computation and transformation step over the initialized inputs.
+Import Python platform information and JAX, then report the selected backend and devices.
 
 ```python
 import platform
 import jax
+import numpy as np
+print("Python:", platform.python_version())
+print("JAX:", jax.__version__)
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+These lines identify the interpreter and backend that produced the result. They are environment evidence, not part of the sum calculation.
 
-## Step 3: Verify shapes and numerical invariants
+## Sum four JAX array elements and check the result
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Print the NumPy version, create [0, 1, 2, 3] as float32, and compare its sum with the hand-computed value.
 
 ```python
-import numpy as np
+print("NumPy:", np.__version__)
+print("Backend:", jax.default_backend())
+print("Devices:", jax.devices())
 x = jax.numpy.arange(4, dtype=jax.numpy.float32)
+print("Sum:", float(x.sum()))
 assert float(x.sum()) == 6.0
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The array sum is 0 + 1 + 2 + 3 = 6. The equality check is exact here because these small integers are represented exactly in float32. The assembled blocks include the same version and device diagnostics as the complete example.
 
 ## Run the example
 
@@ -284,7 +286,6 @@ These assertions lock in the exact numerical contract before you run the full ex
 import os
 # Choose CPU before importing JAX for this first experiment.
 os.environ["JAX_PLATFORMS"] = "cpu"
-# Import required JAX, NumPy, and standard-library modules.
 import platform
 import jax
 import numpy as np
@@ -310,11 +311,11 @@ Expected: The package versions match the pins, Backend is cpu, and the last line
 
 ### Read the figure
 
-Each index shows the initialized JAX array element alongside its elementwise square on the active device.
+The horizontal axis is the element index; the vertical axis shows x=[0, 1, 2, 3] and x squared=[0, 1, 4, 9]. The figure is generated by the separate visual experiment and recorded as a reference; first_experiment.py prints the array sum and does not run Matplotlib.
 
 ### Connect it to the computation
 
-Running this check confirms that JAX, NumPy, and Matplotlib execute deterministically in your local environment.
+The plot makes the four input values and their elementwise squares visible. It is generated by the lesson figure pipeline; the starter program itself computes and prints only the sum.
 
 ```python
 # Plot the 1D verification array `x` and its elementwise square `x ** 2`:
@@ -324,9 +325,15 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:05.346444+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:46:46.183428+00:00. JAX 0.9.2.
 
 ```text
+Python: 3.14.3
+JAX: 0.9.2
+NumPy: 2.4.4
+Backend: cpu
+Devices: [CpuDevice(id=0)]
+Sum: 6.0
 Python: 3.14.3
 JAX: 0.9.2
 NumPy: 2.4.4
@@ -340,7 +347,7 @@ PASS: welcome-01
 
 ## Make it yours
 
-Edit the starter as shown in Step $6$: change the array length from $4$ to $6$ and the expected sum from $6$ to $15$. Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.
+Edit the starter as shown in Step 6: change the array length from $4$ to $6$ and the expected sum from $6$ to $15$. Save, rerun, and keep my-first-run.txt plus a note explaining why the result changed.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 

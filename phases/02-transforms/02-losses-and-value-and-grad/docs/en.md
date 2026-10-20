@@ -77,20 +77,20 @@ A single mean can hide an important individual error. Keep residuals or another 
 
 In a larger model, auxiliary data might contain predictions or accuracy. This interface avoids confusing model outputs, logging information, and the objective. It also makes it easier to test what the step actually optimizes.
 
-## Step 1: Set up imports and input tensors
+## Import JAX differentiation and array operations
 
-Import the required JAX modules and define the initial inputs for losses and value_and_grad.
+Import jax and jax.numpy for the loss and its derivative.
 
 ```python
 import jax
 import jax.numpy as jnp
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+The loss below is scalar-valued, which is the input contract for value_and_grad.
 
-## Step 2: Apply the core JAX transformation
+## Define the three-example squared-error loss
 
-Write the core computation and transformation step over the initialized inputs.
+Set $x=[1,2,3]$, choose targets $y=2x$, and average squared prediction errors for a scalar weight.
 
 ```python
 x = jnp.array([1., 2., 3.])
@@ -99,11 +99,11 @@ def loss(weight):
     return jnp.mean((weight * x - y) ** 2)
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+At weight 1, the residuals are [-1,-2,-3]. The mean squared error is 14/3; averaging matters because it scales the gradient too.
 
-## Step 3: Verify shapes and numerical invariants
+## Compute loss and gradient in one evaluation
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Call value_and_grad at weight 1 and compare both results with hand calculations.
 
 ```python
 value, gradient = jax.value_and_grad(loss)(1.0)
@@ -111,7 +111,7 @@ assert jnp.allclose(value, 14./3.)
 assert jnp.allclose(gradient, -28./3.)
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+The derivative is the mean of $2x(wx-y)$, giving $-28/3$ at $w=1$. Checking value and derivative catches errors in both the objective and its reduction.
 
 ## Run the example
 
@@ -153,7 +153,6 @@ The loss tells us how wrong the predictions are. The derivative tells us how tha
 The dashed line below zero is a negative slope, not a negative squared loss. Likewise, an intersection of the two curves away from the minimum has no special optimization meaning. `value_and_grad` returns these two different pieces of information together.
 
 ```python
-# Compute figure data for: Loss and slope answer different questions
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 4.0, 81)
 # Differentiate the objective to obtain gradients `visual_data`.
@@ -162,7 +161,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:19.594199+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:47:29.571200+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211

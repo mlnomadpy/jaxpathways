@@ -97,7 +97,7 @@ Append the mean loss and a NumPy float64 solve; run python main.py.
 ```python
 # Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
@@ -124,7 +124,7 @@ assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
 # Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
-# Convert `np_w` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
@@ -153,13 +153,12 @@ The feature matrix makes the third prediction equal the sum of the first two. Ma
 Least squares balances this conflict. For each feature column, the residual contributions cancel, giving $X^{\mathsf T}r=0$. That orthogonality, rather than zero residual on every row, is the optimality condition. The unequal bar heights are an unavoidable limitation of this model, not evidence that the solver failed.
 
 ```python
-# Compute figure data for: Least squares balances unavoidable residuals
 visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': 'target / prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'least-squares fit', 'y': (X @ w).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:37.409448+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:24.998666+00:00. JAX 0.9.2.
 
 ```text
 weights / rank / MSE: [0.6666669 1.6666665] 2 0.11111113
@@ -176,7 +175,6 @@ PASS: optimization-06
 ```python
 # Experiment — Duplicate a feature: Fit quality and coefficient uniqueness are different questions.
 a = jnp.array([1.0, 2.0, 3.0])
-# Combine or mask array elements to form `duplicate`.
 duplicate = jnp.stack([a, a], axis=1)
 w_dup, _, rank_dup, _ = jnp.linalg.lstsq(duplicate, 3 * a, rcond=None)
 assert int(rank_dup) == 1

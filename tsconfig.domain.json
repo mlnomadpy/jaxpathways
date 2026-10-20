@@ -42,22 +42,11 @@
     "src/lib/views/pathway.js",
     "src/lib/views/project.js",
     "src/lib/views/routes.js",
-    "src/scripts/boot.js",
-    "src/scripts/browser-actions.js",
-    "src/scripts/choices.js",
-    "src/scripts/copy.js",
-    "src/scripts/course-navigation.js",
-    "src/scripts/developer-controls.js",
-    "src/scripts/entries/assessment.js",
-    "src/scripts/entries/developer.js",
-    "src/scripts/experience.js",
-    "src/scripts/github-stars.js",
-    "src/scripts/home.js",
-    "src/scripts/navigation.js",
-    "src/scripts/reading-tools.js",
-    "src/scripts/release-notices.js",
-    "src/scripts/resume.js",
-    "src/types/**/*.ts"
+    "src/types/**/*.ts",
+    "src/scripts/**/*.js",
+    "src/scripts/workspace.js",
+    "src/scripts/notebook/backup.js",
+    "src/scripts/notebook/evidence.js",
+    "src/scripts/notebook/summary.js"
   ]
 }
-

@@ -12,11 +12,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -32,14 +29,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -71,7 +65,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -106,10 +99,8 @@ def exact_return(theta, horizon=8):
     right = states+1
     def backup(_, values):
         q_left = -.01 + values[left]
-        # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
         return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))
-    # Allocate initialized array `values` with the specified shape and dtype.
     values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))
     return jnp.mean(values[:2])
 
@@ -133,19 +124,15 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
         return (theta, key), exact_return(theta, horizon)
-    # Run a compiled sequential scan over the time/step axis (`((theta, _), history)`).
     (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)
     return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))
 
 
 def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):
-    # Guard input contract (`updates < 1 or batch_size < 1 or horizon < 1 or (epochs < 1) or (learning_rate <= 0)`) and fail fast if violated.
     if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:
         raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')
-    # Guard input contract (`method not in ('ppo', 'reinforce')`) and fail fast if violated.
     if method not in ('ppo', 'reinforce'):
         raise ValueError('unknown method')
-    # Guard input contract (`method == 'reinforce' and epochs != 1`) and fail fast if violated.
     if method == 'reinforce' and epochs != 1:
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
@@ -156,11 +143,9 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
     # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
-    # Guard input contract (`theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta)))`) and fail fast if violated.
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
     seeds = tuple(seeds)
-    # Guard input contract (`len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or (horizon < 1)`) and fail fast if violated.
     if len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or horizon < 1:
         raise ValueError('provide at least two distinct evaluation seeds and positive sizes')
     # Create or split explicit PRNG key(s) (`returns`) for reproducible randomness.
@@ -200,11 +185,8 @@ import numpy as np
 
 # Define `State` module / container with explicit state and forward pass:
 class State(NamedTuple):
-    # Execute `position: jax.Array`
     position: jax.Array
-    # Execute `elapsed: jax.Array`
     elapsed: jax.Array
-    # Execute `done: jax.Array`
     done: jax.Array
 
 
@@ -220,14 +202,11 @@ def step(state, action, horizon=8):
     states absorb without more rewards/events. No implicit reset or lost final observation.
     """
     active = ~state.done
-    # Combine or mask array elements to form `proposed`.
     proposed = jnp.clip(state.position + 2 * action - 1, 0, 3)
-    # Combine or mask array elements to form `position`.
     position = jnp.where(active, proposed, state.position)
     elapsed = state.elapsed + active.astype(jnp.int32)
     terminated = active & (position == 3)
     truncated = active & ~terminated & (elapsed >= horizon)
-    # Combine or mask array elements to form `reward`.
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
@@ -259,7 +238,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
-    # Run a compiled sequential scan over the time/step axis (`(final, records)`).
     final, records = jax.lax.scan(body, states, time_keys)
     return final, records
 
@@ -268,7 +246,6 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Define `policy_loss(theta, records, method, clip)` to evaluate the objective and its automatic derivatives:
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -294,10 +271,8 @@ def exact_return(theta, horizon=8):
     right = states+1
     def backup(_, values):
         q_left = -.01 + values[left]
-        # Combine or mask array elements to form `q_right`.
         q_right = jnp.where(right == 3, 1., -.01 + values[right])
         return jnp.concatenate(((1-p)*q_left+p*q_right, jnp.zeros(1)))
-    # Allocate initialized array `values` with the specified shape and dtype.
     values = jax.lax.fori_loop(0, horizon, backup, jnp.zeros(4))
     return jnp.mean(values[:2])
 
@@ -308,32 +283,26 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
     theta = jnp.zeros(3)
-    # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
-        # Define `epoch(_, candidate)` to evaluate the objective and its automatic derivatives:
         def epoch(_, candidate):
             # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
         return (theta, key), exact_return(theta, horizon)
-    # Run a compiled sequential scan over the time/step axis (`((theta, _), history)`).
     (theta, _), history = jax.lax.scan(update, (theta, key), None, length=updates)
     return theta, jnp.concatenate((exact_return(jnp.zeros(3), horizon)[None], history))
 
 
 def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3, learning_rate=.5):
-    # Guard input contract (`updates < 1 or batch_size < 1 or horizon < 1 or (epochs < 1) or (learning_rate <= 0)`) and fail fast if violated.
     if updates < 1 or batch_size < 1 or horizon < 1 or epochs < 1 or learning_rate <= 0:
         raise ValueError('positive updates, batch_size, horizon, epochs and learning_rate required')
-    # Guard input contract (`method not in ('ppo', 'reinforce')`) and fail fast if violated.
     if method not in ('ppo', 'reinforce'):
         raise ValueError('unknown method')
-    # Guard input contract (`method == 'reinforce' and epochs != 1`) and fail fast if violated.
     if method == 'reinforce' and epochs != 1:
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
@@ -343,11 +312,9 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
     # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
-    # Guard input contract (`theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta)))`) and fail fast if violated.
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
     seeds = tuple(seeds)
-    # Guard input contract (`len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or (horizon < 1)`) and fail fast if violated.
     if len(seeds) < 2 or len(set(seeds)) != len(seeds) or batch_size < 1 or horizon < 1:
         raise ValueError('provide at least two distinct evaluation seeds and positive sizes')
     # Create or split explicit PRNG key(s) (`returns`) for reproducible randomness.
@@ -376,7 +343,6 @@ print('uniform baseline mean:', baseline['mean'])
 print('across-agent mean / sample sd:', trained_means.mean(),trained_means.std(ddof=1))
 
 # Figure data experiment
-# Compute figure data for: Held-out returns for independently trained agents
 visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'training seed','ylabel':'mean episode return','series':[{'label':'held-out sampled','y':trained_means.tolist()},{'label':'exact expectation','y':exact_means.tolist()},{'label':'uniform baseline (shared)','y':[baseline['mean']]*5}]}
 
 # Experiment: Check baselines with known returns
@@ -394,9 +360,7 @@ print('left / random / right:', left['mean'], baseline['mean'], right['mean'])
 before = np.array(policies[0],copy=True)
 a = evaluate(policies[0],evaluation_seeds)
 b = evaluate(policies[0],evaluation_seeds)
-# Execute `np.testing.assert_array_equal(before,policies[0])`
 np.testing.assert_array_equal(before,policies[0])
-# Execute `np.testing.assert_array_equal(a['episode_returns'],b['episod`
 np.testing.assert_array_equal(a['episode_returns'],b['episode_returns'])
 c = evaluate(policies[0],[2000,2001,2002,2003])
 assert not np.array_equal(a['episode_returns'],c['episode_returns'])
@@ -414,7 +378,6 @@ print('mean improvement across trained agents:', deltas.mean())
 # Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
 means = np.array([1.,0.])
 counts = np.array([1,9])
-# Aggregate array values to compute `wrong`.
 wrong = means.mean()
 right = np.average(means,weights=counts)
 assert wrong == .5 and right == .1
@@ -422,7 +385,6 @@ assert wrong == .5 and right == .1
 # Reference practice: Distinguish spread from standard error
 # Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
 values = np.array([.8,.9,1.])
-# Aggregate array values to compute `sd`.
 sd = values.std(ddof=1)
 naive_se = sd/np.sqrt(3)
 assert abs(sd-.1) < 1e-12

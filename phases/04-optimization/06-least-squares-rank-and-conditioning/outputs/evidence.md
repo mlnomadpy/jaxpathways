@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Save the hand solution, residual orthogonality, duplicate-column ambiguity, perturbation table and NumPy comparison.
 
 - Command: `python3 phases/04-optimization/06-least-squares-rank-and-conditioning/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-05",
-  "contentHash": "c229344c4a2c52d7669643c92b4b25cb997cf90ecb36600645fff53e8c8cbe68",
-  "executedAt": "2026-10-20T10:50:41.243511+00:00",
+  "contentHash": "6915c92427edd7dc7828b2493c9568ebbbb621ad19e0438d40af95196c5c7b9e",
+  "executedAt": "2026-10-20T21:41:23.697401+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\n<class 'jax.numpy.float32'> max absolute error 0.0\n<class 'jax.numpy.float16'> max absolute error 0.0010547637939453125\n<class 'jax.numpy.bfloat16'> max absolute error 0.006171703338623047\nW8A32 simulated output error 0.008031368255615234\nW4A32 simulated output error 0.14571428298950195\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nClipped values: 1 reconstructed: [0.19685039 0.8976378  1.        ]\nAffine accumulators: [[5, 15]] output codes: [[2, 7]]\nCorrect / missing zero point / clipped: [[0.625, 0.9375]] [[-0.125, 0.5625]] [[0.52734375, 0.52734375]]\nSmall-channel max error; shared / per-channel: 0.03 7.874053e-05\nZero channel handled\nW8A8 fixture error 0.00742650032043457\nCode-origin invariance and bias-only zero input verified.\nWeight-plus-scale subtotals: 24 14 11\nPASS: deployment-05\n",
   "notebookCells": [
     {
-      "sourceHash": "c84aab026baa98296ddd4ec55a293a08044df3a833fa94f639a35bc2af26f132",
+      "sourceHash": "f413ab479aaebcc9cad74cce6b507d92b23378082681d4e5e34be7a89ec57455",
       "outputs": []
     },
     {
-      "sourceHash": "7e7d3ab5a6a3750770c20ff70c4632be3710225e5048a98d79012c8b99fc969d",
+      "sourceHash": "94709e5946253acf6ba2cb83ee00326af6ea9ecb78911e96c4a0c21d51b70834",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "sourceHash": "0c46b5f8dd46f047fdc9a8f3c8c3e48626a893688f37987471752284789dd2bd",
+      "sourceHash": "9b4efa53a693a2a854d4d909e56d70c2f3183c6f8b6634fdfd209ae9771f97ad",
       "outputs": []
     },
     {
@@ -49,7 +49,7 @@
       ]
     },
     {
-      "sourceHash": "0bfbd482a3d7224b387d2015bc89d18c23655d7e2427e31ec4185b977c78f3cb",
+      "sourceHash": "b2d3b969dfa07257af35600c3532b4950ef5e82cf17597fdb7f29cdfe382bff1",
       "outputs": [
         {
           "output_type": "stream",
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "3792708110eaeb14764a6f9b2713e5b81ac394a05ba621e58074ada0b198d96b",
+      "sourceHash": "5543e0239264a994d22d0cdd9e57da5ead295306dc596ed38f5a0a6908904081",
       "outputs": [
         {
           "output_type": "stream",
@@ -93,7 +93,7 @@
       ]
     },
     {
-      "sourceHash": "e3825743b20fefc8cd49b0cd0dabfbccaeaa994ad51bc1077862e121ff2aecfb",
+      "sourceHash": "e76530515d2789ed1a6bebe75e0b11edd35d4b8fda9a9c80d1613270191527aa",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,7 +105,7 @@
       ]
     },
     {
-      "sourceHash": "e76e6b30f58e400a5ad3e236fd636208558f87a28a244e3d5faa49befff40e82",
+      "sourceHash": "4e695c3e89b28766999e3e3a554d13dfb4ff3a6c5e6f4b71fcd1314de4b88b82",
       "outputs": [
         {
           "output_type": "stream",
@@ -118,7 +118,7 @@
       ]
     },
     {
-      "sourceHash": "cdd0e17b1f1720a3a0b416e570934051b26857a4e0a021871efe089be46f702d",
+      "sourceHash": "7e948f6c4423cc15d19a661a93d986a923f751500447c260ecdd5d026a991a3d",
       "outputs": [
         {
           "output_type": "stream",
@@ -130,11 +130,11 @@
       ]
     },
     {
-      "sourceHash": "05f208bc714918a31d0b4d4ff5f9a5a9ee3a19ddb3c01892ff9a5ff4ed183341",
+      "sourceHash": "a3464658ce79b681946c84a37d8a62b64f66ba40edd0aeb9a0c142fcf328ff7d",
       "outputs": []
     },
     {
-      "sourceHash": "b39b296575538c429a325e1c349e7e05fcb9125069841efacb8144ab15306c4c",
+      "sourceHash": "c72b1ea6597e2d665a91f86ec9fd395bb40c25b84e9dea9168ba8ee2565032d4",
       "outputs": [
         {
           "output_type": "stream",
@@ -146,11 +146,11 @@
       ]
     },
     {
-      "sourceHash": "03d2c187ce66ee839f05f3699c4c3a743d8801d0d1813bcc43d754962ac2e9e8",
+      "sourceHash": "3779f5b133edb41c7674e71b47879c290b8f373448fb9234eff3b07e543a8264",
       "outputs": []
     },
     {
-      "sourceHash": "34c45dc59881d6c1fa37a1ed3948b098b7b0cad44ab45138aa36703397fd176d",
+      "sourceHash": "847831c01c8620ffff784f69166eb85e59cd00b679c9851a5581d49347153c03",
       "outputs": [
         {
           "output_type": "stream",
@@ -162,11 +162,11 @@
       ]
     },
     {
-      "sourceHash": "dd318e93db4448409361e13fdf33816a2bd40f0477a14965b6de42bee1735eb1",
+      "sourceHash": "29b1d77cd2b94e8c4efc6600220ccd03eba0cc7f48961b46ba7b0cf6f5e245e0",
       "outputs": []
     },
     {
-      "sourceHash": "347231a721184597459781d812f4c5be1b96c29c358fd7d07d72fdddf0e48c73",
+      "sourceHash": "63de9c5586a2c06e0500ae6fa848020d4becb72dc8f0728897c757cdf348302e",
       "outputs": [
         {
           "output_type": "stream",

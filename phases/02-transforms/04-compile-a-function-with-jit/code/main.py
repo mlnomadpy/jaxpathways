@@ -1,27 +1,26 @@
 """Compile a function with jit: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Define mean squared error and a four-example input matrix
 import time
 import jax
 import jax.numpy as jnp
 def loss(w, x, y):
     return jnp.mean((x @ w - y) ** 2)
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
 
-# Step 2: Apply the core JAX transformation
+# Compile the loss and run its first synchronized call
 w = jnp.array([1., 2., -1.])
 y = jnp.ones(4)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(loss)
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 first = compiled(w, x, y).block_until_ready()
 
-# Step 3: Verify shapes and numerical invariants
+# Measure a repeat call and compare numerical results
 first_seconds = time.perf_counter() - t0
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 assert jnp.allclose(first, loss(w, x, y))
@@ -33,18 +32,17 @@ import jax
 import jax.numpy as jnp
 def loss(w, x, y):
     return jnp.mean((x @ w - y) ** 2)
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(12, dtype=jnp.float32).reshape(4, 3) / 10.
 w = jnp.array([1., 2., -1.])
 y = jnp.ones(4)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(loss)
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 first = compiled(w, x, y).block_until_ready()
 first_seconds = time.perf_counter() - t0
 t0 = time.perf_counter()
-# Synchronize host execution until asynchronous device computation completes.
+# Wait for device work to finish before timing it or comparing its result on the host.
 second = compiled(w, x, y).block_until_ready()
 repeat_seconds = time.perf_counter() - t0
 print("Loss:", float(second))
@@ -53,7 +51,6 @@ assert jnp.allclose(first, loss(w, x, y))
 assert jnp.allclose(second, first)
 
 # Figure data experiment
-# Compute figure data for: Compilation preserves the result
 visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat compiled'], 'ylabel': 'mean squared loss', 'series': [{'label': 'evaluated loss', 'y': [float(loss(w, x, y)), float(first), float(second)]}]}
 
 # Experiment: Derive predictions and gradients outside the transform
@@ -61,7 +58,6 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
-# Perform matrix / vector contraction (`@`) to compute `manual_gradient`.
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
 # Differentiate the objective to obtain `compiled_value_gradient` via automatic differentiation.
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
@@ -72,12 +68,12 @@ assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
 # Experiment — Collect a synchronized latency sample: The report includes Python invocation and completed numerical...
 import statistics
 def completed_samples(function, repeats=20):
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     function(w, x, y).block_until_ready()
     durations = []
     for _ in range(repeats):
         start = time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         function(w, x, y).block_until_ready()
         durations.append(time.perf_counter() - start)
     return durations
@@ -99,7 +95,6 @@ assert jnp.allclose(g, expected_g)
 # Reference practice: Check that a new value remains runtime data
 # Check that a new value remains runtime data (Practice): The same computation accepts different runtime values.
 for new_w in (w, w + 0.25):
-    # Aggregate array values to compute `expected`.
     expected = jnp.mean((x @ new_w - y) ** 2)
     observed = compiled(new_w, x, y)
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)

@@ -76,7 +76,6 @@ Create main.py with digest_obj and atomic_write_json so interrupted writes never
 
 ```python
 # Step 1 — Define deterministic hashing and atomic checkpoint writes: Writing to a temporary sibling file, flushing with fsync, and...
-# Import hashlib for this computation.
 import hashlib
 import json
 import os
@@ -88,7 +87,6 @@ import jax.numpy as jnp
 import numpy as np
 
 
-# Function `digest_obj(value)` implementing this stage's computation:
 def digest_obj(value):
     # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
@@ -97,23 +95,16 @@ def digest_obj(value):
 
 
 
-# Function `atomic_write_json(path, payload)` implementing this stage's computation:
 def atomic_write_json(path, payload):
     # Read or serialize artifact data on disk (`path`).
     path = Path(path)
-    # Run `path.parent.mkdir` to perform the next check or state transition.
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `path.with_suffix` to compute `tmp`.
     tmp = path.with_suffix(path.suffix + ".tmp")
     # Enter managed runtime/context scope for this block:
     with tmp.open("w", encoding="utf-8") as f:
-        # Run `json.dump` to perform the next check or state transition.
         json.dump(payload, f, sort_keys=True)
-        # Run `f.flush` to perform the next check or state transition.
         f.flush()
-        # Run `os.fsync` to perform the next check or state transition.
         os.fsync(f.fileno())
-    # Run `os.replace` to perform the next check or state transition.
     os.replace(tmp, path)
 ```
 
@@ -129,27 +120,21 @@ Append run_tpu_ready_job to main.py.
 def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0.05):
     # Read or serialize artifact data on disk (`run_dir`).
     run_dir = Path(run_dir)
-    # Run `run_dir.mkdir` to perform the next check or state transition.
     run_dir.mkdir(parents=True, exist_ok=True)
-    # Compute `events_path` from `run_dir / "events.jsonl"`
     events_path = run_dir / "events.jsonl"
-    # Compute `ckpt_path` from `run_dir / "checkpoint-latest.json"`
     ckpt_path = run_dir / "checkpoint-latest.json"
 
-    # Function `emit(event)` implementing this stage's computation:
     def emit(event, **fields):
         # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `record`.
         record = {"event": event, "backend": jax.default_backend(), "devices": jax.device_count(), **fields}
         # Enter managed runtime/context scope for this block:
         with events_path.open("a", encoding="utf-8") as f:
-            # Compute `f.write(json.dumps(record, sort_keys` as `True) + "\n")`.
             f.write(json.dumps(record, sort_keys=True) + "\n")
         # Return `record` to the caller.
         return record
 
     # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
-    # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
     config = {"schema": 1, "seed": int(seed), "lr": float(lr), "data": "linspace64-target-3x-minus-0.5-v1", "batch_size": 16, "optimizer": "momentum-0.8-noise-key-v1"}
@@ -188,31 +173,23 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         raise ValueError(f"checkpoint step {step} exceeds requested final step {steps}")
 
     @jax.jit
-    # Function `train_step(w, b, m_w, m_b, ...)` implementing this stage's computation:
     def train_step(w, b, m_w, m_b, key):
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
         key, subkey = jax.random.split(key)
         # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
-        # Compute `xb, yb` from `x[idx], target_y[idx]`
         xb, yb = x[idx], target_y[idx]
 
-        # Function `loss_fn(w_in, b_in)` implementing this stage's computation:
         def loss_fn(w_in, b_in):
             # Perform matrix contraction / projection to compute `pred`.
             pred = xb @ w_in + b_in
             # Return `jnp.mean((pred - yb) ** 2)` to the caller.
             return jnp.mean((pred - yb) ** 2)
 
-        # Evaluate both scalar loss and parameter gradients in one pass (`(loss, (gw, gb))`).
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
-        # Compute `m_w` from `0.8 * m_w + gw`
         m_w = 0.8 * m_w + gw
-        # Compute `m_b` from `0.8 * m_b + gb`
         m_b = 0.8 * m_b + gb
-        # Compute `w` from `w - lr * m_w`
         w = w - lr * m_w
-        # Compute `b` from `b - lr * m_b`
         b = b - lr * m_b
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
@@ -223,18 +200,14 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
     # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
-    # Run `train_step` to compute `warm`.
     warm = train_step(w, b, m_w, m_b, key)
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(warm)
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
-    # Run `emit` to perform the next check or state transition.
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
-    # Compute `step_losses` from `[]`
     step_losses = []
-    # Compute `step_times_ms` from `[]`
     step_times_ms = []
     while step < steps:
         t_step = time.perf_counter()
@@ -260,7 +233,6 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             atomic_write_json(ckpt_path, state_payload)
             emit("checkpoint", step=step, state_hash=state_payload["state_hash"])
 
-    # Run `emit` to perform the next check or state transition.
     emit("completed", step=step, state_hash=state_payload["state_hash"])
     # Return `{'final_step': step, 'state_hash': state_payload['state_hash'], 'w': float(np.asarray(w).squeeze()), 'b': float(np.asarray(b).squeeze()), 'warmup_ms': warmup_ms, 'step_losses': step_losses, 'step_times_ms': step_times_ms}` to the caller.
     return {
@@ -272,7 +244,6 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         "step_losses": step_losses,
         "step_times_ms": step_times_ms,
     }
-
 
 ```
 
@@ -284,26 +255,19 @@ Append the 3-step + 3-step resumed run and 6-step uninterrupted control comparis
 
 ```python
 # Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run: Because parameters, momentum buffers, and PRNG keys are all...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
     # Read or serialize artifact data on disk (`root`).
     root = Path(tmp)
-    # Run `run_tpu_ready_job` to compute `part1`.
     part1 = run_tpu_ready_job(root / "resumed", steps=3, save_every=3, resume=False)
-    # Run `run_tpu_ready_job` to compute `part2`.
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
-    # Run `run_tpu_ready_job` to compute `control`.
     control = run_tpu_ready_job(root / "control", steps=6, save_every=3, resume=False)
-    # Compute `resumed_losses` from `part1["step_losses"] + part2["step_losses"]`
     resumed_losses = part1["step_losses"] + part2["step_losses"]
 
 # Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Assert that `np.allclose(resumed_losses, control["step_losses"])`.
 assert np.allclose(resumed_losses, control["step_losses"])
-# Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
-# Print diagnostic summary of the computed outputs.
 print("Losses across 6 steps:", [round(v, 5) for v in control["step_losses"]])
 ```
 
@@ -313,7 +277,6 @@ Because parameters, momentum buffers, and PRNG keys are all restored, the resume
 
 ```python
 # Step 1 — Define deterministic hashing and atomic checkpoint writes: Writing to a temporary sibling file, flushing with fsync, and...
-# Import hashlib for this computation.
 import hashlib
 import json
 import os
@@ -325,7 +288,6 @@ import jax.numpy as jnp
 import numpy as np
 
 
-# Function `digest_obj(value)` implementing this stage's computation:
 def digest_obj(value):
     # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
@@ -334,52 +296,36 @@ def digest_obj(value):
 
 
 
-# Function `atomic_write_json(path, payload)` implementing this stage's computation:
 def atomic_write_json(path, payload):
     # Read or serialize artifact data on disk (`path`).
     path = Path(path)
-    # Run `path.parent.mkdir` to perform the next check or state transition.
     path.parent.mkdir(parents=True, exist_ok=True)
-    # Run `path.with_suffix` to compute `tmp`.
     tmp = path.with_suffix(path.suffix + ".tmp")
-    # Enter managed runtime/context scope for this block:
     with tmp.open("w", encoding="utf-8") as f:
-        # Run `json.dump` to perform the next check or state transition.
         json.dump(payload, f, sort_keys=True)
-        # Run `f.flush` to perform the next check or state transition.
         f.flush()
-        # Run `os.fsync` to perform the next check or state transition.
         os.fsync(f.fileno())
-    # Run `os.replace` to perform the next check or state transition.
     os.replace(tmp, path)
 
 
 # Step 2 — Implement the TPU-ready job runner with warmup separation and resume: Warmup compiles the JIT function without mutating w, b, m_w, m_b,...
-# Define `run_tpu_ready_job(run_dir, steps, save_every, resume...)` to evaluate the objective and its automatic derivatives:
 def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0.05):
     # Read or serialize artifact data on disk (`run_dir`).
     run_dir = Path(run_dir)
-    # Run `run_dir.mkdir` to perform the next check or state transition.
     run_dir.mkdir(parents=True, exist_ok=True)
-    # Compute `events_path` from `run_dir / "events.jsonl"`
     events_path = run_dir / "events.jsonl"
-    # Compute `ckpt_path` from `run_dir / "checkpoint-latest.json"`
     ckpt_path = run_dir / "checkpoint-latest.json"
 
-    # Function `emit(event)` implementing this stage's computation:
     def emit(event, **fields):
-        # Check which hardware backend (`cpu`, `gpu`, or `tpu`) JAX selected for `record`.
+        # Record the backend selected by this JAX process in the event.
         record = {"event": event, "backend": jax.default_backend(), "devices": jax.device_count(), **fields}
-        # Enter managed runtime/context scope for this block:
         with events_path.open("a", encoding="utf-8") as f:
-            # Compute `f.write(json.dumps(record, sort_keys` as `True) + "\n")`.
             f.write(json.dumps(record, sort_keys=True) + "\n")
         # Return `record` to the caller.
         return record
 
     # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
-    # Compute `target_y` from `3.0 * x - 0.5`
     target_y = 3.0 * x - 0.5
 
     config = {"schema": 1, "seed": int(seed), "lr": float(lr), "data": "linspace64-target-3x-minus-0.5-v1", "batch_size": 16, "optimizer": "momentum-0.8-noise-key-v1"}
@@ -418,31 +364,22 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         raise ValueError(f"checkpoint step {step} exceeds requested final step {steps}")
 
     @jax.jit
-    # Function `train_step(w, b, m_w, m_b, ...)` implementing this stage's computation:
     def train_step(w, b, m_w, m_b, key):
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
         key, subkey = jax.random.split(key)
         # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
-        # Compute `xb, yb` from `x[idx], target_y[idx]`
         xb, yb = x[idx], target_y[idx]
 
-        # Function `loss_fn(w_in, b_in)` implementing this stage's computation:
         def loss_fn(w_in, b_in):
-            # Perform matrix contraction / projection to compute `pred`.
             pred = xb @ w_in + b_in
             # Return `jnp.mean((pred - yb) ** 2)` to the caller.
             return jnp.mean((pred - yb) ** 2)
 
-        # Evaluate both scalar loss and parameter gradients in one pass (`(loss, (gw, gb))`).
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
-        # Compute `m_w` from `0.8 * m_w + gw`
         m_w = 0.8 * m_w + gw
-        # Compute `m_b` from `0.8 * m_b + gb`
         m_b = 0.8 * m_b + gb
-        # Compute `w` from `w - lr * m_w`
         w = w - lr * m_w
-        # Compute `b` from `b - lr * m_b`
         b = b - lr * m_b
         # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
@@ -453,18 +390,14 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
     # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
-    # Run `train_step` to compute `warm`.
     warm = train_step(w, b, m_w, m_b, key)
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(warm)
     # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
-    # Run `emit` to perform the next check or state transition.
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
-    # Compute `step_losses` from `[]`
     step_losses = []
-    # Compute `step_times_ms` from `[]`
     step_times_ms = []
     while step < steps:
         t_step = time.perf_counter()
@@ -490,7 +423,6 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             atomic_write_json(ckpt_path, state_payload)
             emit("checkpoint", step=step, state_hash=state_payload["state_hash"])
 
-    # Run `emit` to perform the next check or state transition.
     emit("completed", step=step, state_hash=state_payload["state_hash"])
     # Return `{'final_step': step, 'state_hash': state_payload['state_hash'], 'w': float(np.asarray(w).squeeze()), 'b': float(np.asarray(b).squeeze()), 'warmup_ms': warmup_ms, 'step_losses': step_losses, 'step_times_ms': step_times_ms}` to the caller.
     return {
@@ -506,26 +438,19 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
 
 # Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run: Because parameters, momentum buffers, and PRNG keys are all...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
     # Read or serialize artifact data on disk (`root`).
     root = Path(tmp)
-    # Run `run_tpu_ready_job` to compute `part1`.
     part1 = run_tpu_ready_job(root / "resumed", steps=3, save_every=3, resume=False)
-    # Run `run_tpu_ready_job` to compute `part2`.
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
-    # Run `run_tpu_ready_job` to compute `control`.
     control = run_tpu_ready_job(root / "control", steps=6, save_every=3, resume=False)
-    # Compute `resumed_losses` from `part1["step_losses"] + part2["step_losses"]`
     resumed_losses = part1["step_losses"] + part2["step_losses"]
 
 # Assert invariant `part2["state_hash"] == control["state_hash"]` holds
 assert part2["state_hash"] == control["state_hash"]
-# Assert that `np.allclose(resumed_losses, control["step_losses"])`.
 assert np.allclose(resumed_losses, control["step_losses"])
-# Print the observed values to compare against the expected result.
 print("Resumed state_hash matches uninterrupted control:", part2["state_hash"])
-# Print diagnostic summary of the computed outputs.
 print("Losses across 6 steps:", [round(v, 5) for v in control["step_losses"]])
 ```
 
@@ -548,8 +473,6 @@ The horizontal axis shows training steps 1 through 6, with a vertical dotted bou
 Because the checkpoint at step 3 saved `(w, b, m_w, m_b, key)` atomically and the warmup call did not consume the restored state, the two loss trajectories lie directly on top of each other (`max_abs_diff == 0`).
 
 ```python
-# Compute figure data for: Interrupted-and-resumed trajectory vs uninterrupted 6-step control run
-# Construct dictionary `visual_data` with the structured fields for this stage.
 visual_data = {
     'kind': 'line',
     'x': [1, 2, 3, 4, 5, 6],
@@ -565,14 +488,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:58:53.178365+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:56:39.243938+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 79.34 Median steady step ms: 0.0432
+Warmup ms: 90.087 Median steady step ms: 0.0353
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
@@ -588,7 +511,6 @@ PASS: tpu-02
 ```python
 # Experiment — Compare JIT warmup latency against steady-state step latency: Logging warmup separately in events.jsonl prevents compilation...
 median_step_ms = float(np.median(control["step_times_ms"]))
-# Print the observed values to compare against the expected result.
 print("Warmup ms:", round(control["warmup_ms"], 3), "Median steady step ms:", round(median_step_ms, 4))
 # Assert invariant `control["warmup_ms"] > median_step_ms` holds
 assert control["warmup_ms"] > median_step_ms
@@ -632,35 +554,22 @@ Run `run_tpu_ready_job` for $4$ steps (`save_every=2`), resume to $8$ steps, and
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `steps(...)` — Call `steps` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 2. Read or serialize artifact data on disk (`ex_root`).
-3. Run `run_tpu_ready_job` to compute `r1`.
-4. Run `run_tpu_ready_job` to compute `r2`.
-5. Run `run_tpu_ready_job` to compute `ctrl8`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Run run_tpu_ready_job for 4 steps (save_every=2), resume to 8 steps,...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
     # Read or serialize artifact data on disk (`ex_root`).
     ex_root = Path(...)  # TODO: compute ex_root
-    # Run `run_tpu_ready_job` to compute `r1`.
     r1 = run_tpu_ready_job(...)  # TODO: compute r1
-    # Run `run_tpu_ready_job` to compute `r2`.
     r2 = run_tpu_ready_job(...)  # TODO: compute r2
-    # Run `run_tpu_ready_job` to compute `ctrl8`.
     ctrl8 = run_tpu_ready_job(...)  # TODO: compute ctrl8
-# Print the observed values to compare against the expected result.
 print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-# Assert that `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8`.
 assert r2["state_hash"]  # TODO: complete assertion check
 ```
 
@@ -668,19 +577,14 @@ assert r2["state_hash"]  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Run run_tpu_ready_job for 4 steps (save_every=2), resume to 8 steps,...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
     # Read or serialize artifact data on disk (`ex_root`).
     ex_root = Path(tmp)
-    # Run `run_tpu_ready_job` to compute `r1`.
     r1 = run_tpu_ready_job(ex_root / "resumed", steps=4, save_every=2, resume=False)
-    # Run `run_tpu_ready_job` to compute `r2`.
     r2 = run_tpu_ready_job(ex_root / "resumed", steps=8, save_every=2, resume=True)
-    # Run `run_tpu_ready_job` to compute `ctrl8`.
     ctrl8 = run_tpu_ready_job(ex_root / "control", steps=8, save_every=2, resume=False)
-# Print the observed values to compare against the expected result.
 print("Step 8 resumed vs control hash:", r2["state_hash"], ctrl8["state_hash"])
-# Assert that `r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8`.
 assert r2["state_hash"] == ctrl8["state_hash"] and len(r1["step_losses"] + r2["step_losses"]) == 8
 ```
 
@@ -700,35 +604,25 @@ Read `events.jsonl` line by line with `json.loads`.
 
 ### How to write: Inspect the JSONL event sequence from a resumed run — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `run(...)` — Call `run` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
-2. Create an isolated temporary directory to run and inspect artifacts safely:
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 3. Read or serialize artifact data on disk (`ev_dir`).
-4. Run `run_tpu_ready_job` to perform the next check or state transition.
-5. Run `run_tpu_ready_job` to perform the next check or state transition.
+4. Read or serialize artifact data on disk (`event_names`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
     # Read or serialize artifact data on disk (`ev_dir`).
     ev_dir = Path(...)  # TODO: compute ev_dir
-    # Run `run_tpu_ready_job` to perform the next check or state transition.
     run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    # Run `run_tpu_ready_job` to perform the next check or state transition.
     run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
     # Read or serialize artifact data on disk (`event_names`).
     event_names = ...  # TODO: compute event_names
-# Print the observed values to compare against the expected result.
 print("Recorded event sequence:", event_names)
-# Assert that `"started" in event_names and "restored" in event_names and event_names[-1] == "completed"`.
 assert "started"  # TODO: complete assertion check
 ```
 
@@ -736,19 +630,15 @@ assert "started"  # TODO: complete assertion check
 
 ```python
 # Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
     # Read or serialize artifact data on disk (`ev_dir`).
     ev_dir = Path(tmp) / "job"
-    # Run `run_tpu_ready_job` to perform the next check or state transition.
     run_tpu_ready_job(ev_dir, steps=2, save_every=2, resume=False)
-    # Run `run_tpu_ready_job` to perform the next check or state transition.
     run_tpu_ready_job(ev_dir, steps=4, save_every=2, resume=True)
     # Read or serialize artifact data on disk (`event_names`).
     event_names = [json.loads(line)["event"] for line in (ev_dir / "events.jsonl").read_text().splitlines()]
-# Print the observed values to compare against the expected result.
 print("Recorded event sequence:", event_names)
-# Assert that `"started" in event_names and "restored" in event_names and event_names[-1] == "completed"`.
 assert "started" in event_names and "restored" in event_names and event_names[-1] == "completed"
 ```
 
@@ -770,35 +660,27 @@ Check `list(Path(tmp).glob('*.tmp')) == []`.
 
 ### How to write: Verify atomic checkpoint file replacement — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `replacement(...)` — Call `replacement` with your updated parameters or inputs from this lesson's workspace.
-- `tempfile.TemporaryDirectory(...)` — Call `tempfile.TemporaryDirectory` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Create an isolated temporary directory to run and inspect artifacts safely:
+1. Keep this run’s database and artifacts in a scratch directory removed on exit.
 2. Read or serialize artifact data on disk (`target`).
-3. Run `atomic_write_json` to perform the next check or state transition.
-4. Run `atomic_write_json` to perform the next check or state transition.
-5. Read or serialize artifact data on disk (`leftovers`).
+3. Read or serialize artifact data on disk (`leftovers`).
+4. Read or serialize artifact data on disk (`loaded`).
+5. Assert invariant `loaded["step"] == 4 and leftovers == []` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Verify atomic checkpoint file replacement (Transfer / diagnosis): os.replace atomically swaps the flushed .tmp file into...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
     # Read or serialize artifact data on disk (`target`).
     target = Path(...)  # TODO: compute target
-    # Run `atomic_write_json` to perform the next check or state transition.
     atomic_write_json(target, {"step": 2})
-    # Run `atomic_write_json` to perform the next check or state transition.
     atomic_write_json(target, {"step": 4})
     # Read or serialize artifact data on disk (`leftovers`).
     leftovers = list(...)  # TODO: compute leftovers
     # Read or serialize artifact data on disk (`loaded`).
     loaded = json.loads(...)  # TODO: compute loaded
-# Print the observed values to compare against the expected result.
 print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
 # Assert invariant `loaded["step"] == 4 and leftovers == []` holds
 assert loaded["step"]  # TODO: complete assertion check
@@ -808,19 +690,16 @@ assert loaded["step"]  # TODO: complete assertion check
 
 ```python
 # Verify atomic checkpoint file replacement (Transfer / diagnosis): os.replace atomically swaps the flushed .tmp file into...
-# Create an isolated temporary directory to run and inspect artifacts safely:
+# Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
     # Read or serialize artifact data on disk (`target`).
     target = Path(tmp) / "checkpoint-latest.json"
-    # Run `atomic_write_json` to perform the next check or state transition.
     atomic_write_json(target, {"step": 2})
-    # Run `atomic_write_json` to perform the next check or state transition.
     atomic_write_json(target, {"step": 4})
     # Read or serialize artifact data on disk (`leftovers`).
     leftovers = list(Path(tmp).glob("*.tmp"))
     # Read or serialize artifact data on disk (`loaded`).
     loaded = json.loads(target.read_text(encoding="utf-8"))
-# Print the observed values to compare against the expected result.
 print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
 # Assert invariant `loaded["step"] == 4 and leftovers == []` holds
 assert loaded["step"] == 4 and leftovers == []

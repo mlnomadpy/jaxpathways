@@ -69,31 +69,31 @@ A model update is a larger version of the same idea: parameters and gradients pr
 
 This lesson prepares you to reason about optimizer and simulation state. It is separate from memory efficiency or a training algorithm; those require broader computations and measurements.
 
-## Step 1: Set up imports and input tensors
+## Create the original four-element array
 
-Import the required JAX modules and define the initial inputs for immutable updates and indexing.
+Import jax.numpy and define the values that the indexed updates will use.
 
 ```python
 import jax.numpy as jnp
 x = jnp.array([1., 2., 3., 4.])
 ```
 
-Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic.
+Keep this original value available so the later checks can show that JAX updates return new arrays.
 
-## Step 2: Apply the core JAX transformation
+## Set one index and add to two others
 
-Write the core computation and transformation step over the initialized inputs.
+Use .at[1].set to replace the second element, then .at[[0, 2]].add to add five at two indices.
 
 ```python
 y = x.at[1].set(20.)
 z = x.at[jnp.array([0, 2])].add(5.)
 ```
 
-This stage executes the primary numerical transformation and binds the intermediate outputs.
+Each indexed operation returns a new array. The set and add operations leave all unselected positions unchanged.
 
-## Step 3: Verify shapes and numerical invariants
+## Check both updated values and the unchanged input
 
-Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.
+Compare the original, replacement result, and addition result with their expected vectors.
 
 ```python
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
@@ -101,7 +101,7 @@ assert jnp.allclose(y, jnp.array([1.,20.,3.,4.]))
 assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 ```
 
-These assertions lock in the exact numerical contract before you run the full experiment and variations.
+Checking x itself makes the immutability behavior observable; the other checks verify the selected indices and values.
 
 ## Run the example
 
@@ -142,14 +142,12 @@ The bottom row still contains $2$ at index $1$. This is the visual clue that the
 An immutable update returns a new value. To make changes accumulate, pass the returned array into the next update. If these operations were chained, the final array would be $(6,20,8,4)$, which is deliberately not the bottom row shown here.
 
 ```python
-# Compute figure data for: An update returns a new array
-# Combine or mask array elements to form `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows': ['original', 'set index 1', 'add at 0 and 2'], 'columns': ['0', '1', '2', '3'], 'unit': 'stored value'}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:15.394008+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:47:17.889065+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]
@@ -190,7 +188,6 @@ indices = jnp.array([1, 1, 3])
 contributions = jnp.array([2, 3, 7], dtype=jnp.int32)
 base_counts = jnp.zeros(4, dtype=jnp.int32)
 counts = base_counts.at[indices].add(contributions)
-# Allocate initialized array `reference_counts` with the specified shape and dtype.
 reference_counts = np.zeros(4, dtype=np.int32)
 for index, contribution in zip([1, 1, 3], [2, 3, 7]):
     # Accumulate the next contribution into `reference_counts[index]`.
@@ -259,13 +256,13 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Construct and reshape `matrix` into the target tensor dimensions.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
-# Construct and reshape `matrix` into the target tensor dimensions.
 matrix = jnp.arange(...)  # TODO: compute matrix
 updated_matrix = ...  # TODO: compute updated_matrix
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
@@ -276,7 +273,6 @@ assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete asser
 
 ```python
 # Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
-# Construct and reshape `matrix` into the target tensor dimensions.
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
 updated_matrix = matrix.at[:, -1].set(-1.)
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))

@@ -82,8 +82,12 @@ test('course loading rejects malformed reading records and clears stale in-memor
   globalThis.fetch = async () => ({
     ok: true,
     json: async () => ({
-      phases: [{ id: 'arrays', lessons: [{ id: 'arrays-01', status: 'authored' }] }],
+      title: 'Fixture course',
+      phases: [{ id: 'arrays', lessons: [{ id: 'arrays-01', title: 'Array lesson', status: 'authored' }] }],
       pathways: [{ id: 'foundations', phaseIds: ['arrays'] }],
+      projectIds: [],
+      roles: [],
+      domains: [],
     }),
   });
   await loadCourse();

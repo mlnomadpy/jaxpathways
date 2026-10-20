@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-04",
-  "contentHash": "24da684f527e7b04d4809cc6a23ec0be5882e57eed5b0bb5aa7f9b6ded984682",
-  "executedAt": "2026-10-20T10:46:51.862987+00:00",
+  "contentHash": "bc64c1c816552987626821b8d8b00c14b81c1f1dce39126baca9a555966377d6",
+  "executedAt": "2026-10-20T18:51:14.491280+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nRestored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]\nRestored next four losses: [0.5496272444725037, 0.8390463590621948, 0.07169045507907867, 0.32427603006362915]\nFull state agrees at step six\nMissing iterator restore repeats earlier IDs and changes the next loss\nCorrect IDs alone do not restore the training transition\nRejected incompatible seed\nRejected incompatible sha256\nOriginal run contract remains valid.\nExpected batch-configuration mismatch\nPASS: recovery-04\n",
   "notebookCells": [
     {
-      "sourceHash": "176da7dd290026a024d84190fe5ecbee49bdd340e4c74f4fc70d702b936c4534",
+      "sourceHash": "3f9e16aa3fb7cc0d65a27789ac7457b63008f4d5885d6a76cf930fd4ada5b08e",
       "outputs": []
     },
     {
-      "sourceHash": "6fca34d30ad95056675f75066f36b5b9b88614278113624fe6aa03873877ff24",
+      "sourceHash": "53d9251901f5b5fc8fcbd5f5d8d79f8838c97155db34063ef982c09bb080d0c0",
       "outputs": []
     },
     {
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "sourceHash": "abc06288a187a0218df1c47da00a59380eaf042f14cc7f8247ef74eccba0ff11",
+      "sourceHash": "1cae0ecef94b43d5c19b082d6f8a96329c2c13657114192c2705b8b00b283145",
       "outputs": [
         {
           "output_type": "stream",
@@ -81,7 +81,7 @@
       ]
     },
     {
-      "sourceHash": "5ea5adeae25b6701082d1a97471cf9739cdb1b7fe8f7edd4f7a78fbd3f497a7d",
+      "sourceHash": "b013b59b2a8bdbf251e5b42b9437d38019f2840d26880ef8882a86346c17b0ff",
       "outputs": [
         {
           "output_type": "stream",
@@ -93,19 +93,19 @@
       ]
     },
     {
-      "sourceHash": "ab3790861a8cef0d10c1bd8a3b519354252755533fff4694d49dc0a9bf21a276",
+      "sourceHash": "eb2fa291feaa1f692545c6117defe28dd6a02cbfafef18466116de0e24273ce4",
       "outputs": []
     },
     {
-      "sourceHash": "512bec49f21da7165f3a77cc5b04a9bf7ba837e542403aa9c9e08541ff10e3f8",
+      "sourceHash": "74639a1822f6df5c3f029f2d333e321988a18482484296c2d726006457e34f2f",
       "outputs": []
     },
     {
-      "sourceHash": "ad1e56caeb29b81462a9325ab13c659e34c8ef9ca7f0428e38b2258a33c010c8",
+      "sourceHash": "f933f12fdbb0089c6f27c9ef2a073c61177c5006050c9b902839467504c7fef6",
       "outputs": []
     },
     {
-      "sourceHash": "c6e76d6fd53d902ecf52e0b4891fb1301ca78386a1ea957d4f97c22e013effbd",
+      "sourceHash": "a2476da3f6e2eff4ce225fc20b1a70c0d1c473ee648380e84dfa46fa14f3d23e",
       "outputs": [
         {
           "output_type": "stream",
@@ -119,11 +119,11 @@
       ]
     },
     {
-      "sourceHash": "3b76f3d1577c2e61f9cc0056f39b0553d7174db9ba1c6cf7d7534012845ced96",
+      "sourceHash": "28c599aa3668c8cb42edf70720bb58c846b4ca99717b2ff4f5aa79b24c719c5c",
       "outputs": []
     },
     {
-      "sourceHash": "c4a52fc2b2254cf66cb9528a9bb8bd10de564ba68be1f33c82ec1c6465c52be0",
+      "sourceHash": "829f7f3b6e3bf929986039cb6795fc71d2adc0caa7b5e27aaf7cc8f8a27b527a",
       "outputs": [
         {
           "output_type": "stream",

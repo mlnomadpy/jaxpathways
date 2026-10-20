@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep reconstructed trajectories, randomized keys, padding masks and independent return calculations. Show how a changed key affects interaction without changing the environment rules.
 
 - Command: `python3 phases/12-rl/02-batch-environments-and-scan-rollouts/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

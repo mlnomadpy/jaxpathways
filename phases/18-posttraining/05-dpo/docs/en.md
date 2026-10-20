@@ -127,7 +127,6 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
@@ -150,14 +149,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -182,7 +179,6 @@ import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Define `dpo_loss(policy_logps, reference_logps, chosen, rejected...)` to evaluate the objective and its automatic derivatives:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=0.2):
     margin = (policy_logps[chosen] - policy_logps[rejected]) - jax.lax.stop_gradient(
         reference_logps[chosen] - reference_logps[rejected]
@@ -195,7 +191,6 @@ chosen = jnp.array([0, 0, 1])
 rejected = jnp.array([1, 2, 2])
 theta = jnp.array([0.2, 0.0, -0.2])
 history = []
-# Evaluate numerically stable log-space cross-entropy/likelihood (`loss`).
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
@@ -210,14 +205,12 @@ for _ in range(120):
     theta = theta - 0.4 * g
 
 assert history[-1] < history[0] * 0.5
-# Evaluate numerically stable log-space cross-entropy/likelihood (`policy`).
 policy = jax.nn.log_softmax(theta)
-# Convert `margin` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 margin = np.asarray(
     (policy[chosen] - policy[rejected]) - (reference[chosen] - reference[rejected]),
     np.float64,
 )
-# Execute `np.testing.assert_allclose(`.
 np.testing.assert_allclose(
     loss(theta), np.mean(np.logaddexp(0, -0.3 * margin)), atol=1e-6
 )
@@ -253,7 +246,6 @@ The second panel shows final reference-corrected margins for each comparison. Al
 Positive final corrected margins mean the policy favors each chosen action more strongly relative to the reference. The independent host softplus calculation and reference-gradient check establish objective behavior; separate generation and human review would be needed for a language application.
 
 ```python
-# Compute figure data for: Direct preference optimization and reference-corrected margins — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'DPO preference loss (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
@@ -264,7 +256,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:52:21.092144+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:43:00.312774+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]
@@ -286,7 +278,6 @@ PASS: posttraining-05
 # Experiment — Verify the reference cancellation: The initial policy is not uniform.
 initial = dpo_loss(reference, reference, chosen, rejected, 0.3)
 np.testing.assert_allclose(initial, np.log(2), atol=1e-6)
-# Aggregate array values to compute `uncorrected`.
 uncorrected = jnp.mean(
     jax.nn.softplus(-0.3 * (reference[chosen] - reference[rejected]))
 )
@@ -326,10 +317,6 @@ The rejected probability falls further. Monitoring only the margin would miss th
 Swap chosen and rejected IDs after training and verify that the loss rises.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `dpo_loss(...)` — Call `dpo_loss` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -374,7 +361,6 @@ The reference is an input to the objective but not an optimization variable.
 
 **Step-by-step implementation plan:**
 1. Differentiate the objective to obtain `reference_grad` via automatic differentiation.
-2. Allocate initialized array `` with the specified shape and dtype.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -384,7 +370,6 @@ The reference is an input to the objective but not an optimization variable.
 reference_grad = jax.grad(...)  # TODO: compute reference_grad
     policy, reference, chosen, rejected, 0.3
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(
     reference_grad, np.zeros(reference_grad.shape)
 )
@@ -399,7 +384,6 @@ print('Reference gradient is zero.')
 reference_grad = jax.grad(dpo_loss, argnums=1)(
     policy, reference, chosen, rejected, 0.3
 )
-# Allocate initialized array `` with the specified shape and dtype.
 np.testing.assert_array_equal(
     reference_grad, np.zeros(reference_grad.shape)
 )
@@ -430,8 +414,7 @@ The log-softmax normalizer cancels in a log-probability difference. Shared model
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
-2. Differentiate the objective to obtain gradients ``.
+1. Differentiate the objective to obtain gradients ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -441,7 +424,6 @@ probe = jnp.array(...)  # TODO: compute probe
 choice = jnp.array(...)  # TODO: compute choice
 reject = jnp.array(...)  # TODO: compute reject
 beta = ...  # TODO: compute beta
-# Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
 one_pair = ...  # TODO: compute one_pair
     jax.nn.log_softmax(logits), reference, choice, reject, beta
 )
@@ -462,7 +444,6 @@ probe = jnp.array([0.6, -0.3, 0.1])
 choice = jnp.array([0])
 reject = jnp.array([1])
 beta = 0.3
-# Evaluate numerically stable log-space cross-entropy/likelihood (`one_pair`).
 one_pair = lambda logits: dpo_loss(
     jax.nn.log_softmax(logits), reference, choice, reject, beta
 )

@@ -28,7 +28,6 @@ def block_forward(p, x):
     scores = q@k.T / jnp.sqrt(x.shape[-1])
     # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
@@ -37,7 +36,6 @@ def block_forward(p, x):
 # Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
 output = block_forward(p, x)
 # Check tensor shape invariant: `output.shape == x.shape`
@@ -57,9 +55,9 @@ import numpy as np
 
 # Step 2 — 2. Implement the mechanism: x → norm → Q/K/V → causal attention → output projection...
 def layer_norm(x):
-    # Reduce along axis=-1 to compute `mean`.
+    # Normalize each token over its feature channels by computing its mean.
     mean = jnp.mean(x, axis=-1, keepdims=True)
-    # Reduce along axis=-1 to compute `variance`.
+    # Measure each token’s variance across its feature channels.
     variance = jnp.mean((x-mean)**2, axis=-1, keepdims=True)
     return (x-mean) / jnp.sqrt(variance + 1e-5)
 
@@ -76,7 +74,6 @@ def block_forward(p, x):
     scores = q@k.T / jnp.sqrt(x.shape[-1])
     # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
-    # Apply nonlinear activation or probability normalization to compute `weights`.
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
@@ -84,7 +81,6 @@ def block_forward(p, x):
 # Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
-# Construct and reshape `x` into the target tensor dimensions.
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
 output = block_forward(p, x)
 # Check tensor shape invariant: `output.shape == x.shape`
@@ -98,7 +94,6 @@ assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
 print("Block shape:", output.shape)
 
 # Figure data experiment
-# Compute figure data for: A residual block adds a correction to its input
 visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['token ' + str(i) for i in range(4)], 'columns': ['f' + str(i) for i in range(8)], 'unit': 'output minus input', 'diverging': True}
 
 # Experiment: Verify the residual identity and causal boundary
@@ -114,7 +109,6 @@ assert not jnp.allclose(changed_output[-1], output[-1])
 low_p = jax.tree.map(lambda z:z.astype(jnp.bfloat16), p)
 low_x = x.astype(jnp.bfloat16)
 low_out = block_forward(low_p, low_x).astype(jnp.float32)
-# Aggregate array values to compute `error`.
 error = jnp.max(jnp.abs(low_out-output))
 print("bfloat16 max absolute error:", float(error))
 # Confirm that all computed values remain finite (no NaN or Inf).
@@ -134,7 +128,6 @@ def mixed_block(p, x):
     return residual + activation@p["down"]
 
 mixed_out = mixed_block(low_p,low_x).astype(jnp.float32)
-# Aggregate array values to compute `mixed_error`.
 mixed_error = jnp.max(jnp.abs(mixed_out-output))
 print("Float32 reduction policy max absolute error:",float(mixed_error))
 # Ensure all array elements remain finite: `jnp.all(jnp.isfinite(mixed_out))`
@@ -158,7 +151,6 @@ assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)
 # Reference practice: Check normalization without autodiff
 # Check normalization without autodiff (Transfer / diagnosis): The independent reduction and constant-row case check the...
 row = np.asarray(x[0])
-# Aggregate array values to compute `reference`.
 reference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)
 assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)
@@ -168,7 +160,6 @@ assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)
 expanded = jax.nn.gelu(layer_norm(x)@p["up"])
 # Check tensor shape invariant: `expanded.shape == (4,16)`
 assert expanded.shape == (4,16)
-# Run the boundary check and catch the expected exception:
 try:
     _ = x + expanded
 except TypeError:

@@ -166,13 +166,12 @@ A JAX random function is deterministic given the same key and arguments. Calling
 The lines only connect coordinates to make equality visible. This is not a time series or a probability density, and three different values is distinct from statistical independence. The practical check is reproducibility: reuse for deliberate replay, split for the next stochastic operation.
 
 ```python
-# Compute figure data for: Reused keys replay the same sample
 visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:26.921075+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:47:55.146167+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True
@@ -235,7 +234,7 @@ Split a fresh seed into four keys, then use vmap to draw two normal values from 
 
 **Key functions & syntax to use:**
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
@@ -286,7 +285,7 @@ Reuse the random construction for a controlled comparison, not accidentally acro
 **Key functions & syntax to use:**
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
@@ -336,13 +335,12 @@ The draw function does not mutate the key.
 ### How to write: Diagnose key reuse in a loop — Step-by-step recipe & starter scaffold
 
 **Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Manages explicit, stateless PRNG keys—always split a key before passing subkeys into independent random draws.
+- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
 1. Create or split explicit PRNG key(s) (`root`) for reproducible randomness.
 2. Sample deterministic random values into `broken` using an explicit PRNG key.
-3. Combine or mask array elements to form `fixed`.
-4. Check tensor shape invariant: `fixed.shape==(3,2)`
+3. Check tensor shape invariant: `fixed.shape==(3,2)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -358,7 +356,6 @@ rows = ...  # TODO: compute rows
 for _ in range(3):
     current,noise = noise_step(...)  # TODO: compute current,noise
     rows.append(noise)
-# Combine or mask array elements to form `fixed`.
 fixed = jnp.stack(...)  # TODO: compute fixed
 # Check tensor shape invariant: `fixed.shape==(3,2)`
 assert fixed.shape  # TODO: complete assertion check
@@ -379,7 +376,6 @@ rows=[]
 for _ in range(3):
     current,noise=noise_step(current)
     rows.append(noise)
-# Combine or mask array elements to form `fixed`.
 fixed=jnp.stack(rows)
 # Check tensor shape invariant: `fixed.shape==(3,2)`
 assert fixed.shape==(3,2)

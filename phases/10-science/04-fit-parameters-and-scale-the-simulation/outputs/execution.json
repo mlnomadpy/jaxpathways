@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-04",
-  "contentHash": "bb80ff68a6e9f9b6cf42f0a888fc8bd47dd6ac73b99118ee76dcfd9e4baad8e2",
-  "executedAt": "2026-10-20T10:48:32.222051+00:00",
+  "contentHash": "de42efc858b15335965fdca615a9b7807c7232d4961465aa0fff643c9246023f",
+  "executedAt": "2026-10-20T19:02:01.529648+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,10 +11,10 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.007125083357095718, 0.007125083357095718), (16, 0.007792375981807709, 0.0004870234988629818), (256, 0.030416063964366913, 0.00011881274986080825)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
+  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.009916722774505615, 0.009916722774505615), (16, 0.008708331733942032, 0.000544270733371377), (256, 0.05366699770092964, 0.0002096367097692564)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
   "notebookCells": [
     {
-      "sourceHash": "552521f6459da38e2acd85e37575a3f470de953a3b4115c69a99468323697dca",
+      "sourceHash": "10f11d7000ab61694e91481740a4a304ecf3ae0e29ef2170da266d5988457f3c",
       "outputs": []
     },
     {
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "31d3d61b92834b01b1c5c33749b50926065a34225338592784d7f94423111ba5",
+      "sourceHash": "88d91d46376c87031aeda81e0cfe9526b6735543b5eaed40ac79e60d2a6c254b",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "6217be3d896a1d98353d156c269ddce79b881161af32d2c404efb4c4b93f5d72",
+      "sourceHash": "e28c444c87d14d54d3b5aa0c0eda185a0be483cc21662d2063e6bb19c174ca01",
       "outputs": [
         {
           "output_type": "stream",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "sourceHash": "9121168bf8ffa9acb528c5402bb9cb61fd0ed45661f5cda854cc32e5c66280e6",
+      "sourceHash": "063fb6facfe3c82579191fc3307315febd803b47825bc94759536996522fde0e",
       "outputs": []
     },
     {
@@ -90,23 +90,23 @@
       ]
     },
     {
-      "sourceHash": "fc548a5a7678b9b2ec95c3246c9bc5be184a0b1f77f630514c227958fb497bdf",
+      "sourceHash": "edfe2e80af3e51fba3b979f7b6c33b37e0763de8a8e9e88b6f93830d57db0b1d",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.008541159331798553, 0.008541159331798553), (16, 0.008792150765657425, 0.0005495094228535891), (256, 0.04145922139286995, 0.00016195008356589824)]\n"
+            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.03683427348732948, 0.03683427348732948), (16, 0.05174987018108368, 0.00323436688631773), (256, 0.29558269307017326, 0.0011546198948053643)]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "97fede0d0c3535684cdbcc1cc742c1fb6ff7547ebc34516a18d07a07e0f8e674",
+      "sourceHash": "7e481a18c80a54cdc6e76580ca7a26684bcf0bf9e3c0f55799490eb1aa771e29",
       "outputs": []
     },
     {
-      "sourceHash": "dbf331005f3b093fc18bab6afec602f7f0642ded92b8ec5dc4d9233ea8f0fd8e",
+      "sourceHash": "dde05a74fd1c6342e1c9b78dd6a2ee6cb2b8d34358092ff291784bafe4bde055",
       "outputs": [
         {
           "output_type": "stream",
@@ -134,11 +134,11 @@
       ]
     },
     {
-      "sourceHash": "33fa3739bb57d8366585001fe1fb781c5315cb949abf712c292fd25ff4a0765d",
+      "sourceHash": "5c67a4c7f4fe8556841902e9e5bcd293d2604ef83b63e4cb4325270d571a9bb8",
       "outputs": []
     },
     {
-      "sourceHash": "b629acd32be5b179e96e2fe42322e11f3502e1fb4fd5b63429507778aff45928",
+      "sourceHash": "f718ee5d6a57cde8c8c42ce7ccc67ae24234ca1bae47655526dd8241f0b4dd09",
       "outputs": [
         {
           "output_type": "stream",

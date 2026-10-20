@@ -109,16 +109,16 @@ def measure(batch_size,repeats=40):
     # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     first=infer(device).block_until_ready()
     first_ms=(time.perf_counter()-began)*1000
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     samples=[]
     for _ in range(repeats):
         began=time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         infer(device).block_until_ready()
         samples.append((time.perf_counter()-began)*1000)
     p50=float(np.percentile(samples,50))
@@ -153,12 +153,10 @@ Append the FCFS simulator and two hypothetical arrival schedules. Times are mill
 ```python
 # Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
 def simulate_queue(arrival_ms,service_ms):
-    # Convert `arrivals` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
-    # Guard input contract (`arrivals.ndim != 1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals) < 0)`) and fail fast if violated.
     if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):
         raise ValueError('arrivals must be a finite ordered vector')
-    # Guard input contract (`not np.isfinite(service_ms) or service_ms <= 0`) and fail fast if violated.
     if not np.isfinite(service_ms) or service_ms<=0:
         raise ValueError('service duration must be positive milliseconds')
     ready=0.
@@ -171,11 +169,8 @@ def simulate_queue(arrival_ms,service_ms):
         finishes.append(ready)
     return np.array(starts),np.array(finishes),np.array(finishes)-arrivals
 hand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)
-# Execute `np.testing.assert_allclose(hand_start,[0.,2.,4.])`
 np.testing.assert_allclose(hand_start,[0.,2.,4.])
-# Execute `np.testing.assert_allclose(hand_finish,[2.,4.,6.])`
 np.testing.assert_allclose(hand_finish,[2.,4.,6.])
-# Execute `np.testing.assert_allclose(hand_latency,[2.,3.,2.])`
 np.testing.assert_allclose(hand_latency,[2.,3.,2.])
 request_index=np.arange(60)
 stable_arrivals=request_index*1.5*service_ms
@@ -214,16 +209,16 @@ def measure(batch_size,repeats=40):
     # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     first=infer(device).block_until_ready()
     first_ms=(time.perf_counter()-began)*1000
-    # Convert `expected` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     expected=np.tanh(host@np.asarray(W1))@np.asarray(W2)
     np.testing.assert_allclose(first,expected,rtol=2e-5,atol=2e-6)
     samples=[]
     for _ in range(repeats):
         began=time.perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         infer(device).block_until_ready()
         samples.append((time.perf_counter()-began)*1000)
     p50=float(np.percentile(samples,50))
@@ -242,12 +237,10 @@ service_ms=measurements[0]['p50_ms']
 
 # Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
 def simulate_queue(arrival_ms,service_ms):
-    # Convert `arrivals` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
-    # Guard input contract (`arrivals.ndim != 1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals) < 0)`) and fail fast if violated.
     if arrivals.ndim!=1 or np.any(~np.isfinite(arrivals)) or np.any(np.diff(arrivals)<0):
         raise ValueError('arrivals must be a finite ordered vector')
-    # Guard input contract (`not np.isfinite(service_ms) or service_ms <= 0`) and fail fast if violated.
     if not np.isfinite(service_ms) or service_ms<=0:
         raise ValueError('service duration must be positive milliseconds')
     ready=0.
@@ -260,11 +253,8 @@ def simulate_queue(arrival_ms,service_ms):
         finishes.append(ready)
     return np.array(starts),np.array(finishes),np.array(finishes)-arrivals
 hand_start,hand_finish,hand_latency=simulate_queue([0.,1.,4.],2.)
-# Execute `np.testing.assert_allclose(hand_start,[0.,2.,4.])`
 np.testing.assert_allclose(hand_start,[0.,2.,4.])
-# Execute `np.testing.assert_allclose(hand_finish,[2.,4.,6.])`
 np.testing.assert_allclose(hand_finish,[2.,4.,6.])
-# Execute `np.testing.assert_allclose(hand_latency,[2.,3.,2.])`
 np.testing.assert_allclose(hand_latency,[2.,3.,2.])
 request_index=np.arange(60)
 stable_arrivals=request_index*1.5*service_ms
@@ -296,25 +286,24 @@ The upper panel shows measured CPU warm p50 and p95 milliseconds per batch for b
 The lower panel’s growth comes entirely from the chosen arrival schedule and serial queue recurrence. The service duration stays fixed in the simulation. Normalizing by the measured service duration makes the buildup visible without freezing host-dependent milliseconds into the prose. Real requests can add networking, preprocessing, variable service times and batch collection; those costs are not inferred from this graph.
 
 ```python
-# Compute figure data for: Measured batch computation and a separately simulated queue
 visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batch 1","batch 8","batch 32"],"xlabel":"resident-input batch shape","ylabel":"measured CPU milliseconds per batch","series":[{"label":"warm p50","y":[r["p50_ms"] for r in measurements]},{"label":"warm p95","y":[r["p95_ms"] for r in measurements]}]},{"kind":"line","x":request_index.tolist(),"xlabel":"request index (simulation)","ylabel":"simulated response / measured service","series":[{"label":"spaced arrivals","y":(stable_latency/service_ms).tolist()},{"label":"overloaded arrivals","y":(overloaded_latency/service_ms).tolist()}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:50:44.185786+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T21:41:26.651820+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 30.380667187273502, 'p50_ms': 0.009396113455295563, 'p95_ms': 0.02765634562820195, 'steady_examples_per_second': 106426.98225790464}
-{'batch': 8, 'first_call_ms': 19.219750072807074, 'p50_ms': 0.011957716196775436, 'p95_ms': 0.018120976164937012, 'steady_examples_per_second': 669024.0735231122}
-{'batch': 32, 'first_call_ms': 18.149458803236485, 'p50_ms': 0.01568719744682312, 'p95_ms': 0.03619375638663767, 'steady_examples_per_second': 2039879.979102351}
-measured batch-one service proxy (ms): 0.009396113455295563
-simulated last stable/overloaded response (ms): 0.009396113455295563 0.23114439100027084
-{'batch': 1, 'first_call_ms': 18.95762514322996, 'p50_ms': 0.009458279237151146, 'p95_ms': 0.020428886637091616, 'steady_examples_per_second': 105727.47694655736}
-{'batch': 8, 'first_call_ms': 17.656249925494194, 'p50_ms': 0.012186821550130844, 'p95_ms': 0.01899753697216509, 'steady_examples_per_second': 656446.7992816477}
-{'batch': 32, 'first_call_ms': 17.30937510728836, 'p50_ms': 0.016249949112534523, 'p95_ms': 0.02756859175860881, 'steady_examples_per_second': 1969236.9359677904}
-measured batch-one service proxy (ms): 0.009458279237151146
-simulated last stable/overloaded response (ms): 0.009458279237151146 0.2326736692339182
+{'batch': 1, 'first_call_ms': 31.63241595029831, 'p50_ms': 0.008584000170230865, 'p95_ms': 0.010295724496245379, 'steady_examples_per_second': 116495.80384072909}
+{'batch': 8, 'first_call_ms': 19.124249927699566, 'p50_ms': 0.011896016076207161, 'p95_ms': 0.018525682389736165, 'steady_examples_per_second': 672494.0474820426}
+{'batch': 32, 'first_call_ms': 18.948249984532595, 'p50_ms': 0.016208039596676826, 'p95_ms': 0.03126210067421197, 'steady_examples_per_second': 1974328.8390386852}
+measured batch-one service proxy (ms): 0.008584000170230865
+simulated last stable/overloaded response (ms): 0.008584000170230865 0.2111664041876793
+{'batch': 1, 'first_call_ms': 19.50295828282833, 'p50_ms': 0.009729061275720596, 'p95_ms': 0.01709614880383014, 'steady_examples_per_second': 102784.83932417555}
+{'batch': 8, 'first_call_ms': 19.412833265960217, 'p50_ms': 0.01685391180217266, 'p95_ms': 0.027345563285052756, 'steady_examples_per_second': 474667.25196513184}
+{'batch': 32, 'first_call_ms': 18.082582857459784, 'p50_ms': 0.015333062037825584, 'p95_ms': 0.026933732442557812, 'steady_examples_per_second': 2086993.4473008884}
+measured batch-one service proxy (ms): 0.009729061275720596
+simulated last stable/overloaded response (ms): 0.009729061275720596 0.23933490738272667
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2
@@ -384,17 +373,15 @@ Simulate a burst of four requests arriving at time zero with a two-millisecond s
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])`
-2. Execute `np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Simulate a burst of four requests arriving at time zero with a...
 _,burst_finish,burst_latency = simulate_queue(...)  # TODO: compute _,burst_finish,burst_latency
-# Execute `np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
-# Execute `np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 ```
 
@@ -403,9 +390,7 @@ np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 ```python
 # Exercise solution: Simulate a burst of four requests arriving at time zero with a...
 _,burst_finish,burst_latency=simulate_queue([0.,0.,0.,0.],2.)
-# Execute `np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
-# Execute `np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])`
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 ```
 
@@ -425,20 +410,15 @@ The worker is idle between spaced requests but never idle during the burst.
 
 ### How to write: Expose burst sensitivity — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `sensitivity(...)` — Call `sensitivity` with your updated parameters or inputs from this lesson's workspace.
-- `simulate_queue(...)` — Call `simulate_queue` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Allocate initialized array `(_, _, burst)` with the specified shape and dtype.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
 _,_,smooth = simulate_queue(...)  # TODO: compute _,_,smooth
-# Allocate initialized array `(_, _, burst)` with the specified shape and dtype.
 _,_,burst = simulate_queue(...)  # TODO: compute _,_,burst
 assert smooth.max()  # TODO: complete assertion check
 ```
@@ -448,7 +428,6 @@ assert smooth.max()  # TODO: complete assertion check
 ```python
 # Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
 _,_,smooth=simulate_queue(np.arange(5)*3.,2.)
-# Allocate initialized array `(_, _, burst)` with the specified shape and dtype.
 _,_,burst=simulate_queue(np.zeros(5),2.)
 assert smooth.max()==2. and burst.max()==10.
 ```
@@ -470,10 +449,6 @@ Public simulation inputs need finite, ordered values and positive service time.
 </details>
 
 ### How to write: Reject a broken timeline — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `timeline(...)` — Call `timeline` with your updated parameters or inputs from this lesson's workspace.
-- `simulate_queue(...)` — Call `simulate_queue` with your updated parameters or inputs from this lesson's workspace.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
@@ -523,20 +498,15 @@ Compute finish minus arrival for each request. Here a response exactly at the de
 
 ### How to write: Measure the margin below a response deadline — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `deadline(...)` — Call `deadline` with your updated parameters or inputs from this lesson's workspace.
-- `simulate_queue(...)` — Call `simulate_queue` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
-1. Execute `np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8`
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.
 _,_,deadline_latencies = simulate_queue(...)  # TODO: compute _,_,deadline_latencies
-# Execute `np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8`
 np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
 missed_deadlines = int(...)  # TODO: compute missed_deadlines
 assert missed_deadlines  # TODO: complete assertion check
@@ -548,7 +518,6 @@ print('Requests beyond the declared deadline:',missed_deadlines)
 ```python
 # Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.
 _,_,deadline_latencies=simulate_queue(np.zeros(5),2.)
-# Execute `np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8`
 np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
 missed_deadlines=int(np.count_nonzero(deadline_latencies>6.))
 assert missed_deadlines==2

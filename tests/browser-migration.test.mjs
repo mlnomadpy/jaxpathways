@@ -11,13 +11,15 @@ import { initReaderEvents, showLesson } from '../src/scripts/reader.js';
 import { setupChoices } from '../src/scripts/paths.js';
 import { initProject } from '../src/scripts/project.js';
 import { setupPlatform } from '../src/scripts/workspace.js';
+import { renderLesson } from '../src/lib/lesson-template.js';
 
 async function page(name, query = '', records = {}) {
   const window = new Window({ url: `https://example.org/jaxpathways/${name}.html${query}`, settings: { disableJavaScriptEvaluation: true, disableCSSFileLoading: true, disableJavaScriptFileLoading: true } });
   window.document.write(fs.readFileSync(`dist/${name}.html`, 'utf8'));
   window.HTMLElement.prototype.scrollIntoView = function () {};
-  for (const key of ['document','location','history','navigator','localStorage','MutationObserver','HTMLSelectElement','HTMLElement','Event','FormData','KeyboardEvent']) Object.defineProperty(globalThis,key,{value:window[key],configurable:true,writable:true});
+  for (const key of ['document','location','history','navigator','localStorage','MutationObserver','HTMLSelectElement','HTMLButtonElement','HTMLInputElement','HTMLTextAreaElement','HTMLFormElement','HTMLElement','Event','FormData','KeyboardEvent']) Object.defineProperty(globalThis,key,{value:window[key],configurable:true,writable:true});
   globalThis.window=window;
+  globalThis.getComputedStyle=window.getComputedStyle.bind(window);
   globalThis.matchMedia=window.matchMedia.bind(window);
   globalThis.requestAnimationFrame=window.requestAnimationFrame.bind(window);
   const requests=[];
@@ -67,10 +69,20 @@ test('catalog retains route, roadmap and browser-history filtering under a proje
 });
 
 test('every authored lesson renders, and checkpoint progress stays separate from exercise evidence',async()=>{
-  const p=await page('lesson','?lesson=welcome-01');
+  const p=await page('lesson-welcome-01');
   try {
     await loadCourse();initReaderEvents();
+    const fullCourse=JSON.parse(fs.readFileSync('dist/curriculum.json','utf8'));
+    for(const phase of courseState.course.phases) {
+      const fullPhase=fullCourse.phases.find(item=>item.id===phase.id);
+      phase.lessons=phase.lessons.map(lesson=>fullPhase.lessons.find(item=>item.id===lesson.id)||lesson);
+    }
     for(const phase of courseState.course.phases)for(const lesson of phase.lessons.filter(l=>l.status==='authored')){
+      const pageRoot=p.$('#lesson-page');
+      const body=p.$('#lesson-body');
+      pageRoot.dataset.staticLesson=lesson.id;
+      body.dataset.lesson=lesson.id;
+      body.innerHTML=renderLesson({phase,lesson,prerequisiteLinks:'Fixture prerequisites',allLessons:phase.lessons,index:phase.lessons.findIndex(item=>item.id===lesson.id),activePath:'all'});
       showLesson(phase,lesson);assert.equal(p.$('#lesson-title').textContent,lesson.title);
       assert(p.$('#lesson-checkpoint'));assert(p.$('.copy-snippet'));assert(p.$('#reader-toc').children.length>0);
       const equations=p.all('#lesson-body annotation[encoding="application/x-tex"]').map(node=>node.textContent);
@@ -78,13 +90,22 @@ test('every authored lesson renders, and checkpoint progress stays separate from
       // Let pending reader tasks settle before replacing the next full chapter.
       await new Promise(setImmediate);
     }
-    const phase=courseState.course.phases[0],lesson=phase.lessons[0];showLesson(phase,lesson);
+    const phase=courseState.course.phases[0],lesson=phase.lessons[0];
+    p.$('#lesson-page').dataset.staticLesson=lesson.id;
+    p.$('#lesson-body').dataset.lesson=lesson.id;
+    p.$('#lesson-body').innerHTML=renderLesson({phase,lesson,prerequisiteLinks:'Fixture prerequisites',allLessons:phase.lessons,index:0,activePath:'all'});
+    showLesson(phase,lesson);
     p.$(`input[name="answer"][value="${lesson.content.answer}"]`).checked=true;
     p.$('#lesson-checkpoint').dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));
     let saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));
     assert.equal(saved.lessons[lesson.id].checkpointPassed,true);assert.equal(saved.lessons[lesson.id].evidenceSaved,false);
     p.$('#exercise-complete').click();saved=JSON.parse(localStorage.getItem('jaxpathways-lessons-v1'));assert.equal(saved.lessons[lesson.id].evidenceSaved,true);
-    p.$('#next').click();assert.notEqual(p.$('#lesson-title').textContent,lesson.title);
+    const nextLink=p.$('#next').dataset.href;
+    const redirects=[];
+    p.window.location.replace=(href)=>redirects.push(href);
+    p.$('#next').click();
+    assert.equal(p.$('#lesson-title').textContent,lesson.title);
+    assert.equal(new URL(redirects[0]).pathname,`/jaxpathways/${nextLink.split('?')[0]}`);
     assert(JSON.parse(localStorage.getItem('jaxpathways-reading-v1')).lastLessonId);
   } finally {await p.close();}
 });
@@ -138,7 +159,12 @@ test('permanent lesson pages retain pathway, section and existing learner eviden
   try {
     const staticTitle=p.$('#lesson-title');
     assert.equal(staticTitle.textContent,'Set up your learning workspace');
-    await loadCourse();courseState.activePath='foundations';initReaderEvents();
+    await loadCourse();
+    assert.deepEqual(p.requests, ['/jaxpathways/api/v1/course-navigation.json']);
+    const lessonPayload = JSON.parse(p.$('#current-lesson-data').textContent);
+    assert.equal(lessonPayload.lesson.id, 'welcome-01');
+    assert(lessonPayload.lesson.content);
+    courseState.activePath='foundations';initReaderEvents();
     const found=courseState.course.phases[0];showLesson(found,found.lessons[0]);
     assert.equal(p.$('#lesson-title'),staticTitle);
     assert.equal(location.pathname,'/jaxpathways/lesson-welcome-01.html');
@@ -146,5 +172,24 @@ test('permanent lesson pages retain pathway, section and existing learner eviden
     assert.match(p.$('#exercise-complete').textContent,/unfinished/);
     assert.match(p.$('#checkpoint-result').textContent,/previously passed/);
     assert.equal(JSON.parse(localStorage.getItem('jaxpathways-lessons-v1')).lessons['welcome-01'].evidenceSaved,true);
+  } finally {await p.close();}
+});
+
+test('legacy reader requests redirect to the canonical SSR lesson and preserve context', async()=>{
+  const p=await page('lesson','?lesson=welcome-01&path=foundations&find=workspace#section-2');
+  try {
+    const fullCourse=JSON.parse(fs.readFileSync('dist/curriculum.json','utf8'));
+    courseState.standalone=true;
+    courseState.course=fullCourse;
+    courseState.curriculum=fullCourse.pathways.map(route=>({...route,lessons:route.phaseIds.flatMap(id=>fullCourse.phases.find(phase=>phase.id===id)?.lessons||[])}));
+    courseState.activePath='foundations';
+    const phase=fullCourse.phases.find(item=>item.lessons.some(lesson=>lesson.id==='welcome-01'));
+    const lesson=phase.lessons.find(item=>item.id==='welcome-01');
+    const originalBody=p.$('#lesson-body').innerHTML;
+    const redirects=[];
+    p.window.location.replace=(href)=>redirects.push(href);
+    showLesson(phase,lesson);
+    assert.deepEqual(redirects,['https://example.org/jaxpathways/lesson-welcome-01.html?path=foundations&find=workspace#section-2']);
+    assert.equal(p.$('#lesson-body').innerHTML,originalBody);
   } finally {await p.close();}
 });

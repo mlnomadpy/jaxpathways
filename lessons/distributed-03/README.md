@@ -93,9 +93,9 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_num_cpu_devices', 4)
 import jax.numpy as jnp
 import numpy as np
@@ -112,21 +112,15 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
-# Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
-# Configure multi-device placement / sharding specification (`rows`).
 rows = NamedSharding(mesh, P('data', None))
-# Configure multi-device placement / sharding specification (`replicated`).
 replicated = NamedSharding(mesh, P())
-# Configure multi-device placement / sharding specification (`features`).
 features = NamedSharding(mesh, P('data'))
-# Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
-# Configure multi-device placement / sharding specification (`y`).
 y = jax.device_put(yh, NamedSharding(mesh, P('data')))
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(wh, replicated)
@@ -176,13 +170,10 @@ Add this block after the preceding block in a fresh Python file, then run the co
 
 ```python
 # Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
-# Configure multi-device placement / sharding specification (`all_gradient`).
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
-# Configure multi-device placement / sharding specification (`shard_gradient`).
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P('data')))
-# Configure multi-device placement / sharding specification (`gather`).
 gather = jax.jit(jax.shard_map(lambda g: jax.lax.all_gather(g, 'data', tiled=True),
     mesh=mesh, in_specs=P('data'), out_specs=P(), check_vma=False))
 ga = all_gradient(x, y, w)
@@ -190,7 +181,7 @@ gs = shard_gradient(x, y, w)
 gg = gather(gs)
 reference = 2 * xh.T @ (xh @ wh - yh) / 16
 for result in [ga, gs, gg]:
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
 # Check tensor shape invariant: `all(s.data.shape == (8,) for s in ga.addressable_shards)`
 assert all(s.data.shape == (8,) for s in ga.addressable_shards)
@@ -213,12 +204,12 @@ Add this block after the preceding block in a fresh Python file, then run the co
 ```python
 # Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def completed_samples(fn, *args):
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
     samples = []
     for _ in range(7):
         start = perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         fn(*args).block_until_ready()
         samples.append((perf_counter() - start) * 1e6)
     return samples
@@ -244,9 +235,9 @@ Compare both the numerical global result and the placement needed by its next co
 ```python
 # Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
 import jax
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
-# Update state in place with the new values.
+# Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_num_cpu_devices', 4)
 import jax.numpy as jnp
 import numpy as np
@@ -255,21 +246,15 @@ from time import perf_counter
 
 # Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
-# Configure multi-device placement / sharding specification (`mesh`).
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
-# Configure multi-device placement / sharding specification (`rows`).
 rows = NamedSharding(mesh, P('data', None))
-# Configure multi-device placement / sharding specification (`replicated`).
 replicated = NamedSharding(mesh, P())
-# Configure multi-device placement / sharding specification (`features`).
 features = NamedSharding(mesh, P('data'))
-# Construct and reshape `xh` into the target tensor dimensions.
 xh = np.arange(16 * 8, dtype=np.float32).reshape(16, 8) / 128 - 0.5
 yh = xh @ np.linspace(-0.4, 0.3, 8, dtype=np.float32)
 wh = np.linspace(0.1, -0.2, 8, dtype=np.float32)
 # Place `x` explicitly onto the target JAX device.
 x = jax.device_put(xh, rows)
-# Configure multi-device placement / sharding specification (`y`).
 y = jax.device_put(yh, NamedSharding(mesh, P('data')))
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(wh, replicated)
@@ -287,13 +272,10 @@ def reduce_shard(a, b, weights):
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 
 # Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
-# Configure multi-device placement / sharding specification (`all_gradient`).
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
-# Configure multi-device placement / sharding specification (`shard_gradient`).
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P('data')))
-# Configure multi-device placement / sharding specification (`gather`).
 gather = jax.jit(jax.shard_map(lambda g: jax.lax.all_gather(g, 'data', tiled=True),
     mesh=mesh, in_specs=P('data'), out_specs=P(), check_vma=False))
 ga = all_gradient(x, y, w)
@@ -301,7 +283,7 @@ gs = shard_gradient(x, y, w)
 gg = gather(gs)
 reference = 2 * xh.T @ (xh @ wh - yh) / 16
 for result in [ga, gs, gg]:
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(result), reference, atol=2e-6, rtol=2e-6)
 # Check tensor shape invariant: `all(s.data.shape == (8,) for s in ga.addressable_shards)`
 assert all(s.data.shape == (8,) for s in ga.addressable_shards)
@@ -316,12 +298,12 @@ assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
 # Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
 def completed_samples(fn, *args):
-    # Synchronize host execution until asynchronous device computation completes.
+    # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
     samples = []
     for _ in range(7):
         start = perf_counter()
-        # Synchronize host execution until asynchronous device computation completes.
+        # Wait for device work to finish before timing it or comparing its result on the host.
         fn(*args).block_until_ready()
         samples.append((perf_counter() - start) * 1e6)
     return samples
@@ -359,23 +341,22 @@ The upper panel counts values in one local result: eight for all-reduce, two for
 The reduction in the middle storage bar comes from partitioning the summed gradient. The return of both bars after gathering explains why a local memory benefit and a complete communication benefit are different claims. The momentum experiment consumes slices before reconstructing weights. Its numerical comparison checks correctness; the separate synchronized CPU samples check a different question and is distinct from accelerator speed.
 
 ```python
-# Compute figure data for: One mathematical gradient, different local storage
 visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','after gather'],'ylabel':'values stored per device','series':[{'label':'observed local shape','y':[ga.addressable_shards[0].data.size,gs.addressable_shards[0].data.size,gg.addressable_shards[0].data.size]}]},{'kind':'bar','labels':['all-reduce','reduce-scatter','scatter + gather'],'ylabel':'modeled bytes per rank','series':[{'label':'idealized ring payload','y':[ring_all_bytes,ring_scatter_bytes,ring_scatter_bytes*2]}]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:48.161184+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:25.726420+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 99.08340871334076, 'reduce_scatter': 102.49996557831764, 'all_gather_only': 108.41712355613708}
+Completed CPU median microseconds: {'all_reduce': 89.9164006114006, 'reduce_scatter': 93.58301758766174, 'all_gather_only': 100.12509301304817}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 109.4592735171318, 'reduce_scatter': 109.74984616041183, 'all_gather_only': 86.12498641014099}
+Completed CPU median microseconds: {'all_reduce': 88.16691115498543, 'reduce_scatter': 80.5417075753212, 'all_gather_only': 88.2497988641262}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
@@ -398,10 +379,10 @@ new_v = 0.9 * vs + gs
 new_w = ws - 0.1 * new_v
 updated = gather(new_w)
 expected_w = wh - 0.1 * (0.9 * v_host + reference)
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(updated), expected_w, atol=2e-6, rtol=2e-6)
 for shard in updated.addressable_shards:
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(shard.data), expected_w, atol=2e-6, rtol=2e-6)
 # Check tensor shape invariant: `all(s.data.shape == (2,) for s in new_v.addressable_shards)`
 assert all(s.data.shape == (2,) for s in new_v.addressable_shards)
@@ -423,27 +404,25 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Configure multi-device placement / sharding specification (`y2`).
-2. Place `w2` explicitly onto the target JAX device.
-3. Convert `` to a host NumPy array for inspection or verification.
-4. Convert `` to a host NumPy array for inspection or verification.
+1. Place `w2` explicitly onto the target JAX device.
+2. Transfer the device result to the host for an independent NumPy comparison.
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Repeat the gradient comparison after reversing both observation rows...
 x2 = jax.device_put(...)  # TODO: compute x2
-# Configure multi-device placement / sharding specification (`y2`).
 y2 = jax.device_put(...)  # TODO: compute y2
 w2h = ...  # TODO: compute w2h
 # Place `w2` explicitly onto the target JAX device.
 w2 = jax.device_put(...)  # TODO: compute w2
 r2 = ...  # TODO: compute r2
 for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(answer), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(answer), r2, atol
     for shard in answer.addressable_shards:
-        # Convert `` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol = ...  # TODO: compute np.testing.assert_allclose(np.asarray(shard.data), r2, atol
 wrong_labels = ...  # TODO: compute wrong_labels
 assert np.max(np.abs(wrong_labels-r2))  # TODO: complete assertion check
@@ -455,17 +434,16 @@ print('Joint permutation preserves the gradient; label-only reversal does not.')
 ```python
 # Exercise solution: Repeat the gradient comparison after reversing both observation rows...
 x2 = jax.device_put(xh[::-1].copy(), rows)
-# Configure multi-device placement / sharding specification (`y2`).
 y2 = jax.device_put(yh[::-1].copy(), NamedSharding(mesh, P('data')))
 w2h = wh + np.float32(0.17)
 # Place `w2` explicitly onto the target JAX device.
 w2 = jax.device_put(w2h, replicated)
 r2 = 2 * xh.T @ (xh @ w2h - yh) / 16
 for answer in [all_gradient(x2, y2, w2), gather(shard_gradient(x2, y2, w2))]:
-    # Convert `` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     np.testing.assert_allclose(np.asarray(answer), r2, atol=2e-6, rtol=2e-6)
     for shard in answer.addressable_shards:
-        # Convert `` to a host NumPy array for inspection or verification.
+        # Transfer the device result to the host for an independent NumPy comparison.
         np.testing.assert_allclose(np.asarray(shard.data), r2, atol=2e-6, rtol=2e-6)
 wrong_labels = 2 * xh.T @ (xh @ w2h - yh[::-1]) / 16
 assert np.max(np.abs(wrong_labels-r2)) > 0.01
@@ -487,11 +465,6 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 </details>
 
 ### How to write: Account for the complete communication cycle — Step-by-step recipe & starter scaffold
-
-**Key functions & syntax to use:**
-- `cycle(...)` — Call `cycle` with your updated parameters or inputs from this lesson's workspace.
-- `budget.append(...)` — Call `budget.append` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
 
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.

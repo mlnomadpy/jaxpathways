@@ -14,9 +14,7 @@ assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
 # Push a direction and pull a sensitivity
 # Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
-# Compute exact directional derivative / Jacobian / Hessian (`(out, jv)`).
 out, jv = jax.jvp(f, (x,), (v,))
-# Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
 c = out
 jt_c = pullback(c)[0]
@@ -44,9 +42,7 @@ J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
 # Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
-# Compute exact directional derivative / Jacobian / Hessian (`(out, jv)`).
 out, jv = jax.jvp(f, (x,), (v,))
-# Compute exact directional derivative / Jacobian / Hessian (`(_, pullback)`).
 _, pullback = jax.vjp(f, x)
 c = out
 jt_c = pullback(c)[0]
@@ -62,8 +58,6 @@ assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 print('Jv / loss gradient:', jv, jt_c)
 
 # Figure data experiment
-# Compute figure data for: A Jacobian maps inputs to output sensitivities
-# Compute higher-order Jacobian or Hessian curvature matrix `visual_data`.
 visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': ['output 0', 'output 1'], 'columns': ['input 0', 'input 1'], 'unit': 'partial derivative'}
 
 # Experiment: Check a finite input move
@@ -99,7 +93,6 @@ assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))
 # Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...
 A = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
 c3 = jnp.array([1.0, -1.0, 2.0])
-# Compute exact directional derivative / Jacobian / Hessian (`(_, back)`).
 _, back = jax.vjp(lambda z: A @ z, x)
 # Check tensor shape invariant: `back(c3)[0].shape == (2,)`
 assert back(c3)[0].shape == (2,)

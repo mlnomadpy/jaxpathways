@@ -125,9 +125,7 @@ import jax.numpy as jnp
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
 def loss(w):
     return (w - 2.) ** 2
-# Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:
 def train(initial, rate, steps):
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
         # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
@@ -165,7 +163,6 @@ Here the loss is $(w-2)^2$. One update multiplies the weight error $w-2$ by $1-2
 The large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate $0.5$ depends on this simple quadratic’s curvature and is not a universal best learning rate.
 
 ```python
-# Compute figure data for: Gradient descent trades step size for stability
 rates = [0.1, 0.5, 1.1]
 series = []
 for rate_plot in rates:
@@ -181,7 +178,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:45:48.289484+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:48:53.460340+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -250,11 +247,6 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `train(...)` — Call `train` with your updated parameters or inputs from this lesson's workspace.
-- `loss(...)` — Call `loss` with your updated parameters or inputs from this lesson's workspace.
-- `assert condition` — Verify that the observed output shape, status, or numerical value satisfies the contract.
-
 **Step-by-step implementation plan:**
 1. Set up the changed input or configuration parameters requested in the prompt.
 2. Run the target function or transformation and assert that the output matches your prediction.
@@ -302,7 +294,6 @@ The error multiplier is $1-8\eta$; use $\eta=0.1$.
 **Step-by-step implementation plan:**
 1. Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
 2. Differentiate the objective to obtain `new` via automatic differentiation.
-3. Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -315,7 +306,6 @@ def scaled_step(w, _):
     # Differentiate the objective to obtain `new` via automatic differentiation.
     new = ...  # TODO: compute new
     return ...  # TODO: return computed result
-# Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
 assert jnp.allclose(scaled_w, 3., atol=1e-5)  # TODO: complete assertion check
 assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
@@ -332,7 +322,6 @@ def scaled_step(w, _):
     # Differentiate the objective to obtain `new` via automatic differentiation.
     new = w-0.1*jax.grad(scaled_loss)(w)
     return new, scaled_loss(new)
-# Run compiled structured control flow via `jax.lax` (`(scaled_w, scaled_history)`).
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
 assert jnp.allclose(scaled_w, 3., atol=1e-5)
 assert jnp.all(jnp.diff(scaled_history) <= 1e-6)

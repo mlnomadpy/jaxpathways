@@ -62,5 +62,13 @@
     }
   ],
   "referenceCommand": "python3 projects/weight-conversion/tests/check.py --implementation solution --stage all",
-  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review. Copy the starter scaffold `projects/weight-conversion/starter/bridge.py` to `projects/weight-conversion/my_bridge.py`, implement the stage functions in `projects/weight-conversion/my_bridge.py`, and verify each stage with `python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 1` (through `--stage 3`)."
+  "setupNote": "Run from the course workspace root after installing requirements-cpu.txt in your Python environment. CPU fixtures require no external datasets, credentials or cloud services. Checks are cumulative public practice, not independent learner review. Copy the starter scaffold `projects/weight-conversion/starter/bridge.py` to `projects/weight-conversion/my_bridge.py`, implement the stage functions in `projects/weight-conversion/my_bridge.py`, and verify each stage with `python3 projects/weight-conversion/tests/check.py --implementation projects/weight-conversion/my_bridge.py --stage 1` (through `--stage 3`).",
+  "environment": {
+    "requirementsPath": "requirements-conversion.txt",
+    "pythonCompatibility": ">=3.11,<3.15",
+    "setupCommands": {
+      "unix": "python3 -m venv .venv\nsource .venv/bin/activate\npython -m pip install -r requirements-conversion.txt",
+      "windows": "py -3 -m venv .venv\n.\\.venv\\Scripts\\python.exe -m pip install -r requirements-conversion.txt"
+    }
+  }
 }

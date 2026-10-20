@@ -1,5 +1,22 @@
 [
   {
+    "version": "0.8.0",
+    "date": "2026-10-20",
+    "title": "A clearer course and traceable model projects",
+    "summary": "Repair beginner setup and navigation, make runtime boundaries explicit, and connect real model training stages to inspectable results.",
+    "changes": [
+      "Kept the first lesson inside its beginner workspace and reduced its installation to JAX and NumPy.",
+      "Separated CPU reference validation from implemented target runners and physical TPU qualification.",
+      "Corrected lesson stage counts, section jumps and mobile outlines; reorganized course and project discovery with optional full-text search.",
+      "Completed deployment milestones in career routes and generated current project and assessment counts.",
+      "Rewrote generic build steps and code comments, corrected mathematical notation, and formatted project teaching code.",
+      "Added a 70,704-parameter real-text causal Transformer pilot with pretraining, continuation adaptation, checkpoint lineage, held-out baseline comparison and verified export. Its measured quality remains weak.",
+      "Removed stale generic programs from ten planned model capstones, preserving their distinct implementation and evidence gates.",
+      "Reduced reader data loading, extended strict checking to every browser controller, repaired book history links and added native-browser and Windows CI checks.",
+      "Added explicit tracking protocols for human teaching reviews and native book compatibility. Physical TPU runs, human reviews and target-scale model releases remain unqualified."
+    ]
+  },
+  {
     "version": "0.7.2",
     "date": "2026-10-20",
     "title": "Google Rich Results schema compatibility",

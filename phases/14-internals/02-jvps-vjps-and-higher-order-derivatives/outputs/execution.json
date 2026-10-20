@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "internals-02",
-  "contentHash": "b4c3b8720c5f59e80a50216fbd223c61ea013199a86108a3d73205efb94fc75a",
-  "executedAt": "2026-10-20T10:50:09.725259+00:00",
+  "contentHash": "4f0d878ad30ef954222f1494fc8d48e895f180f8263b79a888abe2a47c15aabd",
+  "executedAt": "2026-10-20T21:27:27.079602+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Jacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nJacobian: [[-0.7         0.4       ]\n [ 0.92106099 -1.4       ]]\nJVP: [-0.96        1.52527319] VJP: [ 1.49212199 -2.6       ] adjoint pair: 2.570546385606924 2.570546385606924\nHessian-vector product: [ 1.74991568 -3.38303348]\nForward columns and reverse rows agree\nExact HVP: [ 1.74991568 -3.38303348] Gauss-Newton product: [ 2.07686964 -2.51938247]\nChanged-point adjoint verified\nDirection linearity holds; the Jacobian changes with the base point\nBilinear Hessian symmetry and finite-difference product verified\nPASS: internals-02\n",
   "notebookCells": [
     {
-      "sourceHash": "26930fcce005548ffadf077d9a760bc955f778e4aa0b364f78b49ab352f65f36",
+      "sourceHash": "83a7943ed4b76cb2121359b5ceaef3f77b0e3441604706dcac48a2506975ff0a",
       "outputs": []
     },
     {
-      "sourceHash": "53c8b9d33f90e049d200074d12354242b296d1d17c4e4ac843d911a5e2c0362e",
+      "sourceHash": "817dc1ee44985d9bb54e32c2b035abe61cc89cc6795ec03f95df6191e4bba6e2",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,7 +32,7 @@
       ]
     },
     {
-      "sourceHash": "61bd143423b05dcdead7d5d30272c9aabc850916010504dd051022b5c443ce01",
+      "sourceHash": "b5d2f75cbf575521f80bb3e71c7cc3f858f5fc2fde4f4e803634715f2442f798",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "0f61a54e9f5fb6e1ff910fa44d2fc5b32b3155cf78d09567fb6a0451202aff3c",
+      "sourceHash": "4de6061c458e112a4b0dbec59e99d5935375bf934beb35ade4a17d21ae2367a8",
       "outputs": [
         {
           "output_type": "stream",
@@ -59,7 +59,7 @@
       ]
     },
     {
-      "sourceHash": "a15b15540d2b831957c84138342fe2efe2d94d2670cf850ce339e1a92956e6a9",
+      "sourceHash": "eb85d85c78ebbe69e915fcefbfbff3d5a00bda105263aed5c19290b9a08e564a",
       "outputs": []
     },
     {
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "c93a0b857496ac96bc88842b60d7d62b37dc652dc0216fda545f556fa4bacc6e",
+      "sourceHash": "381f526192d56993c2e0e72efd7c59e7e5f258cd96d2554c4110482007913e19",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "9afe791ac7c07f1e5e86c70b1670ea77677ef9c438dccd1d67002415df92585d",
+      "sourceHash": "f4437ffcb90eda31d74a57fd2bec62e14b50905e5edf89009601cdb1656b9c93",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,11 +102,11 @@
       ]
     },
     {
-      "sourceHash": "47dd0d4a6c4602230854f961ed660d59244978d8ba49af044593ef728ea66754",
+      "sourceHash": "64d688c02071db693180285052573846d83a26581ae30c19e6ac2d1c492aacd3",
       "outputs": []
     },
     {
-      "sourceHash": "7b3265d5c4d4f3a347bdc3539f7183fe30e5c8c018dc36b3392d36981b2cbda2",
+      "sourceHash": "05918e41562fb0d6d9023997277425e1f28d880514fa71b1981a9be4818014f3",
       "outputs": [
         {
           "output_type": "stream",
@@ -118,11 +118,11 @@
       ]
     },
     {
-      "sourceHash": "86ac12ac4c46fc64ce3d53a485dcc50ccab53a749c541472c519fe785728731f",
+      "sourceHash": "ef62ef46f867320b7560c775db55b67016ce4ec41eabfdd0fcff028896eabaef",
       "outputs": []
     },
     {
-      "sourceHash": "f259868362260f7a94af770fb4192ec2a2f1b3a1f99f778856d503e168f0a14b",
+      "sourceHash": "2984368ec698b0d4fc01def1f5807a562a50743358c51c74dfd90efe1b92cb90",
       "outputs": [
         {
           "output_type": "stream",

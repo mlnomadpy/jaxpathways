@@ -27,7 +27,6 @@ state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)
 snapshot=transition(state)
 path=root/'step_1'
 t0=time.perf_counter()
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     returned=time.perf_counter()
@@ -36,7 +35,6 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.wait_until_finished()
     committed=time.perf_counter()
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
     assert int(restored['step'])==1 and int(live['step'])==2
     publish(path,1)
@@ -47,20 +45,16 @@ assert report['accepted_step']==1
 # Interrupt publication deliberately
 # A deliberately interrupted application publication leaves the previous commit selected.
 unpublished=root/'step_2'
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(unpublished,args=ocp.args.StandardSave(live))
     cp.wait_until_finished()
-    # Run the boundary check and catch the expected exception:
     try:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
 assert accepted()['step']==1
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
 assert int(previous['step'])==1
 print('Checkpoint workspace:',root)
@@ -92,7 +86,6 @@ state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)
 snapshot=transition(state)
 path=root/'step_1'
 t0=time.perf_counter()
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(path,args=ocp.args.StandardSave(snapshot))
     returned=time.perf_counter()
@@ -101,7 +94,6 @@ with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.wait_until_finished()
     committed=time.perf_counter()
     restored=cp.restore(path,args=ocp.args.StandardRestore(snapshot))
-    # Execute `np.testing.assert_array_equal(restored['weight'],snapshot['w`
     np.testing.assert_array_equal(restored['weight'],snapshot['weight'])
     assert int(restored['step'])==1 and int(live['step'])==2
     publish(path,1)
@@ -111,20 +103,16 @@ assert report['accepted_step']==1
 
 # A deliberately interrupted application publication leaves the previous commit selected.
 unpublished=root/'step_2'
-# Enter `ocp.AsyncCheckpointer(ocp.StandardCheckpointH` context block:
 with ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:
     cp.save(unpublished,args=ocp.args.StandardSave(live))
     cp.wait_until_finished()
-    # Run the boundary check and catch the expected exception:
     try:
         raise RuntimeError('injected interruption before updating LATEST')
     except RuntimeError:
         pass
 assert accepted()['step']==1
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     previous=cp.restore(accepted()['path'],target=snapshot)
-# Execute `np.testing.assert_array_equal(previous['weight'],snapshot['w`
 np.testing.assert_array_equal(previous['weight'],snapshot['weight'])
 assert int(previous['step'])==1
 print('Checkpoint workspace:',root)
@@ -132,7 +120,6 @@ print(json.dumps(report,indent=2))
 print('Unpublished step 2 exists; application recovery still selects verified step 1.')
 
 # Figure data experiment
-# Compute figure data for: A live step can be ahead of the accepted checkpoint
 visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted checkpoint'],'ylabel':'completed step','series':[{'label':'local publication experiment','y':[int(snapshot["step"]),int(live["step"]),report["accepted_step"]]}]}
 
 # Experiment: Trigger an asynchronous error
@@ -141,10 +128,8 @@ def injected_failure():
     raise RuntimeError('injected finalization callback failure')
 failed_path=root/'callback_failure'
 cp=ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler(),async_options=ocp.options.AsyncOptions(post_finalization_callback=injected_failure))
-# Run the boundary check and catch the expected exception:
 try:
     cp.save(failed_path,args=ocp.args.StandardSave(live))
-    # Run the boundary check and catch the expected exception:
     try:
         cp.wait_until_finished()
     except RuntimeError as error:
@@ -158,14 +143,11 @@ assert accepted()['step']==1
 
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Verify and publish the already written second checkpoint.
-# Enter `ocp.StandardCheckpointer()` context block:
 with ocp.StandardCheckpointer() as cp:
     verified=cp.restore(unpublished,target=live)
-# Execute `np.testing.assert_array_equal(verified['weight'],live['weigh`
 np.testing.assert_array_equal(verified['weight'],live['weight'])
 assert int(verified['step'])==2
 publish(unpublished,2)
-# Execute `np.testing.assert_array_equal(transition(verified)['weight']`
 np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
 assert accepted()['step']==2 and int(snapshot['step'])==1
 print('Step two verified and accepted; next transition agrees.')
@@ -173,12 +155,10 @@ print('Step two verified and accepted; next transition agrees.')
 # Reference practice: Keep only a genuinely accepted target
 # Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
 def preflight(record):
-    # Guard input contract (`not Path(record['path']).is_dir() or int(record['step']) < 0`) and fail fast if violated.
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')
     return record
 before=accepted()
-# Run the boundary check and catch the expected exception:
 try:preflight({'path':str(root/'never_saved'),'step':99})
 except ValueError:pass
 else:raise AssertionError('missing target accepted')

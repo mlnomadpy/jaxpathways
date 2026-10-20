@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep source pairing, temperature, stable two-direction loss checks, collapse and duplicate baselines, training outputs and broken-pair diagnosis.
 
 - Command: `python3 phases/17-pretraining/03-contrastive/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

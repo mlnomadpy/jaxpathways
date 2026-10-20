@@ -7,7 +7,7 @@ Copy this template into your own portfolio and fill it after running your modifi
 Keep an axis sketch, asymmetric offset checks, aligned-versus-pairwise residual arrays, a rejected shape mismatch, and the float32 precision observation. Explain the intended residual contract.
 
 - Command: `python3 phases/01-arrays/02-shapes-broadcasting-and-dtypes/code/main.py`
-- Working directory: repository root
+- Working directory: Repository root
 - Python / JAX / NumPy versions: 
 - Hardware and device: 
 - My prediction before running: 

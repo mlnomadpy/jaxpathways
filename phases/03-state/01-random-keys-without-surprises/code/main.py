@@ -50,7 +50,6 @@ assert jnp.array_equal(a, repeated)
 assert not jnp.array_equal(a, b)
 
 # Figure data experiment
-# Compute figure data for: Reused keys replay the same sample
 visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}
 
 # Experiment: Implement one random state transition
@@ -111,7 +110,6 @@ rows=[]
 for _ in range(3):
     current,noise=noise_step(current)
     rows.append(noise)
-# Combine or mask array elements to form `fixed`.
 fixed=jnp.stack(rows)
 # Check tensor shape invariant: `fixed.shape==(3,2)`
 assert fixed.shape==(3,2)

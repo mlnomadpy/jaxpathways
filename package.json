@@ -1,7 +1,7 @@
 {
   "name": "jaxpathways",
   "private": true,
-  "version": "0.7.2",
+  "version": "0.8.0",
   "scripts": {
     "dev": "npm run content:build && astro dev",
     "check": "npm run content:build && npm run check:astro && npm run check:types && npm run lint && npm run format:check && node scripts/validate-curriculum.mjs && npm run build && npm test && python3 scripts/check-distribution.py && npm run check:site",
@@ -9,6 +9,7 @@
     "smoke:cpu": "python3 scripts/smoke-lessons.py",
     "build": "npm run release:check && npm run content:build && astro build",
     "test:project": "python3 scripts/check-projects.py",
+    "test:browser": "playwright test",
     "audit:content": "python3 scripts/audit-content.py",
     "preview": "astro preview",
     "content:build": "node scripts/render-curriculum.mjs && python3 scripts/build-distribution.py && python3 scripts/build-assessments.py && python3 scripts/build-project-workspace.py && python3 scripts/build-tpu-workspace.py && python3 scripts/build-experiment-workshop.py",
@@ -34,6 +35,7 @@
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
     "@eslint/js": "^10.0.1",
+    "@playwright/test": "1.64.1",
     "astro": "^7.3.5",
     "eslint": "^10.12.0",
     "globals": "^17.13.0",

@@ -1,14 +1,14 @@
 """Pure functions and explicit inputs: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX array operations
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Define a prediction from explicit parameters
 def predict(params, x):
     return params["weight"] * x + params["bias"]
 params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
 
-# Step 3: Verify shapes and numerical invariants
+# Evaluate the predictor on three inputs
 x = jnp.array([0., 1., 2.])
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 
@@ -22,7 +22,6 @@ print(predict(params, x))
 assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))
 
 # Figure data experiment
-# Compute figure data for: Explicit parameters make predictions inspectable
 # Create device-backed JAX array `changed`.
 changed = {**params, 'bias': jnp.array(3.0)}
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}

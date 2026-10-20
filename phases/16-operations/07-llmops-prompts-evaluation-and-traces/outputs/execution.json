@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-07",
-  "contentHash": "43e1f34e84f93a58fe344a5357aee212ede59116f582807c39c167b4ae0f84a7",
-  "executedAt": "2026-10-20T10:51:53.818799+00:00",
+  "contentHash": "bc7504d15e87d5604903e49adfc44f71d0d0bfdf4408d79d286055b3aae8c6a2",
+  "executedAt": "2026-10-20T21:42:34.978995+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Observed replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.\nObserved replay scores: [{'overall': 0.9, 'answerable': 1.0, 'unanswerable': 0.0}, {'overall': 1.0, 'answerable': 1.0, 'unanswerable': 1.0}]\nTwo real MLflow traces; no LLM API was called and no general model quality was evaluated.\nRelease decisions: [False, True]\nComplete inventory: {'count': 10, 'passed': 9, 'fraction': 0.9} ; missing, duplicate and unknown responses rejected.\nUnrecognized citations rejected.\nAn abstention flag alone does not satisfy the output contract.\nFailed answerable work remains in denominator: {'count': 10, 'passed': 9, 'fraction': 0.9}\nPASS: operations-07\n",
   "notebookCells": [
     {
-      "sourceHash": "649769c1c54e070b7d4767e14a65cfabfe3712cf5a99be19fe8abc01e2a7d03f",
+      "sourceHash": "7d3d83ea9ff415a1d2bbce7f62c3ef3704f8e5ae3815e9a8166ae34ed5e773ca",
       "outputs": []
     },
     {
-      "sourceHash": "0dfba4ba6cc1982b4d817b478bb8dee7b41286555b71eb684837ba10d8915657",
+      "sourceHash": "090d652ea34eebb704be239a3f8e95edffd0b9c7981c737905ee23264b4695e5",
       "outputs": [
         {
           "output_type": "stream",
@@ -32,9 +32,9 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Updating database tables\n",
-            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-2:35: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
+            "2026/10/20 14:42:33 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 14:42:33 INFO mlflow.store.db.utils: Updating database tables\n",
+            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-2:34: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
           ]
         }
       ]
@@ -44,7 +44,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "c905358810448a1648ef26cc14654084b28bd7fed27d09a01dfe55335ff22500",
+      "sourceHash": "d68d5531a9723245096247b5c61673c863922346a9a842d08b869d0fac46f3ca",
       "outputs": [
         {
           "output_type": "stream",
@@ -58,15 +58,15 @@
           "output_type": "stream",
           "name": "stderr",
           "text": [
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
-            "2026/10/20 03:51:52 INFO mlflow.store.db.utils: Updating database tables\n",
-            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-4:49: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
+            "2026/10/20 14:42:33 INFO mlflow.store.db.utils: Creating initial MLflow database tables...\n",
+            "2026/10/20 14:42:33 INFO mlflow.store.db.utils: Updating database tables\n",
+            "/Users/tahabsn/Documents/ChatGPT/jaxpathways/phases/16-operations/07-llmops-prompts-evaluation-and-traces/notebooks/exercise.ipynb:cell-4:47: FutureWarning: Parameter 'experiment_ids' is deprecated. Please use 'locations' instead.\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "917c08bd4f5fbf6ac3e258e355733e76d9d33405e06fcdee53f40787843b11bc",
+      "sourceHash": "095cf8793b4a6754e953dec7a46fa18847b0b2b0bf82c0838f55b938c390cc35",
       "outputs": []
     },
     {
@@ -97,7 +97,7 @@
       ]
     },
     {
-      "sourceHash": "704122e566e69d78148a71e3d119bc99631db134b03bcce674ff5c84095d6a28",
+      "sourceHash": "96cc2e24ad69e6e305b4b93e65b22ba3541b18ed36aba6ae94d118068f9634ff",
       "outputs": [
         {
           "output_type": "stream",

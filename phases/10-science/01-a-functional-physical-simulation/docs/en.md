@@ -69,7 +69,7 @@ Append this block to main.py in your CPU course environment; for the first block
 ```python
 # Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -82,7 +82,6 @@ def euler_solve(rate, initial, steps, dt):
     def advance(value, unused):
         updated = euler_step(rate, value, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 ```
@@ -129,7 +128,7 @@ Every run stops at the same physical time. Halving the step approximately halves
 ```python
 # Step 1 — Define a state transition: A scalar state enters and a new scalar leaves.
 import jax
-# Update state in place with the new values.
+# Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
 import jax.numpy as jnp
 import numpy as np
@@ -142,7 +141,6 @@ def euler_solve(rate, initial, steps, dt):
     def advance(value, unused):
         updated = euler_step(rate, value, dt)
         return updated, updated
-    # Run compiled structured control flow via `jax.lax` (`(_, tail)`).
     _, tail = jax.lax.scan(advance, initial, None, length=steps)
     return jnp.concatenate((jnp.atleast_1d(initial), tail))
 
@@ -189,16 +187,15 @@ The code checks the coarse curve against the exact geometric sequence for Euler.
 These curves describe a stable, positive parameter choice. They are separate from accuracy for every time step or equation. The instability experiment changes the multiplier until the numerical behavior no longer resembles cooling.
 
 ```python
-# Compute figure data for: A correct Euler program still has time-step error
 # Create device-backed JAX array `fine`.
 fine = np.asarray(euler_solve(0.7, jnp.array(2.0), 8, 0.25))[::2]
-# Convert `visual_data` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':'Euler h=0.5','y':np.asarray(trajectory).tolist()},{'label':'Euler h=0.25 (sampled)','y':fine.tolist()},{'label':'analytic exponential','y':continuous.tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T10:47:54.140127+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T18:52:32.499907+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213

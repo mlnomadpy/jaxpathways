@@ -1,16 +1,16 @@
 """Your first gradient: worked experiments and reference solutions. CPU checks."""
 
-# Step 1: Set up imports and input tensors
+# Import JAX automatic differentiation
 import jax
 import jax.numpy as jnp
 
-# Step 2: Apply the core JAX transformation
+# Define the square and differentiate it
 def f(x):
     return x ** 2
 # Differentiate the objective to obtain `derivative` via automatic differentiation.
 derivative = jax.grad(f)
 
-# Step 3: Verify shapes and numerical invariants
+# Check the derivative at two points
 assert jnp.allclose(derivative(3.0), 6.)
 assert jnp.allclose(derivative(0.0), 0.)
 
@@ -37,7 +37,6 @@ assert jnp.allclose(derivative(3.0), 6.)
 assert jnp.allclose(derivative(0.0), 0.)
 
 # Figure data experiment
-# Compute figure data for: A tangent describes local change
 # Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-4.0, 4.0, 81)
 point = 3.0

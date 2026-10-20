@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-04",
-  "contentHash": "fba8433e52316e9b4754f027642448996809914e15f1853638a5018bfa9eaeb8",
-  "executedAt": "2026-10-20T10:47:51.553258+00:00",
+  "contentHash": "1b69bfc3e483f10590951ab28b31d9b77adf0d3cc964fddf0b9fd5ed3828651b",
+  "executedAt": "2026-10-20T18:52:29.677387+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 4,
@@ -11,18 +11,18 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-8l8pqueq/step-one\nRecorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-9h7rtdxi/step-one\nSame next sample IDs, different weights after missing momentum: 0.0195157527923584\nFive resumed transitions and all addressable parameter replicas agree.\nCurrent-epoch batch matches; next-epoch batch exposes the wrong key.\nPASS: distributed-04\n",
+  "stdout": "Recorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-gte6lwe5/step-one\nRecorded backend/processes/devices: cpu 1 4\nRestored step/cursor: 1 8\nNext sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\nUninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nRestored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\nCheckpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-e7jucqsn/step-one\nSame next sample IDs, different weights after missing momentum: 0.0195157527923584\nFive resumed transitions and all addressable parameter replicas agree.\nCurrent-epoch batch matches; next-epoch batch exposes the wrong key.\nPASS: distributed-04\n",
   "notebookCells": [
     {
       "sourceHash": "a3c3ad433e7428658e502596577dfcea4fee9848e4ddfef52a067994581c1029",
       "outputs": []
     },
     {
-      "sourceHash": "dc50991f33221f18f6e8bd9045fa08a75e6c25dc79862df6bc76651df13db580",
+      "sourceHash": "c5e12bae56c79f7e06cf3a2c9083c365b35a31b293200204d67b3d6fe5c48381",
       "outputs": []
     },
     {
-      "sourceHash": "4ef5d296486524e875d5f71dc6c5e64d8f20cb1c5b0178380a3fbce597c912ff",
+      "sourceHash": "5a979d44c1b8a92e8d31a64051a00e030dbbd3a9b5b3c1aef7bf6d0038f9e11e",
       "outputs": []
     },
     {
@@ -34,11 +34,11 @@
       "outputs": []
     },
     {
-      "sourceHash": "dd7d4409cb28da72ce132f640d0d85cccba7c6d2ffc4fa8c2a3eb72d7bf89e39",
+      "sourceHash": "2a0ae32e790f67dd49414a4fd4340796df751846262e1d2ea5989f9299916b91",
       "outputs": []
     },
     {
-      "sourceHash": "5afb3804305c98101ce1f297990aa249057ab1cf5a846b6ac09611fda79a752f",
+      "sourceHash": "2c635d945970f47807239a6390e44c4fb78d865f14fcdd76453fed50be5e0b16",
       "outputs": [
         {
           "output_type": "stream",
@@ -49,13 +49,13 @@
             "Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\n",
             "Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
             "Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
-            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-3otrvccy/step-one\n"
+            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-pant_hil/step-one\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "5b3c24613331118f4ad3fd4f01bb19c3765f2875eea6a9a295d9389643233bf3",
+      "sourceHash": "e41bc8ac1924196a3e39ad8416371570f82009382be7dd8ab79f77f9879a77b1",
       "outputs": [
         {
           "output_type": "stream",
@@ -66,13 +66,13 @@
             "Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]\n",
             "Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
             "Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]\n",
-            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-ez7ibc0v/step-one\n"
+            "Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-o0sgzxc2/step-one\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "c545f1986fdb75a89a424c03b6afc23a12c6685c2ed65c65bc7acbb72c0b97d9",
+      "sourceHash": "a8a4747690bee6f6092fe2c44b8f8ffe44505df46e71acb4f9a2ef4611b431d3",
       "outputs": []
     },
     {
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "sourceHash": "d6885687a2d239c0f6c3f49d69eb8fa023b51ca2492cdf530af08c728c73944e",
+      "sourceHash": "8f77fface55e24fd9605f6e25b2edb2dd0828a7e697dfd2ae1506a6fc98a0d6d",
       "outputs": [
         {
           "output_type": "stream",
@@ -103,11 +103,11 @@
       ]
     },
     {
-      "sourceHash": "526020b95c1b55db06c4a5ede9774acce43cfdc6cd5ab19761e38c6c675a76d3",
+      "sourceHash": "3c6b218821616c1905c21b9ec87094cc0c556837843b1d493babdfd5620180b4",
       "outputs": []
     },
     {
-      "sourceHash": "8b0394c92d604b2a34b867e6f34a0de8c10429d3bbea1021dee34dacc41b714f",
+      "sourceHash": "a8991bae0624c56b2f0b3a47bf4eb2e86239214c6abfe5bc86a843f6686bd3b3",
       "outputs": [
         {
           "output_type": "stream",
@@ -119,11 +119,11 @@
       ]
     },
     {
-      "sourceHash": "fbcfbf7d341151e7efa298429f4db771ddc7729f989e18fe849120b4e331b867",
+      "sourceHash": "a8a63c7005ac3d7558c45c00e2dec19dde6ca3362350d86dc6de7af9b772f20c",
       "outputs": []
     },
     {
-      "sourceHash": "96ab7901a7e09bf3af7a1c44b058ccdc305dc13047669e113612e5e6b63a554c",
+      "sourceHash": "30881e84f72a97500308a581d53a4d08d83e61166daf43b0c2351a4e4579e592",
       "outputs": [
         {
           "output_type": "stream",

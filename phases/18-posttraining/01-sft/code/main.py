@@ -13,9 +13,8 @@ def response_logps(logits, tokens, response_mask):
     return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -46,7 +45,6 @@ assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
 changed = base_logits.at[:, -1, :].set(100.0)
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -65,9 +63,8 @@ def response_logps(logits, tokens, response_mask):
     return jnp.sum(jnp.where(response_mask[:, 1:], selected, 0.0), axis=-1)
 
 def validate_mask(selected, shape):
-    # Convert `a` to a host NumPy array for inspection or verification.
+    # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(selected)
-    # Guard input contract (`a.shape != shape or a.dtype != np.bool_ or (not a.any())`) and fail fast if violated.
     if a.shape != shape or a.dtype != np.bool_ or not a.any():
         raise ValueError('a nonempty Boolean mask of the target shape is required')
 
@@ -96,7 +93,6 @@ assert np.array_equal(np.argmax(np.asarray(p)[[0, 1]], axis=1), [2, 3])
 # The final position predicts nothing and has no contribution.
 base_logits = p[tokens]
 changed = base_logits.at[:, -1, :].set(100.0)
-# Execute `np.testing.assert_allclose(`
 np.testing.assert_allclose(
     response_logps(changed, tokens, roles),
     response_logps(base_logits, tokens, roles),
@@ -104,14 +100,12 @@ np.testing.assert_allclose(
 print('Response-only token NLL initial/final:', history[0], history[-1])
 
 # Figure data experiment
-# Compute figure data for: Supervised fine-tuning with response-only token loss — recorded experiment
 visual_data={'kind':'line','xlabel':'completed parameter updates before measurement','ylabel':'response-token NLL (nats)','series':[{'label':'recorded CPU training loss','x':list(range(len(history))),'y':history}]}
 for panel in visual_data.get('panels',[visual_data]):
     panel['x']=panel['series'][0]['x']
 
-# Allocate initialized array `initial_output_grads` with the specified shape and dtype.
 initial_output_grads=jax.grad(lambda values:-jnp.sum(response_logps(values,tokens,roles))/jnp.sum(roles[:,1:]))(jnp.zeros((2,3,5)))
-# Convert `extra_panel` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 extra_panel={'kind':'heatmap','values':np.asarray(jnp.linalg.norm(initial_output_grads,axis=-1)).tolist(),'rows':['prompt 0 / answer 2','prompt 1 / answer 3'],'columns':['input position 0','input position 1','input position 2'],'unit':'output-logit gradient L2 norm','xlabel':'position producing the prediction','ylabel':'sequence','title':'Initial supervised gradient by output position'}
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
@@ -120,7 +114,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 # Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
-# Convert `` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(g)[4], 0.0)
 print('Prompt rows learn to predict first answers; the final end-token row has no target.')
 
@@ -128,10 +122,9 @@ print('Prompt rows learn to predict first answers; the final end-token row has n
 # Experiment — Check a ragged batch against a scalar loop: Padding and role masks affect the target after shifting.
 ragged_tokens = jnp.array([[0, 2, 4, 4], [1, 3, 2, 4]])
 ragged_roles = jnp.array([[False, True, True, False], [False, True, True, True]])
-# Construct and reshape `ragged_logits` into the target tensor dimensions.
 ragged_logits = jnp.arange(2 * 4 * 5, dtype=jnp.float32).reshape(2, 4, 5) / 19
 observed = response_logps(ragged_logits, ragged_tokens, ragged_roles)
-# Convert `arr` to a host NumPy array for inspection or verification.
+# Transfer the device result to the host for an independent NumPy comparison.
 arr = np.asarray(ragged_logits, dtype=np.float64)
 expected = []
 for row in range(2):
@@ -148,7 +141,6 @@ print('Supervised targets per sequence:', np.asarray(ragged_roles[:, 1:].sum(1))
 # Reference solution. Try the exercise before reading this.
 # Exercise solution: Score only the first response token in each sequence and compare the...
 first_only = roles.at[:, 2].set(False)
-# Aggregate array values to compute `value`.
 value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
     first_only[:, 1:]
 )
@@ -159,7 +151,6 @@ print('Two first-response targets:', float(value))
 
 # Reference practice: Reject a batch with no answer targets
 # Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
-# Run the boundary check and catch the expected exception:
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -171,7 +162,6 @@ else:
 # Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
 contexts = jnp.array([[1, 0], [3, 0]])
 last_logits = p[contexts[:, -1]]
-# Execute `np.testing.assert_array_equal(last_logits[0], last_logits[1]`
 np.testing.assert_array_equal(last_logits[0], last_logits[1])
 conflicting_targets = jnp.array([2, 3])
 assert conflicting_targets[0] != conflicting_targets[1]

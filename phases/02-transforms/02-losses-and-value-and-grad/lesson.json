@@ -111,26 +111,26 @@
       "reading": "The solid bowl is mean squared loss and the dashed line is its derivative with respect to the weight. The horizontal axis varies the weight. The two vertical quantities have different meanings even though they share one axis.\n\nBoth reach zero at \\(w=2\\). At \\(w=1\\), the loss is about \\(4.67\\), while the derivative is about \\(-9.33\\). Left of the minimum, the derivative is negative; right of it, the derivative is positive.",
       "connection": "The loss tells us how wrong the predictions are. The derivative tells us how that loss changes when the weight increases slightly. A negative derivative means moving right initially lowers the loss, which is why subtracting the gradient moves the weight toward \\(2\\).\n\nThe dashed line below zero is a negative slope, not a negative squared loss. Likewise, an intersection of the two curves away from the minimum has no special optimization meaning. `value_and_grad` returns these two different pieces of information together.",
       "alt": "Loss and slope answer different questions. The solid bowl is mean squared loss and the dashed line is its derivative with respect to the weight. The horizontal axis varies the weight. The two vertical quantities have different meanings even though they share one axis. Both reach zero at \\(w=2\\). At \\(w=1\\), the loss is about \\(4.67\\), while the derivative is about \\(-9.33\\). Left of the minimum, the derivative is negative; right of it, the derivative is positive.",
-      "code": "# Compute figure data for: Loss and slope answer different questions\n# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(0.0, 4.0, 81)\n# Differentiate the objective to obtain gradients `visual_data`.\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}"
+      "code": "# Generate a uniform grid of points in `grid`.\ngrid = jnp.linspace(0.0, 4.0, 81)\n# Differentiate the objective to obtain gradients `visual_data`.\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}"
     },
     "buildSteps": [
       {
-        "title": "Step 1: Set up imports and input tensors",
-        "instruction": "Import the required JAX modules and define the initial inputs for losses and value_and_grad.",
+        "title": "Import JAX differentiation and array operations",
+        "instruction": "Import jax and jax.numpy for the loss and its derivative.",
         "code": "import jax\nimport jax.numpy as jnp",
-        "explanation": "Establishing explicit input shapes and dtypes first makes the downstream transformation contract deterministic."
+        "explanation": "The loss below is scalar-valued, which is the input contract for value_and_grad."
       },
       {
-        "title": "Step 2: Apply the core JAX transformation",
-        "instruction": "Write the core computation and transformation step over the initialized inputs.",
+        "title": "Define the three-example squared-error loss",
+        "instruction": "Set \\(x=[1,2,3]\\), choose targets \\(y=2x\\), and average squared prediction errors for a scalar weight.",
         "code": "x = jnp.array([1., 2., 3.])\ny = 2. * x\ndef loss(weight):\n    return jnp.mean((weight * x - y) ** 2)",
-        "explanation": "This stage executes the primary numerical transformation and binds the intermediate outputs."
+        "explanation": "At weight 1, the residuals are [-1,-2,-3]. The mean squared error is 14/3; averaging matters because it scales the gradient too."
       },
       {
-        "title": "Step 3: Verify shapes and numerical invariants",
-        "instruction": "Check that the resulting arrays satisfy the expected shape, dtype, and numerical tolerances.",
+        "title": "Compute loss and gradient in one evaluation",
+        "instruction": "Call value_and_grad at weight 1 and compare both results with hand calculations.",
         "code": "value, gradient = jax.value_and_grad(loss)(1.0)\nassert jnp.allclose(value, 14./3.)\nassert jnp.allclose(gradient, -28./3.)",
-        "explanation": "These assertions lock in the exact numerical contract before you run the full experiment and variations."
+        "explanation": "The derivative is the mean of \\(2x(wx-y)\\), giving \\(-28/3\\) at \\(w=1\\). Checking value and derivative catches errors in both the objective and its reduction."
       }
     ]
   }

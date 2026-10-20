@@ -26,7 +26,6 @@ def run(rate,steps,features=x,targets=y,clip=None):
         history.append([float(w),float(value),float(jnp.abs(grad))])
         # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
-        # Combine or mask array elements to form `update`.
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
     return float(w),np.asarray(history)
@@ -57,7 +56,6 @@ np.testing.assert_allclose(loss(0.),56/3,rtol=1e-6)
 np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 
 # Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
-# Define `run(rate, steps, features, targets...)` to evaluate the objective and its automatic derivatives:
 def run(rate,steps,features=x,targets=y,clip=None):
     w=jnp.array(0.)
     history=[]
@@ -68,7 +66,6 @@ def run(rate,steps,features=x,targets=y,clip=None):
         history.append([float(w),float(value),float(jnp.abs(grad))])
         # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
-        # Combine or mask array elements to form `update`.
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
     return float(w),np.asarray(history)
@@ -86,7 +83,6 @@ np.testing.assert_allclose(bad[1:,1]/bad[:-1,1],3.24,rtol=1e-5)
 print('Stable final weight:',stable,'unstable pre-update [weight,loss,|gradient|]:\n',bad)
 
 # Figure data experiment
-# Compute figure data for: Correct gradients can still produce unstable training
 visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-update step', 'ylabel': 'mean squared loss', 'yscale': 'log', 'series': [{'label': 'rate 0.1', 'y': good[:, 1].tolist()}, {'label': 'rate 0.3', 'y': bad[:, 1].tolist()}]}
 
 # Experiment: Bounded clipped updates

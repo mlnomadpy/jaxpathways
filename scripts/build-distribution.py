@@ -18,7 +18,7 @@ math_markup = json.loads(subprocess.check_output(["node", "scripts/render-book-m
 def rich(text):
     return math_markup["prose"].get(text, esc(text))
 style = 'figure{margin:1.5rem 0}figure img{width:100%;height:auto}figcaption{font-size:.85em}body{max-width:760px;margin:3rem auto;padding:0 1.5rem;font:18px/1.7 Georgia,serif;color:#172334}h1,h2,h3{font-family:system-ui,sans-serif;line-height:1.3}pre{padding:1rem;background:#eef1f5;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px}article{page-break-before:always;margin-top:4rem}a{color:#2456a6}.solution{page-break-before:always}table{border-collapse:collapse}td,th{border:1px solid #bbc4d0;padding:.35rem}@media print{nav{display:none}body{margin:0;max-width:none}}'
-intro = f'<h1>JAX Pathways: course reader</h1><p>Edition {esc(release["version"])} · {esc(release["date"])} · <a href="https://www.tahabouhsine.com/jaxpathways/releases.html#{esc(release["version"])}">Edition changes</a></p><p>{len(lessons)} authored lessons from the shared course. Reference execution status is recorded separately in validation.json; TPU execution and expert review remain outstanding.</p><p>Follow phases in order when new to JAX. Each phase guide names preparation, a useful artifact and evidence to keep. Exercises and checkpoints are practice; project completion and reviewed competency are separate. Solutions are collected in a separate appendix.</p><h2>Choose a route</h2><ul>'+''.join(f'<li><a href="https://www.tahabouhsine.com/jaxpathways/course.html?path={esc(r["id"])}">{esc(r["title"])}</a> · {esc(r["description"])}</li>' for r in course.get('pathways',[]))+'</ul><p>Career routes and milestones: <a href="https://www.tahabouhsine.com/jaxpathways/careers.html">online career guide</a>.</p>'
+intro = f'<h1>JAX Pathways: course reader</h1><p>Edition {esc(release["version"])} · {esc(release["date"])} · <a href="https://www.tahabouhsine.com/jaxpathways/updates.html#v{esc(release["version"])}">Edition changes</a></p><p>{len(lessons)} authored lessons from the shared course. Reference execution status is recorded separately in validation.json; TPU execution and expert review remain outstanding.</p><p>Follow phases in order when new to JAX. Each phase guide names preparation, a useful artifact and evidence to keep. Exercises and checkpoints are practice; project completion and reviewed competency are separate. Solutions are collected in a separate appendix.</p><h2>Choose a route</h2><ul>'+''.join(f'<li><a href="https://www.tahabouhsine.com/jaxpathways/course.html?path={esc(r["id"])}">{esc(r["title"])}</a> · {esc(r["description"])}</li>' for r in course.get('pathways',[]))+'</ul><p>Career routes and milestones: <a href="https://www.tahabouhsine.com/jaxpathways/careers.html">online career guide</a>.</p>'
 
 def prose(text):
     return ''.join(f'<p>{rich(p)}</p>' for p in text.split('\n\n'))
@@ -32,6 +32,8 @@ solutions=[]
 def chapter(lesson):
     body = f'<h1>{esc(lesson["title"])}</h1><p>{esc(lesson["objective"])}</p>'
     c = lesson['content']
+    if c.get('setupBundle'):
+        body += '<p><a href="https://www.tahabouhsine.com/jaxpathways/'+esc(c['setupBundle']['url'])+'">'+esc(c['setupBundle']['title'])+'</a>. Extract the archive and work inside its <code>jax-start-here</code> folder. The setup instructions refer to <code>first_experiment.py</code> in that folder.</p>'
     if c.get('objectives'):
         body += '<h2>What you will be able to do</h2><ul>'+''.join('<li>'+rich(o)+'</li>' for o in c['objectives'])+'</ul>'
     if c.get('problem'): body += '<h2>The problem</h2>'+prose(c['problem'])
@@ -131,10 +133,17 @@ for manifest in json.loads((ROOT/'curriculum/projects.json').read_text()):
     project_path = ROOT/manifest
     project = json.loads(project_path.read_text())
     with ZipFile(OUT/(project['id']+'.zip'),'w',compression=ZIP_DEFLATED) as bundle:
+        included=set()
         for path in sorted(project_path.parent.rglob('*')):
             if path.is_file() and '__pycache__' not in path.parts:
-                bundle.write(path,path.relative_to(ROOT))
-        bundle.write(ROOT/'requirements-cpu.txt','requirements-cpu.txt')
+                archive_name=path.relative_to(ROOT).as_posix()
+                if archive_name not in included:
+                    bundle.write(path,archive_name)
+                    included.add(archive_name)
+        requirements_path=Path(project['environment']['requirementsPath'])
+        requirements_name=requirements_path.as_posix()
+        if requirements_name not in included:
+            bundle.write(ROOT/requirements_path,requirements_name)
 with ZipFile(OUT/'jax-tutor-skills.zip','w',compression=ZIP_DEFLATED) as bundle:
     for path in sorted((ROOT/'skills').glob('*/SKILL.md')): bundle.write(path,path.relative_to(ROOT))
     for path in sorted((ROOT/'skills').glob('*/references/*.md')): bundle.write(path,path.relative_to(ROOT))
@@ -144,14 +153,17 @@ print(f'Built offline HTML/EPUB ({len(lessons)} lessons), staged project, and tu
 setup=next(l for l in lessons if l['id']=='welcome-01')
 with ZipFile(OUT/'jax-start-here.zip','w',compression=ZIP_DEFLATED) as bundle:
     bundle.writestr('jax-start-here/first_experiment.py',setup['content']['code']+'\n')
-    bundle.write(ROOT/'requirements-cpu.txt','jax-start-here/requirements-cpu.txt')
+    bundle.write(ROOT/'requirements-beginner.txt','jax-start-here/requirements-beginner.txt')
     setup_text=(ROOT/setup['artifacts']['source']).read_text().replace('../outputs/figure.svg','figure.svg').replace('../outputs/mechanism.svg','mechanism.svg')
     bundle.writestr('jax-start-here/START-HERE.md',setup_text)
     if setup.get('visualArtifact'):bundle.write(ROOT/setup['path']/'outputs/figure.svg','jax-start-here/figure.svg')
     if setup.get('visualArtifact',{}).get('mechanismImage'):bundle.write(ROOT/setup['path']/'outputs/mechanism.svg','jax-start-here/mechanism.svg')
 
 # A portable course root for tutors: skills alone do not include their lesson sources.
-workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'scripts/course.py',
+workspace_files = {ROOT/'requirements-cpu.txt', ROOT/'requirements-beginner.txt',
+                   ROOT/'requirements-training.txt', ROOT/'requirements-figures.txt',
+                   ROOT/'requirements-vision.txt', ROOT/'requirements-conversion.txt',
+                   ROOT/'requirements-research.txt', ROOT/'requirements-tracking.txt', ROOT/'scripts/course.py',
                    ROOT/'public/curriculum.json', ROOT/'public/validation.json'}
 for directory in ('curriculum', 'learning-paths', 'phases', 'projects', 'skills', 'assessments', 'resources/tpu-gcp', 'content/guides'):
     workspace_files.update(path for path in (ROOT/directory).rglob('*')

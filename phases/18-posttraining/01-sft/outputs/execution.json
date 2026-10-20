@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-01",
-  "contentHash": "d48f77f40513e77744330ab3407f8ff07c0aa48d1694fb60099b1fec0d05d3ee",
-  "executedAt": "2026-10-20T10:52:09.960042+00:00",
+  "contentHash": "9df519f1c0b25b089187622edcb7f5a8d041133b02d1313281ec67c316170b1b",
+  "executedAt": "2026-10-20T21:42:49.713704+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nResponse-only token NLL initial/final: 1.6094379425048828 0.07985548675060272\nPrompt rows learn to predict first answers; the final end-token row has no target.\nSupervised targets per sequence: [2 3]\nTwo first-response targets: 0.07894014567136765\nNo-target SFT batch rejected\nIdentical final tokens force identical table predictions despite different contexts.\nPASS: posttraining-01\n",
   "notebookCells": [
     {
-      "sourceHash": "fcc90a0683665bfd398240d0c6282b58e16d108dc9ff68b7ac73e76e08a6a24c",
+      "sourceHash": "890aace622acd7ecc6fae0b55dff339a05d12d28dff4d7a3507e703c11990049",
       "outputs": []
     },
     {
@@ -22,7 +22,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "122d285f2b3691297007429ec4448fef9f2080d5caaf5e3e2438c57be40d3c00",
+      "sourceHash": "8174df42c364e26e4fe10f96a3e893075f66c912b1bffaf76c094371d7024660",
       "outputs": [
         {
           "output_type": "stream",
@@ -34,7 +34,7 @@
       ]
     },
     {
-      "sourceHash": "40c1db45fd4f263c8e05374873386765286f5c350969b0dda4c4f9dfa44bab39",
+      "sourceHash": "e3f737d6b52a14b42df63d24c9d9ab8d1056031503c2bf643b32a3d5975d7321",
       "outputs": [
         {
           "output_type": "stream",
@@ -46,7 +46,7 @@
       ]
     },
     {
-      "sourceHash": "a239593576af66316e18f04b9b6da34814ee5c4a1fa929dc570f3638cc2498f5",
+      "sourceHash": "8c5480d42e7ee676303d4940c881049fa137f38bd34cf1b63f0d1a96e3d98e64",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "3c93e437757f40511c785307b8ae182835b2236b97f647bca5542d9b05c3d454",
+      "sourceHash": "3574e52a7726a72852eeb4c2e87e08952185489f8e533cfb1ced80fb4bb2efca",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "7914fb8efcdeb84d64cf94f530f48f83dfa06ae50e34da7102073ef2ca4f5f1e",
+      "sourceHash": "16e9567f4db13f264f10ddda6dcda160efefefe3dee6caa53ef31dd2240ce698",
       "outputs": [
         {
           "output_type": "stream",
@@ -89,11 +89,11 @@
       ]
     },
     {
-      "sourceHash": "2d9f10b9cca9f90e8369439365501f814fde7aa77b1e386c5ba13ee72ed5a3b9",
+      "sourceHash": "19cec7ed35314d6eb0d6d946a47f7233ad17d3f239c60259d66241fbc3e59f33",
       "outputs": []
     },
     {
-      "sourceHash": "843661cca4df79fe2dc5a65e9dc521422785100b3afa4d643bcfa19f9ffb0ff9",
+      "sourceHash": "71db643c07e86168cdddf410e3ce629c24581272a62efa7dcdb6816e431d1b1f",
       "outputs": [
         {
           "output_type": "stream",
@@ -105,11 +105,11 @@
       ]
     },
     {
-      "sourceHash": "b4971a237ecd550e732fc1dfd705b495bb6dd6403203eacc2f36a00fe5692016",
+      "sourceHash": "a028ca564411231452a28cc351a3d0e90cd7c130dd9c0b2741b8e187d16fd683",
       "outputs": []
     },
     {
-      "sourceHash": "a82d40e9aa16de29e5fc1b3555bb5307ce57f9a1d49339b0a46553d70f30ef5c",
+      "sourceHash": "13e29ddedce03d3ba0a22d41432cb76657c4e59b72bd7dc6f29e62f4d3d67224",
       "outputs": [
         {
           "output_type": "stream",
@@ -121,11 +121,11 @@
       ]
     },
     {
-      "sourceHash": "71c8ef52a6c33f2c8b770521dbd17f34b7c63ba12d92f7c908d5635546be79fb",
+      "sourceHash": "905442b90b62f08a6a4765c8aa1f700ea7dddb5a9da27347bb039c46b1086932",
       "outputs": []
     },
     {
-      "sourceHash": "949acbdcf27652f6137c9cf8c4513ec83549e9882de6f4949056dfe79850a244",
+      "sourceHash": "a8a88ba933cb1c33f3ad18a457c6317f39503ec9678ddb5d6f60c2d041c4a73f",
       "outputs": [
         {
           "output_type": "stream",

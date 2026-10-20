@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "optimization-06",
-  "contentHash": "29d8442cd8365bb5d24c7021a429284ada0b407c960fc4a572409a98d41782c2",
+  "contentHash": "99ebb83b2588f486ad02443acd9944f1780bf3d2ce1380cb8c75827190f470a5",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T10:45:19.363128+00:00",
+  "generatedAt": "2026-10-20T18:47:30.458666+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

@@ -40,3 +40,9 @@ Use W&B image tables or equivalent MLflow artifacts for a fixed, permitted sampl
 Package the actual processor, backbone/head weights, labels or retrieval contract, positions/resolution policy and loader. Compare preprocessing and intermediate tensors across Keras/TensorFlow/PyTorch/JAX only for the declared tested path. Qualify calibrated precision on raw images, batch-one and variable-batch serving, malformed input and a real target if edge performance is advertised.
 
 Apply the [Hub release protocol](../embedding-model-300m/RELEASE.md) with image-specific canaries. A clean download must reproduce predictions, not merely load the file. Retain backbone/head/processor/container identities and a compatible previous release for rollback. The final learner dossier includes recipe choice, objective ablation, exact recovery, task failures, measured tradeoffs and release evidence.
+
+## Implementation gate and real-data lineage
+
+Do not promote until source images, class/instance labels, rights, duplicate/entity groups, processor settings and split identities are frozen. Link representation and task-head checkpoints to objective, full state and source exposure; real held-out task metrics and per-class/domain counts are required, while synthetic pixels only validate preprocessing and architecture.
+
+Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
