@@ -1,0 +1,6 @@
+# Teaching receipts hash exact source bytes. Keep ordinary source LF on Windows.
+* text=auto eol=lf
+
+# Preserve original downloaded corpora and csv.writer's recorded CRLF bytes.
+projects/*/data/source/* -text
+*.csv -text

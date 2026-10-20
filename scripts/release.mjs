@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, readdirSync, existsSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
+import { portablePath } from './portable-path.mjs';
 
 const read = path => JSON.parse(readFileSync(path, 'utf8'));
 const stable = value => Array.isArray(value) ? value.map(stable) : value && typeof value === 'object'
@@ -33,7 +34,7 @@ for (const phase of course.phases) {
 // Include project and pathway sources: edits outside lesson prose also require a release note.
 const sources = {};
 for (const directory of ['curriculum', 'learning-paths', 'projects']) {
-  for (const file of readdirSync(directory, { recursive: true }).sort()) {
+  for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
     if (!file.endsWith('.json') || /(?:^|\/)(?:releases|release-snapshots|(?:project-)?validation)\.json$/.test(file) || file.includes('/outputs/')) continue;
     sources[`${directory}/${file}`] = hash(read(`${directory}/${file}`));
   }
@@ -42,7 +43,7 @@ for (const directory of ['curriculum', 'learning-paths', 'projects']) {
 const projectDirectories = read('curriculum/projects.json').map(file => file.replace(/\/project\.json$/, ''));
 for (const directory of ['content/guides', 'resources/tpu-gcp', ...projectDirectories]) {
   if (!existsSync(directory)) continue;
-  for (const file of readdirSync(directory, { recursive: true }).sort()) {
+  for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
     if (!/\.(md|py|txt|jsonl|csv)$/.test(file) || file.includes('__pycache__') || file.startsWith('reference/') || /^my_.*\.py$/.test(file) || /^(?:\.venv|runs|evidence|outputs)\//.test(file)) continue;
     sources[`${directory}/${file}`] = hash(readFileSync(`${directory}/${file}`, 'utf8'));
   }

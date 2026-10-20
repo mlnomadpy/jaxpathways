@@ -15,7 +15,9 @@ Edition: **0.8.0**. The [original review](full-review-2026-10-20.md) describes t
 | #53, #54 | Added desktop/mobile Chromium CI checks, manifest-driven project environments, a minimal beginner environment, layered dependencies, duplicate ZIP-entry checks and source-matching environment instructions. |
 | #31 | Formatted the affected project Python; a pinned Black gate covers the repaired files and new causal pilot (28 files). |
 
-The final integration checks exposed and repaired a textarea-versus-input guard that prevented notebook saves, a learner checker bound to the reference file instead of the learner's implementation, and a project-guide link that resolved a planned capstone as an available guide.
+The final integration checks exposed and repaired a textarea-versus-input guard that prevented notebook saves, a learner checker bound to the reference file instead of the learner's implementation, and a project-guide link that resolved a planned capstone as an available guide. Hosted checks also exposed a missing browser assertion argument and Windows separators in nested asset paths. Browser tests now have their own type gate, generated paths use portable identifiers, and checkout attributes preserve checksum-bound data bytes across platforms.
+
+The compatible Vite dependency was updated to 8.3.4 after the [Windows editor-launch advisory](https://github.com/advisories/GHSA-587h-7wmj-h5pm). The dependency audit reports zero vulnerabilities.
 
 ## Remaining issues and actual limits
 
@@ -30,7 +32,7 @@ The final integration checks exposed and repaired a textarea-versus-input guard 
 - Regenerated every lesson's primary figure and its mechanism diagram where present. The six performance-related image changes reflect actual repeated timing measurements, not fixed illustrative values.
 - All **31** registered reference project suites passed. Every project source hash still matches that complete receipt. The new causal pilot also passed separate learner-file stage 1 and stage 2 invocations, including predecessor rejection and fresh-process inference.
 - A freshly extracted beginner ZIP installed only its JAX/NumPy environment and dependencies into an isolated Python 3.14.3 environment. Its original program printed `Sum: 6.0`; the learner's range and assertion changes printed `Sum: 15.0` from that same folder.
-- `npm run check` passed Astro (**138 files, zero diagnostics**), strict browser/domain types, lint, formatting, curriculum validation, build, unit/DOM tests, distribution fidelity and site/SEO checks. The build contains **214 pages**, 22 phase guides and **209** canonical URLs reachable within three clicks. The final unit/DOM suite passes 113 tests, including the beginner-book regression.
+- `npm run check` passed Astro (**138 files, zero diagnostics**), strict browser/domain types, lint, formatting, curriculum validation, build, unit/DOM tests, distribution fidelity and site/SEO checks. The build contains **214 pages**, 22 phase guides and **209** canonical URLs reachable within three clicks. The final unit/DOM suite covers 114 tests, including beginner-book and Windows-path regressions.
 - Native Chrome checks used desktop **1456×867** and mobile **390×844** views. Both optimizer Build jumps leave the heading about 50px below the sticky bar and show Stage 2 of 5. On mobile, Phase 01's direct entry is at y≈641, before the optional TPU branch. Project filtering shows the eight model projects with zero visible unnamed links. A disposable notebook artifact was saved, recovered after reload, then removed through the real UI.
 - Reader navigation is **280,193 bytes raw / 73,461 gzip**, versus **3,082,786 / 658,321** for the full corpus. The checked optimizer lesson embeds about 24KB of lesson data. The release-notice bundle is about 1.1KB. These file-size checks are not measured Core Web Vitals.
 

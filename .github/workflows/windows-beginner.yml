@@ -10,6 +10,8 @@ jobs:
   powershell:
     runs-on: windows-latest
     timeout-minutes: 15
+    env:
+      PYTHONUTF8: '1'
     steps:
       - uses: actions/checkout@v7
         with:
@@ -28,7 +30,7 @@ jobs:
         run: |
           Expand-Archive public/downloads/jax-start-here.zip -DestinationPath "$env:RUNNER_TEMP/beginner"
           Set-Location "$env:RUNNER_TEMP/beginner/jax-start-here"
-          py -3 -m venv .venv
+          py -3.14 -m venv .venv
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           .\.venv\Scripts\python.exe -m pip install -r requirements-beginner.txt
           if ($LASTEXITCODE) { exit $LASTEXITCODE }

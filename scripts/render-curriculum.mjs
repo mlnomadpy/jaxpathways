@@ -1,4 +1,5 @@
 import {loadLessonEvidence,restoreNotebookOutputs} from './figure-artifacts.mjs';
+import {portablePath} from './portable-path.mjs';
 import {lessonMarkdown,lessonScript,lessonCells} from './lesson-artifacts.mjs';
 import {createHash} from 'node:crypto';
 import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
@@ -118,7 +119,7 @@ const projectPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.jso
 for(const project of [...projects.map(manifest=>JSON.parse(readFileSync(new URL(manifest,root)))),...projectPlans]){
   const directory=`projects/${project.id}/`;
   const guideSource=readFileSync(new URL(project.source,root),'utf8');
-  for(const file of readdirSync(new URL(directory,root),{recursive:true})){
+  for(const file of readdirSync(new URL(directory,root),{recursive:true}).map(portablePath)){
     const linkedData=/\.(json|csv)$/.test(file) && guideSource.includes(']('+file+')');
     if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)) && !linkedData)continue;
     const output=`public/project-assets/${project.id}/${file}`;
