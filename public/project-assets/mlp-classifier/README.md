@@ -17,9 +17,9 @@ Tested locally on CPU (Python 3.14.3, JAX 0.9.2, NumPy 2.4.4, Flax 0.12.6, Optax
 3. Copy the starter into your own file, so the original scaffold stays available:
 
    ```sh
-# Copy the starter template into your editable workspace file
-cp projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py
-```
+   # Copy the starter template into your editable workspace file
+   cp projects/mlp-classifier/starter/model.py projects/mlp-classifier/my_model.py
+   ```
 
 4. Open `projects/mlp-classifier/my_model.py` in your editor. Fill in one stage at a time. Run the corresponding command below from the repository root. A traceback beginning with `NotImplementedError` is expected until you implement the required functions.
 

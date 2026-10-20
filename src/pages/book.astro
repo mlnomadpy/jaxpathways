@@ -1,0 +1,74 @@
+---
+import GuideLayout from '../layouts/GuideLayout.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
+import { course, inventory } from '../lib/course-data.js';
+import { currentRelease } from '../lib/releases.js';
+import { bookDescription } from '../lib/server/seo.js';
+import { siteUrl } from '../lib/urls.js';
+---
+
+<GuideLayout
+  title="Free JAX & Flax book: illustrated course reader | JAX Pathways"
+  description={bookDescription}
+>
+  <PageIntro
+    edition={`Free book · Edition ${currentRelease.version}`}
+    title="JAX Pathways: illustrated course reader"
+    intro={bookDescription}
+  >
+    <p>
+      By <a href="https://www.tahabouhsine.com/">Taha Bouhsine</a>. Updated{' '}
+      <time datetime={currentRelease.date}>{currentRelease.date}</time>.
+    </p>
+    <p>
+      {inventory.authored} authored lessons across {course.phases.length} phases. Start with basic
+      Python and a laptop CPU. Cloud TPU work is an optional specialization.
+    </p>
+    <div class="actions">
+      <a class="button primary" href={siteUrl('downloads/jax-foundations.html')}>
+        Read the illustrated HTML book
+      </a>
+      <a class="button" href={siteUrl('downloads/jax-foundations.epub')} download>
+        Download the EPUB book
+      </a>
+    </div>
+  </PageIntro>
+  <h2>What you will learn</h2>
+  <p>
+    Build a mental model of JAX arrays, automatic differentiation and functional transformations.
+    Then connect Flax models, optimization, experiment tracking, recovery, evaluation and
+    deployment. Worked equations, explained plots and Python examples connect the ideas to practical
+    projects.
+  </p>
+  <h2>Choose a reading format</h2>
+  <p>
+    The HTML reader embeds figures and math fonts for offline reading and browser printing to PDF.
+    The EPUB includes chapters, practical appendices and a separate solutions section. Both come
+    from the same lessons as the online course.
+  </p>
+  <p>
+    For executable code and a place to keep your own results, use the{' '}
+    <a href={siteUrl('developer.html')}>downloadable project workspaces</a>. Reference CPU runs are
+    recorded separately from physical TPU qualification and expert review, which remain outstanding.
+  </p>
+  <h2>Chapters and online lessons</h2>
+  <ol>
+    {course.phases.map((phase) => (
+      <li>
+        <a href={siteUrl(`phase-guides/${phase.id}.html`)}>{phase.title}</a>
+        <p>{phase.description}</p>
+      </li>
+    ))}
+  </ol>
+  <h2>Learn with a project or a route</h2>
+  <p>
+    <a href={siteUrl('pathways.html')}>Choose a learning path</a>, explore{' '}
+    <a href={siteUrl('careers.html')}>career routes and evidence</a>, or connect the chapters
+    through <a href={siteUrl('projects.html')}>staged JAX projects</a>.
+  </p>
+  <p>
+    Found a mistake?{' '}
+    <a href="https://github.com/mlnomadpy/jaxpathways/issues/new/choose">Open a GitHub issue</a>.
+    Read the <a href={siteUrl('updates.html')}>edition history</a> to see what changed.
+  </p>
+</GuideLayout>

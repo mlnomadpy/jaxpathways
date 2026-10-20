@@ -5,8 +5,19 @@ import ReaderChapter from '../../components/shared/ReaderChapter.astro';
 import { readFileSync } from 'node:fs';
 import { inlineMath } from '../../lib/math.js';
 import { bookGuide } from '../../lib/server/book-guides.js';
+import { pageSeo, bookSchema, bookDescription } from '../../lib/server/seo.js';
+import { siteUrl } from '../../lib/urls.js';
 import releaseNotes from '../../../curriculum/releases.json';
 const release = releaseNotes[0];
+const bookUrl = new URL(siteUrl('book.html'), Astro.site);
+const readerUrl = new URL(siteUrl('downloads/jax-foundations.html'), Astro.site);
+const bookMetadata = pageSeo({
+  title: 'JAX Pathways: illustrated course reader',
+  description: bookDescription,
+  canonical: readerUrl,
+  site: Astro.site,
+  structuredData: bookSchema(Astro.site),
+}).graph;
 const online = (path: string) => new URL(path, 'https://www.tahabouhsine.com/jaxpathways/').href;
 const practicalGuide = readFileSync(
   new URL('../../../content/guides/project-workflow.md', import.meta.url),
@@ -34,6 +45,22 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
     <title>JAX Pathways: illustrated course reader</title>
     <style is:inline set:html={readerStyles} />
     <meta name="robots" content="noindex,follow" />
+    <meta name="description" content={bookDescription} />
+    <meta name="author" content="Taha Bouhsine" />
+    <link rel="canonical" href={readerUrl.href} />
+    <meta property="og:type" content="book" />
+    <meta property="og:title" content="JAX Pathways: illustrated course reader" />
+    <meta property="og:description" content={bookDescription} />
+    <meta property="og:url" content={readerUrl.href} />
+    <meta
+      property="og:image"
+      content={new URL(siteUrl('assets/social-card.png'), Astro.site).href}
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script
+      type="application/ld+json"
+      set:html={JSON.stringify(bookMetadata).replace(/</g, '\\u003c')}
+    />
   </head>
   <body>
     <header class="book-cover">
@@ -45,6 +72,9 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
         <br />
         Build the system.
       </h1>
+      <p>
+        By Taha Bouhsine · <a href={bookUrl.href}>Book overview and current edition</a>
+      </p>
       <p class="book-description">
         Worked explanations, executable examples and evidence you can inspect.
       </p>

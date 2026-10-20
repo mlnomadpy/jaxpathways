@@ -31,6 +31,9 @@ export const GET: APIRoute = ({ site }) => {
       `phase-guides/${phase.id}.html`,
       currentRelease.phases[phase.id as keyof typeof currentRelease.phases]?.date,
     );
+  for (const route of course.pathways) urls.set(`learning-paths/${route.id}.html`, undefined);
+  for (const role of course.roles) urls.set(`career-guides/${role.id}.html`, undefined);
+  urls.set('book.html', currentRelease.date);
   for (const project of projectRegistry.projects)
     urls.set(`project-guides/${project.id}.html`, undefined);
   for (const plan of plans) urls.set(`project-plans/${plan.id}.html`, undefined);

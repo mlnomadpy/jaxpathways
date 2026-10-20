@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.7.1",
+    "date": "2026-10-20",
+    "title": "Discoverable courses, career guides and free book",
+    "summary": "Add permanent learning and career guides, an indexable book overview and connected educational metadata.",
+    "changes": [
+      "Added permanent server-rendered pages for all 10 learning pathways and 7 career routes, linked from their catalogs and sitemap.",
+      "Added a free-book overview with author, edition, chapter links and HTML/EPUB formats; completed book sharing and EPUB catalog metadata.",
+      "Replaced navigation-based Course markup with connected WebPage, Course, LearningResource, Book and BreadcrumbList entities, including course provider and phase relationships.",
+      "Expanded SEO checks to every indexable page, catalog entries, visible breadcrumbs, book encodings, canonical URLs and permanent guide coverage.",
+      "Fixed a misindented code fence that rendered a shell comment as a second project heading."
+    ]
+  },
+  {
     "version": "0.7.0",
     "date": "2026-10-20",
     "title": "Book quality repairs and connected model experiments",

@@ -12,7 +12,7 @@
     },
     {
       "projectId": "mlp-classifier",
-      "sourceHash": "82a9d08faf2f7783bd5f2218d667d98d5b734a2d0e3bc7b286d1fa6d1d2e138b",
+      "sourceHash": "cc08843ac2cd74ee57092714f7283f0c556a99c4143dfd5edaf4dfe9ed5fb3cb",
       "command": "python3 projects/mlp-classifier/tests/check.py --stage 3 --implementation solution",
       "stdout": "PASS stage 1: shape, wiring, parameter count, seeded initialization\nPASS stage 2: independent loss, two-seed finite differences, label contract\nPASS stage 3: held-out metrics, unequal-batch aggregation, evaluation isolation, full replay, changed seed\nMeasured synthetic held-out metrics: {'loss': 0.003630386432632804, 'accuracy': 1.0, 'count': 40}\n",
       "status": "passed"

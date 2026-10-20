@@ -58,17 +58,21 @@ const schema = lesson
   ? {
       '@context': 'https://schema.org',
       '@type': 'LearningResource',
+      '@id': new URL(siteUrl(`lesson-${lesson.id}.html`), Astro.site).href + '#lesson',
+      url: new URL(siteUrl(`lesson-${lesson.id}.html`), Astro.site).href,
       name: lesson.title,
       description: lesson.objective,
       learningResourceType: 'Lesson',
       inLanguage: 'en',
       isAccessibleForFree: true,
-      author: { '@type': 'Person', name: 'Taha Bouhsine' },
+      author: { '@id': new URL(siteUrl(''), Astro.site).href + '#author' },
+      teaches: lesson.objective,
       dateModified: revision?.date,
       isPartOf: {
         '@type': 'Course',
-        name: course.title,
-        url: new URL(siteUrl('course.html'), Astro.site).href,
+        '@id': new URL(siteUrl(`phase-guides/${phase!.id}.html`), Astro.site).href + '#course',
+        name: phase!.title,
+        url: new URL(siteUrl(`phase-guides/${phase!.id}.html`), Astro.site).href,
       },
     }
   : undefined;

@@ -37,7 +37,7 @@ import { siteUrl } from '../../lib/urls.js';
                 ? 'Project available: ' + route.capstone.title
                 : 'Final project is planned'}
             </p>
-            <a class="button" href={siteUrl(`pathways.html?path=${route.id}`)}>
+            <a class="button" href={siteUrl(`learning-paths/${route.id}.html`)}>
               Open path
             </a>
             {route.practicalGuide && (

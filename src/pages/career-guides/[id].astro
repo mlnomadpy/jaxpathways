@@ -1,0 +1,90 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import { course } from '../../lib/course-data.js';
+import { inlineMath } from '../../lib/math.js';
+import { siteUrl } from '../../lib/urls.js';
+export function getStaticPaths() {
+  return course.roles.map((role) => ({ params: { id: role.id }, props: { role } }));
+}
+const { role } = Astro.props;
+---
+
+<GuideLayout
+  title={`${role.title}: skills & JAX learning route | JAX Pathways`}
+  description={role.description}
+  active="careers"
+>
+  <PageIntro
+    backHref="careers.html"
+    backLabel="All career routes"
+    edition="Career learning guide"
+    title={role.title}
+    intro={role.description}
+  />
+  <h2>The work</h2>
+  <p set:html={inlineMath(role.workExample)} />
+  <h2>Preparation</h2>
+  <p set:html={inlineMath(role.background)} />
+  <h2>Your portfolio</h2>
+  <p set:html={inlineMath(role.portfolio)} />
+  <h2>Skills and evidence</h2>
+  {(role.skillEvidence || []).map((item) => (
+    <section>
+      <h3 set:html={inlineMath(item.skill)} />
+      <p set:html={inlineMath(item.scope)} />
+      <p set:html={inlineMath(item.evidence)} />
+      <p set:html={inlineMath(item.reviewCriterion)} />
+      <ul>
+        {item.lessonIds.map((id) => (
+          <li>
+            <a href={siteUrl(`lesson-${id}.html`)}>
+              {
+                course.phases.flatMap((phase) => phase.lessons).find((lesson) => lesson.id === id)
+                  ?.title
+              }
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p>
+        <a href={siteUrl(`project-guides/${item.projectId}.html`)}>Practice project</a>: stages{' '}
+        {item.stageIds.join(', ')}.
+      </p>
+    </section>
+  ))}
+  <h2>Milestones</h2>
+  <ol>
+    {role.milestones.map((milestone) => (
+      <li>
+        <h3 set:html={inlineMath(milestone.title)} />
+        <p set:html={inlineMath(milestone.deliverable)} />
+        <ul>
+          {milestone.phaseIds.map((id) => (
+            <li>
+              <a href={siteUrl(`phase-guides/${id}.html`)}>
+                {course.phases.find((phase) => phase.id === id)?.title}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </li>
+    ))}
+  </ol>
+  <h2>Review your readiness</h2>
+  <p set:html={inlineMath(role.readiness)} />
+  <ul>
+    {role.reviewQuestions.map((question) => (
+      <li set:html={inlineMath(question)} />
+    ))}
+  </ul>
+  <p set:html={inlineMath(role.scopeNote)} />
+  <p>
+    <a class="button primary" href={siteUrl(`learning-paths/${role.defaultPathwayId}.html`)}>
+      Open the recommended learning path
+    </a>
+  </p>
+  <p>
+    <a href={siteUrl(`careers.html?role=${role.id}`)}>Plan this route in your workspace</a>
+  </p>
+</GuideLayout>

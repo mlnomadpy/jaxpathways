@@ -1,5 +1,6 @@
 ---
 import { course } from '../../lib/course-data.js';
+import { siteUrl } from '../../lib/urls.js';
 ---
 
 {course.roles.map((role) => (
@@ -11,6 +12,7 @@ import { course } from '../../lib/course-data.js';
         <li>{responsibility}</li>
       ))}
     </ul>
+    <a href={siteUrl(`career-guides/${role.id}.html`)}>Read the career guide</a>
     <button data-role={role.id}>Explore this role</button>
   </article>
 ))}

@@ -1,0 +1,78 @@
+---
+import GuideLayout from '../../layouts/GuideLayout.astro';
+import PageIntro from '../../components/shared/PageIntro.astro';
+import { course } from '../../lib/course-data.js';
+import { inlineMath } from '../../lib/math.js';
+import { siteUrl } from '../../lib/urls.js';
+export function getStaticPaths() {
+  return course.pathways.map((route) => ({ params: { id: route.id }, props: { route } }));
+}
+const { route } = Astro.props;
+---
+
+<GuideLayout
+  title={`${route.title}: JAX learning path | JAX Pathways`}
+  description={route.description}
+  active="pathways"
+>
+  <PageIntro
+    backHref="pathways.html"
+    backLabel="All learning paths"
+    edition="JAX learning path"
+    title={route.title}
+    intro={route.description}
+  />
+  <h2>Who this path is for</h2>
+  <p set:html={inlineMath(route.audience)} />
+  <h2>Preparation</h2>
+  <p set:html={inlineMath(route.prerequisites)} />
+  <h2>Your first useful artifact</h2>
+  <p set:html={inlineMath(route.firstArtifact)} />
+  <h2>How to study</h2>
+  <p set:html={inlineMath(route.studyAdvice)} />
+  <h2>Course phases and lessons</h2>
+  <ol>
+    {route.phaseIds.map((id) => {
+      const phase = course.phases.find((item) => item.id === id)!;
+      return (
+        <li>
+          <a href={siteUrl(`phase-guides/${id}.html`)}>{phase.title}</a>
+          <p>{phase.description}</p>
+          <ul>
+            {phase.lessons
+              .filter((lesson) => lesson.status === 'authored')
+              .map((lesson) => (
+                <li>
+                  <a href={siteUrl(`lesson-${lesson.id}.html`)}>{lesson.title}</a>
+                </li>
+              ))}
+          </ul>
+        </li>
+      );
+    })}
+  </ol>
+  <h2>{route.capstone.title}</h2>
+  <p>
+    {route.capstone.projectId
+      ? 'A guided project is available for this route.'
+      : 'The final project is planned; use the available preparation above.'}
+  </p>
+  <p set:html={inlineMath(route.capstone.assessment)} />
+  <ul>
+    {route.capstone.evidence.map((item) => (
+      <li set:html={inlineMath(item)} />
+    ))}
+  </ul>
+  {route.capstone.projectId && (
+    <p>
+      <a href={siteUrl(`project-guides/${route.capstone.projectId}.html`)}>
+        Read the portfolio project guide
+      </a>
+    </p>
+  )}
+  <p>
+    <a class="button primary" href={siteUrl(`pathways.html?path=${route.id}`)}>
+      Use this path in your learning workspace
+    </a>
+  </p>
+</GuideLayout>

@@ -30,6 +30,10 @@ with ZipFile(OUT/'jax-foundations.epub') as book:
         if name.endswith(('.xhtml','.xml','.opf')): ET.fromstring(book.read(name))
     package=ET.fromstring(book.read('OEBPS/package.opf'))
     ns={'o':'http://www.idpf.org/2007/opf','dc':'http://purl.org/dc/elements/1.1/'}
+    assert package.find('o:metadata/dc:creator',ns).text=='Taha Bouhsine'
+    assert package.find('o:metadata/dc:publisher',ns).text=='JAX Pathways'
+    assert package.find('o:metadata/dc:source',ns).text=='https://www.tahabouhsine.com/jaxpathways/book.html'
+    assert package.find('o:metadata/dc:description',ns).text
     items={item.attrib['id']:item for item in package.findall('o:manifest/o:item',ns)}
     for item in items.values(): assert 'OEBPS/'+item.attrib['href'] in book.namelist()
     for item in package.findall('o:spine/o:itemref',ns): assert item.attrib['idref'] in items

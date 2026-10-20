@@ -3,6 +3,7 @@ import '../styles/features/releases.css';
 import ReleaseNotice from '../components/shared/ReleaseNotice.astro';
 import SiteHeader from '../components/shared/SiteHeader.astro';
 import { siteUrl } from '../lib/urls.js';
+import { pageSeo } from '../lib/server/seo.js';
 interface Props {
   title: string;
   noindex?: boolean;
@@ -26,30 +27,13 @@ const {
 const canonical = new URL(Astro.url.pathname, Astro.site || 'https://www.tahabouhsine.com');
 if (canonical.pathname.endsWith('/index.html'))
   canonical.pathname = canonical.pathname.slice(0, -10);
-const jsonLd =
-  structuredData ||
-  (active === 'index'
-    ? {
-        '@context': 'https://schema.org',
-        '@type': 'WebSite',
-        name: 'JAX Pathways',
-        url: canonical.href,
-        description,
-        author: { '@type': 'Person', name: 'Taha Bouhsine' },
-        inLanguage: 'en',
-      }
-    : active === 'course' && !Astro.url.pathname.includes('lesson')
-      ? {
-          '@context': 'https://schema.org',
-          '@type': 'Course',
-          name: title,
-          description,
-          url: canonical.href,
-          isAccessibleForFree: true,
-          inLanguage: 'en',
-          author: { '@type': 'Person', name: 'Taha Bouhsine' },
-        }
-      : undefined);
+const { graph: jsonLd, crumbs } = pageSeo({
+  title,
+  description,
+  canonical,
+  site: Astro.site,
+  structuredData,
+});
 ---
 
 <!doctype html>
@@ -72,7 +56,17 @@ const jsonLd =
     <link rel="canonical" href={canonical.href} />
     {noindex && <meta name="robots" content="noindex,follow" />}
     <meta name="author" content="Taha Bouhsine" />
-    <meta property="og:type" content="website" />
+    <meta
+      property="og:type"
+      content={
+        Astro.url.pathname.includes('lesson-')
+          ? 'article'
+          : Astro.url.pathname.endsWith('/book.html')
+            ? 'book'
+            : 'website'
+      }
+    />
+    <meta property="og:locale" content="en_US" />
     <meta property="og:site_name" content="JAX Pathways" />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -88,6 +82,12 @@ const jsonLd =
       content="JAX Pathways — Learn, build, explain. A practical course by Taha Bouhsine."
     />
     <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta
+      name="twitter:image"
+      content={new URL(siteUrl('assets/social-card.png'), Astro.site).href}
+    />
     {jsonLd && (
       <script
         type="application/ld+json"
@@ -102,6 +102,43 @@ const jsonLd =
     </a>
     <SiteHeader active={active} />
     <ReleaseNotice />
+    {!noindex && crumbs.length > 0 && (
+      <nav class="seo-breadcrumb" aria-label="Breadcrumb">
+        <ol>
+          {crumbs.map((crumb, index) => (
+            <li>
+              {index === crumbs.length - 1 ? (
+                <span aria-current="page">{crumb.name}</span>
+              ) : (
+                <a href={crumb.url}>{crumb.name}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )}
     <slot />
   </body>
 </html>
+
+<style>
+  .seo-breadcrumb {
+    max-width: 1320px;
+    margin: 16px auto;
+    padding-inline: 5%;
+    font: 13px/1.6 var(--ui);
+    color: var(--muted);
+  }
+  .seo-breadcrumb ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .seo-breadcrumb li + li::before {
+    content: '/';
+    margin-right: 6px;
+  }
+</style>
