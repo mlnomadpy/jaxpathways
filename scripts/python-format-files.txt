@@ -26,3 +26,6 @@ projects/tpu-workflow-audit/tests/check.py
 projects/transforms-audit/solution/model.py
 projects/transforms-audit/tests/check.py
 projects/welcome-audit/tests/check.py
+scripts/smoke-tpu.py
+resources/tpu-gcp/collectives_target.py
+resources/tpu-gcp/check_collectives_target.py
