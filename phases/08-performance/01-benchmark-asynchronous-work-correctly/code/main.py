@@ -10,7 +10,6 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
@@ -22,7 +21,7 @@ w = jax.device_put(w_host, cpu)
 jax.block_until_ready((x, w))
 
 # Define the contract and timer
-# Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
+# Step 2 — Define the contract and timer
 def predict(x, w):
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
@@ -71,7 +70,6 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
@@ -81,7 +79,7 @@ x = jax.device_put(x_host, cpu)
 w = jax.device_put(w_host, cpu)
 # Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x, w))
-# Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
+# Step 2 — Define the contract and timer
 def predict(x, w):
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
@@ -123,7 +121,7 @@ print(json.dumps(report, indent=2))
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call', 'labels': ['first'], 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': [first_call_seconds]}]}, {'kind': 'line', 'title': 'Warm calls', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm sample', 'ylabel': 'seconds', 'series': [{'label': 'synchronized call', 'y': samples}]}]}
 
 # Experiment: Compare handle-only and synchronized boundaries
-# Experiment — Compare handle-only and synchronized boundaries: The separate intervals have different measurement boundaries and...
+# Experiment — Compare handle-only and synchronized boundaries
 start = time.perf_counter()
 handle = compiled_predict(x, w)
 handle_seconds = time.perf_counter() - start
@@ -133,7 +131,7 @@ print("Handle-only seconds:", handle_seconds)
 print("Complete-call samples:", complete_samples)
 
 # Experiment: Return structured results without host copies
-# Experiment — Return structured results without host copies: A tree-level wait makes the benchmark contract explicit for...
+# Experiment — Return structured results without host copies
 # Wrap with `jax.jit` (`structured`) so XLA traces and compiles the function.
 structured = jax.jit(lambda a, b: {"prediction": jnp.tanh(a @ b), "mean": jnp.mean(jnp.tanh(a @ b))})
 # Wait for device work to finish before timing it or comparing its result on the host.
@@ -146,7 +144,7 @@ np.testing.assert_allclose(np.asarray(structured_result["mean"]), reference.mean
 print("Structured samples:", structured_times)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Repeat the benchmark with 96 rows while preserving the feature and...
+# Exercise solution
 larger_host = rng.normal(size=(96, 32)).astype(np.float32)
 # Place `larger` explicitly onto the target JAX device.
 larger = jax.device_put(larger_host, cpu)
@@ -175,7 +173,7 @@ np.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol=2e-
 print("Energy shape and samples:", energy_result.shape, energy_times)
 
 # Reference practice: Repair a timer that includes setup but omits completion
-# Repair a timer that includes setup but omits completion (Diagnosis): The repaired boundary excludes setup, separates warmup and...
+# Repair a timer that includes setup but omits completion (Diagnosis)
 def repaired_benchmark(fn, args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(args)

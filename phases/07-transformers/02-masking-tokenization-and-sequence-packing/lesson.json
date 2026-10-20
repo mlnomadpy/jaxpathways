@@ -47,13 +47,13 @@
         "math": "\\widetilde S_{ij}=\\begin{cases}S_{ij}&\\text{if key }j\\text{ is allowed for query }i\\\\-\\infty&\\text{otherwise}\\end{cases}"
       }
     ],
-    "code": "# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...\ndef masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]\n\n# Step 3 — 3. Run and check: Causal means [2, 3, 4.666667, 7.5]; no weight above the diagonal.\nvalues = jnp.array([[2.], [4.], [8.], [16.]])\ncausal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]\nout, weights = masked_mean(values, causal)\nassert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))\nassert jnp.allclose(jnp.triu(weights, 1), 0.)\nprint(\"Causal means:\", out[:, 0])",
+    "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\n# Step 2 — 2. Implement the mechanism\ndef masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]\n\n# Step 3 — 3. Run and check: Causal means [2, 3, 4.666667, 7.5]; no weight above the diagonal.\nvalues = jnp.array([[2.], [4.], [8.], [16.]])\ncausal = jnp.arange(4)[:, None] >= jnp.arange(4)[None, :]\nout, weights = masked_mean(values, causal)\nassert jnp.allclose(out[:, 0], jnp.array([2., 3., 14/3, 7.5]))\nassert jnp.allclose(jnp.triu(weights, 1), 0.)\nprint(\"Causal means:\", out[:, 0])",
     "output": "Causal means \\([2, 3, 4.666667, 7.5]\\); no weight above the diagonal.",
     "experiments": [
       {
         "title": "Perturb the future",
         "prediction": "If the last value becomes \\(1000\\), which outputs may change?",
-        "code": "# Experiment — Perturb the future: Perturbation tests whether earlier representations depend on...\nchanged = values.at[-1, 0].set(1000.)\nchanged_out, _ = masked_mean(changed, causal)\nassert jnp.allclose(changed_out[:3], out[:3])\nassert not jnp.allclose(changed_out[-1], out[-1])",
+        "code": "# Experiment — Perturb the future\nchanged = values.at[-1, 0].set(1000.)\nchanged_out, _ = masked_mean(changed, causal)\nassert jnp.allclose(changed_out[:3], out[:3])\nassert not jnp.allclose(changed_out[-1], out[-1])",
         "output": "Only the last output changes.",
         "explanation": "Perturbation tests whether earlier representations depend on future information."
       },
@@ -73,7 +73,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Use `valid=[True,True,False,False]`. Reproduce the undefined all-masked rows, then give padded queries a fallback and zero their outputs.",
         "hint": "Insert a diagonal fallback only for invalid queries.",
-        "solution": "# Repair padding-query NaNs (Transfer / diagnosis): A fallback makes normalization defined; zeroing and loss...\npad_valid = jnp.array([True,True,False,False])\npad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)\nbad_pad, _ = masked_mean(values, pad_mask)\n# Confirm that all computed values remain finite (no NaN or Inf).\nassert not jnp.all(jnp.isfinite(bad_pad))\nfallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)\npad_out, _ = masked_mean(values, pad_mask | fallback)\npad_out = jnp.where(pad_valid[:, None], pad_out, 0.)\n# Confirm that all computed values remain finite (no NaN or Inf).\nassert jnp.all(jnp.isfinite(pad_out))\nassert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))",
+        "solution": "# Repair padding-query NaNs (Transfer / diagnosis)\npad_valid = jnp.array([True,True,False,False])\npad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)\nbad_pad, _ = masked_mean(values, pad_mask)\nassert not jnp.all(jnp.isfinite(bad_pad))\nfallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)\npad_out, _ = masked_mean(values, pad_mask | fallback)\npad_out = jnp.where(pad_valid[:, None], pad_out, 0.)\nassert jnp.all(jnp.isfinite(pad_out))\nassert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))",
         "explanation": "A fallback makes normalization defined; zeroing and loss masking retain the semantic padding contract."
       },
       {
@@ -81,7 +81,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "Compare causal-only and segment-aware outputs at query \\(2\\). Explain which prior values caused the difference.",
         "hint": "Query \\(2\\) should see only value \\(8\\) from its own segment.",
-        "solution": "# Detect packed-example leakage (Transfer / diagnosis): The earlier values 2 and 4 belong to another example; they...\nassert jnp.allclose(out[2,0], 14/3)\nassert jnp.allclose(packed_out[2,0], 8.)\nassert not jnp.allclose(out[2,0], packed_out[2,0])",
+        "solution": "# Detect packed-example leakage (Transfer / diagnosis)\nassert jnp.allclose(out[2,0], 14/3)\nassert jnp.allclose(packed_out[2,0], 8.)\nassert not jnp.allclose(out[2,0], packed_out[2,0])",
         "explanation": "The earlier values \\(2\\) and \\(4\\) belong to another example; they must be excluded despite being past positions."
       }
     ],
@@ -116,13 +116,13 @@
       {
         "title": "1. Prepare the experiment",
         "instruction": "In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.",
-        "code": "# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...\nimport jax\nimport jax.numpy as jnp\nimport numpy as np",
+        "code": "# Step 1 — 1. Prepare the experiment\nimport jax\nimport jax.numpy as jnp\nimport numpy as np",
         "explanation": "These imports provide JAX array transformations and NumPy reference calculations. Define the numerical functions next; the final build block supplies the concrete fixture and checks."
       },
       {
         "title": "2. Implement the mechanism",
         "instruction": "Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.",
-        "code": "# Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...\ndef masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]",
+        "code": "# Step 2 — 2. Implement the mechanism\ndef masked_mean(values, allowed):\n    scores = jnp.where(allowed, 0., -jnp.inf)\n    weights = jax.nn.softmax(scores, axis=-1)\n    return weights @ values, weights\n\ndef make_mask(segment_ids, valid):\n    positions = jnp.arange(segment_ids.shape[0])\n    causal = positions[:, None] >= positions[None, :]\n    same_segment = segment_ids[:, None] == segment_ids[None, :]\n    return causal & same_segment & valid[:, None] & valid[None, :]",
         "explanation": "allowed key columns\nquery \\(0\\): \\(1\\) \\(0\\) \\(0\\) \\(0\\)\nquery \\(1\\): \\(1\\) \\(1\\) \\(0\\) \\(0\\)\nquery \\(2\\): \\(1\\) \\(1\\) \\(1\\) \\(0\\)\nquery \\(3\\): \\(1\\) \\(1\\) \\(1\\) \\(1\\)"
       },
       {

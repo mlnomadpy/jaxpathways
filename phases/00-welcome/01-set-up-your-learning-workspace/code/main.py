@@ -20,7 +20,7 @@ x = jax.numpy.arange(4, dtype=jax.numpy.float32)
 print("Sum:", float(x.sum()))
 assert float(x.sum()) == 6.0
 
-# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...
+# Set up your learning workspace
 import os
 # Choose CPU before importing JAX for this first experiment.
 os.environ["JAX_PLATFORMS"] = "cpu"
@@ -44,7 +44,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
+# Exercise solution
 x = jax.numpy.arange(6, dtype=jax.numpy.float32)
 print("Changed experiment sum:", float(x.sum()))
 assert float(x.sum()) == 15.0

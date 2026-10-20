@@ -98,7 +98,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
     return records
 
 # Audit a matrix of shapes and precisions
-# Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
+# Step 2 — Audit a matrix of shapes and precisions
 rng=np.random.default_rng(42)
 correctness=[]
 precision_gaps=[]
@@ -109,8 +109,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     row=[]
     gaps=[]
     for dtype in (jnp.float32,jnp.bfloat16):
-        # Create device-backed JAX array `a`.
-        # Create device-backed JAX array `b`.
         a=jnp.asarray(original_x,dtype=dtype)
         b=jnp.asarray(original_y,dtype=dtype)
         actual=pipelined_axpy(a,b)
@@ -236,7 +234,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
     records["boundary"]="already-placed logical inputs; complete padded/cropped wrapper output; warm synchronized execution"
     return records
 
-# Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
+# Step 2 — Audit a matrix of shapes and precisions
 rng=np.random.default_rng(42)
 correctness=[]
 precision_gaps=[]
@@ -247,8 +245,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     row=[]
     gaps=[]
     for dtype in (jnp.float32,jnp.bfloat16):
-        # Create device-backed JAX array `a`.
-        # Create device-backed JAX array `b`.
         a=jnp.asarray(original_x,dtype=dtype)
         b=jnp.asarray(original_y,dtype=dtype)
         actual=pipelined_axpy(a,b)
@@ -284,7 +280,6 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 # Experiment: Preserve correctness under a joint row permutation
 # Experiment — Preserve correctness under a joint row permutation: This operation has no coupling between rows.
 a=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
-# Create device-backed JAX array `b`.
 b=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
 order=jnp.array([8,0,7,1,6,2,5,3,4])
 inverse=jnp.argsort(order)
@@ -295,7 +290,7 @@ np.testing.assert_array_equal(np.asarray(permuted),np.asarray(original))
 print("Joint row permutation preserves output identity")
 
 # Experiment: Make a precision-policy counterexample
-# Experiment — Make a precision-policy counterexample: The order of representation changes is part of the numerical...
+# Experiment — Make a precision-policy counterexample
 first=jnp.array([1.00390625],dtype=jnp.float32)
 second=jnp.array([0.00390625],dtype=jnp.float32)
 early=(first.astype(jnp.bfloat16).astype(jnp.float32)+second).astype(jnp.bfloat16)
@@ -304,9 +299,8 @@ assert float(early[0])!=float(late[0])
 print("Early/final-only rounding:",float(early[0]),float(late[0]))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Add a (15,255) fixture, compare two tile choices and two buffer...
+# Exercise solution
 a=jnp.asarray(np.random.default_rng(8).normal(size=(15,255)),dtype=jnp.float32)
-# Create device-backed JAX array `b`.
 b=jnp.asarray(np.random.default_rng(9).normal(size=(15,255)),dtype=jnp.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 expected=2*np.asarray(a)+np.asarray(b)

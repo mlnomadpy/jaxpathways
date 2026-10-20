@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate the frozen base from trainable adapters
@@ -101,7 +103,7 @@ Merging is exact algebraically for this dense layer, subject to floating-point r
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
 
 ```python
-# Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
+# Step 1 — 1. Define the frozen-plus-adapter forward pass
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -122,7 +124,6 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
 base = jnp.zeros_like(source_w)
-# Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 for _ in range(150):
     base = base - 0.15 * base_step(base)
@@ -154,7 +155,6 @@ Append this block to main.py and run python main.py again. Keep the earlier bloc
 for _ in range(250):
     value, g = step(params)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
 a, b = params
@@ -180,7 +180,7 @@ The reference target has rank one by construction. Exact base equality and chang
 ## Run the example
 
 ```python
-# Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
+# Step 1 — 1. Define the frozen-plus-adapter forward pass
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -193,7 +193,6 @@ def lora_forward(x, base, a, b, alpha=1.0):
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
 base = jnp.zeros_like(source_w)
-# Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 for _ in range(150):
     base = base - 0.15 * base_step(base)
@@ -217,7 +216,6 @@ assert np.linalg.norm(initial_grads[1]) > 0
 for _ in range(250):
     value, g = step(params)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
 a, b = params
@@ -269,7 +267,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:52.649176+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:55.630118+00:00. JAX 0.9.2.
 
 ```text
 LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24
@@ -290,7 +288,6 @@ PASS: posttraining-02
 ```python
 # Experiment — Show why two zero factors cannot start learning: Each factor’s derivative contains the other factor.
 zero = (jnp.zeros_like(a), jnp.zeros_like(b))
-# Differentiate the objective to obtain `zero_grad` via automatic differentiation.
 zero_grad = jax.grad(loss)(zero)
 assert all(
     np.array_equal(np.asarray(g), np.zeros(g.shape)) for g in zero_grad
@@ -307,11 +304,9 @@ Each factor’s derivative contains the other factor. Randomizing one and zeroin
 **Predict before running:** At nonzero factors, will the two matrix-gradient formulas agree with autodiff including nonunit alpha?
 
 ```python
-# Experiment — Check both factor gradients with matrix calculus: Nonzero factors exercise both gradient paths, while nonunit...
+# Experiment — Check both factor gradients with matrix calculus
 rng = np.random.default_rng(14)
-# Create device-backed JAX array `a_probe`.
 a_probe = jnp.asarray(rng.normal(size=(6, 2)) * 0.1, jnp.float32)
-# Create device-backed JAX array `b_probe`.
 b_probe = jnp.asarray(rng.normal(size=(2, 4)) * 0.1, jnp.float32)
 scale = 3.0 / 2
 output_gradient = (
@@ -319,7 +314,6 @@ output_gradient = (
 )
 expected_a = scale * x.T @ output_gradient @ b_probe.T
 expected_b = scale * a_probe.T @ x.T @ output_gradient
-# Differentiate the objective to obtain `(actual_a, actual_b)` via automatic differentiation.
 actual_a, actual_b = jax.grad(
     lambda aa, bb: jnp.mean(
         (lora_forward(x, base, aa, bb, 3.0) - target) ** 2
@@ -345,14 +339,15 @@ Save both adapter factors and their rank/scaling metadata, reload them and check
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Transfer the device result to the host for an independent NumPy comparison.
-3. Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
+1. Exercise solution
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+3. Transfer the device result to the host for an independent NumPy comparison.
+4. Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Save both adapter factors and their rank/scaling metadata, reload them...
+# Exercise solution
 import tempfile
 from pathlib import Path
 
@@ -382,7 +377,7 @@ print('Adapter round trip and merge checked.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Save both adapter factors and their rank/scaling metadata, reload them...
+# Exercise solution
 import tempfile
 from pathlib import Path
 
@@ -435,7 +430,7 @@ The equivalence is algebraic, so a new input should still agree.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check the merge on new inputs (Transfer): The second check detects an operational merge error that...
+# Check the merge on new inputs (Transfer)
 new_x = jnp.asarray(...)  # TODO: compute new_x
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
@@ -447,7 +442,7 @@ print('New-input merge passes; accidental double merge changes outputs.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check the merge on new inputs (Transfer): The second check detects an operational merge error that...
+# Check the merge on new inputs (Transfer)
 new_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
@@ -479,17 +474,14 @@ Use an independent singular-value decomposition for the rank bound, and divide a
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `a2`.
-2. Create device-backed JAX array `b2`.
+1. Test nonunit scaling and an impossible rank-one target (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test nonunit scaling and an impossible rank-one target (Challenge): The residual predicts a capacity limit independently of an...
+# Test nonunit scaling and an impossible rank-one target (Challenge)
 rng = np.random.default_rng(...)  # TODO: compute rng
-# Create device-backed JAX array `a2`.
 a2 = jnp.asarray(...)  # TODO: compute a2
-# Create device-backed JAX array `b2`.
 b2 = jnp.asarray(...)  # TODO: compute b2
 np.testing.assert_allclose(
     lora_forward(x, base, a2, b2, alpha = ...  # TODO: compute lora_forward(x, base, a2, b2, alpha
@@ -510,11 +502,9 @@ print('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Test nonunit scaling and an impossible rank-one target (Challenge): The residual predicts a capacity limit independently of an...
+# Test nonunit scaling and an impossible rank-one target (Challenge)
 rng = np.random.default_rng(8)
-# Create device-backed JAX array `a2`.
 a2 = jnp.asarray(rng.normal(size=(6, 2)), jnp.float32)
-# Create device-backed JAX array `b2`.
 b2 = jnp.asarray(rng.normal(size=(2, 4)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(x, base, a2, b2, alpha=3.0),

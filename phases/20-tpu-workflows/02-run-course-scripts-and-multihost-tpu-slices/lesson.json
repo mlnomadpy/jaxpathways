@@ -64,7 +64,7 @@
       {
         "title": "Tabulate single-host and multi-host TPU slice topologies",
         "instruction": "Create main.py with SLICE_CATALOG and compute global_chips, total_hbm_gib, and multi_host.",
-        "code": "# Step 1 — Tabulate single-host and multi-host TPU slice topologies: Separating hosts from chips_per_host shows immediately when a...\nimport json\nimport jax\nimport numpy as np\n\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\nfor entry in SLICE_CATALOG:\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1",
+        "code": "# Step 1 — Tabulate single-host and multi-host TPU slice topologies\nimport json\nimport jax\nimport numpy as np\n\nSLICE_CATALOG = [\n    {\"slice\": \"v5litepod-4\", \"hosts\": 1, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-8\", \"hosts\": 1, \"chips_per_host\": 8, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v5litepod-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 16},\n    {\"slice\": \"v6e-16\", \"hosts\": 4, \"chips_per_host\": 4, \"hbm_per_chip_gib\": 32},\n]\nfor entry in SLICE_CATALOG:\n    entry[\"global_chips\"] = entry[\"hosts\"] * entry[\"chips_per_host\"]\n    entry[\"total_hbm_gib\"] = entry[\"global_chips\"] * entry[\"hbm_per_chip_gib\"]\n    entry[\"multi_host\"] = entry[\"hosts\"] > 1",
         "explanation": "Separating hosts from chips_per_host shows immediately when a slice crosses the single-host boundary into multi-host execution."
       },
       {
@@ -85,14 +85,14 @@
       {
         "title": "Compare local vs global device counts across slices",
         "prediction": "How many global chips are left idle if you launch a script without `--worker=all` on `v5litepod-16`?",
-        "code": "# Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...\nv5e16 = next(s for s in SLICE_CATALOG if s[\"slice\"] == \"v5litepod-16\")\nidle_without_worker_all = v5e16[\"global_chips\"] - v5e16[\"chips_per_host\"]\nprint(\"v5litepod-16 global chips:\", v5e16[\"global_chips\"], \"Idle chips without --worker=all:\", idle_without_worker_all)\n# Assert invariant `idle_without_worker_all == 12` holds\nassert idle_without_worker_all == 12",
+        "code": "# Experiment — Compare local vs global device counts across slices\nv5e16 = next(s for s in SLICE_CATALOG if s[\"slice\"] == \"v5litepod-16\")\nidle_without_worker_all = v5e16[\"global_chips\"] - v5e16[\"chips_per_host\"]\nprint(\"v5litepod-16 global chips:\", v5e16[\"global_chips\"], \"Idle chips without --worker=all:\", idle_without_worker_all)\n# Assert invariant `idle_without_worker_all == 12` holds\nassert idle_without_worker_all == 12",
         "output": "Without `--worker=all`, 12 of the 16 TPU chips on `v5litepod-16` never receive a process.",
         "explanation": "Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` chips) require `--worker=all`."
       },
       {
         "title": "Verify total HBM scaling from v5litepod-16 to v6e-16",
         "prediction": "How much total HBM is available across a 16-chip `v6e-16` Pod slice compared to `v5litepod-16`?",
-        "code": "# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16: Doubling per-chip HBM on Trillium (v6e) doubles the total...\nhbm_by_slice = {s[\"slice\"]: s[\"total_hbm_gib\"] for s in SLICE_CATALOG}\nprint(\"Total HBM GiB by slice:\", hbm_by_slice)\nassert hbm_by_slice[\"v6e-16\"] == 512 and hbm_by_slice[\"v5litepod-16\"] == 256",
+        "code": "# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16\nhbm_by_slice = {s[\"slice\"]: s[\"total_hbm_gib\"] for s in SLICE_CATALOG}\nprint(\"Total HBM GiB by slice:\", hbm_by_slice)\nassert hbm_by_slice[\"v6e-16\"] == 512 and hbm_by_slice[\"v5litepod-16\"] == 256",
         "output": "v6e-16 provides 512 GiB of total HBM across 4 hosts (32 GiB/chip), double v5litepod-16's 256 GiB (16 GiB/chip).",
         "explanation": "Doubling per-chip HBM on Trillium (`v6e`) doubles the total sharded model state capacity for the same 4-host Pod topology."
       }
@@ -105,7 +105,7 @@
         "difficulty": "Foundations",
         "prompt": "List the slice names in `SLICE_CATALOG` that require `--worker=all` (`multi_host == True`).",
         "hint": "Filter by `s['multi_host']`.",
-        "solution": "# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...\npod_slices = [s[\"slice\"] for s in SLICE_CATALOG if s[\"multi_host\"]]\nprint(\"Multi-host Pod slices:\", pod_slices)\n# Assert invariant `pod_slices == [\"v5litepod-16\"` holds\nassert pod_slices == [\"v5litepod-16\", \"v6e-16\"]",
+        "solution": "# Filter multi-host slices from the catalog (Foundations)\npod_slices = [s[\"slice\"] for s in SLICE_CATALOG if s[\"multi_host\"]]\nprint(\"Multi-host Pod slices:\", pod_slices)\n# Assert invariant `pod_slices == [\"v5litepod-16\"` holds\nassert pod_slices == [\"v5litepod-16\", \"v6e-16\"]",
         "explanation": "Both 16-chip slices span 4 hosts (`4` chips per host) and therefore require multi-host coordination."
       },
       {

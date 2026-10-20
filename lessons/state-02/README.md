@@ -2,6 +2,8 @@
 
 Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Identify containers, leaves and structure
@@ -75,7 +77,7 @@ Optimizer state is another tree with its own meaning. Its structure need not be 
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -102,10 +104,8 @@ loss reads both parameter leaves. grad returns a matching gradient tree; tree.ma
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
+# Step 3 — Run and check the result
 value, grads = jax.value_and_grad(loss)(params)
-# Transform every leaf of the parameter PyTree (`updated`).
 updated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
 print("Before/after:", float(value), float(loss(updated)))
 assert grads.keys() == params.keys()
@@ -117,7 +117,7 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: loss reads both parameter leaves.
@@ -126,10 +126,8 @@ x = jnp.array([2., 1.])
 def loss(p):
     prediction = jnp.dot(p["weight"], x) + p["bias"]
     return (prediction - 3.) ** 2
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
-# Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
+# Step 3 — Run and check the result
 value, grads = jax.value_and_grad(loss)(params)
-# Transform every leaf of the parameter PyTree (`updated`).
 updated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)
 print("Before/after:", float(value), float(loss(updated)))
 assert grads.keys() == params.keys()
@@ -164,7 +162,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:01.985938+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:15.991069+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405
@@ -179,7 +177,7 @@ PASS: state-02
 **Predict before running:** Predict both weight derivatives and the bias derivative from the residual before inspecting grads.
 
 ```python
-# Experiment — Verify every gradient leaf: This check verifies parameter identity and the actual gradient...
+# Experiment — Verify every gradient leaf
 assert jnp.allclose(grads["weight"],jnp.array([-8.,-4.]))
 assert jnp.allclose(grads["bias"],-4.)
 assert jnp.allclose(updated["weight"],jnp.array([1.4,-0.8]))
@@ -196,7 +194,7 @@ This check verifies parameter identity and the actual gradient values, not just 
 **Predict before running:** What is retained by the tree definition when array values are replaced?
 
 ```python
-# Experiment — Flatten and reconstruct without losing identity: The tree definition describes containers; leaves supply...
+# Experiment — Flatten and reconstruct without losing identity
 leaves,definition=jax.tree.flatten(params)
 rebuilt=jax.tree.unflatten(definition,leaves)
 assert jax.tree.structure(rebuilt)==jax.tree.structure(params)
@@ -219,13 +217,13 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Transform every leaf of the parameter PyTree (`norm_squared`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Exercise solution: Compute the squared norm of all gradient leaves.
-# Transform every leaf of the parameter PyTree (`norm_squared`).
 norm_squared = sum(...)  # TODO: compute norm_squared
 manual = jnp.sum(...)  # TODO: compute manual
 assert jnp.allclose(norm_squared, manual)  # TODO: complete assertion check
@@ -236,7 +234,6 @@ assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
 
 ```python
 # Exercise solution: Compute the squared norm of all gradient leaves.
-# Transform every leaf of the parameter PyTree (`norm_squared`).
 norm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))
 manual = jnp.sum(grads["weight"] ** 2) + grads["bias"] ** 2
 assert jnp.allclose(norm_squared, manual)
@@ -265,7 +262,8 @@ At the starting point prediction is $1$ and residual is $-2$, so the scale deriv
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `g` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -275,7 +273,6 @@ nested = ...  # TODO: compute nested
 def nested_loss(p):
     pred = ...  # TODO: compute pred
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(...)  # TODO: compute g
 assert jax.tree.structure(g)  # TODO: complete assertion check
 assert jnp.allclose(g["scale"],-4.)  # TODO: complete assertion check
@@ -289,7 +286,6 @@ nested={"layer":params,"scale":jnp.array(1.)}
 def nested_loss(p):
     pred=p["scale"]*(jnp.dot(p["layer"]["weight"],x)+p["layer"]["bias"])
     return (pred-3.)**2
-# Differentiate the objective to obtain `g` via automatic differentiation.
 g=jax.grad(nested_loss)(nested)
 assert jax.tree.structure(g)==jax.tree.structure(nested)
 assert jnp.allclose(g["scale"],-4.)
@@ -318,7 +314,8 @@ Matching leaf counts is not enough; key paths matter.
 - `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
 
 **Step-by-step implementation plan:**
-1. Transform every leaf of the parameter PyTree (`fixed`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -330,7 +327,6 @@ except ValueError:
     print("Expected tree mismatch")
 else:
     raise AssertionError("Expected a missing-key failure")
-# Transform every leaf of the parameter PyTree (`fixed`).
 fixed = jax.tree.map(...)  # TODO: compute fixed
 assert jnp.allclose(loss(fixed),0.64,atol=1e-6)  # TODO: complete assertion check
 ```
@@ -345,7 +341,6 @@ except ValueError:
     print("Expected tree mismatch")
 else:
     raise AssertionError("Expected a missing-key failure")
-# Transform every leaf of the parameter PyTree (`fixed`).
 fixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)
 assert jnp.allclose(loss(fixed),0.64,atol=1e-6)
 ```

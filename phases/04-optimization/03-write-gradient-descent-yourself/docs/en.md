@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive one update before writing the loop
@@ -73,7 +75,7 @@ A small change in the weights does not prove convergence: it can mean the learni
 Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -88,11 +90,8 @@ Append this block below the inputs. Before proceeding, trace which values are in
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
 def loss(w):
     return (w - 2.) ** 2
-# Define `train(initial, rate, steps)` to evaluate the objective and its automatic derivatives:
 def train(initial, rate, steps):
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
-        # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
         return next_w, loss(next_w)
     return jax.lax.scan(step, jnp.array(initial), None, length=steps)
@@ -119,7 +118,7 @@ The weight approaches $2.0$ and the final loss is below $10^{-8}$.
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — 2. Define the computation: train defines a state transition that subtracts the derivative.
@@ -127,7 +126,6 @@ def loss(w):
     return (w - 2.) ** 2
 def train(initial, rate, steps):
     def step(w, _):
-        # Differentiate the objective to obtain `next_w` via automatic differentiation.
         next_w = w - rate * jax.grad(loss)(w)
         return next_w, loss(next_w)
     return jax.lax.scan(step, jnp.array(initial), None, length=steps)
@@ -166,7 +164,6 @@ The large rate crosses the optimum and lands farther away on each step. The loss
 rates = [0.1, 0.5, 1.1]
 series = []
 for rate_plot in rates:
-    # Create device-backed JAX array `position_plot`.
     position_plot = jnp.array(0.0)
     losses = []
     for _ in range(12):
@@ -178,7 +175,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:53.460340+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:35.780899+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -195,7 +192,7 @@ PASS: optimization-03
 **Predict before running:** Does history contain the initial loss or the post-update loss?
 
 ```python
-# Experiment — Check the first two steps: A hand-derived trajectory checks update sign and the recording...
+# Experiment — Check the first two steps
 two_w, two_losses = train(0., 0.1, 2)
 assert jnp.allclose(two_w, 0.72)
 assert jnp.allclose(two_losses, jnp.array([2.56, 1.6384]))
@@ -211,7 +208,7 @@ A hand-derived trajectory checks update sign and the recording convention.
 **Predict before running:** What does rate $1$ do after five steps from zero?
 
 ```python
-# Experiment — Test the edge of stability: Magnitude-one error multipliers do not contract even though the...
+# Experiment — Test the edge of stability
 edge_w, edge_losses = train(0., 1., 5)
 assert jnp.allclose(edge_w, 4.)
 assert jnp.allclose(edge_losses, jnp.full(5, 4.))
@@ -226,10 +223,9 @@ Magnitude-one error multipliers do not contract even though the loop remains fin
 **Predict before running:** Can a parameter-change threshold of $10^{-6}$ declare success while the gradient magnitude is $4$?
 
 ```python
-# Experiment — A tiny update far from the solution: A stopping rule must distinguish lack of progress from reaching...
+# Experiment — A tiny update far from the solution
 far = jnp.array(0.)
 quadratic = lambda value: (value-2.)**2
-# Differentiate the objective to obtain `grad_far` via automatic differentiation.
 grad_far = jax.grad(quadratic)(far)
 next_far = far - 1e-8*grad_far
 assert jnp.abs(next_far-far)<1e-6
@@ -292,18 +288,16 @@ The error multiplier is $1-8\eta$; use $\eta=0.1$.
 - `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
 
 **Step-by-step implementation plan:**
-1. Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
-2. Differentiate the objective to obtain `new` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer the stability analysis (Transfer / diagnosis): Changing curvature changes the stability interval to...
+# Transfer the stability analysis (Transfer / diagnosis)
 def scaled_loss(w):
     return ...  # TODO: return computed result
-# Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
 def scaled_step(w, _):
-    # Differentiate the objective to obtain `new` via automatic differentiation.
     new = ...  # TODO: compute new
     return ...  # TODO: return computed result
 scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
@@ -314,12 +308,10 @@ assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Transfer the stability analysis (Transfer / diagnosis): Changing curvature changes the stability interval to...
+# Transfer the stability analysis (Transfer / diagnosis)
 def scaled_loss(w):
     return 4*(w-3.)**2
-# Define `scaled_step(w, _)` to evaluate the objective and its automatic derivatives:
 def scaled_step(w, _):
-    # Differentiate the objective to obtain `new` via automatic differentiation.
     new = w-0.1*jax.grad(scaled_loss)(w)
     return new, scaled_loss(new)
 scaled_w, scaled_history = jax.lax.scan(scaled_step, jnp.array(0.), None, length=20)
@@ -350,16 +342,14 @@ The derivative at zero is $-4$.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `uphill` via automatic differentiation.
-2. Differentiate the objective to obtain `downhill` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce an uphill update and repair it (Transfer / diagnosis): The sign error is isolated using the same input and rate;...
-# Differentiate the objective to obtain `uphill` via automatic differentiation.
+# Reproduce an uphill update and repair it (Transfer / diagnosis)
 uphill = ...  # TODO: compute uphill
-# Differentiate the objective to obtain `downhill` via automatic differentiation.
 downhill = ...  # TODO: compute downhill
 assert loss(uphill)  # TODO: complete assertion check
 assert loss(downhill)  # TODO: complete assertion check
@@ -369,10 +359,8 @@ assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reproduce an uphill update and repair it (Transfer / diagnosis): The sign error is isolated using the same input and rate;...
-# Differentiate the objective to obtain `uphill` via automatic differentiation.
+# Reproduce an uphill update and repair it (Transfer / diagnosis)
 uphill = 0. + 0.1*jax.grad(loss)(0.)
-# Differentiate the objective to obtain `downhill` via automatic differentiation.
 downhill = 0. - 0.1*jax.grad(loss)(0.)
 assert loss(uphill) > loss(0.)
 assert loss(downhill) < loss(0.)

@@ -2,6 +2,8 @@
 
 Phase 12: Reinforcement learning · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement reset and step as pure functions with explicit state.
@@ -111,7 +113,7 @@ The function returns all information needed by the next call. No hidden counter 
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -176,7 +178,7 @@ def step(state, action, horizon=8):
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -213,7 +215,7 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:52.114067+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:17.701210+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]
@@ -229,7 +231,7 @@ PASS: rl-01
 **Predict before running:** Which event wins if the final permitted action reaches the goal?
 
 ```python
-# Experiment — A goal at the deadline: The goal transition defines a completed task, so the two flags...
+# Experiment — A goal at the deadline
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
 assert bool(term) and not bool(trunc) and float(r) == 1.
@@ -245,7 +247,7 @@ The goal transition defines a completed task, so the two flags remain mutually e
 **Predict before running:** Will resetting twice with one key produce two independent trials?
 
 ```python
-# Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
+# Experiment — The same key is the same start
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
 a, b = reset(key), reset(key)
@@ -267,12 +269,13 @@ Begin at position $0$, choose left for three actions with horizon $3$, and then 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Accumulate the next contribution into `total`.
+1. Exercise solution
+2. Accumulate the next contribution into `total`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+# Exercise solution
 s = State(...)  # TODO: compute s
 total = ...  # TODO: compute total
 for i in range(3):
@@ -288,7 +291,7 @@ assert int(s2.position)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+# Exercise solution
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
 total = 0.
 for i in range(3):
@@ -372,7 +375,7 @@ Use ordinary min and max for the independent reference.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Enumerate all one-step moves (Transfer / diagnosis)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(...)  # TODO: compute compiled
 for position in range(3):
@@ -388,7 +391,7 @@ for position in range(3):
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Enumerate all one-step moves (Transfer / diagnosis)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(step)
 for position in range(3):

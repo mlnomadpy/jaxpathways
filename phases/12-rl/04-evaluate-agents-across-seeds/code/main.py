@@ -56,7 +56,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -73,7 +72,6 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Define `policy_loss(theta, records, method, clip)` to evaluate the objective and its automatic derivatives:
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -111,15 +109,12 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
     theta = jnp.zeros(3)
-    # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
-        # Define `epoch(_, candidate)` to evaluate the objective and its automatic derivatives:
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
@@ -138,10 +133,9 @@ def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3,
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
 
 # Add a read-only evaluator
-# Step 2 — Add a read-only evaluator: The evaluator retains raw returns, reports its seed set and...
+# Step 2 — Add a read-only evaluator
 def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
-    # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
@@ -154,7 +148,7 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
             'mean': float(returns.mean()), 'exact': float(exact_return(theta, horizon))}
 
 # Train several agents and retain every result
-# Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
+# Step 3 — Train several agents and retain every result
 training_seeds = [0,7,23,41,59]
 evaluation_seeds = [1000,1001,1002,1003]
 policies, histories, reports = [], [], []
@@ -229,7 +223,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -289,7 +282,6 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
@@ -307,10 +299,9 @@ def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3,
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
 
-# Step 2 — Add a read-only evaluator: The evaluator retains raw returns, reports its seed set and...
+# Step 2 — Add a read-only evaluator
 def evaluate(theta, seeds, batch_size=512, horizon=8):
     """One mean per evaluation stream; preserve raw episode returns too."""
-    # Create device-backed JAX array `theta`.
     theta = jnp.asarray(theta)
     if theta.shape != (3,) or not bool(jnp.all(jnp.isfinite(theta))):
         raise ValueError('theta must contain three finite logits')
@@ -322,7 +313,7 @@ def evaluate(theta, seeds, batch_size=512, horizon=8):
     return {'seeds': list(seeds), 'episode_returns': returns, 'stream_means': returns.mean(1),
             'mean': float(returns.mean()), 'exact': float(exact_return(theta, horizon))}
 
-# Step 3 — Train several agents and retain every result: Each agent receives a separate training key; all use the declared...
+# Step 3 — Train several agents and retain every result
 training_seeds = [0,7,23,41,59]
 evaluation_seeds = [1000,1001,1002,1003]
 policies, histories, reports = [], [], []
@@ -346,7 +337,7 @@ print('across-agent mean / sample sd:', trained_means.mean(),trained_means.std(d
 visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'training seed','ylabel':'mean episode return','series':[{'label':'held-out sampled','y':trained_means.tolist()},{'label':'exact expectation','y':exact_means.tolist()},{'label':'uniform baseline (shared)','y':[baseline['mean']]*5}]}
 
 # Experiment: Check baselines with known returns
-# Experiment — Check baselines with known returns: The baseline check can fail an evaluator even when the learned...
+# Experiment — Check baselines with known returns
 left = evaluate(jnp.full(3,-100.),evaluation_seeds)
 right = evaluate(jnp.full(3,100.),evaluation_seeds)
 assert abs(left['mean']+.08) < 1e-6
@@ -366,7 +357,7 @@ c = evaluate(policies[0],[2000,2001,2002,2003])
 assert not np.array_equal(a['episode_returns'],c['episode_returns'])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Compute the paired held-out improvement over the uniform baseline for...
+# Exercise solution
 deltas = trained_means - baseline['mean']
 # Check tensor shape invariant: `deltas.shape == (5,)`
 assert deltas.shape == (5,)
@@ -383,7 +374,7 @@ right = np.average(means,weights=counts)
 assert wrong == .5 and right == .1
 
 # Reference practice: Distinguish spread from standard error
-# Distinguish spread from standard error (Transfer / diagnosis): The numerical formula is separate from its sampling...
+# Distinguish spread from standard error (Transfer / diagnosis)
 values = np.array([.8,.9,1.])
 sd = values.std(ddof=1)
 naive_se = sd/np.sqrt(3)

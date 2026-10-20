@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 95 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate content identity, validation evidence and active selection.
@@ -215,7 +217,7 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -280,7 +282,7 @@ The supervisor owns the child handle, captures its output and always waits for t
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -493,7 +495,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -550,7 +552,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -667,7 +669,7 @@ visual_data={'kind':'bar','labels':['activate A','publish B','activate B','rejec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:21.363534+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:09.289097+00:00. JAX 0.9.2.
 
 ```text
 first / second content IDs: 810b956e3376228ff3c1f03f469feb3ab26653b488ba51271e82277672590b80 aed1378a7842598237e59c5d189b13d486068b6284d9c1ca3d4e865866ba6990
@@ -683,7 +685,7 @@ PASS: operations-04
 **Predict before running:** Will dictionary key insertion order change the canonical content ID?
 
 ```python
-# Experiment — Identity follows content rather than key insertion order: Canonical encoding removes an incidental representation...
+# Experiment — Identity follows content rather than key insertion order
 assert digest({'a':1,'b':2})==digest({'b':2,'a':1})
 assert digest({'a':1,'b':2})!=digest({'a':1,'b':3})
 ```
@@ -697,7 +699,7 @@ Canonical encoding removes an incidental representation difference but preserves
 **Predict before running:** What happens if the stored file no longer matches its content ID?
 
 ```python
-# Experiment — Detect corruption before activation: A filename containing a hash is not enough: the reader must...
+# Experiment — Detect corruption before activation
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)
@@ -747,12 +749,13 @@ Publish two compatible validated artifacts that differ in an explicit release no
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+1. Exercise solution
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Publish two compatible validated artifacts that differ in an explicit...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     one = publish(...)  # TODO: compute one
@@ -766,7 +769,7 @@ with tempfile.TemporaryDirectory() as folder:
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Publish two compatible validated artifacts that differ in an explicit...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     one=publish(folder,dict(artifact,release_note='candidate one'))
@@ -799,7 +802,7 @@ A boolean flag does not replace required source/config/data evidence.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incomplete provenance record (Transfer / diagnosis): The gate establishes only the declared local contract; it...
+# Reject an incomplete provenance record (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     incomplete = dict(...)  # TODO: compute incomplete
@@ -816,7 +819,7 @@ with tempfile.TemporaryDirectory() as folder:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject an incomplete provenance record (Transfer / diagnosis): The gate establishes only the declared local contract; it...
+# Reject an incomplete provenance record (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     incomplete=dict(artifact)
@@ -854,7 +857,7 @@ A failed rollback must not clear the current selection.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check rollback without history (Transfer / diagnosis): A runbook needs a defined failure path when no compatible...
+# Check rollback without history (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier = publish(...)  # TODO: compute identifier
@@ -872,7 +875,7 @@ with tempfile.TemporaryDirectory() as folder:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check rollback without history (Transfer / diagnosis): A runbook needs a defined failure path when no compatible...
+# Check rollback without history (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)

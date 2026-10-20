@@ -2,6 +2,8 @@
 
 Phase 14: Autodiff & JAX internals · about 130 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Interpret literals, captured constants and variables in a supported flat jaxpr.
@@ -136,7 +138,7 @@ Each environment entry stores a primal and its tangent. Constants and literals r
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -162,7 +164,7 @@ The traced closed constant contributes to the primal but not the input derivativ
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -249,7 +251,7 @@ def tiny_jvp(closed,primals,tangents):
     output=[read(var) for var in program.outvars]
     return tuple(v for v,_ in output),tuple(t for _,t in output)
 
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -267,7 +269,7 @@ np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))
 print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
 print("Interpreted primal and tangent:",float(primal_outputs[0]),float(tangent_outputs[0]))
 
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -312,7 +314,6 @@ The interpreter obtains each value by composing local tangent rules; the referen
 Agreement applies to this primitive subset and tested inputs. It does not validate an unsupported operation, nested control flow, compiler performance or device portability. Those require new rules and new evidence rather than extrapolation from this plot.
 
 ```python
-# Generate a uniform grid of points in `alphas`.
 alphas=np.linspace(-1,1,9)
 interpreted=[]
 analytic=[]
@@ -328,7 +329,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:04.114509+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:16.467113+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']
@@ -353,7 +354,7 @@ PASS: internals-04
 **Predict before running:** If a new function uses exp, should the interpreter guess a derivative or stop?
 
 ```python
-# Experiment — Exercise an unsupported primitive: A numerical result without a supported tangent rule would...
+# Experiment — Exercise an unsupported primitive
 # Trace or lower the function to inspect its compiler representation (`unsupported`).
 unsupported=jax.make_jaxpr(lambda z:jnp.sum(jnp.exp(z)))(x)
 rejected=False
@@ -402,15 +403,16 @@ Trace a new polynomial using only supported primitives, verify its interpreted d
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Trace or lower the function to inspect its compiler representation (`poly_closed`).
-2. Wrap with `jax.jit` (`poly_transform`) so XLA traces and compiles the function.
-3. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Trace or lower the function to inspect its compiler representation (`poly_closed`).
+3. Wrap with `jax.jit` (`poly_transform`) so XLA traces and compiles the function.
 4. Transfer the device result to the host for an independent NumPy comparison.
+5. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Trace a new polynomial using only supported primitives, verify its...
+# Exercise solution
 def polynomial(z):
     return ...  # TODO: return computed result
 # Trace or lower the function to inspect its compiler representation (`poly_closed`).
@@ -429,7 +431,7 @@ print("Changed polynomial transformed and compiled")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Trace a new polynomial using only supported primitives, verify its...
+# Exercise solution
 def polynomial(z):
     return jnp.sum(z*z+(-2.0)*z)
 # Trace or lower the function to inspect its compiler representation (`poly_closed`).
@@ -467,13 +469,14 @@ The new program has two input variables and needs two tangent arguments.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Trace or lower the function to inspect its compiler representation (`explicit_closed`).
-2. Transfer the device result to the host for an independent NumPy comparison.
+1. Make a constant into a differentiable input (Practice)
+2. Trace or lower the function to inspect its compiler representation (`explicit_closed`).
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make a constant into a differentiable input (Practice): Zero tangent belonged to a captured constant relative to the...
+# Make a constant into a differentiable input (Practice)
 def explicit(z,c):
     return ...  # TODO: return computed result
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).
@@ -488,7 +491,7 @@ print("Explicit offset tangent contribution:",float(jnp.sum(constant_direction))
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Make a constant into a differentiable input (Practice): Zero tangent belonged to a captured constant relative to the...
+# Make a constant into a differentiable input (Practice)
 def explicit(z,c):
     return jnp.sum(jnp.sin(z)*z+c)
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).

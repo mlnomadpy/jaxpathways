@@ -20,7 +20,7 @@ def epoch_order(seed,epoch):
     return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))
 
 # Build the pipeline or state transition
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
@@ -36,7 +36,7 @@ elapsed = time.perf_counter()-start_time
 seen = np.concatenate([b["id"] for b in batches])
 
 # Run the comparison
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 assert [len(b["id"]) for b in batches] == [4,4,3]
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
@@ -67,7 +67,7 @@ fingerprint = dataset_digest(features,labels)
 def epoch_order(seed,epoch):
     return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
@@ -82,7 +82,7 @@ batches = list(make_batches(seed=17,epoch=0))
 elapsed = time.perf_counter()-start_time
 seen = np.concatenate([b["id"] for b in batches])
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 assert [len(b["id"]) for b in batches] == [4,4,3]
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
@@ -99,7 +99,7 @@ print("Dataset SHA256:",fingerprint)
 visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}
 
 # Experiment: Compare epochs without a hard-coded order
-# Experiment — Compare epochs without a hard-coded order: Coverage is an invariant; ordering is a deterministic...
+# Experiment — Compare epochs without a hard-coded order
 epoch_one = np.concatenate([b["id"] for b in make_batches(17,1)])
 np.testing.assert_array_equal(np.sort(epoch_one),ids)
 assert not np.array_equal(epoch_one,seen)

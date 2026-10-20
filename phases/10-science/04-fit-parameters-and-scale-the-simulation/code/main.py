@@ -1,7 +1,7 @@
 """Fit parameters and scale the simulation: worked experiments and reference solutions. CPU checks."""
 
 # Define the simulator and immutable observations
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
 # Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
@@ -65,13 +65,12 @@ assert held_rmse < 1e-7
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
 print("Initial-time-only gradient:",float(initial_only_gradient))
 
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
 # Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
@@ -133,7 +132,6 @@ assert held_rmse < 1e-7
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -154,7 +152,7 @@ assert abs(biased_rate-true_rate)>0.1
 print("True rate:",true_rate,"perfect coarse Euler rate:",biased_rate)
 
 # Experiment: Measure fixed-shape CPU batches
-# Experiment — Measure fixed-shape CPU batches: The warmed, synchronized boundary excludes compilation and...
+# Experiment — Measure fixed-shape CPU batches
 import time
 measurements=[]
 for batch_size in (1,16,256):
@@ -175,12 +173,11 @@ for batch_size in (1,16,256):
 print("batch, median milliseconds, milliseconds per trajectory:",measurements)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
+# Exercise solution
 changed_truth=0.4
 changed_observations=train_initials[:,None]*jnp.exp(-changed_truth*times)
 def changed_objective(theta):
     return jnp.mean((predict(jnp.exp(theta),train_initials)-changed_observations)**2)
-# Differentiate the objective to obtain `changed_update` via automatic differentiation.
 changed_update=jax.jit(lambda theta:theta-0.4*jax.grad(changed_objective)(theta))
 changed_theta=jnp.log(0.9)
 for _ in range(200):

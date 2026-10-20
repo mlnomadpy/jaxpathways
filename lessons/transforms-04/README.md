@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 55 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Explain tracing, compilation, dispatch, and synchronization as separate work.
@@ -130,7 +132,7 @@ The repeated call can reuse the compiled executable for matching shapes and dtyp
 ## Run the example
 
 ```python
-# Compile a function with jit: Compilation prepares a program that can be reused for compatible...
+# Compile a function with jit
 import time
 import jax
 import jax.numpy as jnp
@@ -183,15 +185,15 @@ visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat comp
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:41.827744+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:10.581450+00:00. JAX 0.9.2.
 
 ```text
 Loss: 0.46000000834465027
-First/repeat seconds: 0.042516165878623724 4.8582907766103745e-05
-eager median / min / max seconds: 5.647912621498108e-05 5.233287811279297e-05 0.001787582878023386
-compiled median / min / max seconds: 8.854083716869354e-06 8.334405720233917e-06 1.1375173926353455e-05
+First/repeat seconds: 0.014060375280678272 1.7832964658737183e-05
+eager median / min / max seconds: 2.3916596546769142e-05 2.150004729628563e-05 3.854092210531235e-05
+compiled median / min / max seconds: 3.5830307751893997e-06 3.375113010406494e-06 5.084089934825897e-06
 backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32
-compiled value-and-grad median seconds: 1.485389657318592e-05
+compiled value-and-grad median seconds: 7.062684744596481e-06
 PASS: transforms-04
 
 ```
@@ -201,12 +203,11 @@ PASS: transforms-04
 **Predict before running:** Predict the loss $0.46$ and derive $\frac{2}{N}X^\mathsf{T}(Xw-y)$. Does the compiled result match both independent quantities?
 
 ```python
-# Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
+# Experiment — Derive predictions and gradients outside the transform
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
-# Differentiate the objective to obtain `compiled_value_gradient` via automatic differentiation.
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
 checked_value, checked_gradient = compiled_value_gradient(w, x, y)
 assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
@@ -221,7 +222,7 @@ The analytic value check detects mistakes that eager-versus-compiled equality al
 **Predict before running:** Which costs are included in these measurements? Predict whether the tiny compiled loss must be faster, then report what you actually observe.
 
 ```python
-# Experiment — Collect a synchronized latency sample: The report includes Python invocation and completed numerical...
+# Experiment — Collect a synchronized latency sample
 import statistics
 def completed_samples(function, repeats=20):
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -255,17 +256,14 @@ Foundation · Compile `value_and_grad(loss)`, check the loss and gradient agains
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `compiled_step` via automatic differentiation.
-2. Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Compile value_and_grad(loss), check the loss and gradient...
-# Differentiate the objective to obtain `compiled_step` via automatic differentiation.
+# Exercise solution
 compiled_step = jax.jit(...)  # TODO: compute compiled_step
 v, g = compiled_step(...)  # TODO: compute v, g
-# Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(...)  # TODO: compute expected_v, expected_g
 assert jnp.allclose(v, expected_v)  # TODO: complete assertion check
 assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
@@ -274,11 +272,9 @@ assert jnp.allclose(g, expected_g)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Compile value_and_grad(loss), check the loss and gradient...
-# Differentiate the objective to obtain `compiled_step` via automatic differentiation.
+# Exercise solution
 compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
-# Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
 assert jnp.allclose(v, expected_v)
 assert jnp.allclose(g, expected_g)
@@ -351,13 +347,12 @@ Use `jax.tree.map` to block on every returned array, then stop the timer.
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Build a report whose timing claim can be checked (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Build a report whose timing claim can be checked (Challenge): The measurement excludes input construction and first...
+# Build a report whose timing claim can be checked (Challenge)
 def wait_for_outputs(outputs):
     return ...  # TODO: return computed result
 wait_for_outputs(compiled_value_gradient(w, x, y))
@@ -373,7 +368,7 @@ assert len(gradient_times)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Build a report whose timing claim can be checked (Challenge): The measurement excludes input construction and first...
+# Build a report whose timing claim can be checked (Challenge)
 def wait_for_outputs(outputs):
     return jax.tree.map(lambda array: array.block_until_ready(), outputs)
 wait_for_outputs(compiled_value_gradient(w, x, y))

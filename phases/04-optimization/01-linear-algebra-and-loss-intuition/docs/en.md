@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Map one row to one prediction
@@ -86,7 +88,7 @@ $$
 Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -130,7 +132,7 @@ Predictions: $[3., 0., 2.]$; Loss: $0.0$.
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — 2. Define the computation: predict contracts the feature axis through Xw.
@@ -179,7 +181,7 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:20.282346+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:22.739680+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]
@@ -197,8 +199,7 @@ PASS: optimization-01
 **Predict before running:** At bias zero, what are the weight and bias derivatives?
 
 ```python
-# Experiment — Verify the gradient by hand: The matrix formula and autodiff agree for the same row-matched...
-# Differentiate the objective to obtain `(gw, gb)` via automatic differentiation.
+# Experiment — Verify the gradient by hand
 gw, gb = jax.grad(mse, argnums=(0, 1))(w, 0.)
 assert jnp.allclose(gw, jnp.array([-4/3, -4/3]))
 assert jnp.allclose(gb, -2.)
@@ -214,7 +215,7 @@ The matrix formula and autodiff agree for the same row-matched scalar objective.
 **Predict before running:** Does an exact model still have zero loss against column targets?
 
 ```python
-# Experiment — Make the silent shape error visible: A valid broadcast can define an unintended objective without...
+# Experiment — Make the silent shape error visible
 column_targets = targets[:, None]
 pairwise = predict(w, 1., X) - column_targets
 # Check tensor shape invariant: `pairwise.shape == (3, 3)`
@@ -308,7 +309,7 @@ The new target is the dot product plus bias.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Add an unseen observation (Transfer / diagnosis): The fourth row checks a combination absent from the original...
+# Add an unseen observation (Transfer / diagnosis)
 X_new = jnp.concatenate(...)  # TODO: compute X_new
 y_new = jnp.concatenate(...)  # TODO: compute y_new
 assert jnp.allclose(predict(w, 1., X_new), y_new)  # TODO: complete assertion check
@@ -317,7 +318,7 @@ assert jnp.allclose(predict(w, 1., X_new), y_new)  # TODO: complete assertion ch
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Add an unseen observation (Transfer / diagnosis): The fourth row checks a combination absent from the original...
+# Add an unseen observation (Transfer / diagnosis)
 X_new = jnp.concatenate([X, jnp.array([[2., -1.]])])
 y_new = jnp.concatenate([targets, jnp.array([6.])])
 assert jnp.allclose(predict(w, 1., X_new), y_new)
@@ -351,7 +352,7 @@ Compare shapes before subtraction; reshape only this known scalar-target dataset
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
+# Reject and repair a column target (Transfer / diagnosis)
 def checked_loss(prediction, target):
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")
@@ -368,7 +369,7 @@ assert checked_loss(predict(w, 1., X), column_targets[:, 0])  # TODO: complete a
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject and repair a column target (Transfer / diagnosis): The failure is reproduced at the boundary and the repair is...
+# Reject and repair a column target (Transfer / diagnosis)
 def checked_loss(prediction, target):
     if prediction.shape != target.shape:
         raise ValueError("one target required per prediction")

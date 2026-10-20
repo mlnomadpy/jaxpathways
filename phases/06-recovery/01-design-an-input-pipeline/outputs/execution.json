@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-01",
-  "contentHash": "a11590118167970698c04721a32b18b77c612e61de2eb36d575ec988895f41dc",
-  "executedAt": "2026-10-20T18:50:43.689138+00:00",
+  "contentHash": "d29d2a038f4c10ad4dd40f280b7b8a5acd01d4e62a11367981b6e93bd6c94b88",
+  "executedAt": "2026-10-20T22:21:23.552163+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,18 +11,18 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.019213834311813116\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.00010958313941955566\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
+  "stdout": "Batch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 0.01006391691043973\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nBatch sizes: [4, 4, 3]\nExample order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\nPreparation seconds (local observation only): 1.837499439716339e-05\nDataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\nEpoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]\nOmitted IDs: [2, 3, 5]\nCopy preserves fingerprint; reordered source and edited labels invalidate it.\nPASS: recovery-01\n",
   "notebookCells": [
     {
       "sourceHash": "e78ec54a582ee347617fb616386906ebc6dced452326308a2ddb63ff2dba9d7c",
       "outputs": []
     },
     {
-      "sourceHash": "77362ad5c034b2562153228f8fc957c5cb045ce7dbd8260e9b8c04c68cd8f951",
+      "sourceHash": "d97dded3a548eedf7d9367a086cceea839e17ed17af54daafe4bacf5d113b5b3",
       "outputs": []
     },
     {
-      "sourceHash": "fe0eb80192f0363ef85c13e081dd09ee7d91d3006073b2d1b67e7b8453b606fb",
+      "sourceHash": "b779efb4edb7b8c59d229f298885677f580f187c2e29fbed9fb771940127fd60",
       "outputs": [
         {
           "output_type": "stream",
@@ -30,14 +30,14 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 0.016604209318757057\n",
+            "Preparation seconds (local observation only): 0.009791667107492685\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "926fc53d0059e31ea35d708cf2e8154ef3019d41ff65bcdea2f455ac3d34d4c7",
+      "sourceHash": "256b1a98ac90212b42fd1cfb676fa5e7458358a4563d6b461fb32a16e7004731",
       "outputs": [
         {
           "output_type": "stream",
@@ -45,7 +45,7 @@
           "text": [
             "Batch sizes: [4, 4, 3]\n",
             "Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]\n",
-            "Preparation seconds (local observation only): 3.854092210531235e-05\n",
+            "Preparation seconds (local observation only): 2.2124964743852615e-05\n",
             "Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892\n"
           ]
         }
@@ -71,7 +71,7 @@
       ]
     },
     {
-      "sourceHash": "aedfee798c978fc76596efe68de62b9c460f62b1d536a1a0b6e12304d7bab7b6",
+      "sourceHash": "32639bc0b25bb7ad495c4f2c151082658f26b48b51b318ab294e32338de66598",
       "outputs": [
         {
           "output_type": "stream",

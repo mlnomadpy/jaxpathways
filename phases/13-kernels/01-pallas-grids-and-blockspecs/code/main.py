@@ -123,13 +123,13 @@ print("Padding fraction:",(padded-logical)/padded)
 visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (categorical label)','rows':[str(i) for i in range(5)],'columns':[str(i) for i in range(11)],'xlabel':'logical column','ylabel':'logical row'}
 
 # Experiment: Change block geometry without changing values
-# Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...
+# Experiment — Change block geometry without changing values
 changed=blocked_axpy(x,y,(3,5))
 np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)
 print("Changed grid:",(2,3),"same numerical result")
 
 # Experiment: Expose the floor-division omission
-# Experiment — Expose the floor-division omission: This diagnostic models the ownership bug without reading...
+# Experiment — Expose the floor-division omission
 covered=np.zeros((5,11),dtype=bool)
 for i in range(5//2):
     for j in range(11//4):
@@ -139,11 +139,9 @@ assert not covered[-1,-1]
 print("Floor-grid missing logical cells:",int((~covered).sum()))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...
+# Exercise solution
 for shape in [(1,7),(7,9)]:
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(np.random.default_rng(11).normal(size=shape),dtype=jnp.float32)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(np.random.default_rng(12).normal(size=shape),dtype=jnp.float32)
     for block in [(2,4),(3,5)]:
         result=blocked_axpy(a,b,block)

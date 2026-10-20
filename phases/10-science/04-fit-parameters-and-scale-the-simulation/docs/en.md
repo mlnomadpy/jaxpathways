@@ -2,6 +2,8 @@
 
 Phase 10: Scientific computing · about 115 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Fit a constrained physical parameter through an executed simulator.
@@ -76,7 +78,7 @@ The staged scientific-inverse project asks for a reusable simulation and fitting
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
 # Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
@@ -154,7 +156,6 @@ assert held_rmse < 1e-7
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -166,7 +167,7 @@ Held-out starts test transfer within this known equation. Refinement tests wheth
 ## Run the example
 
 ```python
-# Step 1 — Define the simulator and immutable observations: Observations come from the analytic physical model, not the same...
+# Step 1 — Define the simulator and immutable observations
 import jax
 # Enable 64-bit arithmetic before importing jax.numpy or creating arrays.
 jax.config.update("jax_enable_x64", True)
@@ -228,7 +229,6 @@ assert held_rmse < 1e-7
 fine=np.asarray(jax.vmap(lambda initial:solve(fitted_rate,initial,80,0.025))(held_initials))[:,::2]
 fine_rmse=float(np.sqrt(np.mean((fine-held_truth)**2)))
 assert fine_rmse < 1e-7
-# Differentiate the objective to obtain `initial_only_gradient` via automatic differentiation.
 initial_only_gradient=jax.grad(lambda p:jnp.mean((predict(jnp.exp(p),train_initials)[:,0]-observations[:,0])**2))(jnp.log(1.4))
 assert float(initial_only_gradient)==0.0
 print("Held-out RMSE:",held_rmse,"finer-grid RMSE:",fine_rmse)
@@ -264,7 +264,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:02:01.529648+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:57.997762+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -276,7 +276,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.009916722774505615, 0.009916722774505615), (16, 0.008708331733942032, 0.000544270733371377), (256, 0.05366699770092964, 0.0002096367097692564)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.005291774868965149, 0.005291774868965149), (16, 0.005333218723535538, 0.0003333261702209711), (256, 0.03358395770192146, 0.00013118733477313071)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05
@@ -308,7 +308,7 @@ The model parameter absorbs discretization error. Refining the numerical model i
 **Predict before running:** Will total time and time per trajectory necessarily move in the same direction?
 
 ```python
-# Experiment — Measure fixed-shape CPU batches: The warmed, synchronized boundary excludes compilation and...
+# Experiment — Measure fixed-shape CPU batches
 import time
 measurements=[]
 for batch_size in (1,16,256):
@@ -346,18 +346,17 @@ Repeat inference for a new true rate $0.4$ using analytically generated observat
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `changed_update` via automatic differentiation.
+1. Exercise solution
 2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
+# Exercise solution
 changed_truth = ...  # TODO: compute changed_truth
 changed_observations = ...  # TODO: compute changed_observations
 def changed_objective(theta):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `changed_update` via automatic differentiation.
 changed_update = jax.jit(...)  # TODO: compute changed_update
 changed_theta = jnp.log(...)  # TODO: compute changed_theta
 for _ in range(200):
@@ -373,12 +372,11 @@ print("Changed true/recovered rate:",changed_truth,changed_rate)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat inference for a new true rate 0.4 using analytically generated...
+# Exercise solution
 changed_truth=0.4
 changed_observations=train_initials[:,None]*jnp.exp(-changed_truth*times)
 def changed_objective(theta):
     return jnp.mean((predict(jnp.exp(theta),train_initials)-changed_observations)**2)
-# Differentiate the objective to obtain `changed_update` via automatic differentiation.
 changed_update=jax.jit(lambda theta:theta-0.4*jax.grad(changed_objective)(theta))
 changed_theta=jnp.log(0.9)
 for _ in range(200):

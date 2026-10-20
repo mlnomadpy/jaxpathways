@@ -2,6 +2,8 @@
 
 Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Predict the values returned by functional indexed set and add.
@@ -147,7 +149,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:17.889065+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:02.846523+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]
@@ -162,7 +164,7 @@ PASS: arrays-04
 **Predict before running:** If two names point at the original array and one name is rebound, which values remain available?
 
 ```python
-# Experiment — See name rebinding without old-value mutation: Assigning a result changes the binding, while ignoring a result...
+# Experiment — See name rebinding without old-value mutation
 original = x
 rebound = x
 rebound = rebound.at[1].set(20.)
@@ -256,13 +258,12 @@ The slice [:, $-1$] selects every row and the last column. A scalar replacement 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Replace a region of a matrix (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
+# Replace a region of a matrix (Practice)
 matrix = jnp.arange(...)  # TODO: compute matrix
 updated_matrix = ...  # TODO: compute updated_matrix
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))  # TODO: complete assertion check
@@ -272,7 +273,7 @@ assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))  # TODO: complete asser
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
+# Replace a region of a matrix (Practice)
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
 updated_matrix = matrix.at[:, -1].set(-1.)
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))
@@ -302,13 +303,14 @@ Use where for the fixed-shape result. Boolean indexing produces selected values,
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Check tensor shape invariant: `fixed_shape.shape == (4,)`
-2. Check tensor shape invariant: `selected.shape == (2,)`
+1. Keep shape while masking values (Challenge)
+2. Check tensor shape invariant: `fixed_shape.shape == (4,)`
+3. Check tensor shape invariant: `selected.shape == (2,)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep shape while masking values (Challenge): Both are useful representations, but they are not...
+# Keep shape while masking values (Challenge)
 fixed_shape = jnp.where(...)  # TODO: compute fixed_shape
 selected = ...  # TODO: compute selected
 # Check tensor shape invariant: `fixed_shape.shape == (4,)`
@@ -322,7 +324,7 @@ assert jnp.allclose(selected, jnp.array([3., 4.]))  # TODO: complete assertion c
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep shape while masking values (Challenge): Both are useful representations, but they are not...
+# Keep shape while masking values (Challenge)
 fixed_shape = jnp.where(x > 2., x, 0.)
 selected = x[x > 2.]
 # Check tensor shape invariant: `fixed_shape.shape == (4,)`

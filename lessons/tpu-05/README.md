@@ -2,6 +2,8 @@
 
 Phase 20: TPU Workflows: Launching Jobs & Checkpointed Experiments · about 20 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Classify course scripts using a CPU-only / single-host-compatible / multi-host-qualified execution matrix before staging.
@@ -139,7 +141,7 @@ gcloud compute tpus tpu-vm scp --recurse "$TPU_NAME":~/jax-tpu-lab/multihost-run
 Create main.py with SLICE_CATALOG and compute global_chips, total_hbm_gib, and multi_host.
 
 ```python
-# Step 1 — Tabulate single-host and multi-host TPU slice topologies: Separating hosts from chips_per_host shows immediately when a...
+# Step 1 — Tabulate single-host and multi-host TPU slice topologies
 import json
 import jax
 import numpy as np
@@ -299,7 +301,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:56:40.357317+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:13.155520+00:00. JAX 0.9.2.
 
 ```text
 CPU route: python public/exercises/distributed-02.py
@@ -323,7 +325,7 @@ PASS: tpu-05
 **Predict before running:** How many global chips are left idle if you launch a script without `--worker=all` on `v5litepod-16`?
 
 ```python
-# Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...
+# Experiment — Compare local vs global device counts across slices
 v5e16 = next(s for s in SLICE_CATALOG if s["slice"] == "v5litepod-16")
 idle_without_worker_all = v5e16["global_chips"] - v5e16["chips_per_host"]
 print("v5litepod-16 global chips:", v5e16["global_chips"], "Idle chips without --worker=all:", idle_without_worker_all)
@@ -340,7 +342,7 @@ Worker 0 only controls its own 4 local chips; the other 3 hosts (`3 * 4 = 12` ch
 **Predict before running:** How much total HBM is available across a 16-chip `v6e-16` Pod slice compared to `v5litepod-16`?
 
 ```python
-# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16: Doubling per-chip HBM on Trillium (v6e) doubles the total...
+# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16
 hbm_by_slice = {s["slice"]: s["total_hbm_gib"] for s in SLICE_CATALOG}
 print("Total HBM GiB by slice:", hbm_by_slice)
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
@@ -407,13 +409,13 @@ Filter by `s['multi_host']`.
 ### How to write: Filter multi-host slices from the catalog — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+1. Filter multi-host slices from the catalog (Foundations)
 2. Assert invariant `pod_slices == ["v5litepod-16"` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+# Filter multi-host slices from the catalog (Foundations)
 pod_slices = ...  # TODO: compute pod_slices
 print("Multi-host Pod slices:", pod_slices)
 # Assert invariant `pod_slices == ["v5litepod-16"` holds
@@ -423,7 +425,7 @@ assert pod_slices  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+# Filter multi-host slices from the catalog (Foundations)
 pod_slices = [s["slice"] for s in SLICE_CATALOG if s["multi_host"]]
 print("Multi-host Pod slices:", pod_slices)
 # Assert invariant `pod_slices == ["v5litepod-16"` holds

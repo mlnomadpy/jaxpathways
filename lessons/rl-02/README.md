@@ -2,6 +2,8 @@
 
 Phase 12: Reinforcement learning · about 85 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build a scan over vmapped transitions with explicit key ownership.
@@ -121,7 +123,7 @@ Keep the state and ending contract identical to the previous lesson.
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 2 — Collect a batch and compute targets: scan emits time-major arrays; vmap keeps environments independent...
+# Step 2 — Collect a batch and compute targets
 def log_probability(theta, observations, actions):
     logits = theta[jnp.minimum(observations, 2)]
     return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))
@@ -141,7 +143,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -166,7 +167,7 @@ scan emits time-major arrays; vmap keeps environments independent within each ti
 Append this block to main.py. Run python3 main.py in the course CPU environment.
 
 ```python
-# Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
+# Step 3 — Check shapes and episode boundaries
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
@@ -222,7 +223,7 @@ def step(state, action, horizon=8):
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
-# Step 2 — Collect a batch and compute targets: scan emits time-major arrays; vmap keeps environments independent...
+# Step 2 — Collect a batch and compute targets
 def log_probability(theta, observations, actions):
     logits = theta[jnp.minimum(observations, 2)]
     return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))
@@ -242,7 +243,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -259,7 +259,7 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
+# Step 3 — Check shapes and episode boundaries
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
@@ -298,7 +298,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:57.489742+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:22.540523+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716
@@ -334,7 +334,7 @@ The random stream is part of the experiment state. Replay in this environment is
 **Predict before running:** Predict the four targets for rewards $(-0.01,-0.01,1,0)$.
 
 ```python
-# Experiment — Reward-to-go by hand: Zero padded rewards preserve the finite-episode sum, while the...
+# Experiment — Reward-to-go by hand
 r = jnp.array([[-.01],[-.01],[1.],[0.]])
 g = returns_to_go(r)
 assert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))
@@ -409,7 +409,7 @@ Record the mask before calling step; the successful transition still belongs to 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...
+# Catch a shifted mask (Transfer / diagnosis)
 s = State(...)  # TODO: compute s
 correct, broken = ...  # TODO: compute correct, broken
 for a in [1,1]:
@@ -426,7 +426,7 @@ assert abs(broken+.01)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...
+# Catch a shifted mask (Transfer / diagnosis)
 s = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))
 correct, broken = 0., 0.
 for a in [1,1]:
@@ -470,7 +470,7 @@ The two start states need different numbers of actions. Compare each return agai
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
+# Check a deterministic policy limit (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(...)  # TODO: compute _, easy
 expected = jnp.where(...)  # TODO: compute expected
@@ -481,7 +481,7 @@ assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
+# Check a deterministic policy limit (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)

@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 55 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive a batch mean-squared-error gradient for one weight.
@@ -123,7 +125,6 @@ x = jnp.array([1., 2., 3.])
 y = 2. * x
 def loss(weight):
     return jnp.mean((weight * x - y) ** 2)
-# Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
 value, gradient = jax.value_and_grad(loss)(1.0)
 print("Loss:", float(value), "gradient:", float(gradient))
 assert jnp.allclose(value, 14./3.)
@@ -153,15 +154,13 @@ The loss tells us how wrong the predictions are. The derivative tells us how tha
 The dashed line below zero is a negative slope, not a negative squared loss. Likewise, an intersection of the two curves away from the minimum has no special optimization meaning. `value_and_grad` returns these two different pieces of information together.
 
 ```python
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 4.0, 81)
-# Differentiate the objective to obtain gradients `visual_data`.
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel': 'loss or derivative (different quantities)', 'series': [{'label': 'mean squared loss', 'y': jax.vmap(loss)(grid).tolist()}, {'label': 'derivative', 'y': jax.vmap(jax.grad(loss))(grid).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:47:29.571200+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:06.959574+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211
@@ -181,7 +180,6 @@ PASS: transforms-02
 def analytic_loss_gradient(weight):
     return 2. * jnp.mean((weight * x - y) * x)
 for weight in (0., 1., 2.):
-    # Differentiate the objective to obtain `(value_here, grad_here)` via automatic differentiation.
     value_here, grad_here = jax.value_and_grad(loss)(weight)
     print("weight / loss / gradient:", weight, float(value_here), float(grad_here))
     assert jnp.allclose(grad_here, analytic_loss_gradient(weight))
@@ -196,11 +194,10 @@ A derivative describes the direction. A new objective value is obtained only aft
 **Predict before running:** What nested structure will `has_aux=True` return, and which part determines the parameter gradient?
 
 ```python
-# Experiment — Return residuals without changing the objective: The return structure separates logging data from a scalar...
+# Experiment — Return residuals without changing the objective
 def loss_with_residuals(weight):
     residuals = weight * x - y
     return jnp.mean(residuals ** 2), residuals
-# Differentiate the objective to obtain `((aux_value, residuals), aux_grad...` via automatic differentiation.
 (aux_value, residuals), aux_gradient = jax.value_and_grad(loss_with_residuals, has_aux=True)(1.)
 # Check tensor shape invariant: `residuals.shape == (3,)`
 assert residuals.shape == (3,)
@@ -223,13 +220,12 @@ Foundation · Starting from $w=1$, calculate the next weight and loss for $\alph
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Starting from w=1, calculate the next weight and loss for...
+# Exercise solution
 small_step = ...  # TODO: compute small_step
 large_step = ...  # TODO: compute large_step
 assert jnp.allclose(small_step, 29. / 15.)  # TODO: complete assertion check
@@ -241,7 +237,7 @@ assert jnp.allclose(loss(2.), 0.)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Starting from w=1, calculate the next weight and loss for...
+# Exercise solution
 small_step = 1. - 0.1 * gradient
 large_step = 1. - 0.3 * gradient
 assert jnp.allclose(small_step, 29. / 15.)
@@ -272,15 +268,14 @@ Default differentiation is with respect to the first argument, not every floatin
 - `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `(v_explicit, g_explicit)` via automatic differentiation.
+1. Make the data boundary explicit (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make the data boundary explicit (Practice): Keeping data explicit prepares the function for new batches...
+# Make the data boundary explicit (Practice)
 def explicit_loss(weight, inputs, targets):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `(v_explicit, g_explicit)` via automatic differentiation.
 v_explicit, g_explicit = jax.value_and_grad(...)  # TODO: compute v_explicit, g_explicit
 assert jnp.allclose(v_explicit, 14. / 3.)  # TODO: complete assertion check
 assert jnp.allclose(g_explicit, -28. / 3.)  # TODO: complete assertion check
@@ -289,10 +284,9 @@ assert jnp.allclose(g_explicit, -28. / 3.)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Make the data boundary explicit (Practice): Keeping data explicit prepares the function for new batches...
+# Make the data boundary explicit (Practice)
 def explicit_loss(weight, inputs, targets):
     return jnp.mean((weight * inputs - targets) ** 2)
-# Differentiate the objective to obtain `(v_explicit, g_explicit)` via automatic differentiation.
 v_explicit, g_explicit = jax.value_and_grad(explicit_loss)(1., x, y)
 assert jnp.allclose(v_explicit, 14. / 3.)
 assert jnp.allclose(g_explicit, -28. / 3.)
@@ -322,18 +316,15 @@ Duplicate data are not new information. Track the factor $N$ in the mathematical
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `g_mean` via automatic differentiation.
-2. Differentiate the objective to obtain `g_sum` via automatic differentiation.
+1. Audit reduction and batch replication (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit reduction and batch replication (Challenge): Mean gradients stay fixed under exact batch replication; sum...
+# Audit reduction and batch replication (Challenge)
 def summed_loss(weight, inputs, targets):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `g_mean` via automatic differentiation.
 g_mean = jax.grad(...)  # TODO: compute g_mean
-# Differentiate the objective to obtain `g_sum` via automatic differentiation.
 g_sum = jax.grad(...)  # TODO: compute g_sum
 x_twice, y_twice = jnp.tile(...)  # TODO: compute x_twice, y_twice
 assert jnp.allclose(g_sum, len(x) * g_mean)  # TODO: complete assertion check
@@ -345,12 +336,10 @@ assert jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)  # TODO: com
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Audit reduction and batch replication (Challenge): Mean gradients stay fixed under exact batch replication; sum...
+# Audit reduction and batch replication (Challenge)
 def summed_loss(weight, inputs, targets):
     return jnp.sum((weight * inputs - targets) ** 2)
-# Differentiate the objective to obtain `g_mean` via automatic differentiation.
 g_mean = jax.grad(explicit_loss)(1., x, y)
-# Differentiate the objective to obtain `g_sum` via automatic differentiation.
 g_sum = jax.grad(summed_loss)(1., x, y)
 x_twice, y_twice = jnp.tile(x, 2), jnp.tile(y, 2)
 assert jnp.allclose(g_sum, len(x) * g_mean)

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-04",
-  "contentHash": "f22c12e0a60d8c123c68117760183fcd0298f5e86f3d7f72351ef20497327cfe",
+  "contentHash": "1e2968a6e5af5f26ce597b6dfa3725bb00cf27abc99bd801d24ddb2a0e354749",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T18:49:33.506190+00:00",
+  "generatedAt": "2026-10-20T22:28:34.699615+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'transcendentals': 256.0, 'flops': 8192.0, 'utilization1{}': 1.0, 'bytes accessed': 5632.0, 'bytes accessed1{}': 512.0, 'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'bytes accessedout{}': 2048.0}\nLocal CPU samples seconds: [0.00010066572576761246, 4.350021481513977e-05, 6.77499920129776e-05, 0.00010979129001498222, 5.699973553419113e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n",
+  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0, 'bytes accessedout{}': 2048.0, 'bytes accessed1{}': 512.0, 'utilization0{}': 2.0, 'flops': 8192.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0}\nLocal CPU samples seconds: [2.1624844521284103e-05, 5.1792245358228683e-05, 7.991679012775421e-05, 5.195802077651024e-05, 3.545917570590973e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n",
   "data": {
     "kind": "line",
     "x": [

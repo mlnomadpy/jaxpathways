@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "c211625ed7d392bd18ebab5b1c80f711cec07240d6739ca5674c666191882141",
-  "executedAt": "2026-10-20T21:56:41.435866+00:00",
+  "contentHash": "6763c08dcdc8e6b651783ca30eead97071b314f8bb3d601035e6848ea6a41469",
+  "executedAt": "2026-10-20T22:27:14.917346+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\nTPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\nKV cache GiB (FP32 / BF16 / INT8): 2.0 1.0 0.5\n7B mixed train state GiB: 117.347 Minimum chips at 80% usable HBM: 10\n1.5B state plus BF16 KV cache (GiB): 25.646\nArithmetic intensity: 341.3333333333333 FLOPs/byte\nv6e-4 80% usable GiB: 102.4 Fits 7B state estimate: False\nPASS: tpu-03\n",
   "notebookCells": [
     {
-      "sourceHash": "2a5c31059c8c1c1abfb0a91e670b9bc8ab9fe0ac5ec3de14465e49430baa34c9",
+      "sourceHash": "31c9a7b8e464ce3e8eecba8fd7d5b96bb3f32561bea3350f378fe64549aa5e04",
       "outputs": []
     },
     {
-      "sourceHash": "aaa7690d50b4b3ee5dcdaad60f7a236d571f0743ac0df8c4d59704acddf740c8",
+      "sourceHash": "f9d87fd331665f694aefcd88d849550aae65467e5bb3974a315b3daf93280f7f",
       "outputs": [
         {
           "output_type": "stream",
@@ -36,7 +36,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "d1815c5a988ceec26672f41037e0a17fc546b75923e5ab7b1054eb05a8dbc992",
+      "sourceHash": "6f741a3fe17934b9b99360a7edc42c64977e357bf0760528b7522bd7e20c8590",
       "outputs": [
         {
           "output_type": "stream",
@@ -69,7 +69,7 @@
       ]
     },
     {
-      "sourceHash": "a2453c3df46bcc8b66f225743b75ddc762c976081eda4cd29a155bf0c046ce49",
+      "sourceHash": "6b6a50d7c8dd28cbedc2f44d6833c4959e67bfd78acd974322d59f1c13272f98",
       "outputs": [
         {
           "output_type": "stream",

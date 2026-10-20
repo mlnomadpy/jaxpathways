@@ -2,6 +2,8 @@
 
 Phase 14: Autodiff & JAX internals · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Compute and interpret JVP and VJP products with correct domains and shapes.
@@ -107,7 +109,7 @@ The map has two inputs and two outputs. Its Jacobian rows correspond to output c
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 2 — Push a direction forward and pull a measurement backward: The VJP returns one cotangent per input argument, hence the...
+# Step 2 — Push a direction forward and pull a measurement backward
 value,jvp=jax.jvp(mapping,(x,),(v,))
 value_again,pullback=jax.vjp(mapping,x)
 vjp,=pullback(u)
@@ -130,12 +132,10 @@ The VJP returns one cotangent per input argument, hence the one-element tuple. T
 Create main.py for the first block, then append subsequent blocks in order using your course CPU environment.
 
 ```python
-# Step 3 — Compute curvature without materializing a Hessian: For squared residuals, the Hessian includes a...
+# Step 3 — Compute curvature without materializing a Hessian
 def objective(z):
     return 0.5*jnp.vdot(mapping(z),mapping(z))
-# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient=jax.grad(objective)(x)
-# Differentiate the objective to obtain `hvp` via automatic differentiation.
 hvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]
 y=expected_value
 hessian_0=np.array([[0.,1.],[1.,0.]])
@@ -171,7 +171,7 @@ a,b=np.asarray(x)
 jacobian=np.array([[b,a],[np.cos(a),2*b]])
 expected_value=np.array([a*b,np.sin(a)+b*b])
 
-# Step 2 — Push a direction forward and pull a measurement backward: The VJP returns one cotangent per input argument, hence the...
+# Step 2 — Push a direction forward and pull a measurement backward
 value,jvp=jax.jvp(mapping,(x,),(v,))
 value_again,pullback=jax.vjp(mapping,x)
 vjp,=pullback(u)
@@ -186,12 +186,10 @@ np.testing.assert_allclose(left,right,rtol=1e-12)
 print("Jacobian:",jacobian)
 print("JVP:",np.asarray(jvp),"VJP:",np.asarray(vjp),"adjoint pair:",left,right)
 
-# Step 3 — Compute curvature without materializing a Hessian: For squared residuals, the Hessian includes a...
+# Step 3 — Compute curvature without materializing a Hessian
 def objective(z):
     return 0.5*jnp.vdot(mapping(z),mapping(z))
-# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient=jax.grad(objective)(x)
-# Differentiate the objective to obtain `hvp` via automatic differentiation.
 hvp=jax.jvp(jax.grad(objective),(x,),(v,))[1]
 y=expected_value
 hessian_0=np.array([[0.,1.],[1.,0.]])
@@ -233,7 +231,7 @@ visual_data={'panels':[{'kind':'bar','labels':['output 0','output 1'],'ylabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:27:27.079602+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:09.478062+00:00. JAX 0.9.2.
 
 ```text
 Jacobian: [[-0.7         0.4       ]
@@ -258,7 +256,7 @@ PASS: internals-02
 **Predict before running:** Will mapping JVPs over basis vectors directly produce rows or columns?
 
 ```python
-# Experiment — Reconstruct columns and rows independently: The transpose in the forward construction is necessary: vmap...
+# Experiment — Reconstruct columns and rows independently
 basis=jnp.eye(2)
 columns=jax.vmap(lambda direction:jax.jvp(mapping,(x,),(direction,))[1])(basis).T
 # Vectorize across the batch dimension with `jax.vmap` (`rows`).
@@ -277,12 +275,11 @@ The transpose in the forward construction is necessary: vmap first stacks one di
 **Predict before running:** Will the residual-weighted correction vanish at our chosen point?
 
 ```python
-# Experiment — Separate exact curvature from Gauss–Newton: Residuals are nonzero, and both output functions have second...
+# Experiment — Separate exact curvature from Gauss–Newton
 gauss_newton=jacobian.T@jacobian
 approximation=gauss_newton@np.asarray(v)
 assert np.linalg.norm(np.asarray(hvp)-approximation)>0.1
 eps=1e-4
-# Differentiate the objective to obtain `fd` via automatic differentiation.
 fd=(np.asarray(jax.grad(objective)(x+eps*v))-np.asarray(jax.grad(objective)(x-eps*v)))/(2*eps)
 np.testing.assert_allclose(hvp,fd,rtol=1e-7,atol=1e-8)
 print("Exact HVP:",np.asarray(hvp),"Gauss-Newton product:",approximation)
@@ -304,12 +301,13 @@ Repeat the Jacobian, JVP, VJP and adjoint checks at $x=(-0.2,0.8)$ with $v=(-0.5
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
 
 **Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat the Jacobian, JVP, VJP and adjoint checks at x=(-0.2,0.8) with...
+# Exercise solution
 changed_x = jnp.array(...)  # TODO: compute changed_x
 changed_v = jnp.array(...)  # TODO: compute changed_v
 changed_u = jnp.array(...)  # TODO: compute changed_u
@@ -327,7 +325,7 @@ print("Changed-point adjoint verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat the Jacobian, JVP, VJP and adjoint checks at x=(-0.2,0.8) with...
+# Exercise solution
 changed_x=jnp.array([-0.2,0.8])
 changed_v=jnp.array([-0.5,1.3])
 changed_u=jnp.array([1.1,-0.4])
@@ -416,19 +414,17 @@ Compose jvp with grad and compare scalar products.
 - `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `hw` via automatic differentiation.
-2. Differentiate the objective to obtain `fdw` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
 w = jnp.array(...)  # TODO: compute w
-# Differentiate the objective to obtain `hw` via automatic differentiation.
 hw = jax.jvp(...)  # TODO: compute hw
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol = ...  # TODO: compute np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol
 eps = ...  # TODO: compute eps
-# Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw = ...  # TODO: compute fdw
 np.testing.assert_allclose(hw,fdw,rtol = ...  # TODO: compute np.testing.assert_allclose(hw,fdw,rtol
 print("Bilinear Hessian symmetry and finite-difference product verified")
@@ -439,11 +435,9 @@ print("Bilinear Hessian symmetry and finite-difference product verified")
 ```python
 # Check curvature symmetry without a full Hessian (Challenge): For this smooth scalar objective, mixed partials agree.
 w=jnp.array([0.2,0.9])
-# Differentiate the objective to obtain `hw` via automatic differentiation.
 hw=jax.jvp(jax.grad(objective),(x,),(w,))[1]
 np.testing.assert_allclose(jnp.vdot(w,hvp),jnp.vdot(v,hw),rtol=1e-12)
 eps=1e-4
-# Differentiate the objective to obtain `fdw` via automatic differentiation.
 fdw=(jax.grad(objective)(x+eps*w)-jax.grad(objective)(x-eps*w))/(2*eps)
 np.testing.assert_allclose(hw,fdw,rtol=1e-7,atol=1e-8)
 print("Bilinear Hessian symmetry and finite-difference product verified")

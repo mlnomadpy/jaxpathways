@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-04",
-  "contentHash": "de42efc858b15335965fdca615a9b7807c7232d4961465aa0fff643c9246023f",
-  "executedAt": "2026-10-20T19:02:01.529648+00:00",
+  "contentHash": "5fa01774c3b43a21ed659b87d192b100883f4db5bf0fe76ef41669fa452dd669",
+  "executedAt": "2026-10-20T22:22:57.997762+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,10 +11,10 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.009916722774505615, 0.009916722774505615), (16, 0.008708331733942032, 0.000544270733371377), (256, 0.05366699770092964, 0.0002096367097692564)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
+  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.005291774868965149, 0.005291774868965149), (16, 0.005333218723535538, 0.0003333261702209711), (256, 0.03358395770192146, 0.00013118733477313071)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
   "notebookCells": [
     {
-      "sourceHash": "10f11d7000ab61694e91481740a4a304ecf3ae0e29ef2170da266d5988457f3c",
+      "sourceHash": "65a9a7447a53a5c3447eff97406302b1e83271af7b4870fa9f68be1f60df59e7",
       "outputs": []
     },
     {
@@ -31,7 +31,7 @@
       ]
     },
     {
-      "sourceHash": "88d91d46376c87031aeda81e0cfe9526b6735543b5eaed40ac79e60d2a6c254b",
+      "sourceHash": "9bc2ee8cf40f6d6019d2889568e7447512c3277ddff03d6820563991b09ded13",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "e28c444c87d14d54d3b5aa0c0eda185a0be483cc21662d2063e6bb19c174ca01",
+      "sourceHash": "4e2b62fcf17bb729be76cf6b07ce86e102e9479e5cca2367738c39b2af7551b1",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,23 +90,23 @@
       ]
     },
     {
-      "sourceHash": "edfe2e80af3e51fba3b979f7b6c33b37e0763de8a8e9e88b6f93830d57db0b1d",
+      "sourceHash": "a56bd49c2c4c7718712bf09175194401a4724e24db9364686bcfa469583f02df",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.03683427348732948, 0.03683427348732948), (16, 0.05174987018108368, 0.00323436688631773), (256, 0.29558269307017326, 0.0011546198948053643)]\n"
+            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.005249865353107452, 0.005249865353107452), (16, 0.004875008016824722, 0.00030468800105154514), (256, 0.03766687586903572, 0.00014713623386342078)]\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "7e481a18c80a54cdc6e76580ca7a26684bcf0bf9e3c0f55799490eb1aa771e29",
+      "sourceHash": "2054be4494fe04da072da2a7936733797bb3eb830ba557ae5239b9b78447fb16",
       "outputs": []
     },
     {
-      "sourceHash": "dde05a74fd1c6342e1c9b78dd6a2ee6cb2b8d34358092ff291784bafe4bde055",
+      "sourceHash": "fee6343e5f7be2114f5f950f33074078e6509bfd758e6de8988c6aa755bfab33",
       "outputs": [
         {
           "output_type": "stream",

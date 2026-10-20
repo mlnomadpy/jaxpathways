@@ -29,7 +29,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 
 # 3. Fit the transition table and check the final position
@@ -78,7 +77,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 
 # Step 3 — 3. Fit the transition table and check the final position: The table learns only local transitions.
@@ -110,8 +108,7 @@ extra_panel={'kind':'heatmap','values':np.asarray(jnp.linalg.norm(initial_output
 visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 # Experiment: Prove the target-mask shift
-# Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
-# Differentiate the objective to obtain `g` via automatic differentiation.
+# Experiment — Prove the target-mask shift
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -139,7 +136,7 @@ np.testing.assert_allclose(observed, expected, atol=1e-6)
 print('Supervised targets per sequence:', np.asarray(ragged_roles[:, 1:].sum(1)))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Score only the first response token in each sequence and compare the...
+# Exercise solution
 first_only = roles.at[:, 2].set(False)
 value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
     first_only[:, 1:]
@@ -150,7 +147,7 @@ assert np.isfinite(float(value))
 print('Two first-response targets:', float(value))
 
 # Reference practice: Reject a batch with no answer targets
-# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
+# Reject a batch with no answer targets (Transfer)
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -159,7 +156,7 @@ else:
     raise AssertionError('empty supervision accepted')
 
 # Reference practice: Create a failure this model cannot fix
-# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Create a failure this model cannot fix (Challenge)
 contexts = jnp.array([[1, 0], [3, 0]])
 last_logits = p[contexts[:, -1]]
 np.testing.assert_array_equal(last_logits[0], last_logits[1])

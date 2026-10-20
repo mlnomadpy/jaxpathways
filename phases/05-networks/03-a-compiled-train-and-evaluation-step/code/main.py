@@ -1,7 +1,7 @@
 """A compiled train and evaluation step: worked experiments and reference solutions. CPU checks."""
 
 # 1. Construct data, model, and optimizer
-# Step 1 — 1. Construct data, model, and optimizer: The held-out seed is 11; every optimizer call below uses seed-10...
+# Step 1 — 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -31,7 +31,6 @@ model,optimizer=initialize()
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
     # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
@@ -62,7 +61,7 @@ np.testing.assert_allclose(test_accuracy,np.mean((scores>0)==labels),atol=1e-6)
 assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<before_loss*.3
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
 
-# Step 1 — 1. Construct data, model, and optimizer: The held-out seed is 11; every optimizer call below uses seed-10...
+# Step 1 — 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -91,7 +90,6 @@ model,optimizer=initialize()
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
     # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
@@ -122,7 +120,6 @@ assert float(test_accuracy)>.85 and float(objective(model,train_x,train_y))<befo
 print('Updates:',step_count,'held-out loss:',float(test_loss),'accuracy:',float(test_accuracy))
 
 # Figure data experiment
-# Generate a uniform grid of points in `axis`.
 axis = jnp.linspace(-3.0, 3.0, 61)
 gx, gy = jnp.meshgrid(axis, axis)
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
@@ -143,7 +140,7 @@ doubled=evaluate(model,jnp.concatenate([test_x,test_x]),jnp.concatenate([test_y,
 np.testing.assert_allclose(doubled,evaluate(model,test_x,test_y),rtol=1e-5,atol=1e-6)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Compute held-out metrics in three equal chunks and reconstruct the...
+# Exercise solution
 old=snapshot(model)
 pieces=[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i in range(0,48,16)]
 # Reduce along axis=0 to compute `aggregate`.
@@ -170,9 +167,7 @@ print('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expect
 # Reference practice: Catch an evaluation function that trains
 # Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 graph,state=nnx.split(model)
-# Transform every leaf of the parameter PyTree (`bad_model`).
 bad_model=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
-# Configure or step the Optax optimizer state (`bad_optimizer`).
 bad_optimizer=nnx.Optimizer(bad_model,optax.adam(.03),wrt=nnx.Param)
 prior=snapshot(bad_model)
 train_step(bad_model,bad_optimizer,test_x,test_y)

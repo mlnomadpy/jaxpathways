@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 65 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Inventory the complete release
@@ -77,7 +79,7 @@ python projects/engineering-release/tests/check.py --implementation solution --s
 Create main.py and add this setup block. Continue with the next block in the same file.
 
 ```python
-# Step 1 — Prepare the explicit contract: Record the model artifact, data/evaluation identity, image digest,...
+# Step 1 — Prepare the explicit contract
 import hashlib, json, math, tempfile
 from pathlib import Path
 ```
@@ -167,7 +169,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Prepare the explicit contract: Record the model artifact, data/evaluation identity, image digest,...
+# Step 1 — Prepare the explicit contract
 import hashlib, json, math, tempfile
 from pathlib import Path
 
@@ -257,7 +259,7 @@ visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:35.834918+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:32.755641+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
@@ -298,13 +300,12 @@ Change the evaluation hash while keeping the model unchanged, and prove the old 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
+# Exercise solution
 rechecked = dict(...)  # TODO: compute rechecked
 try:
     verify_release(rechecked,approval,150,'cpu-demo')
@@ -317,7 +318,7 @@ else:
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
+# Exercise solution
 rechecked=dict(bundle,evaluation_hash=digest({'high_slice_mse':9.}))
 try:
     verify_release(rechecked,approval,150,'cpu-demo')
@@ -344,12 +345,12 @@ The owner is part of the reviewed release identity.
 ### How to write: Review a changed owner — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
+1. Review a changed owner (transfer)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
+# Review a changed owner (transfer)
 changed_owner = dict(...)  # TODO: compute changed_owner
 assert digest(changed_owner)  # TODO: complete assertion check
 try:
@@ -363,7 +364,7 @@ else:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
+# Review a changed owner (transfer)
 changed_owner=dict(bundle,owner='different-team')
 assert digest(changed_owner)!=approval['bundle_hash']
 try:

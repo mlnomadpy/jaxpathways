@@ -8,12 +8,10 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 def bars(seed,n,noise=.08):
-    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
     images=np.zeros((n,8,8,1),np.float32)
     labels=np.arange(n,dtype=np.int32)%2
     for i,label in enumerate(labels):
-        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
@@ -27,7 +25,7 @@ assert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)
 assert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))
 
 # 2. Build and independently inspect the convolution
-# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Step 2 — 2. Build and independently inspect the convolution
 # Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
     def __init__(self):
@@ -48,7 +46,6 @@ kernel=np.asarray(model.conv.kernel[...])
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
 def train_step(m,o,x,y):
@@ -85,12 +82,10 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 def bars(seed,n,noise=.08):
-    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
     images=np.zeros((n,8,8,1),np.float32)
     labels=np.arange(n,dtype=np.int32)%2
     for i,label in enumerate(labels):
-        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
@@ -103,7 +98,7 @@ test_x,test_y=bars(21,24)
 assert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)
 assert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))
 
-# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Step 2 — 2. Build and independently inspect the convolution
 # Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
     def __init__(self):
@@ -124,7 +119,6 @@ kernel=np.asarray(model.conv.kernel[...])
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
 def train_step(m,o,x,y):
@@ -157,7 +151,7 @@ print('Held-out loss:',reference_loss,'accuracy:',accuracy,'confusion:\n',confus
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-out image 0', 'values': test_x[0, :, :, 0].tolist(), 'unit': 'pixel value'}, {'kind': 'heatmap', 'title': 'Held-out confusion', 'values': confusion.tolist(), 'rows': ['actual horizontal', 'actual vertical'], 'columns': ['pred. horizontal', 'pred. vertical'], 'unit': 'example count'}]}
 
 # Experiment: Trace a second patch and a second filter
-# Experiment — Trace a second patch and a second filter: The same learned filter is reused at each valid location;...
+# Experiment — Trace a second patch and a second filter
 patch=np.asarray(test_x[0,2:5,3:6,:])
 # Transfer the device result to the host for an independent NumPy comparison.
 weights=np.asarray(model.conv.kernel[...])[:,:,:,2]
@@ -201,7 +195,7 @@ print('True-class counts:',counts,'row-normalized confusion:',rates)
 print('Absent class recall: undefined, not zero.')
 
 # Reference practice: Catch a channel-order mistake
-# Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+# Catch a channel-order mistake (Intermediate)
 wrong=jnp.transpose(test_x[:2],(0,3,1,2))
 caught=False
 try:model(wrong)

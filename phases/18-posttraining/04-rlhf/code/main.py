@@ -10,7 +10,6 @@ def preference_loss(w, chosen, rejected):
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Define `ppo_loss(logits, old_logps, actions, advantages...)` to evaluate the objective and its automatic derivatives:
 def ppo_loss(
     logits, old_logps, actions, advantages, reference_logps, beta=0.1, clip=0.2
 ):
@@ -31,7 +30,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -48,13 +46,12 @@ kl_history = []
 step = jax.jit(jax.value_and_grad(ppo_loss))
 
 # 3. Collect rollouts and reuse each batch correctly
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -116,7 +113,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -132,13 +128,12 @@ history = []
 kl_history = []
 step = jax.jit(jax.value_and_grad(ppo_loss))
 
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -202,7 +197,6 @@ enumerated = jnp.sum(
     probe_probs[:, None] * (rewards - constant)[:, None] * score_jacobian,
     axis=0,
 )
-# Differentiate the objective to obtain `exact` via automatic differentiation.
 exact = jax.grad(lambda logits: jnp.sum(jax.nn.softmax(logits) * rewards))(
     probe
 )
@@ -210,14 +204,13 @@ np.testing.assert_allclose(enumerated, exact, atol=1e-6)
 print('Enumerated baseline score gradient matches exact expected-reward gradient.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Check the KL at the fixed reference and compare it with the final...
+# Exercise solution
 zero_kl = float(jnp.sum(jnp.exp(reference) * (reference - reference)))
 assert zero_kl == 0.0 and kl_history[-1] > zero_kl
 print('Reference/final KL:', zero_kl, kl_history[-1])
 
 # Reference practice: Verify detached behavior information
-# Verify detached behavior information (Transfer): Detaching is not enough if you recompute old probabilities...
-# Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+# Verify detached behavior information (Transfer)
 old_grad, adv_grad = jax.grad(ppo_loss, argnums=(1, 3))(
     theta, old_selected, actions, advantage, reference, 0.2, 0.2
 )
@@ -226,7 +219,7 @@ np.testing.assert_array_equal(adv_grad, np.zeros(adv_grad.shape))
 print('Behavior log probabilities and advantages are detached.')
 
 # Reference practice: Compare with the finite-action regularized optimum
-# Compare with the finite-action regularized optimum (Challenge): An independently derived optimum bounds this finite-action...
+# Compare with the finite-action regularized optimum (Challenge)
 beta = 0.2
 optimal_logp = jax.nn.log_softmax(reference + rewards / beta)
 

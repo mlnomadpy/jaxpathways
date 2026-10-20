@@ -2,6 +2,8 @@
 
 Phase 00: Setup & first steps · about 60 minutes · 4 logical CPU devices
 
+This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Start four virtual CPU devices in a fresh process.
@@ -75,7 +77,7 @@ block_until_ready waits for the result before reporting. It is useful when obser
 Create main.py in your course workspace. Paste this block first. If using a notebook, restart its kernel before running any cell.
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -115,7 +117,7 @@ Mesh axis names describe placement. They are separate from the numerical array d
 Append the checks, save the file and run python main.py with the setup lesson environment.
 
 ```python
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 print("JAX version:", jax.__version__)
 print("CPU devices:", len(devices))
 for shard in x.addressable_shards:
@@ -133,7 +135,7 @@ Assertions compare against host calculations or hand-derived values; printing a 
 ## Run the example
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -157,7 +159,7 @@ y = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)
 # Wait for device work to finish before timing it or comparing its result on the host.
 y.block_until_ready()
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 print("JAX version:", jax.__version__)
 print("CPU devices:", len(devices))
 for shard in x.addressable_shards:
@@ -201,7 +203,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:46:52.531886+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:55.084524+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2
@@ -231,7 +233,7 @@ PASS: welcome-cpu
 **Predict before running:** If every input value becomes negative, do the number of devices or local shard shapes change?
 
 ```python
-# Experiment — Keep the shape, change the values: Placement follows the declared shape/specification, not the...
+# Experiment — Keep the shape, change the values
 negative = -host - 2
 # Place `negative_x` explicitly onto the target JAX device.
 negative_x = jax.device_put(negative, rows)
@@ -279,16 +281,16 @@ Predict and verify the per-device shapes for twelve rows, then demonstrate how r
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Place `z` explicitly onto the target JAX device.
-2. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-3. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Place `fixed` explicitly onto the target JAX device.
+1. Exercise solution
+2. Place `z` explicitly onto the target JAX device.
+3. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
+4. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
+5. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Predict and verify the per-device shapes for twelve rows, then...
+# Exercise solution
 twelve = np.arange(...)  # TODO: compute twelve
 # Place `z` explicitly onto the target JAX device.
 z = jax.device_put(...)  # TODO: compute z
@@ -317,7 +319,7 @@ assert fixed.is_fully_replicated  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Predict and verify the per-device shapes for twelve rows, then...
+# Exercise solution
 twelve = np.arange(24,dtype=np.float32).reshape(12,2)
 # Place `z` explicitly onto the target JAX device.
 z = jax.device_put(twelve, rows)

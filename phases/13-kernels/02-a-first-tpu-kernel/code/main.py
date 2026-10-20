@@ -143,7 +143,7 @@ assert bactual.dtype==jnp.bfloat16
 print("bfloat16 represented-input reference matched exactly")
 
 # Experiment: Place the ReLU boundary deliberately
-# Experiment — Place the ReLU boundary deliberately: Testing activation boundaries catches wrong bias axes and...
+# Experiment — Place the ReLU boundary deliberately
 edge_x=jnp.array([[-1.,0.,1.],[1.,-2.,.5]],dtype=jnp.float32)
 edge_bias=jnp.array([1.,0.,-1.],dtype=jnp.float32)
 edge=fused_bias_relu(edge_x,edge_bias)
@@ -152,11 +152,9 @@ np.testing.assert_array_equal(edge,np.array([[0.,0.,0.],[2.,0.,0.]],dtype=np.flo
 print("Boundary fixture:",np.asarray(edge))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Change the activation shape to (17,257), freeze a NumPy random seed...
+# Exercise solution
 rng=np.random.default_rng(5)
-# Create device-backed JAX array `changed_x`.
 changed_x=jnp.asarray(rng.normal(size=(17,257)),dtype=jnp.float32)
-# Create device-backed JAX array `changed_bias`.
 changed_bias=jnp.asarray(rng.normal(size=257),dtype=jnp.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 expected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)
@@ -166,7 +164,7 @@ for block in [(8,128),(16,256)]:
 print("Changed tails and two TPU-compatible blocks verified in interpretation")
 
 # Reference practice: Reject hidden bias-axis broadcasting
-# Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
+# Reject hidden bias-axis broadcasting (Practice)
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
     rejected=False
     try:fused_bias_relu(x,malformed)
@@ -175,7 +173,7 @@ for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float
 print("Malformed bias axes rejected")
 
 # Reference practice: Check a permutation invariant
-# Check a permutation invariant (Challenge): The kernel is columnwise when the corresponding bias travels...
+# Check a permutation invariant (Challenge)
 order=jnp.arange(128,-1,-1)
 permuted=fused_bias_relu(x[:,order],bias[order])
 np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)

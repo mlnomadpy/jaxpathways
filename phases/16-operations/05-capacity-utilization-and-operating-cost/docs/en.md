@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Measure end-to-end local service time at more than one workload length.
@@ -209,7 +211,7 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -274,7 +276,7 @@ The supervisor owns the child handle, captures its output and always waits for t
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
+# Step 4 — Add metric summaries and capacity arithmetic
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -311,7 +313,7 @@ Keep measured quantities separate from invented planning inputs and validate the
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
+# Step 5 — Measure jobs before evaluating assumptions
 samples=[]
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
@@ -454,7 +456,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -511,7 +513,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
+# Step 4 — Add metric summaries and capacity arithmetic
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -540,7 +542,7 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
                 hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
                 within_reserve=load <= 1-reserve_fraction)
 
-# Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
+# Step 5 — Measure jobs before evaluating assumptions
 samples=[]
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
@@ -580,16 +582,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:28.742624+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:20.251555+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.514636832755059, 0.4996092077344656, 0.5204760837368667]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.08674601395614445, 'load_fraction': 0.043373006978072226, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00021686503489036114, 'within_reserve': True}
+measured local job seconds: [0.8654832500033081, 0.933383374940604, 0.9554184577427804]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.15923640962379673, 'load_fraction': 0.07961820481189837, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00039809102405949186, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.5069865840487182, 0.5080082495696843, 0.5672803330235183]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.09454672217058639, 'load_fraction': 0.047273361085293196, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00023636680542646598, 'within_reserve': True}
+measured local job seconds: [0.7919033328071237, 0.7368434579111636, 0.7315183328464627]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.13198388880118728, 'load_fraction': 0.06599194440059364, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003299597220029682, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.047273361085293196 0.09454672217058639
+nominal load at two demand scenarios: 0.06599194440059364 0.13198388880118728
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -600,7 +602,7 @@ PASS: operations-05
 **Predict before running:** What load and minimum worker count follow from $90$-second jobs arriving $80$ times per hour?
 
 ```python
-# Experiment — Check units with known arithmetic: This independent arithmetic checks the calculator without...
+# Experiment — Check units with known arithmetic
 known=capacity(90.,80.,4,2.,.25)
 assert known['offered_worker_hours_per_hour']==2.
 assert known['load_fraction']==.5
@@ -618,7 +620,7 @@ This independent arithmetic checks the calculator without treating invented inpu
 **Predict before running:** Does doubling demand require a proportional change in measured update speed?
 
 ```python
-# Experiment — Double the arrivals without changing the job: Demand changes the required capacity; it does not automatically...
+# Experiment — Double the arrivals without changing the job
 one=capacity(measured,600,2,1.5,.25)
 two=capacity(measured,1200,2,1.5,.25)
 assert abs(two['load_fraction']-2*one['load_fraction'])<1e-12
@@ -637,13 +639,12 @@ Using the measured service-time input, calculate the minimum worker count for $1
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Using the measured service-time input, calculate the minimum worker...
+# Exercise solution
 changed = capacity(...)  # TODO: compute changed
 required = ...  # TODO: compute required
 demand = ...  # TODO: compute demand
@@ -655,7 +656,7 @@ print('required workers under changed hypothetical reserve:',required)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Using the measured service-time input, calculate the minimum worker...
+# Exercise solution
 changed=capacity(measured,1200,2,1.5,.4)
 required=changed['minimum_workers_with_reserve']
 demand=1200*measured/3600
@@ -687,7 +688,7 @@ Every attempt consumes resources under this hypothetical model.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
+# Account for failed attempts (Transfer / diagnosis)
 per_attempt = ...  # TODO: compute per_attempt
 per_completion = ...  # TODO: compute per_completion
 assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
@@ -696,7 +697,7 @@ assert abs(per_completion-1.25*per_attempt)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
+# Account for failed attempts (Transfer / diagnosis)
 per_attempt=measured*1.5/3600
 per_completion=125*per_attempt/100
 assert abs(per_completion-1.25*per_attempt)<1e-12
@@ -727,7 +728,7 @@ A plan should not silently divide by zero or emit a meaningless worker count.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject impossible capacity inputs (Transfer / diagnosis): Input validation makes the assumptions visible and prevents...
+# Reject impossible capacity inputs (Transfer / diagnosis)
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     inputs = dict(...)  # TODO: compute inputs
     inputs.update(change)
@@ -739,7 +740,7 @@ for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=flo
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject impossible capacity inputs (Transfer / diagnosis): Input validation makes the assumptions visible and prevents...
+# Reject impossible capacity inputs (Transfer / diagnosis)
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)
     inputs.update(change)

@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Map named PyTorch tensors into Flax NNX parameters with complete key, shape and dtype checks.
@@ -172,17 +174,11 @@ def convert(state,eps=1e-5):
             raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)
         arrays[name]=value.copy()
     target=FlaxModel(eps)
-    # Create device-backed JAX array `target.hidden.kernel[...]`.
     target.hidden.kernel[...]=jnp.asarray(arrays['hidden.weight'].T)
-    # Create device-backed JAX array `target.hidden.bias[...]`.
     target.hidden.bias[...]=jnp.asarray(arrays['hidden.bias'])
-    # Create device-backed JAX array `target.norm.scale[...]`.
     target.norm.scale[...]=jnp.asarray(arrays['norm.weight'])
-    # Create device-backed JAX array `target.norm.bias[...]`.
     target.norm.bias[...]=jnp.asarray(arrays['norm.bias'])
-    # Create device-backed JAX array `target.out.kernel[...]`.
     target.out.kernel[...]=jnp.asarray(arrays['out.weight'].T)
-    # Create device-backed JAX array `target.out.bias[...]`.
     target.out.bias[...]=jnp.asarray(arrays['out.bias'])
     return target
 
@@ -203,7 +199,6 @@ step_source = TorchModel().eval()
 step_target = convert(step_source.state_dict())
 step_input = np.array([[1., -2., .5]], np.float32)
 step_expected = step_input @ step_source.hidden.weight.detach().numpy().T + step_source.hidden.bias.detach().numpy()
-# Create device-backed JAX array ``.
 np.testing.assert_allclose(step_target(jnp.asarray(step_input))['hidden'], step_expected, rtol=2e-5, atol=2e-6)
 ```
 
@@ -237,7 +232,6 @@ def load_flax(path):
             arrays[key]=value.copy()
     model=FlaxModel(eps)
     for module,name,key in [(model.hidden,'kernel','hidden_kernel'),(model.hidden,'bias','hidden_bias'),(model.norm,'scale','norm_scale'),(model.norm,'bias','norm_bias'),(model.out,'kernel','out_kernel'),(model.out,'bias','out_bias')]:
-        # Create device-backed JAX array `getattr(module, name)[...]`.
         getattr(module,name)[...]=jnp.asarray(arrays[key])
     return model
 
@@ -248,7 +242,6 @@ with tempfile.TemporaryDirectory() as step_folder:
     step_path = Path(step_folder) / 'roundtrip.npz'
     save_flax(step_target, step_path)
     step_reloaded = load_flax(step_path)
-    # Create device-backed JAX array ``.
     np.testing.assert_allclose(step_reloaded(jnp.asarray(step_input))['output'], step_target(jnp.asarray(step_input))['output'], rtol=2e-5, atol=2e-6)
 ```
 
@@ -278,7 +271,6 @@ with tempfile.TemporaryDirectory() as folder:
     errors={name:[] for name in ['hidden','norm','activation','output']}
     for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:
         inputs=np.random.default_rng(batch).normal(size=(batch,3)).astype(np.float32)*scale
-        # Create device-backed JAX array `flax_values`.
         tx=torch.tensor(inputs,requires_grad=True)
         torch_values=source(tx)
         flax_values=target(jnp.asarray(inputs))
@@ -287,12 +279,10 @@ with tempfile.TemporaryDirectory() as folder:
             assert report['passed'],(name,report)
             errors[name].append(report['max_abs'])
         torch_values['output'].sum().backward()
-        # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
         assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']
     wrong=convert(state,eps=.1)
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
-    # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -351,17 +341,11 @@ def convert(state,eps=1e-5):
             raise ValueError('unexpected shape, dtype or nonfinite tensor: '+name)
         arrays[name]=value.copy()
     target=FlaxModel(eps)
-    # Create device-backed JAX array `target.hidden.kernel[...]`.
     target.hidden.kernel[...]=jnp.asarray(arrays['hidden.weight'].T)
-    # Create device-backed JAX array `target.hidden.bias[...]`.
     target.hidden.bias[...]=jnp.asarray(arrays['hidden.bias'])
-    # Create device-backed JAX array `target.norm.scale[...]`.
     target.norm.scale[...]=jnp.asarray(arrays['norm.weight'])
-    # Create device-backed JAX array `target.norm.bias[...]`.
     target.norm.bias[...]=jnp.asarray(arrays['norm.bias'])
-    # Create device-backed JAX array `target.out.kernel[...]`.
     target.out.kernel[...]=jnp.asarray(arrays['out.weight'].T)
-    # Create device-backed JAX array `target.out.bias[...]`.
     target.out.bias[...]=jnp.asarray(arrays['out.bias'])
     return target
 
@@ -400,7 +384,6 @@ def load_flax(path):
             arrays[key]=value.copy()
     model=FlaxModel(eps)
     for module,name,key in [(model.hidden,'kernel','hidden_kernel'),(model.hidden,'bias','hidden_bias'),(model.norm,'scale','norm_scale'),(model.norm,'bias','norm_bias'),(model.out,'kernel','out_kernel'),(model.out,'bias','out_bias')]:
-        # Create device-backed JAX array `getattr(module, name)[...]`.
         getattr(module,name)[...]=jnp.asarray(arrays[key])
     return model
 
@@ -422,7 +405,6 @@ with tempfile.TemporaryDirectory() as folder:
     errors={name:[] for name in ['hidden','norm','activation','output']}
     for batch,scale in [(1,1.),(7,1e-3),(5,4.)]:
         inputs=np.random.default_rng(batch).normal(size=(batch,3)).astype(np.float32)*scale
-        # Create device-backed JAX array `flax_values`.
         tx=torch.tensor(inputs,requires_grad=True)
         torch_values=source(tx)
         flax_values=target(jnp.asarray(inputs))
@@ -431,12 +413,10 @@ with tempfile.TemporaryDirectory() as folder:
             assert report['passed'],(name,report)
             errors[name].append(report['max_abs'])
         torch_values['output'].sum().backward()
-        # Create device-backed JAX array `input_gradient`.
         input_gradient=jax.grad(lambda z:jnp.sum(target(z)['output']))(jnp.asarray(inputs))
         assert error_report(tx.grad.numpy(),input_gradient,atol=5e-6,rtol=5e-5)['passed']
     wrong=convert(state,eps=.1)
     reference={k:v.detach().numpy() for k,v in source(torch.tensor(inputs)).items()}
-    # Create device-backed JAX array `wrong_reports`.
     wrong_reports={k:error_report(reference[k],v) for k,v in wrong(jnp.asarray(inputs)).items()}
     assert wrong_reports['hidden']['passed'] and not wrong_reports['norm']['passed']
     for bad in [dict(state,unexpected=torch.zeros(1)),{k:v for k,v in state.items() if k!='norm.bias'}]:
@@ -471,7 +451,7 @@ visual_data={'kind':'bar','labels':list(errors),'xlabel':'operation in execution
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:20.372760+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:38.522273+00:00. JAX 0.9.2.
 
 ```text
 Maximum absolute error per layer: {'hidden': 2.384185791015625e-07, 'norm': 3.5762786865234375e-07, 'activation': 3.5762786865234375e-07, 'output': 1.1920928955078125e-07}
@@ -492,7 +472,7 @@ PASS: deployment-08
 **Predict before running:** Will the dense hidden output fail when only normalization epsilon changes?
 
 ```python
-# Experiment — Inspect the wrong-epsilon signature: Localize the first divergent operation before remapping...
+# Experiment — Inspect the wrong-epsilon signature
 assert wrong_reports['hidden']['passed']
 assert not wrong_reports['norm']['passed']
 print('Per-layer wrong-epsilon report:',wrong_reports)
@@ -570,7 +550,7 @@ The first weight is rectangular, so validate its source shape before applying th
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a plausible but wrong tensor layout (Transfer): Asymmetric dimensions expose orientation errors that square...
+# Reject a plausible but wrong tensor layout (Transfer)
 bad_state = dict(...)  # TODO: compute bad_state
 bad_state['hidden.weight'] = ...  # TODO: compute bad_state['hidden.weight']
 try:convert(bad_state)
@@ -581,7 +561,7 @@ else:raise AssertionError('layout mismatch accepted')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a plausible but wrong tensor layout (Transfer): Asymmetric dimensions expose orientation errors that square...
+# Reject a plausible but wrong tensor layout (Transfer)
 bad_state=dict(state)
 bad_state['hidden.weight']=state['hidden.weight'].T
 try:convert(bad_state)
@@ -612,7 +592,8 @@ Form the same scalar weighted output in each framework. Create a fresh PyTorch i
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `weighted_target` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -623,7 +604,6 @@ cotangent = np.array(...)  # TODO: compute cotangent
 probe_torch = torch.tensor(...)  # TODO: compute probe_torch
 weighted_source = ...  # TODO: compute weighted_source
 weighted_source.backward()
-# Differentiate the objective to obtain `weighted_target` via automatic differentiation.
 weighted_target = jax.grad(...)  # TODO: compute weighted_target
 vjp_report = error_report(...)  # TODO: compute vjp_report
 assert vjp_report['passed'], vjp_report  # TODO: complete assertion check
@@ -639,7 +619,6 @@ cotangent = np.array([[1., -.5], [2., .25]], np.float32)
 probe_torch = torch.tensor(probe_inputs, requires_grad=True)
 weighted_source = (source(probe_torch)['output'] * torch.tensor(cotangent)).sum()
 weighted_source.backward()
-# Differentiate the objective to obtain `weighted_target` via automatic differentiation.
 weighted_target = jax.grad(lambda z: jnp.sum(target(z)['output'] * jnp.asarray(cotangent)))(jnp.asarray(probe_inputs))
 vjp_report = error_report(probe_torch.grad.numpy(), weighted_target, atol=5e-6, rtol=5e-5)
 assert vjp_report['passed'], vjp_report

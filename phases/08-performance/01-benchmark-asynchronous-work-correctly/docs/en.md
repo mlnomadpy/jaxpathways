@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 80 minutes · CPU
 
+This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Draw the interval a timing actually measures.
@@ -91,7 +93,6 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
@@ -110,7 +111,7 @@ CPU placement and waiting occur before timing. The deterministic host inputs mak
 Append this block to the same file. Run the assembled file with python benchmark.py.
 
 ```python
-# Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
+# Step 2 — Define the contract and timer
 def predict(x, w):
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
@@ -172,7 +173,6 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 cpu = jax.devices("cpu")[0]
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng = np.random.default_rng(4)
 x_host = rng.normal(size=(64, 32)).astype(np.float32)
 w_host = rng.normal(size=(32, 16)).astype(np.float32)
@@ -182,7 +182,7 @@ x = jax.device_put(x_host, cpu)
 w = jax.device_put(w_host, cpu)
 # Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x, w))
-# Step 2 — Define the contract and timer: The timer accepts arbitrary result pytrees because...
+# Step 2 — Define the contract and timer
 def predict(x, w):
     return jnp.tanh(x @ w)
 # Wrap with `jax.jit` (`compiled_predict`) so XLA traces and compiles the function.
@@ -249,7 +249,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:11.386115+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -267,17 +267,17 @@ CPU run: 2026-10-20T18:52:11.386115+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.050012582913041115,
+  "first_call_seconds": 0.02772512473165989,
   "warm_samples_seconds": [
-    3.804173320531845e-05,
-    2.0707957446575165e-05,
-    4.4582877308130264e-05,
-    1.4833174645900726e-05,
-    1.4292076230049133e-05,
-    1.3042241334915161e-05,
-    1.4625024050474167e-05
+    7.50841572880745e-05,
+    2.8582755476236343e-05,
+    1.5583820641040802e-05,
+    1.0250136256217957e-05,
+    8.750241249799728e-06,
+    9.667128324508667e-06,
+    7.542315870523453e-06
   ],
-  "warm_median_seconds": 1.4833174645900726e-05,
+  "warm_median_seconds": 1.0250136256217957e-05,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -295,25 +295,25 @@ CPU run: 2026-10-20T18:52:11.386115+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.02865162491798401,
+  "first_call_seconds": 0.018220333848148584,
   "warm_samples_seconds": [
-    3.8125086575746536e-05,
-    1.9167084246873856e-05,
-    3.137486055493355e-05,
-    1.2959353625774384e-05,
-    1.616682857275009e-05,
-    1.2875068932771683e-05,
-    1.4042016118764877e-05
+    3.875000402331352e-05,
+    3.062514588236809e-05,
+    2.5833025574684143e-05,
+    1.2707896530628204e-05,
+    1.0082963854074478e-05,
+    8.874572813510895e-06,
+    8.58306884765625e-06
   ],
-  "warm_median_seconds": 1.616682857275009e-05,
+  "warm_median_seconds": 1.2707896530628204e-05,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 1.2875068932771683e-05
-Complete-call samples: [1.237494871020317e-05, 1.1541880667209625e-05, 1.1832918971776962e-05]
-Structured samples: [3.837514668703079e-05, 2.6292167603969574e-05, 2.2666994482278824e-05]
-Changed workload: (96, 32) [3.6874786019325256e-05, 1.4875084161758423e-05, 1.2416858226060867e-05, 1.4707911759614944e-05, 1.570815220475197e-05]
-Energy shape and samples: (64,) [4.0874816477298737e-05, 1.8625054508447647e-05, 1.6875099390745163e-05, 1.1667143553495407e-05, 1.1333264410495758e-05]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [2.9250048100948334e-05, 1.6292091459035873e-05, 1.125037670135498e-05, 1.0082963854074478e-05, 1.0166782885789871e-05]}
+Handle-only seconds: 9.416136890649796e-06
+Complete-call samples: [1.4209188520908356e-05, 8.459202945232391e-06, 7.4999406933784485e-06]
+Structured samples: [4.058331251144409e-05, 2.4874694645404816e-05, 1.712469384074211e-05]
+Changed workload: (96, 32) [3.424985334277153e-05, 9.708106517791748e-06, 8.708331733942032e-06, 9.874813258647919e-06, 6.9998204708099365e-06]
+Energy shape and samples: (64,) [2.49580480158329e-05, 1.2541655451059341e-05, 1.0833144187927246e-05, 9.665731340646744e-06, 8.333008736371994e-06]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [7.207971066236496e-06, 9.458977729082108e-06, 7.667113095521927e-06, 8.875038474798203e-06, 1.2541655451059341e-05]}
 PASS: performance-01
 
 ```
@@ -323,7 +323,7 @@ PASS: performance-01
 **Predict before running:** Will the handle-only number necessarily be smaller on this CPU? Which interval guarantees output completion?
 
 ```python
-# Experiment — Compare handle-only and synchronized boundaries: The separate intervals have different measurement boundaries and...
+# Experiment — Compare handle-only and synchronized boundaries
 start = time.perf_counter()
 handle = compiled_predict(x, w)
 handle_seconds = time.perf_counter() - start
@@ -342,7 +342,7 @@ The separate intervals have different measurement boundaries and noise. Only syn
 **Predict before running:** If a function returns predictions and their mean, does waiting for the prediction alone clearly document the readiness of every reported result?
 
 ```python
-# Experiment — Return structured results without host copies: A tree-level wait makes the benchmark contract explicit for...
+# Experiment — Return structured results without host copies
 # Wrap with `jax.jit` (`structured`) so XLA traces and compiles the function.
 structured = jax.jit(lambda a, b: {"prediction": jnp.tanh(a @ b), "mean": jnp.mean(jnp.tanh(a @ b))})
 # Wait for device work to finish before timing it or comparing its result on the host.
@@ -371,15 +371,16 @@ Repeat the benchmark with $96$ rows while preserving the feature and output dime
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Place `larger` explicitly onto the target JAX device.
-2. Wait for device work to finish before timing it or comparing its result on the host.
+1. Exercise solution
+2. Place `larger` explicitly onto the target JAX device.
 3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Transfer the device result to the host for an independent NumPy comparison.
+4. Wait for device work to finish before timing it or comparing its result on the host.
+5. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat the benchmark with 96 rows while preserving the feature and...
+# Exercise solution
 larger_host = rng.normal(...)  # TODO: compute larger_host
 # Place `larger` explicitly onto the target JAX device.
 larger = jax.device_put(...)  # TODO: compute larger
@@ -396,7 +397,7 @@ print("Changed workload:", larger.shape, larger_times)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat the benchmark with 96 rows while preserving the feature and...
+# Exercise solution
 larger_host = rng.normal(size=(96, 32)).astype(np.float32)
 # Place `larger` explicitly onto the target JAX device.
 larger = jax.device_put(larger_host, cpu)
@@ -498,7 +499,7 @@ Prepare and wait for inputs, reuse one compiled callable, warm it, then synchron
 - `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
 
 **Step-by-step implementation plan:**
-1. Repair a timer that includes setup but omits completion (Diagnosis): The repaired boundary excludes setup, separates warmup and...
+1. Repair a timer that includes setup but omits completion (Diagnosis)
 2. Wait for device work to finish before timing it or comparing its result on the host.
 3. Wait for device work to finish before timing it or comparing its result on the host.
 4. Transfer the device result to the host for an independent NumPy comparison.
@@ -506,7 +507,7 @@ Prepare and wait for inputs, reuse one compiled callable, warm it, then synchron
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a timer that includes setup but omits completion (Diagnosis): The repaired boundary excludes setup, separates warmup and...
+# Repair a timer that includes setup but omits completion (Diagnosis)
 def repaired_benchmark(fn, args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(args)
@@ -524,7 +525,7 @@ print(fixed_report)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair a timer that includes setup but omits completion (Diagnosis): The repaired boundary excludes setup, separates warmup and...
+# Repair a timer that includes setup but omits completion (Diagnosis)
 def repaired_benchmark(fn, args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(args)

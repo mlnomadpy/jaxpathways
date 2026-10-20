@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Trace source model through conversion, runtime and device execution.
@@ -173,7 +175,7 @@ The first request can include compilation and initialization. The line plot cont
 Append this block to the same main.py and rerun the whole file. Compare the response with independent NumPy arithmetic and write an honest measurement report.
 
 ```python
-# Step 4 — Validate outputs and describe measurement scope: The report records local CPU timings and explicitly leaves...
+# Step 4 — Validate outputs and describe measurement scope
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
@@ -193,7 +195,7 @@ The report records local CPU timings and explicitly leaves edge-device qualifica
 ## Run the example
 
 ```python
-# Deploy at the edge: conversion, budgets and device checks: An edge deployment includes input decoding, preprocessing,...
+# Deploy at the edge
 import json
 import time
 import numpy as np
@@ -270,88 +272,88 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:27.604690+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:52.215348+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 10.552042163908482,
+  "first_request_ms": 20.69954201579094,
   "warm_samples_ms": [
-    0.11812476441264153,
-    0.05475012585520744,
-    0.0427919439971447,
-    0.0394587405025959,
-    0.03695907071232796,
-    0.0350424088537693,
-    0.03262516111135483,
-    0.03241607919335365,
-    0.03145914524793625,
-    0.03204168751835823,
-    0.03075040876865387,
-    0.02987496554851532,
-    0.029667280614376068,
-    0.02933293581008911,
-    0.03133388236165047,
-    0.02966681495308876,
-    0.02920767292380333,
-    0.0289171002805233,
-    0.02808310091495514,
-    0.02854224294424057,
-    0.02854224294424057,
-    0.02879183739423752,
-    0.028875190764665604,
-    0.029709190130233765,
-    0.028333161026239395,
-    0.028292182832956314,
-    0.02820882946252823,
-    0.02795923501253128,
-    0.02729194238781929,
-    0.027167145162820816
+    0.24737464264035225,
+    0.10249996557831764,
+    0.0727078877389431,
+    0.0627920962870121,
+    0.060750171542167664,
+    0.05566701292991638,
+    0.05533406510949135,
+    0.05333311855792999,
+    0.05141599103808403,
+    0.05195802077651024,
+    0.05116686224937439,
+    0.05145790055394173,
+    0.0500422902405262,
+    0.04929210990667343,
+    0.04766695201396942,
+    0.05366699770092964,
+    0.04920829087495804,
+    0.05041668191552162,
+    0.050541944801807404,
+    0.04804227501153946,
+    0.04700012505054474,
+    0.04691723734140396,
+    0.04691723734140396,
+    0.047625042498111725,
+    0.048166606575250626,
+    0.06870832294225693,
+    0.04687486216425896,
+    0.04591699689626694,
+    0.04575029015541077,
+    0.046416185796260834
   ],
-  "p50_ms": 0.029667047783732414,
-  "p95_ms": 0.049368944019079174,
+  "p50_ms": 0.05047931335866451,
+  "p95_ms": 0.08909353055059901,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 8.324500173330307,
+  "first_request_ms": 17.36054103821516,
   "warm_samples_ms": [
-    0.07854169234633446,
-    0.03979215398430824,
-    0.03424985334277153,
-    0.03304239362478256,
-    0.03633275628089905,
-    0.0311252661049366,
-    0.02954108640551567,
-    0.028749927878379822,
-    0.028540845960378647,
-    0.028749927878379822,
-    0.028250273317098618,
-    0.02750009298324585,
-    0.027999747544527054,
-    0.027082860469818115,
-    0.027083326131105423,
-    0.027374830096960068,
-    0.027749687433242798,
-    0.027542002499103546,
-    0.027250032871961594,
-    0.027250032871961594,
-    0.028042122721672058,
-    0.027083326131105423,
-    0.02791592851281166,
-    0.026708003133535385,
-    0.02824980765581131,
-    0.027499627321958542,
-    0.026791822165250778,
-    0.026625115424394608,
-    0.02674991264939308,
-    0.0260830856859684
+    0.22612465545535088,
+    0.2076667733490467,
+    0.24958280846476555,
+    0.11129211634397507,
+    0.08287513628602028,
+    0.0716252252459526,
+    0.06020767614245415,
+    0.059999991208314896,
+    0.05812523886561394,
+    0.057874713093042374,
+    0.05699973553419113,
+    0.05516689270734787,
+    0.054374802857637405,
+    0.05875015631318092,
+    0.05499972030520439,
+    0.055208802223205566,
+    0.05620857700705528,
+    0.05349982529878616,
+    0.05304161459207535,
+    0.050791073590517044,
+    0.05229096859693527,
+    0.05062483251094818,
+    0.050749629735946655,
+    0.049458350986242294,
+    0.05149981006979942,
+    0.05408283323049545,
+    0.04941597580909729,
+    0.050292350351810455,
+    0.04974985495209694,
+    0.05012517794966698
   ],
-  "p50_ms": 0.02783280797302723,
-  "p95_ms": 0.0382354250177741,
+  "p50_ms": 0.05508330650627613,
+  "p95_ms": 0.21781860850751394,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
@@ -369,7 +371,7 @@ PASS: deployment-06
 **Predict before running:** Will raw sensor values and normalized values produce the same scores?
 
 ```python
-# Experiment — A normalization mismatch survives conversion: Conversion checks must start at the raw input boundary when...
+# Experiment — A normalization mismatch survives conversion
 raw = np.array([[255., 128., 0.]], np.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 wrong = np.asarray(infer(raw))
@@ -388,7 +390,7 @@ Conversion checks must start at the raw input boundary when preprocessing is par
 **Predict before running:** Would an array cast distinguish a numeric string, a boolean and a legitimate sensor reading?
 
 ```python
-# Experiment — Reject raw inputs before normalization hides their meaning: The zero-input oracle checks that preprocessing does not add a...
+# Experiment — Reject raw inputs before normalization hides their meaning
 invalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]
 for invalid in invalid_payloads:
     try:
@@ -416,12 +418,13 @@ Send a second raw input $[0, 255, 128]$ through the full request, and verify its
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
+# Exercise solution
 changed_raw = np.array(...)  # TODO: compute changed_raw
 changed_response = json.loads(...)  # TODO: compute changed_response
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -433,7 +436,7 @@ print("Changed end-to-end request verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
+# Exercise solution
 changed_raw = np.array([[0., 255., 128.]], np.float32)
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -514,7 +517,7 @@ Keep the fixed work unchanged. Compare the total request with the deadline, not 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
+# Decide whether a model speedup meets the request budget (Transfer / diagnosis)
 fixed_ms = ...  # TODO: compute fixed_ms
 model_ms = ...  # TODO: compute model_ms
 deadline_ms = ...  # TODO: compute deadline_ms
@@ -528,7 +531,7 @@ print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,f
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
+# Decide whether a model speedup meets the request budget (Transfer / diagnosis)
 fixed_ms=12.+4.
 model_ms=8.
 deadline_ms=19.

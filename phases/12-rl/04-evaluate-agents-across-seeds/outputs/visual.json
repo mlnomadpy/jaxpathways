@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "rl-04",
-  "contentHash": "d5bb6d331d14bbfe8776c84ed311ba970fad50239c3270e793ef798007367dfb",
+  "contentHash": "e6b486138cc23381c7e8a53bd424ffef1b59c470175144856a2cb61f2714dd60",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T18:50:42.405586+00:00",
+  "generatedAt": "2026-10-20T22:28:59.916327+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

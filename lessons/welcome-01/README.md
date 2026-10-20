@@ -2,6 +2,8 @@
 
 Phase 00: Setup & first steps · about 40 minutes · CPU
 
+This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 Download the beginner workspace: public/downloads/jax-start-here.zip
 
 In the lesson reader, use the beginner workspace download button. In a local checkout, the bundle is under public/downloads/.
@@ -282,7 +284,7 @@ The array sum is 0 + 1 + 2 + 3 = 6. The equality check is exact here because the
 ## Run the example
 
 ```python
-# Set up your learning workspace: Your first goal is a small, repeatable result: save a Python...
+# Set up your learning workspace
 import os
 # Choose CPU before importing JAX for this first experiment.
 os.environ["JAX_PLATFORMS"] = "cpu"
@@ -325,7 +327,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(x))), 'labels': [f'x[{i}]' for
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:46:46.183428+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:52.582445+00:00. JAX 0.9.2.
 
 ```text
 Python: 3.14.3
@@ -355,13 +357,12 @@ Edit the starter as shown in Step 6: change the array length from $4$ to $6$ and
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
+# Exercise solution
 x = jax.numpy.arange(...)  # TODO: compute x
 print("Changed experiment sum:", float(x.sum()))
 assert float(x.sum())  # TODO: complete assertion check
@@ -370,7 +371,7 @@ assert float(x.sum())  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Edit the starter as shown in Step 6: change the array length from 4 to...
+# Exercise solution
 x = jax.numpy.arange(6, dtype=jax.numpy.float32)
 print("Changed experiment sum:", float(x.sum()))
 assert float(x.sum()) == 15.0

@@ -29,7 +29,7 @@ assert jnp.allclose(z, jnp.array([6.,2.,8.,4.]))
 visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows': ['original', 'set index 1', 'add at 0 and 2'], 'columns': ['0', '1', '2', '3'], 'unit': 'stored value'}
 
 # Experiment: See name rebinding without old-value mutation
-# Experiment — See name rebinding without old-value mutation: Assigning a result changes the binding, while ignoring a result...
+# Experiment — See name rebinding without old-value mutation
 original = x
 rebound = x
 rebound = rebound.at[1].set(20.)
@@ -61,14 +61,14 @@ assert jnp.allclose(masked, jnp.array([1.,2.,0.,0.]))
 assert jnp.allclose(x, jnp.array([1.,2.,3.,4.]))
 
 # Reference practice: Replace a region of a matrix
-# Replace a region of a matrix (Practice): Checking the entire matrix verifies both changed and...
+# Replace a region of a matrix (Practice)
 matrix = jnp.arange(9, dtype=jnp.float32).reshape(3, 3)
 updated_matrix = matrix.at[:, -1].set(-1.)
 assert jnp.allclose(updated_matrix, jnp.array([[0., 1., -1.], [3., 4., -1.], [6., 7., -1.]]))
 assert jnp.allclose(matrix, jnp.arange(9).reshape(3, 3))
 
 # Reference practice: Keep shape while masking values
-# Keep shape while masking values (Challenge): Both are useful representations, but they are not...
+# Keep shape while masking values (Challenge)
 fixed_shape = jnp.where(x > 2., x, 0.)
 selected = x[x > 2.]
 # Check tensor shape invariant: `fixed_shape.shape == (4,)`

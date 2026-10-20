@@ -1,7 +1,7 @@
 """Compiled loops with lax.scan: worked experiments and reference solutions. CPU checks."""
 
 # Prepare the inputs
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 
@@ -13,14 +13,14 @@ def step(carry, increment):
 increments = jnp.array([1., 1., 1., 1.])
 
 # Run and check the result
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
 assert jnp.allclose(history, jnp.array([1.,1.5,1.75,1.875]))
 assert jnp.allclose(final, history[-1])
 
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: step returns the next scalar carry and one recorded scalar.
@@ -28,7 +28,7 @@ def step(carry, increment):
     next_value = 0.5 * carry + increment
     return next_value, next_value
 increments = jnp.array([1., 1., 1., 1.])
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
@@ -39,7 +39,7 @@ assert jnp.allclose(final, history[-1])
 visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'ylabel': 'carry value', 'series': [{'label': 'scan history', 'y': history.tolist()}, {'label': 'fixed point 2', 'y': [2.0] * 4}]}
 
 # Experiment: Compare scan to the Python recurrence
-# Experiment — Compare scan to the Python recurrence: The loop is an independent control-flow reference and the fixed...
+# Experiment — Compare scan to the Python recurrence
 inputs=jnp.array([1.,-1.,2.,0.])
 state=0.
 reference=[]
@@ -56,7 +56,6 @@ assert jnp.allclose(last,state)
 # Define `terminal(d)` to carry state across steps with `jax.lax.scan`:
 def terminal(d):
     return jax.lax.scan(lambda c,u:(d*c+u,d*c+u),jnp.array(0.),increments)[0]
-# Differentiate the objective to obtain `(value, sensitivity)` via automatic differentiation.
 value,sensitivity=jax.value_and_grad(terminal)(0.5)
 assert jnp.allclose(value,1.875)
 assert jnp.allclose(sensitivity,2.75)

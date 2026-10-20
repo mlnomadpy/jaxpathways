@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 85 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build useful summaries from structured events emitted by a real worker.
@@ -209,7 +211,7 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -274,7 +276,7 @@ The supervisor owns the child handle, captures its output and always waits for t
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
+# Step 4 — Summarize event boundaries
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -296,7 +298,7 @@ The summary retains work counts, timing boundaries and checkpoint lag separately
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
+# Step 5 — Run a healthy job and a controlled incident
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
     observed=launch(Path(folder)/'healthy',dict(steps=12))
@@ -439,7 +441,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -496,7 +498,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Summarize event boundaries: The summary retains work counts, timing boundaries and checkpoint...
+# Step 4 — Summarize event boundaries
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -510,7 +512,7 @@ def summarize(result):
                 job_examples_per_s=count/result['wall_s'] if result['wall_s'] else 0.,
                 update_duty_fraction=update_s/result['wall_s'] if result['wall_s'] else 0.)
 
-# Step 5 — Run a healthy job and a controlled incident: Both summaries are derived from real child output; failures are...
+# Step 5 — Run a healthy job and a controlled incident
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-signals-') as folder:
     observed=launch(Path(folder)/'healthy',dict(steps=12))
@@ -561,15 +563,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:04.224802+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:25:38.853489+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0006842939183115959, 'update_examples_per_s': 140290.59360467095, 'job_examples_per_s': 186.84414503362623, 'update_duty_fraction': 0.0013318365845691688}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00018191849812865257, 'update_examples_per_s': 219878.68419907492, 'job_examples_per_s': 80.71736904259595, 'update_duty_fraction': 0.00036709956372813125}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00031537609174847603, 'update_examples_per_s': 304398.47062523535, 'job_examples_per_s': 182.3155642523171, 'update_duty_fraction': 0.0005989371887376451}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0001850421540439129, 'update_examples_per_s': 216166.96047813777, 'job_examples_per_s': 77.26277939294994, 'update_duty_fraction': 0.0003574217781572775}
-examples / synchronized seconds: 96 0.00031537609174847603
-measured update duty fraction, not hardware utilization: 0.0005989371887376451
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0012104581110179424, 'update_examples_per_s': 79308.81632844625, 'job_examples_per_s': 102.44077143536792, 'update_duty_fraction': 0.0012916694029466277}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0006199595518410206, 'update_examples_per_s': 64520.33827241911, 'job_examples_per_s': 43.86845768858281, 'update_duty_fraction': 0.0006799167342142643}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00038929283618927, 'update_examples_per_s': 246600.99307177032, 'job_examples_per_s': 132.80315821404676, 'update_duty_fraction': 0.0005385345637087355}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00037824828177690506, 'update_examples_per_s': 105750.645613223, 'job_examples_per_s': 56.760947196710525, 'update_duty_fraction': 0.0005367432687296348}
+examples / synchronized seconds: 96 0.00038929283618927
+measured update duty fraction, not hardware utilization: 0.0005385345637087355
 PASS: operations-02
 
 ```
@@ -579,7 +581,7 @@ PASS: operations-02
 **Predict before running:** Should averaging per-step rates equal total examples divided by total time?
 
 ```python
-# Experiment — Recompute throughput independently: Summing work and time weights slow steps appropriately; an...
+# Experiment — Recompute throughput independently
 total_examples=sum(e['examples'] for e in progress)
 total_time=sum(e['update_s'] for e in progress)
 assert abs(total_examples/total_time-healthy['update_examples_per_s']) < 1e-6
@@ -614,13 +616,12 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
+# Exercise solution
 duty = sum(...)  # TODO: compute duty
 assert 0  # TODO: complete assertion check
 assert abs(duty-healthy['update_duty_fraction'])  # TODO: complete assertion check
@@ -630,7 +631,7 @@ print('measured update duty fraction, not hardware utilization:',duty)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute the fraction of supervisor wall time spent inside synchronized...
+# Exercise solution
 duty=sum(e['update_s'] for e in progress)/observed['wall_s']
 assert 0 < duty < 1
 assert abs(duty-healthy['update_duty_fraction']) < 1e-9
@@ -660,7 +661,7 @@ Sum examples and seconds first.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
+# Catch an average-of-rates error (Transfer / diagnosis)
 durations = ...  # TODO: compute durations
 counts = ...  # TODO: compute counts
 wrong = sum(...)  # TODO: compute wrong
@@ -671,7 +672,7 @@ assert abs(wrong-16/3)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch an average-of-rates error (Transfer / diagnosis): The short step gets excessive influence when rates are...
+# Catch an average-of-rates error (Transfer / diagnosis)
 durations=[1.,3.]
 counts=[8,8]
 wrong=sum(n/t for n,t in zip(counts,durations))/2
@@ -703,7 +704,7 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
+# Change the checkpoint cadence (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     changed = launch(...)  # TODO: compute changed
@@ -714,7 +715,7 @@ assert stats['checkpoint_step']  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Change the checkpoint cadence (Transfer / diagnosis): The run tests a changed operational policy rather than...
+# Change the checkpoint cadence (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     changed=launch(folder,dict(checkpoint_every=3,fail_after=5))

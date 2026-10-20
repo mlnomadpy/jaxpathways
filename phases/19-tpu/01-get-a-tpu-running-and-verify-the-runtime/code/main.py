@@ -1,7 +1,7 @@
 """Select a TPU slice and provision your Cloud TPU VM: worked experiments and reference solutions. CPU checks."""
 
 # Write the runtime contract and synchronized pmap verifier
-# Step 1 — Write the runtime contract and synchronized pmap verifier: The verifier checks both device discovery and a synchronized pmap...
+# Step 1 — Write the runtime contract and synchronized pmap verifier
 import hashlib
 import json
 import os
@@ -17,13 +17,11 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
     devices = jax.devices()
     local_devices = jax.local_devices()
     target = expected_backend or backend
-    # Create evenly spaced index values in `x`.
     x = jnp.arange(len(local_devices) * 8, dtype=jnp.float32).reshape(len(local_devices), 8)
     # Reduce across the target axis to summarize `per_device`.
     per_device = jax.pmap(lambda row: jnp.sum(row * row))(x)
     # Wait for device work to finish before timing it or comparing its result on the host.
     total = float(jax.block_until_ready(jnp.sum(per_device)))
-    # Create evenly spaced index values in `expected_total`.
     expected_total = float(np.sum(np.arange(len(local_devices) * 8, dtype=np.float64) ** 2))
     contract_ok = (
         backend == target
@@ -42,15 +40,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
         "expected_sum_of_squares": expected_total,
         "contract_ok": bool(contract_ok),
     }
-    # Read or serialize artifact data on disk (`receipt['receipt_sha256']`).
     receipt["receipt_sha256"] = hashlib.sha256(
         json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `receipt` to the caller.
     return receipt
 
 # Compare single-host TPU slice topologies and emit the receipt
-# Step 2 — Compare single-host TPU slice topologies and emit the receipt: Calculating total chips and HBM per slice makes the hardware...
+# Step 2 — Compare single-host TPU slice topologies and emit the receipt
 topologies = [
     {"slice": "v5litepod-1", "hosts": 1, "chips_per_host": 1, "hbm_gib_per_chip": 16},
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_gib_per_chip": 16},
@@ -72,7 +68,7 @@ print("Single-host TPU slice HBM totals (GiB):", {t["slice"]: t["total_hbm_gib"]
 receipt = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
 assert receipt["contract_ok"] is True
 
-# Step 1 — Write the runtime contract and synchronized pmap verifier: The verifier checks both device discovery and a synchronized pmap...
+# Step 1 — Write the runtime contract and synchronized pmap verifier
 import hashlib
 import json
 import os
@@ -112,15 +108,13 @@ def verify_runtime_contract(expected_backend=None, min_devices=1):
         "expected_sum_of_squares": expected_total,
         "contract_ok": bool(contract_ok),
     }
-    # Read or serialize artifact data on disk (`receipt['receipt_sha256']`).
     receipt["receipt_sha256"] = hashlib.sha256(
         json.dumps(receipt, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `receipt` to the caller.
     return receipt
 
 
-# Step 2 — Compare single-host TPU slice topologies and emit the receipt: Calculating total chips and HBM per slice makes the hardware...
+# Step 2 — Compare single-host TPU slice topologies and emit the receipt
 topologies = [
     {"slice": "v5litepod-1", "hosts": 1, "chips_per_host": 1, "hbm_gib_per_chip": 16},
     {"slice": "v5litepod-4", "hosts": 1, "chips_per_host": 4, "hbm_gib_per_chip": 16},
@@ -151,34 +145,34 @@ visual_data = {
 }
 
 # Experiment: Reject a mismatched backend or missing TPU devices immediately
-# Experiment — Reject a mismatched backend or missing TPU devices immediately: Failing the contract check explicitly prevents a script from...
+# Experiment — Reject a mismatched backend or missing TPU devices immediately
 mismatch = verify_runtime_contract(expected_backend="tpu", min_devices=4)
 print("Mismatch contract_ok:", mismatch["contract_ok"], "observed:", mismatch["observed_backend"], "devices:", mismatch["device_count"])
 assert mismatch["contract_ok"] == (jax.default_backend() == "tpu" and jax.device_count() >= 4)
 
 # Experiment: Verify single-host vs multi-host process counts
-# Experiment — Verify single-host vs multi-host process counts: Single-host TPU VMs attach all chips to one Linux VM; multi-host...
+# Experiment — Verify single-host vs multi-host process counts
 slice_hosts = {"v5litepod-1": 1, "v5litepod-4": 1, "v5litepod-8": 1, "v5litepod-16": 4}
 needs_multi_host = {k: (v > 1) for k, v in slice_hosts.items()}
 print("Requires --worker=all and jax.distributed.initialize():", needs_multi_host)
 assert needs_multi_host["v5litepod-4"] is False and needs_multi_host["v5litepod-16"] is True
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Call verify_runtime_contract for the active backend with...
+# Exercise solution
 checked = verify_runtime_contract(expected_backend=jax.default_backend(), min_devices=1)
 v5e4 = next(t for t in topologies if t["slice"] == "v5litepod-4")
 print("Checked receipt sha256:", checked["receipt_sha256"], "v5litepod-4 chips:", v5e4["total_chips"], "HBM GiB:", v5e4["total_hbm_gib"])
 assert checked["contract_ok"] is True and v5e4["total_chips"] == 4 and v5e4["total_hbm_gib"] == 64
 
 # Reference practice: Check whether a model state fits on a single-host TPU slice
-# Check whether a model state fits on a single-host TPU slice (Foundations): A single v5litepod-1 chip has 16 GiB HBM, whereas...
+# Check whether a model state fits on a single-host TPU slice (Foundations)
 fitting_slices = [t["slice"] for t in topologies if t["total_hbm_gib"] >= 48]
 print("Slices fitting 48 GiB:", fitting_slices)
 # Assert invariant `fitting_slices == ["v5litepod-4"` holds
 assert fitting_slices == ["v5litepod-4", "v5litepod-8", "v6e-4"]
 
 # Reference practice: Verify the pmap sum-of-squares formula for 4 TPU devices
-# Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis): On a 4-chip TPU VM (v5litepod-4 or v6e-4), x has shape (4,...
+# Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis)
 four_device_expected = float(np.sum(np.arange(4 * 8, dtype=np.float64) ** 2))
 print("Expected 4-device pmap sum of squares:", four_device_expected)
 # Assert invariant `four_device_expected == 10416.0` holds

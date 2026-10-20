@@ -1,7 +1,7 @@
 """Random keys without surprises: worked experiments and reference solutions. CPU checks."""
 
 # Prepare the inputs
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 
@@ -21,13 +21,13 @@ key, next_key = jax.random.split(key)
 b = jax.random.normal(next_key, (3,))
 
 # Run and check the result
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Replay equal:", bool(jnp.array_equal(a, repeated)))
 print("Fresh draw equal:", bool(jnp.array_equal(a, b)))
 assert jnp.array_equal(a, repeated)
 assert not jnp.array_equal(a, b)
 
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: random.split returns two new keys.
@@ -43,7 +43,7 @@ repeated = jax.random.normal(sample_key, (3,))
 key, next_key = jax.random.split(key)
 # Sample deterministic random values into `b` using an explicit PRNG key.
 b = jax.random.normal(next_key, (3,))
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Replay equal:", bool(jnp.array_equal(a, repeated)))
 print("Fresh draw equal:", bool(jnp.array_equal(a, b)))
 assert jnp.array_equal(a, repeated)
@@ -79,7 +79,7 @@ reverse=by_id(jnp.array([8,3]))
 assert jnp.array_equal(forward,reverse[::-1])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Split a fresh seed into four keys, then use vmap to draw two normal...
+# Exercise solution
 def draw(seed):
     # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(jax.random.key(seed), 4)

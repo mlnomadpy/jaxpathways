@@ -2,6 +2,8 @@
 
 Phase 03: State, randomness & control flow · about 65 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate carry from recorded outputs
@@ -83,7 +85,7 @@ Before benchmarking, compare numerical results on the same inputs and synchroniz
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -109,7 +111,7 @@ step returns the next scalar carry and one recorded scalar. scan feeds that carr
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
@@ -122,7 +124,7 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: step returns the next scalar carry and one recorded scalar.
@@ -130,7 +132,7 @@ def step(carry, increment):
     next_value = 0.5 * carry + increment
     return next_value, next_value
 increments = jnp.array([1., 1., 1., 1.])
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 final, history = jax.lax.scan(step, jnp.array(0.), increments)
 print("History:", history)
 print("Final:", float(final))
@@ -166,7 +168,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:06.824349+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:17.479149+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]
@@ -183,7 +185,7 @@ PASS: state-03
 **Predict before running:** Predict every output for inputs $[1,-1,2,0]$ and decay $0.5$.
 
 ```python
-# Experiment — Compare scan to the Python recurrence: The loop is an independent control-flow reference and the fixed...
+# Experiment — Compare scan to the Python recurrence
 inputs=jnp.array([1.,-1.,2.,0.])
 state=0.
 reference=[]
@@ -209,7 +211,6 @@ The loop is an independent control-flow reference and the fixed numbers verify t
 # Define `terminal(d)` to carry state across steps with `jax.lax.scan`:
 def terminal(d):
     return jax.lax.scan(lambda c,u:(d*c+u,d*c+u),jnp.array(0.),increments)[0]
-# Differentiate the objective to obtain `(value, sensitivity)` via automatic differentiation.
 value,sensitivity=jax.value_and_grad(terminal)(0.5)
 assert jnp.allclose(value,1.875)
 assert jnp.allclose(sensitivity,2.75)

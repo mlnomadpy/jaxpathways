@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-04",
-  "contentHash": "c6a4b8b5f542eea8b2fca11cbf330ce8586a874efc2f5ef811ea6df74f643bb5",
-  "executedAt": "2026-10-20T18:50:39.142297+00:00",
+  "contentHash": "b267c0271f38adcaeb8bbe9329197ac21343eafd798f7a706a6ae36a617c9c35",
+  "executedAt": "2026-10-20T22:21:20.761671+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Held-out loss: 0.015700625 accuracy: 1.0 confusion:\n [[12  0]\n [ 0 12]]\nHeld-out loss: 0.015700625 accuracy: 1.0 confusion:\n [[12  0]\n [ 0 12]]\nTrue-class counts: [12 12] row-normalized confusion: [[1. 0.]\n [0. 1.]]\nAbsent class recall: undefined, not zero.\nPASS: networks-04\n",
   "notebookCells": [
     {
-      "sourceHash": "530a2ce1aea694562d6a6eeb24dd2dc60c6a5d422f6a85fcea048a78643a6df8",
+      "sourceHash": "49526e271eb27d0eadd5a6bf5fed3825ebc260db6914b3b7b7c4b20d90d1c1cf",
       "outputs": []
     },
     {
-      "sourceHash": "8d955161d5ef0c54aa30259327205a4b411dd9c12003615b9b0a8625f6ba7b03",
+      "sourceHash": "7edf933645493581794bff531f9c00c758c25923b568646075807d90e8c6bb44",
       "outputs": []
     },
     {
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "sourceHash": "87669d5dd92db275a99b3b819b538cf9d0b73ab82db07dad6ed636f4ac53fd68",
+      "sourceHash": "ad4691e000cf1ae411ccc25cd2a2e846b6a84835e220376ea6b23174aded4011",
       "outputs": [
         {
           "output_type": "stream",
@@ -69,7 +69,7 @@
       ]
     },
     {
-      "sourceHash": "228f88373c5d7072ec264ce3bedfb275c782a5bb6bc065a96c3e17021d6f35bb",
+      "sourceHash": "58a4ed5e75b4c9f425db95b0f6fa88fff655b2d4a38ab755c196d9f3cb44c9fb",
       "outputs": []
     },
     {
@@ -103,11 +103,11 @@
       ]
     },
     {
-      "sourceHash": "9b330ea8bbcd631d71d119935311ba8e99040f6d377851b417f8178e96eee922",
+      "sourceHash": "2af2f48b66b8dca1fbdb3fd795277cb553821a06c68e735ddb0bfa7ae3087dd4",
       "outputs": []
     },
     {
-      "sourceHash": "7d650b868352cfe1aa513a0dc2646c5c6dc2a9bf5d4fa418d5053ccb542abb8b",
+      "sourceHash": "196cfaa94634fe5c52241b67f7083875fd495cba46d461cbadd7830a578105d3",
       "outputs": []
     }
   ],

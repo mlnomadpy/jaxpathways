@@ -38,7 +38,7 @@ def step(state, action, horizon=8):
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
 # Collect a batch and compute targets
-# Step 2 — Collect a batch and compute targets: scan emits time-major arrays; vmap keeps environments independent...
+# Step 2 — Collect a batch and compute targets
 def log_probability(theta, observations, actions):
     logits = theta[jnp.minimum(observations, 2)]
     return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))
@@ -58,7 +58,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -76,7 +75,7 @@ def returns_to_go(rewards):
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
 # Check shapes and episode boundaries
-# Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
+# Step 3 — Check shapes and episode boundaries
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
@@ -126,7 +125,7 @@ def step(state, action, horizon=8):
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
-# Step 2 — Collect a batch and compute targets: scan emits time-major arrays; vmap keeps environments independent...
+# Step 2 — Collect a batch and compute targets
 def log_probability(theta, observations, actions):
     logits = theta[jnp.minimum(observations, 2)]
     return jnp.where(actions == 1, jax.nn.log_sigmoid(logits), jax.nn.log_sigmoid(-logits))
@@ -146,7 +145,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -163,7 +161,7 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Step 3 — Check shapes and episode boundaries: Exactly one ending event and zero padded rewards are stronger...
+# Step 3 — Check shapes and episode boundaries
 theta = jnp.zeros(3)
 # Create or split explicit PRNG key(s) (`(final, records)`) for reproducible randomness.
 final, records = rollout(theta, jax.random.key(5), batch_size=64, horizon=8)
@@ -191,7 +189,7 @@ changed = rollout(theta, jax.random.key(6), 64, 8)[1]
 assert not jnp.array_equal(records['action'], changed['action'])
 
 # Experiment: Reward-to-go by hand
-# Experiment — Reward-to-go by hand: Zero padded rewards preserve the finite-episode sum, while the...
+# Experiment — Reward-to-go by hand
 r = jnp.array([[-.01],[-.01],[1.],[0.]])
 g = returns_to_go(r)
 assert jnp.allclose(g[:,0], jnp.array([.98,.99,1.,0.]))
@@ -208,7 +206,7 @@ assert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))
 assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward']) == 0.))
 
 # Reference practice: Catch a shifted mask
-# Catch a shifted mask (Transfer / diagnosis): The broken mask removes the action responsible for success,...
+# Catch a shifted mask (Transfer / diagnosis)
 s = State(jnp.int32(1),jnp.int32(0),jnp.bool_(False))
 correct, broken = 0., 0.
 for a in [1,1]:
@@ -222,7 +220,7 @@ assert abs(correct-.99) < 1e-6
 assert abs(broken+.01) < 1e-6
 
 # Reference practice: Check a deterministic policy limit
-# Check a deterministic policy limit (Transfer / diagnosis): The expected return is calculated from the initial position...
+# Check a deterministic policy limit (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 _, easy = rollout(jnp.full(3,100.),jax.random.key(42),23,8)
 expected = jnp.where(easy['observation'][0] == 0,.98,.99)

@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 80 minutes · CPU
 
+This reference explicitly selects CPU. Uploading the same file or setting JAX_PLATFORMS does not adapt it to TPU. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Record shapes, dtypes and dynamic/static choices beside observed tracing.
@@ -93,7 +95,7 @@ The exercise compares six dependent updates with host consumption after each ste
 Create diagnosis.py in your activated course environment and add this block.
 
 ```python
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
@@ -121,7 +123,7 @@ This CPU experiment deliberately keeps the trace ledger outside numerical state.
 Append this block to the same file. Run the assembled file with python diagnosis.py.
 
 ```python
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
@@ -163,7 +165,7 @@ Inspect the event deltas on your own environment. The required outputs are check
 ## Run the example
 
 ```python
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
@@ -182,7 +184,7 @@ x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
 # Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
@@ -238,7 +240,7 @@ visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'n
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:13.388424+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:12.954258+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -354,8 +356,8 @@ CPU run: 2026-10-20T18:52:13.388424+00:00. JAX 0.9.2.
   ]
 }
 Static branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]
-Per-step host reads seconds: 0.00012120790779590607
-Final-only wait seconds: 3.437511622905731e-05
+Per-step host reads seconds: 8.750008419156075e-05
+Final-only wait seconds: 2.1750107407569885e-05
 Added ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}
 Masked versus unmasked padded objective: 55.0 58.0
 Observed runtime-Python-branch tracing failure
@@ -547,7 +549,7 @@ A runtime scalar predicate is a tracer, so Python cannot decide its truth value 
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+1. Reproduce and repair runtime Python branching (Diagnosis)
 2. Wrap with `jax.jit` (`repaired`) so XLA traces and compiles the function.
 3. Place `result` explicitly onto the target JAX device.
 4. Transfer the device result to the host for an independent NumPy comparison.
@@ -555,7 +557,7 @@ A runtime scalar predicate is a tracer, so Python cannot decide its truth value 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+# Reproduce and repair runtime Python branching (Diagnosis)
 def broken_branch(values, gain):
     if gain > 1.:
         return ...  # TODO: return computed result
@@ -578,7 +580,7 @@ for gain, expected in [(0.5, 28.), (2., 140.)]:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+# Reproduce and repair runtime Python branching (Diagnosis)
 def broken_branch(values, gain):
     if gain > 1.:
         return jnp.sum(values**2)

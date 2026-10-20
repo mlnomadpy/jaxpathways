@@ -2,6 +2,8 @@
 
 Phase 09: Distributed training · about 100 minutes · 4 logical CPU devices
 
+This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Compare all-reduce and reduce-scatter against the same independent global gradient.
@@ -91,7 +93,7 @@ gcloud compute tpus tpu-vm ssh $TPU_NAME --zone=$ZONE \
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
+# Step 1 — Configure four logical devices
 import jax
 # Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
@@ -110,7 +112,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
+# Step 2 — Place the data and model
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
 rows = NamedSharding(mesh, P('data', None))
@@ -133,7 +135,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
+# Step 3 — Implement partial gradients and collectives
 def local_contribution(a, b, weights):
     return 2 * a.T @ (a @ weights - b) / 16
 ```
@@ -145,7 +147,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
+# Step 4 — Verify the result and placement
 def reduce_all(a, b, weights):
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 ```
@@ -157,7 +159,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 5 — Measure completed calls
 def reduce_shard(a, b, weights):
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 ```
@@ -169,7 +171,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 6 — Measure completed calls
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
@@ -202,7 +204,7 @@ Compare both the numerical global result and the placement needed by its next co
 Add this block after the preceding block in a fresh Python file, then run the complete file.
 
 ```python
-# Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 7 — Measure completed calls
 def completed_samples(fn, *args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
@@ -233,7 +235,7 @@ Compare both the numerical global result and the placement needed by its next co
 ## Run the example
 
 ```python
-# Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
+# Step 1 — Configure four logical devices
 import jax
 # Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
@@ -244,7 +246,7 @@ import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 from time import perf_counter
 
-# Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
+# Step 2 — Place the data and model
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
 rows = NamedSharding(mesh, P('data', None))
@@ -259,19 +261,19 @@ y = jax.device_put(yh, NamedSharding(mesh, P('data')))
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(wh, replicated)
 
-# Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
+# Step 3 — Implement partial gradients and collectives
 def local_contribution(a, b, weights):
     return 2 * a.T @ (a @ weights - b) / 16
 
-# Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
+# Step 4 — Verify the result and placement
 def reduce_all(a, b, weights):
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 
-# Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 5 — Measure completed calls
 def reduce_shard(a, b, weights):
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 
-# Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 6 — Measure completed calls
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
@@ -296,7 +298,7 @@ hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
-# Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 7 — Measure completed calls
 def completed_samples(fn, *args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
@@ -346,17 +348,17 @@ visual_data={'panels':[{'kind':'bar','labels':['all-reduce','reduce-scatter','af
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:25.726420+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:23.581942+00:00. JAX 0.9.2.
 
 ```text
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 89.9164006114006, 'reduce_scatter': 93.58301758766174, 'all_gather_only': 100.12509301304817}
+Completed CPU median microseconds: {'all_reduce': 365.9161739051342, 'reduce_scatter': 139.08278197050095, 'all_gather_only': 111.58362030982971}
 Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]
 Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)
 Idealized ring bytes per rank: 48.0 24.0
-Completed CPU median microseconds: {'all_reduce': 88.16691115498543, 'reduce_scatter': 80.5417075753212, 'all_gather_only': 88.2497988641262}
+Completed CPU median microseconds: {'all_reduce': 118.75014752149582, 'reduce_scatter': 106.83387517929077, 'all_gather_only': 87.7920538187027}
 Sharded momentum matches the independent elementwise update.
 Joint permutation preserves the gradient; label-only reversal does not.
 Idealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]
@@ -404,14 +406,15 @@ Repeat the gradient comparison after reversing both observation rows and labels 
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Place `w2` explicitly onto the target JAX device.
-2. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Place `w2` explicitly onto the target JAX device.
 3. Transfer the device result to the host for an independent NumPy comparison.
+4. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat the gradient comparison after reversing both observation rows...
+# Exercise solution
 x2 = jax.device_put(...)  # TODO: compute x2
 y2 = jax.device_put(...)  # TODO: compute y2
 w2h = ...  # TODO: compute w2h
@@ -432,7 +435,7 @@ print('Joint permutation preserves the gradient; label-only reversal does not.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat the gradient comparison after reversing both observation rows...
+# Exercise solution
 x2 = jax.device_put(xh[::-1].copy(), rows)
 y2 = jax.device_put(yh[::-1].copy(), NamedSharding(mesh, P('data')))
 w2h = wh + np.float32(0.17)
@@ -473,7 +476,7 @@ Use the same full gradient byte count for both collectives; one mebibyte is 2**2
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for the complete communication cycle (Transfer): The two-phase payload equals the all-reduce payload under...
+# Account for the complete communication cycle (Transfer)
 budget = ...  # TODO: compute budget
 for p in [2, 4, 8]:
     size = ...  # TODO: compute size
@@ -491,7 +494,7 @@ print('Idealized payload/storage budget, not observed network traffic:', budget)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Account for the complete communication cycle (Transfer): The two-phase payload equals the all-reduce payload under...
+# Account for the complete communication cycle (Transfer)
 budget = []
 for p in [2, 4, 8]:
     size = 2**20

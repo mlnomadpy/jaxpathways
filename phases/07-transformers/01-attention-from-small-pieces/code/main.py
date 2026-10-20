@@ -1,13 +1,13 @@
 """Attention from small pieces: worked experiments and reference solutions. CPU checks."""
 
 # 1. Prepare the experiment
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
 
 # 2. Implement the mechanism
-# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
+# Step 2 — 2. Implement the mechanism
 def attend(q, k, v):
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
     weights = jax.nn.softmax(scores, axis=-1)
@@ -24,12 +24,12 @@ assert jnp.allclose(weights, jnp.full((2, 3), 1/3))
 assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Step 2 — 2. Implement the mechanism: Multiplying Q\in\mathbb{R}^{T_q\times D_k} by...
+# Step 2 — 2. Implement the mechanism
 def attend(q, k, v):
     scores = q @ k.T / jnp.sqrt(q.shape[-1])
     weights = jax.nn.softmax(scores, axis=-1)
@@ -46,13 +46,12 @@ assert jnp.allclose(output, jnp.array([[2., 2.], [2., 2.]]))
 assert jnp.allclose(jnp.sum(weights, axis=-1), 1.)
 
 # Figure data experiment
-# Create device-backed JAX array `changed_q`.
 changed_q = jnp.array([[3.0, 0.0], [0.0, 3.0]])
 _, focused = attend(changed_q, k, v)
 visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero queries', 'values': weights.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}, {'kind': 'heatmap', 'title': 'Changed queries', 'values': focused.tolist(), 'rows': ['query 0', 'query 1'], 'columns': ['key 0', 'key 1', 'key 2'], 'unit': 'attention weight'}]}
 
 # Experiment: Compare a nonzero query with NumPy
-# Experiment — Compare a nonzero query with NumPy: A separate NumPy calculation checks nonuniform weighting and the...
+# Experiment — Compare a nonzero query with NumPy
 q_new = jnp.array([[2., 0.]])
 actual, w_new = attend(q_new, k, v)
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -80,7 +79,7 @@ assert jnp.allclose(paired, actual)
 assert not jnp.allclose(mismatched, actual)
 
 # Reference practice: Use a different value dimension
-# Use a different value dimension (Transfer / diagnosis): Queries and keys share Dk; values may have an independent...
+# Use a different value dimension (Transfer / diagnosis)
 scalar_v = jnp.array([[3.], [6.], [9.]])
 scalar_out, _ = attend(q, k, scalar_v)
 # Check tensor shape invariant: `scalar_out.shape == (2, 1)`

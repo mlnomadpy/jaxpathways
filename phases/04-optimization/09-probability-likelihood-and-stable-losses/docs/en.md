@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive binary cross-entropy from a probability model and compute it safely from logits.
@@ -92,12 +94,11 @@ A balanced probability assigns loss $\log 2$ to either outcome.
 Append the analytic gradient and a library comparison at moderate scores.
 
 ```python
-# Step 2 — Check the derivative independently: The derivative points toward assigning more probability to the...
+# Step 2 — Check the derivative independently
 assert jnp.allclose(jax.grad(binary_loss)(z, y), -0.5)
 logits = jnp.array([-2.0, 0.0, 2.0])
 labels = jnp.array([0.0, 1.0, 1.0])
 analytic = jax.nn.sigmoid(logits) - labels
-# Differentiate the objective to obtain `actual` via automatic differentiation.
 actual = jax.vmap(jax.grad(binary_loss))(logits, labels)
 assert jnp.allclose(actual, analytic, atol=1e-06)
 assert jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cross_entropy(logits, labels), atol=1e-06)
@@ -132,12 +133,11 @@ z = jnp.array(0.0)
 y = jnp.array(1.0)
 assert jnp.allclose(binary_loss(z, y), jnp.log(2.0))
 
-# Step 2 — Check the derivative independently: The derivative points toward assigning more probability to the...
+# Step 2 — Check the derivative independently
 assert jnp.allclose(jax.grad(binary_loss)(z, y), -0.5)
 logits = jnp.array([-2.0, 0.0, 2.0])
 labels = jnp.array([0.0, 1.0, 1.0])
 analytic = jax.nn.sigmoid(logits) - labels
-# Differentiate the objective to obtain `actual` via automatic differentiation.
 actual = jax.vmap(jax.grad(binary_loss))(logits, labels)
 assert jnp.allclose(actual, analytic, atol=1e-06)
 assert jnp.allclose(binary_loss(logits, labels), optax.sigmoid_binary_cross_entropy(logits, labels), atol=1e-06)
@@ -171,14 +171,13 @@ A large positive logit strongly favors label $1$. That confidence is rewarded on
 Loss is not a probability or classification accuracy, so values above $1$ are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.
 
 ```python
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-10.0, 10.0, 81)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:49:03.868881+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:40.204598+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0
@@ -196,7 +195,6 @@ PASS: optimization-09
 p = jax.nn.sigmoid(jnp.array(100.0))
 naive = -jnp.log(1 - p)
 stable = binary_loss(jnp.array(100.0), jnp.array(0.0))
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert not jnp.isfinite(naive)
 assert jnp.isfinite(stable) and jnp.allclose(stable, 100.0)
 ```
@@ -235,13 +233,12 @@ Compute the binary losses for positive labels at probabilities $0.8$ and $0.2$, 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute the binary losses for positive labels at probabilities 0.8 and...
+# Exercise solution
 probabilities = jnp.array(...)  # TODO: compute probabilities
 z_from_p = jnp.log(...)  # TODO: compute z_from_p
 assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)  # TODO: complete assertion check
@@ -251,7 +248,7 @@ assert binary_loss(z_from_p[0], 1.0)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute the binary losses for positive labels at probabilities 0.8 and...
+# Exercise solution
 probabilities = jnp.array([0.8, 0.2])
 z_from_p = jnp.log(probabilities) - jnp.log1p(-probabilities)
 assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)
@@ -331,22 +328,20 @@ The mean divides by the new observation count; the sum does not.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `mean_grad` via automatic differentiation.
-2. Differentiate the objective to obtain `duplicated_grad` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a reduction mistake (Transfer / diagnosis): Reduction conventions affect gradient scale and...
+# Catch a reduction mistake (Transfer / diagnosis)
 zs = jnp.array(...)  # TODO: compute zs
 ys2 = jnp.array(...)  # TODO: compute ys2
 original = binary_loss(...)  # TODO: compute original
 doubled = binary_loss(...)  # TODO: compute doubled
 assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))  # TODO: complete assertion check
 assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))  # TODO: complete assertion check
-# Differentiate the objective to obtain `mean_grad` via automatic differentiation.
 mean_grad = ...  # TODO: compute mean_grad
-# Differentiate the objective to obtain `duplicated_grad` via automatic differentiation.
 duplicated_grad = jax.grad(...)  # TODO: compute duplicated_grad
 assert jnp.allclose(mean_grad(zs), duplicated_grad)  # TODO: complete assertion check
 ```
@@ -354,16 +349,14 @@ assert jnp.allclose(mean_grad(zs), duplicated_grad)  # TODO: complete assertion 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch a reduction mistake (Transfer / diagnosis): Reduction conventions affect gradient scale and...
+# Catch a reduction mistake (Transfer / diagnosis)
 zs = jnp.array([-1.0, 2.0])
 ys2 = jnp.array([0.0, 1.0])
 original = binary_loss(zs, ys2)
 doubled = binary_loss(jnp.tile(zs, 2), jnp.tile(ys2, 2))
 assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))
 assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))
-# Differentiate the objective to obtain `mean_grad` via automatic differentiation.
 mean_grad = lambda z: jax.grad(lambda t: jnp.mean(binary_loss(t * z, ys2)))(1.0)
-# Differentiate the objective to obtain `duplicated_grad` via automatic differentiation.
 duplicated_grad = jax.grad(lambda t: jnp.mean(binary_loss(t * jnp.tile(zs, 2), jnp.tile(ys2, 2))))(1.0)
 assert jnp.allclose(mean_grad(zs), duplicated_grad)
 ```

@@ -2,6 +2,8 @@
 
 Phase 05: Neural network training · about 95 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Choose a transparent train and held-out split
@@ -65,7 +67,7 @@ Repeat the full initialization and training routine from the same seed and batch
 Create main.py in the training dependency environment. The generator returns separate train and held-out arrays.
 
 ```python
-# Step 1 — 1. Construct data, model, and optimizer: The held-out seed is 11; every optimizer call below uses seed-10...
+# Step 1 — 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -102,7 +104,6 @@ Append train and evaluation functions. Notice that only train_step receives an o
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
     # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
@@ -146,7 +147,7 @@ The synthetic fixture normally exceeds $0.85$ held-out accuracy. Parameter bytes
 ## Run the example
 
 ```python
-# Step 1 — 1. Construct data, model, and optimizer: The held-out seed is 11; every optimizer call below uses seed-10...
+# Step 1 — 1. Construct data, model, and optimizer
 from flax import nnx
 import jax
 import jax.numpy as jnp
@@ -175,7 +176,6 @@ model,optimizer=initialize()
 # Define and JIT-compile `train_step(m, o, x, y)` so XLA traces and fuses the operations:
 @nnx.jit
 def train_step(m,o,x,y):
-    # Differentiate the objective to obtain `(value, grads)` via automatic differentiation.
     value,grads=nnx.value_and_grad(objective)(m,x,y)
     # Apply the parameter gradients to the mutable Flax model and optimizer state.
     o.update(m,grads)
@@ -229,7 +229,6 @@ The data rule assigns label $1$ when $x_0+0.5x_1>0$, whose boundary is $x_1=-2x_
 To inspect a mistake in a changed run, look for a triangle where the probability is below $0.5$, or a circle where it is above $0.5$, and check the model at that exact point. Grid colors are sampled approximations. Perfect accuracy on this small synthetic set is separate from accuracy outside it, and extreme probabilities do not by themselves establish calibration.
 
 ```python
-# Generate a uniform grid of points in `axis`.
 axis = jnp.linspace(-3.0, 3.0, 61)
 gx, gy = jnp.meshgrid(axis, axis)
 grid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)
@@ -240,7 +239,7 @@ visual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-3.0, 3.0, -
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:29.940258+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:14.543674+00:00. JAX 0.9.2.
 
 ```text
 Updates: 80 held-out loss: 0.018426384776830673 accuracy: 1.0
@@ -291,13 +290,14 @@ Compute held-out metrics in three equal chunks and reconstruct the overall means
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `aggregate`.
-2. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Reduce along axis=0 to compute `aggregate`.
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute held-out metrics in three equal chunks and reconstruct the...
+# Exercise solution
 old = snapshot(...)  # TODO: compute old
 pieces = ...  # TODO: compute pieces
 # Reduce along axis=0 to compute `aggregate`.
@@ -310,7 +310,7 @@ for a,b in zip(old,snapshot(model)):np.testing.assert_array_equal(a,b)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute held-out metrics in three equal chunks and reconstruct the...
+# Exercise solution
 old=snapshot(model)
 pieces=[evaluate(model,test_x[i:i+16],test_y[i:i+16]) for i in range(0,48,16)]
 # Reduce along axis=0 to compute `aggregate`.
@@ -407,17 +407,13 @@ Compare both optimizer.step and model parameters around the bad call.
 
 **Step-by-step implementation plan:**
 1. Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
-2. Transform every leaf of the parameter PyTree (`bad_model`).
-3. Configure or step the Optax optimizer state (`bad_optimizer`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 graph,state = nnx.split(...)  # TODO: compute graph,state
-# Transform every leaf of the parameter PyTree (`bad_model`).
 bad_model = nnx.merge(...)  # TODO: compute bad_model
-# Configure or step the Optax optimizer state (`bad_optimizer`).
 bad_optimizer = nnx.Optimizer(...)  # TODO: compute bad_optimizer
 prior = snapshot(...)  # TODO: compute prior
 train_step(bad_model,bad_optimizer,test_x,test_y)
@@ -431,9 +427,7 @@ assert int(optimizer.step[...])  # TODO: complete assertion check
 ```python
 # Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.
 graph,state=nnx.split(model)
-# Transform every leaf of the parameter PyTree (`bad_model`).
 bad_model=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
-# Configure or step the Optax optimizer state (`bad_optimizer`).
 bad_optimizer=nnx.Optimizer(bad_model,optax.adam(.03),wrt=nnx.Param)
 prior=snapshot(bad_model)
 train_step(bad_model,bad_optimizer,test_x,test_y)

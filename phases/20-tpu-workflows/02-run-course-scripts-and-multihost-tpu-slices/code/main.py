@@ -1,7 +1,7 @@
 """Run course scripts and multi-host TPU Pod slices: worked experiments and reference solutions. CPU checks."""
 
 # Tabulate single-host and multi-host TPU slice topologies
-# Step 1 — Tabulate single-host and multi-host TPU slice topologies: Separating hosts from chips_per_host shows immediately when a...
+# Step 1 — Tabulate single-host and multi-host TPU slice topologies
 import json
 import jax
 import numpy as np
@@ -120,7 +120,7 @@ visual_data = {
 }
 
 # Experiment: Compare local vs global device counts across slices
-# Experiment — Compare local vs global device counts across slices: Worker 0 only controls its own 4 local chips; the other 3 hosts...
+# Experiment — Compare local vs global device counts across slices
 v5e16 = next(s for s in SLICE_CATALOG if s["slice"] == "v5litepod-16")
 idle_without_worker_all = v5e16["global_chips"] - v5e16["chips_per_host"]
 print("v5litepod-16 global chips:", v5e16["global_chips"], "Idle chips without --worker=all:", idle_without_worker_all)
@@ -128,7 +128,7 @@ print("v5litepod-16 global chips:", v5e16["global_chips"], "Idle chips without -
 assert idle_without_worker_all == 12
 
 # Experiment: Verify total HBM scaling from v5litepod-16 to v6e-16
-# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16: Doubling per-chip HBM on Trillium (v6e) doubles the total...
+# Experiment — Verify total HBM scaling from v5litepod-16 to v6e-16
 hbm_by_slice = {s["slice"]: s["total_hbm_gib"] for s in SLICE_CATALOG}
 print("Total HBM GiB by slice:", hbm_by_slice)
 assert hbm_by_slice["v6e-16"] == 512 and hbm_by_slice["v5litepod-16"] == 256
@@ -146,7 +146,7 @@ for kwargs in ({}, {"hosts": 4, "execution_class": "cpu-only"}):
         raise AssertionError("unreviewed or CPU-only work must not be routed to a TPU Pod")
 
 # Reference practice: Filter multi-host slices from the catalog
-# Filter multi-host slices from the catalog (Foundations): Both 16-chip slices span 4 hosts (4 chips per host) and...
+# Filter multi-host slices from the catalog (Foundations)
 pod_slices = [s["slice"] for s in SLICE_CATALOG if s["multi_host"]]
 print("Multi-host Pod slices:", pod_slices)
 # Assert invariant `pod_slices == ["v5litepod-16"` holds

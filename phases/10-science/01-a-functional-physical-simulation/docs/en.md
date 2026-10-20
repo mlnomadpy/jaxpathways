@@ -2,6 +2,8 @@
 
 Phase 10: Scientific computing · about 85 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement a pure scalar state transition with units and a fixed time grid.
@@ -187,7 +189,6 @@ The code checks the coarse curve against the exact geometric sequence for Euler.
 These curves describe a stable, positive parameter choice. They are separate from accuracy for every time step or equation. The instability experiment changes the multiplier until the numerical behavior no longer resembles cooling.
 
 ```python
-# Create device-backed JAX array `fine`.
 fine = np.asarray(euler_solve(0.7, jnp.array(2.0), 8, 0.25))[::2]
 # Transfer the device result to the host for an independent NumPy comparison.
 visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':'Euler h=0.5','y':np.asarray(trajectory).tolist()},{'label':'Euler h=0.25 (sampled)','y':fine.tolist()},{'label':'analytic exponential','y':continuous.tolist()}]}
@@ -195,7 +196,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:32.499907+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:30.223618+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213
@@ -218,7 +219,7 @@ PASS: science-01
 **Predict before running:** For $k=0.7$ and $h=2$, predict the signs of the first four states.
 
 ```python
-# Experiment — Stable does not mean physically positive: The magnitude decays because |1-kh|=0.4, but crossing below...
+# Experiment — Stable does not mean physically positive
 oscillatory = euler_solve(0.7, jnp.array(2.0), 4, 2.0)
 np.testing.assert_allclose(oscillatory, [2.0, -0.8, 0.32, -0.128, 0.0512], atol=1e-12)
 print("Stable but sign-alternating:", np.asarray(oscillatory))
@@ -255,13 +256,12 @@ Change the rate to $0.3$, the initial excess to $5$, and use twenty steps of $0.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the rate to 0.3, the initial excess to 5, and use twenty steps...
+# Exercise solution
 changed = euler_solve(...)  # TODO: compute changed
 reference = ...  # TODO: compute reference
 np.testing.assert_allclose(changed, reference, rtol = ...  # TODO: compute np.testing.assert_allclose(changed, reference, rtol
@@ -273,7 +273,7 @@ print("Changed rate, initial state and grid verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Change the rate to 0.3, the initial excess to 5, and use twenty steps...
+# Exercise solution
 changed = euler_solve(0.3, jnp.array(5.0), 20, 0.1)
 reference = 5.0*(1-0.3*0.1)**np.arange(21)
 np.testing.assert_allclose(changed, reference, rtol=1e-12)
@@ -302,13 +302,12 @@ Compare successive squared magnitudes. The sign-alternating case from the experi
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Energy does not check every invariant (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Energy does not check every invariant (Practice): A scalar diagnostic can establish decay without capturing...
+# Energy does not check every invariant (Practice)
 for h in (0.5, 2.0):
     u = np.asarray(...)  # TODO: compute u
     assert np.all(np.diff(u*u/2)  # TODO: complete assertion check
@@ -320,7 +319,7 @@ print("Energy checks distinguish growth, but not sign preservation")
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Energy does not check every invariant (Practice): A scalar diagnostic can establish decay without capturing...
+# Energy does not check every invariant (Practice)
 for h in (0.5, 2.0):
     u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, h))
     assert np.all(np.diff(u*u/2) < 0)
@@ -351,13 +350,12 @@ The horizon is number of updates multiplied by step length.
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Keep the physical horizon fixed (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep the physical horizon fixed (Challenge): A refinement study must hold the modeled experiment fixed;...
+# Keep the physical horizon fixed (Challenge)
 horizon = ...  # TODO: compute horizon
 errors = ...  # TODO: compute errors
 for n in (10, 20, 40):
@@ -371,7 +369,7 @@ print("Same-horizon errors:", errors)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep the physical horizon fixed (Challenge): A refinement study must hold the modeled experiment fixed;...
+# Keep the physical horizon fixed (Challenge)
 horizon = 2.0
 errors = []
 for n in (10, 20, 40):

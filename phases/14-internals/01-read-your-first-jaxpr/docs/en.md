@@ -2,6 +2,8 @@
 
 Phase 14: Autodiff & JAX internals · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Translate jaxpr variables and array types into a data-flow diagram.
@@ -103,7 +105,7 @@ Inspect both representations for a four-step recurrence and verify they return t
 Create main.py in the activated setup environment and add the imports and float32 vector below. Calculate $[2, 3, 4]$ → $[4, 9, 16]$ → $29$ on paper.
 
 ```python
-# Step 1 — 1. Establish the input signature: The vector has shape (3,) and dtype float32; these determine the...
+# Step 1 — 1. Establish the input signature
 import jax
 import jax.numpy as jnp
 
@@ -131,7 +133,7 @@ Each assignment names a new value. sum reduces the three squared values to a sca
 Append this block and run python main.py. Match each printed operation to the flow above, then compare the assertions with your paper calculation.
 
 ```python
-# Step 3 — 3. Inspect and independently verify: Forward operations include add, mul and reduce_sum, with output...
+# Step 3 — 3. Inspect and independently verify
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed = jax.make_jaxpr(shifted_square_sum)(x)
 print("Forward program:")
@@ -140,7 +142,6 @@ for equation in closed.jaxpr.eqns:
     print("Operation:", equation.primitive.name,
           "output shapes:", [v.aval.shape for v in equation.outvars])
 value = shifted_square_sum(x)
-# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient = jax.grad(shifted_square_sum)(x)
 print("Value / gradient:", value, gradient)
 assert jnp.allclose(value, 29.)
@@ -152,7 +153,7 @@ Forward operations include add, mul and reduce_sum, with output shapes $(3,)$, $
 ## Run the example
 
 ```python
-# Step 1 — 1. Establish the input signature: The vector has shape (3,) and dtype float32; these determine the...
+# Step 1 — 1. Establish the input signature
 import jax
 import jax.numpy as jnp
 
@@ -163,7 +164,7 @@ def shifted_square_sum(x):
     squared = shifted * shifted
     return jnp.sum(squared)
 
-# Step 3 — 3. Inspect and independently verify: Forward operations include add, mul and reduce_sum, with output...
+# Step 3 — 3. Inspect and independently verify
 # Trace or lower the function to inspect its compiler representation (`closed`).
 closed = jax.make_jaxpr(shifted_square_sum)(x)
 print("Forward program:")
@@ -172,7 +173,6 @@ for equation in closed.jaxpr.eqns:
     print("Operation:", equation.primitive.name,
           "output shapes:", [v.aval.shape for v in equation.outvars])
 value = shifted_square_sum(x)
-# Differentiate the objective to obtain `gradient` via automatic differentiation.
 gradient = jax.grad(shifted_square_sum)(x)
 print("Value / gradient:", value, gradient)
 assert jnp.allclose(value, 29.)
@@ -207,7 +207,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:27:23.730656+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:05.836158+00:00. JAX 0.9.2.
 
 ```text
 Forward program:
@@ -304,8 +304,7 @@ PASS: internals-01
 **Predict before running:** Which intermediate values and shapes will the derivative need? Write the analytic gradient for $[-1, 0, 2]$ before running.
 
 ```python
-# Experiment — Trace and verify the derivative: The new input checks the derivative independently of the...
-# Differentiate the objective to obtain `derivative_program` via automatic differentiation.
+# Experiment — Trace and verify the derivative
 derivative_program = jax.make_jaxpr(jax.grad(shifted_square_sum))(x)
 print("Derivative program:", derivative_program)
 other = jnp.array([-1., 0., 2.])
@@ -323,7 +322,7 @@ The new input checks the derivative independently of the original sample; trace 
 **Predict before running:** Will the offset vector appear as a second ordinary input in the captured version?
 
 ```python
-# Experiment — Inspect a captured array: The function signature determines ordinary inputs; closed...
+# Experiment — Inspect a captured array
 offset = jnp.array([1., 2., 3.])
 def captured(z):
     return jnp.sum(z + offset)
@@ -478,7 +477,7 @@ Both cond branches must return matching scalar types.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce and repair a traced boolean failure (Transfer / diagnosis): The repair makes runtime control flow explicit and verifies...
+# Reproduce and repair a traced boolean failure (Transfer / diagnosis)
 def bad_branch(z):
     if z[0] > 0:
         return ...  # TODO: return computed result
@@ -499,7 +498,7 @@ assert jnp.allclose(jax.jit(repaired)(-x), 6.)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reproduce and repair a traced boolean failure (Transfer / diagnosis): The repair makes runtime control flow explicit and verifies...
+# Reproduce and repair a traced boolean failure (Transfer / diagnosis)
 def bad_branch(z):
     if z[0] > 0:
         return jnp.sum(z)

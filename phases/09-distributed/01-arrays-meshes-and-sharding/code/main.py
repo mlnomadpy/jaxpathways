@@ -1,7 +1,7 @@
 """Arrays, meshes, and sharding: worked experiments and reference solutions. CPU checks."""
 
 # Start a fresh CPU runtime
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -30,7 +30,7 @@ sum_rows = jax.jit(lambda a:a.sum(axis=0), in_shardings=rows, out_shardings=repl
 sum_rows.block_until_ready()
 
 # Inspect and verify
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 for shard in x.addressable_shards:
     # Check tensor shape invariant: `shard.data.shape == (2,4)`
@@ -46,7 +46,7 @@ print("Row-shard shapes:", [s.data.shape for s in x.addressable_shards])
 print("Column-shard shapes:", [s.data.shape for s in x_columns.addressable_shards])
 print("Column sums:", np.asarray(sum_rows))
 
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -73,7 +73,7 @@ sum_rows = jax.jit(lambda a:a.sum(axis=0), in_shardings=rows, out_shardings=repl
 # Wait for device work to finish before timing it or comparing its result on the host.
 sum_rows.block_until_ready()
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 for shard in x.addressable_shards:
     # Check tensor shape invariant: `shard.data.shape == (2,4)`
@@ -99,7 +99,7 @@ for name, array in [('Row partition', x), ('Column partition', x_columns)]:
 visual_data = {'kind': 'panels', 'panels': panels}
 
 # Experiment: Reshard the same global values
-# Experiment — Reshard the same global values: Resharding changes ownership of values, not their mathematical...
+# Experiment — Reshard the same global values
 moved = jax.device_put(x, columns)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(moved), host)
@@ -108,18 +108,17 @@ assert all(s.data.shape == (8,1) for s in moved.addressable_shards)
 print("Resharded values preserved")
 
 # Experiment: Reduce a dimension that is not partitioned
-# Experiment — Reduce a dimension that is not partitioned: All four columns for a row are already local in row...
+# Experiment — Reduce a dimension that is not partitioned
 vector_rows = NamedSharding(mesh, P("data"))
 # Wrap with `jax.jit` (`per_row`) so XLA traces and compiles the function.
 per_row = jax.jit(lambda a:a.sum(axis=1), in_shardings=rows, out_shardings=vector_rows)(x)
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.asarray(per_row), np.arange(6,119,16,dtype=np.float32))
 # Check tensor shape invariant: `all(s.data.shape == (2,) for s in per_row.addressable_shards)`
 assert all(s.data.shape == (2,) for s in per_row.addressable_shards)
 print("Row sums:", np.asarray(per_row))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Compare row and column layouts of a (12,8) array, and repair a ten-row...
+# Exercise solution
 other = np.arange(96,dtype=np.float32).reshape(12,8)
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.
@@ -148,7 +147,7 @@ np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e
 assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))
 
 # Reference practice: Change both dimensions
-# Change both dimensions (Challenge): The row layout owns three complete feature vectors per...
+# Change both dimensions (Challenge)
 other = np.arange(96,dtype=np.float32).reshape(12,8)
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.

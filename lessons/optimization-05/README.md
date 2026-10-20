@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Read a dot product geometrically and separate a vector into a projection and an orthogonal residual.
@@ -65,7 +67,7 @@ The zero vector has no direction. Projecting onto it would divide by $0$, and co
 Create main.py in your activated CPU course environment. Add the vectors and verify their lengths before adding a projection.
 
 ```python
-# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Step 1 — Draw the two vectors
 import jax.numpy as jnp
 u = jnp.array([3.0, 4.0])
 a = jnp.array([1.0, 0.0])
@@ -109,7 +111,7 @@ You should see $[3,0]$ and $[0,4]$; the squared lengths sum to $25$.
 ## Run the example
 
 ```python
-# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Step 1 — Draw the two vectors
 import jax.numpy as jnp
 u = jnp.array([3.0, 4.0])
 a = jnp.array([1.0, 0.0])
@@ -160,7 +162,7 @@ visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:15.899012+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:20.732527+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -189,7 +191,7 @@ A line does not change when its nonzero direction is rescaled. A dot product alo
 **Predict before running:** For $a=(1,1)$, predict the projection coefficient and leftover.
 
 ```python
-# Experiment — Rotate the line: Changing direction changes what can be explained; merely...
+# Experiment — Rotate the line
 diagonal = jnp.array([1.0, 1.0])
 p2 = project(u, diagonal)
 assert jnp.allclose(p2, jnp.array([3.5, 3.5]))
@@ -309,7 +311,7 @@ Check the directions have zero dot product. Nonorthogonal directions can count t
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
+# Use two perpendicular directions (Transfer / diagnosis)
 a1 = jnp.array(...)  # TODO: compute a1
 a2 = jnp.array(...)  # TODO: compute a2
 assert jnp.allclose(project(u, a1) + project(u, a2), u)  # TODO: complete assertion check
@@ -319,7 +321,7 @@ assert not jnp.allclose(project(u, a) + project(u, a1), u)  # TODO: complete ass
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
+# Use two perpendicular directions (Transfer / diagnosis)
 a1 = jnp.array([1.0, 1.0])
 a2 = jnp.array([1.0, -1.0])
 assert jnp.allclose(project(u, a1) + project(u, a2), u)

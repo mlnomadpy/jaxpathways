@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Represent a preference as a comparison
@@ -108,13 +110,12 @@ The loss sees feature differences. Predict why adding a common score offset late
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -173,13 +174,12 @@ def preference_loss(w, chosen, rejected):
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -248,7 +248,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:54.686301+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:58.074779+00:00. JAX 0.9.2.
 
 ```text
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
@@ -283,12 +283,11 @@ This checks label direction. A decreasing incorrectly signed loss can train a co
 **Predict before running:** If a pair is labeled both ways equally often, should the best margin be positive, negative or zero?
 
 ```python
-# Experiment — Fit conflicting labels conceptually: Disagreement is not fixed by flipping labels until training...
+# Experiment — Fit conflicting labels conceptually
 conflict = lambda margin: 0.5 * (
     jax.nn.softplus(-margin) + jax.nn.softplus(margin)
 )
 np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)
 assert float(conflict(2.0)) > float(conflict(0.0))
 np.testing.assert_allclose(conflict(2.0), conflict(-2.0))
@@ -310,13 +309,12 @@ Calculate the initial loss for tied reward scores independently and verify the t
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Calculate the initial loss for tied reward scores independently and...
+# Exercise solution
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
@@ -327,7 +325,7 @@ print('Tied baseline and preference directions verified.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Calculate the initial loss for tied reward scores independently and...
+# Exercise solution
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
@@ -404,14 +402,14 @@ Use NumPy sigmoid values for the independent calculation; reversing both feature
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Reduce along axis=0 to compute `analytic`.
-3. Differentiate the objective to obtain gradients ``.
+1. Derive the linear reward gradient (Challenge)
+2. Transfer the device result to the host for an independent NumPy comparison.
+3. Reduce along axis=0 to compute `analytic`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
+# Derive the linear reward gradient (Challenge)
 probe_w = jnp.array(...)  # TODO: compute probe_w
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -421,7 +419,6 @@ for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     analytic = np.mean(...)  # TODO: compute analytic
         (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
     )
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(
         jax.grad(preference_loss)(probe_w, positive, negative),
         analytic,
@@ -433,7 +430,7 @@ print('Independent reward gradients agree in both label directions.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
+# Derive the linear reward gradient (Challenge)
 probe_w = jnp.array([0.2, -0.4])
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -443,7 +440,6 @@ for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     analytic = np.mean(
         (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
     )
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(
         jax.grad(preference_loss)(probe_w, positive, negative),
         analytic,

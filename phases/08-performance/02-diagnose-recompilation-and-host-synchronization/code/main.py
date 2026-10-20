@@ -1,7 +1,7 @@
 """Diagnose recompilation and host synchronization: worked experiments and reference solutions. CPU checks."""
 
 # Prepare a trace ledger
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
@@ -22,7 +22,7 @@ x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
 jax.block_until_ready((x8, x12))
 
 # Record call signatures and observed traces
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
@@ -51,7 +51,7 @@ assert call_rows[0]["result"] == 140.
 assert call_rows[2]["result"] == 560.
 assert call_rows[3]["result"] == 506.
 
-# Step 1 — Prepare a trace ledger: This CPU experiment deliberately keeps the trace ledger outside...
+# Step 1 — Prepare a trace ledger
 import json
 import time
 import numpy as np
@@ -70,7 +70,7 @@ x8 = jax.device_put(np.arange(8, dtype=np.float32), cpu)
 x12 = jax.device_put(np.arange(12, dtype=np.float32), cpu)
 # Wait for device work to finish before timing it or comparing its result on the host.
 jax.block_until_ready((x8, x12))
-# Step 2 — Record call signatures and observed traces: The ledger relates each controlled signature change to the...
+# Step 2 — Record call signatures and observed traces
 call_rows = []
 def observed_call(label, x, gain):
     before = len(trace_events)
@@ -168,7 +168,7 @@ assert float(wrong) == float(masked) + 3.
 print("Masked versus unmasked padded objective:", float(masked), float(wrong))
 
 # Reference practice: Reproduce and repair runtime Python branching
-# Reproduce and repair runtime Python branching (Diagnosis): The failure identifies a mismatch between Python control...
+# Reproduce and repair runtime Python branching (Diagnosis)
 def broken_branch(values, gain):
     if gain > 1.:
         return jnp.sum(values**2)

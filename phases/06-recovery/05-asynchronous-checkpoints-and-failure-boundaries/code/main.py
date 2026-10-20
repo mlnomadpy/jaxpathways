@@ -22,7 +22,7 @@ def accepted():
     return json.loads((root/'LATEST.json').read_text())
 
 # Save, continue and verify
-# Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
+# Step 2 — Save, continue and verify
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 snapshot=transition(state)
 path=root/'step_1'
@@ -81,7 +81,7 @@ def publish(path, step):
 def accepted():
     return json.loads((root/'LATEST.json').read_text())
 
-# Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
+# Step 2 — Save, continue and verify
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 snapshot=transition(state)
 path=root/'step_1'
@@ -153,7 +153,7 @@ assert accepted()['step']==2 and int(snapshot['step'])==1
 print('Step two verified and accepted; next transition agrees.')
 
 # Reference practice: Keep only a genuinely accepted target
-# Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
+# Keep only a genuinely accepted target (Transfer)
 def preflight(record):
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')

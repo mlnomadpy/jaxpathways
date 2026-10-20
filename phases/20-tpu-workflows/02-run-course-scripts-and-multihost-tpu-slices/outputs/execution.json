@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-05",
-  "contentHash": "9fb68e7c90f7b0d569560f2df923fdf485c24d7777a23234be22d658a54db042",
-  "executedAt": "2026-10-20T21:56:40.357317+00:00",
+  "contentHash": "44e2d85ae9e09587eaba030ca5725cfa36247e20f5623a8cf54bde0a66a36a03",
+  "executedAt": "2026-10-20T22:27:13.155520+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "CPU route: python public/exercises/distributed-02.py\nCPU-only route remains excluded from TPU Pod execution\nCorrectly rejected CPU-only lesson for TPU Pod execution\nSlice catalog global chips: {'v5litepod-4': 4, 'v5litepod-8': 8, 'v5litepod-16': 16, 'v6e-16': 16}\nCPU route: python public/exercises/distributed-02.py\nv5litepod-16 global chips: 16 Idle chips without --worker=all: 12\nTotal HBM GiB by slice: {'v5litepod-4': 64, 'v5litepod-8': 128, 'v5litepod-16': 256, 'v6e-16': 512}\nCPU route: python public/exercises/distributed-02.py\nRejected unsafe route: {}\nRejected unsafe route: {'hosts': 4, 'execution_class': 'cpu-only'}\nMulti-host Pod slices: ['v5litepod-16', 'v6e-16']\nPer-host batch: 32 Global batch: 128\nPASS: tpu-05\n",
   "notebookCells": [
     {
-      "sourceHash": "bc94234fde61c7dda622e2aa8cb9d1b2b129ba1bc988ce638c1586bd4504e4e8",
+      "sourceHash": "64a274ca0422617ce9b6bb24b8d3349db535cbc6aa94992776ff56fc9d51a34c",
       "outputs": []
     },
     {
@@ -75,7 +75,7 @@
       ]
     },
     {
-      "sourceHash": "a6e582807169c45bf1f5ecb1fbe7d85a632f8f5222298b818b85fd6d97bdd7ba",
+      "sourceHash": "4232ee72d1477180cd063f4f4f3757c84a61c5957466d012c0700b6f4241fe8c",
       "outputs": [
         {
           "output_type": "stream",
@@ -87,7 +87,7 @@
       ]
     },
     {
-      "sourceHash": "032f532e4d7f01b1a9da375ce3e5d0e462f2c36651719f8c7d33f2ca0a84a553",
+      "sourceHash": "6c26c3cbebb07acc4a8f6e076cad99a074edbb0e80c81588c58bacb5603fdd88",
       "outputs": [
         {
           "output_type": "stream",
@@ -117,11 +117,11 @@
       ]
     },
     {
-      "sourceHash": "d7ff94cb6eb71118971adc5424e3596d26b0d12eee21fdf728e6c61198bc8b49",
+      "sourceHash": "46a8826ee91342dfbaf24f2de34d93eeeaea29f2bad595252fad16975169320e",
       "outputs": []
     },
     {
-      "sourceHash": "a696afed844eca528d41c706b20a8cb7bdaa64a74b5dece60c35b2e7d7e9128c",
+      "sourceHash": "5e51ece79ea14bb66dbb323d9b8eb9d01d84aca3a578f8e276cd147e53a9548a",
       "outputs": [
         {
           "output_type": "stream",

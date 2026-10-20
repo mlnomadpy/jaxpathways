@@ -1,7 +1,7 @@
 """Least squares, rank, and conditioning: worked experiments and reference solutions. CPU checks."""
 
 # Construct an imperfect fit
-# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Step 1 — Construct an imperfect fit
 import jax.numpy as jnp
 import numpy as np
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
@@ -9,7 +9,7 @@ y = jnp.array([1.0, 2.0, 2.0])
 expected = jnp.array([2 / 3, 5 / 3])
 
 # Solve and inspect the residual
-# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
+# Step 2 — Solve and inspect the residual
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
 r = X @ w - y
 assert int(rank) == 2
@@ -17,28 +17,28 @@ assert jnp.allclose(w, expected, atol=2e-06)
 assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
 # Compare independent references
-# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Step 3 — Compare independent references
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
 # Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
 assert np.allclose(np.asarray(w), np_w, atol=2e-06)
 print('weights / rank / MSE:', w, rank, jnp.mean(r * r))
 
-# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...
+# Step 1 — Construct an imperfect fit
 import jax.numpy as jnp
 import numpy as np
 X = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])
 y = jnp.array([1.0, 2.0, 2.0])
 expected = jnp.array([2 / 3, 5 / 3])
 
-# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...
+# Step 2 — Solve and inspect the residual
 w, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)
 r = X @ w - y
 assert int(rank) == 2
 assert jnp.allclose(w, expected, atol=2e-06)
 assert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)
 
-# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...
+# Step 3 — Compare independent references
 assert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)
 # Transfer the device result to the host for an independent NumPy comparison.
 np_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]
@@ -58,7 +58,7 @@ assert jnp.allclose(duplicate @ w_dup, 3 * a, atol=3e-06)
 assert jnp.allclose(duplicate @ jnp.array([1.0, 2.0]), duplicate @ jnp.array([0.0, 3.0]))
 
 # Experiment: Perturb a weak direction
-# Experiment — Perturb a weak direction: Nearly dependent columns can amplify target perturbations while...
+# Experiment — Perturb a weak direction
 near = jnp.array([[1.0, 1.0], [0.0, 0.01], [0.0, 0.0]])
 base = near @ jnp.array([1.0, 1.0])
 changed = base + jnp.array([0.0, 0.001, 0.0])

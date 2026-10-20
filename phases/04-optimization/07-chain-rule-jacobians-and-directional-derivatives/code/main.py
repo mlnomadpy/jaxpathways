@@ -1,7 +1,7 @@
 """The chain rule, Jacobians, and directions: worked experiments and reference solutions. CPU checks."""
 
 # Write the vector function
-# Step 1 — Write the vector function: The matrix is written from the derivatives, not obtained from an...
+# Step 1 — Write the vector function
 import jax
 import jax.numpy as jnp
 
@@ -13,7 +13,7 @@ J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
 # Push a direction and pull a sensitivity
-# Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
+# Step 2 — Push a direction and pull a sensitivity
 out, jv = jax.jvp(f, (x,), (v,))
 _, pullback = jax.vjp(f, x)
 c = out
@@ -30,7 +30,7 @@ assert jnp.allclose(jax.grad(loss)(x), J.T @ c)
 assert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))
 print('Jv / loss gradient:', jv, jt_c)
 
-# Step 1 — Write the vector function: The matrix is written from the derivatives, not obtained from an...
+# Step 1 — Write the vector function
 import jax
 import jax.numpy as jnp
 
@@ -41,7 +41,7 @@ v = jnp.array([1.0, -1.0])
 J = jnp.array([[4.0, 1.0], [3.0, 2.0]])
 assert jnp.allclose(f(x), jnp.array([7.0, 6.0]))
 
-# Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...
+# Step 2 — Push a direction and pull a sensitivity
 out, jv = jax.jvp(f, (x,), (v,))
 _, pullback = jax.vjp(f, x)
 c = out
@@ -67,7 +67,7 @@ fd = (f(x + h * v) - f(x - h * v)) / (2 * h)
 assert jnp.allclose(fd, J @ v, atol=0.0001, rtol=0.0001)
 
 # Experiment: Change the point
-# Experiment — Change the point: The Jacobian describes sensitivity at the current point; it is...
+# Experiment — Change the point
 x2 = jnp.array([0.0, 1.0])
 J2 = jnp.array([[0.0, 1.0], [1.0, 0.0]])
 assert jnp.allclose(jax.jacrev(f)(x2), J2)
@@ -80,8 +80,7 @@ def weighted_loss(x):
 assert jnp.allclose(jax.grad(weighted_loss)(x), jnp.array([10.0, 5.0]))
 
 # Reference practice: Find the broken derivative path
-# Find the broken derivative path (Transfer / diagnosis): Equal forward values do not imply equal differentiation...
-# Define `detached(x)` to evaluate the objective and its automatic derivatives:
+# Find the broken derivative path (Transfer / diagnosis)
 def detached(x):
     a = jax.lax.stop_gradient(x[0])
     return jnp.array([a * a + x[1], a * x[1]])
@@ -90,7 +89,7 @@ assert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0,
 assert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))
 
 # Reference practice: Transfer to unequal dimensions
-# Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...
+# Transfer to unequal dimensions (Transfer / diagnosis)
 A = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])
 c3 = jnp.array([1.0, -1.0, 2.0])
 _, back = jax.vjp(lambda z: A @ z, x)

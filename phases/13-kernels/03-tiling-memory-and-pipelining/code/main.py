@@ -1,7 +1,7 @@
 """Tiling, memory, and pipelining: worked experiments and reference solutions. CPU checks."""
 
 # Reuse the checked arithmetic and add a real pipeline
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -99,7 +99,7 @@ for bm,bn in configurations:
     np.testing.assert_allclose(result,reference,rtol=1e-6,atol=1e-6)
 print("programs, padded elements, modeled data-buffer bytes:",metadata)
 
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -200,14 +200,14 @@ labels=['8 x 128','16 x 128','16 x 256']
 visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (configuration-derived)','series':[{'label':'grid programs','y':[row[0] for row in metadata]}]},{'kind':'bar','labels':labels,'ylabel':'modeled data buffers (KiB)','series':[{'label':'double-buffered inputs and output','y':[row[2]/1024 for row in metadata]}]}]}
 
 # Experiment: Change input buffer count without changing the result
-# Experiment — Change input buffer count without changing the result: More input buffering changes potential overlap and storage, not...
+# Experiment — Change input buffer count without changing the result
 three=pipelined_axpy(x,y,buffers=3)
 np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)
 np.testing.assert_array_equal(three,buffered)
 print("Three-buffer schedule matches the two-buffer result")
 
 # Experiment: Check a one-tile pipeline
-# Experiment — Check a one-tile pipeline: A one-tile pipeline has no next tile with which to overlap its...
+# Experiment — Check a one-tile pipeline
 small_x=jnp.arange(8*128,dtype=jnp.float32).reshape(8,128)/100
 small_y=jnp.ones_like(small_x)
 small=pipelined_axpy(small_x,small_y)
@@ -216,12 +216,10 @@ np.testing.assert_allclose(small,2*np.asarray(small_x)+1,rtol=1e-6,atol=1e-6)
 print("Single-tile pipeline checked")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Use a (9,129) random fixture and verify synchronous,...
+# Exercise solution
 rng=np.random.default_rng(23)
 for dtype in (jnp.float32,jnp.bfloat16):
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
     expected=(2*a.astype(jnp.float32)+b.astype(jnp.float32)).astype(dtype)
     for buffers,sync in [(2,True),(2,False),(3,False)]:
@@ -239,7 +237,7 @@ assert rejected
 print("Unsupported pipeline tile rejected")
 
 # Reference practice: Estimate the price of a third input buffer
-# Estimate the price of a third input buffer (Challenge): A third slot for each input increases this limited...
+# Estimate the price of a third input buffer (Challenge)
 for bm,bn in configurations:
     two=(2*2+2)*bm*bn*4
     three=(2*3+2)*bm*bn*4

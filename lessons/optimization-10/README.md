@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive a ridge solution, distinguish data loss from penalized loss, and select a penalty using held-out data.
@@ -98,7 +100,7 @@ The data gradient and penalty gradient cancel at $w=2$.
 Append the three losses and run python main.py.
 
 ```python
-# Step 3 — Separate the quantities you report: Training prediction loss is 1, validation loss is 0, and the...
+# Step 3 — Separate the quantities you report
 train = mse(w, X, y)
 validation = mse(w, Xv, yv)
 penalized = objective(w)
@@ -132,7 +134,7 @@ objective = lambda w: mse(w, X, y) + lam * jnp.dot(w, w)
 assert jnp.allclose(w, jnp.array([2.0]), atol=1e-06)
 assert jnp.allclose(jax.grad(objective)(w), jnp.zeros(1), atol=1e-06)
 
-# Step 3 — Separate the quantities you report: Training prediction loss is 1, validation loss is 0, and the...
+# Step 3 — Separate the quantities you report
 train = mse(w, X, y)
 validation = mse(w, Xv, yv)
 penalized = objective(w)
@@ -163,14 +165,13 @@ The fitted weight is $w=3/(1+\lambda)$. The training targets favor slope $3$, wh
 Select the penalty using the validation minimum, not the intersection of the curves or the smallest training error. Here that choice is $0.5$. A zero validation error is a property of this tiny synthetic example, not a promise that regularization removes all error on real data.
 
 ```python
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(0.0, 2.0, 41)
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'ridge penalty', 'ylabel': 'mean squared prediction error', 'series': [{'label': 'training', 'y': [float(mse(ridge(X, y, float(a)), X, y)) for a in grid]}, {'label': 'validation', 'y': [float(mse(ridge(X, y, float(a)), Xv, yv)) for a in grid]}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:49:15.837378+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:43.467134+00:00. JAX 0.9.2.
 
 ```text
 train / validation / objective: 1.0 0.0 3.0
@@ -185,7 +186,7 @@ PASS: optimization-10
 **Predict before running:** Will the penalty with the lowest training error also have the lowest validation error?
 
 ```python
-# Experiment — Sweep the penalty: Regularization deliberately trades training fit against a...
+# Experiment — Sweep the penalty
 candidates = jnp.array([0.0, 0.5, 2.0])
 fits = jnp.stack([ridge(X, y, float(a)) for a in candidates])
 training = jnp.array([mse(a, X, y) for a in fits])
@@ -206,7 +207,7 @@ Regularization deliberately trades training fit against a preference for smaller
 **Predict before running:** If every training example is repeated, should the same mean-loss objective choose different weights?
 
 ```python
-# Experiment — Duplicate the training set: Using a mean data loss keeps the penalty tradeoff unchanged...
+# Experiment — Duplicate the training set
 repeat = ridge(jnp.tile(X, (2, 1)), jnp.tile(y, 2), lam)
 assert jnp.allclose(repeat, w, atol=1e-06)
 ```
@@ -228,13 +229,12 @@ For a target slope of $4$ and penalty $\lambda=1$, derive the fitted slope and v
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: For a target slope of 4 and penalty \lambda=1, derive the fitted slope...
+# Exercise solution
 y4 = jnp.array(...)  # TODO: compute y4
 w4 = ridge(...)  # TODO: compute w4
 assert jnp.allclose(w4, jnp.array([2.0]))  # TODO: complete assertion check
@@ -244,7 +244,7 @@ assert jnp.allclose(jax.grad(lambda z: mse(z, X, y4) + jnp.dot(z, z))(w4), jnp.z
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: For a target slope of 4 and penalty \lambda=1, derive the fitted slope...
+# Exercise solution
 y4 = jnp.array([-4.0, 4.0])
 w4 = ridge(X, y4, 1.0)
 assert jnp.allclose(w4, jnp.array([2.0]))
@@ -279,7 +279,7 @@ Use a diagonal mask $\operatorname{diag}(1,0)$.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Do not accidentally shrink the intercept (Transfer / diagnosis): The mask expresses a modeling choice: shrink feature effects...
+# Do not accidentally shrink the intercept (Transfer / diagnosis)
 x = jnp.array(...)  # TODO: compute x
 A = jnp.stack(...)  # TODO: compute A
 target = jnp.full(...)  # TODO: compute target
@@ -293,7 +293,7 @@ assert jnp.allclose(all_penalized, jnp.array([0.0, 2.5]))  # TODO: complete asse
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Do not accidentally shrink the intercept (Transfer / diagnosis): The mask expresses a modeling choice: shrink feature effects...
+# Do not accidentally shrink the intercept (Transfer / diagnosis)
 x = jnp.array([-1.0, 0.0, 1.0])
 A = jnp.stack([x, jnp.ones_like(x)], axis=1)
 target = jnp.full((3,), 5.0)

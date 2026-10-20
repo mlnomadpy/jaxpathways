@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Keep three identities separate
@@ -116,7 +118,6 @@ def preference_loss(w, chosen, rejected):
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Define `ppo_loss(logits, old_logps, actions, advantages...)` to evaluate the objective and its automatic derivatives:
 def ppo_loss(
     logits, old_logps, actions, advantages, reference_logps, beta=0.1, clip=0.2
 ):
@@ -144,7 +145,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -168,13 +168,12 @@ The reference is stored before policy updates. This step also creates the sampli
 Append this block to main.py and run python main.py again. Keep the earlier blocks above it.
 
 ```python
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -242,7 +241,6 @@ features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 reward_w = jnp.zeros(2)
-# Differentiate the objective to obtain `reward_step` via automatic differentiation.
 reward_step = jax.jit(jax.grad(lambda w: preference_loss(w, chosen, rejected)))
 for _ in range(100):
     reward_w = reward_w - 0.1 * reward_step(reward_w)
@@ -258,13 +256,12 @@ history = []
 kl_history = []
 step = jax.jit(jax.value_and_grad(ppo_loss))
 
-# Step 3 — 3. Collect rollouts and reuse each batch correctly: Each outer iteration collects a fresh batch; each inner step...
+# Step 3 — 3. Collect rollouts and reuse each batch correctly
 for iteration in range(40):
     old = jax.nn.log_softmax(theta)
     probs = jnp.exp(old)
     # Create or split explicit PRNG key(s) (`(key, draw)`) for reproducible randomness.
     key, draw = jax.random.split(key)
-    # Draw pseudorandom samples for `actions` using the explicit RNG state.
     actions = jax.random.categorical(draw, old, shape=(128,))
     old_selected = jax.lax.stop_gradient(old[actions])
     advantage = jax.lax.stop_gradient(
@@ -331,7 +328,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:58.101781+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:02.074382+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
@@ -381,7 +378,6 @@ enumerated = jnp.sum(
     probe_probs[:, None] * (rewards - constant)[:, None] * score_jacobian,
     axis=0,
 )
-# Differentiate the objective to obtain `exact` via automatic differentiation.
 exact = jax.grad(lambda logits: jnp.sum(jax.nn.softmax(logits) * rewards))(
     probe
 )
@@ -403,13 +399,12 @@ Check the KL at the fixed reference and compare it with the final policy’s exa
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Check the KL at the fixed reference and compare it with the final...
+# Exercise solution
 zero_kl = float(...)  # TODO: compute zero_kl
 assert zero_kl  # TODO: complete assertion check
 print('Reference/final KL:', zero_kl, kl_history[-1])
@@ -418,7 +413,7 @@ print('Reference/final KL:', zero_kl, kl_history[-1])
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Check the KL at the fixed reference and compare it with the final...
+# Exercise solution
 zero_kl = float(jnp.sum(jnp.exp(reference) * (reference - reference)))
 assert zero_kl == 0.0 and kl_history[-1] > zero_kl
 print('Reference/final KL:', zero_kl, kl_history[-1])
@@ -444,13 +439,13 @@ Use argnums to inspect only those two inputs.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify detached behavior information (Transfer): Detaching is not enough if you recompute old probabilities...
-# Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+# Verify detached behavior information (Transfer)
 old_grad, adv_grad = jax.grad(...)  # TODO: compute old_grad, adv_grad
     theta, old_selected, actions, advantage, reference, 0.2, 0.2
 )
@@ -462,8 +457,7 @@ print('Behavior log probabilities and advantages are detached.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify detached behavior information (Transfer): Detaching is not enough if you recompute old probabilities...
-# Differentiate the objective to obtain `(old_grad, adv_grad)` via automatic differentiation.
+# Verify detached behavior information (Transfer)
 old_grad, adv_grad = jax.grad(ppo_loss, argnums=(1, 3))(
     theta, old_selected, actions, advantage, reference, 0.2, 0.2
 )
@@ -494,13 +488,12 @@ Evaluate expected reward minus beta times KL for all three policies, and compute
 - `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Compare with the finite-action regularized optimum (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare with the finite-action regularized optimum (Challenge): An independently derived optimum bounds this finite-action...
+# Compare with the finite-action regularized optimum (Challenge)
 beta = ...  # TODO: compute beta
 optimal_logp = jax.nn.log_softmax(...)  # TODO: compute optimal_logp
 
@@ -524,7 +517,7 @@ print(
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Compare with the finite-action regularized optimum (Challenge): An independently derived optimum bounds this finite-action...
+# Compare with the finite-action regularized optimum (Challenge)
 beta = 0.2
 optimal_logp = jax.nn.log_softmax(reference + rewards / beta)
 

@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Pretrain and reload an artifact with recorded data and checkpoint hashes
@@ -88,7 +90,7 @@ Yes. The gate requires both improvement on the target criterion and a source reg
 Create main.py in the CPU environment. These are explicit synthetic classification tasks; the source model is genuinely optimized before it is saved.
 
 ```python
-# Step 1 — 1. Pretrain a small model and retain its source data identity: The same stable cross-entropy accepts binary labels or teacher...
+# Step 1 — 1. Pretrain a small model and retain its source data identity
 import hashlib
 import json
 import tempfile
@@ -134,7 +136,7 @@ The same stable cross-entropy accepts binary labels or teacher probabilities. Th
 Append this artifact boundary. The manifest names the model, synthetic source split, objective and training recipe; adaptation starts from reloaded weights.
 
 ```python
-# Step 2 — 2. Save and reload before adapting: Both branches begin with identical pretrained parameters and a...
+# Step 2 — 2. Save and reload before adapting
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
     checkpoint=Path(directory)/'pretrained.npz'
@@ -151,7 +153,6 @@ with tempfile.TemporaryDirectory() as directory:
     recorded=json.loads(manifest_path.read_text())
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     with np.load(checkpoint,allow_pickle=False) as saved:
-        # Create device-backed JAX array `restored`.
         restored=jnp.asarray(saved['weights'])
 np.testing.assert_array_equal(restored,base)
 frozen=np.array(restored,copy=True)
@@ -167,7 +168,7 @@ Both branches begin with identical pretrained parameters and a fresh stateless S
 Append the independent derivative and final evaluation. Neither optimization branch receives held_X or held_prob.
 
 ```python
-# Step 3 — 3. Compare on a held-out criterion shared by both objectives: The teacher is the known generating rule in this fixture, so...
+# Step 3 — 3. Compare on a held-out criterion shared by both objectives
 w_check=jnp.array([.2,-.3,.1])
 # Transfer the device result to the host for an independent NumPy comparison.
 host_X=np.asarray(adapt_X,dtype=np.float64)
@@ -177,7 +178,6 @@ host_p=1/(1+np.exp(-(host_X@host_w)))
 for targets in (hard_targets,soft_targets):
     # Transfer the device result to the host for an independent NumPy comparison.
     expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)
 metrics={}
 for name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:
@@ -195,7 +195,7 @@ The teacher is the known generating rule in this fixture, so matching it is an e
 ## Run the example
 
 ```python
-# Step 1 — 1. Pretrain a small model and retain its source data identity: The same stable cross-entropy accepts binary labels or teacher...
+# Step 1 — 1. Pretrain a small model and retain its source data identity
 import hashlib
 import json
 import tempfile
@@ -233,7 +233,7 @@ assert pretrain_history[-1]<pretrain_history[0]-.1
 # Transfer the device result to the host for an independent NumPy comparison.
 source_hash=hashlib.sha256(np.asarray(source_X).tobytes()+np.asarray(source_targets).tobytes()).hexdigest()
 
-# Step 2 — 2. Save and reload before adapting: Both branches begin with identical pretrained parameters and a...
+# Step 2 — 2. Save and reload before adapting
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
     checkpoint=Path(directory)/'pretrained.npz'
@@ -250,7 +250,6 @@ with tempfile.TemporaryDirectory() as directory:
     recorded=json.loads(manifest_path.read_text())
     assert hashlib.sha256(checkpoint.read_bytes()).hexdigest()==recorded['weights_sha256']
     with np.load(checkpoint,allow_pickle=False) as saved:
-        # Create device-backed JAX array `restored`.
         restored=jnp.asarray(saved['weights'])
 np.testing.assert_array_equal(restored,base)
 frozen=np.array(restored,copy=True)
@@ -258,7 +257,7 @@ sft,sft_history=train(restored,adapt_X,hard_targets,steps=200)
 distilled,distill_history=train(restored,adapt_X,soft_targets,steps=200)
 np.testing.assert_array_equal(restored,frozen)
 
-# Step 3 — 3. Compare on a held-out criterion shared by both objectives: The teacher is the known generating rule in this fixture, so...
+# Step 3 — 3. Compare on a held-out criterion shared by both objectives
 w_check=jnp.array([.2,-.3,.1])
 # Transfer the device result to the host for an independent NumPy comparison.
 host_X=np.asarray(adapt_X,dtype=np.float64)
@@ -268,7 +267,6 @@ host_p=1/(1+np.exp(-(host_X@host_w)))
 for targets in (hard_targets,soft_targets):
     # Transfer the device result to the host for an independent NumPy comparison.
     expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)
 metrics={}
 for name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:
@@ -306,7 +304,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:09.444591+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:21.253929+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -359,7 +357,7 @@ PASS: deployment-02
 **Predict before running:** Can a logit of $1000$ be evaluated without exponentiating it directly?
 
 ```python
-# Experiment — Check a stable extreme logit: logaddexp evaluates softplus stably; a naive log(1+exp(z)) can...
+# Experiment — Check a stable extreme logit
 extreme=objective(jnp.array([1000.]),jnp.ones((1,1)),jnp.zeros(1))
 assert jnp.isfinite(extreme) and jnp.allclose(extreme,1000.)
 ```
@@ -373,7 +371,7 @@ logaddexp evaluates softplus stably; a naive log(1+exp(z)) can overflow.
 **Predict before running:** If a teacher flips every target probability, does matching it still solve the original task?
 
 ```python
-# Experiment — Reveal teacher error: Distillation optimizes fidelity to its teacher, which is not...
+# Experiment — Reveal teacher error
 wrong,_=train(restored,adapt_X,1-soft_targets,steps=200)
 assert objective(wrong,held_X,held_prob)>objective(distilled,held_X,held_prob)
 print("wrong-teacher held loss:",float(objective(wrong,held_X,held_prob)))
@@ -390,13 +388,12 @@ Adapt for zero steps and verify that predictions exactly match the reloaded chec
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Adapt for zero steps and verify that predictions exactly match the...
+# Exercise solution
 unchanged,_ = train(...)  # TODO: compute unchanged,_
 np.testing.assert_array_equal(unchanged,restored)
 short,_ = train(...)  # TODO: compute short,_
@@ -407,7 +404,7 @@ np.testing.assert_array_equal(restored,frozen)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Adapt for zero steps and verify that predictions exactly match the...
+# Exercise solution
 unchanged,_=train(restored,adapt_X,hard_targets,steps=0)
 np.testing.assert_array_equal(unchanged,restored)
 short,_=train(restored,adapt_X,hard_targets,steps=10)
@@ -438,7 +435,7 @@ Report the actual values; target improvement is not a source-retention guarantee
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep source-task evidence (Transfer / diagnosis): The two tasks prefer different parameters; the measurement...
+# Keep source-task evidence (Transfer / diagnosis)
 retention = ...  # TODO: compute retention
 assert retention[1]  # TODO: complete assertion check
 print("source retention losses:",retention)
@@ -447,7 +444,7 @@ print("source retention losses:",retention)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep source-task evidence (Transfer / diagnosis): The two tasks prefer different parameters; the measurement...
+# Keep source-task evidence (Transfer / diagnosis)
 retention=[float(objective(w,source_X,source_targets)) for w in (restored,sft,distilled)]
 assert retention[1]>retention[0] and retention[2]>retention[0]
 print("source retention losses:",retention)
@@ -476,27 +473,26 @@ Use the same logits, reduction and targets; this check does not call the JAX los
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array ``.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check the loss without autodiff (Transfer / diagnosis): Independent algebra checks normalization and reduction as...
+# Check the loss without autodiff (Transfer / diagnosis)
 probe = np.array(...)  # TODO: compute probe
 z = ...  # TODO: compute z
 expected = np.mean(...)  # TODO: compute expected
-# Create device-backed JAX array ``.
 np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol = ...  # TODO: compute np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol
 ```
 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check the loss without autodiff (Transfer / diagnosis): Independent algebra checks normalization and reduction as...
+# Check the loss without autodiff (Transfer / diagnosis)
 probe=np.array([-.4,.2,.3])
 z=host_X@probe
 expected=np.mean(np.logaddexp(0,z)-np.asarray(soft_targets)*z)
-# Create device-backed JAX array ``.
 np.testing.assert_allclose(objective(jnp.asarray(probe),adapt_X,soft_targets),expected,rtol=1e-6)
 ```
 

@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 100 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Capture an actual warmed CPU trace with named steps.
@@ -110,11 +112,9 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
@@ -129,7 +129,7 @@ Inputs and compilation precede the measured steps. The output remains independen
 Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.
 
 ```python
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -191,18 +191,16 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
 # Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -263,56 +261,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:15.382695+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:14.367377+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-v1gem5qm
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-dnv_69d7
 {
   "input_wait_us": [
-    1513,
-    1064,
-    1452,
-    1507
-  ],
-  "model_and_wait_us": [
-    102,
-    59,
-    54,
-    48
-  ],
-  "step_us": [
-    1626,
+    1580,
+    1542,
     1133,
-    1515,
-    1561
-  ]
-}
-Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-2twr8e2w
-{
-  "input_wait_us": [
-    1514,
-    1328,
-    1196,
-    1512
+    1543
   ],
   "model_and_wait_us": [
-    73,
-    64,
-    50,
-    61
+    244,
+    71,
+    121,
+    95
   ],
   "step_us": [
-    1595,
-    1416,
-    1252,
-    1580
+    1847,
+    1625,
+    1264,
+    1647
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [8, 24, 6, 7]
-Wrong double-counted totals: [3182, 2808, 2498, 3153]
-{'minimum_ms': 0.05, 'median_ms': 0.0625, 'maximum_ms': 0.073}
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-j91v2d6n
+{
+  "input_wait_us": [
+    1516,
+    1509,
+    1515,
+    1196
+  ],
+  "model_and_wait_us": [
+    66,
+    37,
+    84,
+    99
+  ],
+  "step_us": [
+    1591,
+    1552,
+    1611,
+    1307
+  ]
+}
+Four named steps verified; host annotations are not isolated device kernels.
+Unattributed outer time, microseconds: [9, 6, 12, 12]
+Wrong double-counted totals: [3173, 3098, 3210, 2602]
+{'minimum_ms': 0.037, 'median_ms': 0.07500000000000001, 'maximum_ms': 0.099}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 
@@ -347,13 +345,12 @@ Convert every model interval to milliseconds and summarize its minimum, median a
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Convert every model interval to milliseconds and summarize its...
+# Exercise solution
 model_ms = np.asarray(...)  # TODO: compute model_ms
 summary = ...  # TODO: compute summary
 assert summary['minimum_ms']  # TODO: complete assertion check
@@ -364,7 +361,7 @@ print(summary)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Convert every model interval to milliseconds and summarize its...
+# Exercise solution
 model_ms=np.asarray(model_us)/1000
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']

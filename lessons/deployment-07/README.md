@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Separate training from inference
@@ -196,7 +198,7 @@ Two valid batches pass and three deliberately invalid cases fail. These are proc
 ## Run the example
 
 ```python
-# Containerize a model service and verify its boundary: Containerization packages a runtime environment; a running...
+# Containerize a model service and verify its boundary
 import hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
 MODEL = {'schema': 1, 'weight': 2., 'bias': 1.}
@@ -270,7 +272,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:25.411099+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:47.574303+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3
@@ -291,7 +293,7 @@ PASS: deployment-07
 **Predict before running:** Will a three-element request give the same values as three singleton requests?
 
 ```python
-# Experiment — Change the batch without changing the model: Batching changes transport shape, not the per-observation...
+# Experiment — Change the batch without changing the model
 batch=[-.25,.75,2.]
 assert [MODEL['weight']*x+MODEL['bias'] for x in batch]==[.5,2.5,5.]
 print('Independent three-input predictions: 0.5, 2.5, 5.0')
@@ -306,7 +308,7 @@ Batching changes transport shape, not the per-observation prediction contract. A
 **Predict before running:** Will a matching SHA-256 digest make an infinite model coefficient valid?
 
 ```python
-# Experiment — Rehash an invalid model and watch validation reject it: Python accepts the nonstandard Infinity token in this fixture...
+# Experiment — Rehash an invalid model and watch validation reject it
 invalid_model = dict(MODEL, weight=float('inf'))
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
@@ -332,13 +334,12 @@ Reject an artifact whose bytes changed after its expected digest was recorded.
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Reject an artifact whose bytes changed after its expected digest was...
+# Exercise solution
 original = json.dumps(...)  # TODO: compute original
 mutated = json.dumps(...)  # TODO: compute mutated
 assert hashlib.sha256(original).hexdigest()  # TODO: complete assertion check
@@ -348,7 +349,7 @@ print('Changed artifact requires a new recorded digest.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Reject an artifact whose bytes changed after its expected digest was...
+# Exercise solution
 original=json.dumps(MODEL,sort_keys=True).encode()
 mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
 assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
@@ -372,13 +373,13 @@ The validation boundary should reject before producing JSON predictions.
 ### How to write: Reject a nonfinite request — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
+1. Reject a nonfinite request (transfer)
 2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
+# Reject a nonfinite request (transfer)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as tmp:
     p = Path(...)  # TODO: compute p
@@ -393,7 +394,7 @@ print('Nonfinite input rejected before output.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
+# Reject a nonfinite request (transfer)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as tmp:
     p=Path(tmp)

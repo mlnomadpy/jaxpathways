@@ -48,23 +48,23 @@
       {
         "title": "Construct an imperfect fit",
         "instruction": "Create main.py and add this small matrix and target. Work out the proposed weights on paper.",
-        "code": "# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...\nimport jax.numpy as jnp\nimport numpy as np\nX = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])\ny = jnp.array([1.0, 2.0, 2.0])\nexpected = jnp.array([2 / 3, 5 / 3])",
+        "code": "# Step 1 — Construct an imperfect fit\nimport jax.numpy as jnp\nimport numpy as np\nX = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])\ny = jnp.array([1.0, 2.0, 2.0])\nexpected = jnp.array([2 / 3, 5 / 3])",
         "explanation": "No weights can match all three targets, so a nonzero residual is expected."
       },
       {
         "title": "Solve and inspect the residual",
         "instruction": "Append the direct solve and compute the error from the actual predictions.",
-        "code": "# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...\nw, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)\nr = X @ w - y\nassert int(rank) == 2\nassert jnp.allclose(w, expected, atol=2e-06)\nassert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)",
+        "code": "# Step 2 — Solve and inspect the residual\nw, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)\nr = X @ w - y\nassert int(rank) == 2\nassert jnp.allclose(w, expected, atol=2e-06)\nassert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)",
         "explanation": "Perpendicular residuals verify optimality for this unconstrained least-squares problem."
       },
       {
         "title": "Compare independent references",
         "instruction": "Append the mean loss and a NumPy float64 solve; run python main.py.",
-        "code": "# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...\nassert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]\nassert np.allclose(np.asarray(w), np_w, atol=2e-06)\nprint('weights / rank / MSE:', w, rank, jnp.mean(r * r))",
+        "code": "# Step 3 — Compare independent references\nassert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]\nassert np.allclose(np.asarray(w), np_w, atol=2e-06)\nprint('weights / rank / MSE:', w, rank, jnp.mean(r * r))",
         "explanation": "The hand result and a separate numerical implementation agree within float32 tolerance."
       }
     ],
-    "code": "# Step 1 — Construct an imperfect fit: No weights can match all three targets, so a nonzero residual is...\nimport jax.numpy as jnp\nimport numpy as np\nX = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])\ny = jnp.array([1.0, 2.0, 2.0])\nexpected = jnp.array([2 / 3, 5 / 3])\n\n# Step 2 — Solve and inspect the residual: Perpendicular residuals verify optimality for this unconstrained...\nw, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)\nr = X @ w - y\nassert int(rank) == 2\nassert jnp.allclose(w, expected, atol=2e-06)\nassert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)\n\n# Step 3 — Compare independent references: The hand result and a separate numerical implementation agree...\nassert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]\nassert np.allclose(np.asarray(w), np_w, atol=2e-06)\nprint('weights / rank / MSE:', w, rank, jnp.mean(r * r))",
+    "code": "# Step 1 — Construct an imperfect fit\nimport jax.numpy as jnp\nimport numpy as np\nX = jnp.array([[1.0, 0.0], [0.0, 1.0], [1.0, 1.0]])\ny = jnp.array([1.0, 2.0, 2.0])\nexpected = jnp.array([2 / 3, 5 / 3])\n\n# Step 2 — Solve and inspect the residual\nw, _, rank, singular = jnp.linalg.lstsq(X, y, rcond=None)\nr = X @ w - y\nassert int(rank) == 2\nassert jnp.allclose(w, expected, atol=2e-06)\nassert jnp.allclose(X.T @ r, jnp.zeros(2), atol=2e-06)\n\n# Step 3 — Compare independent references\nassert jnp.allclose(jnp.mean(r * r), 1 / 9, atol=2e-06)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp_w = np.linalg.lstsq(np.asarray(X, dtype=np.float64), np.asarray(y, dtype=np.float64), rcond=None)[0]\nassert np.allclose(np.asarray(w), np_w, atol=2e-06)\nprint('weights / rank / MSE:', w, rank, jnp.mean(r * r))",
     "output": "Weights near \\((2/3,5/3)\\), rank \\(2\\), mean squared error near \\(1/9\\).",
     "experiments": [
       {
@@ -77,7 +77,7 @@
       {
         "title": "Perturb a weak direction",
         "prediction": "If two columns differ by only \\(0.01\\) in one row, can a target change of \\(0.001\\) move a weight by much more?",
-        "code": "# Experiment — Perturb a weak direction: Nearly dependent columns can amplify target perturbations while...\nnear = jnp.array([[1.0, 1.0], [0.0, 0.01], [0.0, 0.0]])\nbase = near @ jnp.array([1.0, 1.0])\nchanged = base + jnp.array([0.0, 0.001, 0.0])\nw0 = jnp.linalg.lstsq(near, base, rcond=None)[0]\nw1 = jnp.linalg.lstsq(near, changed, rcond=None)[0]\nassert jnp.allclose(w1 - w0, jnp.array([-0.1, 0.1]), atol=5e-05)\nprint('condition / target change / weight change:', jnp.linalg.cond(near), jnp.linalg.norm(changed - base), jnp.linalg.norm(w1 - w0))",
+        "code": "# Experiment — Perturb a weak direction\nnear = jnp.array([[1.0, 1.0], [0.0, 0.01], [0.0, 0.0]])\nbase = near @ jnp.array([1.0, 1.0])\nchanged = base + jnp.array([0.0, 0.001, 0.0])\nw0 = jnp.linalg.lstsq(near, base, rcond=None)[0]\nw1 = jnp.linalg.lstsq(near, changed, rcond=None)[0]\nassert jnp.allclose(w1 - w0, jnp.array([-0.1, 0.1]), atol=5e-05)\nprint('condition / target change / weight change:', jnp.linalg.cond(near), jnp.linalg.norm(changed - base), jnp.linalg.norm(w1 - w0))",
         "output": "The target change has length \\(0.001\\), but the weight change has length about \\(0.1414\\).",
         "explanation": "Nearly dependent columns can amplify target perturbations while preserving a close prediction fit."
       }

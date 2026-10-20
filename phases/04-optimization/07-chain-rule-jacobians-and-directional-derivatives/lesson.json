@@ -49,13 +49,13 @@
       {
         "title": "Write the vector function",
         "instruction": "Create main.py. Define the function, its input and the hand-derived Jacobian.",
-        "code": "# Step 1 — Write the vector function: The matrix is written from the derivatives, not obtained from an...\nimport jax\nimport jax.numpy as jnp\n\ndef f(x):\n    return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])\nx = jnp.array([2.0, 3.0])\nv = jnp.array([1.0, -1.0])\nJ = jnp.array([[4.0, 1.0], [3.0, 2.0]])\nassert jnp.allclose(f(x), jnp.array([7.0, 6.0]))",
+        "code": "# Step 1 — Write the vector function\nimport jax\nimport jax.numpy as jnp\n\ndef f(x):\n    return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])\nx = jnp.array([2.0, 3.0])\nv = jnp.array([1.0, -1.0])\nJ = jnp.array([[4.0, 1.0], [3.0, 2.0]])\nassert jnp.allclose(f(x), jnp.array([7.0, 6.0]))",
         "explanation": "The matrix is written from the derivatives, not obtained from an autodiff call."
       },
       {
         "title": "Push a direction and pull a sensitivity",
         "instruction": "Append these two transformations; predict both products first.",
-        "code": "# Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...\nout, jv = jax.jvp(f, (x,), (v,))\n_, pullback = jax.vjp(f, x)\nc = out\njt_c = pullback(c)[0]\nassert jnp.allclose(jv, jnp.array([3.0, 1.0]))\nassert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))",
+        "code": "# Step 2 — Push a direction and pull a sensitivity\nout, jv = jax.jvp(f, (x,), (v,))\n_, pullback = jax.vjp(f, x)\nc = out\njt_c = pullback(c)[0]\nassert jnp.allclose(jv, jnp.array([3.0, 1.0]))\nassert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))",
         "explanation": "Forward mode follows an input direction; reverse mode starts with output sensitivity."
       },
       {
@@ -65,7 +65,7 @@
         "explanation": "Both routes give directional loss derivative \\(27\\)."
       }
     ],
-    "code": "# Step 1 — Write the vector function: The matrix is written from the derivatives, not obtained from an...\nimport jax\nimport jax.numpy as jnp\n\ndef f(x):\n    return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])\nx = jnp.array([2.0, 3.0])\nv = jnp.array([1.0, -1.0])\nJ = jnp.array([[4.0, 1.0], [3.0, 2.0]])\nassert jnp.allclose(f(x), jnp.array([7.0, 6.0]))\n\n# Step 2 — Push a direction and pull a sensitivity: Forward mode follows an input direction; reverse mode starts with...\nout, jv = jax.jvp(f, (x,), (v,))\n_, pullback = jax.vjp(f, x)\nc = out\njt_c = pullback(c)[0]\nassert jnp.allclose(jv, jnp.array([3.0, 1.0]))\nassert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))\n\n# Step 3 — Connect to a scalar loss: Both routes give directional loss derivative 27.\ndef loss(x):\n    return 0.5 * jnp.sum(f(x) ** 2)\nassert jnp.allclose(jax.jacfwd(f)(x), J)\nassert jnp.allclose(jax.grad(loss)(x), J.T @ c)\nassert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))\nprint('Jv / loss gradient:', jv, jt_c)",
+    "code": "# Step 1 — Write the vector function\nimport jax\nimport jax.numpy as jnp\n\ndef f(x):\n    return jnp.array([x[0] ** 2 + x[1], x[0] * x[1]])\nx = jnp.array([2.0, 3.0])\nv = jnp.array([1.0, -1.0])\nJ = jnp.array([[4.0, 1.0], [3.0, 2.0]])\nassert jnp.allclose(f(x), jnp.array([7.0, 6.0]))\n\n# Step 2 — Push a direction and pull a sensitivity\nout, jv = jax.jvp(f, (x,), (v,))\n_, pullback = jax.vjp(f, x)\nc = out\njt_c = pullback(c)[0]\nassert jnp.allclose(jv, jnp.array([3.0, 1.0]))\nassert jnp.allclose(jt_c, jnp.array([46.0, 19.0]))\n\n# Step 3 — Connect to a scalar loss: Both routes give directional loss derivative 27.\ndef loss(x):\n    return 0.5 * jnp.sum(f(x) ** 2)\nassert jnp.allclose(jax.jacfwd(f)(x), J)\nassert jnp.allclose(jax.grad(loss)(x), J.T @ c)\nassert jnp.allclose(jnp.dot(c, jv), jnp.dot(v, jt_c))\nprint('Jv / loss gradient:', jv, jt_c)",
     "output": "Forward product \\([3,1]\\), reverse product \\([46,19]\\), directional loss derivative \\(27\\).",
     "experiments": [
       {
@@ -78,7 +78,7 @@
       {
         "title": "Change the point",
         "prediction": "At \\(x=(0,1)\\), which Jacobian entries change?",
-        "code": "# Experiment — Change the point: The Jacobian describes sensitivity at the current point; it is...\nx2 = jnp.array([0.0, 1.0])\nJ2 = jnp.array([[0.0, 1.0], [1.0, 0.0]])\nassert jnp.allclose(jax.jacrev(f)(x2), J2)\nassert jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)",
+        "code": "# Experiment — Change the point\nx2 = jnp.array([0.0, 1.0])\nJ2 = jnp.array([[0.0, 1.0], [1.0, 0.0]])\nassert jnp.allclose(jax.jacrev(f)(x2), J2)\nassert jnp.allclose(jax.jvp(f, (x2,), (v,))[1], J2 @ v)",
         "output": "The new Jacobian swaps the direction coordinates.",
         "explanation": "The Jacobian describes sensitivity at the current point; it is not generally constant."
       }
@@ -91,7 +91,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "A colleague wraps the first input in `jax.lax.stop_gradient`. The forward outputs are unchanged. Show why the gradient no longer matches the intended mathematical function.",
         "hint": "Compare the derivative of the sum of outputs with \\(J^\\mathsf{T}(1,1)\\).",
-        "solution": "# Find the broken derivative path (Transfer / diagnosis): Equal forward values do not imply equal differentiation...\n# Define `detached(x)` to evaluate the objective and its automatic derivatives:\ndef detached(x):\n    a = jax.lax.stop_gradient(x[0])\n    return jnp.array([a * a + x[1], a * x[1]])\nassert jnp.allclose(detached(x), f(x))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))",
+        "solution": "# Find the broken derivative path (Transfer / diagnosis)\ndef detached(x):\n    a = jax.lax.stop_gradient(x[0])\n    return jnp.array([a * a + x[1], a * x[1]])\nassert jnp.allclose(detached(x), f(x))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(detached(z)))(x), jnp.array([0.0, 3.0]))\nassert jnp.allclose(jax.grad(lambda z: jnp.sum(f(z)))(x), jnp.array([7.0, 3.0]))",
         "explanation": "Equal forward values do not imply equal differentiation behavior when derivative rules are deliberately changed."
       },
       {
@@ -99,7 +99,7 @@
         "difficulty": "Transfer / diagnosis",
         "prompt": "For a matrix \\(A\\in\\mathbb{R}^{3\\times2}\\), check that the VJP of \\(Ax\\) maps an output sensitivity of length \\(3\\) into a vector of length \\(2\\).",
         "hint": "The reference is \\(A^\\mathsf{T}c\\), not \\(Ac\\).",
-        "solution": "# Transfer to unequal dimensions (Transfer / diagnosis): Unequal input and output dimensions make a mistaken...\nA = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])\nc3 = jnp.array([1.0, -1.0, 2.0])\n_, back = jax.vjp(lambda z: A @ z, x)\n# Check tensor shape invariant: `back(c3)[0].shape == (2,)`\nassert back(c3)[0].shape == (2,)\nassert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))",
+        "solution": "# Transfer to unequal dimensions (Transfer / diagnosis)\nA = jnp.array([[1.0, 0.0], [0.0, 2.0], [1.0, 1.0]])\nc3 = jnp.array([1.0, -1.0, 2.0])\n_, back = jax.vjp(lambda z: A @ z, x)\n# Check tensor shape invariant: `back(c3)[0].shape == (2,)`\nassert back(c3)[0].shape == (2,)\nassert jnp.allclose(back(c3)[0], jnp.array([3.0, 0.0]))",
         "explanation": "Unequal input and output dimensions make a mistaken transpose visible."
       }
     ],

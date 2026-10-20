@@ -12,12 +12,12 @@
     "orbax-checkpoint": "0.11.34",
     "matplotlib": "3.10.8"
   },
-  "validatedAt": "2026-10-20T21:56:45.625736+00:00",
+  "validatedAt": "2026-10-20T22:27:20.482206+00:00",
   "scope": "Worked examples and reference solutions executed in fresh processes. No TPU validation or learner assessment.",
   "lessons": [
     {
       "lessonId": "welcome-01",
-      "contentHash": "9e8fda75b90b53a87eee52a0a85fdd34b91cc9402b001aab79cb5bb7e13a5450",
+      "contentHash": "8423cf3f67ce80aa4fe5d0aa00e997dd853a800ade0fb0e2930ae8fc5ec4e6b8",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -27,7 +27,7 @@
     },
     {
       "lessonId": "welcome-02",
-      "contentHash": "7b0c44bacae761f0264a7f929ac0930c3fe37cb9043f75229a664bd38c85f89f",
+      "contentHash": "645b39e06125ed2d102dda5a865d3c5c4fb947f5c9961aa3232c63dfe5e63049",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -37,7 +37,7 @@
     },
     {
       "lessonId": "welcome-cpu",
-      "contentHash": "24943b25551dc741278d859fd21a3051ddbf73a02ad1d6110ef2a5eedfc8d41b",
+      "contentHash": "f6434b70381cb0056a66889045e888e6173f172e8136ffb6cd4603c49a045d1e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -47,7 +47,7 @@
     },
     {
       "lessonId": "welcome-03",
-      "contentHash": "77c93577d598eea2837081b157b7574a571f7ecc61f6883793fe3c3cb415fefc",
+      "contentHash": "15e58b86df9f49f4f437222938dd714cb36d0517aafb54e53b4e76e216d8ac4a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -57,7 +57,7 @@
     },
     {
       "lessonId": "arrays-01",
-      "contentHash": "704ad40bd157a3839ab30854d9cb3fa44812428e11cbfc2a88827091b42fb276",
+      "contentHash": "a3bb6118788fca989b23314c257ba7a58ea6e6365f04da86cf19474861399639",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -67,7 +67,7 @@
     },
     {
       "lessonId": "arrays-02",
-      "contentHash": "91c2c3cb4b85f2488bded39a9a9e980606785df0bb1a189afd2cee72165fd1d0",
+      "contentHash": "4db67ef8528da11f293f10068e20aa3f31097a1a7ee28ff433031266ce7cd9cc",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -77,7 +77,7 @@
     },
     {
       "lessonId": "arrays-03",
-      "contentHash": "884b1f21685913283bb5cb2ca4954dfb0cd8983c3983cdd7141c82521867e5bb",
+      "contentHash": "0c37665d7ff65d2b80d713c9bb6931eb486e6b63714901fc8a5dc5d371a2f160",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -87,7 +87,7 @@
     },
     {
       "lessonId": "arrays-04",
-      "contentHash": "a474c0344b7b784a0d52abd61f96dc1b6e358cb884179d3ae4b09cbe974abb18",
+      "contentHash": "f926c94282e2049fb3c98f9c213a060fdde30c494ef85e39a04afef91a93e3a6",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -97,7 +97,7 @@
     },
     {
       "lessonId": "first-gradient",
-      "contentHash": "7d4e1a8d33bd42d837eb63adaff37333d392aa135be8749bed19734005a7a7b5",
+      "contentHash": "846162ca6d1918a1053cdbc1ab09938332c4f980834eb3a4a12ee1a2b48acf20",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -107,7 +107,7 @@
     },
     {
       "lessonId": "transforms-02",
-      "contentHash": "720fb5b4c1989c28b5ee814277d1bb04ebb8f09150580f5c6cc2c52efddc2068",
+      "contentHash": "143de0d851854ca00ca5052c9c0a62a8f0ce17e5c250fdac43f2bba606db8a60",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -117,7 +117,7 @@
     },
     {
       "lessonId": "transforms-03",
-      "contentHash": "429a2a7eb13036b8f754f8696e00e80252a6f366fa9d14ccccd855e80e8086b0",
+      "contentHash": "b41089a0dfc0582d12bf0894697a5b83ae2c2d2b9b4c0b270958d8747ba156c7",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -127,7 +127,7 @@
     },
     {
       "lessonId": "transforms-04",
-      "contentHash": "a1d6c997d9d6dc5b901aebc3bc35142d2df4edfb27071c791061ff5627ca4d48",
+      "contentHash": "58ee043b76ff4e66f63967bcfaa06ab999c063aeebaa607c7404bae97675f56a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -137,7 +137,7 @@
     },
     {
       "lessonId": "transforms-05",
-      "contentHash": "d14e32e214d0bf2d7167d06e6f74a7db9d32ef2600afa317ee62a13edda159e2",
+      "contentHash": "1bbb1235f3cca8eef9edc5edc8462af2711249f9c972bbe3b998fc74d1cc955a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -147,7 +147,7 @@
     },
     {
       "lessonId": "state-01",
-      "contentHash": "6e6675112f433d2f211cf5a835cccb11a27bfabf7a0ca65c8840d47b2f0727f1",
+      "contentHash": "ca960fd49ea304644dca116b6766f2b912c211379d29bb8fbfad8217b649e0d5",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -157,7 +157,7 @@
     },
     {
       "lessonId": "state-02",
-      "contentHash": "f925308c1d4fcd52e254b0e323f4a622b767cf3c2a092263b45e64a265072e8f",
+      "contentHash": "46b5b8ae79f0c374540ba5570f5d8c557f0866c861054f40f86f18db03d0ec7f",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -167,7 +167,7 @@
     },
     {
       "lessonId": "state-03",
-      "contentHash": "64204d61f222b62ec802b01ea2573862854ca6d8891b2e3d38c64a95dc0ff6b5",
+      "contentHash": "a3709c9b6d461910423f241af33ac7adb769d17175f694fe8bd6f7183779e874",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -177,7 +177,7 @@
     },
     {
       "lessonId": "state-04",
-      "contentHash": "38301010efe790ef863f3400153621acfbfc75b0c5d845b774e399a9bd14c05f",
+      "contentHash": "e35a96c1e52da3e7fd60e1d1bf01a74877e2c064cdad3cc91d2b60a9db0f334d",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -187,7 +187,7 @@
     },
     {
       "lessonId": "optimization-05",
-      "contentHash": "ca747e1eb0d4d613ca63e766552975d1e2cc601b994105af5ffe0ec22dadcdb8",
+      "contentHash": "65be516b8a3c2c8a1958b1aa10213bde825088708d2662889d5e7b8ab3455b15",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -197,7 +197,7 @@
     },
     {
       "lessonId": "optimization-01",
-      "contentHash": "66311ace2e1b09f9ea0efacd817270dc691436d629df243cbc632aa37b566186",
+      "contentHash": "6e7589e3cd1096e39f0509479345a55ae53c18a6d07ed7e03eaf347982fdfed8",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -207,7 +207,7 @@
     },
     {
       "lessonId": "optimization-06",
-      "contentHash": "99ebb83b2588f486ad02443acd9944f1780bf3d2ce1380cb8c75827190f470a5",
+      "contentHash": "1ab5193d56d304a3a09ce402b1a141ca054467ab772d29398885f984a79a5ca2",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -217,7 +217,7 @@
     },
     {
       "lessonId": "optimization-07",
-      "contentHash": "499758a4af8dcc767be22fdb00cd1c98150cc3daabc52d08a89a011b8d6b53e4",
+      "contentHash": "4c5f18de4705110739f4068a78104ffbb081ed4bd2e53ff83d77c3856624e77a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -227,7 +227,7 @@
     },
     {
       "lessonId": "optimization-02",
-      "contentHash": "d581ea2e1e53c2e34c4e0f4da850a5ea4b1c80564172bd2d366a0680b2da390f",
+      "contentHash": "0be50ef55518c74254d0b16db4924f42ba82af2aa1bcb1adf3c450df5c76809a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -237,7 +237,7 @@
     },
     {
       "lessonId": "optimization-08",
-      "contentHash": "389af1d93cb7b759bb08d71c9062280d3d63f872566e750d024f18373137b87c",
+      "contentHash": "6ffb85b56b1e4c756a62df10d91c688b9d0721bf35eecfede11a909d9218103e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -247,7 +247,7 @@
     },
     {
       "lessonId": "optimization-03",
-      "contentHash": "2e4b37d7ebf2346a4e9f89ccca269fa111c1c4f0f945004e2e5c67bd6aa10c1b",
+      "contentHash": "83bb5257df37e0b1b7e2727a2234ae001d4ebe881f1bb5e5c719b722b7ff9785",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -257,7 +257,7 @@
     },
     {
       "lessonId": "optimization-09",
-      "contentHash": "109876103016efe621e31b084b962075eda59e9af55f5cc5edfa76590142699b",
+      "contentHash": "a203728004291f3e860d5966eab454e7012aa35c1ae016f0235c0ac57d110811",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -267,7 +267,7 @@
     },
     {
       "lessonId": "optimization-10",
-      "contentHash": "de8266d840ac6e4f1d70f6d2218eaae28f51aabae33b58d72edde52b56ab6155",
+      "contentHash": "7410ad75349d61b3523658c69edf3998c9e0273d5b04a0ddc9667c2a1c4e5285",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -277,7 +277,7 @@
     },
     {
       "lessonId": "optimization-11",
-      "contentHash": "cdab6577267b76c4f76f9df825f0f71e08130aa6e3c6e7ee658925a79396668b",
+      "contentHash": "84be8a214c63edecdbc9afbfd8281cb6fec4143d439e7500a8d08ca515a43839",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -287,7 +287,7 @@
     },
     {
       "lessonId": "optimization-04",
-      "contentHash": "506d5e20bbda1a225bc92ee72a380d9be590b4585ee32a7de9c63db7dd19616c",
+      "contentHash": "ba1612841a736c056fd2201b031447ad0a8a075c716d1aa307b29de08fca88f6",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -297,7 +297,7 @@
     },
     {
       "lessonId": "optimization-12",
-      "contentHash": "06bd437f7ddbfc36a508678133816d8e078b547128216af005370eabf21e1c93",
+      "contentHash": "0714aab5d60a8298cca7c2886d4b499ed5791da7b0dd1ac9e222e08bddacda9e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -307,7 +307,7 @@
     },
     {
       "lessonId": "networks-01",
-      "contentHash": "f7fa8ff9ce750a3f53bc7373c1b7f67b88477aa93f628c60d1c5f962e4c75e28",
+      "contentHash": "87e05dc6b3d2ef6fd2ceb92e8824af860e7eb7fb5df12b2805df97372a34aa33",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -317,7 +317,7 @@
     },
     {
       "lessonId": "networks-02",
-      "contentHash": "35b659a46581c3ea5bb6ba231d7203e22211307fb89aafacbd7ebd8ff600e8c4",
+      "contentHash": "6ecf2783994f28c8d17cadb1b89a46655ac68ed0eacbd192c52a4044595865c5",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -327,7 +327,7 @@
     },
     {
       "lessonId": "networks-03",
-      "contentHash": "057a029ba03e80cabdf43659fa04576ebbd43bd16adc1064901203d8ef84495e",
+      "contentHash": "32046e1c3e946be3fb4ba7fdb17c90931db649229fe9d5959527fda4599c7a83",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -337,7 +337,7 @@
     },
     {
       "lessonId": "networks-04",
-      "contentHash": "c6a4b8b5f542eea8b2fca11cbf330ce8586a874efc2f5ef811ea6df74f643bb5",
+      "contentHash": "b267c0271f38adcaeb8bbe9329197ac21343eafd798f7a706a6ae36a617c9c35",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -347,7 +347,7 @@
     },
     {
       "lessonId": "networks-05",
-      "contentHash": "de1306118adfb108218503e360b733ba13096a8d21cecbbe29db56fbcf696a2d",
+      "contentHash": "1de64108356ac6b55add5e6e18d0a2b48a58dcc018d52bc34aaaa4074385a51b",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -357,7 +357,7 @@
     },
     {
       "lessonId": "recovery-01",
-      "contentHash": "a11590118167970698c04721a32b18b77c612e61de2eb36d575ec988895f41dc",
+      "contentHash": "d29d2a038f4c10ad4dd40f280b7b8a5acd01d4e62a11367981b6e93bd6c94b88",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -367,7 +367,7 @@
     },
     {
       "lessonId": "recovery-02",
-      "contentHash": "1f93bc7183dae439bb2147a73efa44c4dad04cf0ec3b5ecc8251cd1899509632",
+      "contentHash": "f495da2358b705188085d6dc80fab3aead6198e506e3f5f8bcc63b6a981f0565",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -377,7 +377,7 @@
     },
     {
       "lessonId": "recovery-03",
-      "contentHash": "48aeed0f4edf38957f4501996db32508b7831883ed4c4fb30f77bf7a7335835e",
+      "contentHash": "c1b9b3a83f2e4fcdce34d76fcccc75486e260d5ac349dc3f0a988516438cc08e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -387,7 +387,7 @@
     },
     {
       "lessonId": "recovery-04",
-      "contentHash": "bc64c1c816552987626821b8d8b00c14b81c1f1dce39126baca9a555966377d6",
+      "contentHash": "59cc045a9bd8a2cf309cc3584fad31c12ea640a030b23176c1ed50bdc58c1c4e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -397,7 +397,7 @@
     },
     {
       "lessonId": "recovery-05",
-      "contentHash": "a24d03bcade2f5a5988b002714b36dc9fdf95a9a883f5a8b4a1e5d64fd6d8510",
+      "contentHash": "b520f1026bd4e8947b7cc60c0f5fca2907d0af68a258de8b94fe555f5f2f683b",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -407,7 +407,7 @@
     },
     {
       "lessonId": "recovery-06",
-      "contentHash": "c6b5a20d7a65135f428f096afbaca49a7bf27111ff69e368470244f7fdf5dd60",
+      "contentHash": "a0d2a3e74259b13847efbb720f08c1b5fa140fd35862091e83a7bee56418dad6",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -417,7 +417,7 @@
     },
     {
       "lessonId": "transformers-01",
-      "contentHash": "bb582c7e07d57b97853788f7352f4ffecc45f75df3e8d93a4138af7861da2ecf",
+      "contentHash": "0d6ee1eba32e1d42f9e4bf7cb87335c94e635a7197fa467fa7f2851d756e54cd",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -427,7 +427,7 @@
     },
     {
       "lessonId": "transformers-02",
-      "contentHash": "0be2379ad6da68b86cb2a8e0317411bc954c6d3dc1039ea0e69a0385be4e8b7f",
+      "contentHash": "b20b283b95e95f623cc8bef6ec24a863937a8592490164aff60a6664cac82cd0",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -437,7 +437,7 @@
     },
     {
       "lessonId": "transformers-03",
-      "contentHash": "ef41ce0879bb3e219d16e0a8c0a3dc2a75ce9af6f591da105822f46581362f16",
+      "contentHash": "6ad119670f2e09a617446318e6b6244ebbcc3cc84f4c4bf00b4ef473c6515ea5",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -447,7 +447,7 @@
     },
     {
       "lessonId": "transformers-04",
-      "contentHash": "3599589119a3a416510e54966cf4fb5ff51f65c4e83fc60f31ebb205f5e3155e",
+      "contentHash": "2e669c95373bbd00fa51e4dab3753713e7b9e736fda13e2cd00134e928e07c79",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -457,7 +457,7 @@
     },
     {
       "lessonId": "performance-01",
-      "contentHash": "4ce6bf6756e3ac06d9bfba3ac807996f690a7d3eca990e781498cbdf5ce91877",
+      "contentHash": "b403b34976d1136fc1c14907cfdce91b95be88456f8d284da9584bd21c1cd6b2",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -467,7 +467,7 @@
     },
     {
       "lessonId": "performance-02",
-      "contentHash": "fe5a11fe85ab9b7944b86f109089aa6cfa284c8cef0adbc79d2ad4e933c3cb38",
+      "contentHash": "4787ebcdd9f2b2fb00b6758298ee1a2801419181be935d945550bd44be9b8edb",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -477,7 +477,7 @@
     },
     {
       "lessonId": "performance-03",
-      "contentHash": "867f778e3f904205f678f6aa9e3423396d5f9c7ff51dded845344cf9838e9b6e",
+      "contentHash": "3a5510e5b64dd7c57c0423c597e4e89439c4ab88b2efd1061943d75630f39256",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -487,7 +487,7 @@
     },
     {
       "lessonId": "performance-04",
-      "contentHash": "f22c12e0a60d8c123c68117760183fcd0298f5e86f3d7f72351ef20497327cfe",
+      "contentHash": "1e2968a6e5af5f26ce597b6dfa3725bb00cf27abc99bd801d24ddb2a0e354749",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -497,7 +497,7 @@
     },
     {
       "lessonId": "performance-05",
-      "contentHash": "aba0a4fead00dff929f89f048824edc5c534d1d58ba57056ea26d26c68a4130a",
+      "contentHash": "953d2c8f82fb8e3666fe64c389103aaf9cbc0fa319805797bd0fd47319a649a6",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -507,7 +507,7 @@
     },
     {
       "lessonId": "distributed-01",
-      "contentHash": "e3afcb0650cf970a0c85af62edc3545d5a36ce2bee2c27a68726d000c1d36b67",
+      "contentHash": "aa5db6bd0941d58cf7ec19201fc49c53dbc6c01d87a84048ee91bfb64f55d9b5",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -517,7 +517,7 @@
     },
     {
       "lessonId": "distributed-02",
-      "contentHash": "4a1319dce86c429ed579a1e92a4a061ab1799516233f14002758554bb8f58418",
+      "contentHash": "a2329b55b454ea74f41e5958428f664d866e8720b7073cc88a5ab5c48ce35c6e",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -527,7 +527,7 @@
     },
     {
       "lessonId": "distributed-03",
-      "contentHash": "84c095e870cd83df6bddcfd5725c649840c766b85bd3ad7f1a51048eaf61278d",
+      "contentHash": "9de1f0e556f53526c37eedb72c46675ce93f7ecfe13d16860511aefe9ea7adea",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -537,7 +537,7 @@
     },
     {
       "lessonId": "distributed-04",
-      "contentHash": "1b69bfc3e483f10590951ab28b31d9b77adf0d3cc964fddf0b9fd5ed3828651b",
+      "contentHash": "9cdd69b8d811c0bce40bd267e048c18cd93ad1b6242a0a9625314df9e38586ae",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -547,7 +547,7 @@
     },
     {
       "lessonId": "science-01",
-      "contentHash": "1bf65f0e228f703523d2011e014b2e486ba863b15eb08527e9d407a4fc4e57ae",
+      "contentHash": "a2fbff5804670b8b4ea3d809da398281608025c9908abdd2e5995fdf33a1b0b3",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -557,7 +557,7 @@
     },
     {
       "lessonId": "science-02",
-      "contentHash": "a491814c7b70fc0c999a69fb35c5e419130c9667fb0a56b8585985ee7efc999b",
+      "contentHash": "e209d0ae039048221b5ec3b673287b7790b27f5e333ca009869013923d129862",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -567,7 +567,7 @@
     },
     {
       "lessonId": "science-03",
-      "contentHash": "be90a81f6f42c654a0120a561636faa8b39b04c2c88c23de75134ca1822a2d91",
+      "contentHash": "69114cee2db562fd6b40ed3833d5280a898411201a8931c3fc1c498a06026500",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -577,7 +577,7 @@
     },
     {
       "lessonId": "science-04",
-      "contentHash": "de42efc858b15335965fdca615a9b7807c7232d4961465aa0fff643c9246023f",
+      "contentHash": "5fa01774c3b43a21ed659b87d192b100883f4db5bf0fe76ef41669fa452dd669",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -587,7 +587,7 @@
     },
     {
       "lessonId": "probability-01",
-      "contentHash": "d60741cca7cb179b23db65fa8b32b91429b1792b59cfaaaf0f63c8714e7bf2cc",
+      "contentHash": "e18a8c5d734c0f12f518c640bd1705566bc3cfcd4d59ed068557e5068a46af5f",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -597,7 +597,7 @@
     },
     {
       "lessonId": "probability-02",
-      "contentHash": "3c6877ba17255dd773d486870c3c00b06428ac512614894ddccbedb307726ae8",
+      "contentHash": "90894d79dfc9454a4cb25814a50853b0bbb5adf0ebaf076f136e9420da1b8cdb",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -607,7 +607,7 @@
     },
     {
       "lessonId": "probability-03",
-      "contentHash": "cb3cc939c2ec4f664bc5182650de6a4a7ec706509d2d44da2f317f4665fa9623",
+      "contentHash": "d8afedbd44bbe1fc7b099312f8c2a9cde06f5040e96b03ae888d19bb399ce441",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -617,7 +617,7 @@
     },
     {
       "lessonId": "probability-04",
-      "contentHash": "8dafdffc0f26c34aa62d455d3864a7920d6f477c5b92fb3f0878b35da93e189c",
+      "contentHash": "2877a0330b6d0582e438f3d7a1cf91c6b350f48e3f14d9bf632459a2da134110",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -627,7 +627,7 @@
     },
     {
       "lessonId": "rl-01",
-      "contentHash": "5faf941f424f2deb9890a1786b5fedbedbfa63b1c9be496b3792629cfb56a13f",
+      "contentHash": "8924c6656c49fe651b5e36b73cfe42986c4cadbc2500d00484f43c58c418fd99",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -637,7 +637,7 @@
     },
     {
       "lessonId": "rl-02",
-      "contentHash": "255b752c2a6f55805f969b67577382a0d73c7f32221a049953fbc5ed73a04c98",
+      "contentHash": "eed062567019977867672fc990722e1e7684c5333282bd5509dad37ca67d46c8",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -647,7 +647,7 @@
     },
     {
       "lessonId": "rl-03",
-      "contentHash": "8c6d486e7eff394f8e6260b385f8e10367787ba32ca6db49ac33b43865d89c52",
+      "contentHash": "00d7e49541952bdfc1073f1e9c0a4b6023af5e7a5f53938b82f6a2fac7481c6a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -657,7 +657,7 @@
     },
     {
       "lessonId": "rl-04",
-      "contentHash": "d5bb6d331d14bbfe8776c84ed311ba970fad50239c3270e793ef798007367dfb",
+      "contentHash": "e6b486138cc23381c7e8a53bd424ffef1b59c470175144856a2cb61f2714dd60",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -667,7 +667,7 @@
     },
     {
       "lessonId": "kernels-01",
-      "contentHash": "95bdf2df85e6897dc96bdfdb6c7e1348d81af0bce4d6b030bb300d625a943e71",
+      "contentHash": "387bd503296b3fa5c6a18372f86ecb56ef0cff1c608aa3c402396a0905270cd0",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -677,7 +677,7 @@
     },
     {
       "lessonId": "kernels-02",
-      "contentHash": "136c7049d152e162a59bdc2c3cda4056ac5c56ac1768d919470543fd95d03714",
+      "contentHash": "6011a5ed8dc740f1a87425e03152abccd30c7172e975641d04b774939f1a883c",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -687,7 +687,7 @@
     },
     {
       "lessonId": "kernels-03",
-      "contentHash": "f972b684ec2c99a270b232bd6f16b23ca0bdbfad63f57447bfae03d134c62bfc",
+      "contentHash": "e742271fd81f2c5ea07ee8c6682b601e0d52d97e71b8580ea6cf1d589a7e4034",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -697,7 +697,7 @@
     },
     {
       "lessonId": "kernels-04",
-      "contentHash": "3fab089eb5ff37b6c388172385b2a568eddb07a69cd2de46aeec774863cc13be",
+      "contentHash": "f47f1d3e6629f5974b36e14f957442c2c4e638d57105dd5f9484c260ebad714d",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -707,7 +707,7 @@
     },
     {
       "lessonId": "internals-01",
-      "contentHash": "2c8e6deb82ccb23d45dc105b7f0f4296b74d16e91654415694693664a62b891f",
+      "contentHash": "ce8a624369c7ccb4cdb8304a3cfbfe5e2211911d89b1c3c158d17544df664ed1",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -717,7 +717,7 @@
     },
     {
       "lessonId": "internals-02",
-      "contentHash": "4f0d878ad30ef954222f1494fc8d48e895f180f8263b79a888abe2a47c15aabd",
+      "contentHash": "f4f338a6363e91aead0de90f4a94c243ed6575e7bbca0a1d42397536147f4a61",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -727,7 +727,7 @@
     },
     {
       "lessonId": "internals-03",
-      "contentHash": "4e5347de01319e5fd371b566d5ad0e6119f4f2f344a7ee9413d8f05777e31353",
+      "contentHash": "b75464a32ef934330816d6aec69f0b6f5f61c43d4747a8f621261bf30239869f",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -737,7 +737,7 @@
     },
     {
       "lessonId": "internals-04",
-      "contentHash": "f83a99414208d46aaaf26a95a29a1fcd69a917b467b605d3f29c0eab468f2f8c",
+      "contentHash": "7a551835941ba5bdaff7034102498c68f55d54a0bff9ffa087a2ff5a69420140",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -747,7 +747,7 @@
     },
     {
       "lessonId": "deployment-02",
-      "contentHash": "43f9cd0d9b9c7a423111489f6a03be39464dd8df32069adec5df09da4b7bc499",
+      "contentHash": "d65b9c15f4b29ea62526c4dab4812889d9f31301bd806c0c1cacd4dd7bb25d93",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -757,7 +757,7 @@
     },
     {
       "lessonId": "deployment-01",
-      "contentHash": "627b092d79a93b1d510ab68451f85864212612a14f040df0928a4da122a781b4",
+      "contentHash": "c65b35b64a1ca62d830bfe5cbc013e7c0bde6763a7f1d8f3822d6715cb2bf39b",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -767,7 +767,7 @@
     },
     {
       "lessonId": "deployment-08",
-      "contentHash": "98a06dd031a8d509f641c05e215d0a0522d8a61db5982c9cfadaef8f29796c29",
+      "contentHash": "c8842cfffbc52bcb1ea707c05c7dca451db1638894c908df81c0356e8a6b6153",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -777,7 +777,7 @@
     },
     {
       "lessonId": "deployment-03",
-      "contentHash": "c726b4d77574f156d2031a97e4036b36e6b24cc6e71e2b688dd561f94eb89afb",
+      "contentHash": "e80088adb3ad789a58d8eacd0ba291d56c5125f262831c9b806b27d93edd19b4",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -787,7 +787,7 @@
     },
     {
       "lessonId": "deployment-05",
-      "contentHash": "6915c92427edd7dc7828b2493c9568ebbbb621ad19e0438d40af95196c5c7b9e",
+      "contentHash": "0577618741532bdb6eeb6c2761385723059d56ddbece0be84f02d50eec2721de",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -797,7 +797,7 @@
     },
     {
       "lessonId": "deployment-07",
-      "contentHash": "14d087fe571229415dde483d37344214f1f826338ceaa9c83b631be5d9142da4",
+      "contentHash": "091a84105423934a262810668e533ec296cfced9f4f3f1632011574c820aab84",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -807,7 +807,7 @@
     },
     {
       "lessonId": "deployment-04",
-      "contentHash": "c1bd9e11ce82d271134b27d280e71ae2f39d2ea0f51be04b5d3c075faa13bd49",
+      "contentHash": "3b122fa9b09545b8f09f1c5bb5ff9c2dfe950341ad1502cb25bbf3aa4ed9798a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -817,7 +817,7 @@
     },
     {
       "lessonId": "deployment-06",
-      "contentHash": "fa808a9414cbb44b1ec88ae4c01eeebaa86b6a24bc7fc33ea91a1eb27d663546",
+      "contentHash": "67fb17127bdde697de7953664e438bbdc13daa37f34e6331c6ec5301fc8c71b7",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -827,7 +827,7 @@
     },
     {
       "lessonId": "operations-01",
-      "contentHash": "372676aba49235a652ca9580c8424381596b7a3b82b8e167e228f4357899e5b6",
+      "contentHash": "42d17c0c320ed689e1b48f6fb1959f2191c0e75142741ef551c15b1874cc5b36",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -837,7 +837,7 @@
     },
     {
       "lessonId": "operations-02",
-      "contentHash": "0a7bf6b98bbd3007a197a8caca7b493e3bc1ea5911688d60c7650b862a6d64e1",
+      "contentHash": "4c6320d6cd7bb54793cebefc0369fbcc9d3b2223020fdbb5e1b8f7f1d93fa760",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -847,7 +847,7 @@
     },
     {
       "lessonId": "operations-03",
-      "contentHash": "ab54b5b7a0cfc853471b130b4af25c1cff856dc95c90cab61aaff0231d566960",
+      "contentHash": "24035d2dc3523f8f8236c80c7da144cbf9763694a1da5a5c0181d5758209e058",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -857,7 +857,7 @@
     },
     {
       "lessonId": "operations-04",
-      "contentHash": "98bf10b5ec69ebb835e10215d122209d530bb43637c2d2b4eaa69f02eacd4b71",
+      "contentHash": "fdfadbb1a3e40ca5fef95c02b2f369ec1a35a94868135fd4c44a92f0c576f90f",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -867,7 +867,7 @@
     },
     {
       "lessonId": "operations-05",
-      "contentHash": "2047a67518e491b1bd635647aff5f846bec7d9575d4f93075a6242bab1672a98",
+      "contentHash": "b0557ff9b7365db24e95b83c012db26360219ce4bd2a154eb3472873123316da",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -877,7 +877,7 @@
     },
     {
       "lessonId": "operations-06",
-      "contentHash": "fbfb592239d0c72aff220f3eabd36000359daec647cd8385a57ef379f6d4207a",
+      "contentHash": "0121871c1f1374ac99950577151e0383ae776e976d3b81b5b7b8a42730b0ce0c",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -887,7 +887,7 @@
     },
     {
       "lessonId": "operations-07",
-      "contentHash": "bc7504d15e87d5604903e49adfc44f71d0d0bfdf4408d79d286055b3aae8c6a2",
+      "contentHash": "d07428d34939c68d2b07403a09e85dea8be1fca3dc8a05f3b582ffb4f9408d61",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -897,7 +897,7 @@
     },
     {
       "lessonId": "operations-08",
-      "contentHash": "833bdfa70b6e9558cbd287b91da9476e091e64e37df0a0c9cc4a784b8300771c",
+      "contentHash": "34161a6bfcb2037ba0bb9fd0b0b80bbc1876ff2ae0849ebb2b651bf7c43f56b9",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -907,7 +907,7 @@
     },
     {
       "lessonId": "pretraining-01",
-      "contentHash": "89952345187d7c2380d0fc6c12678bed38ca0fdc01a8462da90c50f961354bcc",
+      "contentHash": "237417e175319caeaf6f3750c4e6c1ae0a9fc8f1ec11e3c4f10262e522470152",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -917,7 +917,7 @@
     },
     {
       "lessonId": "pretraining-02",
-      "contentHash": "0fb44f2c52da021e2eb226ab078c83963ac8ebbeef107c9b5732fc153e92a083",
+      "contentHash": "fbdcf0dec49edee880ebd7e4e743c2c4de16e6fbf31d3b3963a50066b7a492a9",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -927,7 +927,7 @@
     },
     {
       "lessonId": "pretraining-03",
-      "contentHash": "db53cc1c7fde0a34003b3b5dd6315217bdd8482cbb173c468d1aad0524e7a20a",
+      "contentHash": "89a798a25c2ff1ea24131280c7f2d7d37a29c9b5d6dc7e4d1e7c0fa0daeb9692",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -937,7 +937,7 @@
     },
     {
       "lessonId": "posttraining-01",
-      "contentHash": "9df519f1c0b25b089187622edcb7f5a8d041133b02d1313281ec67c316170b1b",
+      "contentHash": "e143b22bbf5d9afe5c2d54bf7d89303256e27976ff9cc9d473d73ce42aada7f5",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -947,7 +947,7 @@
     },
     {
       "lessonId": "posttraining-02",
-      "contentHash": "5efe27b34a6827f73a968e1ec2e60f91c8b8eec68f0ea6732765ecbdb44f49aa",
+      "contentHash": "e7d104e494933051fe13e64e431849f5aa135b6df904d42819f8b3461e62154a",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -957,7 +957,7 @@
     },
     {
       "lessonId": "posttraining-03",
-      "contentHash": "82e1a29e71eedfc4d177c60935cef2898f510f65966d103ed1aaf28f0baa334f",
+      "contentHash": "faccee3034727db2448c2c101d73060330d5917072654cfa10738ec9e51853e7",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -967,7 +967,7 @@
     },
     {
       "lessonId": "posttraining-04",
-      "contentHash": "07fc9a10e7fa3d21e084b355ff1ef4ba289ff05e9a884233398d2c3b8994323c",
+      "contentHash": "1c1c62e2cdd853abee839b8d2960f001b72fe8fa5e0808e3ca94f3ce30a89412",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -977,7 +977,7 @@
     },
     {
       "lessonId": "posttraining-05",
-      "contentHash": "feeb0ffc080debc2d4ab74ab938d30a86d8f0e69cfa3b0ac75227425e0229b85",
+      "contentHash": "9fad79b21a975beb939193f8c46fd858e858b640b4e9305c9e7832b1bd335299",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -987,7 +987,7 @@
     },
     {
       "lessonId": "tpu-01",
-      "contentHash": "602dd71099d437d7b32e2a26f89165918a2b4649fbf21a742ee9bb6a6b371b82",
+      "contentHash": "640f815fbd2a3f03b222521ea6936c5c227ab0abf32ea46eb54c70a96e0cb5d9",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -997,7 +997,7 @@
     },
     {
       "lessonId": "tpu-04",
-      "contentHash": "b28a706e456877dc7d60afc07bcc702b2f6c9910b1a0004a2fdbcc91f6e2c818",
+      "contentHash": "bea6fb9f5f8fad4951d860c7459a0ef56ac245d3dee084a497ce816cacd5cfce",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1007,7 +1007,7 @@
     },
     {
       "lessonId": "tpu-02",
-      "contentHash": "8289c55fd53b8ee48730761b5bcb588c24aef423b7a7e039acae7ddd8788a370",
+      "contentHash": "faba90e250eac21e49d496fa2c46348cb1b4270e3d576469881b319d0b0220d0",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1017,7 +1017,7 @@
     },
     {
       "lessonId": "tpu-05",
-      "contentHash": "9fb68e7c90f7b0d569560f2df923fdf485c24d7777a23234be22d658a54db042",
+      "contentHash": "44e2d85ae9e09587eaba030ca5725cfa36247e20f5623a8cf54bde0a66a36a03",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1027,7 +1027,7 @@
     },
     {
       "lessonId": "tpu-03",
-      "contentHash": "c211625ed7d392bd18ebab5b1c80f711cec07240d6739ca5674c666191882141",
+      "contentHash": "6763c08dcdc8e6b651783ca30eead97071b314f8bb3d601035e6848ea6a41469",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {
@@ -1037,7 +1037,7 @@
     },
     {
       "lessonId": "tpu-06",
-      "contentHash": "e7d5a0d29433270bde08e80889f3e7ad5b1a8790e0c94fdf603568aa1c272ee5",
+      "contentHash": "67fcbb2bd892d8f2e02910579e21ce7a9e19114342fb16de421941095cd668d6",
       "script": "passed",
       "notebookCode": "passed",
       "runtime": {

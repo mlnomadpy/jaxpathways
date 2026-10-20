@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "a1d6c997d9d6dc5b901aebc3bc35142d2df4edfb27071c791061ff5627ca4d48",
-  "executedAt": "2026-10-20T18:47:41.827744+00:00",
+  "contentHash": "58ee043b76ff4e66f63967bcfaa06ab999c063aeebaa607c7404bae97675f56a",
+  "executedAt": "2026-10-20T22:20:10.581450+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.042516165878623724 4.8582907766103745e-05\neager median / min / max seconds: 5.647912621498108e-05 5.233287811279297e-05 0.001787582878023386\ncompiled median / min / max seconds: 8.854083716869354e-06 8.334405720233917e-06 1.1375173926353455e-05\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 1.485389657318592e-05\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.014060375280678272 1.7832964658737183e-05\neager median / min / max seconds: 2.3916596546769142e-05 2.150004729628563e-05 3.854092210531235e-05\ncompiled median / min / max seconds: 3.5830307751893997e-06 3.375113010406494e-06 5.084089934825897e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 7.062684744596481e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
@@ -26,14 +26,14 @@
       "outputs": []
     },
     {
-      "sourceHash": "31f9155f84ce434df82788dde4bca629500e6c19ff61ae10f1966b2529780da0",
+      "sourceHash": "27509eda909ea7f755d3f163fe367f85c26496fb387785a22b8a0537d22dccaf",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.03497433289885521 5.737505853176117e-05\n"
+            "First/repeat seconds: 0.013492625206708908 1.712515950202942e-05\n"
           ]
         }
       ]
@@ -58,29 +58,29 @@
       ]
     },
     {
-      "sourceHash": "5d20c5a2a9e08c0110cb14fdca002744d81386d25b9390873b5681ae814c1d12",
+      "sourceHash": "90a05f94514bab9f26494de07e608a6b90f1a89351d1cda5a2a8ce76159374f7",
       "outputs": []
     },
     {
-      "sourceHash": "08bfb3f83a584ade862b791bff4b679f77f519c8f40f67621b5e18f3fb73cb1b",
+      "sourceHash": "9de10e21de34d780291dcbb0f0815b975ed94e4343e99f2ceb2b5ea27c37acf7",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 5.474942736327648e-05 5.254102870821953e-05 8.933339267969131e-05\n",
-            "compiled median / min / max seconds: 8.999835699796677e-06 8.124858140945435e-06 1.1750031262636185e-05\n",
+            "eager median / min / max seconds: 2.3603904992341995e-05 2.2541731595993042e-05 3.5416800528764725e-05\n",
+            "compiled median / min / max seconds: 4.084315150976181e-06 3.62517312169075e-06 5.000270903110504e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "0f58fd5f884533abe8cb256b165955561b0ce11658c769dee00f343d5a012d07",
+      "sourceHash": "5f840447f3d750e044cec6a256009f8c7cfc4633a05de2d281dd710e1153f200",
       "outputs": []
     },
     {
-      "sourceHash": "f31932adcd3dac4754ea2f5eef6230dd7fa95dac9be32fa6c0fe51ddc72a88f0",
+      "sourceHash": "f2e9d2501adcceca18ca16075318afd97fb2749f7ec6633dd5be8b0cdeb536b0",
       "outputs": []
     },
     {
@@ -92,17 +92,17 @@
       "outputs": []
     },
     {
-      "sourceHash": "f13e0af89c2640b98012419559f80102b071795f2f93d8f9e9e0b8a475a1317f",
+      "sourceHash": "431007fc3e1d415aa3118992a51dfc1e7b9455f6a8bd7102c87b6d2f139e8ff2",
       "outputs": []
     },
     {
-      "sourceHash": "c61e7aaa8cc5f59004a30c33407e5dd23b87c9090b2790a34034b33cfc4326c0",
+      "sourceHash": "5081fc57983ece891a00a6377190c83c1b2735ecb920312db67a0c6652a902c5",
       "outputs": [
         {
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 1.687486656010151e-05\n"
+            "compiled value-and-grad median seconds: 6.395392119884491e-06\n"
           ]
         }
       ]

@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Write and check a single-example function before batching it.
@@ -129,7 +131,7 @@ The expected outputs [1, 1, 8] are hand-computed row by row. The leading output 
 ## Run the example
 
 ```python
-# Batch a function with vmap: Vectorization lets us describe one example clearly and then...
+# Batch a function with vmap
 import jax
 import jax.numpy as jnp
 def predict(weight, x):
@@ -170,7 +172,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:36.130768+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:08.798159+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]
@@ -184,7 +186,7 @@ PASS: transforms-03
 **Predict before running:** Predict the values and output shape. Which reference will catch an incorrectly mapped parameter axis?
 
 ```python
-# Experiment — Verify against a loop and a matrix product: The loop makes example selection explicit; the matrix product...
+# Experiment — Verify against a loop and a matrix product
 loop_predictions = jnp.stack([predict(weight, row) for row in batch])
 vector_predictions = batched(weight, batch)
 matrix_predictions = batch @ weight
@@ -238,14 +240,13 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.
+1. Exercise solution
 2. Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Compute each prediction gradient with respect to the...
-# Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.
+# Exercise solution
 per_example_gradient = jax.vmap(...)  # TODO: compute per_example_gradient
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape  # TODO: complete assertion check
@@ -255,8 +256,7 @@ assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion che
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Compute each prediction gradient with respect to the...
-# Differentiate the objective to obtain `per_example_gradient` via automatic differentiation.
+# Exercise solution
 per_example_gradient = jax.vmap(jax.grad(predict), in_axes=(None, 0))(weight, batch)
 # Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
 assert per_example_gradient.shape == (3, 2)
@@ -286,8 +286,7 @@ The per-example squared-loss gradient is $2(\hat y-y)x$: twice the residual time
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `individual_grads` via automatic differentiation.
-2. Check tensor shape invariant: `individual_grads.shape == (3, 2)`
+1. Check tensor shape invariant: `individual_grads.shape == (3, 2)`
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -296,7 +295,6 @@ The per-example squared-loss gradient is $2(\hat y-y)x$: twice the residual time
 targets = jnp.array(...)  # TODO: compute targets
 def single_loss(parameters, row, target):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `individual_grads` via automatic differentiation.
 individual_grads = jax.vmap(...)  # TODO: compute individual_grads
 manual_grads = ...  # TODO: compute manual_grads
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
@@ -312,7 +310,6 @@ assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))  # TODO: complete 
 targets = jnp.array([0., 2., 7.])
 def single_loss(parameters, row, target):
     return (predict(parameters, row) - target) ** 2
-# Differentiate the objective to obtain `individual_grads` via automatic differentiation.
 individual_grads = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, targets)
 manual_grads = 2. * (batch @ weight - targets)[:, None] * batch
 # Check tensor shape invariant: `individual_grads.shape == (3, 2)`
@@ -346,20 +343,17 @@ Differentiation is linear over these independent sums. Ensure your function actu
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `each` via automatic differentiation.
-2. Differentiate the objective to obtain `aggregate` via automatic differentiation.
-3. Check tensor shape invariant: `aggregate.shape == weight.shape`
+1. Prove the mean-gradient identity with an experiment (Challenge)
+2. Check tensor shape invariant: `aggregate.shape == weight.shape`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Prove the mean-gradient identity with an experiment (Challenge): The aggregate has parameter shape, while per-example...
+# Prove the mean-gradient identity with an experiment (Challenge)
 def batch_mean_loss(parameters, rows, labels):
     return jnp.mean(jax.vmap(single_loss, in_axes = ...  # TODO: compute return jnp.mean(jax.vmap(single_loss, in_axes
 for labels in (targets, targets + 0.5):
-    # Differentiate the objective to obtain `each` via automatic differentiation.
     each = jax.vmap(...)  # TODO: compute each
-    # Differentiate the objective to obtain `aggregate` via automatic differentiation.
     aggregate = jax.grad(...)  # TODO: compute aggregate
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape  # TODO: complete assertion check
@@ -369,13 +363,11 @@ for labels in (targets, targets + 0.5):
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Prove the mean-gradient identity with an experiment (Challenge): The aggregate has parameter shape, while per-example...
+# Prove the mean-gradient identity with an experiment (Challenge)
 def batch_mean_loss(parameters, rows, labels):
     return jnp.mean(jax.vmap(single_loss, in_axes=(None, 0, 0))(parameters, rows, labels))
 for labels in (targets, targets + 0.5):
-    # Differentiate the objective to obtain `each` via automatic differentiation.
     each = jax.vmap(jax.grad(single_loss), in_axes=(None, 0, 0))(weight, batch, labels)
-    # Differentiate the objective to obtain `aggregate` via automatic differentiation.
     aggregate = jax.grad(batch_mean_loss)(weight, batch, labels)
     # Check tensor shape invariant: `aggregate.shape == weight.shape`
     assert aggregate.shape == weight.shape

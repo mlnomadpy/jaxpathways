@@ -22,7 +22,6 @@ y = 2 * x + 1
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
@@ -64,7 +63,7 @@ with tempfile.TemporaryDirectory(prefix='tracking-lesson-') as folder:
     restored = json.loads(Path(artifact).read_text())
     assert abs(restored['weight'] - 2) < .001 and abs(restored['bias'] - 1) < .001
 
-# Track experiments and lineage with MLflow: A tracker is useful when a plotted point leads back to the data,...
+# Track experiments and lineage with MLflow
 import os
 # Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'
@@ -82,7 +81,6 @@ y = 2 * x + 1
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
@@ -135,7 +133,7 @@ assert validation[1] < validation[0]
 print('Validation difference:',validation[0]-validation[1])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+# Exercise solution
 bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
 assert bad_validation > min(validation)
 print('Wrong zero model validation MSE:',bad_validation)

@@ -2,6 +2,8 @@
 
 Phase 13: Pallas kernels · about 95 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement an actual Pallas Ref-writing kernel with grid and BlockSpecs.
@@ -241,7 +243,7 @@ visual_data={'kind':'heatmap','values':owner.tolist(),'unit':'program ID (catego
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:26:13.715613+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:35.944346+00:00. JAX 0.9.2.
 
 ```text
 Shape and boundary: (5, 11) -3.75 7.050000190734863
@@ -265,7 +267,7 @@ PASS: kernels-01
 **Predict before running:** Will blocks of $(3,5)$ change the logical answer?
 
 ```python
-# Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...
+# Experiment — Change block geometry without changing values
 changed=blocked_axpy(x,y,(3,5))
 np.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)
 print("Changed grid:",(2,3),"same numerical result")
@@ -280,7 +282,7 @@ Grid geometry is an implementation choice for this independent elementwise opera
 **Predict before running:** How many logical cells would a grid built with floor division cover?
 
 ```python
-# Experiment — Expose the floor-division omission: This diagnostic models the ownership bug without reading...
+# Experiment — Expose the floor-division omission
 covered=np.zeros((5,11),dtype=bool)
 for i in range(5//2):
     for j in range(11//4):
@@ -304,19 +306,16 @@ Test a singleton row and a changed nondivisible matrix with negative values. Ver
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `a`.
-2. Create device-backed JAX array `b`.
-3. Check tensor shape invariant: `result.shape==shape`
-4. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Check tensor shape invariant: `result.shape==shape`
+3. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...
+# Exercise solution
 for shape in [(1,7),(7,9)]:
-    # Create device-backed JAX array `a`.
     a = jnp.asarray(...)  # TODO: compute a
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(...)  # TODO: compute b
     for block in [(2,4),(3,5)]:
         result = blocked_axpy(...)  # TODO: compute result
@@ -330,11 +329,9 @@ print("Singleton and changed tails verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...
+# Exercise solution
 for shape in [(1,7),(7,9)]:
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(np.random.default_rng(11).normal(size=shape),dtype=jnp.float32)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(np.random.default_rng(12).normal(size=shape),dtype=jnp.float32)
     for block in [(2,4),(3,5)]:
         result=blocked_axpy(a,b,block)

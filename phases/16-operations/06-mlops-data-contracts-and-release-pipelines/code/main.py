@@ -5,7 +5,7 @@
 import hashlib, json, math
 
 # Run and inspect the controlled experiment
-# Step 2 — Run and inspect the controlled experiment: The input mix changes from [0.9,0.1] to [0.5,0.5] across two...
+# Step 2 — Run and inspect the controlled experiment
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
@@ -85,7 +85,7 @@ assert math.isclose(shift, .4)
 # Step 1 — Prepare the explicit contract: The fixture gives every observation an ID, a source group and a split.
 import hashlib, json, math
 
-# Step 2 — Run and inspect the controlled experiment: The input mix changes from [0.9,0.1] to [0.5,0.5] across two...
+# Step 2 — Run and inspect the controlled experiment
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':'), allow_nan=False).encode()).hexdigest()
 
@@ -174,7 +174,7 @@ assert math.isclose(wrong,2.005) and not math.isclose(wrong,metrics['overall']['
 print('Unweighted slice average:',wrong)
 
 # Reference practice: Change the population mix
-# Change the population mix (transfer): Aggregate performance changes with population mix even when...
+# Change the population mix (transfer)
 shifted=gate_metrics([.01]+[4.]*9,['low']+['high']*9,.5)
 assert math.isclose(shifted['overall']['mse'],3.601)
 assert shifted['high']['mse']==metrics['high']['mse']

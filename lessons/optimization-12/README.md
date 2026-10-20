@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Explain Adam’s moments, inspect clipping and schedule order, and compare optimizers with a controlled update budget.
@@ -80,12 +82,11 @@ For the regression audit project, first document feature and target shapes, loss
 Create main.py. Use an explicit two-gradient sequence to inspect the optimizer independently of a training loop.
 
 ```python
-# Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
+# Step 1 — Build a transparent Adam reference
 import jax
 import jax.numpy as jnp
 import optax
 params = jnp.zeros(2)
-# Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
 state = adam.init(params)
 m = jnp.zeros(2)
@@ -100,7 +101,7 @@ The supplied gradients isolate optimizer arithmetic; they are not presented as a
 Append the manual recurrences and compare each update with Optax.
 
 ```python
-# Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
+# Step 2 — Verify both moment updates
 for t, g in enumerate(gradients, start=1):
     m = 0.9 * m + 0.1 * g
     v = 0.99 * v + 0.01 * g * g
@@ -120,11 +121,9 @@ Append a global clipping plus SGD chain and run python main.py.
 ```python
 # Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
 g = jnp.array([3.0, 4.0])
-# Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
-# Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
@@ -135,19 +134,18 @@ For this SGD chain, the update norm is $0.1$. That bound does not automatically 
 ## Run the example
 
 ```python
-# Step 1 — Build a transparent Adam reference: The supplied gradients isolate optimizer arithmetic; they are not...
+# Step 1 — Build a transparent Adam reference
 import jax
 import jax.numpy as jnp
 import optax
 params = jnp.zeros(2)
-# Configure or step the Optax optimizer state (`adam`).
 adam = optax.adam(0.1, b1=0.9, b2=0.99, eps=1e-08)
 state = adam.init(params)
 m = jnp.zeros(2)
 v = jnp.zeros(2)
 gradients = [jnp.array([2.0, -4.0]), jnp.array([1.0, 3.0])]
 
-# Step 2 — Verify both moment updates: The first update is near (-0.1,0.1); the next depends on both...
+# Step 2 — Verify both moment updates
 for t, g in enumerate(gradients, start=1):
     m = 0.9 * m + 0.1 * g
     v = 0.99 * v + 0.01 * g * g
@@ -159,11 +157,9 @@ for t, g in enumerate(gradients, start=1):
 
 # Step 3 — Inspect one clipped update: For this SGD chain, the update norm is 0.1.
 g = jnp.array([3.0, 4.0])
-# Configure or step the Optax optimizer state (`clip`).
 clip = optax.clip_by_global_norm(1.0)
 clipped, _ = clip.update(g, clip.init(jnp.zeros(2)))
 assert jnp.allclose(clipped, jnp.array([0.6, 0.8]), atol=1e-06)
-# Configure or step the Optax optimizer state (`chain`).
 chain = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
 update, _ = chain.update(g, chain.init(jnp.zeros(2)))
 assert jnp.allclose(update, jnp.array([-0.06, -0.08]), atol=1e-06)
@@ -198,12 +194,10 @@ def plot_bowl(z):
     return 0.5 * (z[0] ** 2 + 10 * z[1] ** 2)
 series = []
 for name, tx in [('SGD 0.05', optax.sgd(0.05)), ('momentum 0.05', optax.sgd(0.05, momentum=0.9)), ('Adam 0.1', optax.adam(0.1))]:
-    # Create device-backed JAX array `p_plot`.
     p_plot = jnp.array([1.0, 1.0])
     s_plot = tx.init(p_plot)
     vals = [float(plot_bowl(p_plot))]
     for _ in range(50):
-        # Differentiate the objective to obtain gradients `(delta, s_plot)`.
         delta, s_plot = tx.update(jax.grad(plot_bowl)(p_plot), s_plot, p_plot)
         p_plot = optax.apply_updates(p_plot, delta)
         vals.append(float(plot_bowl(p_plot)))
@@ -213,7 +207,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:49:47.570599+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:53.825684+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -234,17 +228,14 @@ PASS: optimization-12
 
 ```python
 # Experiment — Inspect the schedule boundary: A schedule is indexed by optimizer updates.
-# Configure or step the Optax optimizer state (`schedule`).
 schedule = optax.linear_schedule(init_value=0.1, end_value=0.01, transition_steps=4)
 rates = jnp.array([schedule(i) for i in range(6)])
 assert jnp.allclose(rates, jnp.array([0.1, 0.0775, 0.055, 0.0325, 0.01, 0.01]), atol=1e-06)
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.sgd(schedule)
 p = jnp.array(0.0)
 s = tx.init(p)
 for _ in range(5):
     delta, s = tx.update(jnp.array(1.0), s, p)
-    # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
 assert jnp.allclose(p, -0.275, atol=1e-06)
 print('schedule rates:', rates)
@@ -259,25 +250,20 @@ A schedule is indexed by optimizer updates. Recording only the number of epochs 
 **Predict before running:** Will every optimizer produce the same path on a bowl with unequal curvature?
 
 ```python
-# Experiment — Compare a fixed update budget: This is a controlled demonstration at stated rates and update...
+# Experiment — Compare a fixed update budget
 def bowl(w):
     return 0.5 * (w[0] ** 2 + 10 * w[1] ** 2)
 start = jnp.array([1.0, 1.0])
-# Configure or step the Optax optimizer state (`optimizers`).
 optimizers = {'sgd': optax.sgd(0.05), 'momentum': optax.sgd(0.05, momentum=0.9), 'adam': optax.adam(0.1)}
 traces = {}
 for name, tx in optimizers.items():
 
-    # Define `step(carry, _)` to evaluate the objective and its automatic derivatives:
     def step(carry, _):
         p, s = carry
-        # Differentiate the objective to obtain `(delta, s)` via automatic differentiation.
         delta, s = tx.update(jax.grad(bowl)(p), s, p)
-        # Configure or step the Optax optimizer state (`p`).
         p = optax.apply_updates(p, delta)
         return ((p, s), bowl(p))
     (_, _), history = jax.lax.scan(step, (start, tx.init(start)), None, length=50)
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert jnp.all(jnp.isfinite(history))
     assert history[-1] < bowl(start)
     traces[name] = history
@@ -345,20 +331,18 @@ The retained count has reached the final rate; a reset count starts at $0$.
 - `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
 
 **Step-by-step implementation plan:**
-1. Configure or step the Optax optimizer state (`tx`).
-2. Configure or step the Optax optimizer state (`p`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
-# Configure or step the Optax optimizer state (`tx`).
+# Catch schedule restart (Transfer / diagnosis)
 tx = optax.sgd(...)  # TODO: compute tx
 p = jnp.array(...)  # TODO: compute p
 s = tx.init(...)  # TODO: compute s
 for _ in range(5):
     delta, s = tx.update(...)  # TODO: compute delta, s
-    # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(...)  # TODO: compute p
 continued, _ = tx.update(...)  # TODO: compute continued, _
 restarted, _ = tx.update(...)  # TODO: compute restarted, _
@@ -369,14 +353,12 @@ assert jnp.allclose(restarted, -0.1, atol=1e-06)  # TODO: complete assertion che
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch schedule restart (Transfer / diagnosis): Restoring weights without optimizer state can silently...
-# Configure or step the Optax optimizer state (`tx`).
+# Catch schedule restart (Transfer / diagnosis)
 tx = optax.sgd(schedule)
 p = jnp.array(0.0)
 s = tx.init(p)
 for _ in range(5):
     delta, s = tx.update(jnp.array(1.0), s, p)
-    # Configure or step the Optax optimizer state (`p`).
     p = optax.apply_updates(p, delta)
 continued, _ = tx.update(jnp.array(1.0), s, p)
 restarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)
@@ -408,16 +390,14 @@ The un-clipped SGD update already has norm $0.5$, below the threshold $1$.
 - `optax.adam(lr) / optax.apply_updates(params, updates)` — Optax gradient transformations and numerically stable loss functions over parameter PyTrees.
 
 **Step-by-step implementation plan:**
-1. Configure or step the Optax optimizer state (`before`).
-2. Configure or step the Optax optimizer state (`after`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
-# Configure or step the Optax optimizer state (`before`).
 before = optax.chain(...)  # TODO: compute before
-# Configure or step the Optax optimizer state (`after`).
 after = optax.chain(...)  # TODO: compute after
 u_before, _ = before.update(...)  # TODO: compute u_before, _
 u_after, _ = after.update(...)  # TODO: compute u_after, _
@@ -429,9 +409,7 @@ assert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)  # TODO: complete
 
 ```python
 # Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.
-# Configure or step the Optax optimizer state (`before`).
 before = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))
-# Configure or step the Optax optimizer state (`after`).
 after = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))
 u_before, _ = before.update(g, before.init(jnp.zeros(2)))
 u_after, _ = after.update(g, after.init(jnp.zeros(2)))

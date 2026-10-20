@@ -2,6 +2,8 @@
 
 Phase 13: Pallas kernels · about 120 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build a representative shape/dtype correctness matrix for an actual Pallas pipeline.
@@ -172,7 +174,7 @@ The candidate uses the same checked Pallas pipeline. The benchmark rejects CPU i
 Create main.py for the first block, then append each block in order in your course CPU environment.
 
 ```python
-# Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
+# Step 2 — Audit a matrix of shapes and precisions
 rng=np.random.default_rng(42)
 correctness=[]
 precision_gaps=[]
@@ -183,8 +185,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     row=[]
     gaps=[]
     for dtype in (jnp.float32,jnp.bfloat16):
-        # Create device-backed JAX array `a`.
-        # Create device-backed JAX array `b`.
         a=jnp.asarray(original_x,dtype=dtype)
         b=jnp.asarray(original_y,dtype=dtype)
         actual=pipelined_axpy(a,b)
@@ -323,7 +323,7 @@ def target_benchmark(candidate,baseline,args,repeats=20):
     records["boundary"]="already-placed logical inputs; complete padded/cropped wrapper output; warm synchronized execution"
     return records
 
-# Step 2 — Audit a matrix of shapes and precisions: A zero kernel error means the implementation honored the declared...
+# Step 2 — Audit a matrix of shapes and precisions
 rng=np.random.default_rng(42)
 correctness=[]
 precision_gaps=[]
@@ -334,8 +334,6 @@ for shape in [(1,1),(8,128),(9,129),(17,257)]:
     row=[]
     gaps=[]
     for dtype in (jnp.float32,jnp.bfloat16):
-        # Create device-backed JAX array `a`.
-        # Create device-backed JAX array `b`.
         a=jnp.asarray(original_x,dtype=dtype)
         b=jnp.asarray(original_y,dtype=dtype)
         actual=pipelined_axpy(a,b)
@@ -394,7 +392,7 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:02:57.529980+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:03.072730+00:00. JAX 0.9.2.
 
 ```text
 Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
@@ -424,7 +422,6 @@ PASS: kernels-04
 ```python
 # Experiment — Preserve correctness under a joint row permutation: This operation has no coupling between rows.
 a=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
-# Create device-backed JAX array `b`.
 b=jnp.asarray(rng.normal(size=(9,129)),dtype=jnp.float32)
 order=jnp.array([8,0,7,1,6,2,5,3,4])
 inverse=jnp.argsort(order)
@@ -444,7 +441,7 @@ This operation has no coupling between rows. A failure suggests ownership or dat
 **Predict before running:** Will rounding an intermediate bfloat16 value always equal one final output cast?
 
 ```python
-# Experiment — Make a precision-policy counterexample: The order of representation changes is part of the numerical...
+# Experiment — Make a precision-policy counterexample
 first=jnp.array([1.00390625],dtype=jnp.float32)
 second=jnp.array([0.00390625],dtype=jnp.float32)
 early=(first.astype(jnp.bfloat16).astype(jnp.float32)+second).astype(jnp.bfloat16)
@@ -467,15 +464,14 @@ Add a (15,255) fixture, compare two tile choices and two buffer counts, and reta
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `b`.
+1. Exercise solution
 2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a (15,255) fixture, compare two tile choices and two buffer...
+# Exercise solution
 a = jnp.asarray(...)  # TODO: compute a
-# Create device-backed JAX array `b`.
 b = jnp.asarray(...)  # TODO: compute b
 # Transfer the device result to the host for an independent NumPy comparison.
 expected = ...  # TODO: compute expected
@@ -491,9 +487,8 @@ for block in [(8,128),(16,256)]:
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a (15,255) fixture, compare two tile choices and two buffer...
+# Exercise solution
 a=jnp.asarray(np.random.default_rng(8).normal(size=(15,255)),dtype=jnp.float32)
-# Create device-backed JAX array `b`.
 b=jnp.asarray(np.random.default_rng(9).normal(size=(15,255)),dtype=jnp.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 expected=2*np.asarray(a)+np.asarray(b)

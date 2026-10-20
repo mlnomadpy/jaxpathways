@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-03",
-  "contentHash": "84c095e870cd83df6bddcfd5725c649840c766b85bd3ad7f1a51048eaf61278d",
-  "executedAt": "2026-10-20T18:52:25.726420+00:00",
+  "contentHash": "9de1f0e556f53526c37eedb72c46675ce93f7ecfe13d16860511aefe9ea7adea",
+  "executedAt": "2026-10-20T22:22:23.581942+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 4,
@@ -11,34 +11,34 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 89.9164006114006, 'reduce_scatter': 93.58301758766174, 'all_gather_only': 100.12509301304817}\nGradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 88.16691115498543, 'reduce_scatter': 80.5417075753212, 'all_gather_only': 88.2497988641262}\nSharded momentum matches the independent elementwise update.\nJoint permutation preserves the gradient; label-only reversal does not.\nIdealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]\nPASS: distributed-03\n",
+  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 365.9161739051342, 'reduce_scatter': 139.08278197050095, 'all_gather_only': 111.58362030982971}\nGradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 118.75014752149582, 'reduce_scatter': 106.83387517929077, 'all_gather_only': 87.7920538187027}\nSharded momentum matches the independent elementwise update.\nJoint permutation preserves the gradient; label-only reversal does not.\nIdealized payload/storage budget, not observed network traffic: [{'ranks': 2, 'all_reduce_bytes': 1048576, 'scatter_gather_bytes': 1048576, 'shard_storage_bytes': 524288}, {'ranks': 4, 'all_reduce_bytes': 1572864, 'scatter_gather_bytes': 1572864, 'shard_storage_bytes': 262144}, {'ranks': 8, 'all_reduce_bytes': 1835008, 'scatter_gather_bytes': 1835008, 'shard_storage_bytes': 131072}]\nPASS: distributed-03\n",
   "notebookCells": [
     {
-      "sourceHash": "e1dc0a76e2218c975d5a49dcbb6c59188e70defb614799316d511892e6738073",
+      "sourceHash": "4fb13ba83f9875840719ab1dd03b68c1fd609da25fedc9d16578bfa627eff4f7",
       "outputs": []
     },
     {
-      "sourceHash": "bfefee9bea3b5e2dbca3f9b7199819e521c7081ade85d8660c5eee79ba6859f1",
+      "sourceHash": "480b1047263070c322d226fbfdcfa94d681dbe81df0f4400fb5005f20146467b",
       "outputs": []
     },
     {
-      "sourceHash": "41dcbbbb08b88f0226c5115c61935588aaf57b481e464028bde39c3d42142cac",
+      "sourceHash": "902ed65c9bfb140f322542163cad101e058e879b3078bf0060a0ccdd211ecea0",
       "outputs": []
     },
     {
-      "sourceHash": "9519f6e31a19cd06547739f482dc8b799bb8eb1d653bf28cd63da15fc3d8c284",
+      "sourceHash": "60b93be98829f9c1fd09d2b877da0f8137f86968667f56050a3b00d40db1a0d8",
       "outputs": []
     },
     {
-      "sourceHash": "afc06023c22b4d1e9b13b4c2fb77a185170f9da06cc633daa8f1e325f6640119",
+      "sourceHash": "24b2219fb3f5e5f044fd7d5285e4991e96a659778a8b8b31d3ff0f4840dec843",
       "outputs": []
     },
     {
-      "sourceHash": "1d42fd14ecad4487920636f9b59e94cfe74d41f10cb032c40a53bcd28039be89",
+      "sourceHash": "c95447d72473b3df46210a903efd34391ce49a55103ba2d11f45398c6008102c",
       "outputs": []
     },
     {
-      "sourceHash": "d9e027c5d649fa50456191b464a4b7f89e7ab664cc592619d8641e9353b59730",
+      "sourceHash": "d5107f684755c5b751c305b2c9f33423d6cd832e3658e32eae3345e1dbf54483",
       "outputs": [
         {
           "output_type": "stream",
@@ -47,13 +47,13 @@
             "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\n",
             "Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\n",
             "Idealized ring bytes per rank: 48.0 24.0\n",
-            "Completed CPU median microseconds: {'all_reduce': 115.5002973973751, 'reduce_scatter': 111.08396574854851, 'all_gather_only': 107.20780119299889}\n"
+            "Completed CPU median microseconds: {'all_reduce': 195.4580657184124, 'reduce_scatter': 130.20774349570274, 'all_gather_only': 117.41695925593376}\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "66a70e22a1531d6c2b8252d3841bd5460353e3339558edcb29e1ba2b0aa83c30",
+      "sourceHash": "f5b0153b1bd08fe8191244b6fe13e7da1dd1289bdab17c35a97a0368d4f07dfc",
       "outputs": [
         {
           "output_type": "stream",
@@ -62,7 +62,7 @@
             "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\n",
             "Local result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\n",
             "Idealized ring bytes per rank: 48.0 24.0\n",
-            "Completed CPU median microseconds: {'all_reduce': 111.6669736802578, 'reduce_scatter': 115.62509462237358, 'all_gather_only': 98.29085320234299}\n"
+            "Completed CPU median microseconds: {'all_reduce': 124.04099106788635, 'reduce_scatter': 112.70912364125252, 'all_gather_only': 108.41619223356247}\n"
           ]
         }
       ]
@@ -99,11 +99,11 @@
       ]
     },
     {
-      "sourceHash": "fa429282ca0efc53cf698b85969545042d69bed9af259877deb16d1ce9db3d9d",
+      "sourceHash": "8f3413f1f231ac967739399db520dde85947aba3df0d3bb81a8c06a57d908c83",
       "outputs": []
     },
     {
-      "sourceHash": "f21bd68bf83f9d70dbb0a3a79871be343dc3bde71f6003e15f1199af3e5a9a62",
+      "sourceHash": "250fcf603561034b8cf293b835631e48115525889245556043eedbdb25608627",
       "outputs": [
         {
           "output_type": "stream",
@@ -115,11 +115,11 @@
       ]
     },
     {
-      "sourceHash": "dea1c8e2869d4b4ec8c3d9ee33337cb4d5262aab084c70bbf3b4c7cb5a73c2cd",
+      "sourceHash": "8ebe679680b4f9275e5ab7e5397dc91c04e1e84cf67cf696b6db7be8bcd968c3",
       "outputs": []
     },
     {
-      "sourceHash": "36722bc196794c59697566aa754d890e8aaeb663bf86d8f3ab9f088f298600d7",
+      "sourceHash": "5fd3adfd22f84cebb4dff285ded4b1e483f2c953cd2a267ef30dce585f13a5ad",
       "outputs": [
         {
           "output_type": "stream",

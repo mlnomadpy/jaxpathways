@@ -11,22 +11,20 @@ reference = x @ w
 np.testing.assert_allclose(reference[0,0], -1.437, atol=1e-6)
 
 # Round inputs and weights, then accumulate explicitly
-# Step 2 — Round inputs and weights, then accumulate explicitly: The printed errors isolate the consequence of representational...
+# Step 2 — Round inputs and weights, then accumulate explicitly
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 
 # Construct signed integer codes and channel scales
-# Step 3 — Construct signed integer codes and channel scales: An all-zero channel uses scale 1 and zero codes, so reconstruction...
+# Step 3 — Construct signed integer codes and channel scales
 def quantize_weights(weights, bits):
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
@@ -53,7 +51,7 @@ for bits in (8, 4):
     assert np.all(error <= bound + 1e-6)
     print("W%dA32 simulated output error" % bits, float(error.max()))
 
-# Choose weight, activation and accumulation precision: A precision policy specifies how weights, activations,...
+# Choose weight, activation and accumulation precision
 import numpy as np
 import jax.numpy as jnp
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
@@ -62,13 +60,11 @@ reference = x @ w
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 
@@ -215,10 +211,9 @@ np.testing.assert_allclose(shared[:,0], [0.,0.,0.], atol=0)
 print('Small-channel max error; shared / per-channel:', np.max(np.abs(shared[:,0]-heterogeneous[:,0])), np.max(np.abs(per_channel[:,0]-heterogeneous[:,0])))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Add a zero-valued output channel and verify that its quantization...
+# Exercise solution
 with_zero = np.column_stack((w, np.zeros(3, np.float32)))
 q, scale = quantize_weights(with_zero, 8)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()
 np.testing.assert_array_equal(q[:, -1], 0)
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
@@ -255,7 +250,7 @@ for bad_scale in (0., -1., float('nan')):
 print('Code-origin invariance and bias-only zero input verified.')
 
 # Reference practice: Account for actual low-bit storage
-# Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
+# Account for actual low-bit storage (Transfer / diagnosis)
 q4, s4 = quantize_weights(w, 4)
 float_weight_bytes = w.nbytes
 simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes

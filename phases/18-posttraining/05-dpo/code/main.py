@@ -1,12 +1,11 @@
 """Direct preference optimization and reference-corrected margins: worked experiments and reference solutions. CPU checks."""
 
 # 1. Define the reference-corrected pair objective
-# Step 1 — 1. Define the reference-corrected pair objective: The reference correction is detached, while current policy log...
+# Step 1 — 1. Define the reference-corrected pair objective
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Define `dpo_loss(policy_logps, reference_logps, chosen, rejected...)` to evaluate the objective and its automatic derivatives:
 def dpo_loss(policy_logps, reference_logps, chosen, rejected, beta=0.2):
     margin = (policy_logps[chosen] - policy_logps[rejected]) - jax.lax.stop_gradient(
         reference_logps[chosen] - reference_logps[rejected]
@@ -23,7 +22,6 @@ history = []
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 
@@ -54,7 +52,7 @@ print(
     margin,
 )
 
-# Step 1 — 1. Define the reference-corrected pair objective: The reference correction is detached, while current policy log...
+# Step 1 — 1. Define the reference-corrected pair objective
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -74,7 +72,6 @@ history = []
 loss = lambda theta: dpo_loss(
     jax.nn.log_softmax(theta), reference, chosen, rejected, 0.3
 )
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 np.testing.assert_allclose(loss(theta), np.log(2), atol=1e-6)
 
@@ -137,14 +134,13 @@ np.testing.assert_allclose(after, np.logaddexp(0.0, -0.3 * np.log(3)), atol=1e-6
 print('Loss before/after:', before, after, '; chosen probability: 0.4 -> 0.3')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Swap chosen and rejected IDs after training and verify that the loss...
+# Exercise solution
 reverse = float(dpo_loss(policy, reference, rejected, chosen, 0.3))
 assert reverse > float(dpo_loss(policy, reference, chosen, rejected, 0.3))
 print('Reversed-label loss:', reverse)
 
 # Reference practice: Freeze the reference numerically and in autodiff
-# Freeze the reference numerically and in autodiff (Transfer): Also retain the actual reference checkpoint and tokenizer...
-# Differentiate the objective to obtain `reference_grad` via automatic differentiation.
+# Freeze the reference numerically and in autodiff (Transfer)
 reference_grad = jax.grad(dpo_loss, argnums=1)(
     policy, reference, chosen, rejected, 0.3
 )
@@ -154,7 +150,7 @@ np.testing.assert_array_equal(
 print('Reference gradient is zero.')
 
 # Reference practice: Derive a one-pair categorical gradient
-# Derive a one-pair categorical gradient (Challenge): The unpaired logit is absent from this categorical...
+# Derive a one-pair categorical gradient (Challenge)
 probe = jnp.array([0.6, -0.3, 0.1])
 choice = jnp.array([0])
 reject = jnp.array([1])
@@ -164,7 +160,6 @@ one_pair = lambda logits: dpo_loss(
 )
 margin_value = float((probe[0] - probe[1]) - (reference[0] - reference[1]))
 factor = -beta / (1 + np.exp(beta * margin_value))
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(
     jax.grad(one_pair)(probe), [factor, -factor, 0.0], atol=1e-6
 )

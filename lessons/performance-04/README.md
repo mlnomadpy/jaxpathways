@@ -2,6 +2,8 @@
 
 Phase 08: Performance diagnosis · about 95 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Locate matrix multiplication and activation in StableHLO.
@@ -96,7 +98,7 @@ StableHLO establishes the operation and shape contract. Numerical equality is ch
 Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.
 
 ```python
-# Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
+# Step 2 — Calculate an explicitly hypothetical model
 def workload(a,b):return jnp.tanh(a@b)
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
@@ -144,7 +146,7 @@ Warm samples measure the current CPU, while the work count remains a matmul-only
 Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.
 
 ```python
-# Step 4 — Keep runtime observations separate: Warm samples measure the current CPU, while the work count remains...
+# Step 4 — Keep runtime observations separate
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
@@ -171,7 +173,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
-# Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
+# Step 2 — Calculate an explicitly hypothetical model
 def workload(a,b):return jnp.tanh(a@b)
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
@@ -203,7 +205,7 @@ roofline=np.minimum(peak,memory_ceiling)
 np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])
 assert np.all(roofline[2:]==peak)
 
-# Step 4 — Keep runtime observations separate: Warm samples measure the current CPU, while the work count remains...
+# Step 4 — Keep runtime observations separate
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
@@ -248,17 +250,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:17.223660+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:15.822023+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'bytes accessed': 5632.0}
-Local CPU samples seconds: [2.8500333428382874e-05, 1.8625054508447647e-05, 1.4499761164188385e-05, 1.291697844862938e-05, 1.2500211596488953e-05]
+Compiler estimates (backend-specific): {'transcendentals': 256.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0}
+Local CPU samples seconds: [3.929203376173973e-05, 5.700020119547844e-05, 1.5208963304758072e-05, 1.0291580110788345e-05, 8.707866072654724e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0}
-Local CPU samples seconds: [2.1167099475860596e-05, 1.6707926988601685e-05, 1.1874828487634659e-05, 1.2584030628204346e-05, 1.2124888598918915e-05]
+Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'transcendentals': 256.0, 'utilization0{}': 2.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0}
+Local CPU samples seconds: [1.4874618500471115e-05, 1.254212111234665e-05, 9.542331099510193e-06, 7.832888513803482e-06, 7.916707545518875e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]
@@ -346,7 +348,7 @@ The model assumes both inputs and output use that element size; real accumulatio
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep the same shapes but change storage precision (Transfer): Changing storage bytes in an accounting model does not...
+# Keep the same shapes but change storage precision (Transfer)
 f32,b32,i32 = contract(...)  # TODO: compute f32,b32,i32
 f16,b16,i16 = contract(...)  # TODO: compute f16,b16,i16
 assert f32  # TODO: complete assertion check
@@ -357,7 +359,7 @@ print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep the same shapes but change storage precision (Transfer): Changing storage bytes in an accounting model does not...
+# Keep the same shapes but change storage precision (Transfer)
 f32,b32,i32=contract(32,16,8,4)
 f16,b16,i16=contract(32,16,8,2)
 assert f32==f16 and b32==2*b16

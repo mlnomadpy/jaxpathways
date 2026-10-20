@@ -1,7 +1,7 @@
 """Distributions and sampling: worked experiments and reference solutions. CPU checks."""
 
 # 1. Define a density and its contract
-# Step 1 — 1. Define a density and its contract: The normalization term matters when comparing different scales;...
+# Step 1 — 1. Define a density and its contract
 import math
 import numpy as np
 import jax
@@ -12,7 +12,7 @@ def normal_logpdf(value, loc, scale):
     return -0.5*((value-loc)/scale)**2 - jnp.log(scale) - 0.5*jnp.log(2*jnp.pi)
 
 # 2. Sample with explicit ownership
-# Step 2 — 2. Sample with explicit ownership: The broad mean bound is five analytic standard errors for this...
+# Step 2 — 2. Sample with explicit ownership
 # Create or split explicit PRNG key(s) (`(key_a, key_b)`) for reproducible randomness.
 key_a, key_b = jax.random.split(jax.random.key(23))
 # Sample deterministic random values into `a` using an explicit PRNG key.
@@ -26,19 +26,18 @@ assert not jnp.array_equal(a,b)
 assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 
 # 3. Compare an independent calculation
-# Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
+# Step 3 — 3. Compare an independent calculation
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
 stable = logsumexp(components)-jnp.log(2.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 print('sample mean, variance:',float(a.mean()),float(a.var()))
 print('stable equal-mixture log density:',float(stable))
 
-# Step 1 — 1. Define a density and its contract: The normalization term matters when comparing different scales;...
+# Step 1 — 1. Define a density and its contract
 import math
 import numpy as np
 import jax
@@ -48,7 +47,7 @@ from jax.scipy.special import logsumexp
 def normal_logpdf(value, loc, scale):
     return -0.5*((value-loc)/scale)**2 - jnp.log(scale) - 0.5*jnp.log(2*jnp.pi)
 
-# Step 2 — 2. Sample with explicit ownership: The broad mean bound is five analytic standard errors for this...
+# Step 2 — 2. Sample with explicit ownership
 # Create or split explicit PRNG key(s) (`(key_a, key_b)`) for reproducible randomness.
 key_a, key_b = jax.random.split(jax.random.key(23))
 # Sample deterministic random values into `a` using an explicit PRNG key.
@@ -61,13 +60,12 @@ assert abs(float(a.var())-expected_variance) < .4
 assert not jnp.array_equal(a,b)
 assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 
-# Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
+# Step 3 — 3. Compare an independent calculation
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
 stable = logsumexp(components)-jnp.log(2.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 print('sample mean, variance:',float(a.mean()),float(a.var()))
@@ -79,13 +77,13 @@ sizes = np.array([1,4,16,64,100,400])
 visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observations N","ylabel":"standard deviation (reading units)","xscale":"log","series":[{"label":"individual reading","y":[3.]*len(sizes)},{"label":"average of N readings","y":(3/np.sqrt(sizes)).tolist()}]}
 
 # Experiment: Density can exceed one
-# Experiment — Density can exceed one: A narrow continuous density can exceed one; its area, not its...
+# Experiment — Density can exceed one
 peak = jnp.exp(normal_logpdf(0.,0.,.1))
 assert peak > 1
 print("peak density:",float(peak))
 
 # Experiment: Separate sum and mixture
-# Experiment — Separate sum and mixture: Independence multiplies probabilities, while alternative mixture...
+# Experiment — Separate sum and mixture
 values = jnp.array([-2.,-3.])
 independent_log = values.sum()
 mixture_log = logsumexp(values)-jnp.log(2.)
@@ -94,7 +92,7 @@ assert mixture_log > -3.
 print(float(independent_log),float(mixture_log))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
+# Exercise solution
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = -1.+.5*jax.random.normal(jax.random.key(51),(30000,))
 assert abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)
@@ -106,7 +104,7 @@ scores = normal_logpdf(0.,0.,jnp.array([1.,2.]))
 assert jnp.allclose(scores[0]-scores[1],jnp.log(2.))
 
 # Reference practice: Demonstrate key ownership
-# Demonstrate key ownership (Transfer / diagnosis): Different split keys avoid accidental replay; one differing...
+# Demonstrate key ownership (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
 left,right = jax.random.split(jax.random.key(17))
 # Sample deterministic random values into `first` using an explicit PRNG key.

@@ -2,6 +2,8 @@
 
 Phase 17: Self-supervised pretraining: masked and contrastive learning · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Define the positive pair before augmenting
@@ -91,7 +93,7 @@ Retain both the encoder representation and projection-head choice when reporting
 Create main.py in your activated course environment. Paste this block, then run python main.py; function definitions alone print nothing.
 
 ```python
-# Step 1 — 1. Define both retrieval directions: Row and column log-softmax share scores but normalize different...
+# Step 1 — 1. Define both retrieval directions
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -122,7 +124,6 @@ right = left + jnp.array(
 )
 w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: paired_contrastive(left @ w, right @ w, 0.2))
 )
@@ -161,7 +162,6 @@ np.testing.assert_allclose(
     atol=1e-6,
 )
 assert np.array_equal(np.argmax(host, axis=1), np.arange(4))
-# Create device-backed JAX array `permutation`.
 permutation = jnp.array([2, 0, 3, 1])
 np.testing.assert_allclose(
     paired_contrastive(left @ w, right @ w),
@@ -181,7 +181,7 @@ The host calculation checks both denominators. Joint permutation preserves the p
 ## Run the example
 
 ```python
-# Step 1 — 1. Define both retrieval directions: Row and column log-softmax share scores but normalize different...
+# Step 1 — 1. Define both retrieval directions
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -204,7 +204,6 @@ right = left + jnp.array(
 )
 w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: paired_contrastive(left @ w, right @ w, 0.2))
 )
@@ -235,7 +234,6 @@ np.testing.assert_allclose(
     atol=1e-6,
 )
 assert np.array_equal(np.argmax(host, axis=1), np.arange(4))
-# Create device-backed JAX array `permutation`.
 permutation = jnp.array([2, 0, 3, 1])
 np.testing.assert_allclose(
     paired_contrastive(left @ w, right @ w),
@@ -282,7 +280,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:46.638305+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:48.912284+00:00. JAX 0.9.2.
 
 ```text
 Paired contrastive initial/final: 0.564157247543335 0.013556718826293945 ; all four nearest pairs correct
@@ -320,7 +318,7 @@ Equal similarity gives each candidate probability one quarter. This baseline cat
 **Predict before running:** For two orthogonal matched pairs, does lowering temperature change top-1 retrieval or only confidence?
 
 ```python
-# Experiment — Separate temperature from ranking: The independent binary-softmax expression checks scale handling...
+# Experiment — Separate temperature from ranking
 orthogonal = jnp.eye(2)
 for tau in [0.2, 1.0, 2.0]:
     observed = float(paired_contrastive(orthogonal, orthogonal, tau))
@@ -343,13 +341,12 @@ Permute only the right-hand embeddings after training and demonstrate the effect
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Permute only the right-hand embeddings after training and demonstrate...
+# Exercise solution
 wrong_pair_loss = float(...)  # TODO: compute wrong_pair_loss
 assert wrong_pair_loss  # TODO: complete assertion check
 print('Incorrect pair mapping loss:', wrong_pair_loss)
@@ -358,7 +355,7 @@ print('Incorrect pair mapping loss:', wrong_pair_loss)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Permute only the right-hand embeddings after training and demonstrate...
+# Exercise solution
 wrong_pair_loss = float(paired_contrastive(left @ w, (right @ w)[permutation]))
 assert wrong_pair_loss > float(paired_contrastive(left @ w, right @ w))
 print('Incorrect pair mapping loss:', wrong_pair_loss)
@@ -390,7 +387,7 @@ Each original candidate appears twice, but only one copy is labeled positive.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Duplicate a source and inspect the objective (Transfer): The extra log(2) comes from duplicating each denominator...
+# Duplicate a source and inspect the objective (Transfer)
 duplicated = float(...)  # TODO: compute duplicated
     paired_contrastive(jnp.tile(left @ w, (2, 1)), jnp.tile(right @ w, (2, 1)))
 )
@@ -402,7 +399,7 @@ print('Duplicated diagonal-only penalty:', duplicated - original)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Duplicate a source and inspect the objective (Transfer): The extra log(2) comes from duplicating each denominator...
+# Duplicate a source and inspect the objective (Transfer)
 duplicated = float(
     paired_contrastive(jnp.tile(left @ w, (2, 1)), jnp.tile(right @ w, (2, 1)))
 )
@@ -435,7 +432,8 @@ Use a fresh matrix; a gradient near a trained optimum may be too small to diagno
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `auto` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -443,7 +441,6 @@ Use a fresh matrix; a gradient near a trained optimum may be too small to diagno
 # Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.
 audit_w = jnp.array(...)  # TODO: compute audit_w
 objective = ...  # TODO: compute objective
-# Differentiate the objective to obtain `auto` via automatic differentiation.
 auto = float(...)  # TODO: compute auto
 for epsilon in [1e-3, 5e-4]:
     delta = jnp.zeros_like(...)  # TODO: compute delta
@@ -460,7 +457,6 @@ for epsilon in [1e-3, 5e-4]:
 # Check the encoder gradient through normalization (Challenge): This checks the complete input-to-normalized-similarity chain.
 audit_w = jnp.array([[0.2, 0.1], [0.1, 0.1], [0.02, -0.01]])
 objective = lambda weights: paired_contrastive(left @ weights, right @ weights, 0.2)
-# Differentiate the objective to obtain `auto` via automatic differentiation.
 auto = float(jax.grad(objective)(audit_w)[0, 0])
 for epsilon in [1e-3, 5e-4]:
     delta = jnp.zeros_like(audit_w).at[0, 0].set(epsilon)

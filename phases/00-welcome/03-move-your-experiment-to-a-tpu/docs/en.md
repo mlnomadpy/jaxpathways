@@ -2,6 +2,8 @@
 
 Phase 00: Setup & first steps · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Verify the device of a completed prediction and its independent numerical reference.
@@ -150,7 +152,7 @@ An old notebook kernel may retain an initialized CPU backend or stale variables.
 Add this block to main.py after the preceding block. Run the assembled file in a fresh process.
 
 ```python
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -166,7 +168,7 @@ Keep the requested backend, observed output placement and independent arithmetic
 Add this block to main.py after the preceding block. Run the assembled file in a fresh process.
 
 ```python
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
@@ -216,7 +218,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -224,7 +226,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
@@ -281,7 +283,7 @@ visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:46:56.117493+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:56.192607+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -347,7 +349,7 @@ PASS: welcome-03
 **Predict before running:** Would a correct numeric answer be enough if the report says CPU but the requested target is TPU?
 
 ```python
-# Experiment — Reject a mismatched report: Numerical agreement and requested placement are separate...
+# Experiment — Reject a mismatched report
 def verify_report(record, required):
     if record['platform'] != required or record['expected'] != required:
         raise ValueError('requested and observed platform disagree')
@@ -447,7 +449,7 @@ A row-wise affine prediction commutes with row permutation. A sum would conceal 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
+# Test row order without changing the model (Transfer)
 reversed_x = jax.device_put(...)  # TODO: compute reversed_x
 reversed_y = predict(...)  # TODO: compute reversed_y
 # Wait for device work to finish before timing it or comparing its result on the host.
@@ -463,7 +465,7 @@ print('Row reversal preserved values and requested placement.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
+# Test row order without changing the model (Transfer)
 reversed_x = jax.device_put(x_host[::-1].copy(), devices[0])
 reversed_y = predict(reversed_x, w)
 # Wait for device work to finish before timing it or comparing its result on the host.

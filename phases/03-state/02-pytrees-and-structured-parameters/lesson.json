@@ -4,10 +4,10 @@
   "minutes": 60,
   "content": {
     "idea": "A pytree is a nested structure whose leaves hold values such as parameters. JAX can transform the leaves while preserving the structure. This makes a model's parameter groups explicit and lets us compare the gradient tree with the parameters it differentiates.",
-    "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: loss reads both parameter leaves.\nparams = {\"weight\": jnp.array([1., -1.]), \"bias\": jnp.array(0.)}\nx = jnp.array([2., 1.])\ndef loss(p):\n    prediction = jnp.dot(p[\"weight\"], x) + p[\"bias\"]\n    return (prediction - 3.) ** 2\n# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\n# Differentiate the objective to obtain `(value, grads)` via automatic differentiation.\nvalue, grads = jax.value_and_grad(loss)(params)\n# Transform every leaf of the parameter PyTree (`updated`).\nupdated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)\nprint(\"Before/after:\", float(value), float(loss(updated)))\nassert grads.keys() == params.keys()\nassert loss(updated) < value",
+    "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: loss reads both parameter leaves.\nparams = {\"weight\": jnp.array([1., -1.]), \"bias\": jnp.array(0.)}\nx = jnp.array([2., 1.])\ndef loss(p):\n    prediction = jnp.dot(p[\"weight\"], x) + p[\"bias\"]\n    return (prediction - 3.) ** 2\n# Step 3 — Run and check the result\nvalue, grads = jax.value_and_grad(loss)(params)\nupdated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)\nprint(\"Before/after:\", float(value), float(loss(updated)))\nassert grads.keys() == params.keys()\nassert loss(updated) < value",
     "output": "Before/after: \\(4.0\\), approximately \\(0.64\\).",
     "exercise": "Compute the squared norm of all gradient leaves. Verify it by adding the weight and bias contributions directly.",
-    "solution": "# Exercise solution: Compute the squared norm of all gradient leaves.\n# Transform every leaf of the parameter PyTree (`norm_squared`).\nnorm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))\nmanual = jnp.sum(grads[\"weight\"] ** 2) + grads[\"bias\"] ** 2\nassert jnp.allclose(norm_squared, manual)\nassert jnp.allclose(norm_squared, 96.)",
+    "solution": "# Exercise solution: Compute the squared norm of all gradient leaves.\nnorm_squared = sum(jnp.sum(g ** 2) for g in jax.tree.leaves(grads))\nmanual = jnp.sum(grads[\"weight\"] ** 2) + grads[\"bias\"] ** 2\nassert jnp.allclose(norm_squared, manual)\nassert jnp.allclose(norm_squared, 96.)",
     "question": "What structure does `grad(loss)(params)` have?",
     "options": [
       "One scalar regardless of parameters",
@@ -50,14 +50,14 @@
       {
         "title": "Verify every gradient leaf",
         "prediction": "Predict both weight derivatives and the bias derivative from the residual before inspecting grads.",
-        "code": "# Experiment — Verify every gradient leaf: This check verifies parameter identity and the actual gradient...\nassert jnp.allclose(grads[\"weight\"],jnp.array([-8.,-4.]))\nassert jnp.allclose(grads[\"bias\"],-4.)\nassert jnp.allclose(updated[\"weight\"],jnp.array([1.4,-0.8]))\nassert jnp.allclose(updated[\"bias\"],0.2)\nassert jnp.allclose(loss(updated),0.64,atol=1e-6)",
+        "code": "# Experiment — Verify every gradient leaf\nassert jnp.allclose(grads[\"weight\"],jnp.array([-8.,-4.]))\nassert jnp.allclose(grads[\"bias\"],-4.)\nassert jnp.allclose(updated[\"weight\"],jnp.array([1.4,-0.8]))\nassert jnp.allclose(updated[\"bias\"],0.2)\nassert jnp.allclose(loss(updated),0.64,atol=1e-6)",
         "output": "All leaves agree with the hand-derived update.",
         "explanation": "This check verifies parameter identity and the actual gradient values, not just a matching container."
       },
       {
         "title": "Flatten and reconstruct without losing identity",
         "prediction": "What is retained by the tree definition when array values are replaced?",
-        "code": "# Experiment — Flatten and reconstruct without losing identity: The tree definition describes containers; leaves supply...\nleaves,definition=jax.tree.flatten(params)\nrebuilt=jax.tree.unflatten(definition,leaves)\nassert jax.tree.structure(rebuilt)==jax.tree.structure(params)\nassert jnp.array_equal(rebuilt[\"weight\"],params[\"weight\"])\nassert jnp.array_equal(rebuilt[\"bias\"],params[\"bias\"])",
+        "code": "# Experiment — Flatten and reconstruct without losing identity\nleaves,definition=jax.tree.flatten(params)\nrebuilt=jax.tree.unflatten(definition,leaves)\nassert jax.tree.structure(rebuilt)==jax.tree.structure(params)\nassert jnp.array_equal(rebuilt[\"weight\"],params[\"weight\"])\nassert jnp.array_equal(rebuilt[\"bias\"],params[\"bias\"])",
         "output": "The original keys and corresponding values are reconstructed.",
         "explanation": "The tree definition describes containers; leaves supply numerical values. Both are needed for reconstruction."
       }
@@ -67,7 +67,7 @@
         "title": "Extend to a nested model",
         "prompt": "Place weight and bias under a layer dictionary and add a scalar scale parameter. Verify the derivative of scale for \\(s(wx+b)\\).",
         "hint": "At the starting point prediction is \\(1\\) and residual is \\(-2\\), so the scale derivative is \\(-4\\).",
-        "solution": "# Extend to a nested model (Practice): Nested parameter identity survives differentiation.\nnested={\"layer\":params,\"scale\":jnp.array(1.)}\ndef nested_loss(p):\n    pred=p[\"scale\"]*(jnp.dot(p[\"layer\"][\"weight\"],x)+p[\"layer\"][\"bias\"])\n    return (pred-3.)**2\n# Differentiate the objective to obtain `g` via automatic differentiation.\ng=jax.grad(nested_loss)(nested)\nassert jax.tree.structure(g)==jax.tree.structure(nested)\nassert jnp.allclose(g[\"scale\"],-4.)",
+        "solution": "# Extend to a nested model (Practice): Nested parameter identity survives differentiation.\nnested={\"layer\":params,\"scale\":jnp.array(1.)}\ndef nested_loss(p):\n    pred=p[\"scale\"]*(jnp.dot(p[\"layer\"][\"weight\"],x)+p[\"layer\"][\"bias\"])\n    return (pred-3.)**2\ng=jax.grad(nested_loss)(nested)\nassert jax.tree.structure(g)==jax.tree.structure(nested)\nassert jnp.allclose(g[\"scale\"],-4.)",
         "explanation": "Nested parameter identity survives differentiation. The independent scale calculation checks the new path.",
         "difficulty": "Practice"
       },
@@ -75,7 +75,7 @@
         "title": "Repair a mismatched update tree",
         "prompt": "Remove bias from the gradient dictionary, reproduce the structural error, then restore it and verify the hand update.",
         "hint": "Matching leaf counts is not enough; key paths matter.",
-        "solution": "# Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.\ntry:\n    jax.tree.map(lambda p,g:p-0.05*g,params,{\"weight\":grads[\"weight\"]})\nexcept ValueError:\n    print(\"Expected tree mismatch\")\nelse:\n    raise AssertionError(\"Expected a missing-key failure\")\n# Transform every leaf of the parameter PyTree (`fixed`).\nfixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)\nassert jnp.allclose(loss(fixed),0.64,atol=1e-6)",
+        "solution": "# Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.\ntry:\n    jax.tree.map(lambda p,g:p-0.05*g,params,{\"weight\":grads[\"weight\"]})\nexcept ValueError:\n    print(\"Expected tree mismatch\")\nelse:\n    raise AssertionError(\"Expected a missing-key failure\")\nfixed=jax.tree.map(lambda p,g:p-0.05*g,params,grads)\nassert jnp.allclose(loss(fixed),0.64,atol=1e-6)",
         "explanation": "A missing bias gradient is a tree mismatch. Broadcasting weights or changing a learning rate cannot supply the missing parameter identity.",
         "difficulty": "Challenge"
       }
@@ -101,7 +101,7 @@
       {
         "title": "Prepare the inputs",
         "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
-        "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp",
         "explanation": "These explicit inputs define the case that the later checks will verify."
       },
       {
@@ -113,7 +113,7 @@
       {
         "title": "Run and check the result",
         "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
-        "code": "# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\n# Differentiate the objective to obtain `(value, grads)` via automatic differentiation.\nvalue, grads = jax.value_and_grad(loss)(params)\n# Transform every leaf of the parameter PyTree (`updated`).\nupdated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)\nprint(\"Before/after:\", float(value), float(loss(updated)))\nassert grads.keys() == params.keys()\nassert loss(updated) < value",
+        "code": "# Step 3 — Run and check the result\nvalue, grads = jax.value_and_grad(loss)(params)\nupdated = jax.tree.map(lambda p, g: p - 0.05 * g, params, grads)\nprint(\"Before/after:\", float(value), float(loss(updated)))\nassert grads.keys() == params.keys()\nassert loss(updated) < value",
         "explanation": "Compare the output to the expected result below before making the exercise change."
       }
     ],

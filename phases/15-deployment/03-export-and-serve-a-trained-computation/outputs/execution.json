@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "c726b4d77574f156d2031a97e4036b36e6b24cc6e71e2b688dd561f94eb89afb",
-  "executedAt": "2026-10-20T21:41:22.471337+00:00",
+  "contentHash": "e80088adb3ad789a58d8eacd0ba291d56c5125f262831c9b806b27d93edd19b4",
+  "executedAt": "2026-10-20T22:24:42.546071+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "Verified serialized bytes: 1172\nVerified serialized bytes: 1172\nRejected incompatible shape: ValueError\nFresh interpreter loaded bytes and matched the known scores.\nChanged exported request verified\nInvalid requests rejected before the one valid inference call.\nPASS: deployment-03\n",
   "notebookCells": [
     {
-      "sourceHash": "e45805259254b78c84924423a4b39ccd8ec169fa0d901524be41fdf507e2ae59",
+      "sourceHash": "991ce720f92e1e5c7b5ba60d51c5b34632568fea104a8b0811e0e78586916496",
       "outputs": []
     },
     {
@@ -65,7 +65,7 @@
       ]
     },
     {
-      "sourceHash": "b9bfe706e815340749069c598e5c60751e66262dba0a4b6efc17cafe23b31ade",
+      "sourceHash": "7431036411d41039ce999f58a92dccf5242d69cd2c366bb2e95ca6b0e0fedeee",
       "outputs": [
         {
           "output_type": "stream",
@@ -77,7 +77,7 @@
       ]
     },
     {
-      "sourceHash": "d8c0f8b21e0bac7d1877f95c2dd5f1414bb5d7120a79a426d893de634362b9dc",
+      "sourceHash": "96ee1c716c391d2c6b08d3d8ef6434d1a0e92f4da0a1936786ec76c747c02345",
       "outputs": [
         {
           "output_type": "stream",

@@ -13,7 +13,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -42,7 +41,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -92,7 +90,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         worker_count=0)
 
 # Build the pipeline or state transition
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def data_contract(seed=42):
     source = TutorialSource()
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
@@ -106,7 +104,6 @@ def consume(state,iterator,count):
     for _ in range(count):
         batch = next(iterator)
         orders.append(batch["id"].copy())
-        # Create device-backed JAX array `(state, value)`.
         state,value = step(state,jnp.asarray(batch["x"]),jnp.asarray(batch["y"]))
         losses.append(float(value))
     return state,np.array(losses),orders
@@ -124,7 +121,7 @@ resumed_iterator = iter(make_loader())
 resumed_iterator.set_state(unpack_bytes(restored_payload["pipeline"]))
 
 # Run the comparison
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 reference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
@@ -147,7 +144,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -224,7 +220,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],
         worker_count=0)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def data_contract(seed=42):
     source = TutorialSource()
     values = np.array([[source[i]["x"],source[i]["y"]] for i in range(len(source))],dtype=np.float32)
@@ -238,7 +234,6 @@ def consume(state,iterator,count):
     for _ in range(count):
         batch = next(iterator)
         orders.append(batch["id"].copy())
-        # Create device-backed JAX array `(state, value)`.
         state,value = step(state,jnp.asarray(batch["x"]),jnp.asarray(batch["y"]))
         losses.append(float(value))
     return state,np.array(losses),orders
@@ -255,7 +250,7 @@ validate_contract(restored_payload["contract"],contract)
 resumed_iterator = iter(make_loader())
 resumed_iterator.set_state(unpack_bytes(restored_payload["pipeline"]))
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 reference_final,reference_losses,reference_ids = consume(reference_state,reference_iterator,4)
 resumed_final,resumed_losses,resumed_ids = consume(restored_payload["training"],resumed_iterator,4)
 for a,b in zip(reference_ids,resumed_ids):np.testing.assert_array_equal(a,b)
@@ -279,7 +274,7 @@ assert not np.isclose(wrong_losses[0],reference_losses[0],rtol=1e-6,atol=1e-7)
 print("Missing iterator restore repeats earlier IDs and changes the next loss")
 
 # Experiment: Restore only the reader
-# Experiment — Restore only the reader: Input replay and model-state replay are complementary...
+# Experiment — Restore only the reader
 reader_only = iter(make_loader())
 reader_only.set_state(unpack_bytes(restored_payload["pipeline"]))
 wrong_model,wrong_model_losses,correct_ids = consume(initial_state(),reader_only,1)
@@ -289,7 +284,7 @@ assert int(wrong_model["step"])==1
 print("Correct IDs alone do not restore the training transition")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Repeat the protocol after one batch and compare the next five batches...
+# Exercise solution
 other_iterator = iter(make_loader())
 other_state,_,_ = consume(initial_state(),other_iterator,1)
 other_payload = {"training":other_state,"pipeline":pack_bytes(other_iterator.get_state()),"contract":encode_contract(contract)}
@@ -308,7 +303,7 @@ same_tree(a,b)
 assert int(b["step"])==6
 
 # Reference practice: Reject an incompatible resume before consuming data
-# Reject an incompatible resume before consuming data (Transfer): Exact state replay only makes sense under a compatible data...
+# Reject an incompatible resume before consuming data (Transfer)
 for field,value in [('seed',43),('sha256','different-dataset')]:
     incompatible=dict(contract,**{field:value})
     try:validate_contract(restored_payload['contract'],incompatible)

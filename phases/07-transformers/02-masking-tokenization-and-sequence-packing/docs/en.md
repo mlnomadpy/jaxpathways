@@ -2,6 +2,8 @@
 
 Phase 07: Transformers & language models · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build a causal mask from positions
@@ -80,7 +82,7 @@ $$
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -93,7 +95,7 @@ These imports provide JAX array transformations and NumPy reference calculations
 Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.
 
 ```python
-# Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...
+# Step 2 — 2. Implement the mechanism
 def masked_mean(values, allowed):
     scores = jnp.where(allowed, 0., -jnp.inf)
     weights = jax.nn.softmax(scores, axis=-1)
@@ -131,12 +133,12 @@ Causal means $[2, 3, 4.666667, 7.5]$; no weight above the diagonal.
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Step 2 — 2. Implement the mechanism: allowed key columns query 0: 1 0 0 0 query 1: 1 1 0 0 query 2: 1 1...
+# Step 2 — 2. Implement the mechanism
 def masked_mean(values, allowed):
     scores = jnp.where(allowed, 0., -jnp.inf)
     weights = jax.nn.softmax(scores, axis=-1)
@@ -185,7 +187,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:51:35.184339+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:53.649309+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]
@@ -199,7 +201,7 @@ PASS: transformers-02
 **Predict before running:** If the last value becomes $1000$, which outputs may change?
 
 ```python
-# Experiment — Perturb the future: Perturbation tests whether earlier representations depend on...
+# Experiment — Perturb the future
 changed = values.at[-1, 0].set(1000.)
 changed_out, _ = masked_mean(changed, causal)
 assert jnp.allclose(changed_out[:3], out[:3])
@@ -289,22 +291,20 @@ Insert a diagonal fallback only for invalid queries.
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Confirm that all computed values remain finite (no NaN or Inf).
-2. Confirm that all computed values remain finite (no NaN or Inf).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair padding-query NaNs (Transfer / diagnosis): A fallback makes normalization defined; zeroing and loss...
+# Repair padding-query NaNs (Transfer / diagnosis)
 pad_valid = jnp.array(...)  # TODO: compute pad_valid
 pad_mask = make_mask(...)  # TODO: compute pad_mask
 bad_pad, _ = masked_mean(...)  # TODO: compute bad_pad, _
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert not jnp.all(jnp.isfinite(bad_pad))  # TODO: complete assertion check
 fallback = ...  # TODO: compute fallback
 pad_out, _ = masked_mean(...)  # TODO: compute pad_out, _
 pad_out = jnp.where(...)  # TODO: compute pad_out
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(pad_out))  # TODO: complete assertion check
 assert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))  # TODO: complete assertion check
 ```
@@ -312,16 +312,14 @@ assert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))  # TODO: complete as
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair padding-query NaNs (Transfer / diagnosis): A fallback makes normalization defined; zeroing and loss...
+# Repair padding-query NaNs (Transfer / diagnosis)
 pad_valid = jnp.array([True,True,False,False])
 pad_mask = make_mask(jnp.zeros(4, dtype=int), pad_valid)
 bad_pad, _ = masked_mean(values, pad_mask)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert not jnp.all(jnp.isfinite(bad_pad))
 fallback = (~pad_valid[:, None]) & jnp.eye(4, dtype=bool)
 pad_out, _ = masked_mean(values, pad_mask | fallback)
 pad_out = jnp.where(pad_valid[:, None], pad_out, 0.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(pad_out))
 assert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))
 ```
@@ -354,7 +352,7 @@ Query $2$ should see only value $8$ from its own segment.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect packed-example leakage (Transfer / diagnosis): The earlier values 2 and 4 belong to another example; they...
+# Detect packed-example leakage (Transfer / diagnosis)
 assert jnp.allclose(out[2,0], 14/3)  # TODO: complete assertion check
 assert jnp.allclose(packed_out[2,0], 8.)  # TODO: complete assertion check
 assert not jnp.allclose(out[2,0], packed_out[2,0])  # TODO: complete assertion check
@@ -363,7 +361,7 @@ assert not jnp.allclose(out[2,0], packed_out[2,0])  # TODO: complete assertion c
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Detect packed-example leakage (Transfer / diagnosis): The earlier values 2 and 4 belong to another example; they...
+# Detect packed-example leakage (Transfer / diagnosis)
 assert jnp.allclose(out[2,0], 14/3)
 assert jnp.allclose(packed_out[2,0], 8.)
 assert not jnp.allclose(out[2,0], packed_out[2,0])

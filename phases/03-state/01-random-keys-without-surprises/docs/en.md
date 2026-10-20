@@ -2,6 +2,8 @@
 
 Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Treat a key as an explicit input
@@ -74,7 +76,7 @@ Keep identifiers unique where distinct randomness is intended. Reusing an identi
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -108,7 +110,7 @@ random.split returns two new keys. noise_step returns the continuation key as pa
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Replay equal:", bool(jnp.array_equal(a, repeated)))
 print("Fresh draw equal:", bool(jnp.array_equal(a, b)))
 assert jnp.array_equal(a, repeated)
@@ -120,7 +122,7 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: random.split returns two new keys.
@@ -136,7 +138,7 @@ repeated = jax.random.normal(sample_key, (3,))
 key, next_key = jax.random.split(key)
 # Sample deterministic random values into `b` using an explicit PRNG key.
 b = jax.random.normal(next_key, (3,))
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print("Replay equal:", bool(jnp.array_equal(a, repeated)))
 print("Fresh draw equal:", bool(jnp.array_equal(a, b)))
 assert jnp.array_equal(a, repeated)
@@ -171,7 +173,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:55.146167+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:14.269894+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True
@@ -237,13 +239,14 @@ Split a fresh seed into four keys, then use vmap to draw two normal values from 
 - `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
-2. Check tensor shape invariant: `draw(7).shape == (4, 2)`
+1. Exercise solution
+2. Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
+3. Check tensor shape invariant: `draw(7).shape == (4, 2)`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Split a fresh seed into four keys, then use vmap to draw two normal...
+# Exercise solution
 def draw(seed):
     # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(...)  # TODO: compute keys
@@ -256,7 +259,7 @@ assert jnp.array_equal(draw(7), draw(7))  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Split a fresh seed into four keys, then use vmap to draw two normal...
+# Exercise solution
 def draw(seed):
     # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
     keys = jax.random.split(jax.random.key(seed), 4)

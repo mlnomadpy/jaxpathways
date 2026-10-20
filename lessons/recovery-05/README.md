@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Distinguish requested, completed, verified and published checkpoint state.
@@ -102,7 +104,7 @@ The manifest has its own acceptance boundary. State updates return new arrays so
 Create a Python file in the course environment. Add this block after the preceding block, then run the assembled file.
 
 ```python
-# Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
+# Step 2 — Save, continue and verify
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 snapshot=transition(state)
 path=root/'step_1'
@@ -174,7 +176,7 @@ def publish(path, step):
 def accepted():
     return json.loads((root/'LATEST.json').read_text())
 
-# Step 2 — Save, continue and verify: Wait on the real background writer, restore against the snapshot...
+# Step 2 — Save, continue and verify
 state={'weight':jnp.arange(1024,dtype=jnp.float32),'step':jnp.array(0,jnp.int32)}
 snapshot=transition(state)
 path=root/'step_1'
@@ -241,21 +243,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:51:17.997839+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:42.787594+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-gdtdp41c
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-20iu6hgs
 {
-  "save_call_seconds": 0.003559208009392023,
-  "remaining_work_and_wait_seconds": 0.01838504197075963,
+  "save_call_seconds": 0.003268791828304529,
+  "remaining_work_and_wait_seconds": 0.016436292324215174,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-m8dmlkko
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-e4ianqej
 {
-  "save_call_seconds": 0.003066000062972307,
-  "remaining_work_and_wait_seconds": 0.01094033382833004,
+  "save_call_seconds": 0.0017639580182731152,
+  "remaining_work_and_wait_seconds": 0.009139417205005884,
   "accepted_step": 1,
   "live_step": 2
 }
@@ -356,7 +358,7 @@ Check path existence and the declared step before restoration; still compare res
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
+# Keep only a genuinely accepted target (Transfer)
 def preflight(record):
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')
@@ -373,7 +375,7 @@ print('Missing target rejected; accepted checkpoint unchanged.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Keep only a genuinely accepted target (Transfer): File presence is a necessary local preflight, not proof that...
+# Keep only a genuinely accepted target (Transfer)
 def preflight(record):
     if not Path(record['path']).is_dir() or int(record['step'])<0:
         raise ValueError('checkpoint target unavailable')

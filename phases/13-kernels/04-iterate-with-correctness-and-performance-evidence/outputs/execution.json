@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-04",
-  "contentHash": "3fab089eb5ff37b6c388172385b2a568eddb07a69cd2de46aeec774863cc13be",
-  "executedAt": "2026-10-20T21:02:57.529980+00:00",
+  "contentHash": "f47f1d3e6629f5974b36e14f957442c2c4e638d57105dd5f9484c260ebad714d",
+  "executedAt": "2026-10-20T22:24:03.072730+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -18,7 +18,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "12663c1538bfe91b0c84997782e97658f519b36e97f470ca20f22df75a1a21f5",
+      "sourceHash": "1f88acb38ff1ce5e44e8edf80b08a6a35151912cc19ea9c454f8aacd9add8c83",
       "outputs": [
         {
           "output_type": "stream",
@@ -44,7 +44,7 @@
       ]
     },
     {
-      "sourceHash": "ddee91c70cc72f5d194046d25d19aed25ded22e8c0b025c9f867e0aa66fa82ce",
+      "sourceHash": "c297afc5144e34e44fc8d84ca8f85f69fc47ed6c962f51745b32eac8d2a4b48b",
       "outputs": [
         {
           "output_type": "stream",
@@ -78,7 +78,7 @@
       ]
     },
     {
-      "sourceHash": "45294465c50ccd06bf170f1ad8c235601b1b728c3139f9461883ebf7818ffb23",
+      "sourceHash": "047f2e54ea3ff66be8c6c8c207e0c62e0441bc6f887bc14ea41daa77c32591ee",
       "outputs": [
         {
           "output_type": "stream",
@@ -90,7 +90,7 @@
       ]
     },
     {
-      "sourceHash": "726e85aea810f2548c50e8ac7e93233e0f1faf1c7c1872c9b7776ee151bd1eb4",
+      "sourceHash": "95d0e5a84cc4b5bd935a3aaebf5cc1a1be7cd30a40c6af4e50f003e233da8862",
       "outputs": [
         {
           "output_type": "stream",
@@ -102,11 +102,11 @@
       ]
     },
     {
-      "sourceHash": "2ad2fa3effac48e9ad15bc9c170cdca9d879cc6ced3562a2b444b5d44665c288",
+      "sourceHash": "79cee00c6a3662ff2b0299705a50f226876766eb89c677b9fc7bd4f4596318cb",
       "outputs": []
     },
     {
-      "sourceHash": "5ad1d36a7a8e64da5d03c7f7438ad4ac3bab976f825ba9d375fd6ed448a5d8a5",
+      "sourceHash": "924dbe0d252a97ed06929b3e25d97094a48b843f5174f5d6a55016d80a3bc747",
       "outputs": [
         {
           "output_type": "stream",

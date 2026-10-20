@@ -1,7 +1,7 @@
 """bfloat16, int8 precision, and XProf profiling on TPU: worked experiments and reference solutions. CPU checks."""
 
 # Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
+# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
 from pathlib import Path
 import os
 import tempfile
@@ -52,38 +52,32 @@ def evaluate_precision_policies(seed=0):
             "weight_bytes": int(w_int8.size),
             "scale_bytes": int(scale.size * 4),
         })
-    # Return `results` to the caller.
     return results
 
 
 # Capture a warmed XProf trace and verify *.xplane.pb output
-# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
+# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
 def capture_warmed_trace(steps=4, trace_dir=None):
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(step_fn(x))
-    # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     # Enter managed runtime/context scope for this block:
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        # Record execution timing or profiler trace in `t1`.
         t1 = time.perf_counter()
         # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
             x = step_fn(x)
         # Wait for device work to finish before timing it or comparing its result on the host.
         jax.block_until_ready(x)
-        # Record execution timing or profiler trace in `steady_ms`.
         steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
     # Collect files from the retained trace directory.
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
     return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
 
 
@@ -101,7 +95,7 @@ print("Captured *.xplane.pb trace count:", trace_info["xplane_count"], "steady_m
 assert trace_info["xplane_count"] >= 1
 assert prec_table[0]["max_abs_err"] < prec_table[1]["max_abs_err"]
 
-# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors: Measuring both max and mean absolute error across accumulation...
+# Step 1 — Compare BF16 (FP32 vs BF16 accumulation) and per-channel INT8 matmul errors
 from pathlib import Path
 import os
 import time
@@ -151,37 +145,31 @@ def evaluate_precision_policies(seed=0):
             "weight_bytes": int(w_int8.size),
             "scale_bytes": int(scale.size * 4),
         })
-    # Return `results` to the caller.
     return results
 
 
 
-# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output: Warming up before entering jax.profiler.trace ensures the captured...
+# Step 2 — Capture a warmed XProf trace and verify *.xplane.pb output
 def capture_warmed_trace(steps=4, trace_dir=None):
     x = jnp.ones((256, 256), dtype=jnp.bfloat16)
     # Wrap with `jax.jit` (`step_fn`) so XLA traces and compiles the function.
     step_fn = jax.jit(lambda a: jnp.dot(a, a, preferred_element_type=jnp.float32).astype(jnp.bfloat16))
-    # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(step_fn(x))
-    # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     trace_dir = Path(trace_dir or os.environ.get("TPU_TRACE_DIR", "./tpu-xprof-trace")).expanduser().resolve()
     trace_dir.mkdir(parents=True, exist_ok=True)
     with jax.profiler.trace(str(trace_dir)):
-        # Record execution timing or profiler trace in `t1`.
         t1 = time.perf_counter()
         # Repeat the update loop over `range(steps)` steps:
         for _ in range(steps):
             x = step_fn(x)
         # Wait for device work to finish before timing it or comparing its result on the host.
         jax.block_until_ready(x)
-        # Record execution timing or profiler trace in `steady_ms`.
         steady_ms = (time.perf_counter() - t1) * 1000.0 / steps
     # Collect files from the retained trace directory.
     xplane_files = list(trace_dir.rglob("*.xplane.pb"))
-    # Return `{'warmup_ms': warmup_ms, 'steady_ms': steady_ms, 'xplane_count': len(xplane_files)}` to the caller.
     return {"warmup_ms": warmup_ms, "steady_ms": steady_ms, "xplane_count": len(xplane_files), "trace_dir": str(trace_dir)}
 
 
@@ -210,7 +198,7 @@ visual_data = {
 }
 
 # Experiment: Compare FP32 accumulation vs BF16 accumulation error ratio
-# Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio: Passing preferred_element_type=jnp.float32 to jnp.dot or...
+# Experiment — Compare FP32 accumulation vs BF16 accumulation error ratio
 fp32_acc_err = prec_table[0]["max_abs_err"]
 bf16_acc_err = prec_table[1]["max_abs_err"]
 ratio = round(bf16_acc_err / fp32_acc_err, 2)
@@ -219,20 +207,20 @@ print("BF16-accum / FP32-accum max error ratio:", ratio)
 assert ratio > 1.3
 
 # Experiment: Compare warmup duration vs traced steady-state step duration
-# Experiment — Compare warmup duration vs traced steady-state step duration: Keeping warmup outside jax.profiler.trace prevents XLA...
+# Experiment — Compare warmup duration vs traced steady-state step duration
 print("Warmup ms:", round(trace_info["warmup_ms"], 3), "Traced steady step ms:", round(trace_info["steady_ms"], 4))
 # Assert invariant `trace_info["warmup_ms"] > trace_info["steady_ms"]` holds
 assert trace_info["warmup_ms"] > trace_info["steady_ms"]
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Run evaluate_precision_policies(seed=42) and...
+# Exercise solution
 p42 = evaluate_precision_policies(seed=42)
 t3 = capture_warmed_trace(steps=3)
 print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
 assert p42[0]["mean_abs_err"] < p42[1]["mean_abs_err"] and t3["xplane_count"] >= 1
 
 # Reference practice: Compare per-channel vs per-tensor INT8 quantization error
-# Compare per-channel vs per-tensor INT8 quantization error (Foundations): One outlier channel stretches a per-tensor scale factor and...
+# Compare per-channel vs per-tensor INT8 quantization error (Foundations)
 # Create or split explicit PRNG key(s) (`w_skew`) for reproducible randomness.
 w_skew = jax.random.normal(jax.random.PRNGKey(9), (128, 32), dtype=jnp.float32) * 0.2
 w_skew = w_skew.at[:, 0].multiply(10.0)
@@ -252,7 +240,7 @@ print("Mean error (per-channel vs per-tensor):", round(err_col, 5), round(err_gl
 assert err_col < err_glb
 
 # Reference practice: Verify non-empty XProf *.xplane.pb byte size
-# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis): Verifying a non-empty *.xplane.pb file confirms the profiler...
+# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-xplane-size-") as d:
     a = jnp.ones((128, 128), dtype=jnp.bfloat16)
@@ -264,7 +252,6 @@ with tempfile.TemporaryDirectory(prefix="tpu-xplane-size-") as d:
     with jax.profiler.trace(d):
         # Wait for device work to finish before timing it or comparing its result on the host.
         jax.block_until_ready(fn(a))
-    # Read or serialize artifact data on disk (`pb`).
     pb = list(Path(d).rglob("*.xplane.pb"))[0]
     size_bytes = pb.stat().st_size
 print("xplane.pb bytes:", size_bytes)

@@ -2,6 +2,8 @@
 
 Phase 07: Transformers & language models · about 120 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Assemble the token-to-logit contract
@@ -81,7 +83,7 @@ Keep the corpus, vocabulary, context, model seed, optimizer settings, package ve
 Create main.py in the CPU environment. Add these imports and the vocabulary/context contract. Integer IDs must stay consistent with the output head.
 
 ```python
-# Step 1 — 1. Prepare packages and the vocabulary: Vocabulary size is three, model width is eight, and the context...
+# Step 1 — 1. Prepare packages and the vocabulary
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -101,7 +103,7 @@ Vocabulary size is three, model width is eight, and the context limit is four.
 Append the normalization, projection initialization and causal block from the previous lesson. Identify where the attention mask prevents future reads.
 
 ```python
-# Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
+# Step 2 — 2. Reuse the verified causal block
 def layer_norm(x):
     # Reduce along axis=-1 to compute `mean`.
     mean = jnp.mean(x, axis=-1, keepdims=True)
@@ -120,7 +122,6 @@ def block_forward(p, x):
     h = layer_norm(x)
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
     scores = q@k.T / jnp.sqrt(x.shape[-1])
-    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
@@ -134,7 +135,7 @@ The block returns one model-width vector per token; it has no dropout or running
 Append model initialization, token-to-logit mapping and example construction. Write the input and target IDs for the first abcab window before proceeding.
 
 ```python
-# Step 3 — 3. Add embeddings and the vocabulary head: The head has three columns; make_examples shifts each window by...
+# Step 3 — 3. Add embeddings and the vocabulary head
 def init_lm(key):
     # Create or split explicit PRNG key(s) (`(embed_key, block_key, head_key)`) for reproducible randomness.
     embed_key, block_key, head_key = jax.random.split(key, 3)
@@ -160,19 +161,17 @@ The head has three columns; make_examples shifts each window by one token for it
 Append the dataset calls, cross-entropy reduction, Adam transformation and compiled step. Which values are returned for the next update?
 
 ```python
-# Step 4 — 4. Define the loss and compiled state transition: train_step returns new parameters, optimizer state and the...
+# Step 4 — 4. Define the loss and compiled state transition
 train_x, train_y = make_examples("abc"*12)
 held_x, held_y = make_examples("bca"*6)
 def lm_loss(p, x, y):
     # Vectorize across the batch dimension with `jax.vmap` (`predictions`).
     predictions = jax.vmap(logits,in_axes=(None,0))(p,x)
     return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.adam(0.03)
 # Define and JIT-compile `train_step(p, state, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def train_step(p, state, x, y):
-    # Differentiate the objective to obtain `(value, gradients)` via automatic differentiation.
     value, gradients = jax.value_and_grad(lm_loss)(p,x,y)
     updates, next_state = optimizer.update(gradients,state,p)
     return optax.apply_updates(p,updates), next_state, value
@@ -185,7 +184,7 @@ train_step returns new parameters, optimizer state and the pre-update scalar los
 Append this training block. You will save this state after twenty steps; keep the optimizer state alongside parameters.
 
 ```python
-# Step 5 — 5. Run the first twenty updates: Adam count should now equal twenty; initialization is the only...
+# Step 5 — 5. Run the first twenty updates
 # Create or split explicit PRNG key(s) (`params`) for reproducible randomness.
 params = init_lm(jax.random.key(3))
 state = optimizer.init(params)
@@ -202,7 +201,7 @@ Adam count should now equal twenty; initialization is the only random operation 
 Append the save/load helpers. Read each rejection check. Rebuilding a tree template supplies structure, not the saved numeric state.
 
 ```python
-# Step 6 — 6. Write and validate the snapshot format: The loader checks architecture, vocabulary, numeric leaf...
+# Step 6 — 6. Write and validate the snapshot format
 def save_snapshot(folder, p, state, step):
     leaves, _ = jax.tree.flatten((p,state))
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -230,7 +229,6 @@ def load_snapshot(folder):
             saved = data[f"leaf_{i}"]
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
                 raise ValueError("checkpoint leaf contract mismatch")
-            # Create device-backed JAX array ``.
             arrays.append(jnp.array(saved))
     restored_p, restored_state = jax.tree.unflatten(structure,arrays)
     if int(restored_state[0].count) != meta["step"]:
@@ -245,7 +243,7 @@ The loader checks architecture, vocabulary, numeric leaf contracts, step type an
 Append the disk round trip and next-step comparison, then the remaining eighty updates and held-out evaluation. The temporary folder is cleaned up.
 
 ```python
-# Step 7 — 7. Verify resume and evaluate the final fit: Uninterrupted and restored next transitions agree; the held-out...
+# Step 7 — 7. Verify resume and evaluate the final fit
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with TemporaryDirectory() as directory:
     folder = Path(directory)
@@ -295,7 +293,7 @@ The generator recomputes a short window each step. It has no sampling, key/value
 Append the final call and run python main.py. Compare the continuation to the abc cycle you derived before training.
 
 ```python
-# Step 9 — 9. Check the expected continuation: The expected continuation is abcabcabcabc, with held-out loss...
+# Step 9 — 9. Check the expected continuation
 continuation = generate(params,"abca",8)
 print("Greedy continuation:",continuation)
 assert continuation == "abcabcabcabc"
@@ -306,7 +304,7 @@ The expected continuation is abcabcabcabc, with held-out loss below $0.05$ and a
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare packages and the vocabulary: Vocabulary size is three, model width is eight, and the context...
+# Step 1 — 1. Prepare packages and the vocabulary
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -317,7 +315,7 @@ from tempfile import TemporaryDirectory
 
 VOCAB = {"a":0, "b":1, "c":2}
 CONTEXT = 4
-# Step 2 — 2. Reuse the verified causal block: The block returns one model-width vector per token; it has no...
+# Step 2 — 2. Reuse the verified causal block
 def layer_norm(x):
     # Normalize each token over its feature channels by computing its mean.
     mean = jnp.mean(x, axis=-1, keepdims=True)
@@ -336,13 +334,12 @@ def block_forward(p, x):
     h = layer_norm(x)
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
     scores = q@k.T / jnp.sqrt(x.shape[-1])
-    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
 
-# Step 3 — 3. Add embeddings and the vocabulary head: The head has three columns; make_examples shifts each window by...
+# Step 3 — 3. Add embeddings and the vocabulary head
 def init_lm(key):
     # Create or split explicit PRNG key(s) (`(embed_key, block_key, head_key)`) for reproducible randomness.
     embed_key, block_key, head_key = jax.random.split(key, 3)
@@ -360,24 +357,22 @@ def make_examples(text):
     rows = np.stack([ids[i:i+CONTEXT+1] for i in range(len(ids)-CONTEXT)])
     return jnp.array(rows[:,:-1]), jnp.array(rows[:,1:])
 
-# Step 4 — 4. Define the loss and compiled state transition: train_step returns new parameters, optimizer state and the...
+# Step 4 — 4. Define the loss and compiled state transition
 train_x, train_y = make_examples("abc"*12)
 held_x, held_y = make_examples("bca"*6)
 def lm_loss(p, x, y):
     # Vectorize across the batch dimension with `jax.vmap` (`predictions`).
     predictions = jax.vmap(logits,in_axes=(None,0))(p,x)
     return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(predictions,y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.adam(0.03)
 # Define and JIT-compile `train_step(p, state, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def train_step(p, state, x, y):
-    # Differentiate the objective to obtain `(value, gradients)` via automatic differentiation.
     value, gradients = jax.value_and_grad(lm_loss)(p,x,y)
     updates, next_state = optimizer.update(gradients,state,p)
     return optax.apply_updates(p,updates), next_state, value
 
-# Step 5 — 5. Run the first twenty updates: Adam count should now equal twenty; initialization is the only...
+# Step 5 — 5. Run the first twenty updates
 # Create or split explicit PRNG key(s) (`params`) for reproducible randomness.
 params = init_lm(jax.random.key(3))
 state = optimizer.init(params)
@@ -385,7 +380,7 @@ initial = float(lm_loss(params,train_x,train_y))
 for _ in range(20):
     params, state, _ = train_step(params,state,train_x,train_y)
 # Save numeric leaves only, with a schema checked against this program's template.
-# Step 6 — 6. Write and validate the snapshot format: The loader checks architecture, vocabulary, numeric leaf...
+# Step 6 — 6. Write and validate the snapshot format
 def save_snapshot(folder, p, state, step):
     leaves, _ = jax.tree.flatten((p,state))
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -413,14 +408,13 @@ def load_snapshot(folder):
             saved = data[f"leaf_{i}"]
             if saved.shape != leaf.shape or saved.dtype != np.asarray(leaf).dtype:
                 raise ValueError("checkpoint leaf contract mismatch")
-            # Create device-backed JAX array ``.
             arrays.append(jnp.array(saved))
     restored_p, restored_state = jax.tree.unflatten(structure,arrays)
     if int(restored_state[0].count) != meta["step"]:
         raise ValueError("checkpoint step and Adam count disagree")
     return restored_p, restored_state, meta["step"]
 
-# Step 7 — 7. Verify resume and evaluate the final fit: Uninterrupted and restored next transitions agree; the held-out...
+# Step 7 — 7. Verify resume and evaluate the final fit
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with TemporaryDirectory() as directory:
     folder = Path(directory)
@@ -454,7 +448,7 @@ def generate(p, prompt, count):
         tokens.append(new)
     return "".join(inverse[i] for i in tokens)
 
-# Step 9 — 9. Check the expected continuation: The expected continuation is abcabcabcabc, with held-out loss...
+# Step 9 — 9. Check the expected continuation
 continuation = generate(params,"abca",8)
 print("Greedy continuation:",continuation)
 assert continuation == "abcabcabcabc"
@@ -489,7 +483,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:09.327946+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:09.981543+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0
@@ -505,7 +499,7 @@ PASS: transformers-04
 **Predict before running:** With a zero output head, what is the cross entropy for any of the three targets?
 
 ```python
-# Experiment — Verify uniform-logit cross entropy: A known probability distribution independently checks target...
+# Experiment — Verify uniform-logit cross entropy
 zero_head = {**params,"head":jnp.zeros_like(params["head"])}
 assert jnp.allclose(lm_loss(zero_head,train_x,train_y),jnp.log(3.),atol=1e-6)
 ```
@@ -519,7 +513,7 @@ A known probability distribution independently checks target handling and reduct
 **Predict before running:** Changing only the last input token can affect which logits?
 
 ```python
-# Experiment — Test causality at the final model output: Causal independence should hold for the full model, not only the...
+# Experiment — Test causality at the final model output
 example = jnp.array([0,1,2,0])
 original = logits(params,example)
 modified = logits(params,example.at[-1].set(1))
@@ -583,7 +577,7 @@ Change one vocabulary mapping rather than numeric leaves.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible checkpoint (Transfer / diagnosis): The metadata is part of the model contract even when...
+# Reject an incompatible checkpoint (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with TemporaryDirectory() as directory:
     folder = Path(...)  # TODO: compute folder
@@ -620,7 +614,7 @@ with TemporaryDirectory() as directory:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject an incompatible checkpoint (Transfer / diagnosis): The metadata is part of the model contract even when...
+# Reject an incompatible checkpoint (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with TemporaryDirectory() as directory:
     folder = Path(directory)
@@ -679,7 +673,7 @@ The vocabulary mapping intentionally accepts only a, b and c.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make prompt failures explicit (Transfer / diagnosis): A decoding interface needs a defined input contract; neither...
+# Make prompt failures explicit (Transfer / diagnosis)
 try:
     generate(params,"",1)
 except ValueError:
@@ -698,7 +692,7 @@ assert generate(params,"abca",0)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Make prompt failures explicit (Transfer / diagnosis): A decoding interface needs a defined input contract; neither...
+# Make prompt failures explicit (Transfer / diagnosis)
 try:
     generate(params,"",1)
 except ValueError:

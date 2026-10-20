@@ -1,7 +1,7 @@
 """A sharded training step: worked experiments and reference solutions. CPU checks."""
 
 # Start a fresh CPU runtime
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -30,9 +30,7 @@ y = jax.device_put(host_y, labels_sharding)
 w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
 def loss(weights, features, labels):
     return jnp.mean((features @ weights-labels)**2)
-# Define `update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def update(weights, features, labels):
-    # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
@@ -40,7 +38,7 @@ train_step = jax.jit(update, in_shardings=(replicated,rows,labels_sharding),out_
 new_w, before, gradient = train_step(w,x,y)
 
 # Inspect and verify
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 expected_gradient = 2 * host_x.T @ (-host_y) / len(host_y)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(gradient),expected_gradient,rtol=1e-6,atol=1e-6)
@@ -57,7 +55,7 @@ print("Initial loss:",float(before))
 print("Gradient:",np.asarray(gradient),"updated weights:",np.asarray(new_w))
 print("Updated loss:",float(loss(new_w,x,y)))
 
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -86,14 +84,13 @@ w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
 def loss(weights, features, labels):
     return jnp.mean((features @ weights-labels)**2)
 def update(weights, features, labels):
-    # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
 train_step = jax.jit(update, in_shardings=(replicated,rows,labels_sharding),out_shardings=(replicated,replicated,replicated))
 new_w, before, gradient = train_step(w,x,y)
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 expected_gradient = 2 * host_x.T @ (-host_y) / len(host_y)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(gradient),expected_gradient,rtol=1e-6,atol=1e-6)
@@ -127,7 +124,7 @@ np.testing.assert_allclose(np.asarray(reverse_w),np.asarray(new_w),rtol=1e-6,ato
 print("Permutation preserves the global update")
 
 # Experiment: Ten updates against a host training loop
-# Experiment — Ten updates against a host training loop: Checking every update catches transient mismatches that a single...
+# Experiment — Ten updates against a host training loop
 cpu_weights = w
 reference_weights = np.zeros(2,dtype=np.float32)
 for step_index in range(10):
@@ -140,10 +137,9 @@ for step_index in range(10):
 print("Ten-step weights:",np.asarray(cpu_weights))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Run a changed target/initial-state update, then diagnose the...
+# Exercise solution
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
 start = np.array([0.2,-0.1],dtype=np.float32)
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
@@ -170,10 +166,9 @@ np.testing.assert_allclose(weighted,expected_gradient,rtol=1e-6)
 print("Summed local means are four times too large; weighted aggregation repaired")
 
 # Reference practice: Transfer to a different target model
-# Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
+# Transfer to a different target model (Challenge)
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
 start = np.array([0.2,-0.1],dtype=np.float32)
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.

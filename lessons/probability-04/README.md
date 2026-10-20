@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 125 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive the diagonal Gaussian variational optimum for a correlated target
@@ -99,12 +101,9 @@ KL here means KL(q || p). The full covariance of p is retained, while q has inde
 Append a scan of gradient updates. The analytic optimum uses inverse diagonal precision, which differs from the target marginal variances.
 
 ```python
-# Step 2 — 2. Optimize and compare to the exact variational optimum: Optimization has found the best diagonal Gaussian in this KL...
-# Define `update(params, _)` to evaluate the objective and its automatic derivatives:
+# Step 2 — 2. Optimize and compare to the exact variational optimum
 def update(params,_):
-    # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads=jax.grad(kl)(params)
-    # Transform every leaf of the parameter PyTree (`new`).
     new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)
     return new,kl(new)
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
@@ -124,7 +123,7 @@ Optimization has found the best diagonal Gaussian in this KL direction, yet it c
 Append an explicit model-mismatch experiment. The fitted line predicts zero, but new synthetic targets have curvature. Standardized residuals expose the missing structure.
 
 ```python
-# Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
+# Step 3 — 3. Check a prediction under a changed data-generating process
 x=jnp.linspace(-2,2,9)
 linear_mean=jnp.zeros_like(x)
 noise_scale=.25
@@ -155,11 +154,9 @@ def kl(params):
     delta=location-mu
     return .5*(jnp.sum(jnp.diag(P)*variance)+delta@P@delta-2+jnp.linalg.slogdet(Sigma)[1]-jnp.sum(2*log_scale))
 
-# Step 2 — 2. Optimize and compare to the exact variational optimum: Optimization has found the best diagonal Gaussian in this KL...
+# Step 2 — 2. Optimize and compare to the exact variational optimum
 def update(params,_):
-    # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads=jax.grad(kl)(params)
-    # Transform every leaf of the parameter PyTree (`new`).
     new=jax.tree.map(lambda value,grad:value-.05*grad,params,grads)
     return new,kl(new)
 params,history=jax.lax.scan(update,(jnp.zeros(2),jnp.zeros(2)),None,length=600)
@@ -171,7 +168,7 @@ assert jnp.allclose(variance,jnp.array([.36,.36]),atol=1e-5)
 assert kl(params)>0.4
 print('VI mean:',location,'variances:',variance,'remaining KL:',float(kl(params)))
 
-# Step 3 — 3. Check a prediction under a changed data-generating process: This is a deterministic stress fixture with nine targets, not an...
+# Step 3 — 3. Check a prediction under a changed data-generating process
 x=jnp.linspace(-2,2,9)
 linear_mean=jnp.zeros_like(x)
 noise_scale=.25
@@ -208,7 +205,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:49.594214+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:15.474979+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855
@@ -228,7 +225,7 @@ PASS: probability-04
 **Predict before running:** Will an estimate from diagonal-normal draws approach the exact KL even though the approximation is imperfect?
 
 ```python
-# Experiment — Monte Carlo KL through reparameterization: Matching the exact KL validates this estimator on the fixture;...
+# Experiment — Monte Carlo KL through reparameterization
 # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
 eps=jax.random.normal(jax.random.key(52),(40000,2))
 z=location+jnp.exp(log_scale)*eps
@@ -274,13 +271,12 @@ Replace the target correlation by zero and rederive the optimal diagonal varianc
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Replace the target correlation by zero and rederive the optimal...
+# Exercise solution
 def independent_kl(location,log_scale):
     return ...  # TODO: return computed result
 assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assertion check
@@ -289,7 +285,7 @@ assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assert
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Replace the target correlation by zero and rederive the optimal...
+# Exercise solution
 def independent_kl(location,log_scale):
     return .5*(jnp.sum(jnp.exp(2*log_scale))+jnp.sum((location-mu)**2)-2-jnp.sum(2*log_scale))
 assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)
@@ -323,7 +319,7 @@ Retain the off-diagonal covariance terms in the target calculation.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# A correct diagonal is not a correct covariance (Transfer / diagnosis): Joint predictions can reveal approximation error that...
+# A correct diagonal is not a correct covariance (Transfer / diagnosis)
 direction = jnp.ones(...)  # TODO: compute direction
 true_sum_var = ...  # TODO: compute true_sum_var
 approx_sum_var = jnp.sum(...)  # TODO: compute approx_sum_var
@@ -334,7 +330,7 @@ assert jnp.allclose(approx_sum_var,.72,atol=1e-5)  # TODO: complete assertion ch
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# A correct diagonal is not a correct covariance (Transfer / diagnosis): Joint predictions can reveal approximation error that...
+# A correct diagonal is not a correct covariance (Transfer / diagnosis)
 direction=jnp.ones(2)
 true_sum_var=direction@Sigma@direction
 approx_sum_var=jnp.sum(variance)
@@ -371,7 +367,7 @@ The fixture supplies the true curvature; real data would require fitting and hel
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair the changed mean without hiding noise (Transfer / diagnosis): Correcting the mean removes systematic residual structure in...
+# Repair the changed mean without hiding noise (Transfer / diagnosis)
 truth = jnp.linspace(...)  # TODO: compute truth
 # Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 fresh = ...  # TODO: compute fresh
@@ -383,7 +379,7 @@ assert abs(float(residual.mean()))  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair the changed mean without hiding noise (Transfer / diagnosis): Correcting the mean removes systematic residual structure in...
+# Repair the changed mean without hiding noise (Transfer / diagnosis)
 truth=jnp.linspace(-2,2,20000)**2-1
 # Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
 fresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))

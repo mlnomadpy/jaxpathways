@@ -41,7 +41,7 @@ np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectorie
 print("Shape:", trajectories.shape, "endpoints:", np.asarray(trajectories)[:,-1])
 
 # Change composition and verify axis meaning
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
@@ -93,7 +93,7 @@ np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
 print("Shape:", trajectories.shape, "endpoints:", np.asarray(trajectories)[:,-1])
 
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
@@ -112,7 +112,7 @@ print("scan(vectors) transposed equals vmap(scan)")
 visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel':'excess temperature','series':[{'label':f'initial {float(u):g}','y':np.asarray(trajectories)[i].tolist()} for i,u in enumerate(initials)]}
 
 # Experiment: Compare RK4 with an independent polynomial
-# Experiment — Compare RK4 with an independent polynomial: This checks the discrete algorithm independently of the...
+# Experiment — Compare RK4 with an independent polynomial
 z = -rate*dt
 multiplier = 1 + z + z*z/2 + z**3/6 + z**4/24
 polynomial = np.asarray(initials)[:,None]*multiplier**np.arange(steps+1)[None,:]
@@ -130,7 +130,7 @@ np.testing.assert_allclose(paired,paired_reference,rtol=2e-7,atol=1e-10)
 print("Paired-rate endpoints:", np.asarray(paired)[:,-1])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Add a fourth initial condition, verify the changed output shape and...
+# Exercise solution
 changed_initials = jnp.array([0.5, 1.0, 2.0, 3.0])
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(lambda u: solve(0.7,u))(changed_initials)
@@ -162,7 +162,6 @@ print("Only final states returned:", np.asarray(finals))
 grid = jax.vmap(lambda k: jax.vmap(lambda u: solve(k,u))(initials))(rates)
 # Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape == (3,3,41)
-# Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol=1e-12)
 print("Grid axes: rate, initial condition, time", grid.shape)
 print("PASS: science-02")

@@ -1,7 +1,7 @@
 """TPU generations and HBM memory budgeting: worked experiments and reference solutions. CPU checks."""
 
 # Define TPU generation specs and compute Roofline ridge points
-# Step 1 — Define TPU generation specs and compute Roofline ridge points: Dividing peak BF16 FLOP/s by HBM bandwidth (B/s) gives the minimum...
+# Step 1 — Define TPU generation specs and compute Roofline ridge points
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -15,12 +15,11 @@ for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
 
 # Estimate training-state and KV-cache HBM budgets across precisions
-# Step 2 — Estimate training-state and KV-cache HBM budgets across precisions: Computing both training state and KV-cache GiB upfront prevents...
+# Step 2 — Estimate training-state and KV-cache HBM budgets across precisions
 def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_dim=128):
     n_params = params_billions * 1e9
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     gib = float(1024 ** 3)
-    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 18.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
     return {
         "fp32_train_state_gib": round((n_params * 16.0) / gib, 3),
         "mixed_bf16_train_state_gib": round((n_params * 18.0) / gib, 3),
@@ -44,7 +43,7 @@ print("1.5B memory budget (GiB):", budget_1p5b)
 assert budget_7b["mixed_bf16_train_state_gib"] > 64.0 and budget_7b["mixed_bf16_train_state_gib"] < 128.0
 assert budget_1p5b["mixed_bf16_train_state_gib"] < 64.0
 
-# Step 1 — Define TPU generation specs and compute Roofline ridge points: Dividing peak BF16 FLOP/s by HBM bandwidth (B/s) gives the minimum...
+# Step 1 — Define TPU generation specs and compute Roofline ridge points
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -58,12 +57,11 @@ for s in TPU_SPECS:
     s["ridge_flops_per_byte"] = round((s["bf16_tflops"] * 1e12) / (s["bw_gbs"] * 1e9), 1)
 
 
-# Step 2 — Estimate training-state and KV-cache HBM budgets across precisions: Computing both training state and KV-cache GiB upfront prevents...
+# Step 2 — Estimate training-state and KV-cache HBM budgets across precisions
 def estimate_memory_gib(params_billions, kv_tokens, layers=32, kv_heads=8, head_dim=128):
     n_params = params_billions * 1e9
     kv_elements = 2.0 * layers * kv_tokens * kv_heads * head_dim
     gib = float(1024 ** 3)
-    # Return `{'fp32_train_state_gib': round(n_params * 16.0 / gib, 3), 'mixed_bf16_train_state_gib': round(n_params * 18.0 / gib, 3), 'kv_fp32_gib': round(kv_elements * 4.0 / gib, 3), 'kv_bf16_gib': round(kv_elements * 2.0 / gib, 3), 'kv_int8_gib': round(kv_elements * 1.0 / gib, 3)}` to the caller.
     return {
         "fp32_train_state_gib": round((n_params * 16.0) / gib, 3),
         "mixed_bf16_train_state_gib": round((n_params * 18.0) / gib, 3),
@@ -95,7 +93,7 @@ visual_data = {
 }
 
 # Experiment: Compare KV-cache memory across FP32, BF16, and INT8
-# Experiment — Compare KV-cache memory across FP32, BF16, and INT8: Halving bytes per element halves both the HBM capacity consumed...
+# Experiment — Compare KV-cache memory across FP32, BF16, and INT8
 assert np.isclose(budget_7b["kv_fp32_gib"], 2.0 * budget_7b["kv_bf16_gib"])
 assert np.isclose(budget_7b["kv_bf16_gib"], 2.0 * budget_7b["kv_int8_gib"])
 print("KV cache GiB (FP32 / BF16 / INT8):", budget_7b["kv_fp32_gib"], budget_7b["kv_bf16_gib"], budget_7b["kv_int8_gib"])

@@ -1,7 +1,7 @@
 """Communication-efficient algorithms: worked experiments and reference solutions. CPU checks."""
 
 # Configure four logical devices
-# Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
+# Step 1 — Configure four logical devices
 import jax
 # Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
@@ -13,7 +13,7 @@ from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 from time import perf_counter
 
 # Place the data and model
-# Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
+# Step 2 — Place the data and model
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
 rows = NamedSharding(mesh, P('data', None))
@@ -29,22 +29,22 @@ y = jax.device_put(yh, NamedSharding(mesh, P('data')))
 w = jax.device_put(wh, replicated)
 
 # Implement partial gradients and collectives
-# Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
+# Step 3 — Implement partial gradients and collectives
 def local_contribution(a, b, weights):
     return 2 * a.T @ (a @ weights - b) / 16
 
 # Verify the result and placement
-# Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
+# Step 4 — Verify the result and placement
 def reduce_all(a, b, weights):
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 
 # Measure completed calls
-# Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 5 — Measure completed calls
 def reduce_shard(a, b, weights):
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 
 # Measure completed calls
-# Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 6 — Measure completed calls
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
@@ -70,7 +70,7 @@ hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
 # Measure completed calls
-# Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 7 — Measure completed calls
 def completed_samples(fn, *args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
@@ -95,7 +95,7 @@ print('Completed CPU median microseconds:', {
     'all_reduce': float(np.median(all_us)), 'reduce_scatter': float(np.median(shard_us)),
     'all_gather_only': float(np.median(gather_us))})
 
-# Step 1 — Configure four logical devices: Compare both the numerical global result and the placement needed...
+# Step 1 — Configure four logical devices
 import jax
 # Select the CPU backend and virtual device count before initializing JAX.
 jax.config.update('jax_platforms', 'cpu')
@@ -106,7 +106,7 @@ import numpy as np
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 from time import perf_counter
 
-# Step 2 — Place the data and model: Compare both the numerical global result and the placement needed...
+# Step 2 — Place the data and model
 assert jax.local_device_count() == 4, 'Restart with four logical CPU devices'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
 rows = NamedSharding(mesh, P('data', None))
@@ -121,19 +121,19 @@ y = jax.device_put(yh, NamedSharding(mesh, P('data')))
 # Place `w` explicitly onto the target JAX device.
 w = jax.device_put(wh, replicated)
 
-# Step 3 — Implement partial gradients and collectives: Compare both the numerical global result and the placement needed...
+# Step 3 — Implement partial gradients and collectives
 def local_contribution(a, b, weights):
     return 2 * a.T @ (a @ weights - b) / 16
 
-# Step 4 — Verify the result and placement: Compare both the numerical global result and the placement needed...
+# Step 4 — Verify the result and placement
 def reduce_all(a, b, weights):
     return jax.lax.psum(local_contribution(a, b, weights), 'data')
 
-# Step 5 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 5 — Measure completed calls
 def reduce_shard(a, b, weights):
     return jax.lax.psum_scatter(local_contribution(a, b, weights), 'data', tiled=True)
 
-# Step 6 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 6 — Measure completed calls
 all_gradient = jax.jit(jax.shard_map(reduce_all, mesh=mesh,
     in_specs=(P('data', None), P('data'), P()), out_specs=P()))
 shard_gradient = jax.jit(jax.shard_map(reduce_shard, mesh=mesh,
@@ -158,7 +158,7 @@ hlo_all = str(all_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 hlo_shard = str(shard_gradient.lower(x, y, w).compiler_ir(dialect='stablehlo'))
 assert 'all_reduce' in hlo_all and 'reduce_scatter' in hlo_shard
 
-# Step 7 — Measure completed calls: Compare both the numerical global result and the placement needed...
+# Step 7 — Measure completed calls
 def completed_samples(fn, *args):
     # Wait for device work to finish before timing it or comparing its result on the host.
     fn(*args).block_until_ready()
@@ -207,7 +207,7 @@ assert all(s.data.shape == (2,) for s in new_v.addressable_shards)
 print('Sharded momentum matches the independent elementwise update.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Repeat the gradient comparison after reversing both observation rows...
+# Exercise solution
 x2 = jax.device_put(xh[::-1].copy(), rows)
 y2 = jax.device_put(yh[::-1].copy(), NamedSharding(mesh, P('data')))
 w2h = wh + np.float32(0.17)
@@ -225,7 +225,7 @@ assert np.max(np.abs(wrong_labels-r2)) > 0.01
 print('Joint permutation preserves the gradient; label-only reversal does not.')
 
 # Reference practice: Account for the complete communication cycle
-# Account for the complete communication cycle (Transfer): The two-phase payload equals the all-reduce payload under...
+# Account for the complete communication cycle (Transfer)
 budget = []
 for p in [2, 4, 8]:
     size = 2**20

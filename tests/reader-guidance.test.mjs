@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { Window } from 'happy-dom';
 import { renderLesson } from '../src/lib/lesson-template.js';
 import { executionScope } from '../src/lib/runtime.js';
+import { lessonCells, lessonMarkdown } from '../scripts/lesson-artifacts.mjs';
 
 const course = JSON.parse(readFileSync('public/curriculum.json', 'utf8'));
 function view(id, experiments) {
@@ -85,6 +86,21 @@ test('runtime classification separates CPU execution from target qualification g
   assert.doesNotMatch(executionScope(lessons.find((l) => l.id === 'tpu-05')).target, /implemented/);
   for (const lesson of lessons)
     assert.doesNotMatch(executionScope(lesson).description, /stages directly|run on physical TPU/);
+});
+
+test('downloaded notebooks and Markdown preserve the same runtime boundaries as the reader', () => {
+  for (const phase of course.phases) {
+    for (const lesson of phase.lessons.filter((item) => item.status === 'authored')) {
+      const scope = executionScope(lesson);
+      const intro = lessonCells(lesson)[0][1];
+      assert(intro.includes(scope.description), lesson.id);
+      assert(intro.includes(scope.target), lesson.id);
+      assert.doesNotMatch(intro, /Runnable locally on CPU or on a Cloud TPU VM/);
+      const markdown = lessonMarkdown(lesson, phase);
+      assert(markdown.includes(scope.description), lesson.id);
+      assert(markdown.includes(scope.target), lesson.id);
+    }
+  }
 });
 
 test('the offline book links the archive referenced by its beginner setup walkthrough', async () => {

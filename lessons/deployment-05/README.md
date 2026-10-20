@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Compare FP32, FP16 and BF16 rounding without confusing storage with accumulation.
@@ -125,17 +127,15 @@ The top-left output is $-1.437$. This anchors the error comparison to a named va
 Append this block to the same main.py and rerun the whole file. Compare FP32, FP16 and BF16 representations while returning to FP32 before multiplication.
 
 ```python
-# Step 2 — Round inputs and weights, then accumulate explicitly: The printed errors isolate the consequence of representational...
+# Step 2 — Round inputs and weights, then accumulate explicitly
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 ```
@@ -147,7 +147,7 @@ The printed errors isolate the consequence of representational rounding in this 
 Append this block to the same main.py and rerun the whole file. Quantize per output channel and inspect the all-zero-channel case.
 
 ```python
-# Step 3 — Construct signed integer codes and channel scales: An all-zero channel uses scale 1 and zero codes, so reconstruction...
+# Step 3 — Construct signed integer codes and channel scales
 def quantize_weights(weights, bits):
     if bits not in (4, 8):
         raise ValueError("use signed 4 or 8 bit symmetric quantization")
@@ -187,7 +187,7 @@ Every error must fit its stated bound. Move on to activation clipping and the af
 ## Run the example
 
 ```python
-# Choose weight, activation and accumulation precision: A precision policy specifies how weights, activations,...
+# Choose weight, activation and accumulation precision
 import numpy as np
 import jax.numpy as jnp
 x = np.array([[.3, -1.2, 2.1], [1.1, .2, -.8]], np.float32)
@@ -196,13 +196,11 @@ reference = x @ w
 def mixed_forward(x, w, dtype):
     # Demonstrate rounding inputs/weights with explicit float32 accumulation.
     a = jnp.asarray(x, dtype).astype(jnp.float32)
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(w, dtype).astype(jnp.float32)
     return np.asarray(a @ b)
 for dtype in (jnp.float32, jnp.float16, jnp.bfloat16):
     y = mixed_forward(x, w, dtype)
     error = float(np.max(np.abs(y-reference)))
-    # Confirm that all computed values remain finite (no NaN or Inf).
     assert np.isfinite(y).all() and error < .05
     print(str(dtype), "max absolute error", error)
 
@@ -315,7 +313,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:23.697401+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:44.714005+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0
@@ -442,15 +440,14 @@ Add a zero-valued output channel and verify that its quantization scale is finit
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Confirm that all computed values remain finite (no NaN or Inf).
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a zero-valued output channel and verify that its quantization...
+# Exercise solution
 with_zero = np.column_stack(...)  # TODO: compute with_zero
 q, scale = quantize_weights(...)  # TODO: compute q, scale
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()  # TODO: complete assertion check
 np.testing.assert_array_equal(q[:, -1], 0)
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
@@ -460,10 +457,9 @@ print("Zero channel handled")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a zero-valued output channel and verify that its quantization...
+# Exercise solution
 with_zero = np.column_stack((w, np.zeros(3, np.float32)))
 q, scale = quantize_weights(with_zero, 8)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(scale).all()
 np.testing.assert_array_equal(q[:, -1], 0)
 np.testing.assert_array_equal((q * scale)[:, -1], 0)
@@ -612,7 +608,7 @@ Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
+# Account for actual low-bit storage (Transfer / diagnosis)
 q4, s4 = quantize_weights(...)  # TODO: compute q4, s4
 float_weight_bytes = ...  # TODO: compute float_weight_bytes
 simulated_weight_and_scale_bytes = ...  # TODO: compute simulated_weight_and_scale_bytes
@@ -624,7 +620,7 @@ print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_s
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis): The simulation uses 14 bytes for its codes and scales, not...
+# Account for actual low-bit storage (Transfer / diagnosis)
 q4, s4 = quantize_weights(w, 4)
 float_weight_bytes = w.nbytes
 simulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes

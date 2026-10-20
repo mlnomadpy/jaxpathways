@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Rehearse a real worker failure and resume from an atomic complete-state checkpoint.
@@ -205,7 +207,7 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -270,7 +272,7 @@ The supervisor owns the child handle, captures its output and always waits for t
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
+# Step 4 — Rehearse a failure and verify every resumed update
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
@@ -418,7 +420,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -475,7 +477,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
+# Step 4 — Rehearse a failure and verify every resumed update
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
@@ -520,7 +522,7 @@ visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training ste
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:18.330202+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:04.277217+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]
@@ -536,7 +538,7 @@ PASS: operations-03
 **Predict before running:** Could two different states have the same current loss?
 
 ```python
-# Experiment — Compare state, not only loss: Loss is a scalar projection of a much larger state; equal loss...
+# Experiment — Compare state, not only loss
 for event in resume_events:
     original=full_events[event['step']]
     assert event['state_hash']==original['state_hash']
@@ -553,7 +555,7 @@ Loss is a scalar projection of a much larger state; equal loss alone would not p
 **Predict before running:** Should a learning-rate change be silently accepted as an exact resume?
 
 ```python
-# Experiment — Reject a changed training rule: A deliberate branch experiment is valid when explicitly labeled,...
+# Experiment — Reject a changed training rule
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
@@ -573,12 +575,13 @@ Repeat the recovery drill with seed $9$, checkpoint cadence $3$ and failure afte
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+1. Exercise solution
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Repeat the recovery drill with seed 9, checkpoint cadence 3 and...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     base = Path(...)  # TODO: compute base
@@ -595,7 +598,7 @@ with tempfile.TemporaryDirectory() as folder:
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Repeat the recovery drill with seed 9, checkpoint cadence 3 and...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     base=Path(folder)
@@ -632,7 +635,7 @@ The expected outcome is a failed restore; preserve the failure event.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject accidental checkpoint corruption (Transfer / diagnosis): Rejecting corruption is safer and more inspectable than...
+# Reject accidental checkpoint corruption (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps = ...  # TODO: compute launch(folder,dict(steps
@@ -649,7 +652,7 @@ assert any(e['event']  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject accidental checkpoint corruption (Transfer / diagnosis): Rejecting corruption is safer and more inspectable than...
+# Reject accidental checkpoint corruption (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
@@ -688,7 +691,7 @@ Apply the recurrence before multiplying by the learning rate.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Explain a weights-only mismatch by hand (Transfer / diagnosis): The next loss could initially look close, but the state...
+# Explain a weights-only mismatch by hand (Transfer / diagnosis)
 correct = ...  # TODO: compute correct
 weights_only = ...  # TODO: compute weights_only
 assert abs(correct-.46)  # TODO: complete assertion check
@@ -698,7 +701,7 @@ assert abs(correct-weights_only-.16)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Explain a weights-only mismatch by hand (Transfer / diagnosis): The next loss could initially look close, but the state...
+# Explain a weights-only mismatch by hand (Transfer / diagnosis)
 correct=.1*(.8*2+3)
 weights_only=.1*3
 assert abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12

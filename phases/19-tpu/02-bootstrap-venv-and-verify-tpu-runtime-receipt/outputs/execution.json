@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-04",
-  "contentHash": "b28a706e456877dc7d60afc07bcc702b2f6c9910b1a0004a2fdbcc91f6e2c818",
-  "executedAt": "2026-10-20T21:56:35.249294+00:00",
+  "contentHash": "bea6fb9f5f8fad4951d860c7459a0ef56ac245d3dee084a497ce816cacd5cfce",
+  "executedAt": "2026-10-20T22:27:07.386964+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,11 +14,11 @@
   "stdout": "Runtime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nRuntime receipt: {\"backend\": \"cpu\", \"expected_total\": 140.0, \"jax\": \"0.9.2\", \"local_device_count\": 1, \"observed_total\": 140.0, \"per_device_sums\": [140.0], \"python\": \"3.14.3\", \"receipt_sha256\": \"8c6bd0cbe29edc78\", \"verified\": true}\nExpected pmap sums by slice: {'1-device (CPU / v5e-1)': 140.0, '4-device (v5litepod-4 / v6e-4)': 10416.0, '8-device (v5litepod-8 / v6e-8)': 85344.0}\nPer-chip sums on a 4-chip slice: [140.0, 1100.0, 3084.0, 6092.0] Total: 10416.0\nTeardown verifier passed for empty and non-empty gcloud list outputs.\n4-chip expected sum: 10416.0 8-chip expected sum: 85344.0 receipt hash: 8c6bd0cbe29edc78\nSimulated 4-chip TPU check: True Local CPU check: False\nOvernight idle cost avoided (USD): 74.4\nPASS: tpu-04\n",
   "notebookCells": [
     {
-      "sourceHash": "392c1ef89c2ba9df6c3c6021ef4efdde8f99c20d4bdbb35039473325e240b853",
+      "sourceHash": "89ee51c44116de417daffd5301ec5be78e1c351eafaaf8e63ba223bc2764a102",
       "outputs": []
     },
     {
-      "sourceHash": "a3cfecd14430afd5614f10f5eac215ef659babe3c259fa5863c910e69d004c16",
+      "sourceHash": "3417358dfef9c7ecb002d401ca87fdda60d34c579becf5161b7ced701f063c3c",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "bb8187d504e18ec7cfbbb99a24363babbe344d653b23083904d3477010cce9a2",
+      "sourceHash": "dd8819a634c0280b1185c1209fee5d29fb5e382119dad09eee93532c54726de4",
       "outputs": [
         {
           "output_type": "stream",
@@ -48,7 +48,7 @@
       ]
     },
     {
-      "sourceHash": "ee6e51f361ee89cabeef4943e7c4b0d3927dca2fe2f3a349c31c8b044bbeb8e2",
+      "sourceHash": "79c62bfab8096597344a9a749ed0ed61ae56d29cd3db7d5dd2b41f006799a0ea",
       "outputs": []
     },
     {
@@ -67,7 +67,7 @@
       ]
     },
     {
-      "sourceHash": "3818c7acbae51613cd71c5d96aa9fd379368ca56f7ca8bd2c9701fff103841d6",
+      "sourceHash": "e1cf7ef9af802289de70140c00998099fd29cdc6c29ed6fa556b9cab985abfae",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "292cc080184dd22e491b5bff676d9a81a03f0d48c718605872f8d52c36a79cc2",
+      "sourceHash": "354e44ed882d8a0a6bc14d76b5e18099af7bf49baf0553b1d4365ba805af0c9d",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "9023d1b4bc964c047a7ac64d16425819c65311107680cd62afc13ae80b989b67",
+      "sourceHash": "ab5a08b7355e042e041ff6fcedba6177dce167cd42e82e57d0198dfa88406ede",
       "outputs": []
     },
     {
-      "sourceHash": "0697dafc1b4d0f2d3324b55dbce735daf2cd420a525edf33b3faa96b1bec8556",
+      "sourceHash": "a3dcfa9a619158ca7c5a3603cb146e96a9c5c876d8ece2add549613d33ade551",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "c5039cdcf8ef2779f25c6b266899da006cfc9e001023982b255453abb3cc4705",
+      "sourceHash": "09f9a7e9163290b701f10320c1cb5416ac2d6b937386c79d19eb2a076c8f3ea1",
       "outputs": []
     },
     {
-      "sourceHash": "1e6c26e7d86654be2b10185205ef8e61332de6ec602e191f28f8e596388f6fb7",
+      "sourceHash": "518c99621ebb1edc2779f33cb9dc0e0e4770dab3f5534677bda730071be67a34",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "6d03bb6941ee47f3b6cc790ed56f5459262d43fd242e0752359d0046d21126c5",
+      "sourceHash": "a6e6112ecc523d35298c64b94ae7983571085fec1674d3e1166b22d8d4761840",
       "outputs": []
     },
     {
-      "sourceHash": "95d4bdf9fbf83696722364958a8927a5210cec822f256aa8941afc8199e16ed3",
+      "sourceHash": "13bb452280d08a975a239e7ace05ee2585aee1392aa169364a7192c96158cc55",
       "outputs": [
         {
           "output_type": "stream",

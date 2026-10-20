@@ -1,7 +1,7 @@
 """Bootstrap .venv and verify a TPU runtime receipt: worked experiments and reference solutions. CPU checks."""
 
 # Define the closed-form sum-of-squares oracle and pmap receipt builder
-# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder: Each local device computes the sum of squares of its 8-element row...
+# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder
 import hashlib
 import json
 import platform
@@ -12,7 +12,6 @@ import numpy as np
 
 def closed_form_sum_of_squares(num_devices, width=8):
     n = int(num_devices) * int(width)
-    # Return `float((n - 1) * n * (2 * n - 1) // 6)` to the caller.
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
@@ -36,15 +35,13 @@ def build_runtime_receipt():
         "expected_total": expected_total,
         "verified": bool(np.isclose(observed_total, expected_total)),
     }
-    # Read or serialize artifact data on disk (`payload['receipt_sha256']`).
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `payload` to the caller.
     return payload
 
 # Verify the active runtime receipt and tabulate multi-chip expectations
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations: Knowing the exact expected sum for 1, 4, and 8 devices lets you...
+# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
@@ -60,7 +57,7 @@ print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in sl
 receipt = build_runtime_receipt()
 assert receipt["verified"] is True
 
-# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder: Each local device computes the sum of squares of its 8-element row...
+# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder
 import hashlib
 import json
 import platform
@@ -71,7 +68,6 @@ import numpy as np
 
 def closed_form_sum_of_squares(num_devices, width=8):
     n = int(num_devices) * int(width)
-    # Return `float((n - 1) * n * (2 * n - 1) // 6)` to the caller.
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
@@ -95,15 +91,13 @@ def build_runtime_receipt():
         "expected_total": expected_total,
         "verified": bool(np.isclose(observed_total, expected_total)),
     }
-    # Read or serialize artifact data on disk (`payload['receipt_sha256']`).
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `payload` to the caller.
     return payload
 
 
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations: Knowing the exact expected sum for 1, 4, and 8 devices lets you...
+# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
@@ -116,7 +110,6 @@ print("Runtime receipt:", json.dumps(receipt, sort_keys=True))
 print("Expected pmap sums by slice:", {s["slice"]: s["expected_sum"] for s in slice_expectations})
 
 # Figure data experiment
-# Create evenly spaced index values in `per_chip`.
 per_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]
 cumulative = [float(sum(per_chip[: i + 1])) for i in range(4)]
 visual_data = {
@@ -131,7 +124,7 @@ visual_data = {
 }
 
 # Experiment: Compare per-device row sums on a 4-chip TPU slice
-# Experiment — Compare per-device row sums on a 4-chip TPU slice: Inspecting per_device_sums confirms that distinct shards of x...
+# Experiment — Compare per-device row sums on a 4-chip TPU slice
 x4 = jnp.arange(4 * 8, dtype=jnp.float32).reshape(4, 8)
 # Reduce along axis=1 to compute `row_sums_4`.
 row_sums_4 = [float(v) for v in jnp.sum(x4 * x4, axis=1)]
@@ -139,11 +132,9 @@ print("Per-chip sums on a 4-chip slice:", row_sums_4, "Total:", sum(row_sums_4))
 assert row_sums_4 == [140.0, 1100.0, 3084.0, 6092.0] and sum(row_sums_4) == 10416.0
 
 # Experiment: Verify teardown confirmation logic
-# Experiment — Verify teardown confirmation logic: Checking gcloud compute tpus tpu-vm list --zone=$ZONE...
+# Experiment — Verify teardown confirmation logic
 def is_tpu_zone_clean(gcloud_list_json):
-    # Read or serialize artifact data on disk (`items`).
     items = json.loads(gcloud_list_json)
-    # Return `len(items) == 0` to the caller.
     return len(items) == 0
 
 # Assert invariant `is_tpu_zone_clean("[]") is True` holds
@@ -153,7 +144,7 @@ assert is_tpu_zone_clean('[{"name": "jax-tpu-course", "state": "READY"}]') is Fa
 print("Teardown verifier passed for empty and non-empty gcloud list outputs.")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Compute closed_form_sum_of_squares(4) and...
+# Exercise solution
 s4 = closed_form_sum_of_squares(4)
 s8 = closed_form_sum_of_squares(8)
 print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
@@ -161,9 +152,8 @@ print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", r
 assert s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True
 
 # Reference practice: Detect a silent fallback from 4 TPU chips to 1 CPU device
-# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations): Requiring backend == 'tpu', local_device_count == 4, and the...
+# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
 def is_four_chip_tpu_receipt(r):
-    # Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
     return bool(r["backend"] == "tpu" and r["local_device_count"] == 4 and np.isclose(r["observed_total"], 10416.0))
 
 simulated_tpu = {"backend": "tpu", "local_device_count": 4, "observed_total": 10416.0}
@@ -172,7 +162,7 @@ print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "L
 assert is_four_chip_tpu_receipt(simulated_tpu) is True
 
 # Reference practice: Estimate hourly billing savings from immediate teardown
-# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis): Deleting the Cloud TPU VM immediately after copying...
+# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)
 hourly_rate = 4.80
 saved_usd = round((16.0 - 0.5) * hourly_rate, 2)
 print("Overnight idle cost avoided (USD):", saved_usd)

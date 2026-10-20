@@ -4,10 +4,10 @@
   "minutes": 45,
   "content": {
     "idea": "Feature preprocessing answers a specific question: how does each measurement compare with the training data's scale and center? Compute statistics along the observation axis, then reuse those fitted statistics. A held-out example must not help choose the transformation used to evaluate it.",
-    "code": "# From NumPy to jax.numpy: Feature preprocessing answers a specific question: how does each...\nimport jax.numpy as jnp\nx = jnp.array([[1., 10.], [3., 14.], [5., 18.]])\n# Average across examples, leaving one mean for each feature column.\nmean = x.mean(axis=0)\ncentered = x - mean\nprint(\"Mean:\", mean)\nprint(\"Centered:\\n\", centered)\nassert jnp.allclose(mean, jnp.array([3., 14.]))\nassert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))",
+    "code": "# From NumPy to jax.numpy\nimport jax.numpy as jnp\nx = jnp.array([[1., 10.], [3., 14.], [5., 18.]])\n# Average across examples, leaving one mean for each feature column.\nmean = x.mean(axis=0)\ncentered = x - mean\nprint(\"Mean:\", mean)\nprint(\"Centered:\\n\", centered)\nassert jnp.allclose(mean, jnp.array([3., 14.]))\nassert jnp.allclose(centered.mean(axis=0), jnp.zeros(2))",
     "output": "Mean: [ \\(3\\). \\(14\\).]; centered rows: \\([-2., -4.]\\), \\([0., 0.]\\), \\([2., 4.]\\).",
     "exercise": "Foundation · Standardize the original data using its standard deviation plus epsilon \\(10^{-6}\\). Predict the transformed rows and check feature means and scales. Explain why the scale is only approximately one with epsilon.",
-    "solution": "# Exercise solution: Foundation · Standardize the original data using its standard...\n# Reduce along axis=0 to compute `standardized`.\nstandardized = centered / (x.std(axis=0) + 1e-6)\nassert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)\nassert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)",
+    "solution": "# Exercise solution\n# Reduce along axis=0 to compute `standardized`.\nstandardized = centered / (x.std(axis=0) + 1e-6)\nassert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)\nassert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)",
     "question": "Why does `x.mean(axis=0)` return two values?",
     "options": [
       "It averages each row",
@@ -60,7 +60,7 @@
       {
         "title": "Check the normalization arithmetic",
         "prediction": "Predict the feature standard deviations and centered rows before comparing with NumPy.",
-        "code": "# Experiment — Check the normalization arithmetic: Matching dtype and statistic definition makes this a useful...\nimport numpy as np\nreference_data = np.array([[1., 10.], [3., 14.], [5., 18.]], dtype=np.float32)\n# Reduce along axis=0 to compute `reference_mean`.\nreference_mean = reference_data.mean(axis=0)\n# Reduce along axis=0 to compute `reference_scale`.\nreference_scale = reference_data.std(axis=0)\nassert jnp.allclose(mean, reference_mean)\nassert jnp.allclose(x.std(axis=0), reference_scale)\nassert jnp.allclose(x.std(axis=0), jnp.sqrt(jnp.array([8. / 3., 32. / 3.])))",
+        "code": "# Experiment — Check the normalization arithmetic\nimport numpy as np\nreference_data = np.array([[1., 10.], [3., 14.], [5., 18.]], dtype=np.float32)\n# Reduce along axis=0 to compute `reference_mean`.\nreference_mean = reference_data.mean(axis=0)\n# Reduce along axis=0 to compute `reference_scale`.\nreference_scale = reference_data.std(axis=0)\nassert jnp.allclose(mean, reference_mean)\nassert jnp.allclose(x.std(axis=0), reference_scale)\nassert jnp.allclose(x.std(axis=0), jnp.sqrt(jnp.array([8. / 3., 32. / 3.])))",
         "output": "The feature means are \\([3, 14]\\); standard deviations are approximately \\([1.633, 3.266]\\).",
         "explanation": "Matching dtype and statistic definition makes this a useful independent implementation check. It does not test TPU placement or performance."
       },
@@ -78,7 +78,7 @@
         "difficulty": "Practice",
         "prompt": "Fit a standardizer to \\([[1, 5]\\), \\([3, 5]\\), \\([5, 5]]\\). Check the second training column and transform the new row \\([7, 6]\\). Explain why its second output is \\(1\\) rather than zero.",
         "hint": "Fit uses scale \\(1\\) for a constant training feature. Applying statistics does not re-fit them.",
-        "solution": "# Test the constant-feature policy (Practice): The training feature is constant but the new value differs...\nconstant_data = jnp.array([[1., 5.], [3., 5.], [5., 5.]])\nconstant_statistics = fit_standardizer(constant_data)\nconstant_transformed = apply_standardizer(constant_data, constant_statistics)\n# Confirm that all computed values remain finite (no NaN or Inf).\nassert jnp.all(jnp.isfinite(constant_transformed))\nassert jnp.allclose(constant_transformed[:, 1], 0.)\nassert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)",
+        "solution": "# Test the constant-feature policy (Practice)\nconstant_data = jnp.array([[1., 5.], [3., 5.], [5., 5.]])\nconstant_statistics = fit_standardizer(constant_data)\nconstant_transformed = apply_standardizer(constant_data, constant_statistics)\nassert jnp.all(jnp.isfinite(constant_transformed))\nassert jnp.allclose(constant_transformed[:, 1], 0.)\nassert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)",
         "explanation": "The training feature is constant but the new value differs from its fitted mean. The transformation retains that difference under the documented policy."
       },
       {
@@ -86,7 +86,7 @@
         "difficulty": "Challenge",
         "prompt": "Transform two new rows together and separately using training statistics. The outputs should agree. Then show that re-fitting on the new batch changes the outputs.",
         "hint": "The application function should depend on each row and fixed statistics, not on which other rows share the request.",
-        "solution": "# Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...\nnew_rows = jnp.array([[7., 22.], [9., 26.]])\ntogether = apply_standardizer(new_rows, statistics)\nseparately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])\nassert jnp.allclose(together, separately)\nrefitted = apply_standardizer(new_rows, fit_standardizer(new_rows))\nassert not jnp.allclose(together, refitted)",
+        "solution": "# Detect accidental batch-dependent preprocessing (Challenge)\nnew_rows = jnp.array([[7., 22.], [9., 26.]])\ntogether = apply_standardizer(new_rows, statistics)\nseparately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])\nassert jnp.allclose(together, separately)\nrefitted = apply_standardizer(new_rows, fit_standardizer(new_rows))\nassert not jnp.allclose(together, refitted)",
         "explanation": "This consistency test expresses an inference boundary: a fixed preprocessing transform should not change a row because a different neighbor was batched with it."
       }
     ],

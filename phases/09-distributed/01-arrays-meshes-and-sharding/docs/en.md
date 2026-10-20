@@ -2,6 +2,8 @@
 
 Phase 09: Distributed training · about 80 minutes · 4 logical CPU devices
 
+This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Translate a PartitionSpec into local shard shapes.
@@ -94,7 +96,7 @@ gcloud compute tpus tpu-vm ssh $TPU_NAME --zone=$ZONE \
 Create main.py in your course workspace. Paste this block first. If using a notebook, restart its kernel before running any cell.
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -137,7 +139,7 @@ Mesh axis names describe placement. They are separate from the numerical array d
 Append the checks, save the file and run python main.py with the setup lesson environment.
 
 ```python
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 for shard in x.addressable_shards:
     # Check tensor shape invariant: `shard.data.shape == (2,4)`
@@ -159,7 +161,7 @@ Assertions compare against host calculations or hand-derived values; printing a 
 ## Run the example
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -186,7 +188,7 @@ sum_rows = jax.jit(lambda a:a.sum(axis=0), in_shardings=rows, out_shardings=repl
 # Wait for device work to finish before timing it or comparing its result on the host.
 sum_rows.block_until_ready()
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 np.testing.assert_array_equal(np.asarray(sum_rows), np.array([112,120,128,136],dtype=np.float32))
 for shard in x.addressable_shards:
     # Check tensor shape invariant: `shard.data.shape == (2,4)`
@@ -237,7 +239,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:22.222068+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:20.038431+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]
@@ -259,7 +261,7 @@ PASS: distributed-01
 **Predict before running:** Moving $x$ from row partitioning to column partitioning changes local shapes. Does it change the global values?
 
 ```python
-# Experiment — Reshard the same global values: Resharding changes ownership of values, not their mathematical...
+# Experiment — Reshard the same global values
 moved = jax.device_put(x, columns)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_array_equal(np.asarray(moved), host)
@@ -277,11 +279,10 @@ Resharding changes ownership of values, not their mathematical identity.
 **Predict before running:** Sum each row. Predict the output shape and which mesh axis should partition it.
 
 ```python
-# Experiment — Reduce a dimension that is not partitioned: All four columns for a row are already local in row...
+# Experiment — Reduce a dimension that is not partitioned
 vector_rows = NamedSharding(mesh, P("data"))
 # Wrap with `jax.jit` (`per_row`) so XLA traces and compiles the function.
 per_row = jax.jit(lambda a:a.sum(axis=1), in_shardings=rows, out_shardings=vector_rows)(x)
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.asarray(per_row), np.arange(6,119,16,dtype=np.float32))
 # Check tensor shape invariant: `all(s.data.shape == (2,) for s in per_row.addressable_shards)`
 assert all(s.data.shape == (2,) for s in per_row.addressable_shards)
@@ -305,16 +306,16 @@ Compare row and column layouts of a $(12,8)$ array, and repair a ten-row mean wi
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Place `placed` explicitly onto the target JAX device.
-2. Check tensor shape invariant: `shard.data.shape == expected`
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Place `padded` explicitly onto the target JAX device.
-5. Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
+1. Exercise solution
+2. Place `placed` explicitly onto the target JAX device.
+3. Check tensor shape invariant: `shard.data.shape == expected`
+4. Transfer the device result to the host for an independent NumPy comparison.
+5. Place `padded` explicitly onto the target JAX device.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compare row and column layouts of a (12,8) array, and repair a ten-row...
+# Exercise solution
 other = np.arange(...)  # TODO: compute other
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.
@@ -346,7 +347,7 @@ assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compare row and column layouts of a (12,8) array, and repair a ten-row...
+# Exercise solution
 other = np.arange(96,dtype=np.float32).reshape(12,8)
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.
@@ -396,14 +397,15 @@ Four devices divide twelve rows or eight columns.
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Place `placed` explicitly onto the target JAX device.
-2. Check tensor shape invariant: `shard.data.shape == expected`
-3. Transfer the device result to the host for an independent NumPy comparison.
+1. Change both dimensions (Challenge)
+2. Place `placed` explicitly onto the target JAX device.
+3. Check tensor shape invariant: `shard.data.shape == expected`
+4. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change both dimensions (Challenge): The row layout owns three complete feature vectors per...
+# Change both dimensions (Challenge)
 other = np.arange(...)  # TODO: compute other
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.
@@ -418,7 +420,7 @@ for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Change both dimensions (Challenge): The row layout owns three complete feature vectors per...
+# Change both dimensions (Challenge)
 other = np.arange(96,dtype=np.float32).reshape(12,8)
 for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
     # Place `placed` explicitly onto the target JAX device.

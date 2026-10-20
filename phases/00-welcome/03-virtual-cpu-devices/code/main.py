@@ -1,7 +1,7 @@
 """Practice with four virtual CPU devices: worked experiments and reference solutions. CPU checks."""
 
 # Start a fresh CPU runtime
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -27,7 +27,7 @@ y = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)
 y.block_until_ready()
 
 # Inspect and verify
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 print("JAX version:", jax.__version__)
 print("CPU devices:", len(devices))
 for shard in x.addressable_shards:
@@ -39,7 +39,7 @@ assert len(x.addressable_shards) == 4
 assert all(shard.data.shape == (1, 2) for shard in x.addressable_shards)
 print("Global shape:", x.shape, "result:", np.asarray(y).tolist())
 
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -63,7 +63,7 @@ y = jax.jit(lambda a: 2 * a + 1, in_shardings=rows, out_shardings=rows)(x)
 # Wait for device work to finish before timing it or comparing its result on the host.
 y.block_until_ready()
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 print("JAX version:", jax.__version__)
 print("CPU devices:", len(devices))
 for shard in x.addressable_shards:
@@ -82,7 +82,7 @@ for s in x.addressable_shards:
 visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CPU device ID', 'rows': ['row ' + str(i) for i in range(4)], 'columns': ['feature 0', 'feature 1']}
 
 # Experiment: Keep the shape, change the values
-# Experiment — Keep the shape, change the values: Placement follows the declared shape/specification, not the...
+# Experiment — Keep the shape, change the values
 negative = -host - 2
 # Place `negative_x` explicitly onto the target JAX device.
 negative_x = jax.device_put(negative, rows)
@@ -105,7 +105,7 @@ for shard in copies.addressable_shards:
 print("Replicated local shapes:", [s.data.shape for s in copies.addressable_shards])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Predict and verify the per-device shapes for twelve rows, then...
+# Exercise solution
 twelve = np.arange(24,dtype=np.float32).reshape(12,2)
 # Place `z` explicitly onto the target JAX device.
 z = jax.device_put(twelve, rows)

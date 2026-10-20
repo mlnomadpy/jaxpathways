@@ -1,7 +1,7 @@
 """Memory, rematerialization, and optimization tradeoffs: worked experiments and reference solutions. CPU checks."""
 
 # Define two differentiation policies
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -9,9 +9,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -36,11 +34,8 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
@@ -72,7 +67,7 @@ for name, lines in zip(["plain", "remat"], reports):
 print("Compiler memory estimates:", memory)
 print("Synchronized gradient samples:", times)
 
-# Step 1 — Define two differentiation policies: Both functions compute the same pure objective; only the...
+# Step 1 — Define two differentiation policies
 import contextlib
 import io
 import time
@@ -80,9 +75,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 from jax.ad_checkpoint import print_saved_residuals
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(18)
-# Create device-backed JAX array `w`.
 w=jnp.asarray((rng.normal(size=(16,16))*.1).astype(np.float32))
 x=jnp.asarray(np.linspace(-.5,.5,16,dtype=np.float32))
 def layer(v):return jnp.tanh(w@v)
@@ -106,11 +99,8 @@ for _ in range(4):values.append(np.tanh(host_w@values[-1]))
 cotangent=2*values[-1]
 for i in range(4,0,-1):cotangent=host_w.T@(cotangent*(1-values[i]**2))
 for fn in (plain,remat):
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(jax.grad(fn)(x),cotangent,rtol=3e-5,atol=1e-7)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(plain)(x),jax.grad(remat)(x),rtol=1e-6,atol=1e-7)
-# Differentiate the objective to obtain `executables` via automatic differentiation.
 executables=[jax.jit(jax.grad(fn)).lower(x).compile() for fn in (plain,remat)]
 memory=[]
 times=[]
@@ -146,32 +136,26 @@ visual_data={'kind':'panels','panels':panels}
 # Experiment: Move the boundary to the entire objective
 # Experiment — Move the boundary to the entire objective: Correctness is necessary but does not choose the best policy.
 whole=jax.checkpoint(plain)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(whole)(x),cotangent,rtol=3e-5,atol=1e-7)
 print('Whole-objective residuals:',residual_report(whole))
-# Differentiate the objective to obtain `whole_executable` via automatic differentiation.
 whole_executable=jax.jit(jax.grad(whole)).lower(x).compile()
 print('Whole-objective memory estimate:',whole_executable.memory_analysis())
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Use the direction v=(1,\ldots,1) and central differences to...
+# Exercise solution
 direction=jnp.ones_like(x)
 eps=.001
 finite=(float(plain(x+eps*direction))-float(plain(x-eps*direction)))/(2*eps)
-# Differentiate the objective to obtain `automatic` via automatic differentiation.
 automatic=float(jnp.vdot(jax.grad(plain)(x),direction))
 np.testing.assert_allclose(finite,automatic,rtol=3e-3,atol=1e-6)
 print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
 
 # Reference practice: Check higher-order differentiation
-# Check higher-order differentiation (Transfer): Recomputation should preserve the differentiable function in...
+# Check higher-order differentiation (Transfer)
 direction=jnp.linspace(-1.,1.,len(x))
-# Differentiate the objective to obtain `(_, hvp_plain)` via automatic differentiation.
 _,hvp_plain=jax.jvp(jax.grad(plain),(x,),(direction,))
-# Differentiate the objective to obtain `(_, hvp_remat)` via automatic differentiation.
 _,hvp_remat=jax.jvp(jax.grad(remat),(x,),(direction,))
 np.testing.assert_allclose(hvp_plain,hvp_remat,rtol=3e-5,atol=1e-7)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(np.asarray(hvp_plain)).all()
 print('Higher-order directional derivatives agree.')
 print("PASS: performance-05")

@@ -1,7 +1,7 @@
 """Vectors, norms, and projections: worked experiments and reference solutions. CPU checks."""
 
 # Draw the two vectors
-# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Step 1 — Draw the two vectors
 import jax.numpy as jnp
 u = jnp.array([3.0, 4.0])
 a = jnp.array([1.0, 0.0])
@@ -25,7 +25,7 @@ assert jnp.allclose(jnp.dot(a, r), 0.0, atol=1e-06)
 assert jnp.allclose(jnp.dot(p, p) + jnp.dot(r, r), jnp.dot(u, u))
 print('projection / residual:', p, r)
 
-# Step 1 — Draw the two vectors: The length is 5; the component along the horizontal unit direction...
+# Step 1 — Draw the two vectors
 import jax.numpy as jnp
 u = jnp.array([3.0, 4.0])
 a = jnp.array([1.0, 0.0])
@@ -57,7 +57,7 @@ assert jnp.allclose(project(u, -a), p)
 assert jnp.allclose(jnp.dot(u, 2 * a), 2 * jnp.dot(u, a))
 
 # Experiment: Rotate the line
-# Experiment — Rotate the line: Changing direction changes what can be explained; merely...
+# Experiment — Rotate the line
 diagonal = jnp.array([1.0, 1.0])
 p2 = project(u, diagonal)
 assert jnp.allclose(p2, jnp.array([3.5, 3.5]))
@@ -81,7 +81,7 @@ else:
     raise AssertionError('Zero direction was accepted')
 
 # Reference practice: Use two perpendicular directions
-# Use two perpendicular directions (Transfer / diagnosis): Adding separate projections reconstructs a vector in an...
+# Use two perpendicular directions (Transfer / diagnosis)
 a1 = jnp.array([1.0, 1.0])
 a2 = jnp.array([1.0, -1.0])
 assert jnp.allclose(project(u, a1) + project(u, a2), u)

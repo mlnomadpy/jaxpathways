@@ -4,10 +4,10 @@
   "minutes": 60,
   "content": {
     "idea": "A random sampler in JAX receives an explicit key. Reusing the same key with the same sampler repeats the same computation. Splitting gives us separately owned keys, so the program can show which operation receives which randomness.",
-    "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: random.split returns two new keys.\n# Create or split explicit PRNG key(s) (`key`) for reproducible randomness.\nkey = jax.random.key(42)\n# Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.\nkey, sample_key = jax.random.split(key)\n# Sample deterministic random values into `a` using an explicit PRNG key.\na = jax.random.normal(sample_key, (3,))\n# Sample deterministic random values into `repeated` using an explicit PRNG key.\nrepeated = jax.random.normal(sample_key, (3,))\n# Create or split explicit PRNG key(s) (`(key, next_key)`) for reproducible randomness.\nkey, next_key = jax.random.split(key)\n# Sample deterministic random values into `b` using an explicit PRNG key.\nb = jax.random.normal(next_key, (3,))\n# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
+    "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp\n# Step 2 — Build the computation: random.split returns two new keys.\n# Create or split explicit PRNG key(s) (`key`) for reproducible randomness.\nkey = jax.random.key(42)\n# Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.\nkey, sample_key = jax.random.split(key)\n# Sample deterministic random values into `a` using an explicit PRNG key.\na = jax.random.normal(sample_key, (3,))\n# Sample deterministic random values into `repeated` using an explicit PRNG key.\nrepeated = jax.random.normal(sample_key, (3,))\n# Create or split explicit PRNG key(s) (`(key, next_key)`) for reproducible randomness.\nkey, next_key = jax.random.split(key)\n# Sample deterministic random values into `b` using an explicit PRNG key.\nb = jax.random.normal(next_key, (3,))\n# Step 3 — Run and check the result\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
     "output": "Replay equal: True; Fresh draw equal: False.",
     "exercise": "Split a fresh seed into four keys, then use vmap to draw two normal values from each. Replay from the seed and compare.",
-    "solution": "# Exercise solution: Split a fresh seed into four keys, then use vmap to draw two normal...\ndef draw(seed):\n    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.\n    keys = jax.random.split(jax.random.key(seed), 4)\n    return jax.vmap(lambda k: jax.random.normal(k, (2,)))(keys)\n# Check tensor shape invariant: `draw(7).shape == (4, 2)`\nassert draw(7).shape == (4, 2)\nassert jnp.array_equal(draw(7), draw(7))",
+    "solution": "# Exercise solution\ndef draw(seed):\n    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.\n    keys = jax.random.split(jax.random.key(seed), 4)\n    return jax.vmap(lambda k: jax.random.normal(k, (2,)))(keys)\n# Check tensor shape invariant: `draw(7).shape == (4, 2)`\nassert draw(7).shape == (4, 2)\nassert jnp.array_equal(draw(7), draw(7))",
     "question": "What happens if the same key is used twice for the same random operation?",
     "options": [
       "The generator automatically advances",
@@ -101,7 +101,7 @@
       {
         "title": "Prepare the inputs",
         "instruction": "Create main.py in your lesson workspace. Add this first block; use the environment from setup.",
-        "code": "# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...\nimport jax\nimport jax.numpy as jnp",
+        "code": "# Step 1 — Prepare the inputs\nimport jax\nimport jax.numpy as jnp",
         "explanation": "These explicit inputs define the case that the later checks will verify."
       },
       {
@@ -113,7 +113,7 @@
       {
         "title": "Run and check the result",
         "instruction": "Append the checks, save main.py, and run python main.py from this folder using your course environment.",
-        "code": "# Step 3 — Run and check the result: Compare the output to the expected result below before making the...\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
+        "code": "# Step 3 — Run and check the result\nprint(\"Replay equal:\", bool(jnp.array_equal(a, repeated)))\nprint(\"Fresh draw equal:\", bool(jnp.array_equal(a, b)))\nassert jnp.array_equal(a, repeated)\nassert not jnp.array_equal(a, b)",
         "explanation": "Compare the output to the expected result below before making the exercise change."
       }
     ],

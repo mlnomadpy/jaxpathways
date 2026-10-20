@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Distinguish gradients, updates, and parameters
@@ -79,7 +81,7 @@ $$
 Create a file named main.py in your activated learning environment. Add these imports and inputs first. Shapes and numeric types are part of the experiment.
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 import optax
@@ -98,7 +100,6 @@ x = jnp.linspace(-1., 1., 21)
 y = 2. * x + 1.
 def loss(p):
     return jnp.mean((p["weight"] * x + p["bias"] - y) ** 2)
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.sgd(0.2)
 state = optimizer.init(params)
 ```
@@ -113,10 +114,8 @@ Append the remaining block, then run python main.py in the terminal. Compare the
 # Step 3 — 3. Measure and verify: Weight approaches 2.0, bias approaches 1.0, and loss is below 10^{-8}.
 initial_loss = loss(params)
 for _ in range(120):
-    # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
     updates, state = optimizer.update(grads, state, params)
-    # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
 print("Parameters:", params)
 print("Loss:", float(loss(params)))
@@ -130,7 +129,7 @@ Weight approaches $2.0$, bias approaches $1.0$, and loss is below $10^{-8}$.
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the inputs: This block establishes the values used by the following steps; run...
+# Step 1 — 1. Prepare the inputs
 import jax
 import jax.numpy as jnp
 import optax
@@ -140,16 +139,13 @@ x = jnp.linspace(-1., 1., 21)
 y = 2. * x + 1.
 def loss(p):
     return jnp.mean((p["weight"] * x + p["bias"] - y) ** 2)
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer = optax.sgd(0.2)
 state = optimizer.init(params)
 # Step 3 — 3. Measure and verify: Weight approaches 2.0, bias approaches 1.0, and loss is below 10^{-8}.
 initial_loss = loss(params)
 for _ in range(120):
-    # Differentiate the objective to obtain `grads` via automatic differentiation.
     grads = jax.grad(loss)(params)
     updates, state = optimizer.update(grads, state, params)
-    # Configure or step the Optax optimizer state (`params`).
     params = optax.apply_updates(params, updates)
 print("Parameters:", params)
 print("Loss:", float(loss(params)))
@@ -186,7 +182,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:49:35.187975+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:49.580340+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}
@@ -203,12 +199,10 @@ PASS: optimization-04
 **Predict before running:** Predict both parameters after one SGD step at the zero initialization.
 
 ```python
-# Experiment — Check the first update against arithmetic: Independent arithmetic checks the gradient scale and the update...
+# Experiment — Check the first update against arithmetic
 p0 = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
-# Differentiate the objective to obtain `g0` via automatic differentiation.
 g0 = jax.grad(loss)(p0)
 u0, s0 = optimizer.update(g0, optimizer.init(p0), p0)
-# Configure or step the Optax optimizer state (`p1`).
 p1 = optax.apply_updates(p0, u0)
 assert jnp.allclose(p1["weight"], 22/75)
 assert jnp.allclose(p1["bias"], 0.4)
@@ -224,8 +218,7 @@ Independent arithmetic checks the gradient scale and the update sign.
 **Predict before running:** After gradients $2$ then $1$, is the second update the same if you reset state?
 
 ```python
-# Experiment — Observe stateful momentum: Resetting momentum removes the prior-gradient contribution; it...
-# Configure or step the Optax optimizer state (`momentum`).
+# Experiment — Observe stateful momentum
 momentum = optax.sgd(0.1, momentum=0.9)
 m0 = momentum.init(jnp.array(0.))
 u1, m1 = momentum.update(jnp.array(2.), m0)
@@ -246,12 +239,10 @@ Resetting momentum removes the prior-gradient contribution; it changes the optim
 
 ```python
 # Experiment — Coast through a zero-gradient step: Optimizer state carries information from earlier steps.
-# Configure or step the Optax optimizer state (`momentum_tx`).
 momentum_tx = optax.sgd(0.1, momentum=0.9)
 position = jnp.array(0.)
 momentum_state = momentum_tx.init(position)
 coast_first, momentum_state = momentum_tx.update(jnp.array(2.),momentum_state,position)
-# Configure or step the Optax optimizer state (`position`).
 position = optax.apply_updates(position,coast_first)
 coast_second, momentum_state = momentum_tx.update(jnp.array(0.),momentum_state,position)
 assert jnp.allclose(coast_first,-0.2)
@@ -275,21 +266,16 @@ At the original zero parameters, compare the first Optax SGD update with an expl
 - `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `grads` via automatic differentiation.
-2. Configure or step the Optax optimizer state (`actual`).
-3. Transform every leaf of the parameter PyTree (`expected`).
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: At the original zero parameters, compare the first Optax SGD update...
+# Exercise solution
 start = ...  # TODO: compute start
-# Differentiate the objective to obtain `grads` via automatic differentiation.
 grads = jax.grad(...)  # TODO: compute grads
 updates, _ = optimizer.update(...)  # TODO: compute updates, _
-# Configure or step the Optax optimizer state (`actual`).
 actual = optax.apply_updates(...)  # TODO: compute actual
-# Transform every leaf of the parameter PyTree (`expected`).
 expected = jax.tree.map(...)  # TODO: compute expected
 assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
 ```
@@ -297,14 +283,11 @@ assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: At the original zero parameters, compare the first Optax SGD update...
+# Exercise solution
 start = {"weight": jnp.array(0.), "bias": jnp.array(0.)}
-# Differentiate the objective to obtain `grads` via automatic differentiation.
 grads = jax.grad(loss)(start)
 updates, _ = optimizer.update(grads, optimizer.init(start), start)
-# Configure or step the Optax optimizer state (`actual`).
 actual = optax.apply_updates(start, updates)
-# Transform every leaf of the parameter PyTree (`expected`).
 expected = jax.tree.map(lambda p, g: p - 0.2 * g, start, grads)
 assert all(jnp.allclose(a, b) for a, b in zip(jax.tree.leaves(actual), jax.tree.leaves(expected)))
 ```
@@ -373,16 +356,14 @@ SGD updates already contain the minus sign.
 - `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
 
 **Step-by-step implementation plan:**
-1. Transform every leaf of the parameter PyTree (`wrong`).
-2. Configure or step the Optax optimizer state (`right`).
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch double subtraction (Transfer / diagnosis): Comparing identical gradients exposes an update-sign error...
-# Transform every leaf of the parameter PyTree (`wrong`).
+# Catch double subtraction (Transfer / diagnosis)
 wrong = jax.tree.map(...)  # TODO: compute wrong
-# Configure or step the Optax optimizer state (`right`).
 right = optax.apply_updates(...)  # TODO: compute right
 assert loss(wrong)  # TODO: complete assertion check
 assert loss(right)  # TODO: complete assertion check
@@ -391,10 +372,8 @@ assert loss(right)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch double subtraction (Transfer / diagnosis): Comparing identical gradients exposes an update-sign error...
-# Transform every leaf of the parameter PyTree (`wrong`).
+# Catch double subtraction (Transfer / diagnosis)
 wrong = jax.tree.map(lambda p,u: p-u, p0,u0)
-# Configure or step the Optax optimizer state (`right`).
 right = optax.apply_updates(p0,u0)
 assert loss(wrong) > loss(p0)
 assert loss(right) < loss(p0)

@@ -2,6 +2,8 @@
 
 Phase 03: State, randomness & control flow · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Locate the decision boundary
@@ -75,7 +77,7 @@ Test negative, positive and exact-boundary inputs because a `>` versus `>=` chan
 Create main.py in your lesson workspace. Add this first block; use the environment from setup.
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 ```
@@ -101,7 +103,7 @@ Both branches return the same scalar type. cond takes the runtime predicate and 
 Append the checks, save main.py, and run python main.py from this folder using your course environment.
 
 ```python
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print(float(magnitude(-3.)))
 assert jnp.allclose(magnitude(-3.), 3.)
 assert jnp.allclose(magnitude(2.), 2.)
@@ -112,7 +114,7 @@ Compare the output to the expected result below before making the exercise chang
 ## Run the example
 
 ```python
-# Step 1 — Prepare the inputs: These explicit inputs define the case that the later checks will...
+# Step 1 — Prepare the inputs
 import jax
 import jax.numpy as jnp
 # Step 2 — Build the computation: Both branches return the same scalar type.
@@ -120,7 +122,7 @@ import jax.numpy as jnp
 @jax.jit
 def magnitude(x):
     return jax.lax.cond(x >= 0., lambda v: v, lambda v: -v, x)
-# Step 3 — Run and check the result: Compare the output to the expected result below before making the...
+# Step 3 — Run and check the result
 print(float(magnitude(-3.)))
 assert jnp.allclose(magnitude(-3.), 3.)
 assert jnp.allclose(magnitude(2.), 2.)
@@ -149,7 +151,6 @@ The branches together implement $|x|$. Moving right along the negative side decr
 Continuity at the join does not imply differentiability: the classical derivative is undefined at zero because the two slopes disagree. A branch-selected autodiff value there must not be confused with a derivative of a smooth curve. The picture helps separate correct branch outputs from assumptions about gradients.
 
 ```python
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-3.0, 3.0, 25)
 # Vectorize across the batch dimension without a Python loop (`visual_data`).
 visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 'magnitude', 'series': [{'label': 'lax.cond output', 'y': jax.vmap(magnitude)(grid).tolist()}]}
@@ -157,7 +158,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:12.184332+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:19.283709+00:00. JAX 0.9.2.
 
 ```text
 3.0
@@ -198,7 +199,7 @@ The repair changes where the decision is represented. It does not make $x$ stati
 **Predict before running:** Predict the outputs and derivatives away from the nonsmooth point.
 
 ```python
-# Experiment — Check a batched numerical selection: Correct values under batching do not imply a conditional branch...
+# Experiment — Check a batched numerical selection
 values=jnp.array([-3.,-1.,2.,4.])
 assert jnp.allclose(jax.vmap(magnitude)(values),jnp.abs(values))
 assert jnp.allclose(jax.vmap(jax.grad(magnitude))(values),jnp.array([-1.,-1.,1.,1.]))
@@ -219,12 +220,13 @@ Write a compiled function that applies $2x$ when $x$ is positive and $x-2$ other
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
+1. Exercise solution
+2. Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Write a compiled function that applies 2x when x is positive and x-2...
+# Exercise solution
 # Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 @jax.jit
 def choose_update(x):
@@ -237,7 +239,7 @@ assert jnp.allclose(choose_update(0.), -2.)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Write a compiled function that applies 2x when x is positive and x-2...
+# Exercise solution
 # Define and JIT-compile `choose_update(x)` so XLA traces and fuses the operations:
 @jax.jit
 def choose_update(x):
@@ -270,13 +272,12 @@ At $x=1$ the false branch is selected.
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Match a changed piecewise rule (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Match a changed piecewise rule (Practice): The values check the exact boundary and both formulas; the...
+# Match a changed piecewise rule (Practice)
 def piecewise(v):
     return ...  # TODO: return computed result
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))  # TODO: complete assertion check
@@ -287,7 +288,7 @@ assert jnp.allclose(jax.grad(piecewise)(2.),4.)  # TODO: complete assertion chec
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Match a changed piecewise rule (Practice): The values check the exact boundary and both formulas; the...
+# Match a changed piecewise rule (Practice)
 def piecewise(v):
     return jax.lax.cond(v>1.,lambda z:z*z,lambda z:2*z,v)
 assert jnp.allclose(jax.vmap(piecewise)(jnp.array([-1.,1.,2.])),jnp.array([-2.,2.,4.]))
@@ -318,13 +319,12 @@ Decide what each output component means before padding.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Repair incompatible branch shapes (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair incompatible branch shapes (Challenge): A branch mismatch is a result-contract error even when the...
+# Repair incompatible branch shapes (Challenge)
 try:
     jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
 except TypeError:
@@ -339,7 +339,7 @@ assert jnp.allclose(pair(jnp.array(-2.)),jnp.array([2.,4.]))  # TODO: complete a
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair incompatible branch shapes (Challenge): A branch mismatch is a result-contract error even when the...
+# Repair incompatible branch shapes (Challenge)
 try:
     jax.lax.cond(True,lambda x:x,lambda x:jnp.stack([x,x]),jnp.array(2.))
 except TypeError:

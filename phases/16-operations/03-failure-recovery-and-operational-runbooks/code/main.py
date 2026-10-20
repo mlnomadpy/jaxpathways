@@ -125,7 +125,7 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -183,7 +183,7 @@ def launch(root, config=None, timeout=10.):
     return result
 
 # Rehearse a failure and verify every resumed update
-# Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
+# Step 4 — Rehearse a failure and verify every resumed update
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
@@ -325,7 +325,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -382,7 +382,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Rehearse a failure and verify every resumed update: All files stay inside one temporary drill directory; the two runs...
+# Step 4 — Rehearse a failure and verify every resumed update
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-recovery-') as folder:
     base=Path(folder)
@@ -406,7 +406,7 @@ print('all next-update state hashes match:',final_full==final_resumed)
 visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training step','ylabel':'sampled minibatch mean squared error','series':[{'label':'uninterrupted continuation','y':[full_events[i]['loss'] for i in range(3,9)]},{'label':'restored continuation (overlaps)','y':[e['loss'] for e in resume_events]}]}
 
 # Experiment: Compare state, not only loss
-# Experiment — Compare state, not only loss: Loss is a scalar projection of a much larger state; equal loss...
+# Experiment — Compare state, not only loss
 for event in resume_events:
     original=full_events[event['step']]
     assert event['state_hash']==original['state_hash']
@@ -414,7 +414,7 @@ for event in resume_events:
 assert all(name in committed for name in ['params','velocity','key','step','data_hash','config_hash','worker_hash'])
 
 # Experiment: Reject a changed training rule
-# Experiment — Reject a changed training rule: A deliberate branch experiment is valid when explicitly labeled,...
+# Experiment — Reject a changed training rule
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
@@ -423,7 +423,7 @@ assert incompatible['status']=='failed'
 assert any(e['event']=='failed' and 'provenance' in e['message'] for e in incompatible['events'])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Repeat the recovery drill with seed 9, checkpoint cadence 3 and...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     base=Path(folder)
@@ -437,7 +437,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert json.loads((base/'ref'/'checkpoint.json').read_text())==json.loads((base/'broken'/'checkpoint.json').read_text())
 
 # Reference practice: Reject accidental checkpoint corruption
-# Reject accidental checkpoint corruption (Transfer / diagnosis): Rejecting corruption is safer and more inspectable than...
+# Reject accidental checkpoint corruption (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     launch(folder,dict(steps=4))
@@ -451,7 +451,7 @@ assert bad['status']=='failed'
 assert any(e['event']=='failed' and 'checksum' in e['message'] for e in bad['events'])
 
 # Reference practice: Explain a weights-only mismatch by hand
-# Explain a weights-only mismatch by hand (Transfer / diagnosis): The next loss could initially look close, but the state...
+# Explain a weights-only mismatch by hand (Transfer / diagnosis)
 correct=.1*(.8*2+3)
 weights_only=.1*3
 assert abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12

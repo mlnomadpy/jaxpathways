@@ -79,7 +79,7 @@
         "difficulty": "Practice",
         "prompt": "Add the feature bias and row offsets to the original batch. Derive every row before running, then check with an explicitly constructed array.",
         "hint": "Use bias shape \\((3,)\\) and offsets shape \\((2, 1)\\). Do not swap their semantic roles.",
-        "solution": "# Use both kinds of offsets together (Practice): The first row receives 100 in every feature and the second...\ncombined = batch + bias + jnp.array([100., 200.])[:, None]\n# Check tensor shape invariant: `combined.shape == (2, 3)`\nassert combined.shape == (2, 3)\nassert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))",
+        "solution": "# Use both kinds of offsets together (Practice)\ncombined = batch + bias + jnp.array([100., 200.])[:, None]\n# Check tensor shape invariant: `combined.shape == (2, 3)`\nassert combined.shape == (2, 3)\nassert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))",
         "explanation": "The first row receives \\(100\\) in every feature and the second receives \\(200\\), while the feature bias differs by column."
       },
       {
@@ -87,7 +87,7 @@
         "difficulty": "Challenge",
         "prompt": "Write an MSE function that requires prediction and target shapes to match. Test zero loss for matching vectors and rejection of a column target. Explain why an automatic reshape might hide a data-ordering problem.",
         "hint": "Raise a descriptive ValueError before subtracting. The check is based on shape metadata, not array truth values.",
-        "solution": "# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...\ndef aligned_mse(prediction, target):\n    if prediction.shape != target.shape:\n        raise ValueError(\"aligned prediction and target shapes must match\")\n    return jnp.mean((prediction - target) ** 2)\nassert jnp.allclose(aligned_mse(predictions, targets), 0.)\ntry:\n    aligned_mse(predictions, targets[:, None])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Column targets must be rejected\")",
+        "solution": "# Reject an aligned-loss contract violation (Challenge)\ndef aligned_mse(prediction, target):\n    if prediction.shape != target.shape:\n        raise ValueError(\"aligned prediction and target shapes must match\")\n    return jnp.mean((prediction - target) ** 2)\nassert jnp.allclose(aligned_mse(predictions, targets), 0.)\ntry:\n    aligned_mse(predictions, targets[:, None])\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"Column targets must be rejected\")",
         "explanation": "Fix shapes at the data/model interface according to the intended example order. Blindly reshaping inside a loss can conceal mismatched semantics."
       }
     ],

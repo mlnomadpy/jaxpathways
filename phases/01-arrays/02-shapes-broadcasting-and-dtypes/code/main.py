@@ -58,14 +58,14 @@ assert offsets.shape == (2, 1)
 assert jnp.allclose(z, jnp.array([[101.,102.,103.],[204.,205.,206.]]))
 
 # Reference practice: Use both kinds of offsets together
-# Use both kinds of offsets together (Practice): The first row receives 100 in every feature and the second...
+# Use both kinds of offsets together (Practice)
 combined = batch + bias + jnp.array([100., 200.])[:, None]
 # Check tensor shape invariant: `combined.shape == (2, 3)`
 assert combined.shape == (2, 3)
 assert jnp.allclose(combined, jnp.array([[111., 122., 133.], [214., 225., 236.]]))
 
 # Reference practice: Reject an aligned-loss contract violation
-# Reject an aligned-loss contract violation (Challenge): Fix shapes at the data/model interface according to the...
+# Reject an aligned-loss contract violation (Challenge)
 def aligned_mse(prediction, target):
     if prediction.shape != target.shape:
         raise ValueError("aligned prediction and target shapes must match")

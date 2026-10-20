@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Map Dense and Linear weight axes and verify a known output.
@@ -110,7 +112,7 @@ The optional Keras lab runs real backends in separate processes. The default com
 Create main.py in your lesson workspace and run it with the active course Python environment. Keep feature order fixed while you name the input, kernel and bias.
 
 ```python
-# Step 1 — Write the source function and its known input: The arrays define a batch of shape (2,3), a kernel of shape (3,2),...
+# Step 1 — Write the source function and its known input
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -131,7 +133,6 @@ Append this block to the same main.py and rerun the whole file. Transpose the st
 ```python
 # Step 2 — Map the stored tensor into explicit JAX parameters: The zero-input check returns the bias twice.
 torch_weight = keras_kernel.T.copy()  # torch Linear: output, input
-# Create device-backed JAX array `params`.
 params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
 def predict(params, inputs):
     return inputs @ params["kernel"] + params["bias"]
@@ -146,7 +147,7 @@ The zero-input check returns the bias twice. If it does not, inspect bias broadc
 Append this block to the same main.py and rerun the whole file. Run both independent checks and inspect the two output rows.
 
 ```python
-# Step 3 — Verify values before extending the architecture: The first assertion checks hand arithmetic; the second compares...
+# Step 3 — Verify values before extending the architecture
 # Wrap with `jax.jit` (`actual`) so XLA traces and compiles the function.
 actual = np.asarray(jax.jit(predict)(params, jnp.asarray(x)))
 # A hand-computed first row detects a shared layout mistake.
@@ -160,7 +161,7 @@ The first assertion checks hand arithmetic; the second compares the entire batch
 ## Run the example
 
 ```python
-# Move models between JAX, Keras, TensorFlow and PyTorch: Cross-framework conversion must preserve the meaning of inputs,...
+# Move models between JAX, Keras, TensorFlow and PyTorch
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -169,7 +170,6 @@ x = np.array([[1., 2., -1.], [-2., 0., 3.]], np.float32)
 keras_kernel = np.array([[1., -2.], [.5, 1.], [-1., .25]], np.float32)
 bias = np.array([.1, -.2], np.float32)
 torch_weight = keras_kernel.T.copy()  # torch Linear: output, input
-# Create device-backed JAX array `params`.
 params = {"kernel": jnp.asarray(torch_weight.T), "bias": jnp.asarray(bias)}
 def predict(params, inputs):
     return inputs @ params["kernel"] + params["bias"]
@@ -209,7 +209,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Input 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:10.842094+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:23.045594+00:00. JAX 0.9.2.
 
 ```text
 Matched dense outputs: [[ 3.1  -0.45]
@@ -229,7 +229,7 @@ PASS: deployment-01
 **Predict before running:** Will a shape check catch wrong axes when input and output dimensions are equal?
 
 ```python
-# Experiment — A square matrix hides a transpose: Check asymmetric values and independently known outputs, not...
+# Experiment — A square matrix hides a transpose
 square = np.array([[1., 2.], [3., 4.]], np.float32)
 z = np.array([[2., -1.]], np.float32)
 # Check tensor shape invariant: `(z @ square).shape == (z @ square.T).shape`
@@ -370,7 +370,7 @@ Compute both first-layer rows by hand, replace negative entries by zero, and app
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
+# Map a second layer and locate an omitted activation (Transfer / diagnosis)
 second_kernel = np.array(...)  # TODO: compute second_kernel
 second_bias = np.array(...)  # TODO: compute second_bias
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -388,7 +388,7 @@ print('Two-layer reference scores:', bridged_scores[:, 0])
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Map a second layer and locate an omitted activation (Transfer / diagnosis): The first dense layer agrees, but the activation is the...
+# Map a second layer and locate an omitted activation (Transfer / diagnosis)
 second_kernel = np.array([[2.], [-1.]], np.float32)
 second_bias = np.array([.3], np.float32)
 # Transfer the device result to the host for an independent NumPy comparison.

@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 140 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Implement leapfrog with the correct half-step boundaries
@@ -64,7 +66,7 @@ Here the exact mean, variance and covariance are known. Check all of them: getti
 Create a fresh main.py. This correlated Gaussian is an exact test target for an inference algorithm, not a new unknown statistical model.
 
 ```python
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -74,7 +76,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 ```
@@ -106,7 +107,6 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
@@ -150,7 +150,7 @@ The tolerances test this seeded Gaussian fixture only. Agreement with a known po
 ## Run the example
 
 ```python
-# Step 1 — 1. Write a known target and its gradient: Potential energy is the negative log-density up to a constant,...
+# Step 1 — 1. Write a known target and its gradient
 import numpy as np
 import jax
 import jax.numpy as jnp
@@ -160,7 +160,6 @@ precision = jnp.linalg.solve(target_cov,jnp.eye(2))
 def potential(q):
     delta=q-target_mean
     return .5*delta@precision@delta
-# Differentiate the objective to obtain `force` via automatic differentiation.
 force=jax.grad(potential)
 assert jnp.allclose(force(jnp.array([0.,0.])),precision@(-target_mean))
 
@@ -184,7 +183,6 @@ def chain(key,initial,step_size=.25,leapfrog_steps=7,draws=1600):
         p=jax.random.normal(kp,q.shape)
         proposal,new_p=leapfrog(q,p,step_size,leapfrog_steps)
         error=potential(proposal)+.5*jnp.sum(new_p**2)-potential(q)-.5*jnp.sum(p**2)
-        # Draw pseudorandom samples for `accept` using the explicit RNG state.
         accept=jnp.isfinite(error)&(jnp.log(jax.random.uniform(ku)) < -error)
         next_q=jnp.where(accept,proposal,q)
         return (next_q,key),(next_q,accept,error)
@@ -234,7 +232,6 @@ The horizontal axis counts retained transitions after discarding the initial $40
 This trace is one piece of the evidence. The code also checks the two-dimensional covariance, which a single-coordinate trace cannot show, and prints classical split R-hat and acceptance. A smooth-looking trace or repeated crossings of the mean is distinct from exploration of modes absent from this single-Gaussian fixture.
 
 ```python
-# Create evenly spaced index values in `indices`.
 indices=np.arange(0,400,10)
 # Transfer the device result to the host for an independent NumPy comparison.
 visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (after fixed discard)","ylabel":"first parameter coordinate","series":[{"label":"chain "+str(i+1),"y":np.asarray(samples[i,indices,0]).tolist()} for i in range(4)]}
@@ -242,7 +239,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:43.521988+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:11.359092+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]
@@ -261,7 +258,7 @@ PASS: probability-03
 **Predict before running:** If we reverse momentum after a trajectory, should the integrator return to the starting position?
 
 ```python
-# Experiment — Reverse one trajectory: Reversibility is an integrator invariant, independent of whether...
+# Experiment — Reverse one trajectory
 q0=jnp.array([.2,-.4])
 p0=jnp.array([.3,.7])
 q1,p1=leapfrog(q0,p0,.15,9)
@@ -355,7 +352,7 @@ Use independent small noise around four different constants.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis): Between-chain variation dominates within-chain variation, so...
+# Catch chains trapped at different levels (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
 fake = jax.random.normal(...)  # TODO: compute fake
 assert split_rhat(fake)  # TODO: complete assertion check
@@ -364,7 +361,7 @@ assert split_rhat(fake)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch chains trapped at different levels (Transfer / diagnosis): Between-chain variation dominates within-chain variation, so...
+# Catch chains trapped at different levels (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`fake`) for reproducible randomness.
 fake=jax.random.normal(jax.random.key(4),(4,600))*.1+jnp.arange(4)[:,None]*4
 assert split_rhat(fake)>5
@@ -399,7 +396,7 @@ Use the same direction and a moderate float32 finite-difference step.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis): A sign error in potential or a transposed geometry can be...
+# Verify a directional derivative (Transfer / diagnosis)
 q = jnp.array(...)  # TODO: compute q
 v = jnp.array(...)  # TODO: compute v
 eps = ...  # TODO: compute eps
@@ -413,7 +410,7 @@ np.testing.assert_allclose(finite,analytic,rtol = ...  # TODO: compute np.testin
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify a directional derivative (Transfer / diagnosis): A sign error in potential or a transposed geometry can be...
+# Verify a directional derivative (Transfer / diagnosis)
 q=jnp.array([.4,.8])
 v=jnp.array([.7,-.2])
 eps=.001

@@ -23,7 +23,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         worker_count=0)
 
 # Build the pipeline or state transition
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 loader = make_loader()
 iterator = iter(loader)
 first_batch = next(iterator)
@@ -34,14 +34,13 @@ restored_iterator.set_state(snapshot)
 replayed_batch = next(restored_iterator)
 
 # Run the comparison
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 one_epoch = list(make_loader())[:3]
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
 print("First IDs:",first_batch["id"].tolist())
 print("Next IDs:",second_batch["id"].tolist())
@@ -69,7 +68,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],
         worker_count=0)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 loader = make_loader()
 iterator = iter(loader)
 first_batch = next(iterator)
@@ -79,14 +78,13 @@ restored_iterator = iter(make_loader())
 restored_iterator.set_state(snapshot)
 replayed_batch = next(restored_iterator)
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 one_epoch = list(make_loader())[:3]
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
 print("First IDs:",first_batch["id"].tolist())
 print("Next IDs:",second_batch["id"].tolist())
@@ -109,12 +107,11 @@ two_epochs = list(make_loader())
 assert len(two_epochs)==6
 for start in (0,3):
     values = np.concatenate([b["id"] for b in two_epochs[start:start+3]])
-    # Create evenly spaced index values in ``.
     np.testing.assert_array_equal(np.sort(values),np.arange(12))
 print("Each epoch covers all twelve IDs")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Consume two batches, snapshot, and replay the third batch with a new...
+# Exercise solution
 later = iter(make_loader())
 next(later)
 next(later)
@@ -138,7 +135,7 @@ for reference in expected:
 print('Next-epoch IDs replayed:',[b['id'].tolist() for b in expected])
 
 # Reference practice: Reject a changed sampler
-# Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
+# Reject a changed sampler (Challenge)
 incompatible = iter(make_loader(seed=99))
 try:
     incompatible.set_state(snapshot)

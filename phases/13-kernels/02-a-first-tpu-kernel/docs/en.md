@@ -2,6 +2,8 @@
 
 Phase 13: Pallas kernels · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate Pallas TPU kernel is implemented in the target instructions. Physical TPU qualification is still pending; the CPU receipt does not qualify it.
+
 ## What you will be able to do
 
 - Implement a real TPU-targeted Pallas launch with a broadcast BlockSpec.
@@ -244,7 +246,7 @@ visual_data={'kind':'line','x':list(range(129)),'xlabel':'logical column','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:26:17.713817+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:39.064266+00:00. JAX 0.9.2.
 
 ```text
 Interpretation max error: 0.0
@@ -288,7 +290,7 @@ This checks the declared compute/cast policy. Any difference from the original f
 **Predict before running:** What should happen when a value exactly cancels its column bias?
 
 ```python
-# Experiment — Place the ReLU boundary deliberately: Testing activation boundaries catches wrong bias axes and...
+# Experiment — Place the ReLU boundary deliberately
 edge_x=jnp.array([[-1.,0.,1.],[1.,-2.,.5]],dtype=jnp.float32)
 edge_bias=jnp.array([1.,0.,-1.],dtype=jnp.float32)
 edge=fused_bias_relu(edge_x,edge_bias)
@@ -311,18 +313,15 @@ Change the activation shape to (17,257), freeze a NumPy random seed and compare 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `changed_x`.
-2. Create device-backed JAX array `changed_bias`.
-3. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the activation shape to (17,257), freeze a NumPy random seed...
+# Exercise solution
 rng = np.random.default_rng(...)  # TODO: compute rng
-# Create device-backed JAX array `changed_x`.
 changed_x = jnp.asarray(...)  # TODO: compute changed_x
-# Create device-backed JAX array `changed_bias`.
 changed_bias = jnp.asarray(...)  # TODO: compute changed_bias
 # Transfer the device result to the host for an independent NumPy comparison.
 expected = np.maximum(...)  # TODO: compute expected
@@ -335,11 +334,9 @@ print("Changed tails and two TPU-compatible blocks verified in interpretation")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Change the activation shape to (17,257), freeze a NumPy random seed...
+# Exercise solution
 rng=np.random.default_rng(5)
-# Create device-backed JAX array `changed_x`.
 changed_x=jnp.asarray(rng.normal(size=(17,257)),dtype=jnp.float32)
-# Create device-backed JAX array `changed_bias`.
 changed_bias=jnp.asarray(rng.normal(size=257),dtype=jnp.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 expected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)
@@ -369,13 +366,12 @@ A column bias is a vector with exactly one entry per matrix column.
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Reject hidden bias-axis broadcasting (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
+# Reject hidden bias-axis broadcasting (Practice)
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
     rejected = ...  # TODO: compute rejected
     try:fused_bias_relu(x,malformed)
@@ -387,7 +383,7 @@ print("Malformed bias axes rejected")
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...
+# Reject hidden bias-axis broadcasting (Practice)
 for malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):
     rejected=False
     try:fused_bias_relu(x,malformed)
@@ -419,13 +415,12 @@ Use a deterministic reversed column order; do not permute the bias independently
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Check a permutation invariant (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a permutation invariant (Challenge): The kernel is columnwise when the corresponding bias travels...
+# Check a permutation invariant (Challenge)
 order = jnp.arange(...)  # TODO: compute order
 permuted = fused_bias_relu(...)  # TODO: compute permuted
 np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)
@@ -435,7 +430,7 @@ print("Column/bias pairing survives a joint permutation")
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check a permutation invariant (Challenge): The kernel is columnwise when the corresponding bias travels...
+# Check a permutation invariant (Challenge)
 order=jnp.arange(128,-1,-1)
 permuted=fused_bias_relu(x[:,order],bias[order])
 np.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)

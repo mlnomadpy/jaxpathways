@@ -2,6 +2,8 @@
 
 Phase 19: TPU Setup: Provisioning & Runtime Verification · about 20 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. A separate runtime receipt collector is implemented in the target instructions. Physical TPU qualification is still pending; the CPU receipt does not qualify it.
+
 ## What you will be able to do
 
 - Bootstrap `~/jax-tpu-lab/.venv` on a Cloud TPU VM and install `jax[tpu]` from the official `libtpu` wheel index.
@@ -95,7 +97,7 @@ gcloud compute tpus tpu-vm list --zone="$ZONE"
 Create main.py with closed_form_sum_of_squares and build_runtime_receipt.
 
 ```python
-# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder: Each local device computes the sum of squares of its 8-element row...
+# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder
 import hashlib
 import json
 import platform
@@ -106,7 +108,6 @@ import numpy as np
 
 def closed_form_sum_of_squares(num_devices, width=8):
     n = int(num_devices) * int(width)
-    # Return `float((n - 1) * n * (2 * n - 1) // 6)` to the caller.
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
@@ -130,11 +131,9 @@ def build_runtime_receipt():
         "expected_total": expected_total,
         "verified": bool(np.isclose(observed_total, expected_total)),
     }
-    # Read or serialize artifact data on disk (`payload['receipt_sha256']`).
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `payload` to the caller.
     return payload
 ```
 
@@ -145,7 +144,7 @@ Each local device computes the sum of squares of its 8-element row via jax.pmap,
 Append slice_expectations and the receipt verification assertions to main.py.
 
 ```python
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations: Knowing the exact expected sum for 1, 4, and 8 devices lets you...
+# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
@@ -174,7 +173,7 @@ Checking these invariants confirms the computation is ready for the full worked 
 ## Run the example
 
 ```python
-# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder: Each local device computes the sum of squares of its 8-element row...
+# Step 1 — Define the closed-form sum-of-squares oracle and pmap receipt builder
 import hashlib
 import json
 import platform
@@ -185,7 +184,6 @@ import numpy as np
 
 def closed_form_sum_of_squares(num_devices, width=8):
     n = int(num_devices) * int(width)
-    # Return `float((n - 1) * n * (2 * n - 1) // 6)` to the caller.
     return float((n - 1) * n * (2 * n - 1) // 6)
 
 
@@ -209,15 +207,13 @@ def build_runtime_receipt():
         "expected_total": expected_total,
         "verified": bool(np.isclose(observed_total, expected_total)),
     }
-    # Read or serialize artifact data on disk (`payload['receipt_sha256']`).
     payload["receipt_sha256"] = hashlib.sha256(
         json.dumps(payload, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()[:16]
-    # Return `payload` to the caller.
     return payload
 
 
-# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations: Knowing the exact expected sum for 1, 4, and 8 devices lets you...
+# Step 2 — Verify the active runtime receipt and tabulate multi-chip expectations
 slice_expectations = [
     {"slice": "1-device (CPU / v5e-1)", "devices": 1, "expected_sum": closed_form_sum_of_squares(1)},
     {"slice": "4-device (v5litepod-4 / v6e-4)", "devices": 4, "expected_sum": closed_form_sum_of_squares(4)},
@@ -249,7 +245,6 @@ This analytic illustration computes four eight-value row sums with NumPy. It doe
 The calculated total is 10416. A runtime claim must instead use the device count and per-device values in a saved receipt; the current local receipt records one CPU device.
 
 ```python
-# Create evenly spaced index values in `per_chip`.
 per_chip = [float(np.sum(np.arange(i * 8, (i + 1) * 8, dtype=np.float64) ** 2)) for i in range(4)]
 cumulative = [float(sum(per_chip[: i + 1])) for i in range(4)]
 visual_data = {
@@ -266,7 +261,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:56:35.249294+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:07.386964+00:00. JAX 0.9.2.
 
 ```text
 Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}
@@ -287,7 +282,7 @@ PASS: tpu-04
 **Predict before running:** On a 4-chip TPU VM (`v5litepod-4`), why does chip 3 produce a much larger row sum than chip 0?
 
 ```python
-# Experiment — Compare per-device row sums on a 4-chip TPU slice: Inspecting per_device_sums confirms that distinct shards of x...
+# Experiment — Compare per-device row sums on a 4-chip TPU slice
 x4 = jnp.arange(4 * 8, dtype=jnp.float32).reshape(4, 8)
 # Reduce along axis=1 to compute `row_sums_4`.
 row_sums_4 = [float(v) for v in jnp.sum(x4 * x4, axis=1)]
@@ -304,11 +299,9 @@ Inspecting `per_device_sums` confirms that distinct shards of `x` were placed an
 **Predict before running:** How can a helper script check that `gcloud compute tpus tpu-vm list` returned zero active VMs?
 
 ```python
-# Experiment — Verify teardown confirmation logic: Checking gcloud compute tpus tpu-vm list --zone=$ZONE...
+# Experiment — Verify teardown confirmation logic
 def is_tpu_zone_clean(gcloud_list_json):
-    # Read or serialize artifact data on disk (`items`).
     items = json.loads(gcloud_list_json)
-    # Return `len(items) == 0` to the caller.
     return len(items) == 0
 
 # Assert invariant `is_tpu_zone_clean("[]") is True` holds
@@ -329,12 +322,13 @@ Compute `closed_form_sum_of_squares(4)` and `closed_form_sum_of_squares(8)`, ver
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
+1. Exercise solution
+2. Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute closed_form_sum_of_squares(4) and...
+# Exercise solution
 s4 = closed_form_sum_of_squares(...)  # TODO: compute s4
 s8 = closed_form_sum_of_squares(...)  # TODO: compute s8
 print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
@@ -345,7 +339,7 @@ assert s4  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Compute closed_form_sum_of_squares(4) and...
+# Exercise solution
 s4 = closed_form_sum_of_squares(4)
 s8 = closed_form_sum_of_squares(8)
 print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
@@ -370,16 +364,14 @@ Check all three fields in the receipt dictionary.
 ### How to write: Detect a silent fallback from 4 TPU chips to 1 CPU device — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations): Requiring backend == 'tpu', local_device_count == 4, and the...
-2. Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
-3. Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
+1. Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
+2. Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations): Requiring backend == 'tpu', local_device_count == 4, and the...
+# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
 def is_four_chip_tpu_receipt(r):
-    # Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
     return bool(r["backend"] = ...  # TODO: compute return bool(r["backend"]
 
 simulated_tpu = ...  # TODO: compute simulated_tpu
@@ -391,9 +383,8 @@ assert is_four_chip_tpu_receipt(simulated_tpu) is True  # TODO: complete asserti
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations): Requiring backend == 'tpu', local_device_count == 4, and the...
+# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
 def is_four_chip_tpu_receipt(r):
-    # Return `bool(r['backend'] == 'tpu' and r['local_device_count'] == 4 and np.isclose(r['observed_total'], 10416.0))` to the caller.
     return bool(r["backend"] == "tpu" and r["local_device_count"] == 4 and np.isclose(r["observed_total"], 10416.0))
 
 simulated_tpu = {"backend": "tpu", "local_device_count": 4, "observed_total": 10416.0}
@@ -426,7 +417,7 @@ Compare `16.0 * 4.80` against `0.5 * 4.80`.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis): Deleting the Cloud TPU VM immediately after copying...
+# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)
 hourly_rate = ...  # TODO: compute hourly_rate
 saved_usd = round(...)  # TODO: compute saved_usd
 print("Overnight idle cost avoided (USD):", saved_usd)
@@ -437,7 +428,7 @@ assert saved_usd  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis): Deleting the Cloud TPU VM immediately after copying...
+# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)
 hourly_rate = 4.80
 saved_usd = round((16.0 - 0.5) * hourly_rate, 2)
 print("Overnight idle cost avoided (USD):", saved_usd)

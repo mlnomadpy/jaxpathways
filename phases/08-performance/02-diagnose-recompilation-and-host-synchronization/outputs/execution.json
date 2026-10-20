@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-02",
-  "contentHash": "fe5a11fe85ab9b7944b86f109089aa6cfa284c8cef0adbc79d2ad4e933c3cb38",
-  "executedAt": "2026-10-20T18:52:13.388424+00:00",
+  "contentHash": "4787ebcdd9f2b2fb00b6758298ee1a2801419181be935d945550bd44be9b8edb",
+  "executedAt": "2026-10-20T22:22:12.954258+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,14 +11,14 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{\n  \"jax\": \"0.9.2\",\n  \"backend\": \"TFRT_CPU_0\",\n  \"calls\": [\n    {\n      \"label\": \"initial signature\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 140.0\n    },\n    {\n      \"label\": \"same signature changed data\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 204.0\n    },\n    {\n      \"label\": \"same signature changed dynamic gain\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 560.0\n    },\n    {\n      \"label\": \"different input shape\",\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 506.0\n    }\n  ],\n  \"python_trace_events\": [\n    {\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\"\n    },\n    {\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\"\n    }\n  ]\n}\n{\n  \"jax\": \"0.9.2\",\n  \"backend\": \"TFRT_CPU_0\",\n  \"calls\": [\n    {\n      \"label\": \"initial signature\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 140.0\n    },\n    {\n      \"label\": \"same signature changed data\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 204.0\n    },\n    {\n      \"label\": \"same signature changed dynamic gain\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 560.0\n    },\n    {\n      \"label\": \"different input shape\",\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 506.0\n    }\n  ],\n  \"python_trace_events\": [\n    {\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\"\n    },\n    {\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\"\n    }\n  ]\n}\nStatic branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]\nPer-step host reads seconds: 0.00012120790779590607\nFinal-only wait seconds: 3.437511622905731e-05\nAdded ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}\nMasked versus unmasked padded objective: 55.0 58.0\nObserved runtime-Python-branch tracing failure\nPASS: performance-02\n",
+  "stdout": "{\n  \"jax\": \"0.9.2\",\n  \"backend\": \"TFRT_CPU_0\",\n  \"calls\": [\n    {\n      \"label\": \"initial signature\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 140.0\n    },\n    {\n      \"label\": \"same signature changed data\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 204.0\n    },\n    {\n      \"label\": \"same signature changed dynamic gain\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 560.0\n    },\n    {\n      \"label\": \"different input shape\",\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 506.0\n    }\n  ],\n  \"python_trace_events\": [\n    {\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\"\n    },\n    {\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\"\n    }\n  ]\n}\n{\n  \"jax\": \"0.9.2\",\n  \"backend\": \"TFRT_CPU_0\",\n  \"calls\": [\n    {\n      \"label\": \"initial signature\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 140.0\n    },\n    {\n      \"label\": \"same signature changed data\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 204.0\n    },\n    {\n      \"label\": \"same signature changed dynamic gain\",\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 0,\n      \"result\": 560.0\n    },\n    {\n      \"label\": \"different input shape\",\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\",\n      \"observed_trace_delta\": 1,\n      \"result\": 506.0\n    }\n  ],\n  \"python_trace_events\": [\n    {\n      \"shape\": [\n        8\n      ],\n      \"dtype\": \"float32\"\n    },\n    {\n      \"shape\": [\n        12\n      ],\n      \"dtype\": \"float32\"\n    }\n  ]\n}\nStatic branch trace observations: [{'shape': [8], 'square': True}, {'shape': [8], 'square': False}]\nPer-step host reads seconds: 8.750008419156075e-05\nFinal-only wait seconds: 2.1750107407569885e-05\nAdded ledger row: {'label': 'new length sixteen', 'shape': [16], 'dtype': 'float32', 'observed_trace_delta': 1, 'result': 1240.0}\nMasked versus unmasked padded objective: 55.0 58.0\nObserved runtime-Python-branch tracing failure\nPASS: performance-02\n",
   "notebookCells": [
     {
-      "sourceHash": "50fffca7b4f5df65388b33c9f6880b4aa4a82046739e411f26e29a420485fc32",
+      "sourceHash": "3dbdef15470033dc60d5aab243a9d35e9a32d75e1015c419919b793460bd1e74",
       "outputs": []
     },
     {
-      "sourceHash": "b31d802dd9fa920895ba34b3e92920853e2cbb25388d174b35baf1eb35047961",
+      "sourceHash": "689913fdc0450c5237eedaa8fa0e9f24a83d45592437b43dfeb47e58f0f19fef",
       "outputs": []
     },
     {
@@ -89,7 +89,7 @@
       ]
     },
     {
-      "sourceHash": "c8e41e49bb65c1aaa408b6fc9c18744f6b66dadec67a1d1693122d53861fcdf2",
+      "sourceHash": "450f4bac035b5d969a8c03287eb1d9d191980818011220f62ea7b9f06ccc8b43",
       "outputs": [
         {
           "output_type": "stream",
@@ -193,8 +193,8 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Per-step host reads seconds: 0.00010400032624602318\n",
-            "Final-only wait seconds: 2.933293581008911e-05\n"
+            "Per-step host reads seconds: 9.074993431568146e-05\n",
+            "Final-only wait seconds: 2.1375250071287155e-05\n"
           ]
         }
       ]
@@ -232,11 +232,11 @@
       ]
     },
     {
-      "sourceHash": "afae7abf33458eee3f53b964b617b786bd12a75b280e1df7e8f11b7893071e4f",
+      "sourceHash": "3e86ba92c4882bbfb7fef9e96fd985930ffde38328e3279d3775dd49c970b702",
       "outputs": []
     },
     {
-      "sourceHash": "4bec38650e2b3b5434b8e780bcabbf485975e6ee34683671adcf16f6b0212480",
+      "sourceHash": "8a2f952953694159564fe43bbf9525a277f456f976d7a594203e3d2cbd1918ec",
       "outputs": [
         {
           "output_type": "stream",

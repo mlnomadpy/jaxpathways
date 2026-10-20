@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build a Grain source/sampler/batch pipeline and verify its record order.
@@ -102,7 +104,7 @@ This setup makes the dataset and software assumptions explicit. No external data
 Append this block to the same file; follow the named state objects through each function.
 
 ```python
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 loader = make_loader()
 iterator = iter(loader)
 first_batch = next(iterator)
@@ -120,14 +122,13 @@ The function boundaries expose which inputs determine the next output and which 
 Append the checks, save main.py and run python main.py. Predict what should agree before running.
 
 ```python
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 one_epoch = list(make_loader())[:3]
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
 print("First IDs:",first_batch["id"].tolist())
 print("Next IDs:",second_batch["id"].tolist())
@@ -161,7 +162,7 @@ def make_loader(seed=42,batch_size=4,count=12,drop_remainder=False):
         operations=[grain.Batch(batch_size,drop_remainder=drop_remainder)],
         worker_count=0)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 loader = make_loader()
 iterator = iter(loader)
 first_batch = next(iterator)
@@ -171,14 +172,13 @@ restored_iterator = iter(make_loader())
 restored_iterator.set_state(snapshot)
 replayed_batch = next(restored_iterator)
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 np.testing.assert_array_equal(second_batch["id"],replayed_batch["id"])
 for key in ("x","y"):
     np.testing.assert_array_equal(second_batch[key],replayed_batch[key])
 for batch in (first_batch,second_batch):
     np.testing.assert_allclose(batch["y"],2*batch["x"]-1,atol=1e-7)
 one_epoch = list(make_loader())[:3]
-# Create evenly spaced index values in ``.
 np.testing.assert_array_equal(np.sort(np.concatenate([b["id"] for b in one_epoch])),np.arange(12))
 print("First IDs:",first_batch["id"].tolist())
 print("Next IDs:",second_batch["id"].tolist())
@@ -214,7 +214,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:55.312794+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:30.571519+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]
@@ -259,7 +259,6 @@ two_epochs = list(make_loader())
 assert len(two_epochs)==6
 for start in (0,3):
     values = np.concatenate([b["id"] for b in two_epochs[start:start+3]])
-    # Create evenly spaced index values in ``.
     np.testing.assert_array_equal(np.sort(values),np.arange(12))
 print("Each epoch covers all twelve IDs")
 ```
@@ -275,13 +274,12 @@ Consume two batches, snapshot, and replay the third batch with a new compatible 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Consume two batches, snapshot, and replay the third batch with a new...
+# Exercise solution
 later = iter(...)  # TODO: compute later
 next(later)
 next(later)
@@ -295,7 +293,7 @@ np.testing.assert_array_equal(next(new_iterator)["id"],expected_third["id"])
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Consume two batches, snapshot, and replay the third batch with a new...
+# Exercise solution
 later = iter(make_loader())
 next(later)
 next(later)
@@ -377,13 +375,12 @@ Read the restore diagnostic; changing the seed changes sampler identity.
 ### How to write: Reject a changed sampler — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Reject a changed sampler (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
+# Reject a changed sampler (Challenge)
 incompatible = iter(...)  # TODO: compute incompatible
 try:
     incompatible.set_state(snapshot)
@@ -399,7 +396,7 @@ np.testing.assert_array_equal(next(compatible)["id"],second_batch["id"])
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a changed sampler (Challenge): A snapshot cannot be assumed to apply to a different...
+# Reject a changed sampler (Challenge)
 incompatible = iter(make_loader(seed=99))
 try:
     incompatible.set_state(snapshot)

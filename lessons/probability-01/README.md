@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Distinguish samples, density, variance and standard error
@@ -64,7 +66,7 @@ Calling a random function twice with the same key and shape replays the same val
 Create main.py in the activated CPU environment. Add the imports and the scalar normal log-density. A scale is a positive standard deviation, not a variance.
 
 ```python
-# Step 1 — 1. Define a density and its contract: The normalization term matters when comparing different scales;...
+# Step 1 — 1. Define a density and its contract
 import math
 import numpy as np
 import jax
@@ -82,7 +84,7 @@ The normalization term matters when comparing different scales; the squared resi
 Append the sampler. Split one parent key before drawing two samples; retain each array so replay and variation can be checked.
 
 ```python
-# Step 2 — 2. Sample with explicit ownership: The broad mean bound is five analytic standard errors for this...
+# Step 2 — 2. Sample with explicit ownership
 # Create or split explicit PRNG key(s) (`(key_a, key_b)`) for reproducible randomness.
 key_a, key_b = jax.random.split(jax.random.key(23))
 # Sample deterministic random values into `a` using an explicit PRNG key.
@@ -103,13 +105,12 @@ The broad mean bound is five analytic standard errors for this independent norma
 Append the independent scalar reference and stable mixture calculation, then run python main.py. Inspect the density, mean and variance.
 
 ```python
-# Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
+# Step 3 — 3. Compare an independent calculation
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
 stable = logsumexp(components)-jnp.log(2.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 print('sample mean, variance:',float(a.mean()),float(a.var()))
@@ -121,7 +122,7 @@ A log density near negative one thousand remains representable even when exponen
 ## Run the example
 
 ```python
-# Step 1 — 1. Define a density and its contract: The normalization term matters when comparing different scales;...
+# Step 1 — 1. Define a density and its contract
 import math
 import numpy as np
 import jax
@@ -131,7 +132,7 @@ from jax.scipy.special import logsumexp
 def normal_logpdf(value, loc, scale):
     return -0.5*((value-loc)/scale)**2 - jnp.log(scale) - 0.5*jnp.log(2*jnp.pi)
 
-# Step 2 — 2. Sample with explicit ownership: The broad mean bound is five analytic standard errors for this...
+# Step 2 — 2. Sample with explicit ownership
 # Create or split explicit PRNG key(s) (`(key_a, key_b)`) for reproducible randomness.
 key_a, key_b = jax.random.split(jax.random.key(23))
 # Sample deterministic random values into `a` using an explicit PRNG key.
@@ -144,13 +145,12 @@ assert abs(float(a.var())-expected_variance) < .4
 assert not jnp.array_equal(a,b)
 assert jnp.array_equal(a, 2.+3.*jax.random.normal(key_a,(20000,)))
 
-# Step 3 — 3. Compare an independent calculation: A log density near negative one thousand remains representable...
+# Step 3 — 3. Compare an independent calculation
 actual = normal_logpdf(jnp.array([2.,5.]),2.,3.)
 reference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]
 np.testing.assert_allclose(actual,reference,rtol=1e-6)
 components = jnp.array([-1000.,-1001.])
 stable = logsumexp(components)-jnp.log(2.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.isfinite(stable)
 assert jnp.isneginf(jnp.log(jnp.exp(components).mean()))
 print('sample mean, variance:',float(a.mean()),float(a.var()))
@@ -183,7 +183,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:27.237704+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:00.935725+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766
@@ -201,7 +201,7 @@ PASS: probability-01
 **Predict before running:** For a normal with standard deviation $0.1$, can its density at its mean exceed $1$?
 
 ```python
-# Experiment — Density can exceed one: A narrow continuous density can exceed one; its area, not its...
+# Experiment — Density can exceed one
 peak = jnp.exp(normal_logpdf(0.,0.,.1))
 assert peak > 1
 print("peak density:",float(peak))
@@ -216,7 +216,7 @@ A narrow continuous density can exceed one; its area, not its height at a point,
 **Predict before running:** Do two independent observations with log densities $-2,-3$ have the same log likelihood as one equal mixture of those components?
 
 ```python
-# Experiment — Separate sum and mixture: Independence multiplies probabilities, while alternative mixture...
+# Experiment — Separate sum and mixture
 values = jnp.array([-2.,-3.])
 independent_log = values.sum()
 mixture_log = logsumexp(values)-jnp.log(2.)
@@ -240,12 +240,13 @@ Change the sensor to mean $-1$, standard deviation $0.5$, and draw $30000$ readi
 - `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
 
 **Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
+1. Exercise solution
+2. Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
+# Exercise solution
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = ...  # TODO: compute changed
 assert abs(float(changed.mean())+1.)  # TODO: complete assertion check
@@ -255,7 +256,7 @@ assert abs(float(changed.var())-.25)  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Change the sensor to mean -1, standard deviation 0.5, and draw 30000...
+# Exercise solution
 # Create or split explicit PRNG key(s) (`changed`) for reproducible randomness.
 changed = -1.+.5*jax.random.normal(jax.random.key(51),(30000,))
 assert abs(float(changed.mean())+1.) < 5*.5/math.sqrt(30000)
@@ -331,7 +332,7 @@ Split before use; compare arrays with the same shape.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Demonstrate key ownership (Transfer / diagnosis): Different split keys avoid accidental replay; one differing...
+# Demonstrate key ownership (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
 left,right = jax.random.split(...)  # TODO: compute left,right
 # Sample deterministic random values into `first` using an explicit PRNG key.
@@ -345,7 +346,7 @@ assert not jnp.array_equal(first,second)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Demonstrate key ownership (Transfer / diagnosis): Different split keys avoid accidental replay; one differing...
+# Demonstrate key ownership (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(left, right)`) for reproducible randomness.
 left,right = jax.random.split(jax.random.key(17))
 # Sample deterministic random values into `first` using an explicit PRNG key.

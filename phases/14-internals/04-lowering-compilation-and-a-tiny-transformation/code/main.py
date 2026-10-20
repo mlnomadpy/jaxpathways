@@ -62,7 +62,7 @@ def tiny_jvp(closed,primals,tangents):
     return tuple(v for v,_ in output),tuple(t for _,t in output)
 
 # Trace a program and verify the transformed result
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -81,7 +81,7 @@ print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
 print("Interpreted primal and tangent:",float(primal_outputs[0]),float(tangent_outputs[0]))
 
 # Lower and compile the transformation itself
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -162,7 +162,7 @@ def tiny_jvp(closed,primals,tangents):
     output=[read(var) for var in program.outvars]
     return tuple(v for v,_ in output),tuple(t for _,t in output)
 
-# Step 2 — Trace a program and verify the transformed result: The traced closed constant contributes to the primal but not the...
+# Step 2 — Trace a program and verify the transformed result
 offset=jnp.array([0.1,0.2,0.3])
 def program(x):
     return jnp.sum(jnp.sin(x)*x+offset)
@@ -180,7 +180,7 @@ np.testing.assert_allclose(tangent_outputs[0],jax.jvp(program,(x,),(direction,))
 print("Supported primitives:",[e.primitive.name for e in closed.jaxpr.eqns])
 print("Interpreted primal and tangent:",float(primal_outputs[0]),float(tangent_outputs[0]))
 
-# Step 3 — Lower and compile the transformation itself: The Python interpreter runs while tracing the transformed...
+# Step 3 — Lower and compile the transformation itself
 transformed=lambda value,tangent:tiny_jvp(closed,(value,),(tangent,))
 # Wrap with `jax.jit` (`lowered`) so XLA traces and compiles the function.
 lowered=jax.jit(transformed).lower(x,direction)
@@ -202,7 +202,6 @@ print("Lowered IR characters:",len(stablehlo))
 print("Compiled transformed outputs match; changed shape explicitly rejected")
 
 # Figure data experiment
-# Generate a uniform grid of points in `alphas`.
 alphas=np.linspace(-1,1,9)
 interpreted=[]
 analytic=[]
@@ -216,7 +215,7 @@ for alpha in alphas:
 visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement alpha','ylabel':'directional derivative','series':[{'label':'tiny interpreted tangent','y':interpreted},{'label':'whole-expression analytic reference','y':analytic}]}
 
 # Experiment: Exercise an unsupported primitive
-# Experiment — Exercise an unsupported primitive: A numerical result without a supported tangent rule would...
+# Experiment — Exercise an unsupported primitive
 # Trace or lower the function to inspect its compiler representation (`unsupported`).
 unsupported=jax.make_jaxpr(lambda z:jnp.sum(jnp.exp(z)))(x)
 rejected=False
@@ -240,7 +239,7 @@ np.testing.assert_allclose(ct[0],expected_d,rtol=1e-12)
 print("Changed-value compiled tangent:",float(ct[0]))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Trace a new polynomial using only supported primitives, verify its...
+# Exercise solution
 def polynomial(z):
     return jnp.sum(z*z+(-2.0)*z)
 # Trace or lower the function to inspect its compiler representation (`poly_closed`).
@@ -256,7 +255,7 @@ for point in (x,x+0.6):
 print("Changed polynomial transformed and compiled")
 
 # Reference practice: Make a constant into a differentiable input
-# Make a constant into a differentiable input (Practice): Zero tangent belonged to a captured constant relative to the...
+# Make a constant into a differentiable input (Practice)
 def explicit(z,c):
     return jnp.sum(jnp.sin(z)*z+c)
 # Trace or lower the function to inspect its compiler representation (`explicit_closed`).

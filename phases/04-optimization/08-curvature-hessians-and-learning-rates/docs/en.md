@@ -2,6 +2,8 @@
 
 Phase 04: Math & optimization · about 75 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Use curvature to explain learning-rate stability, slow directions and why a zero gradient need not be a minimum.
@@ -83,10 +85,9 @@ At the starting point the gradient is $(1,10)$.
 Append the full Hessian and a product check.
 
 ```python
-# Step 2 — Check second derivatives: The product agrees with the diagonal matrix without constructing a...
+# Step 2 — Check second derivatives
 assert jnp.allclose(jax.hessian(loss)(w), H)
 v = jnp.array([2.0, -1.0])
-# Differentiate the objective to obtain `hv` via automatic differentiation.
 hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 ```
@@ -98,13 +99,10 @@ The product agrees with the diagonal matrix without constructing a Hessian insid
 Append this scan and run python main.py. The history records losses after each update.
 
 ```python
-# Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
-# Define `run(rate, steps)` to evaluate the objective and its automatic derivatives:
+# Step 3 — Run an explicit trajectory
 def run(rate, steps=20):
 
-    # Define `step(w, _)` to evaluate the objective and its automatic derivatives:
     def step(w, _):
-        # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
         return (w, loss(w))
     return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)
@@ -129,18 +127,16 @@ w = jnp.array([1.0, 1.0])
 H = jnp.diag(jnp.array([1.0, 10.0]))
 assert jnp.allclose(jax.grad(loss)(w), H @ w)
 
-# Step 2 — Check second derivatives: The product agrees with the diagonal matrix without constructing a...
+# Step 2 — Check second derivatives
 assert jnp.allclose(jax.hessian(loss)(w), H)
 v = jnp.array([2.0, -1.0])
-# Differentiate the objective to obtain `hv` via automatic differentiation.
 hv = jax.jvp(jax.grad(loss), (w,), (v,))[1]
 assert jnp.allclose(hv, jnp.array([2.0, -10.0]))
 
-# Step 3 — Run an explicit trajectory: The second coordinate vanishes; the first remains near 0.1216...
+# Step 3 — Run an explicit trajectory
 def run(rate, steps=20):
 
     def step(w, _):
-        # Differentiate the objective to obtain `w` via automatic differentiation.
         w = w - rate * jax.grad(loss)(w)
         return (w, loss(w))
     return jax.lax.scan(step, jnp.array([1.0, 1.0]), None, length=steps)
@@ -173,10 +169,8 @@ For a quadratic direction with curvature $\lambda$, gradient descent multiplies 
 The steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.
 
 ```python
-# Create device-backed JAX array `points`.
 points = [jnp.array([1.0, 1.0])]
 for _ in range(20):
-    # Differentiate the objective to obtain gradients ``.
     points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))
 trace = jnp.stack(points)
 visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}
@@ -184,7 +178,7 @@ visual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:48:46.439563+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:33.744025+00:00. JAX 0.9.2.
 
 ```text
 final weights / loss: [ 0.12157664 -0.        ] 0.0073904395
@@ -198,7 +192,7 @@ PASS: optimization-08
 **Predict before running:** Predict the steep coordinate at rates $0.2$ and $0.21$.
 
 ```python
-# Experiment — Cross the stability boundary: A learning-rate bound depends on curvature, not on a universal...
+# Experiment — Cross the stability boundary
 edge, _ = run(0.2)
 bad, bad_history = run(0.21)
 assert jnp.allclose(jnp.abs(edge[1]), 1.0, atol=2e-06)
@@ -215,10 +209,9 @@ A learning-rate bound depends on curvature, not on a universal default value.
 **Predict before running:** For $\tfrac12\|z\|^2$, what happens after a gradient step of size $1$?
 
 ```python
-# Experiment — Change coordinates: Coordinates can change optimization geometry while representing...
+# Experiment — Change coordinates
 z = jnp.array([w[0], jnp.sqrt(10.0) * w[1]])
 round_loss = lambda z: 0.5 * jnp.dot(z, z)
-# Differentiate the objective to obtain `z_next` via automatic differentiation.
 z_next = z - jax.grad(round_loss)(z)
 assert jnp.allclose(z_next, jnp.zeros(2))
 assert jnp.allclose(round_loss(z), loss(w))
@@ -239,13 +232,12 @@ For curvatures $(2,8)$, derive the stable interval and check one step at rate $0
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: For curvatures (2,8), derive the stable interval and check one step at...
+# Exercise solution
 H2 = jnp.diag(...)  # TODO: compute H2
 w_next = ...  # TODO: compute w_next
 assert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)  # TODO: complete assertion check
@@ -255,7 +247,7 @@ assert jnp.allclose(2 / jnp.max(jnp.linalg.eigvalsh(H2)), 0.25)  # TODO: complet
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: For curvatures (2,8), derive the stable interval and check one step at...
+# Exercise solution
 H2 = jnp.diag(jnp.array([2.0, 8.0]))
 w_next = w - 0.1 * (H2 @ w)
 assert jnp.allclose(w_next, jnp.array([0.8, 0.2]), atol=1e-06)
@@ -291,7 +283,7 @@ Move by $0.1$ along each axis separately.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject the zero-gradient shortcut (Transfer / diagnosis): Stationarity is a first-order condition, not a proof of a...
+# Reject the zero-gradient shortcut (Transfer / diagnosis)
 saddle = ...  # TODO: compute saddle
 zero = jnp.zeros(...)  # TODO: compute zero
 assert jnp.allclose(jax.grad(saddle)(zero), zero)  # TODO: complete assertion check
@@ -303,7 +295,7 @@ assert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject the zero-gradient shortcut (Transfer / diagnosis): Stationarity is a first-order condition, not a proof of a...
+# Reject the zero-gradient shortcut (Transfer / diagnosis)
 saddle = lambda z: z[0] ** 2 - z[1] ** 2
 zero = jnp.zeros(2)
 assert jnp.allclose(jax.grad(saddle)(zero), zero)
@@ -337,15 +329,15 @@ The analytic Hessian is diagonal with entries $e^{w_i}$.
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `product` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to a nonquadratic function (Transfer / diagnosis): For a nonquadratic function the Hessian changes with the...
+# Transfer to a nonquadratic function (Transfer / diagnosis)
 point = jnp.array(...)  # TODO: compute point
 direction = jnp.array(...)  # TODO: compute direction
-# Differentiate the objective to obtain `product` via automatic differentiation.
 product = jax.jvp(...)  # TODO: compute product
 assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)  # TODO: complete assertion check
 ```
@@ -353,10 +345,9 @@ assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)  # TODO: complet
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Transfer to a nonquadratic function (Transfer / diagnosis): For a nonquadratic function the Hessian changes with the...
+# Transfer to a nonquadratic function (Transfer / diagnosis)
 point = jnp.array([0.0, jnp.log(2.0)])
 direction = jnp.array([1.0, 3.0])
-# Differentiate the objective to obtain `product` via automatic differentiation.
 product = jax.jvp(jax.grad(lambda z: jnp.sum(jnp.exp(z))), (point,), (direction,))[1]
 assert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)
 ```

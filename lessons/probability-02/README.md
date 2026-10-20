@@ -2,6 +2,8 @@
 
 Phase 11: Probabilistic modeling · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - State the prior, likelihood and observation-noise assumptions
@@ -88,7 +90,7 @@ The design has three rows and two columns. The weight vector contains intercept 
 Append the conjugate update. Use a linear solve rather than writing an explicit matrix inverse for the mean.
 
 ```python
-# Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
+# Step 2 — 2. Solve the posterior system
 def posterior(X,y,sigma,prior_scale):
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
@@ -106,7 +108,7 @@ The independent fractions follow because centered inputs make the precision matr
 Append the prediction calculation, then run python main.py. Retain the two variance components separately.
 
 ```python
-# Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
+# Step 3 — 3. Predict both the latent mean and a new observation
 def predictive(design,mean,cov,sigma):
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
@@ -132,7 +134,7 @@ X = jnp.array([[1.,-1.],[1.,0.],[1.,1.]])
 y = jnp.array([-1.,1.,3.])
 sigma, prior_scale = 1., 2.
 
-# Step 2 — 2. Solve the posterior system: The independent fractions follow because centered inputs make the...
+# Step 2 — 2. Solve the posterior system
 def posterior(X,y,sigma,prior_scale):
     precision = jnp.eye(X.shape[1])/prior_scale**2 + X.T@X/sigma**2
     mean = jnp.linalg.solve(precision,X.T@y/sigma**2)
@@ -142,7 +144,7 @@ mean,cov = posterior(X,y,sigma,prior_scale)
 assert jnp.allclose(mean,jnp.array([12/13,16/9]),atol=1e-6)
 assert jnp.allclose(cov,jnp.diag(jnp.array([4/13,4/9])),atol=1e-6)
 
-# Step 3 — 3. Predict both the latent mean and a new observation: The variance at the extrapolation input is larger because slope...
+# Step 3 — 3. Predict both the latent mean and a new observation
 def predictive(design,mean,cov,sigma):
     center = design@mean
     latent_variance = jnp.einsum('ni,ij,nj->n',design,cov,design)
@@ -174,7 +176,6 @@ The horizontal axis is the input value. The vertical axis is predictive standard
 The gap is not a fixed standard deviation of one: variances add, then we take the square root. The lower curve is narrowest near the observed center and grows under extrapolation. These are exact Gaussian-model standard deviations, not measured error bars or empirical coverage on a real test set.
 
 ```python
-# Generate a uniform grid of points in `grid`.
 grid=jnp.linspace(-3,3,61)
 _,lv,ov=predictive(jnp.stack([jnp.ones_like(grid),grid],axis=1),mean,cov,sigma)
 visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"predictive standard deviation (target units)","series":[{"label":"latent line","y":jnp.sqrt(lv).tolist()},{"label":"new observation","y":jnp.sqrt(ov).tolist()}]}
@@ -182,7 +183,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:25:34.426510+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:04.706399+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]
@@ -216,7 +217,7 @@ The calculation treats rows as independent new evidence. Duplicating a stored fi
 **Predict before running:** With no observations, what should the posterior return?
 
 ```python
-# Experiment — Check the prior-only boundary: The posterior recovers the prior when no likelihood information...
+# Experiment — Check the prior-only boundary
 empty_mean,empty_cov = posterior(jnp.empty((0,2)),jnp.empty((0,)),sigma,prior_scale)
 assert jnp.allclose(empty_mean,0.)
 assert jnp.allclose(empty_cov,4*jnp.eye(2))
@@ -281,7 +282,7 @@ The intercept and slope can compensate for each other when features are not cent
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
+# Move away from centered inputs (Transfer / diagnosis)
 shift_X = jnp.array(...)  # TODO: compute shift_X
 shift_m,shift_c = posterior(...)  # TODO: compute shift_m,shift_c
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -295,7 +296,7 @@ assert shift_c[0,1]  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis): Nonzero covariance affects prediction uncertainty; keeping...
+# Move away from centered inputs (Transfer / diagnosis)
 shift_X = jnp.array([[1.,0.],[1.,1.],[1.,2.]])
 shift_m,shift_c = posterior(shift_X,y,sigma,prior_scale)
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -335,7 +336,7 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis): A simulation verifies that the independent noise term...
+# Verify total predictive variance (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 kw,kn = jax.random.split(...)  # TODO: compute kw,kn
 # Sample deterministic random values into `weights` using an explicit PRNG key.
@@ -348,7 +349,7 @@ assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis): A simulation verifies that the independent noise term...
+# Verify total predictive variance (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
 kw,kn=jax.random.split(jax.random.key(37))
 # Sample deterministic random values into `weights` using an explicit PRNG key.

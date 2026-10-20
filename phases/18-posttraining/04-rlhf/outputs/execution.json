@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "posttraining-04",
-  "contentHash": "07fc9a10e7fa3d21e084b355ff1ef4ba289ff05e9a884233398d2c3b8994323c",
-  "executedAt": "2026-10-20T21:42:58.101781+00:00",
+  "contentHash": "1c1c62e2cdd853abee839b8d2960f001b72fe8fa5e0808e3ca94f3ce30a89412",
+  "executedAt": "2026-10-20T22:27:02.074382+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\nReward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701\nSynthetic preference bandit with actual sampled PPO updates; synthetic preference target or language-generation claim.\nClipped surrogate terms: [ 2.4 -1.6]\nEnumerated baseline score gradient matches exact expected-reward gradient.\nReference/final KL: 0.0 0.7824773192405701\nBehavior log probabilities and advantages are detached.\nRegularized objective reference/trained/optimum: 0.28191882371902466 1.7620493173599243 1.7987911701202393\nPASS: posttraining-04\n",
   "notebookCells": [
     {
-      "sourceHash": "cc4394aa5e6d722a20b94fb497619aceb5eed7067bdee20e18df4dbd97ceff3b",
+      "sourceHash": "a0f12c7f085a91588838462014b7031c008f9feb6d41319d3515e9bccc90141f",
       "outputs": []
     },
     {
-      "sourceHash": "9b372472c0f892f6b13d00eebeb628a247dc78dfef1305bedbe867d3d4b8c478",
+      "sourceHash": "541a0c3bacf0a0cebd1d242a45b9dd069d1d8f459180214fa1156574baa46954",
       "outputs": []
     },
     {
-      "sourceHash": "59d8297468c7c542b76fc3621433d14c43cfdc4532e883d4c9b9d3a2a3590d8e",
+      "sourceHash": "818848db697da33de35305b8752736c0fd639a71bf3bb8012f1c8673bcf5dada",
       "outputs": [
         {
           "output_type": "stream",
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "5ba91c91e5fe076298b8e4296552496a9d49b92d9a9dc79e6c2a16ed83de4211",
+      "sourceHash": "3a3a87dc4f6c977a86b94d36a535f11b46aa021f280768be9cca37fac466e120",
       "outputs": [
         {
           "output_type": "stream",
@@ -79,7 +79,7 @@
       ]
     },
     {
-      "sourceHash": "f59ec9a74e1f22acdfca6c447a71e3ef62813c9cc60d2dbd06ae12eeeeab0f68",
+      "sourceHash": "b8e22f75c9c47395818f2e40475a8da0e7dcff9f1adcaeceec600b7678b52820",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,11 +91,11 @@
       ]
     },
     {
-      "sourceHash": "4f302f0233aa2670ef0ab3fb5e687bfcf1a98d1be3d741a331a275271edea92c",
+      "sourceHash": "364567af297dc21711487977066387c3940f8668c30addcfa2ba00b82c006bad",
       "outputs": []
     },
     {
-      "sourceHash": "c048a4e11bfda94fe65d54a3e3aff50b34346941999f38397356be997774f585",
+      "sourceHash": "96c6aecf6e0694bb4bb328ce619cf6da1a41a035bf447d7bb7c209df64c8f3d2",
       "outputs": [
         {
           "output_type": "stream",
@@ -107,11 +107,11 @@
       ]
     },
     {
-      "sourceHash": "2103e75447beee3ce23c555f526b2851343df9bd9f92a8e4a10d5f82e3430485",
+      "sourceHash": "a6425abeabcd48508fa637ee64e82947194598dbd97671c3329369e7cd77e2f1",
       "outputs": []
     },
     {
-      "sourceHash": "0508099af6557848a5f3abe665e0f478e7aa71f00cbd4ff0c2110d586eeaba22",
+      "sourceHash": "82d6372b6a3aee67828f2138295d6d1b2dfbd69ed34860f3e057ffbd192aa979",
       "outputs": [
         {
           "output_type": "stream",
@@ -123,11 +123,11 @@
       ]
     },
     {
-      "sourceHash": "fb9f26305d0609ab4ae2844011f388825a393d00605ae5a9b032974af09c6086",
+      "sourceHash": "2e1b7dd2af727b6c6f8cd098732888c63b0afb465354137c15c109450bc83d44",
       "outputs": []
     },
     {
-      "sourceHash": "d777e42ac5d11d1859fc4123d67d15b0263192e8202523c5d69cf138aa0af7d6",
+      "sourceHash": "afc805742109ad91ffa1425829082b42b2c71e3534a346c60ddbba6f59ddc307",
       "outputs": [
         {
           "output_type": "stream",

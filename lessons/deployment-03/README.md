@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Serialize and reload a fixed-shape JAX inference computation.
@@ -93,7 +95,6 @@ bias = jnp.array([.1, -.2], dtype=jnp.float32)
 def inference(x):
     return x @ weights + bias
 
-# Create device-backed JAX array ``.
 np.testing.assert_allclose(inference(jnp.array([[1.,2.,-1.]], jnp.float32)), [[3.1,-.45]], atol=1e-6)
 ```
 
@@ -196,7 +197,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:22.471337+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:42.546071+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172
@@ -214,7 +215,7 @@ PASS: deployment-03
 **Predict before running:** Does the exported signature accept two rows?
 
 ```python
-# Experiment — Reject the wrong batch: A Python function being shape-generic does not make its fixed...
+# Experiment — Reject the wrong batch
 try:
     restored.call(np.ones((2, 3), np.float32))
 except (ValueError, TypeError) as error:
@@ -232,7 +233,7 @@ A Python function being shape-generic does not make its fixed exported interface
 **Predict before running:** Will the computation still work when the new process has no inference function or live parameter objects?
 
 ```python
-# Experiment — Load only the exported bytes in a fresh interpreter: The checked boundary is artifact bytes → installed JAX CPU...
+# Experiment — Load only the exported bytes in a fresh interpreter
 import json
 import os
 import subprocess

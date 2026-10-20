@@ -15,7 +15,6 @@ bias = jnp.array([.1, -.2], dtype=jnp.float32)
 def inference(x):
     return x @ weights + bias
 
-# Create device-backed JAX array ``.
 np.testing.assert_allclose(inference(jnp.array([[1.,2.,-1.]], jnp.float32)), [[3.1,-.45]], atol=1e-6)
 
 # Declare the fixed input signature
@@ -73,7 +72,7 @@ direct = np.asarray(inference(sample))
 visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'output score', 'series': [{'label': 'direct', 'y': direct[0].tolist()}, {'label': 'restored artifact', 'y': actual[0].tolist()}]}
 
 # Experiment: Reject the wrong batch
-# Experiment — Reject the wrong batch: A Python function being shape-generic does not make its fixed...
+# Experiment — Reject the wrong batch
 try:
     restored.call(np.ones((2, 3), np.float32))
 except (ValueError, TypeError) as error:
@@ -82,7 +81,7 @@ else:
     raise AssertionError("Fixed batch-one contract was not enforced")
 
 # Experiment: Load only the exported bytes in a fresh interpreter
-# Experiment — Load only the exported bytes in a fresh interpreter: The checked boundary is artifact bytes → installed JAX CPU...
+# Experiment — Load only the exported bytes in a fresh interpreter
 import json
 import os
 import subprocess

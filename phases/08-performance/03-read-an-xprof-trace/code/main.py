@@ -14,11 +14,9 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
@@ -26,7 +24,7 @@ compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
 compiled(x,w).block_until_ready()
 
 # Capture named intervals
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -75,18 +73,16 @@ import jax.numpy as jnp
 # Read `trace_root` from environment configuration (with a default fallback).
 trace_root=Path(os.environ.get('JAX_COURSE_TRACE_DIR') or tempfile.mkdtemp(prefix='jax-course-trace-')).resolve()
 trace_root.mkdir(parents=True,exist_ok=True)
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(31)
 host=rng.normal(size=(48,32)).astype(np.float32)
 weights=rng.normal(size=(32,16)).astype(np.float32)
-# Create device-backed JAX array `(x, w)`.
 x,w=jnp.asarray(host),jnp.asarray(weights)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled=jax.jit(lambda a,b:jnp.tanh(a@b))
 # Wait for device work to finish before timing it or comparing its result on the host.
 compiled(x,w).block_until_ready()
 
-# Step 2 — Capture named intervals: The outer annotation provides context, while two nonoverlapping...
+# Step 2 — Capture named intervals
 with jax.profiler.trace(trace_root,create_perfetto_trace=True):
     for index in range(4):
         with jax.profiler.StepTraceAnnotation('learner_step',step_num=index):
@@ -132,7 +128,7 @@ print('Unattributed outer time, microseconds:',overhead.tolist())
 print('Wrong double-counted totals:',wrong.tolist())
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Convert every model interval to milliseconds and summarize its...
+# Exercise solution
 model_ms=np.asarray(model_us)/1000
 summary={'minimum_ms':float(model_ms.min()),'median_ms':float(np.median(model_ms)),'maximum_ms':float(model_ms.max())}
 assert summary['minimum_ms']<=summary['median_ms']<=summary['maximum_ms']

@@ -13,7 +13,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -42,7 +41,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -72,7 +70,7 @@ workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
 # Build the pipeline or state transition
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -91,7 +89,7 @@ with ocp.StandardCheckpointer() as checkpointer:
 validate_contract(restored["contract"],contract)
 
 # Run the comparison
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
@@ -115,7 +113,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -172,7 +169,7 @@ def validate_contract(saved,expected):
 workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -190,7 +187,7 @@ with ocp.StandardCheckpointer() as checkpointer:
     restored = checkpointer.restore(checkpoint_path,target={"training":initial_state(),"contract":encode_contract(contract)})
 validate_contract(restored["contract"],contract)
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
@@ -209,7 +206,7 @@ restored_norms = [float(jnp.linalg.norm(a)) for a in jax.tree.leaves(restored_ne
 visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'leaf {i}' for i in range(len(saved_norms))], 'xlabel': 'checkpoint parameter leaf index', 'ylabel': 'L2 norm', 'series': [{'label': 'uninterrupted step', 'y': saved_norms}, {'label': 'restored from Orbax', 'y': restored_norms}]}
 
 # Experiment: Model-only restoration loses Adam history
-# Experiment — Model-only restoration loses Adam history: Saved weights give the same pre-update predictions but not...
+# Experiment — Model-only restoration loses Adam history
 model_only = dict(restored["training"])
 model_only["optimizer"] = tx.init(model_only["params"])
 wrong_next,_ = step(model_only,x,y)
@@ -218,7 +215,7 @@ assert int(wrong_next["optimizer"][0].count)==1
 print("Model-only checkpoint produces a different Adam update")
 
 # Experiment: Reset the random stream
-# Experiment — Reset the random stream: A seed identifies the initial stream; a saved continuation key...
+# Experiment — Reset the random stream
 reset_random = dict(restored["training"])
 reset_random["key_data"] = initial_state()["key_data"]
 reset_next,reset_loss = step(reset_random,x,y)
@@ -227,7 +224,7 @@ assert not np.array_equal(np.asarray(reset_next["key_data"]),np.asarray(expected
 print("Reset key changes the noisy objective and continuation stream")
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Advance to step five, save to a new directory, restore and verify step...
+# Exercise solution
 later = state
 for _ in range(2):later,_=step(later,x,y)
 with ocp.StandardCheckpointer() as cp:
@@ -242,7 +239,7 @@ same_tree(left,right)
 assert int(right["step"])==6
 
 # Reference practice: Show what weights-only recovery loses
-# Show what weights-only recovery loses (Transfer): A checkpoint can return plausible predictions yet fail to...
+# Show what weights-only recovery loses (Transfer)
 full=restored['training']
 weights_only=dict(full,optimizer=tx.init(full['params']))
 full_next,_=step(full,x,y)
@@ -253,7 +250,7 @@ assert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leav
 print('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')
 
 # Reference practice: Reject an incompatible update configuration
-# Reject an incompatible update configuration (Challenge): Array restoration does not verify that a learning rate, data...
+# Reject an incompatible update configuration (Challenge)
 changed_contract = dict(contract,learning_rate=0.1)
 try:
     validate_contract(restored["contract"],changed_contract)

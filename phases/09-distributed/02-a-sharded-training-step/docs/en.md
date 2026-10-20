@@ -2,6 +2,8 @@
 
 Phase 09: Distributed training · about 90 minutes · 4 logical CPU devices
 
+This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive the global mean loss and gradient.
@@ -86,7 +88,7 @@ gcloud compute tpus tpu-vm ssh $TPU_NAME --zone=$ZONE \
 Create main.py in your course workspace. Paste this block first. If using a notebook, restart its kernel before running any cell.
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -122,9 +124,7 @@ y = jax.device_put(host_y, labels_sharding)
 w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
 def loss(weights, features, labels):
     return jnp.mean((features @ weights-labels)**2)
-# Define `update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def update(weights, features, labels):
-    # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
@@ -139,7 +139,7 @@ Mesh axis names describe placement. They are separate from the numerical array d
 Append the checks, save the file and run python main.py with the setup lesson environment.
 
 ```python
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 expected_gradient = 2 * host_x.T @ (-host_y) / len(host_y)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(gradient),expected_gradient,rtol=1e-6,atol=1e-6)
@@ -162,7 +162,7 @@ Assertions compare against host calculations or hand-derived values; printing a 
 ## Run the example
 
 ```python
-# Step 1 — Start a fresh CPU runtime: Configuration happens before devices() or array creation...
+# Step 1 — Start a fresh CPU runtime
 import jax
 jax.config.update("jax_platforms", "cpu")
 # Select the CPU backend and virtual device count before initializing JAX.
@@ -191,14 +191,13 @@ w = jax.device_put(np.zeros(2,dtype=np.float32),replicated)
 def loss(weights, features, labels):
     return jnp.mean((features @ weights-labels)**2)
 def update(weights, features, labels):
-    # Differentiate the objective to obtain `(value, gradient)` via automatic differentiation.
     value, gradient = jax.value_and_grad(loss)(weights,features,labels)
     return weights - 0.1*gradient, value, gradient
 # Wrap with `jax.jit` (`train_step`) so XLA traces and compiles the function.
 train_step = jax.jit(update, in_shardings=(replicated,rows,labels_sharding),out_shardings=(replicated,replicated,replicated))
 new_w, before, gradient = train_step(w,x,y)
 
-# Step 3 — Inspect and verify: Assertions compare against host calculations or hand-derived...
+# Step 3 — Inspect and verify
 expected_gradient = 2 * host_x.T @ (-host_y) / len(host_y)
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(np.asarray(gradient),expected_gradient,rtol=1e-6,atol=1e-6)
@@ -245,7 +244,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:23.912194+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:21.714604+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875
@@ -288,7 +287,7 @@ The global mean is invariant to row order. This check exposes accidental depende
 **Predict before running:** Predict whether the two implementations should track each other, not whether loss reaches zero in ten steps.
 
 ```python
-# Experiment — Ten updates against a host training loop: Checking every update catches transient mismatches that a single...
+# Experiment — Ten updates against a host training loop
 cpu_weights = w
 reference_weights = np.zeros(2,dtype=np.float32)
 for step_index in range(10):
@@ -318,7 +317,7 @@ Run a changed target/initial-state update, then diagnose the factor-of-four loca
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
+1. Exercise solution
 2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 3. Place `result` explicitly onto the target JAX device.
 4. Transfer the device result to the host for an independent NumPy comparison.
@@ -327,10 +326,9 @@ Run a changed target/initial-state update, then diagnose the factor-of-four loca
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Run a changed target/initial-state update, then diagnose the...
+# Exercise solution
 changed_y = ...  # TODO: compute changed_y
 start = np.array(...)  # TODO: compute start
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return ...  # TODO: return computed result
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
@@ -360,10 +358,9 @@ print("Summed local means are four times too large; weighted aggregation repaire
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Run a changed target/initial-state update, then diagnose the...
+# Exercise solution
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
 start = np.array([0.2,-0.1],dtype=np.float32)
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
@@ -413,7 +410,7 @@ The original train_step hardcodes $0.1$; define a new step with the changed rate
 - `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
 
 **Step-by-step implementation plan:**
-1. Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
+1. Transfer to a different target model (Challenge)
 2. Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
 3. Place `result` explicitly onto the target JAX device.
 4. Transfer the device result to the host for an independent NumPy comparison.
@@ -421,10 +418,9 @@ The original train_step hardcodes $0.1$; define a new step with the changed rate
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
+# Transfer to a different target model (Challenge)
 changed_y = ...  # TODO: compute changed_y
 start = np.array(...)  # TODO: compute start
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return ...  # TODO: return computed result
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.
@@ -439,10 +435,9 @@ np.testing.assert_allclose(np.asarray(result),start-0.05*reference_gradient,rtol
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Transfer to a different target model (Challenge): The independent formula follows the new target, initial...
+# Transfer to a different target model (Challenge)
 changed_y = host_x @ np.array([-1.,3.],dtype=np.float32)
 start = np.array([0.2,-0.1],dtype=np.float32)
-# Define `changed_update(weights, features, labels)` to evaluate the objective and its automatic derivatives:
 def changed_update(weights,features,labels):
     return weights-0.05*jax.grad(loss)(weights,features,labels)
 # Wrap with `jax.jit` (`changed_step`) so XLA traces and compiles the function.

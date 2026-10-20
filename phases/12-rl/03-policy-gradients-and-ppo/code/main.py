@@ -56,7 +56,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -74,8 +73,7 @@ def returns_to_go(rewards):
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
 # Add objectives and the repeated training loop
-# Step 2 — Add objectives and the repeated training loop: Keep a frozen rollout per update, then collect again using a fresh...
-# Define `policy_loss(theta, records, method, clip)` to evaluate the objective and its automatic derivatives:
+# Step 2 — Add objectives and the repeated training loop
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -113,15 +111,12 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
     # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
     key = jax.random.key(seed)
     theta = jnp.zeros(3)
-    # Define `update(carry, _)` to evaluate the objective and its automatic derivatives:
     def update(carry, _):
         theta, key = carry
         # Create or split explicit PRNG key(s) (`(key, sample_key)`) for reproducible randomness.
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
-        # Define `epoch(_, candidate)` to evaluate the objective and its automatic derivatives:
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
@@ -140,7 +135,7 @@ def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3,
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
 
 # Train and compare to a derivative reference
-# Step 3 — Train and compare to a derivative reference: The seed-specific return is measured after actual interaction and...
+# Step 3 — Train and compare to a derivative reference
 theta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)
 theta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)
 assert history_pg[-1] > .9 and history_ppo[-1] > .9
@@ -209,7 +204,6 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Split the PRNG key deterministically into independent subkeys (`keys`).
         keys = jax.random.split(time_key, batch_size)
         probabilities = jax.nn.sigmoid(theta[jnp.minimum(observations, 2)])
-        # Draw pseudorandom samples for `actions` using the explicit RNG state.
         actions = jax.vmap(jax.random.bernoulli)(keys, probabilities).astype(jnp.int32)
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
@@ -226,7 +220,7 @@ def returns_to_go(rewards):
     """Undiscounted finite-episode objective; rewards after done are already zero."""
     return jnp.cumsum(rewards[::-1], axis=0)[::-1]
 
-# Step 2 — Add objectives and the repeated training loop: Keep a frozen rollout per update, then collect again using a fresh...
+# Step 2 — Add objectives and the repeated training loop
 def policy_loss(theta, records, method='ppo', clip=.2):
     """Normalize by episodes, not live transitions. Freeze behavior data/returns."""
     advantage = jax.lax.stop_gradient(returns_to_go(records['reward']))
@@ -270,7 +264,6 @@ def _train(seed, updates, batch_size, horizon, method, epochs, learning_rate):
         key, sample_key = jax.random.split(key)
         _, records = rollout(theta, sample_key, batch_size, horizon)
         def epoch(_, candidate):
-            # Differentiate the objective to obtain `grad` via automatic differentiation.
             grad = jax.grad(policy_loss)(candidate, records, method)
             return candidate - learning_rate * grad
         theta = jax.lax.fori_loop(0, epochs, epoch, theta)
@@ -288,7 +281,7 @@ def train(seed=0, updates=40, batch_size=256, horizon=8, method='ppo', epochs=3,
         raise ValueError('REINFORCE uses one update per fresh on-policy rollout')
     return _train(seed, updates, batch_size, horizon, method, epochs, learning_rate)
 
-# Step 3 — Train and compare to a derivative reference: The seed-specific return is measured after actual interaction and...
+# Step 3 — Train and compare to a derivative reference
 theta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)
 theta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)
 assert history_pg[-1] > .9 and history_ppo[-1] > .9
@@ -306,7 +299,7 @@ assert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)
 visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches','ylabel':'exact expected episode return','series':[{'label':'REINFORCE: 1 epoch/batch','y':history_pg.tolist()},{'label':'clipped updates: 3 epochs/batch','y':history_ppo.tolist()}]}
 
 # Experiment: Check clipping on both signs
-# Experiment — Check clipping on both signs: The minimum prevents an update from gaining unlimited credit for...
+# Experiment — Check clipping on both signs
 ratio = jnp.array([.6,1.,1.4])
 positive = jnp.minimum(ratio,jnp.clip(ratio,.8,1.2))
 negative = jnp.minimum(-ratio,-jnp.clip(ratio,.8,1.2))
@@ -318,15 +311,13 @@ print('positive / negative targets:', positive, negative)
 # Experiment — Compare sampled and exact gradients: The large batch reduces Monte Carlo noise.
 # Create or split explicit PRNG key(s) (`(_, batch)`) for reproducible randomness.
 _, batch = rollout(z,jax.random.key(902),32768,8)
-# Differentiate the objective to obtain `sampled` via automatic differentiation.
 sampled = -jax.grad(policy_loss)(z,batch,'reinforce')
-# Differentiate the objective to obtain `exact` via automatic differentiation.
 exact = jax.grad(exact_return)(z)
 assert jnp.allclose(sampled,exact,atol=.012,rtol=.04)
 print('sampled / exact gradient:', sampled, exact)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Run REINFORCE with a different training seed and retain the initial...
+# Exercise solution
 other_theta, other_history = train(seed=11,method='reinforce',epochs=1)
 assert other_history[-1] > other_history[0] + .35
 assert other_history[-1] > .9
@@ -334,7 +325,7 @@ assert not jnp.array_equal(other_theta,theta_pg)
 print('changed seed final exact return:', other_history[-1])
 
 # Reference practice: Inspect a frozen behavior reference
-# Inspect a frozen behavior reference (Transfer / diagnosis): The candidate changes while the behavior policy remains the...
+# Inspect a frozen behavior reference (Transfer / diagnosis)
 # Create or split explicit PRNG key(s) (`(_, b)`) for reproducible randomness.
 _, b = rollout(jnp.zeros(3),jax.random.key(77),128,8)
 old = b['old_logp'].copy()
@@ -342,7 +333,6 @@ newlog = log_probability(jnp.ones(3),b['observation'],b['action'])
 ratios = jnp.exp(newlog-old)
 assert jnp.array_equal(old,b['old_logp'])
 assert float(jnp.min(ratios)) < 1 < float(jnp.max(ratios))
-# Differentiate the objective to obtain `old_grad` via automatic differentiation.
 old_grad = jax.grad(lambda lp: policy_loss(jnp.ones(3),dict(b,old_logp=lp)))(old)
 assert jnp.all(old_grad == 0)
 

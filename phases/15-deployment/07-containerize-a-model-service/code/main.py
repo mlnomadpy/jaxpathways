@@ -56,7 +56,7 @@ with tempfile.TemporaryDirectory(prefix='container-contract-') as folder:
 print('Fresh-process valid requests:', accepted, 'rejected boundaries:', rejected)
 print('This companion tests the process/artifact contract. Run the Docker lab for container evidence.')
 
-# Containerize a model service and verify its boundary: Containerization packages a runtime environment; a running...
+# Containerize a model service and verify its boundary
 import hashlib, json, os, subprocess, sys, tempfile
 from pathlib import Path
 MODEL = {'schema': 1, 'weight': 2., 'bias': 1.}
@@ -108,13 +108,13 @@ print('This companion tests the process/artifact contract. Run the Docker lab fo
 visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'xlabel':'local process contract','ylabel':'observed case count','series':[{'label':'executed CPU cases','y':[accepted,rejected]}]}
 
 # Experiment: Change the batch without changing the model
-# Experiment — Change the batch without changing the model: Batching changes transport shape, not the per-observation...
+# Experiment — Change the batch without changing the model
 batch=[-.25,.75,2.]
 assert [MODEL['weight']*x+MODEL['bias'] for x in batch]==[.5,2.5,5.]
 print('Independent three-input predictions: 0.5, 2.5, 5.0')
 
 # Experiment: Rehash an invalid model and watch validation reject it
-# Experiment — Rehash an invalid model and watch validation reject it: Python accepts the nonstandard Infinity token in this fixture...
+# Experiment — Rehash an invalid model and watch validation reject it
 invalid_model = dict(MODEL, weight=float('inf'))
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as directory:
@@ -129,14 +129,14 @@ with tempfile.TemporaryDirectory() as directory:
 print('Matching digest did not bypass model validation.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Reject an artifact whose bytes changed after its expected digest was...
+# Exercise solution
 original=json.dumps(MODEL,sort_keys=True).encode()
 mutated=json.dumps(dict(MODEL,bias=2.),sort_keys=True).encode()
 assert hashlib.sha256(original).hexdigest()!=hashlib.sha256(mutated).hexdigest()
 print('Changed artifact requires a new recorded digest.')
 
 # Reference practice: Reject a nonfinite request
-# Reject a nonfinite request (transfer): A request can parse as JSON in Python while still violating...
+# Reject a nonfinite request (transfer)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as tmp:
     p=Path(tmp)

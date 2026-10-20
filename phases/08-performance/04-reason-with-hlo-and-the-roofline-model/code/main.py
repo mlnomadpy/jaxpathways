@@ -8,7 +8,7 @@ import jax
 import jax.numpy as jnp
 
 # Calculate an explicitly hypothetical model
-# Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
+# Step 2 — Calculate an explicitly hypothetical model
 def workload(a,b):return jnp.tanh(a@b)
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
@@ -42,7 +42,7 @@ np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])
 assert np.all(roofline[2:]==peak)
 
 # Keep runtime observations separate
-# Step 4 — Keep runtime observations separate: Warm samples measure the current CPU, while the work count remains...
+# Step 4 — Keep runtime observations separate
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
@@ -63,7 +63,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
-# Step 2 — Calculate an explicitly hypothetical model: The square-matrix simplification supplies an independent...
+# Step 2 — Calculate an explicitly hypothetical model
 def workload(a,b):return jnp.tanh(a@b)
 a=jnp.arange(32*16,dtype=jnp.float32).reshape(32,16)/512
 b=jnp.arange(16*8,dtype=jnp.float32).reshape(16,8)/128
@@ -95,7 +95,7 @@ roofline=np.minimum(peak,memory_ceiling)
 np.testing.assert_allclose(roofline[:2]/1e9,[80/3,160/3])
 assert np.all(roofline[2:]==peak)
 
-# Step 4 — Keep runtime observations separate: Warm samples measure the current CPU, while the work count remains...
+# Step 4 — Keep runtime observations separate
 executable(a,b).block_until_ready()
 times=[]
 for _ in range(5):
@@ -131,7 +131,7 @@ assert bandwidth*ratio<peak
 print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypothetical model')
 
 # Reference practice: Keep the same shapes but change storage precision
-# Keep the same shapes but change storage precision (Transfer): Changing storage bytes in an accounting model does not...
+# Keep the same shapes but change storage precision (Transfer)
 f32,b32,i32=contract(32,16,8,4)
 f16,b16,i16=contract(32,16,8,2)
 assert f32==f16 and b32==2*b16

@@ -2,6 +2,8 @@
 
 Phase 10: Scientific computing · about 100 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Construct and verify a fourth-order fixed-step transition.
@@ -128,7 +130,7 @@ The batch axis is independent initial conditions, not time. The shared rate and 
 Append this block to main.py in your CPU course environment; for the first block create the file. Run blocks in order.
 
 ```python
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
@@ -186,7 +188,7 @@ np.testing.assert_allclose(trajectories, oracle, rtol=3e-8, atol=1e-10)
 np.testing.assert_allclose(np.asarray(trajectories)[2], 4*np.asarray(trajectories)[0], rtol=1e-12)
 print("Shape:", trajectories.shape, "endpoints:", np.asarray(trajectories)[:,-1])
 
-# Step 3 — Change composition and verify axis meaning: Array arithmetic applies the independent scalar dynamics to all...
+# Step 3 — Change composition and verify axis meaning
 # Define `scan_batch(rate, values, steps, dt)` to carry state across steps with `jax.lax.scan`:
 def scan_batch(rate, values, steps=40, dt=0.05):
     def advance(state, unused):
@@ -230,7 +232,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:35.666419+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:32.553795+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
@@ -251,7 +253,7 @@ PASS: science-02
 **Predict before running:** If the step is correct, can a loop-free formula reproduce every saved state?
 
 ```python
-# Experiment — Compare RK4 with an independent polynomial: This checks the discrete algorithm independently of the...
+# Experiment — Compare RK4 with an independent polynomial
 z = -rate*dt
 multiplier = 1 + z + z*z/2 + z**3/6 + z**4/24
 polynomial = np.asarray(initials)[:,None]*multiplier**np.arange(steps+1)[None,:]
@@ -294,15 +296,16 @@ Add a fourth initial condition, verify the changed output shape and exponential 
 - `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
 
 **Step-by-step implementation plan:**
-1. Vectorize across the batch dimension with `jax.vmap` (`changed`).
-2. Check tensor shape invariant: `changed.shape == (4,41)`
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
+1. Exercise solution
+2. Vectorize across the batch dimension with `jax.vmap` (`changed`).
+3. Check tensor shape invariant: `changed.shape == (4,41)`
+4. Transfer the device result to the host for an independent NumPy comparison.
+5. Vectorize across the batch dimension with `jax.vmap` (`reordered`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a fourth initial condition, verify the changed output shape and...
+# Exercise solution
 changed_initials = jnp.array(...)  # TODO: compute changed_initials
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(...)  # TODO: compute changed
@@ -320,7 +323,7 @@ print("Permutation preserves trajectory identity")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a fourth initial condition, verify the changed output shape and...
+# Exercise solution
 changed_initials = jnp.array([0.5, 1.0, 2.0, 3.0])
 # Vectorize across the batch dimension with `jax.vmap` (`changed`).
 changed = jax.vmap(lambda u: solve(0.7,u))(changed_initials)
@@ -416,7 +419,6 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 **Step-by-step implementation plan:**
 1. Vectorize across the batch dimension with `jax.vmap` (`grid`).
 2. Check tensor shape invariant: `grid.shape == (3,3,41)`
-3. Create evenly spaced index values in ``.
 
 **Starter code scaffold (fill in the TODOs):**
 
@@ -426,7 +428,6 @@ Use nested vmap; identify the rate, initial-condition and time axes explicitly.
 grid = jax.vmap(...)  # TODO: compute grid
 # Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape  # TODO: complete assertion check
-# Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol = ...  # TODO: compute np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol
 print("Grid axes: rate, initial condition, time", grid.shape)
 ```
@@ -439,7 +440,6 @@ print("Grid axes: rate, initial condition, time", grid.shape)
 grid = jax.vmap(lambda k: jax.vmap(lambda u: solve(k,u))(initials))(rates)
 # Check tensor shape invariant: `grid.shape == (3,3,41)`
 assert grid.shape == (3,3,41)
-# Create evenly spaced index values in ``.
 np.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol=1e-12)
 print("Grid axes: rate, initial condition, time", grid.shape)
 ```

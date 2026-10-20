@@ -2,6 +2,8 @@
 
 Phase 17: Self-supervised pretraining: masked and contrastive learning · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Preserve patch order and pixel order
@@ -146,7 +148,6 @@ features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
 w = jnp.zeros((9, 16))
 history = []
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 ```
 
@@ -241,7 +242,6 @@ features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
 w = jnp.zeros((9, 16))
 history = []
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 
 # Step 3 — 3. Fit the decoder and audit the reconstruction: The host loop checks the reduction independently.
@@ -315,7 +315,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:42.975020+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:44.902630+00:00. JAX 0.9.2.
 
 ```text
 Masked pixel MSE initial/final/held amplitudes: 0.5538085699081421 0.0016928859986364841 0.0011766081443056464
@@ -365,7 +365,6 @@ def ambiguity_loss(value):
 np.testing.assert_allclose(
     [ambiguity_loss(0.0), ambiguity_loss(1.0), ambiguity_loss(2.0)], [2.0, 1.0, 2.0]
 )
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(ambiguity_loss)(1.0), 0.0, atol=1e-7)
 print('Ambiguous target MSE at predictions 0, 1, 2: 2, 1, 2')
 ```
@@ -384,13 +383,12 @@ Verify the bottom-right patch against a direct slice and explain why a whole-arr
 - `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Verify the bottom-right patch against a direct slice and explain why a...
+# Exercise solution
 np.testing.assert_array_equal(
     patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
 )
@@ -400,7 +398,7 @@ print('Bottom-right patch order verified.')
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Verify the bottom-right patch against a direct slice and explain why a...
+# Exercise solution
 np.testing.assert_array_equal(
     patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
 )
@@ -429,7 +427,7 @@ Measure the shortcut, then inspect which function inputs contain hidden pixels.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose the leakage shortcut (Transfer): An information-flow check is necessary because the leaked...
+# Expose the leakage shortcut (Transfer)
 shortcut = ...  # TODO: compute shortcut
 assert float(masked_mse(shortcut, patches, hidden))  # TODO: complete assertion check
 # Check tensor shape invariant: `features.shape[1] == 9`
@@ -440,7 +438,7 @@ print('The zero-loss shortcut receives hidden pixels; the real features contain 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Expose the leakage shortcut (Transfer): An information-flow check is necessary because the leaked...
+# Expose the leakage shortcut (Transfer)
 shortcut = patches
 assert float(masked_mse(shortcut, patches, hidden)) == 0.0
 # Check tensor shape invariant: `features.shape[1] == 9`
@@ -470,12 +468,12 @@ Use explicit image slices inside the oracle; do not copy the reshape/transpose i
 - `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array ``.
+1. Audit every patch of a rectangular color image (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit every patch of a rectangular color image (Challenge): The rectangular multichannel case catches axis errors that a...
+# Audit every patch of a rectangular color image (Challenge)
 numbered = np.arange(...)  # TODO: compute numbered
 oracle = np.stack(...)  # TODO: compute oracle
     [
@@ -489,7 +487,6 @@ oracle = np.stack(...)  # TODO: compute oracle
         for image in numbered
     ]
 )
-# Create device-backed JAX array ``.
 np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
 changed_images = ...  # TODO: compute changed_images
 changed_patches = patchify(...)  # TODO: compute changed_patches
@@ -503,7 +500,7 @@ print('All rectangular RGB patches agree; hidden-pixel intervention preserves vi
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Audit every patch of a rectangular color image (Challenge): The rectangular multichannel case catches axis errors that a...
+# Audit every patch of a rectangular color image (Challenge)
 numbered = np.arange(2 * 4 * 6 * 3, dtype=np.float32).reshape(2, 4, 6, 3)
 oracle = np.stack(
     [
@@ -517,7 +514,6 @@ oracle = np.stack(
         for image in numbered
     ]
 )
-# Create device-backed JAX array ``.
 np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
 changed_images = images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].add(-9.0)
 changed_patches = patchify(changed_images)

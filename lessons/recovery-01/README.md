@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 70 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Build and audit a deterministic batched host pipeline.
@@ -105,7 +107,7 @@ This setup makes the dataset and software assumptions explicit. No external data
 Append this block to the same file; follow the named state objects through each function.
 
 ```python
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
@@ -128,7 +130,7 @@ The function boundaries expose which inputs determine the next output and which 
 Append the checks, save main.py and run python main.py. Predict what should agree before running.
 
 ```python
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 assert [len(b["id"]) for b in batches] == [4,4,3]
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
@@ -165,7 +167,7 @@ fingerprint = dataset_digest(features,labels)
 def epoch_order(seed,epoch):
     return np.random.default_rng(np.random.SeedSequence([seed,epoch])).permutation(len(ids))
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 def make_batches(seed,epoch,batch_size=4,drop_last=False):
     if batch_size <= 0:
         raise ValueError("batch_size must be positive")
@@ -180,7 +182,7 @@ batches = list(make_batches(seed=17,epoch=0))
 elapsed = time.perf_counter()-start_time
 seen = np.concatenate([b["id"] for b in batches])
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 assert [len(b["id"]) for b in batches] == [4,4,3]
 np.testing.assert_array_equal(np.sort(seen),ids)
 assert len(np.unique(seen)) == len(ids)
@@ -222,16 +224,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:43.689138+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:23.552163+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.019213834311813116
+Preparation seconds (local observation only): 0.01006391691043973
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.00010958313941955566
+Preparation seconds (local observation only): 1.837499439716339e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]
@@ -245,7 +247,7 @@ PASS: recovery-01
 **Predict before running:** What should remain the same when changing epoch from zero to one?
 
 ```python
-# Experiment — Compare epochs without a hard-coded order: Coverage is an invariant; ordering is a deterministic...
+# Experiment — Compare epochs without a hard-coded order
 epoch_one = np.concatenate([b["id"] for b in make_batches(17,1)])
 np.testing.assert_array_equal(np.sort(epoch_one),ids)
 assert not np.array_equal(epoch_one,seen)

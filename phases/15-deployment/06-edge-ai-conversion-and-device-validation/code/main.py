@@ -51,7 +51,7 @@ for _ in range(30):
     samples.append((time.perf_counter() - start) * 1000)
 
 # Validate outputs and describe measurement scope
-# Step 4 — Validate outputs and describe measurement scope: The report records local CPU timings and explicitly leaves...
+# Step 4 — Validate outputs and describe measurement scope
 expected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)
 np.testing.assert_allclose(json.loads(response)["scores"], expected, atol=1e-6)
 report = {"runtime": "JAX CPU instructional proxy", "jax": jax.__version__,
@@ -65,7 +65,7 @@ print(json.dumps(report, indent=2))
 # Transfer the device result to the host for an independent NumPy comparison.
 np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)
 
-# Deploy at the edge: conversion, budgets and device checks: An edge deployment includes input decoding, preprocessing,...
+# Deploy at the edge
 import json
 import time
 import numpy as np
@@ -117,7 +117,7 @@ print(json.dumps(report, indent=2))
 visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 'warm request number', 'ylabel': 'end-to-end milliseconds', 'series': [{'label': 'local CPU request', 'y': samples}, {'label': 'recorded p95', 'y': [report['p95_ms']] * len(samples)}]}
 
 # Experiment: A normalization mismatch survives conversion
-# Experiment — A normalization mismatch survives conversion: Conversion checks must start at the raw input boundary when...
+# Experiment — A normalization mismatch survives conversion
 raw = np.array([[255., 128., 0.]], np.float32)
 # Transfer the device result to the host for an independent NumPy comparison.
 wrong = np.asarray(infer(raw))
@@ -127,7 +127,7 @@ assert not np.allclose(wrong, right)
 print("Preprocessing mismatch max error", float(np.max(np.abs(wrong-right))))
 
 # Experiment: Reject raw inputs before normalization hides their meaning
-# Experiment — Reject raw inputs before normalization hides their meaning: The zero-input oracle checks that preprocessing does not add a...
+# Experiment — Reject raw inputs before normalization hides their meaning
 invalid_payloads=[{'features':[['255',128,0]]},{'features':[[True,128,0]]},{'features':[[256,128,0]]},{'features':[[-1,128,0]]},{'features':[[0,1]]},{'features':[[0,1,float('nan')]]},{'features':[[0,1,2]],'extra':1}]
 for invalid in invalid_payloads:
     try:
@@ -141,7 +141,7 @@ np.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})
 print('Seven malformed or out-of-domain requests rejected; zero input returns the bias.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Send a second raw input [0, 255, 128] through the full request, and...
+# Exercise solution
 changed_raw = np.array([[0., 255., 128.]], np.float32)
 changed_response = json.loads(request(json.dumps({"features": changed_raw.tolist()})))
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -159,7 +159,7 @@ assert missing and "device" in missing
 print("Not device-validated; missing:", ", ".join(missing))
 
 # Reference practice: Decide whether a model speedup meets the request budget
-# Decide whether a model speedup meets the request budget (Transfer / diagnosis): Halving model time leaves a 20-millisecond request, so it...
+# Decide whether a model speedup meets the request budget (Transfer / diagnosis)
 fixed_ms=12.+4.
 model_ms=8.
 deadline_ms=19.

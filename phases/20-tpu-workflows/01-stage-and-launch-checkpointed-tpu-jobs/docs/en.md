@@ -2,6 +2,8 @@
 
 Phase 20: TPU Workflows: Launching Jobs & Checkpointed Experiments · about 25 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Stage the TPU launcher (`resources/tpu-gcp/launch.py`) to a Cloud TPU VM with `gcloud compute tpus tpu-vm scp`.
@@ -75,7 +77,7 @@ gcloud compute tpus tpu-vm ssh "$TPU_NAME" --zone="$ZONE" --command="
 Create main.py with digest_obj and atomic_write_json so interrupted writes never corrupt the latest checkpoint.
 
 ```python
-# Step 1 — Define deterministic hashing and atomic checkpoint writes: Writing to a temporary sibling file, flushing with fsync, and...
+# Step 1 — Define deterministic hashing and atomic checkpoint writes
 import hashlib
 import json
 import os
@@ -88,7 +90,6 @@ import numpy as np
 
 
 def digest_obj(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
@@ -96,7 +97,6 @@ def digest_obj(value):
 
 
 def atomic_write_json(path, payload):
-    # Read or serialize artifact data on disk (`path`).
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -115,10 +115,8 @@ Writing to a temporary sibling file, flushing with fsync, and calling os.replace
 Append run_tpu_ready_job to main.py.
 
 ```python
-# Step 2 — Implement the TPU-ready job runner with warmup separation and resume: Warmup compiles the JIT function without mutating w, b, m_w, m_b,...
-# Define `run_tpu_ready_job(run_dir, steps, save_every, resume...)` to evaluate the objective and its automatic derivatives:
+# Step 2 — Implement the TPU-ready job runner with warmup separation and resume
 def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0.05):
-    # Read or serialize artifact data on disk (`run_dir`).
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     events_path = run_dir / "events.jsonl"
@@ -130,10 +128,8 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         # Enter managed runtime/context scope for this block:
         with events_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, sort_keys=True) + "\n")
-        # Return `record` to the caller.
         return record
 
-    # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
     target_y = 3.0 * x - 0.5
 
@@ -176,14 +172,12 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     def train_step(w, b, m_w, m_b, key):
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
         key, subkey = jax.random.split(key)
-        # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
         xb, yb = x[idx], target_y[idx]
 
         def loss_fn(w_in, b_in):
             # Perform matrix contraction / projection to compute `pred`.
             pred = xb @ w_in + b_in
-            # Return `jnp.mean((pred - yb) ** 2)` to the caller.
             return jnp.mean((pred - yb) ** 2)
 
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
@@ -191,19 +185,16 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         m_b = 0.8 * m_b + gb
         w = w - lr * m_w
         b = b - lr * m_b
-        # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
 
     if step == steps:
         emit("completed", step=step, state_hash=state_payload["state_hash"])
         return {"final_step": step, "state_hash": state_payload["state_hash"], "w": float(np.asarray(w).squeeze()), "b": float(np.asarray(b).squeeze()), "warmup_ms": 0.0, "step_losses": [], "step_times_ms": []}
 
-    # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     warm = train_step(w, b, m_w, m_b, key)
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(warm)
-    # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
@@ -234,7 +225,6 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             emit("checkpoint", step=step, state_hash=state_payload["state_hash"])
 
     emit("completed", step=step, state_hash=state_payload["state_hash"])
-    # Return `{'final_step': step, 'state_hash': state_payload['state_hash'], 'w': float(np.asarray(w).squeeze()), 'b': float(np.asarray(b).squeeze()), 'warmup_ms': warmup_ms, 'step_losses': step_losses, 'step_times_ms': step_times_ms}` to the caller.
     return {
         "final_step": step,
         "state_hash": state_payload["state_hash"],
@@ -254,10 +244,9 @@ Warmup compiles the JIT function without mutating w, b, m_w, m_b, or key, so ste
 Append the 3-step + 3-step resumed run and 6-step uninterrupted control comparison to main.py.
 
 ```python
-# Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run: Because parameters, momentum buffers, and PRNG keys are all...
+# Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
-    # Read or serialize artifact data on disk (`root`).
     root = Path(tmp)
     part1 = run_tpu_ready_job(root / "resumed", steps=3, save_every=3, resume=False)
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
@@ -276,7 +265,7 @@ Because parameters, momentum buffers, and PRNG keys are all restored, the resume
 ## Run the example
 
 ```python
-# Step 1 — Define deterministic hashing and atomic checkpoint writes: Writing to a temporary sibling file, flushing with fsync, and...
+# Step 1 — Define deterministic hashing and atomic checkpoint writes
 import hashlib
 import json
 import os
@@ -289,7 +278,6 @@ import numpy as np
 
 
 def digest_obj(value):
-    # Return `hashlib.sha256(json.dumps(value, sort_keys=True, separators=(',', ':')).encode()).hexdigest()[:16]` to the caller.
     return hashlib.sha256(
         json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
     ).hexdigest()
@@ -297,7 +285,6 @@ def digest_obj(value):
 
 
 def atomic_write_json(path, payload):
-    # Read or serialize artifact data on disk (`path`).
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
     tmp = path.with_suffix(path.suffix + ".tmp")
@@ -308,9 +295,8 @@ def atomic_write_json(path, payload):
     os.replace(tmp, path)
 
 
-# Step 2 — Implement the TPU-ready job runner with warmup separation and resume: Warmup compiles the JIT function without mutating w, b, m_w, m_b,...
+# Step 2 — Implement the TPU-ready job runner with warmup separation and resume
 def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0.05):
-    # Read or serialize artifact data on disk (`run_dir`).
     run_dir = Path(run_dir)
     run_dir.mkdir(parents=True, exist_ok=True)
     events_path = run_dir / "events.jsonl"
@@ -321,10 +307,8 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         record = {"event": event, "backend": jax.default_backend(), "devices": jax.device_count(), **fields}
         with events_path.open("a", encoding="utf-8") as f:
             f.write(json.dumps(record, sort_keys=True) + "\n")
-        # Return `record` to the caller.
         return record
 
-    # Generate a uniform grid of points in `x`.
     x = jnp.linspace(-1.0, 1.0, 64, dtype=jnp.float32).reshape(64, 1)
     target_y = 3.0 * x - 0.5
 
@@ -367,13 +351,11 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
     def train_step(w, b, m_w, m_b, key):
         # Split the PRNG key deterministically into independent subkeys (`(key, subkey)`).
         key, subkey = jax.random.split(key)
-        # Draw pseudorandom samples for `idx` using the explicit RNG state.
         idx = jax.random.choice(subkey, 64, shape=(16,), replace=False)
         xb, yb = x[idx], target_y[idx]
 
         def loss_fn(w_in, b_in):
             pred = xb @ w_in + b_in
-            # Return `jnp.mean((pred - yb) ** 2)` to the caller.
             return jnp.mean((pred - yb) ** 2)
 
         loss, (gw, gb) = jax.value_and_grad(loss_fn, argnums=(0, 1))(w, b)
@@ -381,19 +363,16 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
         m_b = 0.8 * m_b + gb
         w = w - lr * m_w
         b = b - lr * m_b
-        # Return `(w, b, m_w, m_b, key, loss)` to the caller.
         return w, b, m_w, m_b, key, loss
 
     if step == steps:
         emit("completed", step=step, state_hash=state_payload["state_hash"])
         return {"final_step": step, "state_hash": state_payload["state_hash"], "w": float(np.asarray(w).squeeze()), "b": float(np.asarray(b).squeeze()), "warmup_ms": 0.0, "step_losses": [], "step_times_ms": []}
 
-    # Record execution timing or profiler trace in `t0`.
     t0 = time.perf_counter()
     warm = train_step(w, b, m_w, m_b, key)
     # Wait for device work to finish before timing it or comparing its result on the host.
     jax.block_until_ready(warm)
-    # Record execution timing or profiler trace in `warmup_ms`.
     warmup_ms = (time.perf_counter() - t0) * 1000.0
     emit("warmup", warmup_ms=warmup_ms, step=step)
 
@@ -424,7 +403,6 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
             emit("checkpoint", step=step, state_hash=state_payload["state_hash"])
 
     emit("completed", step=step, state_hash=state_payload["state_hash"])
-    # Return `{'final_step': step, 'state_hash': state_payload['state_hash'], 'w': float(np.asarray(w).squeeze()), 'b': float(np.asarray(b).squeeze()), 'warmup_ms': warmup_ms, 'step_losses': step_losses, 'step_times_ms': step_times_ms}` to the caller.
     return {
         "final_step": step,
         "state_hash": state_payload["state_hash"],
@@ -437,10 +415,9 @@ def run_tpu_ready_job(run_dir, steps=6, save_every=2, resume=False, seed=0, lr=0
 
 
 
-# Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run: Because parameters, momentum buffers, and PRNG keys are all...
+# Step 3 — Compare a checkpoint-resumed run against an uninterrupted control run
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-launch-") as tmp:
-    # Read or serialize artifact data on disk (`root`).
     root = Path(tmp)
     part1 = run_tpu_ready_job(root / "resumed", steps=3, save_every=3, resume=False)
     part2 = run_tpu_ready_job(root / "resumed", steps=6, save_every=3, resume=True)
@@ -488,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:56:39.243938+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:27:11.475158+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 90.087 Median steady step ms: 0.0353
+Warmup ms: 81.296 Median steady step ms: 0.0319
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
@@ -509,7 +486,7 @@ PASS: tpu-02
 **Predict before running:** How does the warmup call duration compare to the median steady-state step duration?
 
 ```python
-# Experiment — Compare JIT warmup latency against steady-state step latency: Logging warmup separately in events.jsonl prevents compilation...
+# Experiment — Compare JIT warmup latency against steady-state step latency
 median_step_ms = float(np.median(control["step_times_ms"]))
 print("Warmup ms:", round(control["warmup_ms"], 3), "Median steady step ms:", round(median_step_ms, 4))
 # Assert invariant `control["warmup_ms"] > median_step_ms` holds
@@ -555,16 +532,15 @@ Run `run_tpu_ready_job` for $4$ steps (`save_every=2`), resume to $8$ steps, and
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Read or serialize artifact data on disk (`ex_root`).
+1. Exercise solution
+2. Keep this run’s database and artifacts in a scratch directory removed on exit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Run run_tpu_ready_job for 4 steps (save_every=2), resume to 8 steps,...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
-    # Read or serialize artifact data on disk (`ex_root`).
     ex_root = Path(...)  # TODO: compute ex_root
     r1 = run_tpu_ready_job(...)  # TODO: compute r1
     r2 = run_tpu_ready_job(...)  # TODO: compute r2
@@ -576,10 +552,9 @@ assert r2["state_hash"]  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Run run_tpu_ready_job for 4 steps (save_every=2), resume to 8 steps,...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-ex-") as tmp:
-    # Read or serialize artifact data on disk (`ex_root`).
     ex_root = Path(tmp)
     r1 = run_tpu_ready_job(ex_root / "resumed", steps=4, save_every=2, resume=False)
     r2 = run_tpu_ready_job(ex_root / "resumed", steps=8, save_every=2, resume=True)
@@ -605,22 +580,18 @@ Read `events.jsonl` line by line with `json.loads`.
 ### How to write: Inspect the JSONL event sequence from a resumed run — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
+1. Inspect the JSONL event sequence from a resumed run (Foundations)
 2. Keep this run’s database and artifacts in a scratch directory removed on exit.
-3. Read or serialize artifact data on disk (`ev_dir`).
-4. Read or serialize artifact data on disk (`event_names`).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
+# Inspect the JSONL event sequence from a resumed run (Foundations)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
-    # Read or serialize artifact data on disk (`ev_dir`).
     ev_dir = Path(...)  # TODO: compute ev_dir
     run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
     run_tpu_ready_job(ev_dir, steps = ...  # TODO: compute run_tpu_ready_job(ev_dir, steps
-    # Read or serialize artifact data on disk (`event_names`).
     event_names = ...  # TODO: compute event_names
 print("Recorded event sequence:", event_names)
 assert "started"  # TODO: complete assertion check
@@ -629,14 +600,12 @@ assert "started"  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Inspect the JSONL event sequence from a resumed run (Foundations): The single append-only events.jsonl log captures both the...
+# Inspect the JSONL event sequence from a resumed run (Foundations)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-events-") as tmp:
-    # Read or serialize artifact data on disk (`ev_dir`).
     ev_dir = Path(tmp) / "job"
     run_tpu_ready_job(ev_dir, steps=2, save_every=2, resume=False)
     run_tpu_ready_job(ev_dir, steps=4, save_every=2, resume=True)
-    # Read or serialize artifact data on disk (`event_names`).
     event_names = [json.loads(line)["event"] for line in (ev_dir / "events.jsonl").read_text().splitlines()]
 print("Recorded event sequence:", event_names)
 assert "started" in event_names and "restored" in event_names and event_names[-1] == "completed"
@@ -662,24 +631,18 @@ Check `list(Path(tmp).glob('*.tmp')) == []`.
 
 **Step-by-step implementation plan:**
 1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Read or serialize artifact data on disk (`target`).
-3. Read or serialize artifact data on disk (`leftovers`).
-4. Read or serialize artifact data on disk (`loaded`).
-5. Assert invariant `loaded["step"] == 4 and leftovers == []` holds
+2. Assert invariant `loaded["step"] == 4 and leftovers == []` holds
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify atomic checkpoint file replacement (Transfer / diagnosis): os.replace atomically swaps the flushed .tmp file into...
+# Verify atomic checkpoint file replacement (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
-    # Read or serialize artifact data on disk (`target`).
     target = Path(...)  # TODO: compute target
     atomic_write_json(target, {"step": 2})
     atomic_write_json(target, {"step": 4})
-    # Read or serialize artifact data on disk (`leftovers`).
     leftovers = list(...)  # TODO: compute leftovers
-    # Read or serialize artifact data on disk (`loaded`).
     loaded = json.loads(...)  # TODO: compute loaded
 print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
 # Assert invariant `loaded["step"] == 4 and leftovers == []` holds
@@ -689,16 +652,13 @@ assert loaded["step"]  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Verify atomic checkpoint file replacement (Transfer / diagnosis): os.replace atomically swaps the flushed .tmp file into...
+# Verify atomic checkpoint file replacement (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix="tpu-atomic-") as tmp:
-    # Read or serialize artifact data on disk (`target`).
     target = Path(tmp) / "checkpoint-latest.json"
     atomic_write_json(target, {"step": 2})
     atomic_write_json(target, {"step": 4})
-    # Read or serialize artifact data on disk (`leftovers`).
     leftovers = list(Path(tmp).glob("*.tmp"))
-    # Read or serialize artifact data on disk (`loaded`).
     loaded = json.loads(target.read_text(encoding="utf-8"))
 print("Loaded step:", loaded["step"], "Leftover tmp files:", leftovers)
 # Assert invariant `loaded["step"] == 4 and leftovers == []` holds

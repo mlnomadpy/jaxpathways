@@ -26,7 +26,7 @@ repeat_seconds = time.perf_counter() - t0
 assert jnp.allclose(first, loss(w, x, y))
 assert jnp.allclose(second, first)
 
-# Compile a function with jit: Compilation prepares a program that can be reused for compatible...
+# Compile a function with jit
 import time
 import jax
 import jax.numpy as jnp
@@ -54,18 +54,17 @@ assert jnp.allclose(second, first)
 visual_data = {'kind': 'bar', 'labels': ['eager', 'first compiled', 'repeat compiled'], 'ylabel': 'mean squared loss', 'series': [{'label': 'evaluated loss', 'y': [float(loss(w, x, y)), float(first), float(second)]}]}
 
 # Experiment: Derive predictions and gradients outside the transform
-# Experiment — Derive predictions and gradients outside the transform: The analytic value check detects mistakes that...
+# Experiment — Derive predictions and gradients outside the transform
 expected_predictions = jnp.array([0., 0.6, 1.2, 1.8])
 assert jnp.allclose(x @ w, expected_predictions, atol=1e-6)
 assert jnp.allclose(compiled(w, x, y), 0.46, atol=1e-6)
 manual_gradient = (2. / len(y)) * x.T @ (x @ w - y)
-# Differentiate the objective to obtain `compiled_value_gradient` via automatic differentiation.
 compiled_value_gradient = jax.jit(jax.value_and_grad(loss))
 checked_value, checked_gradient = compiled_value_gradient(w, x, y)
 assert jnp.allclose(checked_gradient, manual_gradient, rtol=1e-5, atol=1e-6)
 
 # Experiment: Collect a synchronized latency sample
-# Experiment — Collect a synchronized latency sample: The report includes Python invocation and completed numerical...
+# Experiment — Collect a synchronized latency sample
 import statistics
 def completed_samples(function, repeats=20):
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -83,11 +82,9 @@ for name, function in (("eager", loss), ("compiled", compiled)):
 print("backend / shapes / dtype:", jax.default_backend(), x.shape, w.shape, y.shape, x.dtype)
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Foundation · Compile value_and_grad(loss), check the loss and gradient...
-# Differentiate the objective to obtain `compiled_step` via automatic differentiation.
+# Exercise solution
 compiled_step = jax.jit(jax.value_and_grad(loss))
 v, g = compiled_step(w, x, y)
-# Differentiate the objective to obtain `(expected_v, expected_g)` via automatic differentiation.
 expected_v, expected_g = jax.value_and_grad(loss)(w, x, y)
 assert jnp.allclose(v, expected_v)
 assert jnp.allclose(g, expected_g)
@@ -100,7 +97,7 @@ for new_w in (w, w + 0.25):
     assert jnp.allclose(observed, expected, rtol=1e-5, atol=1e-6)
 
 # Reference practice: Build a report whose timing claim can be checked
-# Build a report whose timing claim can be checked (Challenge): The measurement excludes input construction and first...
+# Build a report whose timing claim can be checked (Challenge)
 def wait_for_outputs(outputs):
     return jax.tree.map(lambda array: array.block_until_ready(), outputs)
 wait_for_outputs(compiled_value_gradient(w, x, y))

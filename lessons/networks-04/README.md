@@ -2,6 +2,8 @@
 
 Phase 05: Neural network training · about 110 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Generate images with an explicit label rule
@@ -81,12 +83,10 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 def bars(seed,n,noise=.08):
-    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
     images=np.zeros((n,8,8,1),np.float32)
     labels=np.arange(n,dtype=np.int32)%2
     for i,label in enumerate(labels):
-        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
@@ -107,7 +107,7 @@ Two seeds produce separate examples. Both labels are balanced by construction; n
 Append the small CNN and the patch dot-product check before defining an optimizer.
 
 ```python
-# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Step 2 — 2. Build and independently inspect the convolution
 # Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
     def __init__(self):
@@ -128,7 +128,6 @@ kernel=np.asarray(model.conv.kernel[...])
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
 def train_step(m,o,x,y):
@@ -178,12 +177,10 @@ import jax.numpy as jnp
 import numpy as np
 import optax
 def bars(seed,n,noise=.08):
-    # Draw pseudorandom samples for `rng` using the explicit RNG state.
     rng=np.random.default_rng(seed)
     images=np.zeros((n,8,8,1),np.float32)
     labels=np.arange(n,dtype=np.int32)%2
     for i,label in enumerate(labels):
-        # Draw pseudorandom samples for `position` using the explicit RNG state.
         position=int(rng.integers(2,6))
         if label==0:images[i,position,:,0]=1.
         else:images[i,:,position,0]=1.
@@ -196,7 +193,7 @@ test_x,test_y=bars(21,24)
 assert train_x.shape==(48,8,8,1) and test_x.shape==(24,8,8,1)
 assert not np.array_equal(np.asarray(train_x[:24]),np.asarray(test_x))
 
-# Step 2 — 2. Build and independently inspect the convolution: The first output at (0,0) consumes exactly the top-left 3\times3...
+# Step 2 — 2. Build and independently inspect the convolution
 # Define `BarCNN` module / container with explicit state and forward pass:
 class BarCNN(nnx.Module):
     def __init__(self):
@@ -217,7 +214,6 @@ kernel=np.asarray(model.conv.kernel[...])
 expected=np.sum(patch*kernel[:,:,:,0])+np.asarray(model.conv.bias[...])[0]
 np.testing.assert_allclose(raw[0,0,0,0],expected,rtol=1e-5,atol=1e-6)
 def loss(m,x,y):return jnp.mean(optax.softmax_cross_entropy_with_integer_labels(m(x),y))
-# Configure or step the Optax optimizer state (`optimizer`).
 optimizer=nnx.Optimizer(model,optax.adam(.03),wrt=nnx.Param)
 @nnx.jit
 def train_step(m,o,x,y):
@@ -275,7 +271,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:39.142297+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:20.761671+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:
@@ -296,7 +292,7 @@ PASS: networks-04
 **Predict before running:** If the spatial location changes to $(2,3)$, which input patch produces that output?
 
 ```python
-# Experiment — Trace a second patch and a second filter: The same learned filter is reused at each valid location;...
+# Experiment — Trace a second patch and a second filter
 patch=np.asarray(test_x[0,2:5,3:6,:])
 # Transfer the device result to the host for an independent NumPy comparison.
 weights=np.asarray(model.conv.kernel[...])[:,:,:,2]
@@ -452,13 +448,13 @@ The final axis is the input-channel dimension for NNX Conv.
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+1. Catch a channel-order mistake (Intermediate)
 2. Rearrange tensor axes to match the required layout for `repaired`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+# Catch a channel-order mistake (Intermediate)
 wrong = jnp.transpose(...)  # TODO: compute wrong
 caught = ...  # TODO: compute caught
 try:model(wrong)
@@ -472,7 +468,7 @@ np.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Catch a channel-order mistake (Intermediate): The mistaken array has eight channels where the layer...
+# Catch a channel-order mistake (Intermediate)
 wrong=jnp.transpose(test_x[:2],(0,3,1,2))
 caught=False
 try:model(wrong)

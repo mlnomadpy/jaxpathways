@@ -2,6 +2,8 @@
 
 Phase 13: Pallas kernels · about 120 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Execute actual emit_pipeline semantics under explicit CPU TPU-layout simulation.
@@ -68,7 +70,7 @@ CPU simulation may execute callbacks, bookkeeping and race tracking that have no
 Create main.py for the first block, then append each block in order in your course CPU environment.
 
 ```python
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -186,7 +188,7 @@ This footprint counts only the declared data buffers. It excludes runtime bookke
 ## Run the example
 
 ```python
-# Step 1 — Reuse the checked arithmetic and add a real pipeline: The outer kernel receives global-memory references and emits an...
+# Step 1 — Reuse the checked arithmetic and add a real pipeline
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -312,7 +314,7 @@ visual_data={'panels':[{'kind':'bar','labels':labels,'ylabel':'program count (co
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T19:26:27.544898+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:23:48.503058+00:00. JAX 0.9.2.
 
 ```text
 Actual backend: cpu simulated layout: TPU v5 lite
@@ -337,7 +339,7 @@ PASS: kernels-03
 **Predict before running:** Can adding a third slot to each input change the numerical answer?
 
 ```python
-# Experiment — Change input buffer count without changing the result: More input buffering changes potential overlap and storage, not...
+# Experiment — Change input buffer count without changing the result
 three=pipelined_axpy(x,y,buffers=3)
 np.testing.assert_allclose(three,reference,rtol=1e-6,atol=1e-6)
 np.testing.assert_array_equal(three,buffered)
@@ -353,7 +355,7 @@ More input buffering changes potential overlap and storage, not arithmetic. This
 **Predict before running:** What work can be overlapped when there is only one tile?
 
 ```python
-# Experiment — Check a one-tile pipeline: A one-tile pipeline has no next tile with which to overlap its...
+# Experiment — Check a one-tile pipeline
 small_x=jnp.arange(8*128,dtype=jnp.float32).reshape(8,128)/100
 small_y=jnp.ones_like(small_x)
 small=pipelined_axpy(small_x,small_y)
@@ -373,19 +375,16 @@ Use a (9,129) random fixture and verify synchronous, double-input-buffered and t
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Create device-backed JAX array `a`.
-2. Create device-backed JAX array `b`.
-3. Transfer the device result to the host for an independent NumPy comparison.
+1. Exercise solution
+2. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Use a (9,129) random fixture and verify synchronous,...
+# Exercise solution
 rng = np.random.default_rng(...)  # TODO: compute rng
 for dtype in (jnp.float32,jnp.bfloat16):
-    # Create device-backed JAX array `a`.
     a = jnp.asarray(...)  # TODO: compute a
-    # Create device-backed JAX array `b`.
     b = jnp.asarray(...)  # TODO: compute b
     expected = ...  # TODO: compute expected
     for buffers,sync in [(2,True),(2,False),(3,False)]:
@@ -398,12 +397,10 @@ print("Changed shape, dtype and schedules verified")
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Use a (9,129) random fixture and verify synchronous,...
+# Exercise solution
 rng=np.random.default_rng(23)
 for dtype in (jnp.float32,jnp.bfloat16):
-    # Create device-backed JAX array `a`.
     a=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
-    # Create device-backed JAX array `b`.
     b=jnp.asarray(rng.normal(size=(9,129)),dtype=dtype)
     expected=(2*a.astype(jnp.float32)+b.astype(jnp.float32)).astype(dtype)
     for buffers,sync in [(2,True),(2,False),(3,False)]:
@@ -474,13 +471,12 @@ Count two input arrays and one output array separately because their buffer coun
 ### How to write: Estimate the price of a third input buffer — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Estimate the price of a third input buffer (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Estimate the price of a third input buffer (Challenge): A third slot for each input increases this limited...
+# Estimate the price of a third input buffer (Challenge)
 for bm,bn in configurations:
     two = ...  # TODO: compute two
     three = ...  # TODO: compute three
@@ -491,7 +487,7 @@ for bm,bn in configurations:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Estimate the price of a third input buffer (Challenge): A third slot for each input increases this limited...
+# Estimate the price of a third input buffer (Challenge)
 for bm,bn in configurations:
     two=(2*2+2)*bm*bn*4
     three=(2*3+2)*bm*bn*4

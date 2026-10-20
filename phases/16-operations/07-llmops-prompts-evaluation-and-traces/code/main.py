@@ -1,7 +1,7 @@
 """LLMOps: version prompts, evaluate behavior and trace requests: worked experiments and reference solutions. CPU checks."""
 
 # Prepare the explicit contract
-# Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
+# Step 1 — Prepare the explicit contract
 import os
 # Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
@@ -15,7 +15,7 @@ import mlflow
 from mlflow import MlflowClient
 
 # Run and inspect the controlled experiment
-# Step 2 — Run and inspect the controlled experiment: A trace connects one request’s spans: retrieval, model invocation,...
+# Step 2 — Run and inspect the controlled experiment
 def llm_case(case, answer, allowed_citations):
     """Deterministic replay evaluator, not an LLM judge or a general safety classifier."""
     if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):
@@ -60,7 +60,7 @@ print('Two real MLflow traces; no LLM API was called and no general model qualit
 assert results[1] == {'overall': 1., 'answerable': 1., 'unanswerable': 1.}
 assert not llm_case(cases[0],dict(answer='CPU',citations=['invented'],abstain=False),['course-v1'])
 
-# Step 1 — Prepare the explicit contract: For a text generator, record the model revision, tokenizer, prompt...
+# Step 1 — Prepare the explicit contract
 import os
 # Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ["MLFLOW_DISABLE_AGENT_HINT"]="1"
@@ -73,7 +73,7 @@ from pathlib import Path
 import mlflow
 from mlflow import MlflowClient
 
-# Step 2 — Run and inspect the controlled experiment: A trace connects one request’s spans: retrieval, model invocation,...
+# Step 2 — Run and inspect the controlled experiment
 def llm_case(case, answer, allowed_citations):
     """Deterministic replay evaluator, not an LLM judge or a general safety classifier."""
     if set(answer) != {'answer', 'citations', 'abstain'} or not isinstance(answer['answer'], str):
@@ -118,7 +118,7 @@ print('Two real MLflow traces; no LLM API was called and no general model qualit
 visual_data={'kind':'bar','labels':['overall (10)','answerable (9)','unsupported (1)'],'xlabel':'fixture group (count)','ylabel':'fixture pass fraction','series':[{'label':name,'y':[r[k] for k in ['overall','answerable','unanswerable']]} for name,r in zip(['always-answer','contract-aware'],results)]}
 
 # Experiment: Separate aggregate and critical-case behavior
-# Experiment — Separate aggregate and critical-case behavior: The extra gate encodes a required behavior that the overall...
+# Experiment — Separate aggregate and critical-case behavior
 release=[r['overall']>=.9 and r['unanswerable']==1. for r in results]
 assert release==[False,True]
 print('Release decisions:',release)
@@ -150,19 +150,19 @@ for broken in (complete_replies[:-1], complete_replies + [complete_replies[0]],
 print('Complete inventory:', replay_summary, '; missing, duplicate and unknown responses rejected.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Add a response with an invented citation and require the evaluator to...
+# Exercise solution
 for citation in ['invented','old-index-v0']:
     assert not llm_case(cases[0],dict(answer='CPU',citations=[citation],abstain=False),['course-v1'])
 print('Unrecognized citations rejected.')
 
 # Reference practice: Check abstention structure
-# Check abstention structure (transfer): Validate the full response object; a boolean alone cannot...
+# Check abstention structure (transfer)
 bad=dict(answer='An unsupported claim',citations=[],abstain=True)
 assert not llm_case(cases[-1],bad,['course-v1'])
 print('An abstention flag alone does not satisfy the output contract.')
 
 # Reference practice: Keep failed work in the evaluation inventory
-# Keep failed work in the evaluation inventory (Transfer): The fixture represents an unsuccessful answer as an empty...
+# Keep failed work in the evaluation inventory (Transfer)
 timeout_replies = [{'id': case['id'], 'response': dict(reply)} for case, reply in zip(cases, guarded)]
 timeout_replies[0]['response'] = dict(answer='', citations=[], abstain=True)
 timeout_summary = score_replay(cases, timeout_replies, ['course-v1'])

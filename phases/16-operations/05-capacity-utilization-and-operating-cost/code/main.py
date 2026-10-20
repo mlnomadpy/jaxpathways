@@ -125,7 +125,7 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -183,7 +183,7 @@ def launch(root, config=None, timeout=10.):
     return result
 
 # Add metric summaries and capacity arithmetic
-# Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
+# Step 4 — Add metric summaries and capacity arithmetic
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -213,7 +213,7 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
                 within_reserve=load <= 1-reserve_fraction)
 
 # Measure jobs before evaluating assumptions
-# Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
+# Step 5 — Measure jobs before evaluating assumptions
 samples=[]
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
@@ -350,7 +350,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -407,7 +407,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Add metric summaries and capacity arithmetic: Keep measured quantities separate from invented planning inputs...
+# Step 4 — Add metric summaries and capacity arithmetic
 def summarize(result):
     updates=[e for e in result['events'] if e['event']=='progress']
     checkpoints=[e['step'] for e in result['events'] if e['event']=='checkpoint']
@@ -436,7 +436,7 @@ def capacity(measured_job_s, arrivals_per_hour, workers, hourly_rate, reserve_fr
                 hypothetical_cost_per_job=measured_job_s*hourly_rate/3600,
                 within_reserve=load <= 1-reserve_fraction)
 
-# Step 5 — Measure jobs before evaluating assumptions: Every duration comes from a completed child; arrival and price...
+# Step 5 — Measure jobs before evaluating assumptions
 samples=[]
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:
@@ -455,7 +455,7 @@ print('assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-h
 visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'complete job seconds','title':'Complete process lifetime','series':[{'label':'wall time','y':[r['wall_s'] for _,r,_ in samples]}]},{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xlabel':'updates in fresh local process','ylabel':'synchronized update seconds','title':'Training updates only — separate vertical scale','series':[{'label':'update time','y':[st['update_s'] for _,_,st in samples]}]}]}
 
 # Experiment: Check units with known arithmetic
-# Experiment — Check units with known arithmetic: This independent arithmetic checks the calculator without...
+# Experiment — Check units with known arithmetic
 known=capacity(90.,80.,4,2.,.25)
 assert known['offered_worker_hours_per_hour']==2.
 assert known['load_fraction']==.5
@@ -464,7 +464,7 @@ assert known['hypothetical_cost_per_job']==.05
 assert known['hourly_budget']==8.
 
 # Experiment: Double the arrivals without changing the job
-# Experiment — Double the arrivals without changing the job: Demand changes the required capacity; it does not automatically...
+# Experiment — Double the arrivals without changing the job
 one=capacity(measured,600,2,1.5,.25)
 two=capacity(measured,1200,2,1.5,.25)
 assert abs(two['load_fraction']-2*one['load_fraction'])<1e-12
@@ -472,7 +472,7 @@ assert two['hypothetical_cost_per_job']==one['hypothetical_cost_per_job']
 print('nominal load at two demand scenarios:',one['load_fraction'],two['load_fraction'])
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Using the measured service-time input, calculate the minimum worker...
+# Exercise solution
 changed=capacity(measured,1200,2,1.5,.4)
 required=changed['minimum_workers_with_reserve']
 demand=1200*measured/3600
@@ -481,13 +481,13 @@ if required>1: assert demand/(required-1) > .6
 print('required workers under changed hypothetical reserve:',required)
 
 # Reference practice: Account for failed attempts
-# Account for failed attempts (Transfer / diagnosis): Failure overhead belongs in the budget even when it does not...
+# Account for failed attempts (Transfer / diagnosis)
 per_attempt=measured*1.5/3600
 per_completion=125*per_attempt/100
 assert abs(per_completion-1.25*per_attempt)<1e-12
 
 # Reference practice: Reject impossible capacity inputs
-# Reject impossible capacity inputs (Transfer / diagnosis): Input validation makes the assumptions visible and prevents...
+# Reject impossible capacity inputs (Transfer / diagnosis)
 for change in [dict(reserve_fraction=1.),dict(workers=0),dict(measured_job_s=float('nan'))]:
     inputs=dict(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5)
     inputs.update(change)

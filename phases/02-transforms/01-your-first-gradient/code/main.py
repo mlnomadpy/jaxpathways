@@ -7,7 +7,6 @@ import jax.numpy as jnp
 # Define the square and differentiate it
 def f(x):
     return x ** 2
-# Differentiate the objective to obtain `derivative` via automatic differentiation.
 derivative = jax.grad(f)
 
 # Check the derivative at two points
@@ -30,14 +29,12 @@ import jax
 import jax.numpy as jnp
 def f(x):
     return x ** 2
-# Differentiate the objective to obtain `derivative` via automatic differentiation.
 derivative = jax.grad(f)
 print(float(derivative(3.0)))
 assert jnp.allclose(derivative(3.0), 6.)
 assert jnp.allclose(derivative(0.0), 0.)
 
 # Figure data experiment
-# Generate a uniform grid of points in `grid`.
 grid = jnp.linspace(-4.0, 4.0, 81)
 point = 3.0
 slope = derivative(point)
@@ -50,14 +47,13 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 def composed(x):
     return (3. * x + 1.) ** 2
 for point in (-1., 0., 2.):
-    # Differentiate the objective to obtain `observed` via automatic differentiation.
     observed = jax.grad(composed)(point)
     expected = 6. * (3. * point + 1.)
     print("chain rule:", point, float(observed))
     assert jnp.allclose(observed, expected)
 
 # Experiment: Choose a finite-difference scale
-# Experiment — Choose a finite-difference scale: A central difference has truncation error at larger h and...
+# Experiment — Choose a finite-difference scale
 def cubic32(x):
     return x ** 3
 point = jnp.array(3., dtype=jnp.float32)
@@ -75,14 +71,14 @@ for point in (-2., 0., 3.):
 assert cubic(-0.1) < cubic(0.) < cubic(0.1)
 
 # Reference practice: Differentiate the parameter you intended
-# Differentiate the parameter you intended (Practice): A parameter gradient and an input sensitivity answer...
+# Differentiate the parameter you intended (Practice)
 def scalar_prediction(weight, x):
     return weight * x
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)
 assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)
 
 # Reference practice: Repair an objective without hiding its meaning
-# Repair an objective without hiding its meaning (Challenge): Mean and sum agree on the minimizer here but differ by a...
+# Repair an objective without hiding its meaning (Challenge)
 def two_costs(x):
     return jnp.array([x ** 2, (x - 2.) ** 2])
 def mean_cost(x):

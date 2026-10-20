@@ -4,7 +4,7 @@
   "minutes": 45,
   "content": {
     "idea": "A pure function makes its changing inputs visible and returns its result without secretly changing shared state. That gives transformations such as differentiation and compilation a clear computation to work with. When a prediction changes, we should be able to identify the input that changed.",
-    "code": "# Pure functions and explicit inputs: A pure function makes its changing inputs visible and returns...\nimport jax.numpy as jnp\ndef predict(params, x):\n    return params[\"weight\"] * x + params[\"bias\"]\nparams = {\"weight\": jnp.array(2.), \"bias\": jnp.array(1.)}\nx = jnp.array([0., 1., 2.])\nprint(predict(params, x))\nassert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))",
+    "code": "# Pure functions and explicit inputs\nimport jax.numpy as jnp\ndef predict(params, x):\n    return params[\"weight\"] * x + params[\"bias\"]\nparams = {\"weight\": jnp.array(2.), \"bias\": jnp.array(1.)}\nx = jnp.array([0., 1., 2.])\nprint(predict(params, x))\nassert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))",
     "output": "[\\(1\\). \\(3\\). \\(5\\).]",
     "exercise": "Create new parameters with weight \\(3\\) while retaining the original bias. Show that the original parameters still produce the original predictions.",
     "solution": "# Exercise solution: Create new parameters with weight 3 while retaining the original bias.\nupdated = {**params, \"weight\": jnp.array(3.)}\nassert jnp.allclose(predict(updated, x), jnp.array([1.,4.,7.]))\nassert float(params[\"weight\"]) == 2.0",
@@ -67,7 +67,7 @@
       {
         "title": "Replay two independent model configurations",
         "prediction": "What should each parameter setting predict, regardless of which was called first?",
-        "code": "# Experiment — Replay two independent model configurations: Independent configurations reveal the benefit of explicit inputs...\nfirst_params = {\"weight\": jnp.array(2.), \"bias\": jnp.array(1.)}\nsecond_params = {\"weight\": jnp.array(-1.), \"bias\": jnp.array(4.)}\nfirst_output = predict(first_params, x)\nsecond_output = predict(second_params, x)\nassert jnp.allclose(first_output, jnp.array([1., 3., 5.]))\nassert jnp.allclose(second_output, jnp.array([4., 3., 2.]))\nassert jnp.allclose(predict(first_params, x), first_output)\nassert jnp.allclose(predict(second_params, x), second_output)",
+        "code": "# Experiment — Replay two independent model configurations\nfirst_params = {\"weight\": jnp.array(2.), \"bias\": jnp.array(1.)}\nsecond_params = {\"weight\": jnp.array(-1.), \"bias\": jnp.array(4.)}\nfirst_output = predict(first_params, x)\nsecond_output = predict(second_params, x)\nassert jnp.allclose(first_output, jnp.array([1., 3., 5.]))\nassert jnp.allclose(second_output, jnp.array([4., 3., 2.]))\nassert jnp.allclose(predict(first_params, x), first_output)\nassert jnp.allclose(predict(second_params, x), second_output)",
         "output": "The two configurations produce \\([1, 3, 5]\\) and \\([4, 3, 2]\\), and both can be replayed.",
         "explanation": "Independent configurations reveal the benefit of explicit inputs more clearly than one call on one global parameter set."
       }
@@ -78,7 +78,7 @@
         "difficulty": "Practice",
         "prompt": "Implement `with_bias(params, new_bias)`, returning a new dictionary. Verify outputs for new bias \\(-2\\) and replay the original prediction.",
         "hint": "A new dictionary is required; changing a binding in the original dictionary breaks the promised contract.",
-        "solution": "# Update the bias without changing either parameter input (Practice): The caller can evaluate both the old and new model without...\ndef with_bias(parameters, new_bias):\n    return {**parameters, \"bias\": jnp.asarray(new_bias)}\nchanged_bias = with_bias(params, -2.)\nassert changed_bias is not params\nassert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))\nassert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))",
+        "solution": "# Update the bias without changing either parameter input (Practice)\ndef with_bias(parameters, new_bias):\n    return {**parameters, \"bias\": jnp.asarray(new_bias)}\nchanged_bias = with_bias(params, -2.)\nassert changed_bias is not params\nassert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))\nassert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))",
         "explanation": "The caller can evaluate both the old and new model without restoring a global value or depending on call order."
       },
       {
@@ -86,7 +86,7 @@
         "difficulty": "Challenge",
         "prompt": "Write `evaluate(params, inputs, targets)` that returns predictions and a scalar MSE. Test two model configurations on targets \\([1, 3, 5]\\). Keep printing outside the function.",
         "hint": "Compute data inside the numerical core and report it outside. A tuple return does not itself imply mutation.",
-        "solution": "# Return predictions and metrics together (Challenge): The second model has residuals [3, 0, -3], giving mean...\ndef evaluate(parameters, inputs, targets):\n    predictions = predict(parameters, inputs)\n    return predictions, jnp.mean((predictions - targets) ** 2)\nlabels = jnp.array([1., 3., 5.])\noutputs, error = evaluate(first_params, x, labels)\nother_outputs, other_error = evaluate(second_params, x, labels)\n# Check tensor shape invariant: `error.shape == ()`\nassert error.shape == ()\nassert jnp.allclose(error, 0.)\nassert jnp.allclose(other_error, 6.)\nassert jnp.allclose(outputs, first_output)\nprint(\"evaluation losses:\", float(error), float(other_error))",
+        "solution": "# Return predictions and metrics together (Challenge)\ndef evaluate(parameters, inputs, targets):\n    predictions = predict(parameters, inputs)\n    return predictions, jnp.mean((predictions - targets) ** 2)\nlabels = jnp.array([1., 3., 5.])\noutputs, error = evaluate(first_params, x, labels)\nother_outputs, other_error = evaluate(second_params, x, labels)\n# Check tensor shape invariant: `error.shape == ()`\nassert error.shape == ()\nassert jnp.allclose(error, 0.)\nassert jnp.allclose(other_error, 6.)\nassert jnp.allclose(outputs, first_output)\nprint(\"evaluation losses:\", float(error), float(other_error))",
         "explanation": "The second model has residuals \\([3, 0, -3]\\), giving mean squared error \\(6\\). Known output arithmetic makes the check independent of the implementation."
       }
     ],
@@ -114,7 +114,7 @@
       "reading": "The horizontal axis is the input and the vertical axis is the prediction. The solid line uses bias \\(1\\); the dashed line uses bias \\(3\\). Both use the same weight \\(2\\).\n\nAt input \\(0\\), the predictions are \\(1\\) and \\(3\\). At input \\(2\\), they are \\(5\\) and \\(7\\). The gap stays \\(2\\) everywhere, and the parallel lines rise by \\(2\\) for each unit increase in the input.",
       "connection": "In \\(y=wx+b\\), changing the explicit bias changes the vertical offset, while the unchanged weight preserves the slope. You can read the bias directly where the line meets the vertical axis because the product \\(wx\\) is zero there.\n\nThis makes the function’s inputs inspectable: the change in the output follows the change in the passed parameter. As a check, setting the bias to \\(0\\) would move the solid line down by \\(1\\) and make it pass through the origin. It would not flatten the line.",
       "alt": "Explicit parameters make predictions inspectable. The horizontal axis is the input and the vertical axis is the prediction. The solid line uses bias \\(1\\); the dashed line uses bias \\(3\\). Both use the same weight \\(2\\). At input \\(0\\), the predictions are \\(1\\) and \\(3\\). At input \\(2\\), they are \\(5\\) and \\(7\\). The gap stays \\(2\\) everywhere, and the parallel lines rise by \\(2\\) for each unit increase in the input.",
-      "code": "# Create device-backed JAX array `changed`.\nchanged = {**params, 'bias': jnp.array(3.0)}\nvisual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}"
+      "code": "changed = {**params, 'bias': jnp.array(3.0)}\nvisual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}"
     },
     "buildSteps": [
       {

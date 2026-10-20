@@ -1,7 +1,7 @@
 """LoRA: adapt, save and merge low-rank updates: worked experiments and reference solutions. CPU checks."""
 
 # 1. Define the frozen-plus-adapter forward pass
-# Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
+# Step 1 — 1. Define the frozen-plus-adapter forward pass
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -15,7 +15,6 @@ def lora_forward(x, base, a, b, alpha=1.0):
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
 base = jnp.zeros_like(source_w)
-# Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 for _ in range(150):
     base = base - 0.15 * base_step(base)
@@ -40,7 +39,6 @@ assert np.linalg.norm(initial_grads[1]) > 0
 for _ in range(250):
     value, g = step(params)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
 a, b = params
@@ -60,7 +58,7 @@ print(
     base.size,
 )
 
-# Step 1 — 1. Define the frozen-plus-adapter forward pass: The base is an input to the forward pass but is not in the adapter...
+# Step 1 — 1. Define the frozen-plus-adapter forward pass
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -73,7 +71,6 @@ def lora_forward(x, base, a, b, alpha=1.0):
 x = jnp.asarray(np.random.default_rng(4).normal(size=(24, 6)), jnp.float32)
 source_w = jnp.arange(24, dtype=jnp.float32).reshape(6, 4) / 40
 base = jnp.zeros_like(source_w)
-# Differentiate the objective to obtain `base_step` via automatic differentiation.
 base_step = jax.jit(jax.grad(lambda w: jnp.mean((x @ w - x @ source_w) ** 2)))
 for _ in range(150):
     base = base - 0.15 * base_step(base)
@@ -97,7 +94,6 @@ assert np.linalg.norm(initial_grads[1]) > 0
 for _ in range(250):
     value, g = step(params)
     history.append(float(value))
-    # Transform every leaf of the parameter PyTree (`params`).
     params = jax.tree.map(lambda a, b: a - 0.4 * b, params, g)
 
 a, b = params
@@ -128,7 +124,6 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 # Experiment: Show why two zero factors cannot start learning
 # Experiment — Show why two zero factors cannot start learning: Each factor’s derivative contains the other factor.
 zero = (jnp.zeros_like(a), jnp.zeros_like(b))
-# Differentiate the objective to obtain `zero_grad` via automatic differentiation.
 zero_grad = jax.grad(loss)(zero)
 assert all(
     np.array_equal(np.asarray(g), np.zeros(g.shape)) for g in zero_grad
@@ -136,11 +131,9 @@ assert all(
 print('Both zero factors produce zero first gradients.')
 
 # Experiment: Check both factor gradients with matrix calculus
-# Experiment — Check both factor gradients with matrix calculus: Nonzero factors exercise both gradient paths, while nonunit...
+# Experiment — Check both factor gradients with matrix calculus
 rng = np.random.default_rng(14)
-# Create device-backed JAX array `a_probe`.
 a_probe = jnp.asarray(rng.normal(size=(6, 2)) * 0.1, jnp.float32)
-# Create device-backed JAX array `b_probe`.
 b_probe = jnp.asarray(rng.normal(size=(2, 4)) * 0.1, jnp.float32)
 scale = 3.0 / 2
 output_gradient = (
@@ -148,7 +141,6 @@ output_gradient = (
 )
 expected_a = scale * x.T @ output_gradient @ b_probe.T
 expected_b = scale * a_probe.T @ x.T @ output_gradient
-# Differentiate the objective to obtain `(actual_a, actual_b)` via automatic differentiation.
 actual_a, actual_b = jax.grad(
     lambda aa, bb: jnp.mean(
         (lora_forward(x, base, aa, bb, 3.0) - target) ** 2
@@ -160,7 +152,7 @@ np.testing.assert_allclose(actual_b, expected_b, atol=1e-6)
 print('Both LoRA factor gradients match the matrix-calculus oracle at alpha/r = 1.5.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Save both adapter factors and their rank/scaling metadata, reload them...
+# Exercise solution
 import tempfile
 from pathlib import Path
 
@@ -187,7 +179,7 @@ with tempfile.TemporaryDirectory() as folder:
 print('Adapter round trip and merge checked.')
 
 # Reference practice: Check the merge on new inputs
-# Check the merge on new inputs (Transfer): The second check detects an operational merge error that...
+# Check the merge on new inputs (Transfer)
 new_x = jnp.asarray(np.random.default_rng(91).normal(size=(7, 6)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
@@ -196,11 +188,9 @@ assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged)) >
 print('New-input merge passes; accidental double merge changes outputs.')
 
 # Reference practice: Test nonunit scaling and an impossible rank-one target
-# Test nonunit scaling and an impossible rank-one target (Challenge): The residual predicts a capacity limit independently of an...
+# Test nonunit scaling and an impossible rank-one target (Challenge)
 rng = np.random.default_rng(8)
-# Create device-backed JAX array `a2`.
 a2 = jnp.asarray(rng.normal(size=(6, 2)), jnp.float32)
-# Create device-backed JAX array `b2`.
 b2 = jnp.asarray(rng.normal(size=(2, 4)), jnp.float32)
 np.testing.assert_allclose(
     lora_forward(x, base, a2, b2, alpha=3.0),

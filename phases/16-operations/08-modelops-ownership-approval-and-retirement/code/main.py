@@ -1,7 +1,7 @@
 """ModelOps: own, approve, roll back and retire a model: worked experiments and reference solutions. CPU checks."""
 
 # Prepare the explicit contract
-# Step 1 — Prepare the explicit contract: Record the model artifact, data/evaluation identity, image digest,...
+# Step 1 — Prepare the explicit contract
 import hashlib, json, math, tempfile
 from pathlib import Path
 
@@ -71,7 +71,7 @@ print('All failed gates preserved the selected version. This fixture does not au
 assert checks == [True, False, False, False]
 print("Accepted original / changed artifact / expired approval / wrong target:", checks)
 
-# Step 1 — Prepare the explicit contract: Record the model artifact, data/evaluation identity, image digest,...
+# Step 1 — Prepare the explicit contract
 import hashlib, json, math, tempfile
 from pathlib import Path
 
@@ -149,7 +149,7 @@ else:
     raise AssertionError('expired approval accepted')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Change the evaluation hash while keeping the model unchanged, and...
+# Exercise solution
 rechecked=dict(bundle,evaluation_hash=digest({'high_slice_mse':9.}))
 try:
     verify_release(rechecked,approval,150,'cpu-demo')
@@ -159,7 +159,7 @@ else:
     raise AssertionError('stale approval accepted')
 
 # Reference practice: Review a changed owner
-# Review a changed owner (transfer): Ownership is an operational responsibility, so this policy...
+# Review a changed owner (transfer)
 changed_owner=dict(bundle,owner='different-team')
 assert digest(changed_owner)!=approval['bundle_hash']
 try:

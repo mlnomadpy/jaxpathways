@@ -2,6 +2,8 @@
 
 Phase 16: Workload operations · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Launch and reap a real bounded subprocess with explicit runtime requirements.
@@ -216,7 +218,7 @@ The string is a real Python program launched in a separate process. It emits str
 Append this block to main.py. Run python3 main.py in the CPU course environment.
 
 ```python
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -423,7 +425,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -519,7 +521,7 @@ visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:58.129507+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:25:29.598681+00:00. JAX 0.9.2.
 
 ```text
 statuses: completed failed timed_out
@@ -536,7 +538,7 @@ PASS: operations-01
 **Predict before running:** Can an impossible device requirement produce valid training progress?
 
 ```python
-# Experiment — A child that fails before training: This check links the failure classification to a concrete...
+# Experiment — A child that fails before training
 assert any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])
 assert not any(e['event']=='progress' for e in rejected['events'])
 ```
@@ -617,7 +619,7 @@ Call default_config directly; no child should be needed.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject invalid work before spawning (Transfer / diagnosis): Validation makes an impossible workload fail at the caller...
+# Reject invalid work before spawning (Transfer / diagnosis)
 for values in [dict(steps=0),dict(batch_size=65)]:
     try:
         default_config(**values)
@@ -630,7 +632,7 @@ for values in [dict(steps=0),dict(batch_size=65)]:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject invalid work before spawning (Transfer / diagnosis): Validation makes an impossible workload fail at the caller...
+# Reject invalid work before spawning (Transfer / diagnosis)
 for values in [dict(steps=0),dict(batch_size=65)]:
     try:
         default_config(**values)
@@ -664,7 +666,7 @@ Read the files before leaving the temporary-directory context.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Preserve a successful checkpoint (Transfer / diagnosis): A status and a durable artifact should agree about what was...
+# Preserve a successful checkpoint (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     result = launch(...)  # TODO: compute result
@@ -677,7 +679,7 @@ with tempfile.TemporaryDirectory() as folder:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Preserve a successful checkpoint (Transfer / diagnosis): A status and a durable artifact should agree about what was...
+# Preserve a successful checkpoint (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     result=launch(folder,dict(steps=4))

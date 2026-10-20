@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 100 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Checkpoint complete training state with Orbax and replay the next update.
@@ -85,7 +87,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -114,7 +115,6 @@ def same_tree(left,right):
             np.testing.assert_array_equal(host_a,host_b)
         else:
             np.testing.assert_allclose(host_a,host_b,rtol=1e-6,atol=1e-7)
-# Define `step(state, x, y)` to evaluate the objective and its automatic derivatives:
 def step(state,x,y):
     # Sample deterministic random values into `key` using an explicit PRNG key.
     key = jax.random.wrap_key_data(state["key_data"],impl="threefry2x32")
@@ -151,7 +151,7 @@ This setup makes the dataset and software assumptions explicit. No external data
 Append this block to the same file; follow the named state objects through each function.
 
 ```python
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -177,7 +177,7 @@ The function boundaries expose which inputs determine the next output and which 
 Append the checks, save main.py and run python main.py. Predict what should agree before running.
 
 ```python
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
@@ -207,7 +207,6 @@ import tempfile
 import json
 import hashlib
 from pathlib import Path
-# Configure or step the Optax optimizer state (`tx`).
 tx = optax.adam(0.05)
 def initial_state():
     params = {"weight":jnp.array(0.,jnp.float32),"bias":jnp.array(0.,jnp.float32)}
@@ -264,7 +263,7 @@ def validate_contract(saved,expected):
 workspace = tempfile.TemporaryDirectory()
 root = Path(workspace.name)
 
-# Step 2 — Build the pipeline or state transition: The function boundaries expose which inputs determine the next...
+# Step 2 — Build the pipeline or state transition
 x = jnp.array([0.,0.5,1.],dtype=jnp.float32)
 y = 2*x-1
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -282,7 +281,7 @@ with ocp.StandardCheckpointer() as checkpointer:
     restored = checkpointer.restore(checkpoint_path,target={"training":initial_state(),"contract":encode_contract(contract)})
 validate_contract(restored["contract"],contract)
 
-# Step 3 — Run the comparison: The comparison checks the next behavior, not merely whether a save...
+# Step 3 — Run the comparison
 same_tree(state,restored["training"])
 expected_next,expected_loss = step(state,x,y)
 restored_next,restored_loss = step(restored["training"],x,y)
@@ -322,7 +321,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:51:02.813508+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:34.385805+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3
@@ -345,7 +344,7 @@ PASS: recovery-03
 **Predict before running:** With the same parameters, key and input, will a freshly initialized optimizer reproduce the next update?
 
 ```python
-# Experiment — Model-only restoration loses Adam history: Saved weights give the same pre-update predictions but not...
+# Experiment — Model-only restoration loses Adam history
 model_only = dict(restored["training"])
 model_only["optimizer"] = tx.init(model_only["params"])
 wrong_next,_ = step(model_only,x,y)
@@ -363,7 +362,7 @@ Saved weights give the same pre-update predictions but not necessarily the same 
 **Predict before running:** What changes if parameters and Adam memory restore correctly but the key resets to seed seven?
 
 ```python
-# Experiment — Reset the random stream: A seed identifies the initial stream; a saved continuation key...
+# Experiment — Reset the random stream
 reset_random = dict(restored["training"])
 reset_random["key_data"] = initial_state()["key_data"]
 reset_next,reset_loss = step(reset_random,x,y)
@@ -383,13 +382,12 @@ Advance to step five, save to a new directory, restore and verify step six again
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Advance to step five, save to a new directory, restore and verify step...
+# Exercise solution
 later = ...  # TODO: compute later
 for _ in range(2):later,_=step(later,x,y)
 with ocp.StandardCheckpointer() as cp:
@@ -407,7 +405,7 @@ assert int(right["step"])  # TODO: complete assertion check
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Advance to step five, save to a new directory, restore and verify step...
+# Exercise solution
 later = state
 for _ in range(2):later,_=step(later,x,y)
 with ocp.StandardCheckpointer() as cp:
@@ -448,7 +446,7 @@ Create a new mapping and replace only its optimizer entry.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Show what weights-only recovery loses (Transfer): A checkpoint can return plausible predictions yet fail to...
+# Show what weights-only recovery loses (Transfer)
 full = ...  # TODO: compute full
 weights_only = dict(...)  # TODO: compute weights_only
 full_next,_ = step(...)  # TODO: compute full_next,_
@@ -462,7 +460,7 @@ print('Full restore Adam count: 4; reset memory count: 1; next parameters differ
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Show what weights-only recovery loses (Transfer): A checkpoint can return plausible predictions yet fail to...
+# Show what weights-only recovery loses (Transfer)
 full=restored['training']
 weights_only=dict(full,optimizer=tx.init(full['params']))
 full_next,_=step(full,x,y)
@@ -492,13 +490,14 @@ A compatible pytree can still represent the wrong update rule.
 ### How to write: Reject an incompatible update configuration — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`
-2. Integer PRNG words must be checked exactly, not with relative float tolerance.
+1. Reject an incompatible update configuration (Challenge)
+2. Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`
+3. Integer PRNG words must be checked exactly, not with relative float tolerance.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible update configuration (Challenge): Array restoration does not verify that a learning rate, data...
+# Reject an incompatible update configuration (Challenge)
 changed_contract = dict(...)  # TODO: compute changed_contract
 try:
     validate_contract(restored["contract"],changed_contract)
@@ -524,7 +523,7 @@ else:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject an incompatible update configuration (Challenge): Array restoration does not verify that a learning rate, data...
+# Reject an incompatible update configuration (Challenge)
 changed_contract = dict(contract,learning_rate=0.1)
 try:
     validate_contract(restored["contract"],changed_contract)

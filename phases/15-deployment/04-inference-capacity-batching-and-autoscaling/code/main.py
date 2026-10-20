@@ -1,17 +1,14 @@
 """Inference capacity, batching, and autoscaling: worked experiments and reference solutions. CPU checks."""
 
 # 1. Define and check the inference workload
-# Step 1 — 1. Define and check the inference workload: The timer includes dispatch and completion for already resident...
+# Step 1 — 1. Define and check the inference workload
 import math
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(82)
-# Create device-backed JAX array `W1`.
 W1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))
-# Create device-backed JAX array `W2`.
 W2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))
 # Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:
 @jax.jit
@@ -19,7 +16,6 @@ def infer(inputs):
     return jnp.tanh(inputs@W1)@W2
 def measure(batch_size,repeats=40):
     host=rng.normal(size=(batch_size,64)).astype(np.float32)
-    # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -50,7 +46,7 @@ for report in measurements:
 service_ms=measurements[0]['p50_ms']
 
 # 3. Model a queue with an independent hand-check
-# Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
+# Step 3 — 3. Model a queue with an independent hand-check
 def simulate_queue(arrival_ms,service_ms):
     # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
@@ -81,17 +77,14 @@ assert np.isclose(overloaded_latency[-1],24.6*service_ms)
 print('measured batch-one service proxy (ms):',service_ms)
 print('simulated last stable/overloaded response (ms):',stable_latency[-1],overloaded_latency[-1])
 
-# Step 1 — 1. Define and check the inference workload: The timer includes dispatch and completion for already resident...
+# Step 1 — 1. Define and check the inference workload
 import math
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(82)
-# Create device-backed JAX array `W1`.
 W1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))
-# Create device-backed JAX array `W2`.
 W2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))
 # Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:
 @jax.jit
@@ -99,7 +92,6 @@ def infer(inputs):
     return jnp.tanh(inputs@W1)@W2
 def measure(batch_size,repeats=40):
     host=rng.normal(size=(batch_size,64)).astype(np.float32)
-    # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -128,7 +120,7 @@ for report in measurements:
     print({key:value for key,value in report.items() if key!='samples_ms'})
 service_ms=measurements[0]['p50_ms']
 
-# Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
+# Step 3 — 3. Model a queue with an independent hand-check
 def simulate_queue(arrival_ms,service_ms):
     # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
@@ -163,7 +155,7 @@ print('simulated last stable/overloaded response (ms):',stable_latency[-1],overl
 visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batch 1","batch 8","batch 32"],"xlabel":"resident-input batch shape","ylabel":"measured CPU milliseconds per batch","series":[{"label":"warm p50","y":[r["p50_ms"] for r in measurements]},{"label":"warm p95","y":[r["p95_ms"] for r in measurements]}]},{"kind":"line","x":request_index.tolist(),"xlabel":"request index (simulation)","ylabel":"simulated response / measured service","series":[{"label":"spaced arrivals","y":(stable_latency/service_ms).tolist()},{"label":"overloaded arrivals","y":(overloaded_latency/service_ms).tolist()}]}]}
 
 # Experiment: Compute a replica estimate with explicit units
-# Experiment — Compute a replica estimate with explicit units: This is arithmetic on hypothetical effective capacities, not an...
+# Experiment — Compute a replica estimate with explicit units
 arrival_per_s=300.
 capacity_per_s=200.
 target_utilization=.7
@@ -172,7 +164,7 @@ assert replicas==3
 print("hypothetical planned replicas:",replicas)
 
 # Experiment: Estimate batch-collection delay
-# Experiment — Estimate batch-collection delay: A throughput improvement can be overwhelmed by waiting for a...
+# Experiment — Estimate batch-collection delay
 batch=8
 spacing_ms=2.
 collection_wait=(batch-1-np.arange(batch))*spacing_ms
@@ -180,7 +172,7 @@ assert collection_wait[0]==14.
 assert collection_wait.mean()==7.
 
 # Experiment: Inspect the interpolation behind p95
-# Experiment — Inspect the interpolation behind p95: These deliberately constructed values explain the percentile...
+# Experiment — Inspect the interpolation behind p95
 illustrative_ms=np.array([1.]*19+[100.])
 interpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))
 np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)
@@ -188,19 +180,19 @@ assert interpolated_p95 not in illustrative_ms and illustrative_ms.max()==100.
 print('Analytic sample p95 / max (ms):',interpolated_p95,illustrative_ms.max())
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Simulate a burst of four requests arriving at time zero with a...
+# Exercise solution
 _,burst_finish,burst_latency=simulate_queue([0.,0.,0.,0.],2.)
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 
 # Reference practice: Expose burst sensitivity
-# Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
+# Expose burst sensitivity (Transfer / diagnosis)
 _,_,smooth=simulate_queue(np.arange(5)*3.,2.)
 _,_,burst=simulate_queue(np.zeros(5),2.)
 assert smooth.max()==2. and burst.max()==10.
 
 # Reference practice: Reject a broken timeline
-# Reject a broken timeline (Transfer / diagnosis): Validating assumptions prevents a simulation from silently...
+# Reject a broken timeline (Transfer / diagnosis)
 for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
     try:
         simulate_queue(arrivals,duration)

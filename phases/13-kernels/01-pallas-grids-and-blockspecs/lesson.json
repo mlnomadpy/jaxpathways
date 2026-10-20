@@ -48,20 +48,20 @@
       {
         "title": "Change block geometry without changing values",
         "prediction": "Will blocks of \\((3,5)\\) change the logical answer?",
-        "code": "# Experiment — Change block geometry without changing values: Grid geometry is an implementation choice for this independent...\nchanged=blocked_axpy(x,y,(3,5))\nnp.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)\nprint(\"Changed grid:\",(2,3),\"same numerical result\")",
+        "code": "# Experiment — Change block geometry without changing values\nchanged=blocked_axpy(x,y,(3,5))\nnp.testing.assert_allclose(changed,reference,rtol=1e-6,atol=1e-6)\nprint(\"Changed grid:\",(2,3),\"same numerical result\")",
         "output": "The grid becomes (2,3); the logical output is unchanged.",
         "explanation": "Grid geometry is an implementation choice for this independent elementwise operation. It must not alter the mathematical contract."
       },
       {
         "title": "Expose the floor-division omission",
         "prediction": "How many logical cells would a grid built with floor division cover?",
-        "code": "# Experiment — Expose the floor-division omission: This diagnostic models the ownership bug without reading...\ncovered=np.zeros((5,11),dtype=bool)\nfor i in range(5//2):\n    for j in range(11//4):\n        covered[i*2:(i+1)*2,j*4:(j+1)*4]=True\nassert int(covered.sum())==32\nassert not covered[-1,-1]\nprint(\"Floor-grid missing logical cells:\",int((~covered).sum()))",
+        "code": "# Experiment — Expose the floor-division omission\ncovered=np.zeros((5,11),dtype=bool)\nfor i in range(5//2):\n    for j in range(11//4):\n        covered[i*2:(i+1)*2,j*4:(j+1)*4]=True\nassert int(covered.sum())==32\nassert not covered[-1,-1]\nprint(\"Floor-grid missing logical cells:\",int((~covered).sum()))",
         "output": "A floor-divided grid misses 23 of the 55 logical cells.",
         "explanation": "This diagnostic models the ownership bug without reading uninitialized kernel memory. Ceiling division plus an explicit tail policy repairs it."
       }
     ],
     "exercise": "Test a singleton row and a changed nondivisible matrix with negative values. Verify full NumPy agreement and exact output shapes for two block choices.",
-    "solution": "# Exercise solution: Test a singleton row and a changed nondivisible matrix with negative...\nfor shape in [(1,7),(7,9)]:\n    # Create device-backed JAX array `a`.\n    a=jnp.asarray(np.random.default_rng(11).normal(size=shape),dtype=jnp.float32)\n    # Create device-backed JAX array `b`.\n    b=jnp.asarray(np.random.default_rng(12).normal(size=shape),dtype=jnp.float32)\n    for block in [(2,4),(3,5)]:\n        result=blocked_axpy(a,b,block)\n        # Check tensor shape invariant: `result.shape==shape`\n        assert result.shape==shape\n        # Transfer the device result to the host for an independent NumPy comparison.\n        np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)\nprint(\"Singleton and changed tails verified\")",
+    "solution": "# Exercise solution\nfor shape in [(1,7),(7,9)]:\n    a=jnp.asarray(np.random.default_rng(11).normal(size=shape),dtype=jnp.float32)\n    b=jnp.asarray(np.random.default_rng(12).normal(size=shape),dtype=jnp.float32)\n    for block in [(2,4),(3,5)]:\n        result=blocked_axpy(a,b,block)\n        # Check tensor shape invariant: `result.shape==shape`\n        assert result.shape==shape\n        # Transfer the device result to the host for an independent NumPy comparison.\n        np.testing.assert_allclose(result,2*np.asarray(a)+np.asarray(b),rtol=1e-6,atol=1e-6)\nprint(\"Singleton and changed tails verified\")",
     "practice": [
       {
         "title": "Reject a broadcast that changes the contract",

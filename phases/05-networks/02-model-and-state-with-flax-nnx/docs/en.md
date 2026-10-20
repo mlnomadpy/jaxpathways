@@ -2,6 +2,8 @@
 
 Phase 05: Neural network training · about 80 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Move the explicit equations into a module
@@ -78,7 +80,6 @@ class TinyMLP(nnx.Module):
         rngs=nnx.Rngs(seed)
         self.hidden=nnx.Linear(2,3,rngs=rngs)
         self.out=nnx.Linear(3,1,rngs=rngs)
-        # Create device-backed JAX array `self.calls`.
         self.calls=nnx.Variable(jnp.array(0,dtype=jnp.int32))
     def __call__(self,x,record=False):
         if record:self.calls[...] += 1
@@ -117,12 +118,10 @@ Append the clone test. Predict which counter changes when the clone executes.
 ```python
 # Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
-# Transform every leaf of the parameter PyTree (`clone`).
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
 clone(batch,record=True)
 assert int(clone.calls[...])==2 and int(model.calls[...])==1
-# Differentiate the objective to obtain `grads` via automatic differentiation.
 grads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)
 assert sum(a.size for a in jax.tree.leaves(grads))==13
 assert 'calls' not in grads
@@ -145,7 +144,6 @@ class TinyMLP(nnx.Module):
         rngs=nnx.Rngs(seed)
         self.hidden=nnx.Linear(2,3,rngs=rngs)
         self.out=nnx.Linear(3,1,rngs=rngs)
-        # Create device-backed JAX array `self.calls`.
         self.calls=nnx.Variable(jnp.array(0,dtype=jnp.int32))
     def __call__(self,x,record=False):
         if record:self.calls[...] += 1
@@ -168,12 +166,10 @@ assert int(model.calls[...])==1
 
 # Step 3 — 3. Split, merge, and test independence: nnx.grad differentiates Param variables by default.
 graphdef,state=nnx.split(model)
-# Transform every leaf of the parameter PyTree (`clone`).
 clone=nnx.merge(graphdef,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 np.testing.assert_allclose(clone(batch),model(batch),rtol=1e-6)
 clone(batch,record=True)
 assert int(clone.calls[...])==2 and int(model.calls[...])==1
-# Differentiate the objective to obtain `grads` via automatic differentiation.
 grads=nnx.grad(lambda m:jnp.mean(m(batch)**2))(model)
 assert sum(a.size for a in jax.tree.leaves(grads))==13
 assert 'calls' not in grads
@@ -206,7 +202,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'le
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:18.557643+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:06.702568+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2
@@ -221,7 +217,7 @@ PASS: networks-02
 **Predict before running:** Adding $0.25$ to the output bias should do what to each logit?
 
 ```python
-# Experiment — Bias shifts every score equally: An affine output bias changes the decision threshold uniformly;...
+# Experiment — Bias shifts every score equally
 before=np.asarray(model(batch))
 saved=model.out.bias[...]
 model.out.bias[...] = saved+.25
@@ -309,14 +305,12 @@ Snapshot the original parameters before editing clone.out.bias.
 - `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
 
 **Step-by-step implementation plan:**
-1. Transform every leaf of the parameter PyTree (`original_leaves`).
-2. Transfer the device result to the host for an independent NumPy comparison.
+1. Transfer the device result to the host for an independent NumPy comparison.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change a clone without changing its source (Transfer): The bias is broadcast over observations, so every logit...
-# Transform every leaf of the parameter PyTree (`original_leaves`).
+# Change a clone without changing its source (Transfer)
 original_leaves = ...  # TODO: compute original_leaves
 # Transfer the device result to the host for an independent NumPy comparison.
 old_clone = np.asarray(...)  # TODO: compute old_clone
@@ -330,8 +324,7 @@ print('Clone logits shifted by one; original parameters unchanged.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Change a clone without changing its source (Transfer): The bias is broadcast over observations, so every logit...
-# Transform every leaf of the parameter PyTree (`original_leaves`).
+# Change a clone without changing its source (Transfer)
 original_leaves=[np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(model,nnx.Param))]
 # Transfer the device result to the host for an independent NumPy comparison.
 old_clone=np.asarray(clone(batch)).copy()
@@ -365,19 +358,17 @@ Assignment changes which name refers to the same object.
 - `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
 
 **Step-by-step implementation plan:**
-1. Diagnose a shared module reference (Intermediate): Sharing a graph is useful for tied layers but wrong for an...
-2. Transform every leaf of the parameter PyTree (`independent`).
+1. Diagnose a shared module reference (Intermediate)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a shared module reference (Intermediate): Sharing a graph is useful for tied layers but wrong for an...
+# Diagnose a shared module reference (Intermediate)
 saved_count = int(...)  # TODO: compute saved_count
 shared = ...  # TODO: compute shared
 shared(batch,record = ...  # TODO: compute shared(batch,record
 assert int(model.calls[...])  # TODO: complete assertion check
 graph,state = nnx.split(...)  # TODO: compute graph,state
-# Transform every leaf of the parameter PyTree (`independent`).
 independent = nnx.merge(...)  # TODO: compute independent
 independent(batch,record = ...  # TODO: compute independent(batch,record
 assert int(model.calls[...])  # TODO: complete assertion check
@@ -387,13 +378,12 @@ assert int(independent.calls[...])  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Diagnose a shared module reference (Intermediate): Sharing a graph is useful for tied layers but wrong for an...
+# Diagnose a shared module reference (Intermediate)
 saved_count=int(model.calls[...])
 shared=model
 shared(batch,record=True)
 assert int(model.calls[...])==saved_count+1
 graph,state=nnx.split(model)
-# Transform every leaf of the parameter PyTree (`independent`).
 independent=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))
 independent(batch,record=True)
 assert int(model.calls[...])==saved_count+1

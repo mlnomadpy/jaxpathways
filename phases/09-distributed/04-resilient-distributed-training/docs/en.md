@@ -2,6 +2,8 @@
 
 Phase 09: Distributed training · about 105 minutes · 4 logical CPU devices
 
+This reference configures logical CPU devices to practice placement and sharding. Logical devices do not measure TPU performance. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Restore a complete training state with explicit target sharding.
@@ -94,7 +96,7 @@ The controlled failures below replace only momentum or only the random key. The 
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 1 — Initialize the runtime before device access: Every controller must use consistent state, data and collective...
+# Step 1 — Initialize the runtime before device access
 import os
 import tempfile
 from pathlib import Path
@@ -122,7 +124,7 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
+# Step 2 — Define the global fixture and placements
 count = jax.device_count()
 assert count >= 2, 'Use at least two devices for the placement exercise'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -143,7 +145,7 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 3 — Carry complete transition state: Every controller must use consistent state, data and collective...
+# Step 3 — Carry complete transition state
 def placed(value, sharding=rep):
     # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(value)
@@ -157,7 +159,7 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 4 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 4 — Checkpoint and verify replay
 def initial():
     # Create or split explicit PRNG key(s) (`(key, order_key)`) for reproducible randomness.
     key, order_key = jax.random.split(jax.random.PRNGKey(17))
@@ -175,11 +177,10 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 5 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 5 — Checkpoint and verify replay
 # Define and JIT-compile `update(w, velocity, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def update(w, velocity, x, y):
-    # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
     v = 0.8 * velocity + grad
     return w - 0.04 * v, v, loss
@@ -192,7 +193,7 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 6 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 6 — Checkpoint and verify replay
 def transition(state):
     cursor = int(state['cursor'])
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -228,7 +229,7 @@ Every controller must use consistent state, data and collective order; the defau
 Add this block after the preceding block in main.py and run the assembled file in a fresh process.
 
 ```python
-# Step 7 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 7 — Checkpoint and verify replay
 state = initial()
 state, first_ids, _ = transition(state)
 # Shared path is mandatory for real multi-controller execution.
@@ -275,7 +276,7 @@ Every controller must use consistent state, data and collective order; the defau
 ## Run the example
 
 ```python
-# Step 1 — Initialize the runtime before device access: Every controller must use consistent state, data and collective...
+# Step 1 — Initialize the runtime before device access
 import os
 import tempfile
 from pathlib import Path
@@ -295,7 +296,7 @@ import numpy as np
 import orbax.checkpoint as ocp
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
-# Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
+# Step 2 — Define the global fixture and placements
 count = jax.device_count()
 assert count >= 2, 'Use at least two devices for the placement exercise'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -308,13 +309,13 @@ data = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)
 truth = np.linspace(-0.3, 0.4, width, dtype=np.float32)
 targets = data @ truth
 
-# Step 3 — Carry complete transition state: Every controller must use consistent state, data and collective...
+# Step 3 — Carry complete transition state
 def placed(value, sharding=rep):
     # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(value)
     return jax.make_array_from_callback(a.shape, sharding, lambda index: a[index])
 
-# Step 4 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 4 — Checkpoint and verify replay
 def initial():
     # Create or split explicit PRNG key(s) (`(key, order_key)`) for reproducible randomness.
     key, order_key = jax.random.split(jax.random.PRNGKey(17))
@@ -324,16 +325,15 @@ def initial():
              'order': placed(np.asarray(jax.random.permutation(order_key, size))),
              'cursor': placed(np.int32(0)), 'step': placed(np.int32(0)) }
 
-# Step 5 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 5 — Checkpoint and verify replay
 # Define and JIT-compile `update(w, velocity, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def update(w, velocity, x, y):
-    # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
     v = 0.8 * velocity + grad
     return w - 0.04 * v, v, loss
 
-# Step 6 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 6 — Checkpoint and verify replay
 def transition(state):
     cursor = int(state['cursor'])
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -361,7 +361,7 @@ def transition(state):
                step=placed(np.int32(int(state['step'])+1)))
     return new, ids.copy(), float(loss)
 
-# Step 7 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 7 — Checkpoint and verify replay
 state = initial()
 state, first_ids, _ = transition(state)
 # Shared path is mandatory for real multi-controller execution.
@@ -427,7 +427,7 @@ visual_data={'kind':'line','x':[1,2,3],'xlabel':'update after checkpoint','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:52:29.677387+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:27.523105+00:00. JAX 0.9.2.
 
 ```text
 Recorded backend/processes/devices: cpu 1 4
@@ -435,13 +435,13 @@ Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-gte6lwe5/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-y8y7yj2j/step-one
 Recorded backend/processes/devices: cpu 1 4
 Restored step/cursor: 1 8
 Next sample IDs across epoch boundary: [[12, 5, 4, 1, 8, 13, 2, 11], [9, 0, 7, 15, 11, 13, 8, 14], [1, 6, 5, 4, 3, 12, 2, 10]]
 Uninterrupted losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
 Restored losses: [0.5069587826728821, 0.19637340307235718, 0.1798383891582489]
-Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-e7jucqsn/step-one
+Checkpoint: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-distributed-recovery-0l68di22/step-one
 Same next sample IDs, different weights after missing momentum: 0.0195157527923584
 Five resumed transitions and all addressable parameter replicas agree.
 Current-epoch batch matches; next-epoch batch exposes the wrong key.
@@ -544,7 +544,7 @@ The saved order supplies the remaining current-epoch batch. The key is consumed 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Find a delayed random-state failure (Transfer): A successful first resumed update is separate from future...
+# Find a delayed random-state failure (Transfer)
 # Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
 wrong_key_state = ...  # TODO: compute wrong_key_state
 correct_a, ids_a, _ = transition(...)  # TODO: compute correct_a, ids_a, _
@@ -561,7 +561,7 @@ print('Current-epoch batch matches; next-epoch batch exposes the wrong key.')
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Find a delayed random-state failure (Transfer): A successful first resumed update is separate from future...
+# Find a delayed random-state failure (Transfer)
 # Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
 wrong_key_state = {**restored, 'key': placed(np.asarray(jax.random.PRNGKey(999)))}
 correct_a, ids_a, _ = transition(restored)

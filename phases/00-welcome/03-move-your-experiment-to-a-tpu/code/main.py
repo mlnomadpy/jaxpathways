@@ -1,7 +1,7 @@
 """Move your experiment to a TPU: worked experiments and reference solutions. CPU checks."""
 
 # Choose the requested platform
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -10,7 +10,7 @@ import jax
 import jax.numpy as jnp
 
 # Place inputs and compare a completed prediction
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
@@ -47,7 +47,7 @@ assert report["max_absolute_error"] < 1e-6
 print(json.dumps(report, indent=2))
 print("Completed prediction:", np.asarray(y).tolist())
 
-# Step 1 — Choose the requested platform: Keep the requested backend, observed output placement and...
+# Step 1 — Choose the requested platform
 import os
 import json
 import platform
@@ -55,7 +55,7 @@ import numpy as np
 import jax
 import jax.numpy as jnp
 
-# Step 2 — Place inputs and compare a completed prediction: Keep the requested backend, observed output placement and...
+# Step 2 — Place inputs and compare a completed prediction
 expected = os.environ.get('COURSE_EXPECT_PLATFORM', 'cpu')
 if expected not in {'cpu', 'tpu'}:
     raise ValueError('COURSE_EXPECT_PLATFORM must be cpu or tpu')
@@ -91,7 +91,7 @@ print('Completed prediction:', np.asarray(y).tolist())
 visual_data={'kind':'line','x':list(range(8)),'xlabel':'observation row','ylabel':'prediction','series':[{'label':'JAX: '+expected,'y':np.asarray(y).tolist()},{'label':'NumPy reference','y':reference.tolist()}]}
 
 # Experiment: Reject a mismatched report
-# Experiment — Reject a mismatched report: Numerical agreement and requested placement are separate...
+# Experiment — Reject a mismatched report
 def verify_report(record, required):
     if record['platform'] != required or record['expected'] != required:
         raise ValueError('requested and observed platform disagree')
@@ -122,7 +122,7 @@ assert {d.platform for d in changed.devices()} == {expected}
 print('Changed bias, first prediction:', float(changed[0]))
 
 # Reference practice: Test row order without changing the model
-# Test row order without changing the model (Transfer): Reversing rows should reverse predictions because each...
+# Test row order without changing the model (Transfer)
 reversed_x = jax.device_put(x_host[::-1].copy(), devices[0])
 reversed_y = predict(reversed_x, w)
 # Wait for device work to finish before timing it or comparing its result on the host.

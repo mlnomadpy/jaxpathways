@@ -11,13 +11,12 @@ def preference_loss(w, chosen, rejected):
     return jnp.mean(jax.nn.softplus(-margin))
 
 # 2. Construct and inspect the three comparisons
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -63,13 +62,12 @@ def preference_loss(w, chosen, rejected):
     margin = (chosen - rejected) @ w
     return jnp.mean(jax.nn.softplus(-margin))
 
-# Step 2 — 2. Construct and inspect the three comparisons: Write the desired order before fitting: response zero above one,...
+# Step 2 — 2. Construct and inspect the three comparisons
 features = jnp.array([[1.0, 0.0], [0.0, 1.0], [-1.0, -1.0]])
 chosen = features[jnp.array([0, 0, 1])]
 rejected = features[jnp.array([1, 2, 2])]
 w = jnp.zeros(2)
 history = []
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(
     jax.value_and_grad(lambda w: preference_loss(w, chosen, rejected))
 )
@@ -122,19 +120,18 @@ assert reverse > forward
 print('Forward/reversed preference NLL:', forward, reverse)
 
 # Experiment: Fit conflicting labels conceptually
-# Experiment — Fit conflicting labels conceptually: Disagreement is not fixed by flipping labels until training...
+# Experiment — Fit conflicting labels conceptually
 conflict = lambda margin: 0.5 * (
     jax.nn.softplus(-margin) + jax.nn.softplus(margin)
 )
 np.testing.assert_allclose(conflict(0.0), np.log(2), atol=1e-6)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(conflict)(0.0), 0.0, atol=1e-7)
 assert float(conflict(2.0)) > float(conflict(0.0))
 np.testing.assert_allclose(conflict(2.0), conflict(-2.0))
 print('Balanced conflicting labels prefer a zero margin.')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Calculate the initial loss for tied reward scores independently and...
+# Exercise solution
 np.testing.assert_allclose(
     preference_loss(jnp.zeros(2), chosen, rejected), -np.log(0.5), atol=1e-6
 )
@@ -151,7 +148,7 @@ assert float(preference_loss(2 * w, chosen, rejected)) < float(
 print('Ranking unchanged; confidence and downstream reward scale change.')
 
 # Reference practice: Derive the linear reward gradient
-# Derive the linear reward gradient (Challenge): Checking both directions catches a sign error that a single...
+# Derive the linear reward gradient (Challenge)
 probe_w = jnp.array([0.2, -0.4])
 for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -161,7 +158,6 @@ for positive, negative in [(chosen, rejected), (rejected, chosen)]:
     analytic = np.mean(
         (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0
     )
-    # Differentiate the objective to obtain gradients ``.
     np.testing.assert_allclose(
         jax.grad(preference_loss)(probe_w, positive, negative),
         analytic,

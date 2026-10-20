@@ -2,6 +2,8 @@
 
 Phase 02: JAX transformations · about 60 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Distinguish runtime array values from shape/dtype metadata and static configuration.
@@ -118,7 +120,7 @@ The outputs 6 and 2 distinguish the two reduction rules while using the same dat
 ## Run the example
 
 ```python
-# Tracing, static arguments, and recompilation: Tracing observes how Python builds an array computation from...
+# Tracing, static arguments, and recompilation
 import jax
 import jax.numpy as jnp
 def reduce_values(x, mode):
@@ -163,7 +165,7 @@ visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:47.170389+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:12.240177+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0
@@ -203,7 +205,7 @@ The second call supplies new values with the same shape/dtype. The numerical res
 **Predict before running:** For positive and negative scalar inputs, predict the branch result. Why can eager Python decide but tracing cannot?
 
 ```python
-# Experiment — Reproduce and repair a dynamic branch: The test expects a particular category of error and confirms the...
+# Experiment — Reproduce and repair a dynamic branch
 def python_branch(value):
     if value > 0.:
         return value ** 2
@@ -240,12 +242,13 @@ Foundation · Extend reduce_values with a static max mode while preserving sum a
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
+1. Exercise solution
+2. Wrap with `jax.jit` (`choose`) so XLA traces and compiles the function.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Extend reduce_values with a static max mode while...
+# Exercise solution
 def choose_reduction(values, mode):
     if mode = ...  # TODO: compute if mode
         return ...  # TODO: return computed result
@@ -270,7 +273,7 @@ else:
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Extend reduce_values with a static max mode while...
+# Exercise solution
 def choose_reduction(values, mode):
     if mode == "sum":
         return values.sum()
@@ -365,20 +368,19 @@ Do not use elapsed time alone to infer whether tracing occurred. Values and shap
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
 
 **Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
-2. Create evenly spaced index values in `values`.
+1. Audit a shape-dependent specialization (Challenge)
+2. Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit a shape-dependent specialization (Challenge): Changing the length changes shape metadata and can need a...
+# Audit a shape-dependent specialization (Challenge)
 def plain_sum_squares(values):
     return ...  # TODO: return computed result
 # Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
 compiled_squares = jax.jit(...)  # TODO: compute compiled_squares
 for length in (3, 5):
     for shift in (0., 1.):
-        # Create evenly spaced index values in `values`.
         values = jnp.arange(...)  # TODO: compute values
         expected = sum(...)  # TODO: compute expected
         assert jnp.allclose(compiled_squares(values), expected)  # TODO: complete assertion check
@@ -387,14 +389,13 @@ for length in (3, 5):
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Audit a shape-dependent specialization (Challenge): Changing the length changes shape metadata and can need a...
+# Audit a shape-dependent specialization (Challenge)
 def plain_sum_squares(values):
     return jnp.sum(values ** 2)
 # Wrap with `jax.jit` (`compiled_squares`) so XLA traces and compiles the function.
 compiled_squares = jax.jit(plain_sum_squares)
 for length in (3, 5):
     for shift in (0., 1.):
-        # Create evenly spaced index values in `values`.
         values = jnp.arange(length, dtype=jnp.float32) + shift
         expected = sum(float(v) ** 2 for v in values)
         assert jnp.allclose(compiled_squares(values), expected)

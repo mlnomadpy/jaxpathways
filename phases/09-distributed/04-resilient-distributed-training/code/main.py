@@ -1,7 +1,7 @@
 """Resilient distributed training: worked experiments and reference solutions. CPU checks."""
 
 # Initialize the runtime before device access
-# Step 1 — Initialize the runtime before device access: Every controller must use consistent state, data and collective...
+# Step 1 — Initialize the runtime before device access
 import os
 import tempfile
 from pathlib import Path
@@ -22,7 +22,7 @@ import orbax.checkpoint as ocp
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
 # Define the global fixture and placements
-# Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
+# Step 2 — Define the global fixture and placements
 count = jax.device_count()
 assert count >= 2, 'Use at least two devices for the placement exercise'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -36,14 +36,14 @@ truth = np.linspace(-0.3, 0.4, width, dtype=np.float32)
 targets = data @ truth
 
 # Carry complete transition state
-# Step 3 — Carry complete transition state: Every controller must use consistent state, data and collective...
+# Step 3 — Carry complete transition state
 def placed(value, sharding=rep):
     # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(value)
     return jax.make_array_from_callback(a.shape, sharding, lambda index: a[index])
 
 # Checkpoint and verify replay
-# Step 4 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 4 — Checkpoint and verify replay
 def initial():
     # Create or split explicit PRNG key(s) (`(key, order_key)`) for reproducible randomness.
     key, order_key = jax.random.split(jax.random.PRNGKey(17))
@@ -54,17 +54,16 @@ def initial():
              'cursor': placed(np.int32(0)), 'step': placed(np.int32(0)) }
 
 # Checkpoint and verify replay
-# Step 5 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 5 — Checkpoint and verify replay
 # Define and JIT-compile `update(w, velocity, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def update(w, velocity, x, y):
-    # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
     v = 0.8 * velocity + grad
     return w - 0.04 * v, v, loss
 
 # Checkpoint and verify replay
-# Step 6 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 6 — Checkpoint and verify replay
 def transition(state):
     cursor = int(state['cursor'])
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -93,7 +92,7 @@ def transition(state):
     return new, ids.copy(), float(loss)
 
 # Checkpoint and verify replay
-# Step 7 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 7 — Checkpoint and verify replay
 state = initial()
 state, first_ids, _ = transition(state)
 # Shared path is mandatory for real multi-controller execution.
@@ -134,7 +133,7 @@ print('Uninterrupted losses:', baseline_losses)
 print('Restored losses:', resumed_losses)
 print('Checkpoint:', checkpoint_path)
 
-# Step 1 — Initialize the runtime before device access: Every controller must use consistent state, data and collective...
+# Step 1 — Initialize the runtime before device access
 import os
 import tempfile
 from pathlib import Path
@@ -154,7 +153,7 @@ import numpy as np
 import orbax.checkpoint as ocp
 from jax.sharding import Mesh, NamedSharding, PartitionSpec as P
 
-# Step 2 — Define the global fixture and placements: Every controller must use consistent state, data and collective...
+# Step 2 — Define the global fixture and placements
 count = jax.device_count()
 assert count >= 2, 'Use at least two devices for the placement exercise'
 mesh = Mesh(np.asarray(jax.devices()), ('data',))
@@ -167,13 +166,13 @@ data = np.random.default_rng(41).normal(size=(size, width)).astype(np.float32)
 truth = np.linspace(-0.3, 0.4, width, dtype=np.float32)
 targets = data @ truth
 
-# Step 3 — Carry complete transition state: Every controller must use consistent state, data and collective...
+# Step 3 — Carry complete transition state
 def placed(value, sharding=rep):
     # Transfer the device result to the host for an independent NumPy comparison.
     a = np.asarray(value)
     return jax.make_array_from_callback(a.shape, sharding, lambda index: a[index])
 
-# Step 4 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 4 — Checkpoint and verify replay
 def initial():
     # Create or split explicit PRNG key(s) (`(key, order_key)`) for reproducible randomness.
     key, order_key = jax.random.split(jax.random.PRNGKey(17))
@@ -183,16 +182,15 @@ def initial():
              'order': placed(np.asarray(jax.random.permutation(order_key, size))),
              'cursor': placed(np.int32(0)), 'step': placed(np.int32(0)) }
 
-# Step 5 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 5 — Checkpoint and verify replay
 # Define and JIT-compile `update(w, velocity, x, y)` so XLA traces and fuses the operations:
 @jax.jit
 def update(w, velocity, x, y):
-    # Differentiate the objective to obtain `(loss, grad)` via automatic differentiation.
     loss, grad = jax.value_and_grad(lambda a: jnp.mean((x @ a - y)**2))(w)
     v = 0.8 * velocity + grad
     return w - 0.04 * v, v, loss
 
-# Step 6 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 6 — Checkpoint and verify replay
 def transition(state):
     cursor = int(state['cursor'])
     # Transfer the device result to the host for an independent NumPy comparison.
@@ -220,7 +218,7 @@ def transition(state):
                step=placed(np.int32(int(state['step'])+1)))
     return new, ids.copy(), float(loss)
 
-# Step 7 — Checkpoint and verify replay: Every controller must use consistent state, data and collective...
+# Step 7 — Checkpoint and verify replay
 state = initial()
 state, first_ids, _ = transition(state)
 # Shared path is mandatory for real multi-controller execution.
@@ -290,7 +288,7 @@ assert int(resumed['step']) == 6
 print('Five resumed transitions and all addressable parameter replicas agree.')
 
 # Reference practice: Find a delayed random-state failure
-# Find a delayed random-state failure (Transfer): A successful first resumed update is separate from future...
+# Find a delayed random-state failure (Transfer)
 # Create or split explicit PRNG key(s) (`wrong_key_state`) for reproducible randomness.
 wrong_key_state = {**restored, 'key': placed(np.asarray(jax.random.PRNGKey(999)))}
 correct_a, ids_a, _ = transition(restored)

@@ -43,7 +43,6 @@ features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
 w = jnp.zeros((9, 16))
 history = []
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 
 # 3. Fit the decoder and audit the reconstruction
@@ -125,7 +124,6 @@ features = jnp.concatenate([visible.reshape(4, -1), jnp.ones((4, 1))], axis=1)
 w = jnp.zeros((9, 16))
 history = []
 loss = lambda w: masked_mse((features @ w).reshape(4, 4, 4), patches, hidden)
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(loss))
 
 # Step 3 — 3. Fit the decoder and audit the reconstruction: The host loop checks the reduction independently.
@@ -198,19 +196,18 @@ def ambiguity_loss(value):
 np.testing.assert_allclose(
     [ambiguity_loss(0.0), ambiguity_loss(1.0), ambiguity_loss(2.0)], [2.0, 1.0, 2.0]
 )
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(ambiguity_loss)(1.0), 0.0, atol=1e-7)
 print('Ambiguous target MSE at predictions 0, 1, 2: 2, 1, 2')
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Verify the bottom-right patch against a direct slice and explain why a...
+# Exercise solution
 np.testing.assert_array_equal(
     patches[2, 3], np.asarray(images[2, 2:, 2:, :]).reshape(-1)
 )
 print('Bottom-right patch order verified.')
 
 # Reference practice: Expose the leakage shortcut
-# Expose the leakage shortcut (Transfer): An information-flow check is necessary because the leaked...
+# Expose the leakage shortcut (Transfer)
 shortcut = patches
 assert float(masked_mse(shortcut, patches, hidden)) == 0.0
 # Check tensor shape invariant: `features.shape[1] == 9`
@@ -218,7 +215,7 @@ assert features.shape[1] == 9
 print('The zero-loss shortcut receives hidden pixels; the real features contain only eight visible pixels and a bias.')
 
 # Reference practice: Audit every patch of a rectangular color image
-# Audit every patch of a rectangular color image (Challenge): The rectangular multichannel case catches axis errors that a...
+# Audit every patch of a rectangular color image (Challenge)
 numbered = np.arange(2 * 4 * 6 * 3, dtype=np.float32).reshape(2, 4, 6, 3)
 oracle = np.stack(
     [
@@ -232,7 +229,6 @@ oracle = np.stack(
         for image in numbered
     ]
 )
-# Create device-backed JAX array ``.
 np.testing.assert_array_equal(patchify(jnp.asarray(numbered)), oracle)
 changed_images = images.at[:, :2, 2:, :].add(17.0).at[:, 2:, :2, :].add(-9.0)
 changed_patches = patchify(changed_images)

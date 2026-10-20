@@ -2,6 +2,8 @@
 
 Phase 07: Transformers & language models · about 90 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Follow the two residual paths
@@ -85,7 +87,7 @@ Record maximum absolute error for the supplied small input; do not require bitwi
 In the CPU environment from setup, create main.py and add this block. Write down the dimensions and the known result before continuing.
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
@@ -98,7 +100,7 @@ These imports provide JAX array transformations and NumPy reference calculations
 Append this block in the same file. Follow the shape diagram above and identify each reduction or state transition.
 
 ```python
-# Step 2 — 2. Implement the mechanism: x → norm → Q/K/V → causal attention → output projection...
+# Step 2 — 2. Implement the mechanism
 def layer_norm(x):
     # Reduce along axis=-1 to compute `mean`.
     mean = jnp.mean(x, axis=-1, keepdims=True)
@@ -117,7 +119,6 @@ def block_forward(p, x):
     h = layer_norm(x)
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
     scores = q@k.T / jnp.sqrt(x.shape[-1])
-    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
@@ -134,7 +135,7 @@ residual → norm → expansion → GELU → contraction
 Append this block and run python main.py. Compare its output with your prediction. An assertion failure means a stated contract needs investigation.
 
 ```python
-# Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
+# Step 3 — 3. Run and check
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
@@ -143,7 +144,6 @@ output = block_forward(p, x)
 assert output.shape == x.shape
 # Ensure all array elements remain finite: `jnp.all(jnp.isfinite(output))`
 assert jnp.all(jnp.isfinite(output))
-# Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
 assert jnp.allclose(block_forward(zero, x), x)
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
@@ -155,12 +155,12 @@ Output shape $(4, 8)$; finite values, zero-projection identity, compiled/eager a
 ## Run the example
 
 ```python
-# Step 1 — 1. Prepare the experiment: These imports provide JAX array transformations and NumPy...
+# Step 1 — 1. Prepare the experiment
 import jax
 import jax.numpy as jnp
 import numpy as np
 
-# Step 2 — 2. Implement the mechanism: x → norm → Q/K/V → causal attention → output projection...
+# Step 2 — 2. Implement the mechanism
 def layer_norm(x):
     # Normalize each token over its feature channels by computing its mean.
     mean = jnp.mean(x, axis=-1, keepdims=True)
@@ -179,13 +179,12 @@ def block_forward(p, x):
     h = layer_norm(x)
     q, k, v = h@p["q"], h@p["k"], h@p["v"]
     scores = q@k.T / jnp.sqrt(x.shape[-1])
-    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
     weights = jax.nn.softmax(jnp.where(allowed, scores, -jnp.inf), axis=-1)
     residual = x + (weights@v)@p["o"]
     return residual + jax.nn.gelu(layer_norm(residual)@p["up"])@p["down"]
 
-# Step 3 — 3. Run and check: Output shape (4, 8); finite values, zero-projection identity,...
+# Step 3 — 3. Run and check
 # Create or split explicit PRNG key(s) (`p`) for reproducible randomness.
 p = init_block(jax.random.key(7))
 x = jnp.arange(32, dtype=jnp.float32).reshape(4,8)/10
@@ -194,7 +193,6 @@ output = block_forward(p, x)
 assert output.shape == x.shape
 # Ensure all array elements remain finite: `jnp.all(jnp.isfinite(output))`
 assert jnp.all(jnp.isfinite(output))
-# Transform every leaf of the parameter PyTree (`zero`).
 zero = jax.tree.map(jnp.zeros_like, p)
 assert jnp.allclose(block_forward(zero, x), x)
 assert jnp.allclose(jax.jit(block_forward)(p,x), output, atol=1e-5)
@@ -229,7 +227,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:51:50.264978+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:22:01.330460+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)
@@ -245,7 +243,7 @@ PASS: transformers-03
 **Predict before running:** Which output rows can change when only the last token changes?
 
 ```python
-# Experiment — Verify the residual identity and causal boundary: Masking and per-token operations preserve causal independence...
+# Experiment — Verify the residual identity and causal boundary
 changed_x = x.at[-1].add(100.)
 changed_output = block_forward(p, changed_x)
 assert jnp.allclose(changed_output[:3], output[:3], atol=1e-5)
@@ -261,14 +259,12 @@ Masking and per-token operations preserve causal independence through both subla
 **Predict before running:** Which operations use float32 in mixed_block? Will its error necessarily be smaller for every input?
 
 ```python
-# Experiment — Compare two precision policies: Storage/activation casts and sensitive-reduction precision are...
-# Transform every leaf of the parameter PyTree (`low_p`).
+# Experiment — Compare two precision policies
 low_p = jax.tree.map(lambda z:z.astype(jnp.bfloat16), p)
 low_x = x.astype(jnp.bfloat16)
 low_out = block_forward(low_p, low_x).astype(jnp.float32)
 error = jnp.max(jnp.abs(low_out-output))
 print("bfloat16 max absolute error:", float(error))
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(low_out))
 assert error < 0.1
 
@@ -276,7 +272,6 @@ def mixed_block(p, x):
     h = layer_norm(x.astype(jnp.float32)).astype(jnp.bfloat16)
     q,k,v = h@p["q"], h@p["k"], h@p["v"]
     scores = (q@k.T).astype(jnp.float32)/jnp.sqrt(x.shape[-1])
-    # Create evenly spaced index values in `allowed`.
     allowed = jnp.arange(x.shape[0])[:,None] >= jnp.arange(x.shape[0])[None,:]
     weights = jax.nn.softmax(jnp.where(allowed,scores,-jnp.inf),axis=-1).astype(jnp.bfloat16)
     residual = x+(weights@v)@p["o"]
@@ -309,16 +304,15 @@ Differentiate the mean squared block output with respect to every projection. Ch
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `g` via automatic differentiation.
+1. Exercise solution
 2. Check tensor shape invariant: `all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(...`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Differentiate the mean squared block output with respect to every...
+# Exercise solution
 def objective(params):
     return ...  # TODO: return computed result
-# Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(...)  # TODO: compute g
 # Check tensor shape invariant: `all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(...`
 assert all(a.shape  # TODO: complete assertion check
@@ -332,10 +326,9 @@ assert jnp.allclose(fd,g["down"][0,0],atol=1e-4,rtol=2e-2)  # TODO: complete ass
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Differentiate the mean squared block output with respect to every...
+# Exercise solution
 def objective(params):
     return jnp.mean(block_forward(params,x)**2)
-# Differentiate the objective to obtain `g` via automatic differentiation.
 g = jax.grad(objective)(p)
 # Check tensor shape invariant: `all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(...`
 assert all(a.shape==b.shape and jnp.all(jnp.isfinite(b)) for a,b in zip(jax.tree.leaves(p),jax.tree.leaves(g)))
@@ -374,7 +367,7 @@ Use population variance over features and epsilon $10^{-5}$.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check normalization without autodiff (Transfer / diagnosis): The independent reduction and constant-row case check the...
+# Check normalization without autodiff (Transfer / diagnosis)
 row = np.asarray(...)  # TODO: compute row
 reference = ...  # TODO: compute reference
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol = ...  # TODO: compute np.testing.assert_allclose(layer_norm(x)[0],reference,atol
@@ -384,7 +377,7 @@ assert jnp.allclose(layer_norm(jnp.ones((2,8))),0.)  # TODO: complete assertion 
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Check normalization without autodiff (Transfer / diagnosis): The independent reduction and constant-row case check the...
+# Check normalization without autodiff (Transfer / diagnosis)
 row = np.asarray(x[0])
 reference = (row-row.mean())/np.sqrt(np.mean((row-row.mean())**2)+1e-5)
 np.testing.assert_allclose(layer_norm(x)[0],reference,atol=1e-6)
@@ -416,7 +409,7 @@ The expanded tensor has twice the model width.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a residual width mismatch (Transfer / diagnosis): Residual paths require matching widths; the down projection...
+# Repair a residual width mismatch (Transfer / diagnosis)
 expanded = jax.nn.gelu(...)  # TODO: compute expanded
 # Check tensor shape invariant: `expanded.shape == (4,16)`
 assert expanded.shape  # TODO: complete assertion check
@@ -433,7 +426,7 @@ assert (x + expanded@p["down"]).shape  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Repair a residual width mismatch (Transfer / diagnosis): Residual paths require matching widths; the down projection...
+# Repair a residual width mismatch (Transfer / diagnosis)
 expanded = jax.nn.gelu(layer_norm(x)@p["up"])
 # Check tensor shape invariant: `expanded.shape == (4,16)`
 assert expanded.shape == (4,16)

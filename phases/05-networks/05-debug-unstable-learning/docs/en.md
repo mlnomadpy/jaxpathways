@@ -2,6 +2,8 @@
 
 Phase 05: Neural network training · about 85 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Derive the gradient and curvature on paper
@@ -69,7 +71,6 @@ y=2*x
 def loss(w,features=x,targets=y):return jnp.mean((w*features-targets)**2)
 def analytic_gradient(w):return (28/3)*(w-2)
 np.testing.assert_allclose(loss(0.),56/3,rtol=1e-6)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 ```
 
@@ -81,16 +82,13 @@ Append the runner. Each history row stores pre-update weight, loss, and gradient
 
 ```python
 # Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
-# Define `run(rate, steps, features, targets...)` to evaluate the objective and its automatic derivatives:
 def run(rate,steps,features=x,targets=y,clip=None):
     w=jnp.array(0.)
     history=[]
     objective=lambda value:loss(value,features,targets)
     for _ in range(steps):
-        # Differentiate the objective to obtain `(value, grad)` via automatic differentiation.
         value,grad=jax.value_and_grad(objective)(w)
         history.append([float(w),float(value),float(jnp.abs(grad))])
-        # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
@@ -107,7 +105,7 @@ The rate changes while initial state, data, and objective stay fixed. This isola
 Append analytic comparisons for every recorded iteration, then print the finite divergence trace.
 
 ```python
-# Step 3 — 3. Match the recorded failure to the exact recurrence: An alternating parameter error and a 3.24 loss multiplier support...
+# Step 3 — 3. Match the recorded failure to the exact recurrence
 for rate,history in [(.1,good),(.3,bad)]:
     expected_w=2-2*(1-rate*28/3)**np.arange(len(history))
     expected_loss=(14/3)*(expected_w-2)**2
@@ -131,7 +129,6 @@ y=2*x
 def loss(w,features=x,targets=y):return jnp.mean((w*features-targets)**2)
 def analytic_gradient(w):return (28/3)*(w-2)
 np.testing.assert_allclose(loss(0.),56/3,rtol=1e-6)
-# Differentiate the objective to obtain gradients ``.
 np.testing.assert_allclose(jax.grad(loss)(0.),-56/3,rtol=1e-6)
 
 # Step 2 — 2. Instrument the update loop: The rate changes while initial state, data, and objective stay fixed.
@@ -140,10 +137,8 @@ def run(rate,steps,features=x,targets=y,clip=None):
     history=[]
     objective=lambda value:loss(value,features,targets)
     for _ in range(steps):
-        # Differentiate the objective to obtain `(value, grad)` via automatic differentiation.
         value,grad=jax.value_and_grad(objective)(w)
         history.append([float(w),float(value),float(jnp.abs(grad))])
-        # Confirm that all computed values remain finite (no NaN or Inf).
         assert np.all(np.isfinite(history[-1]))
         update=jnp.clip(grad,-clip,clip) if clip is not None else grad
         w=w-rate*update
@@ -152,7 +147,7 @@ stable,good=run(.1,6)
 unstable,bad=run(.3,6)
 assert abs(stable-2)<1e-5 and bad[-1,1]>bad[0,1]*100
 
-# Step 3 — 3. Match the recorded failure to the exact recurrence: An alternating parameter error and a 3.24 loss multiplier support...
+# Step 3 — 3. Match the recorded failure to the exact recurrence
 for rate,history in [(.1,good),(.3,bad)]:
     expected_w=2-2*(1-rate*28/3)**np.arange(len(history))
     expected_loss=(14/3)*(expected_w-2)**2
@@ -190,7 +185,7 @@ visual_data = {'kind': 'line', 'x': list(range(len(good))), 'xlabel': 'pre-updat
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:50:42.171076+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:22.606387+00:00. JAX 0.9.2.
 
 ```text
 Stable final weight: 1.999999761581421 unstable pre-update [weight,loss,|gradient|]:
@@ -233,7 +228,7 @@ Clipping changes the effective update. Its boundedness is a useful invariant, no
 **Predict before running:** Scale both features and targets by ten. Does the original stable rate remain stable?
 
 ```python
-# Experiment — Feature scaling changes curvature: The gradient multiplies by 100 because both prediction and...
+# Experiment — Feature scaling changes curvature
 scaled_final,scaled=run(.1,3,x*10,y*10)
 assert scaled[-1,1]>scaled[0,1]
 adjusted_final,adjusted=run(.001,6,x*10,y*10)
@@ -305,17 +300,15 @@ Differentiate the scaled objective; plain gradient descent multiplies its gradie
 - `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
 
 **Step-by-step implementation plan:**
-1. Differentiate the objective to obtain `base_gradient` via automatic differentiation.
-2. Differentiate the objective to obtain `scaled_gradient` via automatic differentiation.
+1. Set up the changed input or configuration parameters requested in the prompt.
+2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Rescale the objective and compensate the update (Transfer): Scaling the objective scales the gradient.
 w0 = jnp.array(...)  # TODO: compute w0
-# Differentiate the objective to obtain `base_gradient` via automatic differentiation.
 base_gradient = jax.grad(...)  # TODO: compute base_gradient
-# Differentiate the objective to obtain `scaled_gradient` via automatic differentiation.
 scaled_gradient = jax.grad(...)  # TODO: compute scaled_gradient
 np.testing.assert_allclose(scaled_gradient,5*base_gradient,rtol=1e-6)
 reference = ...  # TODO: compute reference
@@ -331,9 +324,7 @@ print('Reference / compensated / unchanged-rate updates:',reference,compensated,
 ```python
 # Rescale the objective and compensate the update (Transfer): Scaling the objective scales the gradient.
 w0=jnp.array(.25)
-# Differentiate the objective to obtain `base_gradient` via automatic differentiation.
 base_gradient=jax.grad(loss)(w0)
-# Differentiate the objective to obtain `scaled_gradient` via automatic differentiation.
 scaled_gradient=jax.grad(lambda w:5*loss(w))(w0)
 np.testing.assert_allclose(scaled_gradient,5*base_gradient,rtol=1e-6)
 reference=w0-.1*base_gradient
@@ -370,25 +361,17 @@ Changing the learning rate cannot make a NaN observation valid.
 
 **Step-by-step implementation plan:**
 1. Diagnose a nonfinite input before an update (Intermediate): Nonfinite data is a different cause than excessive step size.
-2. Differentiate the objective to obtain `(bad_value, bad_grad)` via automatic differentiation.
-3. Confirm that all computed values remain finite (no NaN or Inf).
-4. Differentiate the objective to obtain `(repaired_value, repaired_grad)` via automatic differentiation.
-5. Confirm that all computed values remain finite (no NaN or Inf).
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
 # Diagnose a nonfinite input before an update (Intermediate): Nonfinite data is a different cause than excessive step size.
 corrupted = ...  # TODO: compute corrupted
-# Differentiate the objective to obtain `(bad_value, bad_grad)` via automatic differentiation.
 bad_value,bad_grad = jax.value_and_grad(...)  # TODO: compute bad_value,bad_grad
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert not np.isfinite(float(bad_value))  # TODO: complete assertion check
 repaired = jnp.array(...)  # TODO: compute repaired
-# Differentiate the objective to obtain `(repaired_value, repaired_grad)` via automatic differentiation.
 repaired_value,repaired_grad = jax.value_and_grad(...)  # TODO: compute repaired_value,repaired_grad
 np.testing.assert_allclose(repaired_grad,-56/3,rtol=1e-6)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(float(repaired_value))  # TODO: complete assertion check
 ```
 
@@ -397,15 +380,11 @@ assert np.isfinite(float(repaired_value))  # TODO: complete assertion check
 ```python
 # Diagnose a nonfinite input before an update (Intermediate): Nonfinite data is a different cause than excessive step size.
 corrupted=x.at[1].set(jnp.nan)
-# Differentiate the objective to obtain `(bad_value, bad_grad)` via automatic differentiation.
 bad_value,bad_grad=jax.value_and_grad(lambda w:loss(w,corrupted,y))(0.)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert not np.isfinite(float(bad_value)) and not np.isfinite(float(bad_grad))
 repaired=jnp.array([1.,2.,3.])
-# Differentiate the objective to obtain `(repaired_value, repaired_grad)` via automatic differentiation.
 repaired_value,repaired_grad=jax.value_and_grad(lambda w:loss(w,repaired,y))(0.)
 np.testing.assert_allclose(repaired_grad,-56/3,rtol=1e-6)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert np.isfinite(float(repaired_value))
 ```
 

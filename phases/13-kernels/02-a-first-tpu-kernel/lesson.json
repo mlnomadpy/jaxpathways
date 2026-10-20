@@ -59,19 +59,19 @@
       {
         "title": "Place the ReLU boundary deliberately",
         "prediction": "What should happen when a value exactly cancels its column bias?",
-        "code": "# Experiment — Place the ReLU boundary deliberately: Testing activation boundaries catches wrong bias axes and...\nedge_x=jnp.array([[-1.,0.,1.],[1.,-2.,.5]],dtype=jnp.float32)\nedge_bias=jnp.array([1.,0.,-1.],dtype=jnp.float32)\nedge=fused_bias_relu(edge_x,edge_bias)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_array_equal(edge,np.array([[0.,0.,0.],[2.,0.,0.]],dtype=np.float32))\nprint(\"Boundary fixture:\",np.asarray(edge))",
+        "code": "# Experiment — Place the ReLU boundary deliberately\nedge_x=jnp.array([[-1.,0.,1.],[1.,-2.,.5]],dtype=jnp.float32)\nedge_bias=jnp.array([1.,0.,-1.],dtype=jnp.float32)\nedge=fused_bias_relu(edge_x,edge_bias)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_array_equal(edge,np.array([[0.,0.,0.],[2.,0.,0.]],dtype=np.float32))\nprint(\"Boundary fixture:\",np.asarray(edge))",
         "output": "Exact cancellations become zero; the only positive result is 2.",
         "explanation": "Testing activation boundaries catches wrong bias axes and accidental operations applied before or after casting."
       }
     ],
     "exercise": "Change the activation shape to (17,257), freeze a NumPy random seed and compare two target-compatible block choices in interpretation. Keep the bias values distinct by column.",
-    "solution": "# Exercise solution: Change the activation shape to (17,257), freeze a NumPy random seed...\nrng=np.random.default_rng(5)\n# Create device-backed JAX array `changed_x`.\nchanged_x=jnp.asarray(rng.normal(size=(17,257)),dtype=jnp.float32)\n# Create device-backed JAX array `changed_bias`.\nchanged_bias=jnp.asarray(rng.normal(size=257),dtype=jnp.float32)\n# Transfer the device result to the host for an independent NumPy comparison.\nexpected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)\nfor block in [(8,128),(16,256)]:\n    result=fused_bias_relu(changed_x,changed_bias,block)\n    np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)\nprint(\"Changed tails and two TPU-compatible blocks verified in interpretation\")",
+    "solution": "# Exercise solution\nrng=np.random.default_rng(5)\nchanged_x=jnp.asarray(rng.normal(size=(17,257)),dtype=jnp.float32)\nchanged_bias=jnp.asarray(rng.normal(size=257),dtype=jnp.float32)\n# Transfer the device result to the host for an independent NumPy comparison.\nexpected=np.maximum(np.asarray(changed_x)+np.asarray(changed_bias)[None,:],0)\nfor block in [(8,128),(16,256)]:\n    result=fused_bias_relu(changed_x,changed_bias,block)\n    np.testing.assert_allclose(result,expected,rtol=1e-6,atol=1e-6)\nprint(\"Changed tails and two TPU-compatible blocks verified in interpretation\")",
     "practice": [
       {
         "title": "Reject hidden bias-axis broadcasting",
         "prompt": "Give the wrapper a matrix-shaped bias and then a wrong-length vector. Verify both fail before launch.",
         "hint": "A column bias is a vector with exactly one entry per matrix column.",
-        "solution": "# Reject hidden bias-axis broadcasting (Practice): Explicit validation turns a confusing broadcast result into...\nfor malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):\n    rejected=False\n    try:fused_bias_relu(x,malformed)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Malformed bias axes rejected\")",
+        "solution": "# Reject hidden bias-axis broadcasting (Practice)\nfor malformed in (jnp.ones((1,129),dtype=jnp.float32),jnp.ones(9,dtype=jnp.float32)):\n    rejected=False\n    try:fused_bias_relu(x,malformed)\n    except ValueError:rejected=True\n    assert rejected\nprint(\"Malformed bias axes rejected\")",
         "explanation": "Explicit validation turns a confusing broadcast result into a local contract error.",
         "difficulty": "Practice"
       },
@@ -79,7 +79,7 @@
         "title": "Check a permutation invariant",
         "prompt": "Permute columns and bias entries together, then undo the permutation. Verify the output is unchanged.",
         "hint": "Use a deterministic reversed column order; do not permute the bias independently.",
-        "solution": "# Check a permutation invariant (Challenge): The kernel is columnwise when the corresponding bias travels...\norder=jnp.arange(128,-1,-1)\npermuted=fused_bias_relu(x[:,order],bias[order])\nnp.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)\nprint(\"Column/bias pairing survives a joint permutation\")",
+        "solution": "# Check a permutation invariant (Challenge)\norder=jnp.arange(128,-1,-1)\npermuted=fused_bias_relu(x[:,order],bias[order])\nnp.testing.assert_allclose(permuted[:,order],actual,rtol=1e-6,atol=1e-6)\nprint(\"Column/bias pairing survives a joint permutation\")",
         "explanation": "The kernel is columnwise when the corresponding bias travels with each column. This catches a wrong window map without relying only on one original fixture.",
         "difficulty": "Challenge"
       }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "a1d6c997d9d6dc5b901aebc3bc35142d2df4edfb27071c791061ff5627ca4d48",
+  "contentHash": "58ee043b76ff4e66f63967bcfaa06ab999c063aeebaa607c7404bae97675f56a",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T18:47:13.151729+00:00",
+  "generatedAt": "2026-10-20T22:27:32.448250+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.04059462482109666 2.9374845325946808e-05\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.01451137475669384 1.5750061720609665e-05\n",
   "data": {
     "kind": "bar",
     "labels": [

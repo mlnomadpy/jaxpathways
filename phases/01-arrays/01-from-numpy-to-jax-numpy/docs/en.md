@@ -2,6 +2,8 @@
 
 Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Translate a feature-wise NumPy calculation to `jax.numpy.`
@@ -113,7 +115,7 @@ The first check catches a wrong reduction axis; the second checks the defining p
 ## Run the example
 
 ```python
-# From NumPy to jax.numpy: Feature preprocessing answers a specific question: how does each...
+# From NumPy to jax.numpy
 import jax.numpy as jnp
 x = jnp.array([[1., 10.], [3., 14.], [5., 18.]])
 # Average across examples, leaving one mean for each feature column.
@@ -153,7 +155,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'observation index', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:02.350553+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:19:58.088865+00:00. JAX 0.9.2.
 
 ```text
 Mean: [ 3. 14.]
@@ -171,7 +173,7 @@ PASS: arrays-01
 **Predict before running:** Predict the feature standard deviations and centered rows before comparing with NumPy.
 
 ```python
-# Experiment — Check the normalization arithmetic: Matching dtype and statistic definition makes this a useful...
+# Experiment — Check the normalization arithmetic
 import numpy as np
 reference_data = np.array([[1., 10.], [3., 14.], [5., 18.]], dtype=np.float32)
 # Reduce along axis=0 to compute `reference_mean`.
@@ -225,12 +227,13 @@ Foundation · Standardize the original data using its standard deviation plus ep
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `standardized`.
+1. Exercise solution
+2. Reduce along axis=0 to compute `standardized`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Standardize the original data using its standard...
+# Exercise solution
 # Reduce along axis=0 to compute `standardized`.
 standardized = ...  # TODO: compute standardized
 assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)  # TODO: complete assertion check
@@ -240,7 +243,7 @@ assert jnp.allclose(standardized.std(axis=0), 1., atol=1e-5)  # TODO: complete a
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Foundation · Standardize the original data using its standard...
+# Exercise solution
 # Reduce along axis=0 to compute `standardized`.
 standardized = centered / (x.std(axis=0) + 1e-6)
 assert jnp.allclose(standardized.mean(axis=0), 0., atol=1e-6)
@@ -269,16 +272,15 @@ Fit uses scale $1$ for a constant training feature. Applying statistics does not
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Confirm that all computed values remain finite (no NaN or Inf).
+1. Test the constant-feature policy (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test the constant-feature policy (Practice): The training feature is constant but the new value differs...
+# Test the constant-feature policy (Practice)
 constant_data = jnp.array(...)  # TODO: compute constant_data
 constant_statistics = fit_standardizer(...)  # TODO: compute constant_statistics
 constant_transformed = apply_standardizer(...)  # TODO: compute constant_transformed
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(constant_transformed))  # TODO: complete assertion check
 assert jnp.allclose(constant_transformed[:, 1], 0.)  # TODO: complete assertion check
 assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)  # TODO: complete assertion check
@@ -287,11 +289,10 @@ assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistic
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Test the constant-feature policy (Practice): The training feature is constant but the new value differs...
+# Test the constant-feature policy (Practice)
 constant_data = jnp.array([[1., 5.], [3., 5.], [5., 5.]])
 constant_statistics = fit_standardizer(constant_data)
 constant_transformed = apply_standardizer(constant_data, constant_statistics)
-# Confirm that all computed values remain finite (no NaN or Inf).
 assert jnp.all(jnp.isfinite(constant_transformed))
 assert jnp.allclose(constant_transformed[:, 1], 0.)
 assert jnp.allclose(apply_standardizer(jnp.array([[7., 6.]]), constant_statistics)[0, 1], 1.)
@@ -320,13 +321,12 @@ The application function should depend on each row and fixed statistics, not on 
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Detect accidental batch-dependent preprocessing (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...
+# Detect accidental batch-dependent preprocessing (Challenge)
 new_rows = jnp.array(...)  # TODO: compute new_rows
 together = apply_standardizer(...)  # TODO: compute together
 separately = jnp.concatenate(...)  # TODO: compute separately
@@ -338,7 +338,7 @@ assert not jnp.allclose(together, refitted)  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Detect accidental batch-dependent preprocessing (Challenge): This consistency test expresses an inference boundary: a...
+# Detect accidental batch-dependent preprocessing (Challenge)
 new_rows = jnp.array([[7., 22.], [9., 26.]])
 together = apply_standardizer(new_rows, statistics)
 separately = jnp.concatenate([apply_standardizer(new_rows[i:i+1], statistics) for i in range(2)])

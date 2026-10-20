@@ -38,7 +38,7 @@ def step(state, action, horizon=8):
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
 # Check a complete episode
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -90,7 +90,7 @@ def step(state, action, horizon=8):
     reward = jnp.where(active, jnp.where(terminated, 1., -.01), 0.)
     return State(position, elapsed, state.done | terminated | truncated), reward, terminated, truncated
 
-# Step 2 — Check a complete episode: The known two-action path produces one terminal reward and then...
+# Step 2 — Check a complete episode
 s = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
 positions, rewards = [int(s.position)], []
 for action in [1, 1, 0, 0]:
@@ -106,14 +106,14 @@ print('positions:', positions, 'rewards:', rewards)
 visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':'reward per transition','series':[{'label':'right, right, padded, padded','y':rewards}]}
 
 # Experiment: A goal at the deadline
-# Experiment — A goal at the deadline: The goal transition defines a completed task, so the two flags...
+# Experiment — A goal at the deadline
 s = State(jnp.int32(2), jnp.int32(1), jnp.bool_(False))
 s, r, term, trunc = step(s, jnp.int32(1), horizon=2)
 assert bool(term) and not bool(trunc) and float(r) == 1.
 print('deadline goal:', bool(term), bool(trunc))
 
 # Experiment: The same key is the same start
-# Experiment — The same key is the same start: This verifies the randomness contract, not a guarantee that...
+# Experiment — The same key is the same start
 # Create or split explicit PRNG key(s) (`key`) for reproducible randomness.
 key = jax.random.key(7)
 a, b = reset(key), reset(key)
@@ -124,7 +124,7 @@ assert 0.4 < float(starts.mean()) < 0.6
 print('fraction starting at one:', float(starts.mean()))
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Begin at position 0, choose left for three actions with horizon 3, and...
+# Exercise solution
 s = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
 total = 0.
 for i in range(3):
@@ -146,7 +146,7 @@ assert abs(continuing_timeout - 1.79) < 1e-7
 assert terminal == finite_horizon_timeout == -.01
 
 # Reference practice: Enumerate all one-step moves
-# Enumerate all one-step moves (Transfer / diagnosis): Enumeration checks boundary behavior separately from the...
+# Enumerate all one-step moves (Transfer / diagnosis)
 # Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 compiled = jax.jit(step)
 for position in range(3):

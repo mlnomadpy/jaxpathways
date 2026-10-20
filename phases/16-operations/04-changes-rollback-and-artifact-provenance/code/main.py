@@ -125,7 +125,7 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -183,7 +183,7 @@ def launch(root, config=None, timeout=10.):
     return result
 
 # Add content-addressed publication and selection
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -383,7 +383,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -440,7 +440,7 @@ def launch(root, config=None, timeout=10.):
     atomic_json(root/'run.json',result)
     return result
 
-# Step 4 — Add content-addressed publication and selection: Publication and activation are separate; rollback uses the same...
+# Step 4 — Add content-addressed publication and selection
 def publish(store, artifact):
     """Content-address one JSON artifact. Publishing does not activate it."""
     store=Path(store)
@@ -536,12 +536,12 @@ assert values==[1,1,2,2,1]
 visual_data={'kind':'bar','labels':['activate A','publish B','activate B','reject candidate','rollback'],'xlabel':'executed local operation','ylabel':'selected artifact code: 1=A, 2=B','series':[{'label':'observed active pointer','y':values}]}
 
 # Experiment: Identity follows content rather than key insertion order
-# Experiment — Identity follows content rather than key insertion order: Canonical encoding removes an incidental representation...
+# Experiment — Identity follows content rather than key insertion order
 assert digest({'a':1,'b':2})==digest({'b':2,'a':1})
 assert digest({'a':1,'b':2})!=digest({'a':1,'b':3})
 
 # Experiment: Detect corruption before activation
-# Experiment — Detect corruption before activation: A filename containing a hash is not enough: the reader must...
+# Experiment — Detect corruption before activation
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)
@@ -571,7 +571,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert before==(Path(folder)/'active.json').read_bytes()
 
 # Reference solution. Try the exercise before reading this.
-# Exercise solution: Publish two compatible validated artifacts that differ in an explicit...
+# Exercise solution
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     one=publish(folder,dict(artifact,release_note='candidate one'))
@@ -582,7 +582,7 @@ with tempfile.TemporaryDirectory() as folder:
     assert read_artifact(folder,one)['release_note']=='candidate one'
 
 # Reference practice: Reject an incomplete provenance record
-# Reject an incomplete provenance record (Transfer / diagnosis): The gate establishes only the declared local contract; it...
+# Reject an incomplete provenance record (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     incomplete=dict(artifact)
@@ -596,7 +596,7 @@ with tempfile.TemporaryDirectory() as folder:
         raise AssertionError('missing provenance accepted')
 
 # Reference practice: Check rollback without history
-# Check rollback without history (Transfer / diagnosis): A runbook needs a defined failure path when no compatible...
+# Check rollback without history (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     identifier=publish(folder,artifact)

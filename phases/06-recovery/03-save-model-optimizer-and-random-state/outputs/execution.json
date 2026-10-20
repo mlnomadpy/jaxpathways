@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "recovery-03",
-  "contentHash": "48aeed0f4edf38957f4501996db32508b7831883ed4c4fb30f77bf7a7335835e",
-  "executedAt": "2026-10-20T18:51:02.813508+00:00",
+  "contentHash": "c1b9b3a83f2e4fcdce34d76fcccc75486e260d5ac349dc3f0a988516438cc08e",
+  "executedAt": "2026-10-20T22:21:34.385805+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,15 +14,15 @@
   "stdout": "Restored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nRestored step: 3\nOptimizer count: 3\nNext update and loss agree; checkpoint exists: True\nModel-only checkpoint produces a different Adam update\nReset key changes the noisy objective and continuation stream\nFull restore Adam count: 4; reset memory count: 1; next parameters differ.\nExpected changed configuration rejection\nExpected exact key-data mismatch\nPASS: recovery-03\n",
   "notebookCells": [
     {
-      "sourceHash": "241826601de1c625f15524ebc0c2f4a4fa09cb2ddd7268ade31ca9a330c8264c",
+      "sourceHash": "53e0b799653dc93e7c1dec1523d3c18ceb729f7078d9436cb7e82e73c32245ed",
       "outputs": []
     },
     {
-      "sourceHash": "dbfb5b9e632c8714dc8094810d1454c40e0989b68c5cf5164f5eae3f916dbbc3",
+      "sourceHash": "bbeb0540e5ed8412a07c25397124bdbbdb058cdfa206dbfa2f41d4d7544fd083",
       "outputs": []
     },
     {
-      "sourceHash": "2f3fbcb9a3ddb8adcbf0de803de7d7f3163680ed880ce7bf103100cfae8929a1",
+      "sourceHash": "d7e7bda09f1986da5e0ccfe70f648abb5efdb0d0db26f75967a51ef0fe18b766",
       "outputs": [
         {
           "output_type": "stream",
@@ -36,7 +36,7 @@
       ]
     },
     {
-      "sourceHash": "187b2d6160ebde7a4e8a9a7c9d3e846ff9901b126e963294c202880ef578571d",
+      "sourceHash": "18c3709c11335149afeda57b2017d39dd66028f1244df3263f78206583f0d6a5",
       "outputs": [
         {
           "output_type": "stream",
@@ -69,7 +69,7 @@
       ]
     },
     {
-      "sourceHash": "eef3e6e7799673966e239abb74fdc1693aa07e515059aa8a5f7e3f220b9f71a6",
+      "sourceHash": "a170c5bc0f87aada498c7a592e459073640405bab33c48dedffbbaf4952bb882",
       "outputs": [
         {
           "output_type": "stream",
@@ -81,7 +81,7 @@
       ]
     },
     {
-      "sourceHash": "77f3f9461a8518390bec2cf4115cc770c5188515b9ba5219afba46897246c351",
+      "sourceHash": "2aa0d87745250415639070d0519051f5d12c9c8e8815ddb54dcf78882a919971",
       "outputs": [
         {
           "output_type": "stream",
@@ -93,19 +93,19 @@
       ]
     },
     {
-      "sourceHash": "fd12997ceca150e80f4c53959876970e2fcc44ba5e3c8e84b386bdbe41dac336",
+      "sourceHash": "d222bdc69df2e7160a88cde1b6a1508f216c68df057e9b7c74edf04e9c903ece",
       "outputs": []
     },
     {
-      "sourceHash": "713da5da45cb2f52e9de6fbe930d8eac4f33cc4e21a7597bdbeae72be6448baa",
+      "sourceHash": "090e71f2b60fc53c8e51181c60a1d6d173ef4125e5537c822c94e8a31e44be5e",
       "outputs": []
     },
     {
-      "sourceHash": "e48f625537230578dbbe82ba210d213e011bbf873006910bd56df041ba2010d6",
+      "sourceHash": "246f28af5f768d2946eab0612704ab2b2f2bc8b03c9cf22efc0e7432563b233e",
       "outputs": []
     },
     {
-      "sourceHash": "43c98a3cfa82ae83e85f89da31f67b6526581a677683fdc64eb334e7a844368f",
+      "sourceHash": "8efde97881a9f6cbde1f3917e9c53e3d06b358387cac4cb92a52b681d1ae1651",
       "outputs": [
         {
           "output_type": "stream",
@@ -117,11 +117,11 @@
       ]
     },
     {
-      "sourceHash": "2552d5a19ebf75e28f7b90a1f13b05e5b065feabe58e142f15f0af522d704e79",
+      "sourceHash": "b68b9710e687ca817575c512d33d2670b1dc333a5f645a78443cb7f1bcc0f924",
       "outputs": []
     },
     {
-      "sourceHash": "ff69d6a0f5078690d51d7d6d47410f5c7a218c63c7e0e6428e38505cae4fa522",
+      "sourceHash": "89907bb6bd7ddd4c470f3ed31827e39c34aa9eca31935effb2a9740f0d06ae11",
       "outputs": [
         {
           "output_type": "stream",

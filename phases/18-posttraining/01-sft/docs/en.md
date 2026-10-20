@@ -2,6 +2,8 @@
 
 Phase 18: Post-training: SFT, LoRA, reward models and RLHF · about 105 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Align predictions with their target tokens
@@ -122,7 +124,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 ```
 
@@ -184,7 +185,6 @@ history = []
 def sft_objective(p):
     return -jnp.sum(response_logps(p[tokens], tokens, roles)) / jnp.sum(roles[:, 1:])
 
-# Differentiate the objective to obtain `step` via automatic differentiation.
 step = jax.jit(jax.value_and_grad(sft_objective))
 
 # Step 3 — 3. Fit the transition table and check the final position: The table learns only local transitions.
@@ -239,7 +239,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:42:49.713704+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:26:52.206662+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272
@@ -258,8 +258,7 @@ PASS: posttraining-01
 **Predict before running:** Which table rows should get gradients when only answer and end tokens are supervised?
 
 ```python
-# Experiment — Prove the target-mask shift: The prediction made at the prompt position is supervised because...
-# Differentiate the objective to obtain `g` via automatic differentiation.
+# Experiment — Prove the target-mask shift
 g = jax.grad(sft_objective)(jnp.zeros((5, 5)))
 assert np.linalg.norm(np.asarray(g)[0]) > 0 and np.linalg.norm(np.asarray(g)[1]) > 0
 # Transfer the device result to the host for an independent NumPy comparison.
@@ -311,12 +310,13 @@ Score only the first response token in each sequence and compare the resulting c
 - `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
 
 **Step-by-step implementation plan:**
-1. Ensure all array elements remain finite: `np.isfinite(float(value))`
+1. Exercise solution
+2. Ensure all array elements remain finite: `np.isfinite(float(value))`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Score only the first response token in each sequence and compare the...
+# Exercise solution
 first_only = ...  # TODO: compute first_only
 value = ...  # TODO: compute value
     first_only[:, 1:]
@@ -330,7 +330,7 @@ print('Two first-response targets:', float(value))
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Score only the first response token in each sequence and compare the...
+# Exercise solution
 first_only = roles.at[:, 2].set(False)
 value = -jnp.sum(response_logps(p[tokens], tokens, first_only)) / jnp.sum(
     first_only[:, 1:]
@@ -364,7 +364,7 @@ Use the shifted target mask, not the unshifted input mask.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
+# Reject a batch with no answer targets (Transfer)
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -376,7 +376,7 @@ else:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a batch with no answer targets (Transfer): An empty answer mask should trigger a clear skip/rejection...
+# Reject a batch with no answer targets (Transfer)
 try:
     validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
 except ValueError:
@@ -407,13 +407,12 @@ Keep the final input token equal and change an earlier token.
 - `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Create a failure this model cannot fix (Challenge)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Create a failure this model cannot fix (Challenge)
 contexts = jnp.array(...)  # TODO: compute contexts
 last_logits = ...  # TODO: compute last_logits
 np.testing.assert_array_equal(last_logits[0], last_logits[1])
@@ -425,7 +424,7 @@ print('Identical final tokens force identical table predictions despite differen
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Create a failure this model cannot fix (Challenge): A model that conditions on the earlier context can represent...
+# Create a failure this model cannot fix (Challenge)
 contexts = jnp.array([[1, 0], [3, 0]])
 last_logits = p[contexts[:, -1]]
 np.testing.assert_array_equal(last_logits[0], last_logits[1])

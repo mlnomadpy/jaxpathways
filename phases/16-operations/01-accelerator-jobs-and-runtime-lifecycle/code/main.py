@@ -125,7 +125,7 @@ except Exception as error:
 '''
 
 # Add bounded launch and result collection
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -319,7 +319,7 @@ except Exception as error:
     raise SystemExit(23)
 '''
 
-# Step 3 — Add bounded launch and result collection: The supervisor owns the child handle, captures its output and...
+# Step 3 — Add bounded launch and result collection
 def default_config(**changes):
     cfg=dict(seed=3,learning_rate=.04,momentum=.8,batch_size=8,steps=8,
              checkpoint_every=2,backend='cpu',min_devices=1,resume=False,
@@ -394,7 +394,7 @@ print('actual exit codes:',successful['returncode'],rejected['returncode'],stall
 visual_data={'kind':'bar','labels':['completed','runtime rejected','timed out'],'xlabel':'observed outcome','ylabel':'supervisor wall time (seconds)','series':[{'label':'actual local process','y':[successful['wall_s'],rejected['wall_s'],stalled['wall_s']]}]}
 
 # Experiment: A child that fails before training
-# Experiment — A child that fails before training: This check links the failure classification to a concrete...
+# Experiment — A child that fails before training
 assert any(e['event']=='failed' and 'runtime' in e['message'] for e in rejected['events'])
 assert not any(e['event']=='progress' for e in rejected['events'])
 
@@ -415,7 +415,7 @@ assert [e['step'] for e in short['events'] if e['event']=='progress']==[1,2,3]
 assert short['events'][-1]['step']==3
 
 # Reference practice: Reject invalid work before spawning
-# Reject invalid work before spawning (Transfer / diagnosis): Validation makes an impossible workload fail at the caller...
+# Reject invalid work before spawning (Transfer / diagnosis)
 for values in [dict(steps=0),dict(batch_size=65)]:
     try:
         default_config(**values)
@@ -425,7 +425,7 @@ for values in [dict(steps=0),dict(batch_size=65)]:
         raise AssertionError('invalid work accepted')
 
 # Reference practice: Preserve a successful checkpoint
-# Preserve a successful checkpoint (Transfer / diagnosis): A status and a durable artifact should agree about what was...
+# Preserve a successful checkpoint (Transfer / diagnosis)
 # Keep this run’s database and artifacts in a scratch directory removed on exit.
 with tempfile.TemporaryDirectory() as folder:
     result=launch(folder,dict(steps=4))

@@ -2,6 +2,8 @@
 
 Phase 06: Data & checkpoint recovery · about 70 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Decide what makes runs comparable
@@ -121,7 +123,6 @@ Hash the data, train each rate in a temporary SQLite-backed MLflow experiment, l
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
@@ -169,7 +170,7 @@ The host-side validation calculation checks what the logged validation metric me
 ## Run the example
 
 ```python
-# Track experiments and lineage with MLflow: A tracker is useful when a plotted point leads back to the data,...
+# Track experiments and lineage with MLflow
 import os
 # Set MLFLOW_DISABLE_AGENT_HINT before importing its runtime.
 os.environ['MLFLOW_DISABLE_AGENT_HINT'] = '1'
@@ -187,7 +188,6 @@ y = 2 * x + 1
 vx = jnp.array([-1.5, -.5, .5, 1.5])
 vy = 2 * vx + 1
 objective = lambda p: jnp.mean((p[0] * x + p[1] - y) ** 2)
-# Differentiate the objective to obtain `update` via automatic differentiation.
 update = jax.jit(lambda p, rate: p - rate * jax.grad(objective)(p))
 # Transfer the device result to the host for an independent NumPy comparison.
 data_hash = hashlib.sha256(np.asarray(x).tobytes() + np.asarray(y).tobytes()).hexdigest()
@@ -257,7 +257,7 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:47:39.248250+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:21:49.231439+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
@@ -290,13 +290,12 @@ Add a third, deliberately wrong model artifact and show why the smallest trainin
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+# Exercise solution
 bad_validation = sum(...)  # TODO: compute bad_validation
 assert bad_validation  # TODO: complete assertion check
 print('Wrong zero model validation MSE:',bad_validation)
@@ -305,7 +304,7 @@ print('Wrong zero model validation MSE:',bad_validation)
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Add a third, deliberately wrong model artifact and show why the...
+# Exercise solution
 bad_validation = sum((0. * t + 0. - (2*t+1))**2 for t in [-1.5,-.5,.5,1.5])/4
 assert bad_validation > min(validation)
 print('Wrong zero model validation MSE:',bad_validation)

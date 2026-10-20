@@ -2,6 +2,8 @@
 
 Phase 15: Deployment, interoperability & edge AI · about 130 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Measure completed inference after warming each batch shape
@@ -88,17 +90,14 @@ No. The worst observed request is $100$ milliseconds, while interpolated p95 is 
 Create a fresh main.py. This fixed dense-network fixture measures an inference boundary; its random weights are not presented as a pretrained or accurate model.
 
 ```python
-# Step 1 — 1. Define and check the inference workload: The timer includes dispatch and completion for already resident...
+# Step 1 — 1. Define and check the inference workload
 import math
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(82)
-# Create device-backed JAX array `W1`.
 W1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))
-# Create device-backed JAX array `W2`.
 W2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))
 # Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:
 @jax.jit
@@ -106,7 +105,6 @@ def infer(inputs):
     return jnp.tanh(inputs@W1)@W2
 def measure(batch_size,repeats=40):
     host=rng.normal(size=(batch_size,64)).astype(np.float32)
-    # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -151,7 +149,7 @@ Do not assume a larger batch is faster per request. Examples per second and mill
 Append the FCFS simulator and two hypothetical arrival schedules. Times are milliseconds throughout the simulation.
 
 ```python
-# Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
+# Step 3 — 3. Model a queue with an independent hand-check
 def simulate_queue(arrival_ms,service_ms):
     # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
@@ -188,17 +186,14 @@ This simulator assumes one serial worker and a constant service duration derived
 ## Run the example
 
 ```python
-# Step 1 — 1. Define and check the inference workload: The timer includes dispatch and completion for already resident...
+# Step 1 — 1. Define and check the inference workload
 import math
 import time
 import numpy as np
 import jax
 import jax.numpy as jnp
-# Draw pseudorandom samples for `rng` using the explicit RNG state.
 rng=np.random.default_rng(82)
-# Create device-backed JAX array `W1`.
 W1=jnp.asarray(rng.normal(0,.1,(64,32)).astype(np.float32))
-# Create device-backed JAX array `W2`.
 W2=jnp.asarray(rng.normal(0,.1,(32,8)).astype(np.float32))
 # Define and JIT-compile `infer(inputs)` so XLA traces and fuses the operations:
 @jax.jit
@@ -206,7 +201,6 @@ def infer(inputs):
     return jnp.tanh(inputs@W1)@W2
 def measure(batch_size,repeats=40):
     host=rng.normal(size=(batch_size,64)).astype(np.float32)
-    # Create device-backed JAX array `device`.
     device=jnp.asarray(host)
     began=time.perf_counter()
     # Wait for device work to finish before timing it or comparing its result on the host.
@@ -235,7 +229,7 @@ for report in measurements:
     print({key:value for key,value in report.items() if key!='samples_ms'})
 service_ms=measurements[0]['p50_ms']
 
-# Step 3 — 3. Model a queue with an independent hand-check: This simulator assumes one serial worker and a constant service...
+# Step 3 — 3. Model a queue with an independent hand-check
 def simulate_queue(arrival_ms,service_ms):
     # Transfer the device result to the host for an independent NumPy comparison.
     arrivals=np.asarray(arrival_ms,dtype=float)
@@ -291,19 +285,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T21:41:26.651820+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:24:50.076919+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 31.63241595029831, 'p50_ms': 0.008584000170230865, 'p95_ms': 0.010295724496245379, 'steady_examples_per_second': 116495.80384072909}
-{'batch': 8, 'first_call_ms': 19.124249927699566, 'p50_ms': 0.011896016076207161, 'p95_ms': 0.018525682389736165, 'steady_examples_per_second': 672494.0474820426}
-{'batch': 32, 'first_call_ms': 18.948249984532595, 'p50_ms': 0.016208039596676826, 'p95_ms': 0.03126210067421197, 'steady_examples_per_second': 1974328.8390386852}
-measured batch-one service proxy (ms): 0.008584000170230865
-simulated last stable/overloaded response (ms): 0.008584000170230865 0.2111664041876793
-{'batch': 1, 'first_call_ms': 19.50295828282833, 'p50_ms': 0.009729061275720596, 'p95_ms': 0.01709614880383014, 'steady_examples_per_second': 102784.83932417555}
-{'batch': 8, 'first_call_ms': 19.412833265960217, 'p50_ms': 0.01685391180217266, 'p95_ms': 0.027345563285052756, 'steady_examples_per_second': 474667.25196513184}
-{'batch': 32, 'first_call_ms': 18.082582857459784, 'p50_ms': 0.015333062037825584, 'p95_ms': 0.026933732442557812, 'steady_examples_per_second': 2086993.4473008884}
-measured batch-one service proxy (ms): 0.009729061275720596
-simulated last stable/overloaded response (ms): 0.009729061275720596 0.23933490738272667
+{'batch': 1, 'first_call_ms': 46.82129202410579, 'p50_ms': 0.014874851331114769, 'p95_ms': 0.05815287586301563, 'steady_examples_per_second': 67227.56266533097}
+{'batch': 8, 'first_call_ms': 29.957707971334457, 'p50_ms': 0.012104865163564682, 'p95_ms': 0.10387939400970919, 'steady_examples_per_second': 660891.2938642047}
+{'batch': 32, 'first_call_ms': 28.894834220409393, 'p50_ms': 0.04816637374460697, 'p95_ms': 0.07945015095174311, 'steady_examples_per_second': 664363.901872163}
+measured batch-one service proxy (ms): 0.014874851331114769
+simulated last stable/overloaded response (ms): 0.014874851331114769 0.3659213427454233
+{'batch': 1, 'first_call_ms': 30.956625007092953, 'p50_ms': 0.008833128958940506, 'p95_ms': 0.051093427464365945, 'steady_examples_per_second': 113210.1664821551}
+{'batch': 8, 'first_call_ms': 31.71129198744893, 'p50_ms': 0.05616643466055393, 'p95_ms': 0.0935911200940609, 'steady_examples_per_second': 142433.8227688583}
+{'batch': 32, 'first_call_ms': 32.31158386915922, 'p50_ms': 0.08312496356666088, 'p95_ms': 0.7933102780953047, 'steady_examples_per_second': 384962.5747425207}
+measured batch-one service proxy (ms): 0.008833128958940506
+simulated last stable/overloaded response (ms): 0.008833128958940506 0.21729497238993645
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2
@@ -316,7 +310,7 @@ PASS: deployment-04
 **Predict before running:** At 300 requests per second, 200 requests per second of effective capacity per replica, and 70% target utilization, how many replicas does the planning formula suggest?
 
 ```python
-# Experiment — Compute a replica estimate with explicit units: This is arithmetic on hypothetical effective capacities, not an...
+# Experiment — Compute a replica estimate with explicit units
 arrival_per_s=300.
 capacity_per_s=200.
 target_utilization=.7
@@ -334,7 +328,7 @@ This is arithmetic on hypothetical effective capacities, not an executed autosca
 **Predict before running:** For eight requests arriving two milliseconds apart, how long do the earliest and average request wait for a full batch before computation?
 
 ```python
-# Experiment — Estimate batch-collection delay: A throughput improvement can be overwhelmed by waiting for a...
+# Experiment — Estimate batch-collection delay
 batch=8
 spacing_ms=2.
 collection_wait=(batch-1-np.arange(batch))*spacing_ms
@@ -351,7 +345,7 @@ A throughput improvement can be overwhelmed by waiting for a batch at low arriva
 **Predict before running:** With nineteen $1$-millisecond samples and one $100$-millisecond sample, must p95 equal an observed sample?
 
 ```python
-# Experiment — Inspect the interpolation behind p95: These deliberately constructed values explain the percentile...
+# Experiment — Inspect the interpolation behind p95
 illustrative_ms=np.array([1.]*19+[100.])
 interpolated_p95=float(np.percentile(illustrative_ms,95,method='linear'))
 np.testing.assert_allclose(interpolated_p95,5.95,atol=1e-10)
@@ -373,13 +367,12 @@ Simulate a burst of four requests arriving at time zero with a two-millisecond s
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Exercise solution
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Simulate a burst of four requests arriving at time zero with a...
+# Exercise solution
 _,burst_finish,burst_latency = simulate_queue(...)  # TODO: compute _,burst_finish,burst_latency
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
@@ -388,7 +381,7 @@ np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
 <details><summary>Reference solution</summary>
 
 ```python
-# Exercise solution: Simulate a burst of four requests arriving at time zero with a...
+# Exercise solution
 _,burst_finish,burst_latency=simulate_queue([0.,0.,0.,0.],2.)
 np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
 np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
@@ -417,7 +410,7 @@ The worker is idle between spaced requests but never idle during the burst.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
+# Expose burst sensitivity (Transfer / diagnosis)
 _,_,smooth = simulate_queue(...)  # TODO: compute _,_,smooth
 _,_,burst = simulate_queue(...)  # TODO: compute _,_,burst
 assert smooth.max()  # TODO: complete assertion check
@@ -426,7 +419,7 @@ assert smooth.max()  # TODO: complete assertion check
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Expose burst sensitivity (Transfer / diagnosis): An average arrival rate alone does not describe a burst or...
+# Expose burst sensitivity (Transfer / diagnosis)
 _,_,smooth=simulate_queue(np.arange(5)*3.,2.)
 _,_,burst=simulate_queue(np.zeros(5),2.)
 assert smooth.max()==2. and burst.max()==10.
@@ -457,7 +450,7 @@ Public simulation inputs need finite, ordered values and positive service time.
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a broken timeline (Transfer / diagnosis): Validating assumptions prevents a simulation from silently...
+# Reject a broken timeline (Transfer / diagnosis)
 for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
     try:
         simulate_queue(arrivals,duration)
@@ -470,7 +463,7 @@ for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Reject a broken timeline (Transfer / diagnosis): Validating assumptions prevents a simulation from silently...
+# Reject a broken timeline (Transfer / diagnosis)
 for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
     try:
         simulate_queue(arrivals,duration)

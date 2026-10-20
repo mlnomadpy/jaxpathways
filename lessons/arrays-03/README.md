@@ -2,6 +2,8 @@
 
 Phase 01: Arrays & pure functions · about 45 minutes · CPU
 
+This worked reference is validated on CPU. Accelerator compatibility requires a separate source review and target execution receipt. Use the execution matrix to review device selection and data ownership before adapting a separate target program.
+
 ## What you will be able to do
 
 - Identify hidden inputs and side effects in a numerical function.
@@ -110,7 +112,7 @@ With weight 2 and bias 1, the predictions are [1, 3, 5]. This check verifies bot
 ## Run the example
 
 ```python
-# Pure functions and explicit inputs: A pure function makes its changing inputs visible and returns...
+# Pure functions and explicit inputs
 import jax.numpy as jnp
 def predict(params, x):
     return params["weight"] * x + params["bias"]
@@ -143,14 +145,13 @@ In $y=wx+b$, changing the explicit bias changes the vertical offset, while the u
 This makes the function’s inputs inspectable: the change in the output follows the change in the passed parameter. As a check, setting the bias to $0$ would move the solid line down by $1$ and make it pass through the origin. It would not flatten the line.
 
 ```python
-# Create device-backed JAX array `changed`.
 changed = {**params, 'bias': jnp.array(3.0)}
 visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'bias 1', 'y': predict(params, x).tolist()}, {'label': 'bias 3', 'y': predict(changed, x).tolist()}]}
 ```
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T18:47:13.327888+00:00. JAX 0.9.2.
+CPU run: 2026-10-20T22:20:00.809634+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]
@@ -183,7 +184,7 @@ The mutation concerns Python container bindings. It does not contradict JAX arra
 **Predict before running:** What should each parameter setting predict, regardless of which was called first?
 
 ```python
-# Experiment — Replay two independent model configurations: Independent configurations reveal the benefit of explicit inputs...
+# Experiment — Replay two independent model configurations
 first_params = {"weight": jnp.array(2.), "bias": jnp.array(1.)}
 second_params = {"weight": jnp.array(-1.), "bias": jnp.array(4.)}
 first_output = predict(first_params, x)
@@ -251,13 +252,12 @@ A new dictionary is required; changing a binding in the original dictionary brea
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+1. Update the bias without changing either parameter input (Practice)
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Update the bias without changing either parameter input (Practice): The caller can evaluate both the old and new model without...
+# Update the bias without changing either parameter input (Practice)
 def with_bias(parameters, new_bias):
     return ...  # TODO: return computed result
 changed_bias = with_bias(...)  # TODO: compute changed_bias
@@ -269,7 +269,7 @@ assert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))  # TODO: comple
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Update the bias without changing either parameter input (Practice): The caller can evaluate both the old and new model without...
+# Update the bias without changing either parameter input (Practice)
 def with_bias(parameters, new_bias):
     return {**parameters, "bias": jnp.asarray(new_bias)}
 changed_bias = with_bias(params, -2.)
@@ -302,12 +302,13 @@ Compute data inside the numerical core and report it outside. A tuple return doe
 - `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
 
 **Step-by-step implementation plan:**
-1. Check tensor shape invariant: `error.shape == ()`
+1. Return predictions and metrics together (Challenge)
+2. Check tensor shape invariant: `error.shape == ()`
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Return predictions and metrics together (Challenge): The second model has residuals [3, 0, -3], giving mean...
+# Return predictions and metrics together (Challenge)
 def evaluate(parameters, inputs, targets):
     predictions = predict(...)  # TODO: compute predictions
     return ...  # TODO: return computed result
@@ -325,7 +326,7 @@ print("evaluation losses:", float(error), float(other_error))
 <details><summary>Reference solution and reasoning</summary>
 
 ```python
-# Return predictions and metrics together (Challenge): The second model has residuals [3, 0, -3], giving mean...
+# Return predictions and metrics together (Challenge)
 def evaluate(parameters, inputs, targets):
     predictions = predict(parameters, inputs)
     return predictions, jnp.mean((predictions - targets) ** 2)
