@@ -1,0 +1,83 @@
+{
+  "schemaVersion": 1,
+  "executedAt": "2026-10-21T17:19:50.381Z",
+  "browser": "156.0.8078.4",
+  "operatingSystem": {
+    "platform": "darwin",
+    "release": "25.5.0"
+  },
+  "renderer": "Isolated headless Chromium, Playwright page.pdf",
+  "sourceUrl": "http://127.0.0.1:4190/downloads/jax-foundations.html",
+  "sourceHtmlSha256": "93a85f74d1cae27fd03c36e4d4cf8a6a64dc3d9a44f81632c086ce161e1304b7",
+  "selection": [
+    {
+      "lessonId": "welcome-01",
+      "articleId": "chapter-0",
+      "title": "Set up your learning workspace",
+      "figures": 2,
+      "codePanels": 19,
+      "mathExpressions": 18,
+      "learnerContracts": 1,
+      "printedAppendix": "chapter-0-print-solutions"
+    },
+    {
+      "lessonId": "optimization-09",
+      "articleId": "chapter-24",
+      "title": "Probability, likelihood, and stable losses",
+      "figures": 1,
+      "codePanels": 13,
+      "mathExpressions": 61,
+      "learnerContracts": 3,
+      "printedAppendix": "chapter-24-print-solutions"
+    },
+    {
+      "lessonId": "transformers-04",
+      "articleId": "chapter-43",
+      "title": "Train, checkpoint, and generate",
+      "figures": 1,
+      "codePanels": 19,
+      "mathExpressions": 11,
+      "learnerContracts": 3,
+      "printedAppendix": "chapter-43-print-solutions"
+    },
+    {
+      "lessonId": "tpu-06",
+      "articleId": "chapter-103",
+      "title": "bfloat16, int8 precision, and XProf profiling on TPU",
+      "figures": 1,
+      "codePanels": 15,
+      "mathExpressions": 2,
+      "learnerContracts": 3,
+      "printedAppendix": "chapter-103-print-solutions"
+    }
+  ],
+  "printState": {
+    "inlineSolutionsHidden": true,
+    "appendicesVisible": true
+  },
+  "scriptSha256": "8e1fa54cfc70e60118bfd8641995fd304852715c57244409fdf408cd656f6c71",
+  "settings": {
+    "scale": 1,
+    "printBackground": true,
+    "orientation": "portrait",
+    "margins": "Book @page CSS: 18mm",
+    "headerFooter": false,
+    "images": "Selected chapter images loaded eagerly before printing"
+  },
+  "artifacts": [
+    {
+      "format": "A4",
+      "filename": "book-samples-a4.pdf",
+      "sha256": "b97ffa9264ce9f1b3bda7c6f58c279149e3c1bb39ab53210a011ea2cad877abb",
+      "bytes": 1428532
+    },
+    {
+      "format": "Letter",
+      "filename": "book-samples-letter.pdf",
+      "sha256": "cb3101063a804c532bb919359db6ead84f71c2f57b731689a9c11aa458c6ad03",
+      "bytes": 1436536
+    }
+  ],
+  "scope": "Four selected actual chapters with original styles and ancestor contexts. Not a full-book pagination, native EPUB, screen-reader or human learner acceptance.",
+  "visualReview": "Pending raster inspection; PDF creation alone is not acceptance."
+}

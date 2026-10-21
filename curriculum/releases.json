@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.11.1",
+    "date": "2026-10-21",
+    "title": "Practice and check answers in the offline reader",
+    "summary": "Bring the standalone HTML book up to date with authored learner workspaces and provide usable reference answers on paper.",
+    "changes": [
+      "Added all 303 authored exercise and practice contracts to the standalone HTML book, including their inputs, outputs, invariants, hints and TODO scaffolds. The EPUB and learner downloads already included these contracts.",
+      "Added a print-only solutions appendix for each chapter with the complete example, exercise and practice references and checkpoint reasoning. Printed tasks link to their appendix; closed interactive reveal controls stay on screen.",
+      "Added rendered-output checks for all 104 book chapters and their task contracts, answer parity and print fragment links. A4 and Letter sample inspection is tracked separately from native EPUB and assistive-technology qualification."
+    ]
+  },
+  {
     "version": "0.11.0",
     "date": "2026-10-21",
     "title": "Practice independently and inspect the evidence",
@@ -57,7 +68,7 @@
     "title": "Distinct assessment summaries for search and sharing",
     "summary": "Give all eleven synthesis assessments accurate, individual descriptions across search metadata, social previews and page schema.",
     "changes": [
-      "Replaced the shared generic assessment description with a summary of each assessment’s actual tasks in the canonical registry.",
+      "Replaced the shared generic assessment description with a summary of each assessment\u2019s actual tasks in the canonical registry.",
       "Added site-wide duplicate-description checks and verified that search, Open Graph, Twitter and WebPage schema descriptions agree."
     ]
   },

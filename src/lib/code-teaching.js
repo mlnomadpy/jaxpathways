@@ -181,7 +181,7 @@ export function renderLearnerStarterContract(contract, title = 'Learner starter 
   /** @param {string} heading @param {string[]} values */
   const list = (heading, values) =>
     values?.length
-      ? `<h4>${heading}</h4><ul>${values.map((value) => `<li>${inlineMath(escapeHtml(value))}</li>`).join('')}</ul>`
+      ? `<h4>${heading}</h4><ul>${values.map((value) => `<li>${inlineMath(value)}</li>`).join('')}</ul>`
       : '';
   const code = buildStarterScaffold(contract);
   return `<section class="learner-starter-contract"><p class="code-guide-kicker">${escapeHtml(title)}</p>

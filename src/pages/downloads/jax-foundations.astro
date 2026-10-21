@@ -249,6 +249,24 @@ const chapterIndex = new Map(authoredLessons.map((lesson, index) => [lesson.id, 
       </section>
     </main>
     <script is:inline>
+      const readerPrintExpanded = new Set();
+      const expandReaderReasoningForPrint = () => {
+        for (const details of document.querySelectorAll('details:not(.solution-reveal)')) {
+          if (details.open) continue;
+          details.open = true;
+          readerPrintExpanded.add(details);
+        }
+      };
+      const restoreReaderReasoningAfterPrint = () => {
+        for (const details of readerPrintExpanded) details.open = false;
+        readerPrintExpanded.clear();
+      };
+      window.addEventListener('beforeprint', expandReaderReasoningForPrint);
+      window.addEventListener('afterprint', restoreReaderReasoningAfterPrint);
+      window.matchMedia?.('print').addEventListener?.('change', (event) => {
+        if (event.matches) expandReaderReasoningForPrint();
+        else restoreReaderReasoningAfterPrint();
+      });
       document.documentElement.dataset.readerReady = 'true';
       document.addEventListener('click', async (event) => {
         const button = event.target.closest('.copy-snippet');
