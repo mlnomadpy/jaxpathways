@@ -46,7 +46,7 @@ const planDirectories = existsSync('curriculum/project-plans.json')
 for (const directory of new Set(['content/guides', 'resources/tpu-gcp', 'assessments', ...projectDirectories, ...planDirectories])) {
   if (!existsSync(directory)) continue;
   for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
-    if (!/\.(md|py|txt|jsonl|csv)$/.test(file) || file.includes('__pycache__') || file.startsWith('reference/') || /^my_.*\.py$/.test(file) || /^(?:\.venv|runs|evidence|outputs)\//.test(file)) continue;
+    if (!/\.(md|py|txt|jsonl|csv|yaml|yml)$/.test(file) || file.includes('__pycache__') || file.startsWith('reference/') || /^my_.*\.py$/.test(file) || /^(?:\.venv|runs|evidence|outputs)\//.test(file)) continue;
     sources[`${directory}/${file}`] = hash(readFileSync(`${directory}/${file}`, 'utf8'));
   }
 }

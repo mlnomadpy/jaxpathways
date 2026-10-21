@@ -8,7 +8,7 @@ const projectId = 'embedding-model-300m';
 const projectRoot = `projects/${projectId}`;
 const indexPath = `${projectRoot}/reference/evidence-index.json`;
 
-test('C01 remains the only bounded pilot while all ten full capstones stay planned', () => {
+test('C01 and C02 are scoped pilots while all ten full capstones stay planned', () => {
   const plans = JSON.parse(readFileSync('curriculum/project-plans.json', 'utf8'));
   const projects = JSON.parse(readFileSync('curriculum/projects.json', 'utf8')).map((path) =>
     JSON.parse(readFileSync(path, 'utf8')),
@@ -18,7 +18,7 @@ test('C01 remains the only bounded pilot while all ten full capstones stay plann
   const pilotPlans = plans.filter((plan) => plan.pilot);
   assert.deepEqual(
     pilotPlans.map((plan) => plan.id),
-    [projectId],
+    [projectId, 'causal-model-300m'],
   );
   assert.equal(
     projects.some((project) => project.id === projectId),
@@ -44,12 +44,12 @@ test('audit reports optional pilot evidence separately from full-capstone status
   assert(c01);
   assert.equal(c01.level, 'planned');
   assert.equal(audit.summary.fullCapstonesPlanned, 10);
-  assert.equal(audit.summary.optionalPilots, 1);
+  assert.equal(audit.summary.optionalPilots, 2);
   const finding = audit.findings.find((item) => item.id === 'production-capstones');
   assert.equal(finding.status, 'open');
   assert.match(finding.title, /all ten full model-lifecycle capstones remain planned/i);
   assert.match(finding.action, /retrieval-quality floors failed/i);
-  assert.match(finding.action, /other nine capstones/i);
+  assert.match(finding.action, /all six branches failed their frozen QA quality floors/i);
   assert.equal(typeof c01.pilotAvailable, 'boolean');
   assert.equal(c01.pilotAvailable, existsSync(indexPath));
   if (!c01.pilotAvailable) {
@@ -151,7 +151,9 @@ with zipfile.ZipFile(archive) as z:
   for (const plan of JSON.parse(readFileSync('curriculum/project-plans.json', 'utf8'))) {
     const route = readFileSync(`dist/project-plans/${plan.id}.html`, 'utf8');
     if (plan.id === projectId) continue;
-    assert(!route.includes('bounded CPU pilot available'), `${plan.id}: pilot badge leaked`);
+    if (!plan.pilot) {
+      assert(!route.includes('bounded CPU pilot available'), `${plan.id}: pilot badge leaked`);
+    }
     assert(!route.includes('embedding-model-300m-pilot.zip'), `${plan.id}: pilot download leaked`);
   }
 });

@@ -1,0 +1,23 @@
+{
+  "source_count": 50,
+  "public_count": 25,
+  "bound_files_match": true,
+  "public_files_match": true,
+  "archive_members": 76,
+  "task_yamls_in_source_set": true,
+  "index_sha256": "e3170945eada0dfb732e8acf3ee09a7d02399983325f623e0082625c6b17ec78",
+  "archive_extracted_to": "/private/tmp/c02-sol-extracted-pilot",
+  "extracted_prepared_data_verify": "pass",
+  "extracted_independent_model_stage": "pass",
+  "focused_tests": {
+    "count": 5,
+    "log_sha256": "7db6049f45d37ff265ef8aaa83d7cc1b84c975a87e2d50351e09abbb65bc5174"
+  },
+  "qa_projection_rows_match_accepted_raw": 768,
+  "figures_visually_inspected": [
+    "c02-training-and-qa.png",
+    "c02-byte-rates.png"
+  ],
+  "hosted_ci": "not reviewed as executed in this acceptance",
+  "full_capstones_status": "all ten planned; C01 and C02 pilot quality floors failed"
+}

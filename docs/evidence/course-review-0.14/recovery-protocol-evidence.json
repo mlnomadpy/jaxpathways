@@ -1,0 +1,216 @@
+{
+  "candidate_path": "/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/recovery-audit/solution/model.py",
+  "candidate_sha256": "b5bdbc988cafcfe789e4703db7acde33eb13f81a1da762f22dcce3ff976347ff",
+  "checker_sha256": "ccf9c6205827af3dd54631ce750e36abc146f0ffbe8374879ffc24fad9875f37",
+  "limitations": [
+    "local single-filesystem process protocol only",
+    "no power-loss, network-filesystem, multihost, or accelerator qualification"
+  ],
+  "numpy": "2.4.4",
+  "project": "recovery-audit",
+  "python": "3.14.3 | packaged by conda-forge | (main, Feb  9 2026, 22:09:14) [Clang 20.1.8 ]",
+  "reference_sha256": "b5bdbc988cafcfe789e4703db7acde33eb13f81a1da762f22dcce3ff976347ff",
+  "requested_stage": "all",
+  "schema_version": 2,
+  "stages": {
+    "1": {
+      "finite_difference_directions": [
+        [
+          {
+            "analytic": 0.8999999999999999,
+            "epsilon": 0.001,
+            "finite_difference": 0.9000000000000119
+          },
+          {
+            "analytic": 0.8999999999999999,
+            "epsilon": 0.0002,
+            "finite_difference": 0.9000000000000674
+          }
+        ],
+        [
+          {
+            "analytic": 1.07,
+            "epsilon": 0.001,
+            "finite_difference": 1.0700000000000154
+          },
+          {
+            "analytic": 1.07,
+            "epsilon": 0.0002,
+            "finite_difference": 1.0699999999996823
+          }
+        ]
+      ],
+      "legacy_wrong_momentum_shape_rejected": true,
+      "update_matches_independent_oracle": true
+    },
+    "2": {
+      "independent_stream_updates": [
+        {
+          "ids": [
+            41,
+            55,
+            18
+          ],
+          "step": 1,
+          "update_end": 3
+        },
+        {
+          "ids": [
+            93,
+            7
+          ],
+          "step": 2,
+          "update_end": 5
+        },
+        {
+          "ids": [
+            7,
+            18,
+            93
+          ],
+          "step": 3,
+          "update_end": 8
+        }
+      ],
+      "legacy_same_process_replay": true,
+      "nondivisible_tail": true,
+      "source_identity": {
+        "candidate_sha256": "b5bdbc988cafcfe789e4703db7acde33eb13f81a1da762f22dcce3ff976347ff",
+        "dataset_sha256": "ceeac139ccb6d31109a7ef7e326e08f4ec4b44a18cb37c7bf5cab924fa92cab0",
+        "ordered_source_ids_sha256": "112354f4fb1dd0393a088888c34c850474eb9c627351b6aa7d1a7636cd7863b0",
+        "training_source_sha256": "b5bdbc988cafcfe789e4703db7acde33eb13f81a1da762f22dcce3ff976347ff"
+      }
+    },
+    "3": {
+      "byte_corruption_rejected": true,
+      "checkpoint_integrity": "SHA-256",
+      "config_mismatch_rejected": true
+    },
+    "5": {
+      "exit_code": 0,
+      "fresh_process_matches_uninterrupted": true,
+      "fresh_process_next_ids": [
+        7,
+        18,
+        93
+      ],
+      "pid": 25435,
+      "published_generation": "g-ee15fe5fb17c425fba8c7544a87b050b",
+      "schema_and_identity_controls": {
+        "history_rank_rejected": true,
+        "history_update_rank_rejected": true,
+        "rechecksummed_velocity_shape_restore_rejected": true,
+        "rechecksummed_wrong_order_rejected": true,
+        "scalar_clock_rank_rejected": true,
+        "scalar_clock_update_rank_rejected": true,
+        "valid_schema_roundtrip": true,
+        "velocity_shape_update_rejected": true,
+        "velocity_shape_writer_rejected": true
+      },
+      "tail_cursor": 5,
+      "worker_output_sha256": "326115388cc9908f209394cb03335fd3ed0e06519efd1d34004936426cf83c11"
+    },
+    "6": {
+      "failpoints": {
+        "after_manifest": {
+          "current_unchanged": true,
+          "elapsed_seconds": 0.07905533304437995,
+          "exit_code": 73,
+          "interrupted_artifact": {
+            "kind": "complete_unpublished_generation",
+            "manifest_bound": true,
+            "manifest_sha256": "84dd10765222fd36abf369796996a514a0f77b9784e7293886f13d4c308bfdcc",
+            "path": "generations/.tmp-g-17394bcf00a84315ad16bd5956288664",
+            "payload_sha256": "e4b88b02729b5f82408a09a50a6339f6281fa58e85fadcb7c32f33f4b5c99f97"
+          },
+          "pid": 25439,
+          "prior_generation_restored": true,
+          "reached_exact_failpoint": true,
+          "stderr": "",
+          "stdout": "",
+          "worker_status": "RuntimeError:injected crash at after_manifest"
+        },
+        "after_payload": {
+          "current_unchanged": true,
+          "elapsed_seconds": 0.07849325006827712,
+          "exit_code": 73,
+          "interrupted_artifact": {
+            "kind": "complete_payload_without_manifest",
+            "matches_expected_state": true,
+            "path": "generations/.tmp-g-f9a4092533ef440cb78b5eb5ed86dee2/state.npz",
+            "sha256": "e4b88b02729b5f82408a09a50a6339f6281fa58e85fadcb7c32f33f4b5c99f97"
+          },
+          "pid": 25438,
+          "prior_generation_restored": true,
+          "reached_exact_failpoint": true,
+          "stderr": "",
+          "stdout": "",
+          "worker_status": "RuntimeError:injected crash at after_payload"
+        },
+        "after_publish": {
+          "complete_generation_visible": true,
+          "exit_code": 73,
+          "pid": 25440,
+          "published_generation": "g-3bdd880c19c74319867161e623fcc026",
+          "reached_exact_failpoint": true,
+          "restored_state_matches": true,
+          "worker_status": "RuntimeError:injected crash at after_publish"
+        },
+        "during_temp_write": {
+          "current_unchanged": true,
+          "elapsed_seconds": 0.09208933310583234,
+          "exit_code": 73,
+          "interrupted_artifact": {
+            "bytes": 1341,
+            "kind": "partial_npz_write",
+            "loadable": false,
+            "path": "generations/.tmp-g-1b4e238eeb0742bdb4f3dfc859249c0f/state.npz.tmp"
+          },
+          "pid": 25437,
+          "prior_generation_restored": true,
+          "reached_exact_failpoint": true,
+          "stderr": "",
+          "stdout": "",
+          "worker_status": "RuntimeError:injected crash at during_temp_write"
+        }
+      },
+      "lock_backend": "fcntl.flock",
+      "platform_compatible_stages": [
+        "1",
+        "2",
+        "3"
+      ],
+      "premature_publication_rejected": true,
+      "publication_boundary": "CURRENT.json atomic replace after immutable generation preparation",
+      "scope": "ordinary process termination on one POSIX local filesystem; no power-loss claim",
+      "tested_platform": "darwin"
+    },
+    "7": {
+      "expected_parent": "g-60ab2b3fcbc445cf9fddf7c568074154",
+      "loser_conflict": true,
+      "no_silent_lost_update": true,
+      "pids": [
+        25441,
+        25442
+      ],
+      "statuses": [
+        "conflict",
+        "published"
+      ],
+      "winner_generation": "g-c773ae9c0b3e4ce58a96ec76daeacb51"
+    },
+    "negative_controls": {
+      "ignored_momentum": "rejected: independent mismatch in weight",
+      "no_op_mutation_must_fail_sensitivity_self_test": "failed as required",
+      "repeated_rng": "rejected: independent mismatch in weight",
+      "unchanged_reference_positive_control": "accepted by independent transition comparison",
+      "weight_only_checkpoint": "rejected after local rechecksumming",
+      "wrong_next_batch": "rejected: independent mismatch in weight"
+    }
+  },
+  "supporting_sources_sha256": {
+    "projects/recovery-audit/README.md": "e15032716d1e6965767def5b1f98f9083c974c4f8b1ce6b406fa428f5d875af8",
+    "projects/recovery-audit/project.json": "c3963e8b7f1acec882f3ab81cdbf363de9ca014a91fe2d438740dfd13bbeedb1",
+    "projects/recovery-audit/starter/model.py": "d69b3113e583f262952e9aa7886b0c00c6df149a32257efd5f56b5218aa3ce70"
+  }
+}

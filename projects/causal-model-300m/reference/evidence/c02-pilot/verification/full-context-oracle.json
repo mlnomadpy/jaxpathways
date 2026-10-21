@@ -1,0 +1,22 @@
+{
+  "adapter_sha256": "6968ebe1a71ce9f46bcdbff203f7465de0cb856bb71e1575c7534124747deb97",
+  "context_limit": 4,
+  "provided_context": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "target": [
+    8
+  ],
+  "actual_model_input": [
+    4,
+    5,
+    6,
+    7
+  ],
+  "actual_logprob": -0.979095458984375,
+  "full_context_oracle_logprob": -0.979095458984375,
+  "logprob_delta": 0.0
+}

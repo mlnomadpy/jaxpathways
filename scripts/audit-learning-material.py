@@ -65,7 +65,12 @@ def pilot_evidence(plan):
             missing.append(relative)
         elif hashlib.sha256(candidate.read_bytes()).hexdigest() != expected:
             missing.append(relative + " (hash mismatch)")
-    for key in ("historical_receipt", "checker_amendment"):
+    required_references = (
+        ("execution_verification", "retention")
+        if plan["id"] == "causal-model-300m"
+        else ("historical_receipt", "checker_amendment")
+    )
+    for key in required_references:
         reference = index.get(key)
         if (
             not isinstance(reference, dict)
@@ -551,23 +556,17 @@ def build():
     for finding in review["findings"]:
         current = dict(finding)
         if finding.get("id") == "production-capstones":
-            c01 = next(
-                item
-                for item in items
-                if item["kind"] == "plans" and item["id"] == "embedding-model-300m"
-            )
+            available = [item for item in items if item["kind"] == "plans" and item.get("pilotAvailable")]
             current["title"] = "All ten full model-lifecycle capstones remain planned"
-            if c01.get("pilotAvailable"):
-                current["action"] = (
-                    "C01 has a bounded CPU workflow, and its precommitted retrieval-quality floors failed. "
-                    "Complete the full-scale and quality gates for C01, then implement and qualify the other nine capstones. "
-                    "Keep this scoped pilot separate from target-scale and production claims."
-                )
-            else:
-                current["action"] = (
-                    "The C01 bounded CPU evidence packet is still pending. Complete the C01 source/evidence handoff, "
-                    "then qualify its full-scale and quality gates and implement the other nine capstones."
-                )
+            descriptions = []
+            if any(item["id"] == "embedding-model-300m" for item in available):
+                descriptions.append("C01 has a bounded CPU workflow; its precommitted retrieval-quality floors failed.")
+            if any(item["id"] == "causal-model-300m" for item in available):
+                descriptions.append("C02 has a bounded CPU lifecycle; all six branches failed their frozen QA quality floors.")
+            current["action"] = " ".join(descriptions + [
+                "Complete the full-scale and quality gates for all ten capstones, including the remaining implementations.",
+                "Keep scoped CPU workflows separate from target-scale, task-quality and production claims."
+            ])
         findings.append(current)
     lesson_items = [x for x in items if x["kind"] == "lessons"]
     summary = dict(

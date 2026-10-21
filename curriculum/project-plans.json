@@ -97,7 +97,14 @@
       "recovery-04"
     ],
     "status": "planned",
-    "source": "projects/causal-model-300m/README.md"
+    "source": "projects/causal-model-300m/README.md",
+    "pilot": {
+      "title": "C02 causal lifecycle CPU pilot",
+      "scope": "A bounded 33,088-parameter CPU workflow connects next-token pretraining, matched continuation, full SFT and LoRA, reloaded evaluation and a local consumer. All six branches failed the frozen QA quality floors. This does not qualify the full approximately-300M capstone, broad benchmarks, target training or production release.",
+      "anchor": "cpu-pilot",
+      "download": "causal-model-300m-pilot.zip",
+      "evidence": "reference/evidence-index.json"
+    }
   },
   {
     "id": "image-model-300m",
