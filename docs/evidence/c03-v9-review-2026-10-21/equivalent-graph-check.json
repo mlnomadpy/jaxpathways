@@ -1,0 +1,9 @@
+{
+  "checker": "image-model-300m/tests/check.py",
+  "error": "AssertionError: candidate fixture could not be transformed through its public model API",
+  "implementation": "/private/tmp/c03-sol-v9-equivalent-candidate/model.py",
+  "stage": "graph",
+  "stages": {},
+  "status": "failed",
+  "traceback": "Traceback (most recent call last):\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/image-model-300m/tests/check.py\", line 3057, in main\n    report[\"stages\"][stage] = run_stage(\n                              ~~~~~~~~~^\n        stage, candidate, args.implementation, args.data, args.archive, output\n        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n    )\n    ^\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/image-model-300m/tests/check.py\", line 2974, in run_stage\n    return _graph_stage(candidate_path, output_directory.expanduser().resolve())\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/image-model-300m/tests/check.py\", line 2274, in _graph_stage\n    candidate_source_sha = _mutate_candidate_fixture(candidate_path, candidate_model)\n  File \"/Users/tahabsn/Documents/ChatGPT/jaxpathways/projects/image-model-300m/tests/check.py\", line 2156, in _mutate_candidate_fixture\n    raise AssertionError(\n        \"candidate fixture could not be transformed through its public model API\"\n    )\nAssertionError: candidate fixture could not be transformed through its public model API\n"
+}
