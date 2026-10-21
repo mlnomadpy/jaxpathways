@@ -53,6 +53,11 @@ const eraSections = eraOrder
         {course.phases.length} phases · {inventory.authored} lessons available
         {inventory.planned ? ` · ${inventory.planned} planned` : ''}
       </p>
+      <p>
+        These are practice drafts. Some courses are still in development; CPU checks and teaching
+        review are separate.{' '}
+        <a href={siteUrl('content-status.html')}>See status and contribution priorities</a>.
+      </p>
       <nav class="course-core-sequence" aria-label="First CPU course steps">
         <a href={siteUrl('lesson-welcome-01.html')}>00 · Set up Python</a>
         <span aria-hidden="true">→</span>

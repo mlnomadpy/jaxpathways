@@ -1,5 +1,6 @@
 ---
 import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import registry from '../../../public/api/v1/projects.json';
@@ -41,6 +42,7 @@ const layout = projectFileLayout(project);
       </a>
     </div>
   </PageIntro>
+  <MaterialStatus kind="projects" id={project.id} />
   <aside class="project-guide-brief" aria-label="Workspace and code placement">
     <p class="edition">Where to put your code &amp; how to run checks</p>
     <p>

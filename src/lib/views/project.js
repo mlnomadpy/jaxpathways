@@ -1,3 +1,4 @@
+import { materialNotice } from '../material-status.js';
 import { extractCodeApis } from '../code-teaching.js';
 import { escapeHtml as escape } from '../html.js';
 import { inlineMath } from '../math.js';
@@ -106,6 +107,7 @@ export function renderProject(p) {
   return `<div class="page-intro">
     <p class="page-eyebrow"><a href="projects.html">All projects</a><span aria-hidden="true"> · </span><a href="course.html?path=${escape(p.pathwayId)}">Course / ${escape(p.pathwayId)}</a><span aria-hidden="true"> · </span><span>Integration project · ${escape(p.hardware)}</span></p>
     <h1>${escape(p.title)}</h1>
+${materialNotice('projects', p.id)}
     <p class="intro">${inlineMath(p.setupNote)}</p>
     <div class="actions">
     <a class="button primary" href="project-guides/${escape(p.id)}.html">Read the guide and figures</a>
@@ -115,7 +117,7 @@ export function renderProject(p) {
     </div>
     <section class="project-blueprint" aria-labelledby="project-blueprint-heading">
     <div class="project-blueprint-header">
-    <span class="stage-pill">Project Blueprint · ${p.stages.length} verified stages</span>
+    <span class="stage-pill">Project Blueprint · ${p.stages.length} reference-checked stages</span>
     <h2 id="project-blueprint-heading">What to do, where to put your code &amp; how to run checks</h2>
     <p class="blueprint-lead">Every project bundle contains a starter template, your editable implementation file, an automated stage checker, and an instructor reference solution. Follow this layout so every stage command finds your code on the first run.</p>
     </div>

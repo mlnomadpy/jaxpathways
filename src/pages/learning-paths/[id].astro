@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import { course } from '../../lib/course-data.js';
 import { inlineMath } from '../../lib/math.js';
@@ -22,6 +23,7 @@ const { route } = Astro.props;
     title={route.title}
     intro={route.description}
   />
+  <MaterialStatus kind="pathways" id={route.id} />
   <h2>Who this path is for</h2>
   <p set:html={inlineMath(route.audience)} />
   <h2>Preparation</h2>

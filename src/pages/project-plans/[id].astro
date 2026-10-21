@@ -1,5 +1,6 @@
 ---
 import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import plans from '../../../curriculum/project-plans.json';
@@ -62,6 +63,7 @@ const content = projectGuide(
       Start with the runnable harness
     </a>
   </PageIntro>
+  <MaterialStatus kind="plans" id={project.id} />
   <GuideContents sections={content.sections} label="Project plan sections" title="In this plan" />
   <section aria-labelledby="preparation-heading">
     <h2 id="preparation-heading">Available preparation lessons</h2>

@@ -129,7 +129,7 @@ report = {
         "assessmentStatuses": dict(
             collections.Counter(a["status"] for a in assessments)
         ),
-        "tpuValidatedLessons": 0,
+        "hardwareEvidence": "See curriculum/hardware-validation.json and the itemized learning-material audit for source-bound target scope; these are not whole-lesson qualifications.",
         "independentlyReviewedLessons": sum(
             r["review"] == "independent expert review recorded" for r in records
         ),
@@ -146,6 +146,6 @@ md = (
 )
 for r in records:
     md += f"| {r['id']}: {r['title']} | {r['contentTier']} | {', '.join(r['missingTeachingComponents']) or 'Complete'} | {', '.join(r['genericManifestFields']) or 'None detected'} | {r['runtime']} |\n"
-md += "\n## Open Engineering TODOs\n\n1. Add runnable starter/solution harnesses for the 10 planned large-model and retrieval capstones in `projects/`.\n2. Add automated Cloud TPU VM CI execution receipts alongside the local CPU verification receipts.\n3. Run the Windows beginner workflow and retain a successful hosted receipt.\n4. Complete native book qualification and human teaching review using docs/book-compatibility.md and docs/teaching-review-protocol.md.\n"
+md += "\n## Current scope and next contributions\n\nRead [the itemized learning-material audit](learning-material-audit-2026-10-21.md) for all projects, planned capstones, assessment rubrics, hardware evidence and teaching-review gaps. This structural inventory does not establish teaching quality or whole-lesson TPU qualification.\n"
 (ROOT / args.markdown).write_text(md)
 print(report["totals"])

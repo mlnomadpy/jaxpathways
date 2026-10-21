@@ -56,7 +56,7 @@ Retain the TPU ridge-point and HBM budget tables from tpu-03, plus the BF16/INT8
 
 ### Further work
 
-Apply the 3-part Cloud TPU mini-course across Phases 07, 08, 09, 13, 15, 16, 17, and 18 by staging each lesson script in exercises/ to your TPU VM.
+Use the reviewed execution matrix before staging code on a TPU. CPU-only lesson companions stay on CPU; only source-reviewed targets with matching dependencies and topology should be launched. The retained v5e receipts qualify their named workloads, not every course script or a production model.
 
 ## Lesson sequence
 

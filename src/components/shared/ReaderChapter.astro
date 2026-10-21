@@ -1,4 +1,5 @@
 ---
+import { materialStatus, materialStatusLabel } from '../../lib/material-status.js';
 import { inlineMath, renderMath } from '../../lib/math.js';
 import { executionScope } from '../../lib/runtime.js';
 import Prose from './Prose.astro';
@@ -15,6 +16,11 @@ interface Props {
 const { lesson, index } = Astro.props;
 const c = lesson.content!;
 const scope = executionScope(lesson);
+const maturity = materialStatus('lessons', lesson.id);
+const statusUrl = new URL(
+  `content-status.html#lessons-${lesson.id}`,
+  'https://www.tahabouhsine.com/jaxpathways/',
+).href;
 const codePanel = (source: string, label: string) =>
   sharedCodePanel(source, label).replace(
     '<pre ',
@@ -28,6 +34,10 @@ const { offline = false } = Astro.props;
     Chapter {index + 1} · {lesson.id}
   </p>
   <h1>{lesson.title}</h1>
+  <p class="chapter-kicker">
+    <a href={statusUrl}>{materialStatusLabel(maturity.level)}</a> · {maturity.review}. Applies to
+    this chapter and its practice tasks.
+  </p>
   <p set:html={inlineMath(lesson.objective)} />
   {c.setupBundle && (
     <p>

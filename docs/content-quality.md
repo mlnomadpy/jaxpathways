@@ -100,3 +100,16 @@ Review each figure against its saved data and the code that produced it. Start b
 Do not describe generic expected behavior when this run shows something more specific: identify tied attention weights, repeated rows, optimizer rebounds, zero-height bars, and overlapping curves where they actually occur. Equal adjacent bars are not overlapping lines. A probability is not accuracy, a gradient is not loss, a categorical device ID is not a performance score, and a timing percentile is not a maximum. Explain logarithmic ratios and mixed linear/log scales explicitly.
 
 Keep walkthroughs in canonical `content.visual.reading` and `content.visual.connection` with paragraph breaks and explicit math delimiters. Their figures and explanations must travel together through the lesson, notebook, Markdown, and books. Timing prose must remain meaningful after reruns: interpret units, sample variation, and measurement boundaries rather than freezing machine-dependent durations into the text. See `docs/plot-interpretation-audit.md` for the reviewed examples and known review limits.
+
+## Material maturity and contribution labels
+
+`curriculum/content-review.json` records the dated editorial scope judgment and next contribution for every phase and runnable project. `npm run content:build` runs `scripts/audit-learning-material.py` after rendering canonical lessons. The generated status registry covers lessons, tasks, projects, plans, assessments, routes, career guides, modality tracks, practical guides and the book. Read the [itemized audit](learning-material-audit-2026-10-21.md).
+
+- **Available draft** describes usable material within its stated practice scope, with teaching review and learner validation still pending.
+- **In development** means important parts of the advertised course or project remain unfinished.
+- **Planned** identifies a specification without a runnable capstone.
+- **Needs repair** marks missing required artifacts or failing current checks.
+
+When changing scope, update the editorial registry with inspectable reasons and a focused contribution. Add entries for new phases and projects before building. A phase also inherits missing or stale lesson evidence; a stale project receipt cannot establish current reference validation. The auditor checks exact source hashes, script and notebook receipts, project companion files and accepted human review evidence. Structural presence is not a content-quality score.
+
+Re-run affected numerical checks when lesson sources change. Record human reviews through `curriculum/teaching-reviews.json` and the [review protocol](teaching-review-protocol.md); an agent audit does not supply human acceptance. Do not infer physical accelerator qualification from logical CPU devices. Maturity labels must never award or erase learner progress.

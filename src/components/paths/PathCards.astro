@@ -1,4 +1,5 @@
 ---
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import groups from '../../data/path-groups.json';
 import { course } from '../../lib/course-data.js';
 import { careerCoverage, pathwayCoverage } from '../../lib/careers.js';
@@ -18,6 +19,7 @@ import { siteUrl } from '../../lib/urls.js';
         return (
           <article class="path-card">
             <h3>{route.title}</h3>
+            <MaterialStatus kind="pathways" id={route.id} compact />
             <p set:html={inlineMath(route.description)} />
             <p class="availability-label">
               {availability.planned ? 'Partly available' : 'Available lesson drafts'} ·{' '}

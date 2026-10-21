@@ -385,11 +385,11 @@ Expected: The next four ID batches and losses match; parameters, Adam state, con
 
 ### Read the figure
 
-The uninterrupted and resumed loss curves overlap to machine precision across steps 3 through 6.
+The uninterrupted and resumed loss curves overlap within the numerical tolerance across steps 3 through 6 in this fixed CPU run. This figure compares four scalar losses; the separate tree assertions check the parameter and optimizer leaves as well.
 
 ### Connect it to the computation
 
-Saving and restoring the step counter, PRNG key, data iterator state, and optimizer moments alongside model weights ensures exact continuation.
+This example restores model weights, optimizer moments, the step counter, PRNG key and data position under an unchanged batching configuration and environment. Its continuation checks support parity for this fixture. They do not establish exact continuation after a batching change, worker loss or a fresh multi-host restart.
 
 ```python
 # Compare step losses for the 4 post-checkpoint updates (`reference_losses` vs `resumed_losses`):
@@ -398,7 +398,7 @@ visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:40.677925+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T10:05:30.972516+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]

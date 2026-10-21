@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../../layouts/GuideLayout.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import { course } from '../../lib/course-data.js';
 import { inlineMath } from '../../lib/math.js';
@@ -22,6 +23,7 @@ const { role } = Astro.props;
     title={role.title}
     intro={role.description}
   />
+  <MaterialStatus kind="careers" id={role.id} />
   <h2>The work</h2>
   <p set:html={inlineMath(role.workExample)} />
   <h2>Preparation</h2>

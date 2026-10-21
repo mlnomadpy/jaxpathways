@@ -1,0 +1,428 @@
+{
+  "schemaVersion": 1,
+  "auditedAt": "2026-10-21",
+  "baseCommit": "972cbb07870ab60758bc9ce38540855c2275463e",
+  "method": "Complete source/companion/receipt inventory and per-item scope review; exercises and transfer prompts inspected across all phases. Mathematical/code close review and visual inspection are selective, not a proof of every sentence or a novice/expert acceptance.",
+  "levels": {
+    "available-draft": "Material is available for its stated practice scope. Teaching review and learner validation are still pending.",
+    "in-development": "Useful material exists, but important parts of this course or project are still being developed. Read its stated scope before starting.",
+    "planned": "A specification or brief exists; no runnable capstone implementation is supplied.",
+    "needs-repair": "Required material is missing or its current checks fail. Do not rely on it until repaired."
+  },
+  "findings": [
+    {
+      "id": "review-evidence",
+      "priority": "P1",
+      "title": "No independent teaching reviews or novice pilots are recorded",
+      "evidence": [
+        "curriculum/teaching-reviews.json",
+        "docs/teaching-review-protocol.md"
+      ],
+      "action": "Recruit consented novices and independent specialists; bind accepted reports to the exact content hash. Automated execution and this internal audit do not count as human acceptance.",
+      "status": "open"
+    },
+    {
+      "id": "production-capstones",
+      "priority": "P1",
+      "title": "All ten larger model and retrieval capstones are specifications",
+      "evidence": [
+        "curriculum/project-plans.json",
+        "projects/embedding-lineage/README.md",
+        "projects/causal-lineage/README.md"
+      ],
+      "action": "Implement one licensed-data, baseline-compared model lineage at a time. Existing tiny pilots and harnesses are preparation, not 300M releases.",
+      "status": "open"
+    },
+    {
+      "id": "target-scope",
+      "priority": "P1",
+      "title": "Hardware evidence is real but narrow",
+      "evidence": [
+        "curriculum/hardware-validation.json"
+      ],
+      "action": "Retain the four source-matching v5e receipts and their limits. Add fresh-process/worker-loss recovery, target inference, native quantization and scaling evidence separately.",
+      "status": "open"
+    },
+    {
+      "id": "checkpoint-feedback",
+      "priority": "P2",
+      "title": "Every lesson checkpoint uses one explanation for all answer choices",
+      "evidence": [
+        "src/scripts/reader.js",
+        "phases"
+      ],
+      "action": "Author misconception-specific feedback and pilot changed-condition tasks. Option shuffling alone does not repair an assessment.",
+      "status": "open"
+    },
+    {
+      "id": "starter-contract",
+      "priority": "P2",
+      "title": "Reference notebooks and generated scaffolds are practice aids, not independent assessment",
+      "evidence": [
+        "src/lib/code-teaching.js",
+        "scripts/lesson-artifacts.mjs"
+      ],
+      "action": "Author learner-only starter contracts and changed unseen fixtures where appropriate; keep solutions behind an explicit reveal and retain review rubrics.",
+      "status": "open"
+    },
+    {
+      "id": "figure-review",
+      "priority": "P2",
+      "title": "Figure freshness is checked but interpretation still needs human review",
+      "evidence": [
+        "phases/06-recovery/03-save-model-optimizer-and-random-state/lesson.json",
+        "phases/06-recovery/04-recover-data-position-and-resume/lesson.json",
+        "docs/teaching-review-protocol.md"
+      ],
+      "action": "Corrected the two recovery captions: equal leaf norms do not imply elementwise equality, and continuation depends on complete state, inputs, configuration and environment. Human review of arrows, axes, units and causal explanations is still needed.",
+      "status": "partly addressed"
+    },
+    {
+      "id": "career-calibration",
+      "priority": "P2",
+      "title": "Career routes and duration estimates are not externally calibrated",
+      "evidence": [
+        "curriculum/course.json",
+        "learning-paths",
+        "curriculum/teaching-reviews.json"
+      ],
+      "action": "Ask working practitioners to review role coverage and pilot actual learner journeys. Portfolio fixture passes do not establish job readiness.",
+      "status": "open"
+    },
+    {
+      "id": "status-drift",
+      "priority": "P2",
+      "title": "Availability, completion and hardware review were mixed in learner-facing wording",
+      "evidence": [
+        "src/pages/projects.astro",
+        "src/pages/book.astro",
+        "src/pages/downloads/jax-foundations.astro",
+        "curriculum/course.json"
+      ],
+      "action": "Added learner-facing maturity, current CPU checks, scoped hardware evidence and teaching-review status. Replaced stale blanket TPU staging instructions. Keep these labels source-bound as the material changes.",
+      "status": "addressed"
+    }
+  ],
+  "phases": [
+    {
+      "id": "welcome",
+      "level": "available-draft",
+      "strength": "A concrete saved-file and environment walkthrough, plus CPU/device checks.",
+      "contribution": "Run consented fresh-machine novice pilots on Windows, macOS and Linux; record where learners need help."
+    },
+    {
+      "id": "arrays",
+      "level": "available-draft",
+      "strength": "Dense-array axes, preprocessing and update contracts have changed-input checks.",
+      "contribution": "Add a masked variable-length batch that continues into the model project; review constant-feature and ragged-input explanations."
+    },
+    {
+      "id": "transforms",
+      "level": "available-draft",
+      "strength": "Gradients, batching, compilation and tracing have independent arithmetic and changed conditions.",
+      "contribution": "Review transformation composition at nonsmooth boundaries and add a single continuing model across the five lessons."
+    },
+    {
+      "id": "state",
+      "level": "available-draft",
+      "strength": "Key ownership, parameter trees, scan carries and branches have explicit invariants.",
+      "contribution": "Connect sample IDs, augmentation keys and optimizer state to a recovery handoff; test that novices can explain key reuse."
+    },
+    {
+      "id": "optimization",
+      "level": "available-draft",
+      "strength": "Twelve connected math labs and an optimizer audit cover geometry, conditioning, noise and update state.",
+      "contribution": "Pilot the synthesis with learners; add constrained or nonsmooth optimization only around a new inspectable task, and improve feedback on wrong answers."
+    },
+    {
+      "id": "networks",
+      "level": "available-draft",
+      "strength": "MLP, NNX and CNN examples test gradients, evaluation isolation and synthetic image errors.",
+      "contribution": "Add a licensed natural-image pilot with frozen source-group splits, a simple baseline and per-class error slices."
+    },
+    {
+      "id": "recovery",
+      "level": "available-draft",
+      "strength": "Grain/Orbax and the recovery audit exercise complete state and input-position contracts.",
+      "contribution": "Review exact-continuation wording against its fixed environment; inject storage and concurrent-writer failures separately from ordinary local restore."
+    },
+    {
+      "id": "transformers",
+      "level": "in-development",
+      "strength": "Attention, packing and a small causal harness are runnable; natural-data pilots are separate projects.",
+      "contribution": "Connect tokenizer choices and a complete configurable Transformer to real-corpus evaluation, cache checks and saved phase handoffs."
+    },
+    {
+      "id": "performance",
+      "level": "available-draft",
+      "strength": "Warm timing, call ledgers, retained CPU traces and independent memory estimates are available.",
+      "contribution": "Annotate a real target trace with the exact workload and bottleneck; retain distributions and distinguish estimates from measured allocated memory."
+    },
+    {
+      "id": "distributed",
+      "level": "in-development",
+      "strength": "Logical CPU sharding is checked; separate v5e collectives and same-process multi-host restore receipts exist.",
+      "contribution": "Qualify fresh-process multi-host restart and worker-loss recovery with explicit data ownership; do not infer scaling results from logical CPU devices."
+    },
+    {
+      "id": "science",
+      "level": "in-development",
+      "strength": "Scalar ODE, sensitivity and inverse-problem labs use discrete and continuous references.",
+      "contribution": "Add an adaptive or stiff-solver example, identifiable noisy observations and domain-expert review before claiming a general scientific-computing pathway."
+    },
+    {
+      "id": "probability",
+      "level": "in-development",
+      "strength": "Exact Bayesian regression, instructional HMC and VI provide independent oracles.",
+      "contribution": "Add a real NumPyro or equivalent library workflow, modern chain diagnostics and a deliberately failing posterior predictive check."
+    },
+    {
+      "id": "rl",
+      "level": "in-development",
+      "strength": "A tabular environment, policy updates and paired-seed evaluation have exact finite-task checks.",
+      "contribution": "Implement a learned value function, GAE and timeout bootstrapping before extending to continuous actions or larger benchmark environments."
+    },
+    {
+      "id": "kernels",
+      "level": "in-development",
+      "strength": "CPU interpretation and a separately qualified two-kernel v5e target are available.",
+      "contribution": "Turn the bounded target receipt into a learner tuning lab with retained trace interpretation and end-to-end comparison; GPU and general pipeline claims remain unqualified."
+    },
+    {
+      "id": "internals",
+      "level": "available-draft",
+      "strength": "Jaxpr, directional products, custom rules and a supported-subset interpreter have independent derivative checks.",
+      "contribution": "Add transformation-composition failures and effect/extension boundaries; have an independent reviewer check the supported subset and numerical assumptions."
+    },
+    {
+      "id": "deployment",
+      "level": "in-development",
+      "strength": "Dense framework conversion, exports, precision contracts and process boundaries are checked.",
+      "contribution": "Execute and document a real container service, concurrent request workload and named edge-device/delegate report; dense parity is not full architecture portability."
+    },
+    {
+      "id": "operations",
+      "level": "in-development",
+      "strength": "Local job incidents, checksummed recovery and release/rollback drills are runnable.",
+      "contribution": "Add authenticated approvals, multi-writer release control, load-driven SLO incidents and application-specific LLM evaluation beyond deterministic fixtures."
+    },
+    {
+      "id": "pretraining",
+      "level": "in-development",
+      "strength": "Small masked-token, masked-image and contrastive objective labs run on CPU.",
+      "contribution": "Integrate the objectives with saved encoder architectures, licensed data recipes and downstream probes; the larger modality capstones are still plans."
+    },
+    {
+      "id": "posttraining",
+      "level": "in-development",
+      "strength": "Response masks, dense LoRA, learned rewards, PPO-bandit and DPO mechanics are implemented.",
+      "contribution": "Adapt a real saved Transformer and compare target quality, retained behavior and reference drift; sequence PPO/value models and human preferences are not supplied."
+    },
+    {
+      "id": "tpu",
+      "level": "in-development",
+      "strength": "Provisioning guidance and runtime verification connect to separate bounded physical v5e evidence.",
+      "contribution": "Review generation-specific topology and memory assumptions, test a learner provisioning journey and keep pricing illustrative rather than a live quote."
+    },
+    {
+      "id": "tpu-workflows",
+      "level": "in-development",
+      "strength": "Reviewed launch targets, checkpoint contracts and a bounded multi-host receipt exist.",
+      "contribution": "Qualify fresh-process and worker-loss recovery, retained per-worker evidence and cleanup in an observed learner run; device discovery alone is not training qualification."
+    },
+    {
+      "id": "tpu-systems",
+      "level": "in-development",
+      "strength": "Memory/precision models and retained profiling paths connect to narrow v5e targets.",
+      "contribution": "Teach target trace interpretation and native low-bit kernel/storage evidence; distinguish per-chip capacity, sharded state and dequantized reference arithmetic."
+    }
+  ],
+  "projects": [
+    {
+      "id": "regression-audit",
+      "level": "available-draft",
+      "strength": "Independent regression gradients and changed-condition training.",
+      "contribution": "Pilot the rubric with unseen data and retain a reviewer-scored evidence package."
+    },
+    {
+      "id": "mlp-classifier",
+      "level": "available-draft",
+      "strength": "Small synthetic classifier with objective, gradient and replay checks.",
+      "contribution": "Bridge to a licensed real dataset with frozen splits, error analysis and reviewer feedback."
+    },
+    {
+      "id": "scientific-inverse",
+      "level": "available-draft",
+      "strength": "Bounded physical simulation, sensitivities and parameter recovery.",
+      "contribution": "Add noisy observations, identifiability stress tests and domain-expert interpretation."
+    },
+    {
+      "id": "policy-evaluation",
+      "level": "available-draft",
+      "strength": "Tabular environment, policy objectives and held-out evaluation.",
+      "contribution": "Add learned value estimates and a larger task after validating timeout semantics."
+    },
+    {
+      "id": "bayesian-regression",
+      "level": "available-draft",
+      "strength": "Exact regression oracle and instructional sampler/predictive checks.",
+      "contribution": "Add library inference, modern diagnostics and reviewer-checked model mismatch cases."
+    },
+    {
+      "id": "derivative-audit",
+      "level": "available-draft",
+      "strength": "Directional products, custom rules and a small primitive transformation.",
+      "contribution": "Review higher-order composition and unsupported-primitive failure cases."
+    },
+    {
+      "id": "deployment-audit",
+      "level": "available-draft",
+      "strength": "Small artifact adaptation, precision and request capacity contracts.",
+      "contribution": "Attach a real container run, load test and target runtime report."
+    },
+    {
+      "id": "workload-operations",
+      "level": "available-draft",
+      "strength": "Real local process incidents, complete recovery and rollback.",
+      "contribution": "Extend from local drills to authenticated, concurrent cloud release and SLO failure cases."
+    },
+    {
+      "id": "audio-harness",
+      "level": "available-draft",
+      "strength": "Synthetic waveform classification with recovery, precision and export.",
+      "contribution": "Add licensed recordings, speaker/source-held-out splits and task-appropriate baselines; this is not an ASR model."
+    },
+    {
+      "id": "cross-modal-harness",
+      "level": "available-draft",
+      "strength": "Small paired-branch contrastive system with recovery and export.",
+      "contribution": "Add natural paired data, duplicate-positive handling and held-out multimodal retrieval."
+    },
+    {
+      "id": "kernel-audit",
+      "level": "available-draft",
+      "strength": "Interpreted semantics plus two separately observed v5e target kernels.",
+      "contribution": "Reproduce the bounded target on new shapes and interpret the trace before claiming a useful speedup."
+    },
+    {
+      "id": "image-harness",
+      "level": "available-draft",
+      "strength": "Synthetic CNN lifecycle with augmentation, recovery and frozen errors.",
+      "contribution": "Add real photos, source-group leakage checks and an observed edge/runtime report."
+    },
+    {
+      "id": "foundation-toolkit",
+      "level": "available-draft",
+      "strength": "Environment, masked arrays, gradient batches and replayed simulation.",
+      "contribution": "Test the end-to-end beginner handoff without revealing reference answers."
+    },
+    {
+      "id": "sharded-training",
+      "level": "available-draft",
+      "strength": "Logical CPU ownership, weighted updates, recovery and trace evidence.",
+      "contribution": "Qualify fresh-process multi-host data and recovery behavior on an explicitly named target."
+    },
+    {
+      "id": "text-harness",
+      "level": "available-draft",
+      "strength": "Tiny byte-level causal training, full recovery, KV cache and export.",
+      "contribution": "Add tokenizer/corpus studies and nonperiodic held-out generation before any language-quality claim."
+    },
+    {
+      "id": "optimizer-audit",
+      "level": "available-draft",
+      "strength": "Geometry, conditioning, enumerated gradient noise and optimizer-state evidence.",
+      "contribution": "Pilot the synthesis with learner implementations and review failure explanations."
+    },
+    {
+      "id": "engineering-release",
+      "level": "available-draft",
+      "strength": "Tracked training, slice gates and deterministic LLM application fixtures.",
+      "contribution": "Evaluate a real application with versioned prompts/retrieval, adversarial cases and human review."
+    },
+    {
+      "id": "training-methods",
+      "level": "available-draft",
+      "strength": "Eight small masked, contrastive, adaptation and preference objectives.",
+      "contribution": "Connect each objective to real saved architectures and phase-to-phase checkpoint lineage."
+    },
+    {
+      "id": "weight-conversion",
+      "level": "available-draft",
+      "strength": "Real framework dense mappings and first-divergence numerical checks.",
+      "contribution": "Convert a complete saved attention architecture, including normalization, masks and input gradients."
+    },
+    {
+      "id": "welcome-audit",
+      "level": "available-draft",
+      "strength": "Environment evidence and independent arithmetic with learner-owned implementation.",
+      "contribution": "Run an unaided novice walkthrough and review the retained environment record."
+    },
+    {
+      "id": "arrays-audit",
+      "level": "available-draft",
+      "strength": "Array shape, statistics and changed-input diagnostics.",
+      "contribution": "Add ragged/masked data and assess the learner explanation of each axis."
+    },
+    {
+      "id": "transforms-audit",
+      "level": "available-draft",
+      "strength": "Differentiation, batching and tracing invariants.",
+      "contribution": "Add composed transformations with a deliberately incorrect derivative boundary."
+    },
+    {
+      "id": "recovery-audit",
+      "level": "available-draft",
+      "strength": "Local checkpoint contract and independent continuation checks.",
+      "contribution": "Inject incomplete writes, stale manifests and incompatible input state in separate processes."
+    },
+    {
+      "id": "performance-audit",
+      "level": "available-draft",
+      "strength": "Compilation/timing distinctions and retained evidence.",
+      "contribution": "Add a target-backed workload and a reviewed trace, not a generic timing improvement claim."
+    },
+    {
+      "id": "posttraining-audit",
+      "level": "available-draft",
+      "strength": "Bounded adaptation and preference-contract checks.",
+      "contribution": "Transfer the contracts to a saved Transformer and document retained behavior."
+    },
+    {
+      "id": "tpu-runtime-audit",
+      "level": "available-draft",
+      "strength": "CPU-verifiable runtime and participation evidence contracts.",
+      "contribution": "Observe a learner-owned TPU receipt on a declared topology and keep the exact numerical reference."
+    },
+    {
+      "id": "tpu-workflow-audit",
+      "level": "available-draft",
+      "strength": "Launch, checkpoint and recovery evidence contracts.",
+      "contribution": "Add a fresh-process multi-host restart and failure-injection qualification."
+    },
+    {
+      "id": "tpu-systems-audit",
+      "level": "available-draft",
+      "strength": "Precision/memory/profiling contracts with bounded assumptions.",
+      "contribution": "Attach actual native low-bit execution and an interpreted target trace."
+    },
+    {
+      "id": "reproducible-experiments",
+      "level": "available-draft",
+      "strength": "Six recorded CPU runs, paired comparisons, logging and a research notebook.",
+      "contribution": "Pilot learner-owned hypotheses, failed/retried runs and the optional logger adapters."
+    },
+    {
+      "id": "embedding-lineage",
+      "level": "in-development",
+      "strength": "A real-text CPU pilot with MLM, contrastive continuation, adaptation and held-out retrieval; quality is weak.",
+      "contribution": "Improve the frozen data/evaluation recipe against BM25 before scaling or claiming a useful released embedding model."
+    },
+    {
+      "id": "causal-lineage",
+      "level": "in-development",
+      "strength": "A real-text CPU Transformer pilot with continuation, held-out perplexity and export; quality is weak.",
+      "contribution": "Improve baseline-relative held-out quality and tokenizer/data decisions before scaling or publishing a production model."
+    }
+  ]
+}

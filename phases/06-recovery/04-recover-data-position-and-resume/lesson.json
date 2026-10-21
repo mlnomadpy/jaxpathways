@@ -144,8 +144,8 @@
       "title": "Loss trajectory parity: uninterrupted vs. checkpoint-resumed run",
       "prediction": "Predict whether resuming training at step 2 with restored optimizer, iterator, and PRNG state matches an uninterrupted trajectory.",
       "code": "# Compare step losses for the 4 post-checkpoint updates (`reference_losses` vs `resumed_losses`):\nvisual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after checkpoint', 'ylabel': 'batch loss', 'series': [{'label': 'uninterrupted reference_losses', 'y': [float(v) for v in reference_losses]}, {'label': 'checkpoint resumed_losses', 'y': [float(v) for v in resumed_losses]}]}",
-      "reading": "The uninterrupted and resumed loss curves overlap to machine precision across steps 3 through 6.",
-      "connection": "Saving and restoring the step counter, PRNG key, data iterator state, and optimizer moments alongside model weights ensures exact continuation."
+      "reading": "The uninterrupted and resumed loss curves overlap within the numerical tolerance across steps 3 through 6 in this fixed CPU run. This figure compares four scalar losses; the separate tree assertions check the parameter and optimizer leaves as well.",
+      "connection": "This example restores model weights, optimizer moments, the step counter, PRNG key and data position under an unchanged batching configuration and environment. Its continuation checks support parity for this fixture. They do not establish exact continuation after a batching change, worker loss or a fresh multi-host restart."
     },
     "diagram": {
       "title": "One checkpoint, one completed-step boundary",

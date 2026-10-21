@@ -1,4 +1,5 @@
 ---
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import TrackStageCard from '../../components/tracks/TrackStageCard.astro';
 import manifest from '../../../curriculum/modality-tracks.json';
@@ -71,6 +72,7 @@ const nextProjects = projectPlans.filter((project) => project.trackIds.includes(
         </a>
       </div>
     </PageIntro>
+    <MaterialStatus kind="tracks" id={track.id} />
     <section class="track-contract" aria-labelledby="target-heading">
       <div>
         <h2 id="target-heading">What you’re working toward</h2>

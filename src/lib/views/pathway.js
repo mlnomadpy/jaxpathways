@@ -1,3 +1,4 @@
+import { materialNotice } from '../material-status.js';
 import { escapeHtml } from '../html.js';
 import { inlineMath } from '../math.js';
 import { courseTypeCue } from '../runtime.js';
@@ -24,6 +25,7 @@ export function renderPathway(route, course, hasNext) {
     <div class="path-detail-heading">
     <div>
     <h1 tabindex="-1">${escapeHtml(route.title)}</h1>
+${materialNotice('pathways', route.id)}
     <p class="intro">${inlineMath(route.description)}</p>
     <p class="availability-label">${a.planned ? 'Partly available' : 'Available lesson drafts'} · ${a.available} lessons${a.planned ? ` · ${a.planned} planned ${a.planned === 1 ? 'topic' : 'topics'}` : ''}</p>
     <p>${inlineMath(route.prerequisites)}</p>

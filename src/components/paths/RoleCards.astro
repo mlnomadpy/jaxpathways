@@ -1,4 +1,5 @@
 ---
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import { course } from '../../lib/course-data.js';
 import { siteUrl } from '../../lib/urls.js';
 ---
@@ -6,6 +7,7 @@ import { siteUrl } from '../../lib/urls.js';
 {course.roles.map((role) => (
   <article class="role-card">
     <h3>{role.title}</h3>
+    <MaterialStatus kind="careers" id={role.id} compact />
     <p class="role-headline">{role.headline}</p>
     <ul>
       {role.responsibilities.slice(0, 2).map((responsibility) => (

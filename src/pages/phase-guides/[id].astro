@@ -1,5 +1,6 @@
 ---
 import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import RevisionStamp from '../../components/shared/RevisionStamp.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
@@ -69,6 +70,7 @@ const lesson = (id: string) => phase.lessons.find((item) => item.id === id)!;
       </a>
     </div>
   </PageIntro>
+  <MaterialStatus kind="phases" id={phase.id} />
   {['welcome', 'networks', 'recovery', 'operations'].includes(phase.id) && (
     <p>
       <a href={siteUrl('project-workflow.html')}>

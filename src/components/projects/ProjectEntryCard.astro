@@ -1,5 +1,6 @@
 ---
 import { course } from '../../lib/course-data.js';
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import { inlineMath } from '../../lib/math.js';
 import { siteUrl } from '../../lib/urls.js';
 import { projectFileLayout } from '../../lib/views/project.js';
@@ -31,6 +32,7 @@ const prerequisitePhases = course.phases.filter((phase) =>
       {pathwayTitle} · {project.hardware}
     </p>
     <h3>{project.title}</h3>
+    <MaterialStatus kind="projects" id={project.id} compact />
     <p class="project-outcome" set:html={inlineMath(project.rubric[0] || project.setupNote)} />
     <p class="project-effort">
       {prerequisitePhases.length} preparation {prerequisitePhases.length === 1 ? 'phase' : 'phases'}
