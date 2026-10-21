@@ -1,0 +1,50 @@
+{
+  "observed_at": "2026-10-21T22:08:55.566267+00:00",
+  "supersedes_pending_scope": "observations.json apple_books import/rendering only; earlier failed attempts remain retained",
+  "candidate_commit": "a3df5706b43355a8f218d86fdd100c74ff17ec94",
+  "epub_sha256": "f1dffaaf634c077c333a0376f752621fd4b4a6d533b527dd4ebedfae33d29284",
+  "method": "CUA native Finder open of exact-copy edition-specific filename, followed by Books AX and screenshots",
+  "environment": {
+    "app": "Apple Books on macOS",
+    "appearance": "existing dark appearance; settings not changed",
+    "capture_dimensions": [
+      1008,
+      1896
+    ],
+    "reader_title": "JAX Pathways: course reader 0.14.0"
+  },
+  "result": "bounded native rendering and TOC navigation passed",
+  "observations": [
+    {
+      "page": "1",
+      "observed": "Title, edition0.14.0, date2026-10-21 and In development/teaching review pending render visibly."
+    },
+    {
+      "page": "TOC",
+      "observed": "Phase/lesson hierarchy appears with page numbers. Selected Least squares, rank, and conditioning opens correct chapter at page465."
+    },
+    {
+      "page": "466,468,470",
+      "observed": "Inline indexed weights, vectors, residual, transpose and display least-squares/condition-number fractions render visibly without clipped math in this sample."
+    },
+    {
+      "page": "470",
+      "observed": "Complete bar chart with target/fit legend, all three rows, y-axis and numeric bar labels is visible and legible."
+    },
+    {
+      "page": "472",
+      "observed": "Monospace Python code has preserved indentation and readable soft wrapping for a long array literal, with instructions and interpretation visible."
+    }
+  ],
+  "interaction_followups": [
+    "Compare your reasoning disclosure received one accessibility click at page467 without observed expansion. A direct-coordinate attempt failed AXError.noValue; keyboard focus was not established. Treat disclosure interaction as unqualified, not a demonstrated content failure."
+  ],
+  "not_qualified": [
+    "Every chapter or reader setting",
+    "Second EPUB engine",
+    "Native assistive-technology speech and reading order",
+    "Print layout",
+    "Independent teaching acceptance",
+    "EPUB disclosure interaction"
+  ]
+}
