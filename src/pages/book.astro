@@ -1,5 +1,6 @@
 ---
 import GuideLayout from '../layouts/GuideLayout.astro';
+import MaterialStatus from '../components/shared/MaterialStatus.astro';
 import PageIntro from '../components/shared/PageIntro.astro';
 import { course, inventory } from '../lib/course-data.js';
 import { currentRelease } from '../lib/releases.js';
@@ -33,6 +34,7 @@ import { siteUrl } from '../lib/urls.js';
       </a>
     </div>
   </PageIntro>
+  <MaterialStatus kind="book" id="reader" />
   <h2>What you will learn</h2>
   <p>
     Build a mental model of JAX arrays, automatic differentiation and functional transformations.
@@ -49,7 +51,8 @@ import { siteUrl } from '../lib/urls.js';
   <p>
     For executable code and a place to keep your own results, use the{' '}
     <a href={siteUrl('developer.html')}>downloadable project workspaces</a>. Reference CPU runs are
-    recorded separately from physical TPU qualification and expert review, which remain outstanding.
+    recorded separately from the bounded physical TPU target receipts and the independent teaching
+    review still needed.
   </p>
   <h2>Chapters and online lessons</h2>
   <ol>

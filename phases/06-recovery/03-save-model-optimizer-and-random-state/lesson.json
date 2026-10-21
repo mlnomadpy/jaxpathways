@@ -135,8 +135,8 @@
       "title": "Parameter parity: uninterrupted step vs. Orbax-restored step",
       "prediction": "Predict the maximum absolute difference between the uninterrupted next state and the Orbax-restored next state.",
       "code": "# Compare parameter leaf norms between `expected_next` and `restored_next`:\nsaved_norms = [float(jnp.linalg.norm(a)) for a in jax.tree.leaves(expected_next['params'])]\nrestored_norms = [float(jnp.linalg.norm(a)) for a in jax.tree.leaves(restored_next['params'])]\nvisual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'leaf {i}' for i in range(len(saved_norms))], 'xlabel': 'checkpoint parameter leaf index', 'ylabel': 'L2 norm', 'series': [{'label': 'uninterrupted step', 'y': saved_norms}, {'label': 'restored from Orbax', 'y': restored_norms}]}",
-      "reading": "Adjacent bars for each parameter leaf have identical L2 norms between the uninterrupted run and the Orbax-restored run.",
-      "connection": "Verifying exact leaf equality after deserialization guarantees that the restored checkpoint reproduces the exact next training step."
+      "reading": "For each parameter leaf, the two bars show matching L2 norms after the next update. Matching norms alone do not prove that every element matches: different vectors can have the same norm. Use the separate elementwise state assertions in the script to check the stronger claim.",
+      "connection": "In this fixed CPU example, the complete restored state, unchanged update configuration and same next input reproduce the reference step within the asserted tolerances. Parameter equality after deserialization alone cannot establish next-step parity; optimizer state, randomness, data position and the execution environment also matter."
     }
   }
 }

@@ -26,7 +26,10 @@ import { course, inventory } from '../../lib/course-data.js';
     <p class="hero-byline">
       Created by <strong>{copy.hero.author}</strong>. Run on your own machine.
     </p>
-    <p class="hero-note">{copy.hero.note}</p>
+    <p class="hero-note">
+      {copy.hero.note}{' '}
+      <a href={siteUrl('content-status.html')}>See material status and contribute</a>.
+    </p>
   </div>
 
   <div class="hero-actions actions">

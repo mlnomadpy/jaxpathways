@@ -1,3 +1,4 @@
+import { materialNotice } from '../material-status.js';
 import { escapeHtml } from '../html.js';
 import { inlineMath } from '../math.js';
 import { routeViewContext } from './routes.js';
@@ -17,6 +18,7 @@ export function renderCareer(role, course) {
     <div>
     <p class="page-eyebrow"><button type="button" id="close-career" class="career-link" aria-label="Back to career routes">All career routes</button><span aria-hidden="true"> · </span><span>Career route</span></p>
     <h3>${escapeHtml(role.title)}</h3>
+${materialNotice('careers', role.id)}
     </div>
     </div>
     <p>${inlineMath(role.description)}</p>

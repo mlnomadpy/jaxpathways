@@ -1,6 +1,7 @@
 ---
 import AssessmentActions from '../../components/shared/AssessmentActions.astro';
 import GuideContents from '../../components/shared/GuideContents.astro';
+import MaterialStatus from '../../components/shared/MaterialStatus.astro';
 import PageIntro from '../../components/shared/PageIntro.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import assessments from '../../../curriculum/assessments.json';
@@ -31,6 +32,7 @@ const content = assessmentContent(assessment.source);
     <Fragment slot="title" set:html={content.heading} />
     <AssessmentActions assessment={assessment} />
   </PageIntro>
+  <MaterialStatus kind="assessments" id={assessment.id} />
   <GuideContents
     sections={content.sections}
     label="Assessment sections"

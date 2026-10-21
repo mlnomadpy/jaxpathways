@@ -1,4 +1,5 @@
 ---
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import GuideLayout from '../../layouts/GuideLayout.astro';
 import GuideContents from '../shared/GuideContents.astro';
 import PageIntro from '../shared/PageIntro.astro';
@@ -51,6 +52,7 @@ const content = assessmentContent(source, siteUrl);
       </a>
     </div>
   </PageIntro>
+  <MaterialStatus kind="guides" id={source.split('/').at(-1)!.replace(/\.md$/, '')} />
   <GuideContents sections={content.sections} label={contentsLabel} />
   <article set:html={content.body} />
 </GuideLayout>

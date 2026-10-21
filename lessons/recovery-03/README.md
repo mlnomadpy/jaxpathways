@@ -306,11 +306,11 @@ Expected: Saved/restored training step $3$ and Adam count $3$; next step $4$, lo
 
 ### Read the figure
 
-Adjacent bars for each parameter leaf have identical L2 norms between the uninterrupted run and the Orbax-restored run.
+For each parameter leaf, the two bars show matching L2 norms after the next update. Matching norms alone do not prove that every element matches: different vectors can have the same norm. Use the separate elementwise state assertions in the script to check the stronger claim.
 
 ### Connect it to the computation
 
-Verifying exact leaf equality after deserialization guarantees that the restored checkpoint reproduces the exact next training step.
+In this fixed CPU example, the complete restored state, unchanged update configuration and same next input reproduce the reference step within the asserted tolerances. Parameter equality after deserialization alone cannot establish next-step parity; optimizer state, randomness, data position and the execution environment also matter.
 
 ```python
 # Compare parameter leaf norms between `expected_next` and `restored_next`:
@@ -321,7 +321,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:34.385805+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T10:05:22.060810+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3

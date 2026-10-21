@@ -144,6 +144,34 @@
           }
         }
       }
+    },
+    "/api/v1/content-status.json": {
+      "get": {
+        "summary": "Read learning-material maturity, review gaps, source-matching evidence and contribution requests",
+        "responses": {
+          "200": {
+            "description": "Generated read-only JSON resource",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "schemaVersion"
+                  ],
+                  "properties": {
+                    "schemaVersion": {
+                      "const": 1
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "No resource exists for that identifier"
+          }
+        }
+      }
     }
   }
 }

@@ -8,7 +8,7 @@ const origin = 'https://example.org';
 const siteOrigins = new Set(['https://www.tahabouhsine.com', 'https://tahabouhsine.com']);
 const files = fs.readdirSync('dist', {recursive:true}).filter(file=>file.endsWith('.html'));
 const sourceCourse=JSON.parse(fs.readFileSync('public/curriculum.json','utf8'));
-const expected=['book',...sourceCourse.pathways.map(route=>'learning-paths/'+route.id),...sourceCourse.roles.map(role=>'career-guides/'+role.id),'updates',...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>'lesson-'+l.id),...JSON.parse(fs.readFileSync('curriculum/project-plans.json','utf8')).map(project=>'project-plans/'+project.id),...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.map(p=>'phase-guides/'+p.id),'index','course','lesson','pathways','careers','notebook','organizer','project','projects','developer','project-workflow','tpu-gcp','tpu-performance',...JSON.parse(fs.readFileSync('curriculum/projects.json','utf8')).map(manifest=>'project-guides/'+JSON.parse(fs.readFileSync(manifest,'utf8')).id),...JSON.parse(fs.readFileSync('curriculum/assessments.json','utf8')).map(assessment=>assessment.url.replace(/\.html$/,'')),'downloads/jax-foundations', ...JSON.parse(fs.readFileSync('curriculum/modality-tracks.json','utf8')).tracks.map(track=>'tracks/'+track.id)];
+const expected=['content-status','book',...sourceCourse.pathways.map(route=>'learning-paths/'+route.id),...sourceCourse.roles.map(role=>'career-guides/'+role.id),'updates',...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>'lesson-'+l.id),...JSON.parse(fs.readFileSync('curriculum/project-plans.json','utf8')).map(project=>'project-plans/'+project.id),...JSON.parse(fs.readFileSync('curriculum/course.json','utf8')).phases.map(p=>'phase-guides/'+p.id),'index','course','lesson','pathways','careers','notebook','organizer','project','projects','developer','project-workflow','tpu-gcp','tpu-performance',...JSON.parse(fs.readFileSync('curriculum/projects.json','utf8')).map(manifest=>'project-guides/'+JSON.parse(fs.readFileSync(manifest,'utf8')).id),...JSON.parse(fs.readFileSync('curriculum/assessments.json','utf8')).map(assessment=>assessment.url.replace(/\.html$/,'')),'downloads/jax-foundations', ...JSON.parse(fs.readFileSync('curriculum/modality-tracks.json','utf8')).tracks.map(track=>'tracks/'+track.id)];
 assert.deepEqual([...files].sort(),expected.map(file=>file+'.html').sort(),'all website routes must be built by Astro');
 const course=JSON.parse(fs.readFileSync('public/curriculum.json','utf8'));
 const projectRegistry=JSON.parse(fs.readFileSync('public/api/v1/projects.json','utf8')).projects;
@@ -84,3 +84,24 @@ for(const phase of course.phases){
  await releaseDocuments();
 }
 console.log(`PASS: ${course.phases.length} phase guides preserve lesson coverage, evidence and further-work boundaries.`);
+
+const maturity=JSON.parse(fs.readFileSync('public/api/v1/content-status.json','utf8'));
+const statusDoc=documentFor('content-status.html');
+assert.equal(statusDoc.querySelectorAll('.material-directory > li').length,maturity.items.length);
+assert.equal(statusDoc.querySelectorAll('input,select,textarea').length,0,'status and contribution browsing should not require typing');
+for(const item of maturity.items){
+ const entry=statusDoc.getElementById(`${item.kind}-${item.id}`);
+ assert(entry,`missing status directory entry ${item.kind}:${item.id}`);
+ assert.equal(entry.querySelector('[data-maturity]').getAttribute('data-maturity'),item.level);
+}
+await releaseDocuments();
+for(const item of maturity.items){
+ const doc=documentFor(item.url);
+ const key=`${item.kind}:${item.id}`;
+ assert(doc.querySelector(`[data-material-key="${key}"] [data-maturity]`)||doc.querySelector(`[data-material-key="${key}"][data-maturity]`),`missing visible maturity on ${item.url}`);
+ await releaseDocuments();
+}
+const book=documentFor('downloads/jax-foundations.html');
+for(const item of maturity.items.filter(item=>['lessons','phases'].includes(item.kind)))assert(book.querySelector(`a[href$="content-status.html#${item.kind}-${item.id}"]`),`reader omitted maturity ${item.id}`);
+await releaseDocuments();
+console.log(`PASS: ${maturity.items.length} learner-facing maturity labels, contextual contribution entries and book status links.`);

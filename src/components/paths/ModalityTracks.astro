@@ -1,4 +1,5 @@
 ---
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import manifest from '../../../curriculum/modality-tracks.json';
 import { siteUrl } from '../../lib/urls.js';
 import '../../styles/features/tracks.css';
@@ -18,6 +19,7 @@ import '../../styles/features/tracks.css';
           0{index + 1} / {track.status === 'authored' ? 'Runnable harness' : 'Guided plan'}
         </p>
         <h3>{track.title}</h3>
+        <MaterialStatus kind="tracks" id={track.id} compact />
         <p>{track.summary}</p>
         <a class="button" href={siteUrl(`tracks/${track.id}.html`)}>
           Explore the {track.id} guide

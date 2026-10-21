@@ -1,0 +1,64 @@
+.material-badge {
+  display: inline-block;
+  padding: 3px 9px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--ink);
+  background: var(--panel);
+  font: 600 12px/1.6 var(--ui);
+  white-space: nowrap;
+}
+.material-badge[data-maturity='available-draft'] {
+  color: var(--allowed-ink);
+  background: var(--allowed-bg);
+}
+.material-badge[data-maturity='in-development'] {
+  color: var(--stage-experiment-accent);
+  background: var(--stage-experiment-banner);
+}
+.material-badge[data-maturity='planned'] {
+  color: var(--blocked-ink);
+  background: var(--blocked-bg);
+}
+.material-badge[data-maturity='in-development'],
+.material-badge[data-maturity='planned'] {
+  border-style: dashed;
+}
+.material-badge[data-maturity='needs-repair'] {
+  border-width: 2px;
+}
+.material-status {
+  margin-block: 16px 24px;
+  padding: 12px 16px;
+  border-left: 3px solid var(--line);
+  background: var(--panel);
+  font: 14px/1.6 var(--ui);
+}
+.material-status p {
+  margin: 0;
+  max-width: 85ch;
+}
+.material-status p + p {
+  margin-top: 6px;
+}
+.material-status .material-badge {
+  margin-right: 10px;
+}
+.material-directory {
+  list-style: none;
+  padding: 0;
+}
+.material-directory > li {
+  padding-block: 20px;
+  border-top: 1px solid var(--line);
+  scroll-margin-top: 100px;
+}
+.material-directory h3 {
+  margin: 0 0 8px;
+}
+.material-directory p {
+  margin: 6px 0;
+}
+.material-directory .actions {
+  margin-top: 10px;
+}

@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.9.0",
+    "date": "2026-10-21",
+    "title": "Honest material status and focused contributions",
+    "summary": "Show what is available to practice, what is still being developed and how to contribute across the course and book.",
+    "changes": [
+      "Added an itemized audit of 202 learning-material entries and 529 practice tasks, including every phase, lesson, project, assessment, pathway and career guide.",
+      "Added separate maturity labels and teaching-review notices to catalogs, guides, lessons, project workspaces and HTML/EPUB book chapters, with a searchable browser-native status directory and contextual GitHub contribution links.",
+      "Bound validation labels to current source hashes, kept learner progress separate and documented the difference between CPU references, bounded physical v5e evidence, human review and planned production-model capstones.",
+      "Corrected two recovery-plot explanations: equal norms alone do not establish elementwise equality, and continuation parity depends on complete state, inputs, configuration and environment. Reran both affected CPU scripts and notebook companions.",
+      "Replaced stale blanket TPU staging instructions with the reviewed execution matrix. Independent expert review, learner pilots, realistic model capstones and broader hardware qualification remain contribution priorities."
+    ]
+  },
+  {
     "version": "0.8.2",
     "date": "2026-10-21",
     "title": "Direct routes to assessments and course material",

@@ -1,0 +1,11 @@
+---
+import { materialBadge, materialNotice } from '../../lib/material-status.js';
+interface Props {
+  kind: string;
+  id: string;
+  compact?: boolean;
+}
+const { kind, id, compact = false } = Astro.props;
+---
+
+<Fragment set:html={compact ? materialBadge(kind, id) : materialNotice(kind, id)} />

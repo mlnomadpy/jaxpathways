@@ -1,0 +1,154 @@
+---
+import GuideLayout from '../layouts/GuideLayout.astro';
+import PageIntro from '../components/shared/PageIntro.astro';
+import MaterialStatus from '../components/shared/MaterialStatus.astro';
+import { materialRegistry, contributionUrl } from '../lib/server/material-directory.js';
+import { inlineMath } from '../lib/math.js';
+import { siteUrl } from '../lib/urls.js';
+const groups = [
+  ['phases', 'Course phases'],
+  ['lessons', 'Lessons and their exercises'],
+  ['projects', 'Runnable practice projects'],
+  ['plans', 'Planned model capstones'],
+  ['assessments', 'Synthesis assessments'],
+  ['pathways', 'Learning paths'],
+  ['careers', 'Career guides'],
+  ['tracks', 'Modality tracks'],
+  ['guides', 'Practical guides'],
+  ['book', 'Book formats'],
+];
+const summary = materialRegistry.summary;
+---
+
+<GuideLayout
+  title="Course status and contribution guide | JAX Pathways"
+  description="Check the maturity of every JAX course, lesson, exercise, project and assessment. See current validation, unfinished work and specific ways to contribute."
+>
+  <PageIntro
+    edition={`Material review · ${materialRegistry.auditedAt}`}
+    title="What is ready to practice, and what still needs work?"
+    intro="Use the scoped examples now. Check the limits before choosing a larger project, and help us improve the material."
+  >
+    <p>
+      {summary.currentCpuLessons} lesson CPU references and {summary.currentProjectReferences}{' '}
+      project reference checkers match the current sources. {summary.expertReviewedLessons}{' '}
+      independent expert teaching reviews and {summary.novicePilotedLessons} learner pilots are
+      recorded. A reference pass does not establish comprehension or professional readiness.
+    </p>
+    <nav class="actions" aria-label="Material status sections">
+      {groups.map(([id, label]) => (
+        <a href={`#${id}`}>{label}</a>
+      ))}
+    </nav>
+  </PageIntro>
+  <section aria-labelledby="labels-heading">
+    <h2 id="labels-heading">Read the labels</h2>
+    <p>
+      <strong>Available draft:</strong> the scoped practice material exists. Teaching review and
+      learner testing are still pending.
+    </p>
+    <p>
+      <strong>In development:</strong> useful material exists, with important work still missing
+      from the course or project.
+    </p>
+    <p>
+      <strong>Planned:</strong> a brief exists, but the capstone has no runnable implementation.
+    </p>
+    <p>
+      <strong>Needs repair:</strong> required material is missing or a current check fails.
+    </p>
+    <p>
+      These describe the material. They do not change your saved progress, quiz results or portfolio
+      evidence. Lesson and project runtimes have their own boundaries. Study-time estimates are not
+      calibrated learner completion times.
+    </p>
+  </section>
+  <section aria-labelledby="contribution-heading">
+    <h2 id="contribution-heading">Useful contributions now</h2>
+    <p>
+      Start with one changed example, unclear explanation, annotated figure or reproducible bug. Use
+      the contribution link beside an item to open a GitHub issue with its context. For a code or
+      writing change, propose a focused pull request against its canonical source.
+    </p>
+    <ul>
+      <li>Run a consented novice walkthrough and record where the instructions need help.</li>
+      <li>
+        Review mathematical assumptions, numerical checks, figure interpretations and task rubrics.
+      </li>
+      <li>
+        Add feedback for specific wrong checkpoint answers and changed-condition learner tests.
+      </li>
+      <li>
+        Build one realistic model lineage with licensed data, frozen evaluation and exported reload.
+      </li>
+      <li>
+        Review career coverage as a practitioner and explain what the portfolio does not establish.
+      </li>
+    </ul>
+    <p>
+      See the{' '}
+      <a href="https://github.com/mlnomadpy/jaxpathways/blob/main/docs/teaching-review-protocol.md">
+        teaching review protocol
+      </a>{' '}
+      and
+      <a href="https://github.com/mlnomadpy/jaxpathways/blob/main/docs/learning-material-audit-2026-10-21.md">
+        {' '}
+        complete audit with every exercise and project stage
+      </a>
+      . This internal audit is not an independent human review.
+    </p>
+  </section>
+  <section aria-labelledby="hardware-heading">
+    <h2 id="hardware-heading">What the hardware evidence establishes</h2>
+    <p>
+      {summary.boundedHardwareQualifications} source-matching physical v5e target receipts are
+      recorded. They qualify named experiments, not an entire course, production model or TPU
+      generation.
+    </p>
+    <ul>
+      {materialRegistry.hardware.map((target) => (
+        <li>
+          <a href={`https://github.com/mlnomadpy/jaxpathways/blob/main/${target.evidence}`}>
+            {target.id}
+          </a>
+          : {target.scope}{' '}
+          {!target.current && 'Source changed; qualification needs to be repeated.'}
+        </li>
+      ))}
+    </ul>
+    <p>
+      Fresh-process or worker-loss multi-host recovery, general scaling, production-model quality
+      and edge-device deployment need their own evidence.
+    </p>
+  </section>
+  {groups.map(([kind, label]) => (
+    <section id={kind} aria-labelledby={`${kind}-heading`}>
+      <h2 id={`${kind}-heading`}>{label}</h2>
+      <ul class="material-directory">
+        {materialRegistry.items
+          .filter((item) => item.kind === kind)
+          .map((item) => (
+            <li id={`${kind}-${item.id}`}>
+              <h3>
+                <a href={siteUrl(item.url)}>{item.title}</a>
+              </h3>
+              <MaterialStatus kind={kind} id={item.id} compact />
+              <p set:html={inlineMath(item.summary)} />
+              <p>
+                <strong>Evidence:</strong> {item.validation}. {item.review}.
+              </p>
+              <p>
+                <strong>Help needed:</strong> {item.contribution}
+              </p>
+              <div class="actions">
+                <a href={contributionUrl(kind, item.id)}>Contribute to this material</a>
+                <a href={`https://github.com/mlnomadpy/jaxpathways/blob/main/${item.source}`}>
+                  Canonical source
+                </a>
+              </div>
+            </li>
+          ))}
+      </ul>
+    </section>
+  ))}
+</GuideLayout>

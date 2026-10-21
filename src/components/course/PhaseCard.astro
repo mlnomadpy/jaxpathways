@@ -1,5 +1,6 @@
 ---
 import RevisionStamp from '../shared/RevisionStamp.astro';
+import MaterialStatus from '../shared/MaterialStatus.astro';
 import registry from '../../../public/api/v1/projects.json';
 import { course } from '../../lib/course-data.js';
 import { inlineMath } from '../../lib/math.js';
@@ -35,6 +36,7 @@ const linkedProject = p.projectId
         <span class="course-meta-pill">{cue.paceLabel}</span>
       </span>
       <h2 class="phase-title">{p.title}</h2>
+      <MaterialStatus kind="phases" id={p.id} compact />
       <small>{p.part}</small>
     </span>
     <span class="badge">
