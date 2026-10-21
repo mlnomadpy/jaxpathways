@@ -183,7 +183,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:46.848107+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:02.904778+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -365,9 +365,17 @@ When does averaging batch means reproduce the dataset mean?
 
 <details><summary>Answer and explanation</summary>
 
-When batch sizes are equal, or the means are weighted by their example counts
+**1. Always**
+
+A small batch and a large batch should not receive equal weight. Compare batches of sizes one and three with different means.
+
+**2. When batch sizes are equal, or the means are weighted by their example counts (correct)**
 
 The dataset mean weights examples equally. Unequal batches need count weighting.
+
+**3. Only with Adam**
+
+The aggregation identity does not depend on Adam. Weight each batch mean by its observation count and divide by the total count.
 
 </details>
 

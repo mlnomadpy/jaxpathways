@@ -261,56 +261,56 @@ visual_data={'kind':'line','x':[0,1,2,3],'xlabel':'captured step','ylabel':'host
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:14.367377+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:17.832572+00:00. JAX 0.9.2.
 
 ```text
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-dnv_69d7
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-w7v_e05c
 {
   "input_wait_us": [
-    1580,
-    1542,
-    1133,
-    1543
+    1412,
+    1157,
+    1506,
+    1507
   ],
   "model_and_wait_us": [
-    244,
-    71,
-    121,
-    95
-  ],
-  "step_us": [
-    1847,
-    1625,
-    1264,
-    1647
-  ]
-}
-Four named steps verified; host annotations are not isolated device kernels.
-Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-j91v2d6n
-{
-  "input_wait_us": [
-    1516,
-    1509,
-    1515,
-    1196
-  ],
-  "model_and_wait_us": [
-    66,
+    77,
+    45,
     37,
-    84,
-    99
+    45
   ],
   "step_us": [
-    1591,
-    1552,
-    1611,
-    1307
+    1498,
+    1209,
+    1547,
+    1554
   ]
 }
 Four named steps verified; host annotations are not isolated device kernels.
-Unattributed outer time, microseconds: [9, 6, 12, 12]
-Wrong double-counted totals: [3173, 3098, 3210, 2602]
-{'minimum_ms': 0.037, 'median_ms': 0.07500000000000001, 'maximum_ms': 0.099}
+Trace directory: /private/var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-course-trace-x3ur39xu
+{
+  "input_wait_us": [
+    1255,
+    1509,
+    1317,
+    1509
+  ],
+  "model_and_wait_us": [
+    69,
+    97,
+    47,
+    41
+  ],
+  "step_us": [
+    1331,
+    1614,
+    1369,
+    1552
+  ]
+}
+Four named steps verified; host annotations are not isolated device kernels.
+Unattributed outer time, microseconds: [7, 8, 5, 2]
+Wrong double-counted totals: [2655, 3220, 2733, 3102]
+{'minimum_ms': 0.041, 'median_ms': 0.058, 'maximum_ms': 0.097}
 Hypothetical union: 12 microseconds; summed duration: 19.
 PASS: performance-03
 
@@ -441,7 +441,15 @@ A step annotation lasts longer than its model annotation. What can this alone es
 
 <details><summary>Answer and explanation</summary>
 
-The step includes time outside the model region; inspect the other regions and lanes to explain it.
+**1. The accelerator was idle for the entire difference.**
+
+The difference can include host work, transfers, synchronization or scheduling. Inspect trace lanes before assigning all of it to idle time.
+
+**2. The whole difference is input loading.**
+
+A wide step region alone cannot isolate data loading. Compare input, host and device events within the same time interval.
+
+**3. The step includes time outside the model region; inspect the other regions and lanes to explain it. (correct)**
 
 The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence.
 

@@ -121,6 +121,11 @@
         "code": "# Inspect residual live tensors and compare compiler memory and wall-clock gradient samples:\nfor name, lines in zip([\"plain\", \"remat\"], reports):\n    print(name, \"\\n\" + \"\\n\".join(lines))\nprint(\"Compiler memory estimates:\", memory)\nprint(\"Synchronized gradient samples:\", times)",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "AD residuals and compiler temporary-buffer estimates describe different stages. Fewer saved intermediates need not lower the reported buffer peak.",
+      "Residual lists and compiler buffer estimates describe different levels. Report the observed equality and investigate the real target workload before claiming a memory or speed benefit.",
+      "Rematerialization trades storage for recomputation. Measure latency and peak memory separately before claiming an improvement."
     ]
   }
 }

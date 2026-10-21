@@ -80,3 +80,9 @@ Measure batches of one, thirty-two and two hundred fifty-six initial states on t
 - **Accept explanation:** The figures are interpreted using actual data and the timing boundary is reproducible. **Revise:** generic captions replace observations or CPU results are described as hardware scaling proof.
 
 Submit the implementation, executable assessment, report, source data and figure assets. An unresolved discrepancy is evidence to investigate, not a reason to remove the comparison.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+The inverse solver recovers the planted parameter on one grid but its estimate shifts under refinement.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

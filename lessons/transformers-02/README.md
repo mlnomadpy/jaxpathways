@@ -187,7 +187,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:53.649309+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:50.956765+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]
@@ -381,9 +381,17 @@ What must a packed causal mask enforce?
 
 <details><summary>Answer and explanation</summary>
 
-Same segment and permitted causal keys, plus explicit padding behavior
+**1. Causal order only**
+
+A causal mask still allows earlier tokens from another packed example. Require the same segment as well as a valid causal position.
+
+**2. Same segment and permitted causal keys, plus explicit padding behavior (correct)**
 
 Packing combines positions in storage, not their semantic context. Segment and validity constraints retain example boundaries.
+
+**3. Equal token IDs**
+
+Equal token IDs do not imply the same example or a valid attention edge. Use segment IDs, positions and padding validity.
 
 </details>
 

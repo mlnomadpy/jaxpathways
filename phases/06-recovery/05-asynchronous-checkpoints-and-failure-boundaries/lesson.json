@@ -117,6 +117,11 @@
         "code": "# A deliberately interrupted application publication leaves the previous commit selected.\nunpublished=root/'step_2'\nwith ocp.AsyncCheckpointer(ocp.StandardCheckpointHandler()) as cp:\n    cp.save(unpublished,args=ocp.args.StandardSave(live))\n    cp.wait_until_finished()\n    try:\n        raise RuntimeError('injected interruption before updating LATEST')\n    except RuntimeError:\n        pass\nassert accepted()['step']==1\nwith ocp.StandardCheckpointer() as cp:\n    previous=cp.restore(accepted()['path'],target=snapshot)\nnp.testing.assert_array_equal(previous['weight'],snapshot['weight'])\nassert int(previous['step'])==1\nprint('Checkpoint workspace:',root)\nprint(json.dumps(report,indent=2))\nprint('Unpublished step 2 exists; application recovery still selects verified step 1.')",
         "explanation": "The injected application interruption leaves the old accepted checkpoint intact even though a newer directory exists."
       }
+    ],
+    "optionFeedback": [
+      "Directory creation can precede a failed asynchronous write. A candidate becomes accepted only after completion and validation.",
+      "Deleting the last accepted checkpoint removes the recovery path. Retain it until a new candidate has completed and passed validation.",
+      "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point."
     ]
   }
 }

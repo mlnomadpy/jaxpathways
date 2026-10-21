@@ -24,3 +24,11 @@ python3 projects/kernel-audit/tests/check-scale-reference.py
 ```
 
 It checks a fixed seeded global gradient, the three/five count-weighted repair, one update and actual placement over four logical CPU devices. This is a numerical reference, not a network benchmark or a substitute for the learner’s trace and changed-workload evidence.
+
+## Discussion-case review notes
+
+Four local means average to the single-device result for one equal-sized batch; the final uneven batch disagrees.
+
+Ask for local loss/gradient numerators and valid counts, including empty partitions. Compare their global reduction against concatenated valid examples. Equal-sized agreement alone does not establish the general aggregation contract.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

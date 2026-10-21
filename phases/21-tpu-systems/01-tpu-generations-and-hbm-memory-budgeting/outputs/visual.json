@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-03",
-  "contentHash": "6763c08dcdc8e6b651783ca30eead97071b314f8bb3d601035e6848ea6a41469",
+  "contentHash": "8d86097eb24c2b0430ba3dab9b0f25a70c85b75ee7b1aac89b3784cb9a5961f8",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "analytic",
-  "generatedAt": "2026-10-20T22:30:08.766206+00:00",
+  "generatedAt": "2026-10-21T11:29:56.668095+00:00",
   "provenance": "analytic_calculation_not_device_execution",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 573.8}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n",
+  "stdout": "TPU ridge points (FLOP/byte): {'v5e': 240.5, 'v5p': 166.0, 'v6e': 560.4}\n7B memory budget (GiB): {'fp32_train_state_gib': 104.308, 'mixed_bf16_train_state_gib': 117.347, 'kv_fp32_gib': 2.0, 'kv_bf16_gib': 1.0, 'kv_int8_gib': 0.5}\n1.5B memory budget (GiB): {'fp32_train_state_gib': 22.352, 'mixed_bf16_train_state_gib': 25.146, 'kv_fp32_gib': 1.0, 'kv_bf16_gib': 0.5, 'kv_int8_gib': 0.25}\n",
   "data": {
     "kind": "bar",
     "panels": [
@@ -52,7 +52,7 @@
             "y": [
               240.5,
               166.0,
-              573.8
+              560.4
             ]
           }
         ]
@@ -62,8 +62,8 @@
   "diagram": {
     "title": "TPU HBM-to-MXU dataflow and mixed-precision state budget",
     "prediction": "Which tensors stay in `float32` in HBM and which operands stream as `bfloat16` into the MXU?",
-    "reading": "Read top to bottom: HBM stores master `fp32` parameters and Adam moments (`m`, `v`) alongside `bf16` activations and KV cache; operands are cast to `bf16` (or `int8`) to stream across the HBM bandwidth bottleneck into the MXU, which accumulates dot products in `fp32` before writing updated state back.",
-    "alt": "Read top to bottom: HBM holds fp32 master weights and Adam moments plus bf16/int8 caches, streams bf16 operands into the MXU, accumulates dot products in fp32, and updates sharded HBM state.",
+    "reading": "Follow the assumed mixed-precision ledger from HBM to compute: FP32 master weights and moments coexist with BF16 compute weights. A dot can request BF16 inputs and FP32 accumulation. A quantized path additionally needs its own scale and accumulation contract. The diagram names memory/compute boundaries; it does not show an observed kernel placement or prove an INT8 speedup.",
+    "alt": "Conceptual mixed-precision ledger: HBM holds master weights and optimizer state; the compute path requires explicit operand and accumulation types, supported lowering and separately inspected target traces.",
     "scope": "Architecture and dataflow mechanism diagram.",
     "height": 6,
     "panel": {
@@ -91,7 +91,7 @@
           "id": "2",
           "x": 5,
           "y": 4.4,
-          "label": "TPU MXU systolic array: bf16/int8 multiply + fp32 accumulation",
+          "label": "Compute path: explicit operand dtype, accumulation contract and supported lowering",
           "tone": "result",
           "w": 8.6,
           "h": 1.05
@@ -100,7 +100,7 @@
           "id": "3",
           "x": 5,
           "y": 6.1,
-          "label": "XProf *.xplane.pb trace: verify MXU busy % vs HBM bandwidth stall",
+          "label": "Target trace: inspect compute, memory, transfer and communication evidence",
           "tone": "warning",
           "w": 8.6,
           "h": 1.05

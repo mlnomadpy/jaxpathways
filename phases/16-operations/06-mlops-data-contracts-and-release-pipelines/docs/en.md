@@ -286,7 +286,7 @@ visual_data={'kind':'bar','labels':['overall (10)','low (9)','high (1)'],'xlabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:21.540496+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:10.484856+00:00. JAX 0.9.2.
 
 ```text
 Overall MSE: 0.409 high-slice MSE: 4.0 release: False
@@ -396,9 +396,17 @@ An input drift alert fired before new labels arrived. What follows?
 
 <details><summary>Answer and explanation</summary>
 
-Investigate the change and gather quality evidence before choosing a response.
+**1. Retrain and automatically replace the active model.**
 
-MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.
+Drift can reflect harmless distribution changes or instrumentation faults. Investigate data and labeled quality before promotion.
+
+**2. Investigate the change and gather quality evidence before choosing a response. (correct)**
+
+An unlabeled drift alert is evidence of a distribution change under the detector, not direct evidence of accuracy loss. Investigate data integrity, affected slices, service health and delayed outcomes. Retraining and promotion require their own declared quality gates.
+
+**3. Declare accuracy has decreased by the drift score.**
+
+Input drift and accuracy loss are different observations. Without labels, the detector cannot directly measure accuracy.
 
 </details>
 

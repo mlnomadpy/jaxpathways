@@ -85,7 +85,7 @@
       "Only if the model has low validation loss."
     ],
     "answer": 1,
-    "explanation": "Here ModelOps means the operational ownership of models across their lifecycle: inventory, intended use, review, deployment status, monitoring, incident response and retirement. Teams use overlapping MLOps and ModelOps terms; the useful distinction is the responsibility and evidence each process owns.",
+    "explanation": "This check can bind approval metadata to a particular artifact and expiry. It does not authenticate the human named as reviewer. Identity and authorization require a separate trusted mechanism; a digest alone supplies neither.",
     "diagnosis": "Compare the whole bundle hash and target first, then time boundaries and reviewer authority. Never bypass a rejected rollout by editing a passed flag or pointing the alias manually. Keep the rejected transition in the incident record.",
     "takeaways": [
       "Inventory the complete release",
@@ -134,6 +134,11 @@
         "code": "# Verify that only the reviewed release passed and all rejected transitions preserved active.json:\nassert checks == [True, False, False, False]\nprint(\"Accepted original / changed artifact / expired approval / wrong target:\", checks)",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "The hash can bind a statement to an artifact but does not prove who wrote it. Verify reviewer identity through a separate trusted channel.",
+      "This check can bind approval metadata to a particular artifact and expiry. It does not authenticate the human named as reviewer. Identity and authorization require a separate trusted mechanism; a digest alone supplies neither.",
+      "Validation loss is a model metric, not an identity credential. Check authorization, binding and expiry separately."
     ]
   }
 }

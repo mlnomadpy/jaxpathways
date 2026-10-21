@@ -11,7 +11,12 @@
         "Increase the optimizer learning rate until they match."
       ],
       "correct": 1,
-      "explanation": "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough."
+      "explanation": "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.",
+      "optionFeedback": [
+        "A nonzero derivative can be correct for the discretized computation. Compare it with that computation’s independent derivative.",
+        "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.",
+        "Changing the optimizer does not reduce the solver’s time-discretization error. Refine the time grid while holding the horizon fixed."
+      ]
     }
   ]
 }

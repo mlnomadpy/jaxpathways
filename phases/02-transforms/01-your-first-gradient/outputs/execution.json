@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "first-gradient",
-  "contentHash": "846162ca6d1918a1053cdbc1ab09938332c4f980834eb3a4a12ee1a2b48acf20",
-  "executedAt": "2026-10-20T22:20:04.704196+00:00",
+  "contentHash": "b5fce64c4d1a88dd634b22ba67ca5894e4810cfdc4f03fd31eab49ff36663ee1",
+  "executedAt": "2026-10-21T11:26:55.490385+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

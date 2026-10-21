@@ -148,6 +148,11 @@
       "Use synchronous execution as a debugging comparison",
       "Count the cost of a tile choice",
       "Only target measurements can rank pipeline speed"
+    ],
+    "optionFeedback": [
+      "Fewer programs can still mean more padding, pressure or stalls. Compare target measurements for identical useful work.",
+      "A simulator’s schedule is not device latency. Record actual target timing and inspect memory/overlap behavior.",
+      "Simulation establishes tested semantics. Buffering and tile changes affect several costs, and only actual target measurements can rank performance."
     ]
   }
 }

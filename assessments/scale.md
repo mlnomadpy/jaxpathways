@@ -83,3 +83,9 @@ Conclude with **keep**, **revise**, **use the baseline**, or **await target evid
 - **Accept decision:** Local and end-to-end evidence support the recommendation and remaining uncertainty is visible. **Revise:** only favorable configurations are shown or a performance claim exceeds its hardware/workload evidence.
 
 Save your source code, environment specification, data-generation rules, verification checks, trace files, figure data, timing records, and decision report in your portfolio.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+Four local means average to the single-device result for one equal-sized batch; the final uneven batch disagrees.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

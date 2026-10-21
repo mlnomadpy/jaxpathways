@@ -256,6 +256,11 @@
         "height": 8,
         "width": 10
       }
-    }
+    },
+    "optionFeedback": [
+      "A digest is an integrity/identity mechanism. Quality evaluation and authenticated authority require separate evidence and controls.",
+      "A digest binds bytes, not future behavior. Evaluate quality under a defined data and runtime contract.",
+      "Anyone can hash an artifact. Publisher authentication requires a separate trusted identity or signing mechanism."
+    ]
   }
 }

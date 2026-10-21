@@ -38,11 +38,11 @@ Review: [From NumPy to jax.numpy](01-from-numpy-to-jax-numpy/docs/en.md).
 
 ### Try a changed condition
 
-Normalize a matrix with a constant feature and one masked observation. What should the constant feature and the mean denominator do?
+Use rows \((1,3)\), \((5,7)\), \((100,200)\), with the last row masked. Predict feature means and population variances. Then select only the first row.
 
 <details><summary>Compare an approach</summary>
 
-Define the constant-feature policy before division, for example a unit fallback scale. Compute statistics only from valid observations; masking the final output alone leaves the fitted statistics contaminated. Reject a feature with no valid observations or declare an explicit policy.
+With two valid rows the means are \((3,5)\), variances \((4,4)\), and count 2. Selecting only the first row gives means \((1,3)\), variances \((0,0)\), count 1. Dividing by all three rows is a denominator bug. A zero valid count needs rejection or an explicitly declared policy before division.
 
 </details>
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "science-04",
-  "contentHash": "5fa01774c3b43a21ed659b87d192b100883f4db5bf0fe76ef41669fa452dd669",
-  "executedAt": "2026-10-20T22:22:57.997762+00:00",
+  "contentHash": "7705d973dc3a041f6629e016654e8b54c4ed179632824578b7b509194b84e7f1",
+  "executedAt": "2026-10-21T11:30:59.965943+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.005291774868965149, 0.005291774868965149), (16, 0.005333218723535538, 0.0003333261702209711), (256, 0.03358395770192146, 0.00013118733477313071)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
+  "stdout": "Initial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nInitial/fitted rate: 1.4 0.7000000090128304\nInitial/final loss: 0.11676630453561089 1.9484774169068916e-32\nHeld-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09\nInitial-time-only gradient: 0.0\nTrue rate: 0.7 perfect coarse Euler rate: 0.5906238205625731\nbatch, median milliseconds, milliseconds per trajectory: [(1, 0.004500150680541992, 0.004500150680541992), (16, 0.005416106432676315, 0.0003385066520422697), (256, 0.03458419814705849, 0.00013509452401194721)]\nChanged true/recovered rate: 0.4 0.40000000054230433\nRecovered initial amplitude: 2.8000000000000003\nNoisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05\nPASS: science-04\n",
   "notebookCells": [
     {
       "sourceHash": "65a9a7447a53a5c3447eff97406302b1e83271af7b4870fa9f68be1f60df59e7",
@@ -96,7 +96,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.005249865353107452, 0.005249865353107452), (16, 0.004875008016824722, 0.00030468800105154514), (256, 0.03766687586903572, 0.00014713623386342078)]\n"
+            "batch, median milliseconds, milliseconds per trajectory: [(1, 0.005499925464391708, 0.005499925464391708), (16, 0.005749985575675964, 0.00035937409847974777), (256, 0.039833132177591324, 0.0001555981725687161)]\n"
           ]
         }
       ]

@@ -34,6 +34,8 @@ function notebookAttemptScaffold(solutionCode) {
 }
 const terminalMarkdown = s => (s.commands||[]).map(c=>`\n\n**${c.label}**\n\n\`\`\`${c.shell}\n${c.code}\n\`\`\`\n\n**Expected:** ${c.expected}`).join('');
 const paragraphs = (heading, body) => `## ${heading}\n\n${body}\n\n`;
+const feedbackMarkdown = c => c.options.map((option, index) =>
+  `**${index + 1}. ${option}${index === c.answer ? ' (correct)' : ''}**\n\n${c.optionFeedback[index]}`).join('\n\n');
 function mechanismMarkdown(lesson, notebook=false) {
   const d=lesson.content.diagram;
   if(!d)return '';
@@ -62,7 +64,7 @@ export function lessonMarkdown(lesson, phase) {
   for(const e of c.experiments||[])out+=paragraphs(e.title,`**Predict before running:** ${e.prediction}\n\n${fence(e.code)}\n\n**Expected:** ${e.output}\n\n${e.explanation}`);
   out+=paragraphs('Make it yours',`${c.exercise}\n\n${exerciseGuideMarkdown(c.solution, 'How to write this exercise')}\n\n<details><summary>Reference solution</summary>\n\n${fence(c.solution)}\n\n</details>`);
   for(const p of c.practice||[])out+=paragraphs(p.title,`**${p.difficulty}**\n\n${p.prompt}\n\n<details><summary>Hint</summary>\n\n${p.hint}\n\n</details>\n\n${exerciseGuideMarkdown(p.solution, 'How to write: ' + p.title)}\n\n<details><summary>Reference solution and reasoning</summary>\n\n${fence(p.solution)}\n\n${p.explanation}\n\n</details>`);
-  out+=paragraphs('Check your understanding',`${c.question}\n\n${c.options.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n\n<details><summary>Answer and explanation</summary>\n\n${c.options[c.answer]}\n\n${c.explanation}\n\n</details>`);
+  out+=paragraphs('Check your understanding',`${c.question}\n\n${c.options.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n\n<details><summary>Answer and explanation</summary>\n\n${feedbackMarkdown(c)}\n\n</details>`);
   if(c.diagnosis)out+=paragraphs('Diagnose the result',c.diagnosis);
   if(c.takeaways)out+=paragraphs('Carry forward',c.takeaways.map(t=>`- ${t}`).join('\n'));
   out+=paragraphs('Keep your evidence',lesson.evidence+'\n\nSave your predictions, modified code, terminal outputs, and reasoning in your engineering portfolio.');
@@ -86,6 +88,7 @@ export function lessonCells(lesson){
   cells.push(['markdown','## Your exercise\n\n'+c.exercise+'\n\n'+exerciseGuideMarkdown(c.solution,'How to write this exercise')],['code',notebookAttemptScaffold(c.solution)],['markdown','## Reference solution\n\nTry your own implementation first.'],['code',c.solution]);
   for(const p of c.practice||[])cells.push(['markdown',`## ${p.title} · ${p.difficulty}\n\n${p.prompt}\n\nHint: ${p.hint}\n\n${exerciseGuideMarkdown(p.solution,'How to write: '+p.title)}`],['code',notebookAttemptScaffold(p.solution)],['markdown','## Reference reasoning\n\n'+p.explanation],['code',p.solution]);
   cells.push(['markdown',`## Checkpoint\n\n${c.question}\n\n${c.options.map((o,i)=>`${i+1}. ${o}`).join('\n')}\n\n## Diagnose\n\n${c.diagnosis||''}\n\n## Evidence\n\n${lesson.evidence}`]);
+  cells.push(['markdown',`<details><summary>Compare checkpoint reasoning after your attempt</summary>\n\n${feedbackMarkdown(c)}\n\n</details>`]);
   if(c.takeaways)cells.push(['markdown','## Carry forward\n\n'+c.takeaways.map(t=>'- '+t).join('\n')]);
   if(c.references)cells.push(['markdown','## Primary references\n\n'+c.references.map(r=>`- [${r.title}](${r.url})`).join('\n')]);
   return cells;

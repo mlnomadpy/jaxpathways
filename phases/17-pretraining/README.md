@@ -42,11 +42,11 @@ Review: [Masked image modeling: reconstruct missing patches](02-mim/docs/en.md).
 
 ### Try a changed condition
 
-A batch contains duplicate semantic pairs. Should each duplicate automatically be a negative?
+Two rows in a contrastive batch refer to the same semantic positive. What assumption does a diagonal-only target violate?
 
 <details><summary>Compare an approach</summary>
 
-No. Decide positives by source or semantic identity and use a compatible objective; the duplicate-pair exercise shows how a diagonal-only loss penalizes duplicates.
+It assumes one unique positive per row and treats the duplicate positive as a negative. Write the positive matrix before choosing an objective. A multi-positive loss or deduplication policy changes the task definition; report which one is used and keep evaluation groups separated from training.
 
 </details>
 

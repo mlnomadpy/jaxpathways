@@ -203,7 +203,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:19:55.084524+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:40.276651+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2
@@ -480,9 +480,17 @@ What does a $(12,2)$ global array sharded with `P("data",None)` over four device
 
 <details><summary>Answer and explanation</summary>
 
-Each device holds a $(3,2)$ slice and the global array remains $(12,2)$.
+**1. Each device holds a $(3,2)$ slice and the global array remains $(12,2)$. (correct)**
 
 Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.
+
+**2. Each device holds the complete array.**
+
+P(data, None) partitions the first axis. Divide twelve rows among four devices and inspect addressable_shards rather than assuming replication.
+
+**3. Each device represents a separate TPU chip.**
+
+These are logical CPU devices. They let you test partitioning semantics, but provide no evidence about TPU chips, interconnects or throughput.
 
 </details>
 

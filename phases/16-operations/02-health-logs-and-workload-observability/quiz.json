@@ -11,7 +11,12 @@
         "The fraction of this job’s wall time inside the measured synchronized update boundary"
       ],
       "correct": 2,
-      "explanation": "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation."
+      "explanation": "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation.",
+      "optionFeedback": [
+        "Wall time inside an update is not a hardware occupancy counter. Use a device profiler for utilization claims.",
+        "A local loop does not measure a fleet. State the measured process, device and timing boundary.",
+        "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation."
+      ]
     }
   ]
 }

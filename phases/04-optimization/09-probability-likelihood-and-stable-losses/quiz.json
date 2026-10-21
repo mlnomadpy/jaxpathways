@@ -11,7 +11,12 @@
         "It removes the need for held-out evaluation"
       ],
       "correct": 1,
-      "explanation": "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model."
+      "explanation": "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.",
+      "optionFeedback": [
+        "Numerical stability avoids overflow and cancellation. It does not guarantee that the learned decision boundary classifies every example correctly.",
+        "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.",
+        "A stable loss is still a training objective. You need held-out data to estimate generalization and choose model settings."
+      ]
     }
   ]
 }

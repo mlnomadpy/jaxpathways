@@ -329,7 +329,7 @@ visual_data={'kind':'line','x':alphas.tolist(),'xlabel':'base-point displacement
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:16.467113+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:22.781770+00:00. JAX 0.9.2.
 
 ```text
 Supported primitives: ['sin', 'mul', 'add', 'reduce_sum']
@@ -593,9 +593,17 @@ Why does the tiny interpreter raise an error for an unsupported primitive instea
 
 <details><summary>Answer and explanation</summary>
 
-Executing a primal without a verified tangent rule would silently break the derivative contract.
+**1. Every unsupported primitive is mathematically nondifferentiable.**
+
+The primal operation can be mathematically differentiable while your interpreter lacks its rule. State the supported primitive set.
+
+**2. Executing a primal without a verified tangent rule would silently break the derivative contract. (correct)**
 
 The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest.
+
+**3. Compiled JAX cannot run exponentials.**
+
+JAX can differentiate exp. This exercise deliberately limits its own interpreter and should reject operations without verified rules.
 
 </details>
 

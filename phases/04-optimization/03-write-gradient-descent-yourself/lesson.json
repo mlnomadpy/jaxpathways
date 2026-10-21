@@ -140,6 +140,11 @@
       "connection": "Here the loss is \\((w-2)^2\\). One update multiplies the weight error \\(w-2\\) by \\(1-2\\eta\\). The three rates therefore multiply that error by \\(0.8\\), \\(0\\), and \\(-1.2\\), respectively. Squaring gives loss multipliers \\(0.64\\), \\(0\\), and \\(1.44\\).\n\nThe large rate crosses the optimum and lands farther away on each step. The loss plot shows the growing distance, while the sign change follows from the update equation; loss alone does not reveal which side the weight is on. The one-step success of rate \\(0.5\\) depends on this simple quadratic’s curvature and is not a universal best learning rate.",
       "alt": "Gradient descent trades step size for stability. The horizontal axis counts completed updates, including the initial state at \\(0\\). The vertical axis is squared error. It uses a symmetric-log scale: values near zero are on a linear region, while large values are compressed logarithmically. That lets the zero-loss trajectory remain visible. All three curves begin at loss \\(4\\). Learning rate \\(0.1\\) decreases it gradually; rate \\(0.5\\) reaches zero after one update and stays there. Rate \\(1.1\\) increases it from \\(4\\) to \\(5.76\\), then beyond \\(200\\) by the last plotted update.",
       "code": "rates = [0.1, 0.5, 1.1]\nseries = []\nfor rate_plot in rates:\n    position_plot = jnp.array(0.0)\n    losses = []\n    for _ in range(12):\n        losses.append(float((position_plot - 2) ** 2))\n        position_plot = position_plot - rate_plot * 2 * (position_plot - 2)\n    series.append({'label': 'rate ' + str(rate_plot), 'y': losses})\nvisual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update', 'ylabel': 'squared error', 'yscale': 'symlog', 'series': series}"
-    }
+    },
+    "optionFeedback": [
+      "The recurrence multiplies the error by \\(-1.2\\), so its magnitude grows while its sign alternates.",
+      "scan repeats the update you give it. Derive the one-step error factor; the instability is already present in that recurrence.",
+      "A safe learning rate depends on curvature. For this quadratic, use the magnitude of the error multiplier rather than a universal threshold."
+    ]
   }
 }

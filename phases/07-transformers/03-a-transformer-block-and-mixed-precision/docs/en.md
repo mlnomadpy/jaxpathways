@@ -227,7 +227,7 @@ visual_data = {'kind': 'heatmap', 'values': (output - x).tolist(), 'rows': ['tok
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:01.330460+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:03.244690+00:00. JAX 0.9.2.
 
 ```text
 Block shape: (4, 8)
@@ -454,9 +454,17 @@ If all projection matrices are zero in this block, what should the output be?
 
 <details><summary>Answer and explanation</summary>
 
-The original input
+**1. Zero**
+
+The attention branch vanishes but the skip connection remains. Substitute a zero branch into input plus branch.
+
+**2. The original input (correct)**
 
 Zero scores create uniform attention, but zero projections make sublayer contributions zero; both residual paths preserve $x$.
+
+**3. Undefined because attention has zero scores**
+
+Zero scores produce a defined softmax over valid keys. The zero value/output projections remove the branch contribution, leaving the residual.
 
 </details>
 

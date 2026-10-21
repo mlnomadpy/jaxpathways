@@ -307,19 +307,19 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:19.988713+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:02.849718+00:00. JAX 0.9.2.
 
 ```text
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
-Captured *.xplane.pb trace count: 12 steady_ms: 0.214
+Captured *.xplane.pb trace count: 16 steady_ms: 0.0803
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
 Retained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace
-Captured *.xplane.pb trace count: 12 steady_ms: 0.1226
+Captured *.xplane.pb trace count: 16 steady_ms: 0.0847
 BF16-accum / FP32-accum max error ratio: 1.49
-Warmup ms: 32.025 Traced steady step ms: 0.1226
-Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 12
+Warmup ms: 17.771 Traced steady step ms: 0.0847
+Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 16
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 259914
+xplane.pb bytes: 259901
 PASS: tpu-06
 
 ```
@@ -547,9 +547,17 @@ Why should you run and synchronize at least one warmup step before entering `wit
 
 <details><summary>Answer and explanation</summary>
 
-So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation
+**1. Because `jax.profiler.trace` deletes all model weights if warmup is skipped**
 
-Separating warmup from the traced steps ensures the XProf timeline reflects actual steady-state device execution, host input dispatch, and ICI collectives.
+Tracing should observe execution, not delete model state. Warmup prepares the tested executable before the recorded window.
+
+**2. So the captured `*.xplane.pb` trace measures steady-state TPU execution and collective communication rather than one-time Python tracing and XLA HLO compilation (correct)**
+
+Warming and synchronizing the same signature reduces initial compilation in the recorded window. Inspect the trace to confirm: new shapes or static arguments can still compile, and cache state can still affect timing. Record target latency outside profiler overhead too.
+
+**3. Because `bfloat16` only works inside a profiler context**
+
+Profiling is not restricted to BF16. Record the precision used and the actual operations in the captured target workload.
 
 </details>
 

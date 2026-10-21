@@ -162,7 +162,7 @@ visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:20.732527+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:22.736890+00:00. JAX 0.9.2.
 
 ```text
 projection / residual: [3. 0.] [0. 4.]
@@ -342,9 +342,17 @@ Does doubling a nonzero direction double the projection onto its line?
 
 <details><summary>Answer and explanation</summary>
 
-No; the coefficient and direction rescale in opposite ways
+**1. Yes, because the dot product doubles**
+
+Doubling the direction also quadruples its squared norm. Work out the coefficient and the reconstructed vector separately.
+
+**2. No; the coefficient and direction rescale in opposite ways (correct)**
 
 The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.
+
+**3. Only when the vectors are perpendicular**
+
+Orthogonality is not required. Substitute a general nonzero direction into the projection formula and cancel the scale factor.
 
 </details>
 

@@ -181,3 +181,11 @@ Try these without changing the reference CLI first:
 Reference reasoning: learning-rate changes alter the config identity, not source or data; changing data alters its fingerprint; invalid steps cannot describe this exercise's valid run; a package's location is more reliable than an accidental notebook working directory. Timestamps, run IDs and commands naturally differ between attempts.
 
 Keep both original run directories, the changed-data run, test output and your completed notes. Your explanation should identify the controlled variable, the limits of the environment record, and the difference between **prepared**, **executed**, and **evaluated**. These checks establish experiment organization. The linked numerical lessons establish whether the model itself works.
+
+## 9. Review a comparison before trusting the dashboard
+
+Suppose two configurations use paired seeds 0, 1 and 2. Their held-out losses are A: 0.40, 0.50, 0.60 and B: 0.39, 0.49, 0.80. These are an illustrative calculation, not recorded training results. Lower is better. The paired differences B minus A are -0.01, -0.01 and +0.20, with mean +0.06. Removing seed 2 would reverse the story. Keep the complete table, failed runs and the predeclared handling of missing results.
+
+Store the experimental question and acceptance rule before executing the sweep. For each run, keep resolved configuration, code/data identities, seed, environment, actual command, exit status and metric definitions. Name whether loss is pre-update, post-update or held out, and record its denominator. Comparing two dashboard lines is meaningful only when those definitions match.
+
+Use the [reproducible experiments workshop](project-guides/reproducible-experiments.html) to execute paired comparisons and build the research notebook. During review, open the notebook from a fresh kernel and identify which cells read retained artifacts and which rerun computation. A tracker URL is convenient navigation, but the retained run dossier must still explain the result if the tracker becomes unavailable.

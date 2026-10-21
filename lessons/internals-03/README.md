@@ -275,7 +275,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:14.787278+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:20.085754+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]
@@ -522,9 +522,17 @@ A custom derivative is linear in its tangent and returns finite values. What add
 
 <details><summary>Answer and explanation</summary>
 
-Agreement with the actual primal derivative through an independent derivation or numerical check.
+**1. Agreement with the actual primal derivative through an independent derivation or numerical check. (correct)**
 
 Linearity is necessary, but a wrong constant multiple of the true derivative is also linear and finite. Independent comparisons establish the missing mathematical agreement.
+
+**2. A larger batch size so its bars look smoother.**
+
+A bigger batch does not supply an independent derivative reference. Compare the custom rule against the intended primal function.
+
+**3. No additional evidence: linearity guarantees the coefficient is correct.**
+
+Many wrong derivative rules are linear and finite. Test against an analytic derivative or a carefully chosen finite difference.
 
 </details>
 

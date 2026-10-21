@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-02",
-  "contentHash": "4c6320d6cd7bb54793cebefc0369fbcc9d3b2223020fdbb5e1b8f7f1d93fa760",
+  "contentHash": "d4c2fbbde32e792212ef57b123cae78be657e147878cef80cdab9555148ee0b3",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:36.619883+00:00",
+  "generatedAt": "2026-10-21T11:25:24.126025+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0004630410112440586, 'update_examples_per_s': 207325.04825452823, 'job_examples_per_s': 164.50709472730256, 'update_duty_fraction': 0.0007934742864515866}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0001732083037495613, 'update_examples_per_s': 230935.81043224846, 'job_examples_per_s': 68.43845758848998, 'update_duty_fraction': 0.00029635272875346604}\n",
+  "stdout": "healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0009208736009895802, 'update_examples_per_s': 104248.8349072418, 'job_examples_per_s': 105.17385529217412, 'update_duty_fraction': 0.0010088731963839729}\nincident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0004731663502752781, 'update_examples_per_s': 84536.86526256327, 'job_examples_per_s': 50.524800077269774, 'update_duty_fraction': 0.0005976658812737456}\n",
   "data": {
     "kind": "line",
     "x": [

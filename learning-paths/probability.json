@@ -41,7 +41,7 @@
     "probability"
   ],
   "modalityTrackIds": [],
-  "studyAdvice": "Start with distributions and the exact regression posterior so you have a reference for approximate inference. Run multiple HMC chains and deliberately inspect an unstable sampler before studying variational inference. Compare latent uncertainty with uncertainty in a future observation. Complete the Bayesian project with a changed prior and held-out data before moving to an optional NumPyro model.",
+  "studyAdvice": "Start with distributions and the exact regression posterior so you have a reference for approximate inference. Run multiple HMC chains and deliberately inspect an unstable sampler before studying variational inference. Compare latent uncertainty with uncertainty in a future observation. Complete the Bayesian project with a changed prior and held-out data before moving to an optional NumPyro model. For review, compare the full covariance and predictive intervals with an exact small target. Distinguish Monte Carlo error, variational-family error and model misspecification before selecting a diagnostic.",
   "engineeringLessonIds": [
     "recovery-06"
   ]

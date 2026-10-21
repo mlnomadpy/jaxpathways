@@ -132,6 +132,11 @@
         "code": "value, gradient = jax.value_and_grad(loss)(1.0)\nassert jnp.allclose(value, 14./3.)\nassert jnp.allclose(gradient, -28./3.)",
         "explanation": "The derivative is the mean of \\(2x(wx-y)\\), giving \\(-28/3\\) at \\(w=1\\). Checking value and derivative catches errors in both the objective and its reduction."
       }
+    ],
+    "optionFeedback": [
+      "A sum counts each replicated contribution again. A mean divides by the new batch size and would preserve the gradient in this example.",
+      "A sum counts both copies, so its gradient doubles. A mean would cancel the duplication through its denominator.",
+      "value_and_grad preserves the objective you supply. Compare sum and mean explicitly; the transform does not normalize a loss for you."
     ]
   }
 }

@@ -11,7 +11,12 @@
         "Assume every operator uses the NPU."
       ],
       "correct": 0,
-      "explanation": "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement."
+      "explanation": "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
+      "optionFeedback": [
+        "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
+        "CPU timing and compression ratio cannot establish NPU placement or latency. Inspect delegated operations on the actual device.",
+        "Conversion can leave unsupported operations on CPU. Confirm partitioning and measure the whole prediction boundary."
+      ]
     }
   ]
 }

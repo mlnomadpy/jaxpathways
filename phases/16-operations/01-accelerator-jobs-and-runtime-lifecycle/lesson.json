@@ -160,6 +160,11 @@
         "code": "# Step 4 — Exercise all three lifecycle outcomes: Each outcome comes from a real subprocess.\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix='ops-lifecycle-') as folder:\n    base = Path(folder)\n    successful = launch(base/'success')\n    rejected = launch(base/'wrong-runtime',dict(min_devices=999))\n    stalled = launch(base/'timeout',dict(stall_at=0,stall_seconds=20),timeout=6)\nassert successful['status'] == 'completed'\nassert rejected['status'] == 'failed' and rejected['returncode'] != 0\nassert stalled['status'] == 'timed_out' and stalled['returncode'] != 0\nassert any(e['event']=='stall_injected' for e in stalled['events'])\nprint('statuses:',successful['status'],rejected['status'],stalled['status'])\nprint('actual exit codes:',successful['returncode'],rejected['returncode'],stalled['returncode'])",
         "explanation": "Each outcome comes from a real subprocess. Temporary directories contain and clean up every artifact."
       }
+    ],
+    "optionFeedback": [
+      "A timed-out parent can leave the child consuming resources. Terminate the process group, escalate if needed and reap its exit.",
+      "The supervisor must resolve the actual process lifetime. A status label does not stop computation or release process resources.",
+      "Editing a log does not stop a process. Check process termination and the resulting exit status."
     ]
   }
 }

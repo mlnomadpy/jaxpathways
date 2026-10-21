@@ -259,7 +259,7 @@ visual_data={'kind':'bar','labels':['reviewed','changed model','expired','wrong 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:32.755641+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:18.986696+00:00. JAX 0.9.2.
 
 ```text
 Accepted original / changed artifact / expired approval / wrong target: [True, False, False, False]
@@ -389,9 +389,17 @@ An approval record contains a reviewer name and a matching hash. Does that authe
 
 <details><summary>Answer and explanation</summary>
 
-No. The fixture checks binding and expiry; trusted identity and authorization are separate requirements.
+**1. Yes, a hash verifies the reviewer identity.**
 
-Here ModelOps means the operational ownership of models across their lifecycle: inventory, intended use, review, deployment status, monitoring, incident response and retirement. Teams use overlapping MLOps and ModelOps terms; the useful distinction is the responsibility and evidence each process owns.
+The hash can bind a statement to an artifact but does not prove who wrote it. Verify reviewer identity through a separate trusted channel.
+
+**2. No. The fixture checks binding and expiry; trusted identity and authorization are separate requirements. (correct)**
+
+This check can bind approval metadata to a particular artifact and expiry. It does not authenticate the human named as reviewer. Identity and authorization require a separate trusted mechanism; a digest alone supplies neither.
+
+**3. Only if the model has low validation loss.**
+
+Validation loss is a model metric, not an identity credential. Check authorization, binding and expiry separately.
 
 </details>
 

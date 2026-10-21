@@ -27,3 +27,11 @@ Stage 2 swaps the two policy preference scores. The margin becomes -0.3 and the 
 Stage 3 saves response-token count, SFT loss, margin and DPO loss to `runs/posttraining-audit/posttraining-audit-evidence.json`. Without `--evidence-dir`, the file is temporary. Stage 4 runs the full check. Passing output begins `PASS posttraining-audit stage N`.
 
 These are objective mechanics on synthetic values. They do not demonstrate a trained language model, preference-data quality, retained behavior or user-facing response quality. Reference command: `python3 projects/posttraining-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Improve a chosen-versus-rejected log-probability margin while decreasing the chosen probability. Construct concrete numbers.
+
+**Keep for review:** Before/after chosen, rejected and fixed-reference values. For example (-2, -3) to (-3, -5) improves the raw margin from one to two but lowers chosen probability; independent quality evaluation is still needed.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

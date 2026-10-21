@@ -11,7 +11,12 @@
         "\\((3, 2)\\)"
       ],
       "correct": 1,
-      "explanation": "\\((2, 1)\\) broadcasts across the three columns. Shape \\((2,)\\) conflicts with the trailing dimension \\(3\\)."
+      "explanation": "\\((2, 1)\\) broadcasts across the three columns. Shape \\((2,)\\) conflicts with the trailing dimension \\(3\\).",
+      "optionFeedback": [
+        "Broadcasting aligns trailing dimensions, so a length-two vector cannot match the trailing length-three axis. Add a singleton feature axis.",
+        "\\((2, 1)\\) broadcasts across the three columns. Shape \\((2,)\\) conflicts with the trailing dimension \\(3\\).",
+        "This has the axes reversed. Write one offset per row and repeat it across the three columns using shape \\((2,1)\\)."
+      ]
     }
   ]
 }

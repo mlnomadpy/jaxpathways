@@ -131,6 +131,11 @@
         "code": "step_us=[e['dur'] for e in steps]\nassert all(t>=0 for t in input_us+model_us+step_us)",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "The difference can include host work, transfers, synchronization or scheduling. Inspect trace lanes before assigning all of it to idle time.",
+      "A wide step region alone cannot isolate data loading. Compare input, host and device events within the same time interval.",
+      "The annotation boundaries establish inclusion, not a universal attribution of the remaining time. Our injected wait is known from code; an actual workload needs trace evidence."
     ]
   }
 }

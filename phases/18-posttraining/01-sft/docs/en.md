@@ -239,7 +239,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:52.206662+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:37.532819+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272
@@ -447,9 +447,17 @@ Should prompt inputs disappear when using response-only loss?
 
 <details><summary>Answer and explanation</summary>
 
-No. They remain context; only their target eligibility changes.
+**1. No. They remain context; only their target eligibility changes. (correct)**
 
 Attention visibility and supervised output positions are separate contracts.
+
+**2. Yes. Masking a prompt token out of the loss also removes it from causal attention.**
+
+A response-only loss keeps prompt tokens as conditioning inputs. Attention visibility and target eligibility are separate contracts.
+
+**3. No, but the logit produced at the final prompt position must be excluded because its input role is prompt.**
+
+Eligibility belongs to the shifted target token, not simply the role of the input position. Inspect the last prompt position’s next-token target.
 
 </details>
 

@@ -207,7 +207,7 @@ visual_data = {'kind': 'line', 'x': list(range(51)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:53.825684+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:11.583981+00:00. JAX 0.9.2.
 
 ```text
 step / update: 1 [-0.09999993  0.09999993]
@@ -431,9 +431,17 @@ Does clipping gradients before Adam guarantee that final updates obey the same n
 
 <details><summary>Answer and explanation</summary>
 
-No; Adam subsequently rescales coordinates
+**1. Yes, every later transformation preserves that bound**
+
+Adam rescales coordinates using its moment estimates after clipping. Inspect the norm of the actual parameter delta separately.
+
+**2. No; Adam subsequently rescales coordinates (correct)**
 
 The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.
+
+**3. Only if the loss is a scalar**
+
+A scalar loss can have a large or poorly scaled gradient. Compute the gradient norm and update norm rather than inferring them from loss shape.
 
 </details>
 

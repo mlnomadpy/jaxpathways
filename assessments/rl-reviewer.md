@@ -33,3 +33,11 @@ If both new and old probabilities are recomputed from the same candidate, their 
 At horizon \(6\), always-left earns \(-0.06\), while always-right remains at \(0.985\), because both possible starts reach the goal within three moves. The uniform-policy baseline is \(0.367578125\) at that horizon; it must be recomputed rather than copied from the horizon-eight lesson. Evaluate sampled baselines against the independent enumerator.
 
 Do not impose the original lesson’s final-return thresholds on the changed training budget. Inspect correct updates, replay, exact and sampled metrics, and honest failures. Distinguish compute-unmatched training procedures, shared-stream pairing, the number of trained agents and the number of episodes. A report that pools episodes into thousands of supposedly independent training runs needs revision.
+
+## Discussion-case review notes
+
+One trained policy has hundreds of evaluation episodes and a narrow confidence interval; another has one episode per independently trained seed.
+
+These measure different sources of variation. Require an experimental-unit statement and retain agent-level means before comparing training procedures. Do not treat episodes from one fitted agent as independent training runs.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

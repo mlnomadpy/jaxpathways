@@ -183,7 +183,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:04.706399+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:06.814419+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]
@@ -373,9 +373,17 @@ Which variance describes a new noisy reading at a given input?
 
 <details><summary>Answer and explanation</summary>
 
-The propagated weight uncertainty plus observation-noise variance
+**1. Only the posterior variance of the intercept**
+
+A future prediction depends on all relevant coefficient uncertainty at its input, including covariance, plus observation noise.
+
+**2. The propagated weight uncertainty plus observation-noise variance (correct)**
 
 Both the unknown line and a new independent observation error contribute. Omitting the latter gives an interval for the latent mean, not for a future reading.
+
+**3. The training mean squared error divided by the number of weights**
+
+Training MSE divided by parameter count is not this posterior predictive calculation. Propagate the coefficient covariance through the new input.
 
 </details>
 

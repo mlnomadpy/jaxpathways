@@ -177,7 +177,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:40.204598+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:52.517152+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0
@@ -375,9 +375,17 @@ Why compute binary cross-entropy from logits?
 
 <details><summary>Answer and explanation</summary>
 
-It avoids unstable probability and logarithm intermediates
+**1. It makes all classifications correct**
+
+Numerical stability avoids overflow and cancellation. It does not guarantee that the learned decision boundary classifies every example correctly.
+
+**2. It avoids unstable probability and logarithm intermediates (correct)**
 
 A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.
+
+**3. It removes the need for held-out evaluation**
+
+A stable loss is still a training objective. You need held-out data to estimate generalization and choose model settings.
 
 </details>
 

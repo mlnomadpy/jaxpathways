@@ -465,14 +465,14 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:11.475158+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:57.046280+00:00. JAX 0.9.2.
 
 ```text
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
 Resumed state_hash matches uninterrupted control: ecba6a13e41beb0003af0371f8422efa3b08538c4420efb07a9bc61b0a10cdc1
 Losses across 6 steps: [3.6712, 3.78913, 1.91372, 2.09553, 1.81174, 1.16636]
-Warmup ms: 81.296 Median steady step ms: 0.0319
+Warmup ms: 98.396 Median steady step ms: 0.0422
 Resume rejection: checkpoint state hash mismatch
 Step 8 resumed vs control hash: eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9 eba1c0bcfb80184d9f5108c1d6539369e21f95276e5d6806234237f41eccbed9
 Recorded event sequence: ['started', 'warmup', 'step', 'step', 'checkpoint', 'completed', 'restored', 'warmup', 'step', 'step', 'checkpoint', 'completed']
@@ -679,9 +679,17 @@ Why does `run_tpu_ready_job` execute `train_step` once and discard its outputs b
 
 <details><summary>Answer and explanation</summary>
 
-To trigger XLA compilation and synchronize the warmup result without altering the initial or restored training state, keeping compilation latency out of steady-state step measurements
+**1. To mutate the parameters one extra time before step 1**
 
-JAX compiles `@jax.jit` functions on their first call for a given input shape and dtype; warming up on the initial state without overwriting `(w, b, m_w, m_b, key)` isolates compile time from step time while preserving exact state trajectories.
+Retaining warmup output would advance this example’s state. Discard its returned state and begin the measured trajectory from the intended checkpoint.
+
+**2. To trigger XLA compilation and synchronize the warmup result without altering the initial or restored training state, keeping compilation latency out of steady-state step measurements (correct)**
+
+This fixed-signature example warms and synchronizes the compiled step, then discards its returned state so the measured trajectory starts at the intended state. A later shape, dtype or static-argument change can still recompile. Warmup is not a general steady-state guarantee.
+
+**3. Because JAX cannot save checkpoints without a warmup call**
+
+Checkpoint compatibility is not created by warmup. Warmup separates initial compilation from timing for the tested signature.
 
 </details>
 

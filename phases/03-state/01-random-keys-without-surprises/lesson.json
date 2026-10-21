@@ -125,6 +125,11 @@
       "connection": "A JAX random function is deterministic given the same key and arguments. Calling it again with that key replays the result; it does not silently advance a hidden random state. Splitting produces a new key for a new draw.\n\nThe lines only connect coordinates to make equality visible. This is not a time series or a probability density, and three different values is distinct from statistical independence. The practical check is reproducibility: reuse for deliberate replay, split for the next stochastic operation.",
       "alt": "Reused keys replay the same sample. The horizontal axis selects a coordinate within a three-element random draw; the vertical axis gives its sampled value. The solid first-draw line and dashed same-key replay line lie on top of each other. The dash-dot line comes from a new split key. The replay repeats approximately \\((0.606,0.799,-0.909)\\), while the split-key draw is approximately \\((-0.211,-1.363,-0.045)\\). Two curves are hard to distinguish precisely because their coordinates are equal.",
       "code": "visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'ylabel': 'normal draw', 'series': [{'label': 'first draw', 'y': a.tolist()}, {'label': 'same key replay', 'y': repeated.tolist()}, {'label': 'split next draw', 'y': b.tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "A JAX key is an explicit value, not an advancing generator. Split it and pass a distinct key for each intended random draw.",
+      "Keys are explicit immutable inputs. Identical inputs reproduce the draw; split keys to describe independent randomness.",
+      "Key reuse need not raise an exception. Compare the actual samples; reproducibility requires managing keys even when execution succeeds."
+    ]
   }
 }

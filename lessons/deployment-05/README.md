@@ -313,7 +313,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:44.714005+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:51.717726+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0
@@ -643,9 +643,17 @@ What must a deployment policy specify beyond “INT8 weights”?
 
 <details><summary>Answer and explanation</summary>
 
-Activation, accumulator and output formats, scales, calibration and supported kernels.
+**1. Activation, accumulator and output formats, scales, calibration and supported kernels. (correct)**
 
 Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.
+
+**2. Only the filename extension.**
+
+A filename or container format does not define tensor scales, calibration or accumulation. Write the numerical contract explicitly.
+
+**3. Nothing; INT8 guarantees acceleration.**
+
+Smaller storage does not guarantee faster execution. Check native operator support, data movement and measured target latency.
 
 </details>
 

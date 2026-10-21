@@ -248,7 +248,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:58.074779+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:44.375795+00:00. JAX 0.9.2.
 
 ```text
 Synthetic preference NLL initial/final: 0.6931471824645996 0.08669456839561462 ; rewards: [ 1.9811294  0.327278  -2.3084073]
@@ -462,9 +462,17 @@ What do pairwise preferences identify directly?
 
 <details><summary>Answer and explanation</summary>
 
-Reward differences under the chosen comparison model, not an absolute universal utility.
+**1. Reward differences under the chosen comparison model, not an absolute universal utility. (correct)**
 
 A shared additive offset cancels from every pairwise probability.
+
+**2. A unique zero point for individual response rewards across unrelated prompts.**
+
+Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.
+
+**3. A scale-invariant objective whose positive rescaling leaves downstream KL regularization unchanged.**
+
+Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective.
 
 </details>
 

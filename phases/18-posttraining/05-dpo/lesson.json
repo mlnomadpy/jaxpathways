@@ -104,7 +104,7 @@
       "Yes, because the reference log-probability difference must be re-estimated from on-policy rollouts each step."
     ],
     "answer": 0,
-    "explanation": "Its data and objective differ from the learned-reward PPO loop; evaluation quality remains a separate question.",
+    "explanation": "DPO uses offline preference pairs and a fixed reference policy rather than an online reward-model rollout loop. Its reference-corrected relative objective does not guarantee higher absolute chosen probability or better independently evaluated outputs.",
     "diagnosis": "If initial loss is not log(2) when current equals reference, inspect the subtraction and masks. If reversed preferences still improve the reported score, inspect label direction and cached-reference alignment.",
     "references": [
       {
@@ -229,6 +229,11 @@
         "height": 7.3,
         "width": 10
       }
-    }
+    },
+    "optionFeedback": [
+      "DPO uses offline preference pairs and a fixed reference policy rather than an online reward-model rollout loop. Its reference-corrected relative objective does not guarantee higher absolute chosen probability or better independently evaluated outputs.",
+      "A relative chosen-versus-rejected margin can improve while both absolute probabilities fall. Compare both log probabilities and their difference.",
+      "The reference is a fixed policy in this offline objective. It is not an on-policy estimate updated from rollouts."
+    ]
   }
 }

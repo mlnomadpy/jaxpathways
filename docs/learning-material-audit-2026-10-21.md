@@ -47,11 +47,11 @@ Retain the four source-matching v5e receipts and their limits. Add fresh-process
 
 Evidence: [curriculum/hardware-validation.json](../curriculum/hardware-validation.json).
 
-### P2: Every lesson checkpoint uses one explanation for all answer choices
+### P2: Choice-specific checkpoint reasoning is implemented; learner validation remains open
 
-Status: **open**.
+Status: **partly-addressed**.
 
-Author misconception-specific feedback and pilot changed-condition tasks. Option shuffling alone does not repair an assessment.
+Review the three rationales in every lesson and pilot changed-condition tasks. Author revision is not independent teaching acceptance.
 
 Evidence: [src/scripts/reader.js](../src/scripts/reader.js), [phases](../phases).
 

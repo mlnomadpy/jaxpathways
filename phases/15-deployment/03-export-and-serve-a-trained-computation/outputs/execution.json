@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-03",
-  "contentHash": "e80088adb3ad789a58d8eacd0ba291d56c5125f262831c9b806b27d93edd19b4",
-  "executedAt": "2026-10-20T22:24:42.546071+00:00",
+  "contentHash": "18fb85b08abccd7332bf8f72e23ecd5b8c7e7ab20352b4ba868722dc373898b9",
+  "executedAt": "2026-10-21T11:32:50.159952+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,

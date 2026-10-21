@@ -173,7 +173,7 @@ visual_data['yscale'] = 'log'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:29.990002+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:37.276758+00:00. JAX 0.9.2.
 
 ```text
 Finite difference: [-2.9999971  2.4999976]
@@ -393,9 +393,17 @@ Does passing one gradient check prove a loss implementation is correct for all i
 
 <details><summary>Answer and explanation</summary>
 
-No; it is evidence at tested inputs and must be combined with shape and objective checks
+**1. Yes, autodiff is an oracle**
+
+An independent derivative or finite difference helps test AD. Reusing AD as its own expected answer cannot detect a shared objective error.
+
+**2. No; it is evidence at tested inputs and must be combined with shape and objective checks (correct)**
 
 Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.
+
+**3. Only on TPU**
+
+Gradient checks are useful on CPU too. Their limits concern tested inputs, tolerances and objective correctness, not a requirement for TPUs.
 
 </details>
 

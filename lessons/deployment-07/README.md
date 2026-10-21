@@ -272,7 +272,7 @@ visual_data={'kind':'bar','labels':['valid predictions','expected rejections'],'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:47.574303+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:53.511392+00:00. JAX 0.9.2.
 
 ```text
 Fresh-process valid requests: 2 rejected boundaries: 3
@@ -475,9 +475,17 @@ The image built successfully. What should happen before serving traffic?
 
 <details><summary>Answer and explanation</summary>
 
-Load the expected artifact, verify its digest and complete a prediction through the target runtime.
+**1. Assume the trained model is included and ready.**
+
+An image can build while carrying the wrong model. Verify the artifact digest and a known prediction inside the target runtime.
+
+**2. Load the expected artifact, verify its digest and complete a prediction through the target runtime. (correct)**
 
 A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.
+
+**3. Ignore preprocessing because dependencies are pinned.**
+
+Pinned packages do not specify preprocessing. Export and test the exact input-to-output pipeline.
 
 </details>
 

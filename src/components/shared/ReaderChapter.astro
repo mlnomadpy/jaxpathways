@@ -181,6 +181,18 @@ const { offline = false } = Astro.props;
     <p>
       <span set:html={inlineMath(`Answer: ${c.options[c.answer]}. ${c.explanation}`)} />
     </p>
+    <h3>Reason through the other choices</h3>
+    <ul>
+      {c.options.map(
+        (option, index) =>
+          index !== c.answer && (
+            <li>
+              <strong set:html={inlineMath(option)} />
+              <Prose text={c.optionFeedback[index]} />
+            </li>
+          ),
+      )}
+    </ul>
   </details>
   {c.diagnosis && (
     <>

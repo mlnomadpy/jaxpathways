@@ -215,7 +215,7 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:17.701210+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:17.951411+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]
@@ -418,7 +418,15 @@ What should step emit when called on a finished state?
 
 <details><summary>Answer and explanation</summary>
 
-The unchanged state, zero reward and no new ending event
+**1. Another goal reward because the agent is still at the goal**
+
+Repeated terminal rewards would change the return. Step the absorbing state again and check for zero additional reward.
+
+**2. A new random start and its first reward**
+
+An implicit reset would mix episodes and change the next observation contract. Reset explicitly after the terminal transition.
+
+**3. The unchanged state, zero reward and no new ending event (correct)**
 
 Absorbing padding preserves one episode. Reset is a separate explicit operation, and ending flags mark events rather than every later padded row.
 

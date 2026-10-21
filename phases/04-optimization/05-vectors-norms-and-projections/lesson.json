@@ -133,6 +133,11 @@
       "connection": "We projected onto the horizontal direction. The residual is perpendicular to that direction, so its dot product with \\((1,0)\\) is zero. This right angle explains why moving the projection along the horizontal line cannot remove the remaining vertical error.\n\nThe lengths form a familiar check: \\(\\lVert p\\rVert=3\\), \\(\\lVert r\\rVert=4\\), and \\(\\lVert u\\rVert=5\\), with \\(3^2+4^2=5^2\\). Projection separates the part represented by the chosen direction from the part that direction cannot represent.",
       "alt": "Projection and leftover form a right triangle. Both axes are ordinary vector coordinates. The diagonal arrow goes from the origin to \\(u=(3,4)\\). The horizontal arrow reaches the projection \\(p=(3,0)\\), and the vertical arrow then goes from that point up to \\(u\\). Follow the horizontal and vertical arrows tip to tail: together they reproduce the diagonal arrow. Although the residual arrow is drawn starting at \\((3,0)\\), its displacement is \\(r=(0,4)\\), not \\((3,4)\\).",
       "code": "visual_data = {'kind': 'vectors', 'arrows': [{'label': 'input u', 'start': [0, 0], 'end': u.tolist()}, {'label': 'projection p', 'start': [0, 0], 'end': p.tolist()}, {'label': 'residual r', 'start': p.tolist(), 'end': u.tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Doubling the direction also quadruples its squared norm. Work out the coefficient and the reconstructed vector separately.",
+      "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.",
+      "Orthogonality is not required. Substitute a general nonzero direction into the projection formula and cancel the scale factor."
+    ]
   }
 }

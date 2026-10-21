@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:description>Read top to bottom: HBM holds fp32 master weights and Adam moments plus bf16/int8 caches, streams bf16 operands into the MXU, accumulates dot products in fp32, and updates sharded HBM state.</dc:description>
+    <dc:description>Conceptual mixed-precision ledger: HBM holds master weights and optimizer state; the compute path requires explicit operand and accumulation types, supported lowering and separately inspected target traces.</dc:description>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -60,56 +60,56 @@ z
 " style="fill: #536273; stroke: #536273; stroke-width: 1.7; stroke-linecap: round"/>
    </g>
    <g id="patch_5">
-    <path d="M 45.750204 30.690209 
-L 530.249796 30.690209 
-Q 534.239793 30.690209 534.239793 34.950204 
-L 534.239793 92.764425 
-Q 534.239793 97.02442 530.249796 97.02442 
-L 45.750204 97.02442 
-Q 41.760207 97.02442 41.760207 92.764425 
-L 41.760207 34.950204 
-Q 41.760207 30.690209 45.750204 30.690209 
+    <path d="M 53.773345 30.690209 
+L 522.226655 30.690209 
+Q 526.084505 30.690209 526.084505 34.950204 
+L 526.084505 92.764425 
+Q 526.084505 97.02442 522.226655 97.02442 
+L 53.773345 97.02442 
+Q 49.915495 97.02442 49.915495 92.764425 
+L 49.915495 34.950204 
+Q 49.915495 30.690209 53.773345 30.690209 
 z
-" clip-path="url(#p289f00a7fc)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
+" clip-path="url(#p1d4a876fd5)" style="fill: #eef3ff; stroke: #3559a8; stroke-width: 1.5; stroke-linejoin: miter"/>
    </g>
    <g id="patch_6">
-    <path d="M 45.750204 134.147235 
-L 530.249796 134.147235 
-Q 534.239793 134.147235 534.239793 138.40723 
-L 534.239793 196.221451 
-Q 534.239793 200.481446 530.249796 200.481446 
-L 45.750204 200.481446 
-Q 41.760207 200.481446 41.760207 196.221451 
-L 41.760207 138.40723 
-Q 41.760207 134.147235 45.750204 134.147235 
+    <path d="M 53.773345 134.147235 
+L 522.226655 134.147235 
+Q 526.084505 134.147235 526.084505 138.40723 
+L 526.084505 196.221451 
+Q 526.084505 200.481446 522.226655 200.481446 
+L 53.773345 200.481446 
+Q 49.915495 200.481446 49.915495 196.221451 
+L 49.915495 138.40723 
+Q 49.915495 134.147235 53.773345 134.147235 
 z
-" clip-path="url(#p289f00a7fc)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
+" clip-path="url(#p1d4a876fd5)" style="fill: #f0eafa; stroke: #6240ad; stroke-width: 1.5; stroke-linejoin: miter"/>
    </g>
    <g id="patch_7">
-    <path d="M 45.750204 237.604261 
-L 530.249796 237.604261 
-Q 534.239793 237.604261 534.239793 241.864257 
-L 534.239793 299.678477 
-Q 534.239793 303.938472 530.249796 303.938472 
-L 45.750204 303.938472 
-Q 41.760207 303.938472 41.760207 299.678477 
-L 41.760207 241.864257 
-Q 41.760207 237.604261 45.750204 237.604261 
+    <path d="M 53.773345 237.604261 
+L 522.226655 237.604261 
+Q 526.084505 237.604261 526.084505 241.864257 
+L 526.084505 299.678477 
+Q 526.084505 303.938472 522.226655 303.938472 
+L 53.773345 303.938472 
+Q 49.915495 303.938472 49.915495 299.678477 
+L 49.915495 241.864257 
+Q 49.915495 237.604261 53.773345 237.604261 
 z
-" clip-path="url(#p289f00a7fc)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
+" clip-path="url(#p1d4a876fd5)" style="fill: #e5f4ee; stroke: #17735c; stroke-width: 1.5; stroke-linejoin: miter"/>
    </g>
    <g id="patch_8">
-    <path d="M 45.750204 341.061288 
-L 530.249796 341.061288 
-Q 534.239793 341.061288 534.239793 345.321283 
-L 534.239793 403.135503 
-Q 534.239793 407.395499 530.249796 407.395499 
-L 45.750204 407.395499 
-Q 41.760207 407.395499 41.760207 403.135503 
-L 41.760207 345.321283 
-Q 41.760207 341.061288 45.750204 341.061288 
+    <path d="M 53.773345 341.061288 
+L 522.226655 341.061288 
+Q 526.084505 341.061288 526.084505 345.321283 
+L 526.084505 403.135503 
+Q 526.084505 407.395499 522.226655 407.395499 
+L 53.773345 407.395499 
+Q 49.915495 407.395499 49.915495 403.135503 
+L 49.915495 345.321283 
+Q 49.915495 341.061288 53.773345 341.061288 
 z
-" clip-path="url(#p289f00a7fc)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
+" clip-path="url(#p1d4a876fd5)" style="fill: #fff0e6; stroke: #a64d20; stroke-width: 1.5; stroke-linejoin: miter"/>
    </g>
    <g id="text_1">
     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="67.168564" transform="rotate(-0 288 67.168564)">TPU HBM capacity: fp32 master weights + Adam (m, v) + bf16/int8 KV cache</text>
@@ -118,16 +118,16 @@ z
     <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="170.625591" transform="rotate(-0 288 170.625591)">HBM bandwidth pipe (819-2765 GB/s): stream bf16 / int8 operands</text>
    </g>
    <g id="text_3">
-    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="274.082617" transform="rotate(-0 288 274.082617)">TPU MXU systolic array: bf16/int8 multiply + fp32 accumulation</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="274.082617" transform="rotate(-0 288 274.082617)">Compute path: explicit operand dtype, accumulation contract and supported lowering</text>
    </g>
    <g id="text_4">
-    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="377.539643" transform="rotate(-0 288 377.539643)">XProf *.xplane.pb trace: verify MXU busy % vs HBM bandwidth stall</text>
+    <text style="font-size: 12px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #172334" x="288" y="377.539643" transform="rotate(-0 288 377.539643)">Target trace: inspect compute, memory, transfer and communication evidence</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="p289f00a7fc">
-   <rect x="3.00024" y="3.00024" width="569.99952" height="425.99952"/>
+  <clipPath id="p1d4a876fd5">
+   <rect x="12.43923" y="3.00024" width="551.12154" height="425.99952"/>
   </clipPath>
  </defs>
 </svg>

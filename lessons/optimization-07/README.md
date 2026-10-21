@@ -176,7 +176,7 @@ visual_data = {'kind': 'heatmap', 'values': jax.jacfwd(f)(x).tolist(), 'rows': [
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:27.311584+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:32.780282+00:00. JAX 0.9.2.
 
 ```text
 Jv / loss gradient: [3. 1.] [46. 19.]
@@ -363,9 +363,17 @@ Which object does a reverse-mode pullback map to input sensitivity?
 
 <details><summary>Answer and explanation</summary>
 
-An output sensitivity vector
+**1. An output sensitivity vector (correct)**
 
 A VJP multiplies an output sensitivity by the transposed Jacobian. A JVP instead propagates an input direction forward.
+
+**2. An arbitrary input direction**
+
+An input direction belongs to a JVP. A VJP takes an output cotangent and maps it back into the input space.
+
+**3. Only a scalar learning rate**
+
+A learning rate belongs to the optimizer. The VJP is a derivative operation and exists before any update rule is chosen.
 
 </details>
 

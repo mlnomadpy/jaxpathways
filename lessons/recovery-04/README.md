@@ -398,7 +398,7 @@ visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T10:05:30.972516+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:24.040104+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]
@@ -625,9 +625,17 @@ Which evidence supports a consistent restart boundary?
 
 <details><summary>Answer and explanation</summary>
 
-The next IDs, losses and full training state match the uninterrupted future under a compatible contract.
+**1. The checkpoint directory exists.**
+
+A directory can be incomplete or contain mismatched components. Wait for completion, validate metadata and compare continuation.
+
+**2. The next IDs, losses and full training state match the uninterrupted future under a compatible contract. (correct)**
 
 A consistent restart preserves both data position and transition state, not just a readable file or a favorable metric.
+
+**3. The final loss eventually decreases.**
+
+Many different trajectories decrease loss. Test next-batch IDs, losses and state against an uninterrupted reference at the same boundary.
 
 </details>
 

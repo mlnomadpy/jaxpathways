@@ -27,3 +27,11 @@ Do not generalize this example into a claim that all variational procedures unde
 At input zero, the latent variance is \(4/13\); the observation variance is \(17/13\). At input two, the latent variance is \(4/13+16/9=244/117\), and observation variance is \(361/117\). Standard deviations require square roots; adding standard deviations directly is wrong for independent noise.
 
 Simulation under the fitted model can check the arithmetic and interval construction. It does not show that the assumed model fits external observations. A shifted mean or curved residual pattern can expose model mismatch even with a numerically correct posterior. Require the learner to distinguish a small deterministic stress fixture from an estimated population coverage rate and to keep an external-data study labeled as proposed until it is executed.
+
+## Discussion-case review notes
+
+The chains have similar means and classical R-hat near one, but all start in the same mode and predictive residuals show curvature.
+
+Score chain exploration and model criticism separately. Ask for dispersed starts, traces/ESS and a predictive residual plot. Neither chain agreement nor more draws fixes a misspecified mean function.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

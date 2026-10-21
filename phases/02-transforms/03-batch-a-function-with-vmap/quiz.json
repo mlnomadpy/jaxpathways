@@ -11,7 +11,12 @@
         "Per-example: \\((D,)\\); mean-loss: \\((B,)\\)."
       ],
       "correct": 1,
-      "explanation": "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape."
+      "explanation": "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape.",
+      "optionFeedback": [
+        "The per-example Jacobian keeps the batch axis. Differentiating a scalar mean reduces that axis, leaving one value per parameter.",
+        "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape.",
+        "This reverses the two contracts. Inspect whether the differentiated function returns one scalar per example or one scalar for the batch."
+      ]
     }
   ]
 }

@@ -175,7 +175,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Zero q
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:51.372649+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:47.030518+00:00. JAX 0.9.2.
 
 ```text
 Weights / output: [[0.33333334 0.33333334 0.33333334]
@@ -368,9 +368,17 @@ Which dimension should softmax normalize for one query to combine all key/value 
 
 <details><summary>Answer and explanation</summary>
 
-The key dimension
+**1. The query dimension**
+
+Normalizing over queries changes which probabilities sum to one. For each query, sum its weights over the available keys.
+
+**2. The key dimension (correct)**
 
 One query needs a probability distribution across keys; each row must sum to one.
+
+**3. The value feature dimension**
+
+The value-feature axis belongs to the weighted output representation. Attention probabilities normalize over candidate key positions.
 
 </details>
 

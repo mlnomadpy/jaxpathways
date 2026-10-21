@@ -168,7 +168,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:17.479149+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:17.990505+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]
@@ -378,9 +378,17 @@ What must remain consistent across scan steps?
 
 <details><summary>Answer and explanation</summary>
 
-The carry structure, shapes, and dtypes
+**1. The numerical value of the carry**
+
+The carry values are meant to change. It is their structure, shapes and dtypes that must stay compatible across iterations.
+
+**2. The carry structure, shapes, and dtypes (correct)**
 
 The carry value changes through time, but its structural and array type properties must remain consistent.
+
+**3. Every recorded output must be zero**
+
+Outputs can contain arbitrary computed values with a consistent per-step structure. They do not need to be zero.
 
 </details>
 

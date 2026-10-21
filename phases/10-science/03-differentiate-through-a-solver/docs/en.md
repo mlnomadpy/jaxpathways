@@ -221,7 +221,7 @@ visual_data={'kind':'line','x':counts,'xlabel':'RK4 steps over two seconds','yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:37.201162+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:38.414360+00:00. JAX 0.9.2.
 
 ```text
 Autodiff: -0.9863878096749447 discrete oracle: -0.9863878096749429 continuous oracle: -0.9863878557664257
@@ -449,9 +449,17 @@ An autodiff derivative matches the discrete RK4 formula, but both differ from th
 
 <details><summary>Answer and explanation</summary>
 
-Refine the grid at fixed horizon and inspect convergence of sensitivity.
+**1. Replace the derivative with zero.**
+
+A nonzero derivative can be correct for the discretized computation. Compare it with that computation’s independent derivative.
+
+**2. Refine the grid at fixed horizon and inspect convergence of sensitivity. (correct)**
 
 The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.
+
+**3. Increase the optimizer learning rate until they match.**
+
+Changing the optimizer does not reduce the solver’s time-discretization error. Refine the time grid while holding the horizon fixed.
 
 </details>
 

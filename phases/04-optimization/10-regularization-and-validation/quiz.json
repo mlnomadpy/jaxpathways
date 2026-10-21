@@ -11,7 +11,12 @@
         "A repeatedly inspected final test loss"
       ],
       "correct": 1,
-      "explanation": "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection."
+      "explanation": "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.",
+      "optionFeedback": [
+        "Penalized training losses mix prediction error with a penalty and are not directly comparable evidence of held-out prediction quality.",
+        "Validation compares predictive performance of candidates fitted on training data. A separate final test set is for reporting after selection.",
+        "Repeatedly choosing settings on the test set makes it part of model selection. Use validation data, then evaluate the frozen choice on test data."
+      ]
     }
   ]
 }

@@ -130,6 +130,11 @@
         "code": "# Step 3 — 3. Compare an independent calculation\nactual = normal_logpdf(jnp.array([2.,5.]),2.,3.)\nreference = [-math.log(3*math.sqrt(2*math.pi)), -.5-math.log(3*math.sqrt(2*math.pi))]\nnp.testing.assert_allclose(actual,reference,rtol=1e-6)\ncomponents = jnp.array([-1000.,-1001.])\nstable = logsumexp(components)-jnp.log(2.)\nassert jnp.isfinite(stable)\nassert jnp.isneginf(jnp.log(jnp.exp(components).mean()))\nprint('sample mean, variance:',float(a.mean()),float(a.var()))\nprint('stable equal-mixture log density:',float(stable))",
         "explanation": "A log density near negative one thousand remains representable even when exponentiating it underflows in float32."
       }
+    ],
+    "optionFeedback": [
+      "The mean becomes more precisely estimated while individual draws remain variable. Compare the sampling distribution with the distribution of sample means.",
+      "Dividing variance by sample count describes uncertainty in the mean estimator, not the variability of one future reading.",
+      "For independent draws the average has variance \\(\\sigma^2/N\\); a new reading still has variance \\(\\sigma^2\\). These are different random variables."
     ]
   }
 }

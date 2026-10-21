@@ -175,7 +175,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:04.704196+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:55.490385+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339
@@ -376,9 +376,17 @@ For $f(x)=x^3$, JAX reports $f\prime(0)=0$. What can you conclude?
 
 <details><summary>Answer and explanation</summary>
 
-The first-order local slope is zero; optimality requires more evidence.
+**1. $x=0$ is a global minimum.**
+
+A zero first derivative is compatible with a maximum, minimum or stationary inflection. Compare nearby values on both sides of zero.
+
+**2. The first-order local slope is zero; optimality requires more evidence. (correct)**
 
 The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum.
+
+**3. JAX has stopped differentiating because the output is zero.**
+
+The derivative is zero because the function is locally flat to first order at this input. Differentiate at a nonzero input to check the rule.
 
 </details>
 

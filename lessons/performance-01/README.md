@@ -249,7 +249,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'bar', 'title': 'First call
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:15.224809+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -267,17 +267,17 @@ CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.02772512473165989,
+  "first_call_seconds": 0.028692624997347593,
   "warm_samples_seconds": [
-    7.50841572880745e-05,
-    2.8582755476236343e-05,
-    1.5583820641040802e-05,
-    1.0250136256217957e-05,
-    8.750241249799728e-06,
-    9.667128324508667e-06,
-    7.542315870523453e-06
+    4.0084123611450195e-05,
+    1.3208016753196716e-05,
+    1.7875339835882187e-05,
+    8.457805961370468e-06,
+    8.00006091594696e-06,
+    7.334165275096893e-06,
+    8.542090654373169e-06
   ],
-  "warm_median_seconds": 1.0250136256217957e-05,
+  "warm_median_seconds": 8.542090654373169e-06,
   "max_abs_error": 2.384185791015625e-07
 }
 {
@@ -295,25 +295,25 @@ CPU run: 2026-10-20T22:22:11.246292+00:00. JAX 0.9.2.
   ],
   "dtype": "float32",
   "boundary": "input already placed; call plus output synchronization",
-  "first_call_seconds": 0.018220333848148584,
+  "first_call_seconds": 0.017361541744321585,
   "warm_samples_seconds": [
-    3.875000402331352e-05,
-    3.062514588236809e-05,
-    2.5833025574684143e-05,
-    1.2707896530628204e-05,
-    1.0082963854074478e-05,
-    8.874572813510895e-06,
-    8.58306884765625e-06
+    2.820882946252823e-05,
+    1.5084166079759598e-05,
+    8.79121944308281e-06,
+    9.833835065364838e-06,
+    7.207971066236496e-06,
+    7.417052984237671e-06,
+    6.833113729953766e-06
   ],
-  "warm_median_seconds": 1.2707896530628204e-05,
+  "warm_median_seconds": 8.79121944308281e-06,
   "max_abs_error": 2.384185791015625e-07
 }
-Handle-only seconds: 9.416136890649796e-06
-Complete-call samples: [1.4209188520908356e-05, 8.459202945232391e-06, 7.4999406933784485e-06]
-Structured samples: [4.058331251144409e-05, 2.4874694645404816e-05, 1.712469384074211e-05]
-Changed workload: (96, 32) [3.424985334277153e-05, 9.708106517791748e-06, 8.708331733942032e-06, 9.874813258647919e-06, 6.9998204708099365e-06]
-Energy shape and samples: (64,) [2.49580480158329e-05, 1.2541655451059341e-05, 1.0833144187927246e-05, 9.665731340646744e-06, 8.333008736371994e-06]
-{'boundary': 'placed inputs; warm call plus output wait', 'samples': [7.207971066236496e-06, 9.458977729082108e-06, 7.667113095521927e-06, 8.875038474798203e-06, 1.2541655451059341e-05]}
+Handle-only seconds: 7.750000804662704e-06
+Complete-call samples: [1.4499761164188385e-05, 8.457805961370468e-06, 7.832888513803482e-06]
+Structured samples: [4.2084138840436935e-05, 2.5250017642974854e-05, 1.7167069017887115e-05]
+Changed workload: (96, 32) [2.950010821223259e-05, 1.4374963939189911e-05, 8.292030543088913e-06, 8.499715477228165e-06, 9.750016033649445e-06]
+Energy shape and samples: (64,) [2.691708505153656e-05, 1.4374963939189911e-05, 8.916947990655899e-06, 1.1249911040067673e-05, 9.708106517791748e-06]
+{'boundary': 'placed inputs; warm call plus output wait', 'samples': [1.2666918337345123e-05, 9.25036147236824e-06, 6.583984941244125e-06, 9.167008101940155e-06, 7.041729986667633e-06]}
 PASS: performance-01
 
 ```
@@ -554,9 +554,17 @@ What does the synchronized warmed timer in this lesson measure?
 
 <details><summary>Answer and explanation</summary>
 
-A warmed call including dispatch and waiting for output readiness, excluding prior input placement
+**1. Only the accelerator kernel, with all dispatch overhead removed**
+
+The measured boundary includes host dispatch and the wait. Calling it pure device-kernel time requires a device trace.
+
+**2. A warmed call including dispatch and waiting for output readiness, excluding prior input placement (correct)**
 
 The boundary includes the call and its completion wait. It excludes input placement and does not isolate compiler or kernel stages.
+
+**3. Exactly the compiler duration**
+
+Warmup has already performed compilation for the tested signature. A new shape or static argument may still introduce another compilation.
 
 </details>
 

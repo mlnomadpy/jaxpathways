@@ -328,7 +328,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:02.074382+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:48.473293+00:00. JAX 0.9.2.
 
 ```text
 Reward initial/final and final KL: 0.28191882371902466 1.9185447692871094 0.7824773192405701
@@ -552,9 +552,17 @@ Which policy is refreshed for the next rollout batch?
 
 <details><summary>Answer and explanation</summary>
 
-The behavior policy follows the current policy; the reference policy remains frozen.
+**1. The behavior policy follows the current policy; the reference policy remains frozen. (correct)**
 
 Behavior identity belongs to the collected data. Reference identity belongs to the regularized objective.
+
+**2. Both the behavior policy and the reference policy update after every inner PPO gradient step.**
+
+Behavior probabilities stay fixed within the collected rollout’s update epochs. The candidate policy changes; the reference remains frozen.
+
+**3. The reference policy refreshes each rollout while old behavior probabilities remain fixed for the entire run.**
+
+Keeping the old behavior forever makes later rollout ratios describe the wrong collection policy. Refresh behavior data for each new rollout.
 
 </details>
 

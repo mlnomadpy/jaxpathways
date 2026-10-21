@@ -143,6 +143,11 @@
         "code": "assert jnp.allclose(jnp.array(rewards), jnp.array([-.01, 1., 0., 0.]))\nassert int(s.elapsed) == 2",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "Repeated terminal rewards would change the return. Step the absorbing state again and check for zero additional reward.",
+      "An implicit reset would mix episodes and change the next observation contract. Reset explicitly after the terminal transition.",
+      "Absorbing padding preserves one episode. Reset is a separate explicit operation, and ending flags mark events rather than every later padded row."
     ]
   }
 }

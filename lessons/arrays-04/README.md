@@ -149,7 +149,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, y, z]).tolist(), 'rows
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:02.846523+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:52.432761+00:00. JAX 0.9.2.
 
 ```text
 Original: [1. 2. 3. 4.]
@@ -349,9 +349,17 @@ After `y = x.at[1].set(20.)`, what happens to $x$?
 
 <details><summary>Answer and explanation</summary>
 
-Its value remains unchanged
+**1. Its second element becomes $20$**
+
+The update expression creates a new array value. Compare x with the returned value; assignment to a new name does not mutate x.
+
+**2. Its value remains unchanged (correct)**
 
 The expression returns the updated value. Assign it to a name to keep it; $x$ retains its original value.
+
+**3. It becomes a Python list**
+
+The .at update preserves array semantics. Inspect the returned shape and dtype rather than expecting a Python list.
 
 </details>
 

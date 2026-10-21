@@ -255,7 +255,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:04.536354+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:51.098699+00:00. JAX 0.9.2.
 
 ```text
 DPO initial/final: 0.6931471824645996 0.27227783203125 ; reference-corrected margins: [3.0890286  6.17805719 3.08902884]
@@ -465,9 +465,17 @@ Does this DPO loop require a separately trained reward model and fresh policy ro
 
 <details><summary>Answer and explanation</summary>
 
-No. It optimizes reference-corrected preferences from the supplied pairs.
+**1. No. It optimizes reference-corrected preferences from the supplied pairs. (correct)**
 
-Its data and objective differ from the learned-reward PPO loop; evaluation quality remains a separate question.
+DPO uses offline preference pairs and a fixed reference policy rather than an online reward-model rollout loop. Its reference-corrected relative objective does not guarantee higher absolute chosen probability or better independently evaluated outputs.
+
+**2. No, and a positive reference-corrected margin guarantees that the absolute chosen probability increased.**
+
+A relative chosen-versus-rejected margin can improve while both absolute probabilities fall. Compare both log probabilities and their difference.
+
+**3. Yes, because the reference log-probability difference must be re-estimated from on-policy rollouts each step.**
+
+The reference is a fixed policy in this offline objective. It is not an on-policy estimate updated from rollouts.
 
 </details>
 

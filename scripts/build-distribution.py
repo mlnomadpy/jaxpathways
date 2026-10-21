@@ -95,7 +95,7 @@ def chapter(lesson):
         solutions.append('<h3>'+esc(practice['title'])+'</h3>'+code_block(practice['solution'])+prose(practice['explanation']))
     body += f'<h2>Checkpoint</h2><p>{rich(c["question"])}</p><ol>' + ''.join(f'<li>{rich(o)}</li>' for o in c['options']) + '</ol>'
     body += '<p>Answer and explanation are in the separate solutions appendix.</p>'
-    solutions.append(f'<h3>Checkpoint</h3><p>Answer: {rich(c["options"][c["answer"]])}. {rich(c["explanation"])}</p></section>')
+    solutions.append(f'<h3>Checkpoint</h3><p>Answer: {rich(c["options"][c["answer"]])}. {rich(c["explanation"])}</p><h4>Reason through the other choices</h4><ul>' + "".join(f'<li><strong>{rich(option)}</strong>{prose(c["optionFeedback"][index])}</li>' for index, option in enumerate(c["options"]) if index != c["answer"]) + "</ul></section>")
     if c.get('diagnosis'): body += '<h2>Diagnose the result</h2>'+prose(c['diagnosis'])
     if c.get('takeaways'): body += '<h2>Carry forward</h2><ul>'+''.join('<li>'+rich(t)+'</li>' for t in c['takeaways'])+'</ul>'
     body += '<h2>Your evidence</h2>'+prose(lesson['evidence'])

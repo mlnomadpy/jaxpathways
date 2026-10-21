@@ -141,6 +141,11 @@
       "connection": "Read the learned parameters from the geometry: the intercept is \\(1\\), and increasing the input by \\(1\\) raises the prediction by \\(2\\). Training has therefore recovered the target relationship \\(y=2x+1\\), whereas the initial model used zero slope and zero intercept.\n\nThis picture shows the final fit across the displayed inputs, not the optimizer’s path or its runtime. Agreement on an exact synthetic linear target is a useful correctness check. It is separate from performance on noisy data or on a different relationship.",
       "alt": "The fitted line recovers slope and bias. The horizontal axis gives input values and the vertical axis gives predictions. The dashed initial model is flat at zero. The target and trained-model lines rise together from approximately \\((-1,-1)\\) through \\((0,1)\\) to \\((1,3)\\). The trained line lies almost exactly on top of the target, so one can hide the other. This overlap is the intended result, not a missing legend entry. It means the predictions agree to the numerical tolerance used in the example.",
       "code": "visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'prediction', 'series': [{'label': 'target', 'y': y.tolist()}, {'label': 'initial model', 'y': jnp.zeros_like(x).tolist()}, {'label': 'trained model', 'y': (params['weight'] * x + params['bias']).tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.",
+      "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
+      "Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates."
+    ]
   }
 }

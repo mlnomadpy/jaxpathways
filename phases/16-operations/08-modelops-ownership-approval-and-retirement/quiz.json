@@ -11,7 +11,12 @@
         "Only if the model has low validation loss."
       ],
       "correct": 1,
-      "explanation": "Here ModelOps means the operational ownership of models across their lifecycle: inventory, intended use, review, deployment status, monitoring, incident response and retirement. Teams use overlapping MLOps and ModelOps terms; the useful distinction is the responsibility and evidence each process owns."
+      "explanation": "This check can bind approval metadata to a particular artifact and expiry. It does not authenticate the human named as reviewer. Identity and authorization require a separate trusted mechanism; a digest alone supplies neither.",
+      "optionFeedback": [
+        "The hash can bind a statement to an artifact but does not prove who wrote it. Verify reviewer identity through a separate trusted channel.",
+        "This check can bind approval metadata to a particular artifact and expiry. It does not authenticate the human named as reviewer. Identity and authorization require a separate trusted mechanism; a digest alone supplies neither.",
+        "Validation loss is a model metric, not an identity credential. Check authorization, binding and expiry separately."
+      ]
     }
   ]
 }

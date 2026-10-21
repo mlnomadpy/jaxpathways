@@ -129,6 +129,11 @@
       "connection": "The branches together implement \\(|x|\\). Moving right along the negative side decreases the result with slope \\(-1\\); moving right along the positive side increases it with slope \\(1\\). The sharp corner records that change of rule.\n\nContinuity at the join does not imply differentiability: the classical derivative is undefined at zero because the two slopes disagree. A branch-selected autodiff value there must not be confused with a derivative of a smooth curve. The picture helps separate correct branch outputs from assumptions about gradients.",
       "alt": "Both branches form one magnitude function. The horizontal axis varies the input and the vertical axis gives the returned magnitude. The V-shaped line passes through \\((-3,3)\\), \\((0,0)\\), and \\((3,3)\\). Equal distances to the left and right of zero produce equal outputs. The left arm comes from negating a negative input. The right arm comes from returning a nonnegative input unchanged. At zero the two values meet, so there is no jump in the output.",
       "code": "grid = jnp.linspace(-3.0, 3.0, 25)\n# Vectorize across the batch dimension without a Python loop (`visual_data`).\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'input', 'ylabel': 'magnitude', 'series': [{'label': 'lax.cond output', 'y': jax.vmap(magnitude)(grid).tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Both branches are traced into one conditional contract. A scalar and a length-three vector cannot be alternative results of that contract.",
+      "Compiled control flow requires compatible output structures and array types across branches.",
+      "The sign selects the runtime branch but does not remove the need to trace and type-check the other branch."
+    ]
   }
 }

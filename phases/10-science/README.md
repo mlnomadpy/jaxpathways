@@ -38,11 +38,11 @@ Review: [Differentiate through a solver](03-differentiate-through-a-solver/docs/
 
 ### Try a changed condition
 
-All observations are taken at the initial time of a decay process. Can they identify its decay rate?
+Forward Euler solves \(y\prime=-y\) from 1 to time 1. Compare step sizes 0.5 and 0.25 with the exact exponential.
 
 <details><summary>Compare an approach</summary>
 
-They identify initial amplitude but contain no elapsed-time decay signal. Collect later observations and inspect parameter sensitivity; more optimizer steps cannot create missing information.
+Euler gives 0.25 for two half-steps and 0.31640625 for four quarter-steps. The exact value is about 0.36787944. The finer grid reduces this forward error; a correct derivative of either discrete program still need not equal the continuous derivative. Repeat at a fixed horizon and inspect convergence, rather than tuning the fitted parameter to hide solver error.
 
 </details>
 

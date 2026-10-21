@@ -11,7 +11,12 @@
         "Every recorded output must be zero"
       ],
       "correct": 1,
-      "explanation": "The carry value changes through time, but its structural and array type properties must remain consistent."
+      "explanation": "The carry value changes through time, but its structural and array type properties must remain consistent.",
+      "optionFeedback": [
+        "The carry values are meant to change. It is their structure, shapes and dtypes that must stay compatible across iterations.",
+        "The carry value changes through time, but its structural and array type properties must remain consistent.",
+        "Outputs can contain arbitrary computed values with a consistent per-step structure. They do not need to be zero."
+      ]
     }
   ]
 }

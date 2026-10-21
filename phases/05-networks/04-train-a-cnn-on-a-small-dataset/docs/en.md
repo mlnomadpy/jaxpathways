@@ -271,7 +271,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:20.761671+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:28:42.608380+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:
@@ -493,9 +493,17 @@ What does spatial mean pooling discard in this classifier?
 
 <details><summary>Answer and explanation</summary>
 
-The exact location of local responses
+**1. The exact location of local responses (correct)**
 
 Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates.
+
+**2. The number of output channels**
+
+A mean over spatial axes preserves the channel axis. Inspect which axes disappear from the output shape.
+
+**3. All orientation-sensitive features**
+
+Convolutional channels can encode orientation responses before pooling. The direct information lost here is the exact spatial arrangement.
 
 </details>
 

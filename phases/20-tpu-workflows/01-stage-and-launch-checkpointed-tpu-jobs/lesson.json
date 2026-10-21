@@ -100,7 +100,7 @@
       "Because JAX cannot save checkpoints without a warmup call"
     ],
     "answer": 1,
-    "explanation": "JAX compiles `@jax.jit` functions on their first call for a given input shape and dtype; warming up on the initial state without overwriting `(w, b, m_w, m_b, key)` isolates compile time from step time while preserving exact state trajectories.",
+    "explanation": "This fixed-signature example warms and synchronizes the compiled step, then discards its returned state so the measured trajectory starts at the intended state. A later shape, dtype or static-argument change can still recompile. Warmup is not a general steady-state guarantee.",
     "diagnosis": "If a resumed TPU run diverges from an uninterrupted run, check whether optimizer moments (`m_w`, `m_b`), PRNG `key`, or dataset position were omitted from the checkpoint.",
     "takeaways": [
       "Always separate `@jax.jit` warmup compilation from steady-state step timing and call `jax.block_until_ready`.",
@@ -192,6 +192,11 @@
     },
     "runtime": {
       "kind": "cpu"
-    }
+    },
+    "optionFeedback": [
+      "Retaining warmup output would advance this example’s state. Discard its returned state and begin the measured trajectory from the intended checkpoint.",
+      "This fixed-signature example warms and synchronizes the compiled step, then discards its returned state so the measured trajectory starts at the intended state. A later shape, dtype or static-argument change can still recompile. Warmup is not a general steady-state guarantee.",
+      "Checkpoint compatibility is not created by warmup. Warmup separates initial compilation from timing for the tested signature."
+    ]
   }
 }

@@ -135,6 +135,11 @@
       "connection": "A single straight boundary cannot separate these alternating corners. The hidden nonlinear layer allows the model to bend the boundary and create separated regions for the same class. The transition band between light and dark marks inputs where the predicted probability changes rapidly.\n\nMost colored locations are grid queries, not additional labeled observations. Their colors show how this trained model extends its predictions between and beyond the examples. A dark region alone is separate from calibrated confidence or accuracy there; those claims need appropriate held-out data.",
       "alt": "A tiny MLP separates the XOR regions. The axes are the two input features. Background color shows the model’s predicted probability of label \\(1\\): dark purple is near \\(1\\), and the pale regions are near \\(0\\). The markers give observed labels independently of that background: triangles are label \\(1\\), circles are label \\(0\\). The triangles at \\((-1,1)\\) and \\((1,-1)\\) sit in dark regions. The circles at \\((-1,-1)\\) and \\((1,1)\\) sit in pale regions. Thus the learned pattern assigns label \\(1\\) to opposite-sign corners and label \\(0\\) to same-sign corners, matching XOR.",
       "code": "axis = jnp.linspace(-1.6, 1.6, 61)\ngx, gy = jnp.meshgrid(axis, axis)\ngrid = jnp.stack([gx.ravel(), gy.ravel()], axis=-1)\n# Rearrange tensor axes to match the required layout for `prob`.\nprob = jax.nn.sigmoid(logits(params, grid)).reshape(gx.shape)\nvisual_data = {'kind': 'field', 'values': prob.tolist(), 'extent': [-1.6, 1.6, -1.6, 1.6], 'xlabel': 'feature 0', 'ylabel': 'feature 1', 'unit': 'P(label 1)', 'points': x.tolist(), 'labels': y.tolist()}"
-    }
+    },
+    "optionFeedback": [
+      "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.",
+      "Two affine layers compose into another affine map. Write their combined matrix and bias to see why another layer alone is insufficient.",
+      "The loss changes how parameters are fitted, not which functions the architecture can represent. Inspect the forward map for a nonlinearity."
+    ]
   }
 }

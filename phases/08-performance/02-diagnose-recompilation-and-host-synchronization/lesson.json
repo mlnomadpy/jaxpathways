@@ -152,6 +152,11 @@
       "connection": "The existing specialization can accept compatible dynamic values without rerunning the traced Python body. Changing the example’s shape from length \\(8\\) to length \\(12\\) changes the abstract input signature, so a new trace is observed. This isolates shape from ordinary value changes.\n\nThe vertical axis counts Python traces, not seconds, device kernels, or an exact count of backend compilations. To diagnose runtime overhead, combine this kind of counter with synchronized measurements or a profiler. A changed answer alone is not evidence of retracing.",
       "alt": "A new value is not necessarily a new trace. Each bar reports the additional Python tracing events observed during one call category. The sequence is \\((1,0,0,1)\\): the initial call traces, new array values do not, a new dynamic gain does not, and a new input shape triggers another trace. The two zero-height bars are meaningful observations. The calls still execute and can return changed values; zero means the trace counter did not increase for those calls.",
       "code": "visual_data = {'kind': 'bar', 'labels': ['initial', 'new values', 'new gain', 'new shape'], 'ylabel': 'observed Python trace events', 'series': [{'label': 'trace delta', 'y': [r['observed_trace_delta'] for r in call_rows]}]}"
-    }
+    },
+    "optionFeedback": [
+      "Python runs during tracing and can run without a corresponding steady-state device event. Do not count appends as executed device steps.",
+      "Python executes during tracing; compiled array computation may run repeatedly without that append. Correlate with public compiler logs or traces before claiming recompilation.",
+      "A side effect does not measure compiler duration. Use compile logs or an explicit timing boundary to investigate compilation."
+    ]
   }
 }

@@ -25,3 +25,11 @@ Stage 2 changes the parameter count to 50 and the supplied rate to 300 with two 
 Stage 3 writes the byte ledger, rate calculation and scope note to `runs/tpu-systems-audit/tpu-systems-audit.json`. The report says that no device memory or TPU scaling was measured. Without `--evidence-dir`, evidence is temporary. Stage 4 runs all checks. Passing output begins `PASS tpu-systems-audit stage N`.
 
 The estimate excludes gradients, activations, communication buffers, temporary copies and allocator overhead. Add those before making a capacity decision. Reference command: `python3 projects/tpu-systems-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+Convert 918 TFLOP/s and 1638 GB/s into a Roofline intersection. Compare a hypothetical 341.3 FLOP/byte workload.
+
+**Keep for review:** About 560.4 FLOP/byte after the factor-of-1000 unit conversion. The hypothetical workload lies below that ideal ridge; actual target bottlenecks, native precision and latency remain to be measured.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

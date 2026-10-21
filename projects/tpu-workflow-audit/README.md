@@ -25,3 +25,11 @@ Stage 2 changes the receipt steps to 7 and 6, then tries duplicate worker IDs, d
 Stage 3 writes the complete receipt-gate result and its simulation scope to `runs/tpu-workflow-audit/tpu-workflow-audit-evidence.json`. Without `--evidence-dir`, it uses a temporary directory. Stage 4 reruns all stages. Passing output begins `PASS tpu-workflow-audit stage N`.
 
 This tests publication logic on data structures only. It does not prove multi-host startup, network reliability, checkpoint durability or TPU behavior. Reference command: `python3 projects/tpu-workflow-audit/tests/check.py --implementation solution --stage 4`.
+
+## Review handoff: explain a changed condition
+
+One worker exits after a save starts but before global acceptance. Sketch the next recovery decision without provisioning hardware.
+
+**Keep for review:** A state diagram identifying the last accepted checkpoint, participating workers, completion barrier and failure evidence. The bounded same-process physical receipt does not qualify this worker-loss scenario.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

@@ -133,6 +133,11 @@
       "connection": "For a quadratic direction with curvature \\(\\lambda\\), gradient descent multiplies the coordinate by \\(1-\\eta\\lambda\\). At learning rate \\(0.1\\), that multiplier is \\(0.9\\) for curvature \\(1\\) and zero for curvature \\(10\\). The unequal curves come from curvature interacting with the same learning rate.\n\nThe steeper direction is faster here because the rate exactly cancels it. Increasing the rate further does not keep making it better: sufficiently large steps produce oscillation or divergence. This is why one shared rate can be constrained by a steep direction while making slow progress in a flatter one.",
       "alt": "Unequal curvature produces unequal progress. The horizontal axis counts completed updates; the point at \\(0\\) is the initial state. The vertical axis shows a parameter coordinate, not the total loss. Both coordinates start at \\(1\\), but the coordinate with curvature \\(10\\) drops to zero after one update, while the coordinate with curvature \\(1\\) decays gradually. The gradual curve starts \\(1,0.9,0.81\\) and is still about \\(0.122\\) after \\(20\\) updates. The dashed curve remains at zero after its first drop. It has reached its optimum in this particular direction.",
       "code": "points = [jnp.array([1.0, 1.0])]\nfor _ in range(20):\n    points.append(points[-1] - 0.1 * jax.grad(loss)(points[-1]))\ntrace = jnp.stack(points)\nvisual_data = {'kind': 'line', 'x': list(range(21)), 'xlabel': 'completed update', 'ylabel': 'coordinate value', 'series': [{'label': 'curvature 1', 'y': trace[:, 0].tolist()}, {'label': 'curvature 10', 'y': trace[:, 1].tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Stationarity alone does not establish global optimality. Inspect curvature, nearby values and any convexity assumptions.",
+      "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.",
+      "A valid stationary point can have a zero gradient. Check the derivative independently before blaming the optimizer."
+    ]
   }
 }

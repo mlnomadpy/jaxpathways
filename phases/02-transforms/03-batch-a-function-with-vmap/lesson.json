@@ -177,6 +177,11 @@
         "code": "batch = jnp.array([[1., 1.], [2., 3.], [4., 0.]])\n# Vectorize across the batch dimension with `jax.vmap` (`batched`).\nbatched = jax.vmap(predict, in_axes=(None, 0))\nassert jnp.allclose(batched(weight, batch), jnp.array([1.,1.,8.]))",
         "explanation": "The expected outputs [1, 1, 8] are hand-computed row by row. The leading output axis corresponds to the three input examples."
       }
+    ],
+    "optionFeedback": [
+      "The per-example Jacobian keeps the batch axis. Differentiating a scalar mean reduces that axis, leaving one value per parameter.",
+      "Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape.",
+      "This reverses the two contracts. Inspect whether the differentiated function returns one scalar per example or one scalar for the batch."
     ]
   }
 }

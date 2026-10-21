@@ -54,3 +54,11 @@ Recall@1 changes in increments of 0.2 because there are five test queries; MRR a
 **Transfer exercise:** predict how reducing `max_length` from 48 to 32 changes the reported test truncation count and dense retrieval. Change the config only in a copy, use a new output directory, and rerun all stages; the source/config-bound checkpoint checks should reject attempts to resume from the previous configuration. Record whether the observed retrieval change supports your prediction. For optional experiment tracking, see the separate [reproducible experiments and MLflow workshop](../reproducible-experiments/README.md); this project does not integrate a hosted tracking service.
 
 ![Separate training objective curves for MLM, contrastive continuation, and supervised contrastive adaptation](outputs/loss-curves.svg)
+
+## Review handoff: explain a changed condition
+
+The tiny real-text run completes and exports, but retrieval quality is weak. What would justify changing the data recipe rather than declaring the project production-ready?
+
+**Keep for review:** Frozen query/document groups, exact-retrieval baselines, per-query rank changes and a controlled data/objective ablation. Preserve this pilot’s weak-quality result; it is not a trained 300M model or an MTEB release.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

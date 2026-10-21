@@ -197,7 +197,7 @@ visual_data = {'kind': 'bar', 'labels': ['score 0', 'score 1'], 'ylabel': 'outpu
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:42.546071+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:50.159952+00:00. JAX 0.9.2.
 
 ```text
 Verified serialized bytes: 1172
@@ -442,9 +442,17 @@ What does a successful local export round trip prove?
 
 <details><summary>Answer and explanation</summary>
 
-The saved computation matches the tested CPU contract.
+**1. The saved computation matches the tested CPU contract. (correct)**
 
 A successful round trip verifies the tested artifact and local runtime. Other consumers, device kernels and request systems require separate checks.
+
+**2. The file is an edge executable on every NPU.**
+
+Other targets may lack operators or lower them differently. Preserve the tested CPU scope until the actual target runner is exercised.
+
+**3. An HTTP service now exists.**
+
+An exported function is an artifact, not a running service. Loading, request validation and serving behavior need their own tests.
 
 </details>
 

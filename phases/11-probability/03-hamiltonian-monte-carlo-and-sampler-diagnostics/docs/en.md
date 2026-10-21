@@ -239,7 +239,7 @@ visual_data={"kind":"line","x":indices.tolist(),"xlabel":"retained transition (a
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:11.359092+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:12.248686+00:00. JAX 0.9.2.
 
 ```text
 mean: [ 0.98358583 -1.0185838 ] covariance: [[0.98042357 0.7727629 ]
@@ -435,7 +435,15 @@ Four chains have classical split R-hat close to one. What can we conclude?
 
 <details><summary>Answer and explanation</summary>
 
-Their within-chain and between-chain variance estimates agree, but additional checks are still necessary
+**1. They have certainly explored every posterior mode**
+
+Chains trapped in the same mode can agree. Inspect traces, effective sample size and multiple initializations as well as R-hat.
+
+**2. Their retained draws are independent**
+
+R-hat near one does not remove serial correlation. Autocorrelation and effective sample size assess a different part of chain quality.
+
+**3. Their within-chain and between-chain variance estimates agree, but additional checks are still necessary (correct)**
 
 A diagnostic can reveal problems without proving their absence. Here we also compare to exact moments; an unknown target needs several diagnostics and model checks.
 

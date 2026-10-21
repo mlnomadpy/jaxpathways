@@ -96,3 +96,13 @@ This capstone reuses the roadmap's 61 lesson units and adds explicit project-sta
 Do not promote a pilot until its source-group split, tokenizer, MLM/contrastive/pair-stage checkpoint ancestry, complete training state and held-out retrieval protocol have receipts. The real-data pilot must disclose overlap, source exposure, permissions and a frozen test set; a synthetic fit only verifies code paths.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+MLM validation improves while query-to-document retrieval degrades after contrastive continuation.
+
+**Decide:** Treat MLM, unsupervised contrastive continuation and supervised pair adaptation as distinct checkpoints with frozen parent identities. Compare pooling, length policy, source mixture and hard-negative policy one at a time on development tasks. Use a pinned MTEB task/version protocol only after checking data overlap, and preserve an untouched final evaluation.
+
+**Review packet:** A checkpoint lineage graph, tokens/pairs seen by source, objective-specific denominators, retrieval baselines, per-task/slice results and a cold-load Hugging Face artifact test. The existing embedding-lineage pilot remains preparation, not a 300M reference.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

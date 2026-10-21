@@ -38,11 +38,11 @@ Review: [Losses and value_and_grad](02-losses-and-value-and-grad/docs/en.md).
 
 ### Try a changed condition
 
-One minibatch has two examples and another has six. How should you combine their mean gradients?
+Two batches have sizes 2 and 6 and scalar mean gradients 3 and 1. What is the combined mean gradient? What mistake gives 2?
 
 <details><summary>Compare an approach</summary>
 
-Weight each mean gradient by its example count, add the weighted gradients, then divide by eight. An unweighted average gives examples in the smaller batch too much influence. Verify against a gradient over the concatenated batch.
+The eight-example mean is \((2\cdot3+6\cdot1)/8=1.5\). Averaging the two batch means gives 2 and overweights the smaller batch. Compare with the gradient on concatenated examples, not another copy of the aggregation code.
 
 </details>
 

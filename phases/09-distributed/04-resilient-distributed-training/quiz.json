@@ -11,7 +11,12 @@
         "The display formatting of the loss."
       ],
       "correct": 1,
-      "explanation": "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary."
+      "explanation": "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary.",
+      "optionFeedback": [
+        "A learning rate changes updates, not the next permutation. Compare the saved random key and loader cursor first.",
+        "The current order can reproduce the rest of one epoch while an incorrect saved key changes the next shuffle. Check complete random state at the accepted boundary.",
+        "Print formatting cannot change IDs. Inspect the actual next-epoch order and the key used to generate it."
+      ]
     }
   ]
 }

@@ -42,11 +42,11 @@ Review: [Health, logs, and workload observability](02-health-logs-and-workload-o
 
 ### Try a changed condition
 
-An input-distribution alert fires while delayed labels have not arrived. Should the system automatically retrain and promote?
+A new artifact passes a global score, but one required slice fails its threshold. The previous artifact is healthy. What should the release pointer do?
 
 <details><summary>Compare an approach</summary>
 
-No conclusion about quality follows yet. Check data integrity, affected slices and service health; gather outcome evidence under a declared response policy. Any candidate must pass independent release gates, and selection must remain unchanged after failure.
+Keep the previous accepted artifact active and retain the failed candidate’s evidence. A global average cannot override a required slice gate. Record artifact/config identity and the reason for rejection. Test that a failed promotion leaves the active selection unchanged; rollback must select a verified prior artifact, not simply a filename.
 
 </details>
 

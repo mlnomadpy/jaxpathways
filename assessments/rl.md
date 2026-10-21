@@ -88,3 +88,9 @@ Use **accept**, **revise**, or **not demonstrated** for each task:
 - **Limits:** the report identifies the small synthetic environment, stationary policy class, CPU-only verification, public tests and absence of independent expert review.
 
 Every task needs inspectable learner evidence for overall acceptance. A reviewer may request a different horizon, policy or seed set. The public [reviewer notes](rl-reviewer.md) help check arithmetic after the attempt; they are not a hidden exam key.
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+One trained policy has hundreds of evaluation episodes and a narrow confidence interval; another has one episode per independently trained seed.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

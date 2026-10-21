@@ -38,11 +38,11 @@ Review: [Random keys without surprises](01-random-keys-without-surprises/docs/en
 
 ### Try a changed condition
 
-Resume a simulation halfway through with the saved position but a newly created key. What must you compare to determine whether it is a true continuation?
+A random walk resumes with the correct position but a reset key. Its final mean is close to the uninterrupted result. Is that enough?
 
 <details><summary>Compare an approach</summary>
 
-Compare the next draw and next state, then the remaining trajectory, against an uninterrupted reference. Restore the original key and counter as well as position. A similar final average is not a continuation check.
+No. A distribution-level agreement can coexist with different next draws. Compare the next random value, carry, step and later trajectory. Save the key at the same boundary as the position; do not claim cross-version bitwise reproducibility from a same-environment pass.
 
 </details>
 

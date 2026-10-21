@@ -38,11 +38,11 @@ Review: [Build a Bayesian regression](02-build-a-bayesian-regression/docs/en.md)
 
 ### Try a changed condition
 
-Chains agree closely, but prediction residuals bend systematically with the input. What should be changed first?
+A correlated Gaussian target has unit marginal variances and correlation 0.8. A diagonal Gaussian variational fit gets the mean right but reports variance 0.36. Must optimization have failed?
 
 <details><summary>Compare an approach</summary>
 
-Investigate the model’s mean function and observation assumptions. Agreement between chains concerns exploration of the chosen posterior; it does not certify that the chosen model describes the data.
+Not necessarily. In the reverse-KL Gaussian case the optimal diagonal variances equal inverse precision diagonals, which here are \(1-0.8^2=0.36\). The family cannot represent correlation. Compare mean, covariance and predictive intervals with the exact target; a small optimizer gradient does not certify uncertainty calibration.
 
 </details>
 

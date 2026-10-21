@@ -90,7 +90,7 @@ for(const phase of course.phases)for(const lesson of phase.lessons){
   if(lesson.status!=='authored')continue;
   for(const [local,source] of [['script','scriptSource'],['notebook','notebookSource']])writeFileSync(new URL(lesson.artifacts[source],root),readFileSync(new URL('public/'+lesson.artifacts[local],root)));
   const c=lesson.content;
-  writeFileSync(new URL(lesson.artifacts.quizSource,root),JSON.stringify({schemaVersion:1,lessonId:lesson.id,questions:[{stage:'post',question:c.question,options:c.options,correct:c.answer,explanation:c.explanation}]},null,2)+'\n');
+  writeFileSync(new URL(lesson.artifacts.quizSource,root),JSON.stringify({schemaVersion:1,lessonId:lesson.id,questions:[{stage:'post',question:c.question,options:c.options,correct:c.answer,explanation:c.explanation,optionFeedback:c.optionFeedback}]},null,2)+'\n');
   const beginnerWorkspace = lesson.content?.setupBundle;
   const evidenceCommand = beginnerWorkspace
     ? 'macOS / Linux: `source .venv/bin/activate && python first_experiment.py`; PowerShell: `.\\.venv\\Scripts\\python.exe first_experiment.py`'

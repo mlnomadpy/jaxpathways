@@ -36,3 +36,11 @@ Report complete local timing samples without promising a fixed latency across ma
 Require a changed example and an independent denominator or probability calculation. Check that hidden targets do not enter the encoder, pair identity survives augmentation, and response masks shift with targets. For LoRA, inspect unchanged base arrays and rank/scaling metadata rather than only a decreasing loss. Ask the learner to explain why the two-zero-factor initialization stalls.
 
 For conversion, require the first mismatching layer and explicit near-zero handling. Reject claims based only on matching parameter shapes or final argmax. Confirm that the saved target artifact, rather than the live source object, supplies the final inference result. Preference claims must identify synthetic versus human label provenance and distinguish frozen reference from rollout behavior policy.
+
+## Discussion-case review notes
+
+Accuracy improves after changing preprocessing, but the validation set was also used to refit normalization and choose thresholds.
+
+Require training-only preprocessing statistics, a declared validation-selection step and a final untouched evaluation set. Preserve the measured number as contaminated evidence, rather than silently replacing it with a clean claim.
+
+Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.

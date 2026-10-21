@@ -151,7 +151,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:00.809634+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:49.315141+00:00. JAX 0.9.2.
 
 ```text
 [1. 3. 5.]
@@ -355,9 +355,17 @@ What makes predict easier to transform and test?
 
 <details><summary>Answer and explanation</summary>
 
-Passing parameters and data explicitly
+**1. Reading an editable global weight**
+
+A mutable global makes the result depend on hidden state and can be captured during tracing. Pass the current parameters explicitly.
+
+**2. Passing parameters and data explicitly (correct)**
 
 Explicit inputs expose the computation and let you compare calls with controlled parameter values.
+
+**3. Printing inside every numerical operation**
+
+Printing exposes a trace or value but does not make the function pure. Check whether the return depends only on explicit inputs.
 
 </details>
 

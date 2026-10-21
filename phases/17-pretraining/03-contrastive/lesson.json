@@ -104,7 +104,7 @@
       "Diagonal-only supervision automatically merges duplicate semantic examples into a single positive target."
     ],
     "answer": 0,
-    "explanation": "It is separate from downstream task quality or robustness to a new data distribution.",
+    "explanation": "Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.",
     "diagnosis": "If training stalls near the collapsed baseline, inspect norms and pairing before reducing temperature. Unexpected loss jumps after batching changes can reflect false negatives or a different candidate set.",
     "references": [
       {
@@ -151,6 +151,11 @@
     "takeaways": [
       "Track source identity explicitly across both view pipelines: symmetric contrastive loss normalizes row and column retrieval probabilities over the candidate pool, and a collapsed representation sits at \\(\\log N\\).",
       "Keep temperature \\(\\tau\\) and candidate-pool size fixed when comparing contrastive losses, and evaluate frozen representations on held-out source groups rather than training-pair lookup."
+    ],
+    "optionFeedback": [
+      "Training-pair retrieval shows that this objective and implementation can fit the observed pairs. It does not establish held-out semantic retrieval, robustness, or the absence of duplicate-positive problems. Keep the evaluation candidate pool and split identities separate.",
+      "Temperature rescales logits but does not change a fixed embedding’s cosine ranking. Training effects require a separate comparison.",
+      "A diagonal label still penalizes duplicate positives in other columns. Use a multi-positive objective or data policy when the task requires it."
     ]
   }
 }

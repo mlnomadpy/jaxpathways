@@ -144,6 +144,11 @@
       "Use a finite-difference window, not one magical epsilon",
       "Know which solver problem you have solved"
     ],
-    "output": "Endpoint autodiff approximately -0.9863878097; continuous reference approximately -0.9863878558. The loss gradient agrees with central differences and decreases the loss when subtracted."
+    "output": "Endpoint autodiff approximately -0.9863878097; continuous reference approximately -0.9863878558. The loss gradient agrees with central differences and decreases the loss when subtracted.",
+    "optionFeedback": [
+      "A nonzero derivative can be correct for the discretized computation. Compare it with that computation’s independent derivative.",
+      "The implementation derivative is consistent with the executed solver. A fixed-horizon refinement study tests whether its discretization bias is becoming small enough.",
+      "Changing the optimizer does not reduce the solver’s time-discretization error. Refine the time grid while holding the horizon fixed."
+    ]
   }
 }

@@ -154,6 +154,11 @@
       "Measure a bounded scaling experiment",
       "Move from this audit to a scientific workflow"
     ],
-    "output": "The rate moves from 1.4 to approximately 0.700000009. Held-out and refined-grid RMSE stay below 1e-7; initial-only observations have zero rate gradient."
+    "output": "The rate moves from 1.4 to approximately 0.700000009. Held-out and refined-grid RMSE stay below 1e-7; initial-only observations have zero rate gradient.",
+    "optionFeedback": [
+      "A larger accelerator batch repeats the same uninformative time-zero observations. Add measurements that depend on the unknown rate.",
+      "A smaller integration step cannot make a time-zero observation informative about dynamics. Inspect parameter sensitivity of the data.",
+      "The initial state is independent of rate. No optimizer can recover a rate from data whose predictions do not depend on it."
+    ]
   }
 }

@@ -184,6 +184,11 @@
           ]
         ]
       }
-    }
+    },
+    "optionFeedback": [
+      "Summing over time leaves one scalar for each episode. Averaging these episode returns gives the finite-episode performance objective.",
+      "Summing over environments merges different episodes. Keep one return per environment by reducing the time axis.",
+      "Reducing both axes gives one aggregate instead of per-environment returns. Inspect the intended output shape before computing a summary."
+    ]
   }
 }

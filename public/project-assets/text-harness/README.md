@@ -137,3 +137,11 @@ Complete the [TPU training-system synthesis](../../assessments/tpu.md). CPU mode
 ## API references
 
 The reference uses installed JAX 0.9.2 and verifies the actual serialized calls locally. The [JAX export guide](https://docs.jax.dev/en/latest/export/export.html) describes staged computation serialization; exported artifacts still require a compatible runtime. The [JAX profiling guide](https://docs.jax.dev/en/latest/profiling.html) explains trace recording and waiting for computation completion. The measured source-bound report takes precedence over assumptions about a different runtime or device.
+
+## Review handoff: explain a changed condition
+
+Change padding or prompt length while keeping the intended response tokens fixed. Which shifted targets, attention edges and cached positions should change?
+
+**Keep for review:** A small token-position table, loss-eligible target mask, cache-position trace and full-versus-cached logits. Keep tokenizer and model identities with the exported artifact.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

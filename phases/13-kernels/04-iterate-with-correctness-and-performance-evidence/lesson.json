@@ -148,6 +148,11 @@
       "Compare a strong baseline with the same contract",
       "Relate local kernels to the distributed workload",
       "Accept, revise or decline the optimization"
+    ],
+    "optionFeedback": [
+      "First compare against an oracle using the same represented operands. Error from casting the original FP32 inputs is a separate numerical budget.",
+      "Numerical agreement says nothing about TPU throughput. Native lowering and target timing need separate evidence.",
+      "The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset."
     ]
   }
 }

@@ -50,11 +50,11 @@ Review: [Supervised fine-tuning with response-only token loss](01-sft/docs/en.md
 
 ### Try a changed condition
 
-Reward rises, but independently reviewed outputs get worse. What has been established?
+A preference update changes chosen/rejected log probabilities from \((-2,-3)\) to \((-3,-5)\), with the reference fixed. Did the chosen absolute probability increase?
 
 <details><summary>Compare an approach</summary>
 
-Only improvement against the learned reward. Investigate reward exploitation, preference coverage and independent task metrics; do not label the result human alignment.
+No. The log-probability margin improves from 1 to 2 while the chosen probability falls. DPO compares reference-corrected relative likelihoods. Record chosen, rejected and margin values separately, and use independent task/retention evaluation before calling the model better.
 
 </details>
 

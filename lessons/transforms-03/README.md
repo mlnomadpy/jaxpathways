@@ -172,7 +172,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:08.798159+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:03.192499+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]
@@ -388,9 +388,17 @@ For $B$ examples and $D$ shared parameters, what shapes do per-example loss grad
 
 <details><summary>Answer and explanation</summary>
 
-Per-example: $(B, D)$; mean-loss: $(D,)$.
+**1. Both have shape $(B, D)$.**
+
+The per-example Jacobian keeps the batch axis. Differentiating a scalar mean reduces that axis, leaving one value per parameter.
+
+**2. Per-example: $(B, D)$; mean-loss: $(D,)$. (correct)**
 
 Mapping collects one parameter gradient per example. Reducing independent losses to a mean produces one gradient matching the shared parameter shape.
+
+**3. Per-example: $(D,)$; mean-loss: $(B,)$.**
+
+This reverses the two contracts. Inspect whether the differentiated function returns one scalar per example or one scalar for the batch.
 
 </details>
 

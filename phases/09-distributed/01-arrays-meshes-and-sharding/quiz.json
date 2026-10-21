@@ -11,7 +11,12 @@
         "Partitioning changes the mathematical definition of sum."
       ],
       "correct": 0,
-      "explanation": "The reduction spans the partitioned row dimension, so partial contributions must be combined."
+      "explanation": "The reduction spans the partitioned row dimension, so partial contributions must be combined.",
+      "optionFeedback": [
+        "The reduction spans the partitioned row dimension, so partial contributions must be combined.",
+        "The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.",
+        "The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition."
+      ]
     }
   ]
 }

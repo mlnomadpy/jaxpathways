@@ -285,19 +285,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:50.076919+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:55.002413+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 46.82129202410579, 'p50_ms': 0.014874851331114769, 'p95_ms': 0.05815287586301563, 'steady_examples_per_second': 67227.56266533097}
-{'batch': 8, 'first_call_ms': 29.957707971334457, 'p50_ms': 0.012104865163564682, 'p95_ms': 0.10387939400970919, 'steady_examples_per_second': 660891.2938642047}
-{'batch': 32, 'first_call_ms': 28.894834220409393, 'p50_ms': 0.04816637374460697, 'p95_ms': 0.07945015095174311, 'steady_examples_per_second': 664363.901872163}
-measured batch-one service proxy (ms): 0.014874851331114769
-simulated last stable/overloaded response (ms): 0.014874851331114769 0.3659213427454233
-{'batch': 1, 'first_call_ms': 30.956625007092953, 'p50_ms': 0.008833128958940506, 'p95_ms': 0.051093427464365945, 'steady_examples_per_second': 113210.1664821551}
-{'batch': 8, 'first_call_ms': 31.71129198744893, 'p50_ms': 0.05616643466055393, 'p95_ms': 0.0935911200940609, 'steady_examples_per_second': 142433.8227688583}
-{'batch': 32, 'first_call_ms': 32.31158386915922, 'p50_ms': 0.08312496356666088, 'p95_ms': 0.7933102780953047, 'steady_examples_per_second': 384962.5747425207}
-measured batch-one service proxy (ms): 0.008833128958940506
-simulated last stable/overloaded response (ms): 0.008833128958940506 0.21729497238993645
+{'batch': 1, 'first_call_ms': 40.03216698765755, 'p50_ms': 0.012270873412489891, 'p95_ms': 0.07185202557593583, 'steady_examples_per_second': 81493.79154886819}
+{'batch': 8, 'first_call_ms': 24.695958010852337, 'p50_ms': 0.02254103310406208, 'p95_ms': 0.0645504333078861, 'steady_examples_per_second': 354908.3115697272}
+{'batch': 32, 'first_call_ms': 25.196250062435865, 'p50_ms': 0.03366637974977493, 'p95_ms': 0.06809143815189599, 'steady_examples_per_second': 950503.1499626546}
+measured batch-one service proxy (ms): 0.012270873412489891
+simulated last stable/overloaded response (ms): 0.012270873412489891 0.3018634859472513
+{'batch': 1, 'first_call_ms': 26.054666843265295, 'p50_ms': 0.009604496881365776, 'p95_ms': 0.04470832645893096, 'steady_examples_per_second': 104117.89522678238}
+{'batch': 8, 'first_call_ms': 21.883500274270773, 'p50_ms': 0.028500333428382874, 'p95_ms': 0.058129383251070976, 'steady_examples_per_second': 280698.4704267695}
+{'batch': 32, 'first_call_ms': 20.954708103090525, 'p50_ms': 0.02204161137342453, 'p95_ms': 0.05853539332747457, 'steady_examples_per_second': 1451799.483162209}
+measured batch-one service proxy (ms): 0.009604496881365776
+simulated last stable/overloaded response (ms): 0.009604496881365776 0.2362706232815981
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2
@@ -531,9 +531,17 @@ A batch of eight finishes in four milliseconds. Which statement follows for a fu
 
 <details><summary>Answer and explanation</summary>
 
-The compute-throughput proxy is two thousand examples per second, while batch execution still takes four milliseconds
+**1. Every example experiences half a millisecond of response latency**
+
+Dividing batch time by eight gives an amortized throughput cost, not each request’s elapsed latency. Requests still wait for batch execution.
+
+**2. The compute-throughput proxy is two thousand examples per second, while batch execution still takes four milliseconds (correct)**
 
 Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.
+
+**3. The service can guarantee the same throughput for every arrival pattern**
+
+Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee.
 
 </details>
 

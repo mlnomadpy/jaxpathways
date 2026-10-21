@@ -159,6 +159,11 @@
         "code": "# Step 5 — Measure jobs before evaluating assumptions\nsamples=[]\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory(prefix='ops-capacity-') as folder:\n    for steps in [8,32,64]:\n        run=launch(Path(folder)/str(steps),dict(steps=steps))\n        assert run['status']=='completed'\n        samples.append((steps,run,summarize(run)))\nmeasured=max(run['wall_s'] for _,run,_ in samples)\nplan=capacity(measured_job_s=measured,arrivals_per_hour=600,workers=2,hourly_rate=1.5,reserve_fraction=.25)\nassert plan['hourly_budget']==3.\nprint('measured local job seconds:',[r['wall_s'] for _,r,_ in samples])\nprint('illustrative capacity plan:',plan)\nprint('assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve')",
         "explanation": "Every duration comes from a completed child; arrival and price inputs are labeled hypothetical."
       }
+    ],
+    "optionFeedback": [
+      "The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload.",
+      "Device occupancy needs device-level evidence. This timer measures how the local worker divides its wall time.",
+      "A synchronized loop excludes queueing and burst arrivals. Use a load test for service-level latency claims."
     ]
   }
 }

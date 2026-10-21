@@ -232,7 +232,7 @@ visual_data={'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabel'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:32.553795+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:33.218510+00:00. JAX 0.9.2.
 
 ```text
 Shape: (3, 41) endpoints: [0.12329848 0.24659697 0.49319394]
@@ -458,9 +458,17 @@ What does a shape of (3, 41) mean in the batch-major solver?
 
 <details><summary>Answer and explanation</summary>
 
-Three independent initial conditions, each with the initial state plus forty updates.
+**1. Three independent initial conditions, each with the initial state plus forty updates. (correct)**
 
 vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified.
+
+**2. Three time points, each with forty-one parameters.**
+
+The first axis indexes initial conditions, not times. The second includes the initial value and forty subsequent states.
+
+**3. Forty-one independent devices.**
+
+A batch dimension does not imply device placement. Inspect array sharding separately from its logical shape.
 
 </details>
 

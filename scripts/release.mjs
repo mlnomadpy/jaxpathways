@@ -41,7 +41,9 @@ for (const directory of ['curriculum', 'learning-paths', 'projects']) {
 }
 // Practical guides and their launchers are canonical course material too.
 const projectDirectories = read('curriculum/projects.json').map(file => file.replace(/\/project\.json$/, ''));
-for (const directory of ['content/guides', 'resources/tpu-gcp', ...projectDirectories]) {
+const planDirectories = existsSync('curriculum/project-plans.json')
+  ? read('curriculum/project-plans.json').map(plan => plan.source.slice(0, plan.source.lastIndexOf('/'))) : [];
+for (const directory of new Set(['content/guides', 'resources/tpu-gcp', 'assessments', ...projectDirectories, ...planDirectories])) {
   if (!existsSync(directory)) continue;
   for (const file of readdirSync(directory, { recursive: true }).map(portablePath).sort()) {
     if (!/\.(md|py|txt|jsonl|csv)$/.test(file) || file.includes('__pycache__') || file.startsWith('reference/') || /^my_.*\.py$/.test(file) || /^(?:\.venv|runs|evidence|outputs)\//.test(file)) continue;

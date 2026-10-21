@@ -11,7 +11,12 @@
         "A matching current loss proves every future update matches"
       ],
       "correct": 0,
-      "explanation": "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values."
+      "explanation": "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.",
+      "optionFeedback": [
+        "Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.",
+        "Vocabulary settings belong to the model/data contract, but do not replace Adam moments and its update count.",
+        "Equal current losses can hide different optimizer histories. Compare the next update with full state restored."
+      ]
     }
   ]
 }

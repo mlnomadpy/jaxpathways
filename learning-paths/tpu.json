@@ -70,7 +70,7 @@
     "text",
     "cross-modal"
   ],
-  "studyAdvice": "Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course.",
+  "studyAdvice": "Complete the 3-part Cloud TPU mini-course (19: TPU Setup, 20: TPU Workflows, 21: TPU Systems) immediately after 00: Setup & first steps so you know how to get a TPU running, stage scripts with gcloud compute tpus tpu-vm scp, launch single-host and --worker=all jobs, and capture XProf traces before starting any TPU-dependent course. Then build the tiny Transformer, verify causal masking and held-out token loss, restore the complete state in a fresh process, and run the distributed, pretraining, post-training, and operations experiments on your TPU VM in parallel with the course. For review, identify the provisioning API, machine type, process/device topology and receipt scope. Present synchronized work and named-resource cleanup separately; do not equate every device with a chip.",
   "engineeringLessonIds": [
     "tpu-01",
     "tpu-04",

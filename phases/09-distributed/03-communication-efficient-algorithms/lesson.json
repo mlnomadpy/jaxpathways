@@ -187,6 +187,11 @@
           ]
         ]
       }
-    }
+    },
+    "optionFeedback": [
+      "Count bytes in both collective phases. Replacing an all-reduce with reduce-scatter plus all-gather need not reduce the ideal ring payload.",
+      "The scatter and gather each contribute one phase. The advantage depends on what consumes the partitioned value and when reconstruction is required.",
+      "A global shape describes array semantics, not how replicas or shards become consistent. Communication still has to move the contributions."
+    ]
   }
 }

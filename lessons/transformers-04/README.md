@@ -483,7 +483,7 @@ visual_data = {'kind': 'heatmap', 'values': probs.tolist(), 'rows': ['position '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:09.981543+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:13.970606+00:00. JAX 0.9.2.
 
 ```text
 Initial / held loss / held accuracy: 0.9807573556900024 0.0017881905660033226 1.0
@@ -722,9 +722,17 @@ Why is saving only parameters insufficient to replay the next Adam update?
 
 <details><summary>Answer and explanation</summary>
 
-Adam uses optimizer count and moment history as well as parameters
+**1. Adam uses optimizer count and moment history as well as parameters (correct)**
 
 Adam’s update depends on its explicit state. Compare the actual next transition after restoring both parameter and optimizer values.
+
+**2. The vocabulary alone stores all optimizer state**
+
+Vocabulary settings belong to the model/data contract, but do not replace Adam moments and its update count.
+
+**3. A matching current loss proves every future update matches**
+
+Equal current losses can hide different optimizer histories. Compare the next update with full state restored.
 
 </details>
 

@@ -38,11 +38,11 @@ Review: [JVPs, VJPs, and higher-order derivatives](02-jvps-vjps-and-higher-order
 
 ### Try a changed condition
 
-A custom JVP returns the correct derivative when the tangent equals one but squares the tangent internally. Is it valid?
+A proposed JVP returns \(2xv^2\) for \(f(x)=x^2\). It agrees at direction 1. Test direction 2 and explain the failure.
 
 <details><summary>Compare an approach</summary>
 
-No. Derivatives are linear maps in the direction at a fixed base point. Check multiple directions and linear combinations; agreement for one seed is insufficient.
+The correct derivative map is \(2xv\). At direction 2 the proposal gives \(8x\) instead of \(4x\), except at the uninformative base point zero. Test nonzero base points and linear combinations of directions, then compare against an independent primal derivative.
 
 </details>
 

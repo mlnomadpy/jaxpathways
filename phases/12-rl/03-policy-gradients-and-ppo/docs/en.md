@@ -416,7 +416,7 @@ visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:29.815968+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:29.324297+00:00. JAX 0.9.2.
 
 ```text
 REINFORCE initial/final exact return: 0.46687505 0.9521624
@@ -609,7 +609,15 @@ During multiple PPO epochs on one rollout batch, what must remain fixed?
 
 <details><summary>Answer and explanation</summary>
 
-The collected actions, return targets and behavior-policy log probabilities
+**1. Only the current candidate policy**
+
+The candidate policy changes during optimization; the collected actions and behavior log probabilities describe the fixed rollout.
+
+**2. Only the clipping threshold; old probabilities can be recomputed from the candidate**
+
+Recomputing old probabilities with the updated policy destroys the importance ratio. Save them when the rollout is collected.
+
+**3. The collected actions, return targets and behavior-policy log probabilities (correct)**
 
 The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison.
 

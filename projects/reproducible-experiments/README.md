@@ -245,3 +245,11 @@ Keep the full suite, your implementation, checker output and a completed interpr
 - [TensorBoard event writer source](https://github.com/tensorflow/tensorboard/blob/2.21.0/tensorboard/summary/writer/event_file_writer.py).
 - [W&B SDK and offline logging](https://github.com/wandb/wandb).
 - [MLflow experiment tracking](https://mlflow.org/docs/latest/ml/tracking/).
+
+## Review handoff: explain a changed condition
+
+Remove the worst-performing seed from only one learning-rate condition. Why does the resulting dashboard no longer support the paired comparison?
+
+**Keep for review:** The complete seed-by-condition table, missing-run policy and paired differences for the predeclared set. Keep failed runs; separate post-update training observations from held-out evaluation.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

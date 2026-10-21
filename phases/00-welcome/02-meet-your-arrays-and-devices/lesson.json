@@ -130,6 +130,11 @@
       "connection": "Now connect the picture to a reduction. Summing the feature columns within each row gives \\(0+1+2=3\\) and \\(3+4+5=12\\). That is why summing along axis \\(1\\) returns two values. Summing down rows instead would return \\((3,5,7)\\), one value per feature.\n\nThe row labels are positions, not times or class labels. The darker lower row tells us its stored values are larger; it does not imply that the observation is more important.",
       "alt": "Rows are groups of observations. The horizontal axis selects a feature column; the vertical axis selects an observation row. Each cell contains one array value. The color bar maps larger numbers to darker purple: the bottom-right cell is darkest because it contains \\(5\\). Read across the top row to find \\((0,1,2)\\), then across the bottom row to find \\((3,4,5)\\). The picture therefore represents an array with shape \\((2,3)\\): two observations, each with three features.",
       "code": "visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1'], 'columns': ['feature 0', 'feature 1', 'feature 2'], 'unit': 'array value'}"
-    }
+    },
+    "optionFeedback": [
+      "This would describe reducing the columns within each row. Axis zero runs down the observations; write the two row vectors and add them element by element.",
+      "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
+      "A reduction removes the selected axis unless keepdims is requested. Count the three column sums left after combining the two rows."
+    ]
   }
 }

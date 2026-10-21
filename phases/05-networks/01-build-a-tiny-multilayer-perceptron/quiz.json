@@ -11,7 +11,12 @@
         "Cross-entropy itself changes the prediction boundary"
       ],
       "correct": 0,
-      "explanation": "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features."
+      "explanation": "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.",
+      "optionFeedback": [
+        "The optimizer can change coefficients but cannot enlarge the affine function class. The activation supplies nonlinear intermediate features.",
+        "Two affine layers compose into another affine map. Write their combined matrix and bias to see why another layer alone is insufficient.",
+        "The loss changes how parameters are fitted, not which functions the architecture can represent. Inspect the forward map for a nonlinearity."
+      ]
     }
   ]
 }

@@ -214,7 +214,7 @@ visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3']
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:21:30.571519+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:02.250064+00:00. JAX 0.9.2.
 
 ```text
 First IDs: [8, 6, 7, 9]
@@ -423,9 +423,17 @@ What makes a fresh loader resume at the saved next batch?
 
 <details><summary>Answer and explanation</summary>
 
-Restoring compatible iterator state after rebuilding its source/sampler configuration.
+**1. Only using the original seed.**
+
+A seed restarts an initial sequence; it does not specify the current cursor. Rebuild the compatible pipeline and restore its iterator state.
+
+**2. Restoring compatible iterator state after rebuilding its source/sampler configuration. (correct)**
 
 Seed and source determine order, but iterator state determines where the resumed reader begins.
+
+**3. Calling next once regardless of checkpoint position.**
+
+Consuming one batch moves the cursor and can skip data. Verify the restored next batch against the uninterrupted run before advancing.
 
 </details>
 

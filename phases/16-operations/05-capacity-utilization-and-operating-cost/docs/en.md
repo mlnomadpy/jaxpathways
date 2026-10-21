@@ -582,16 +582,16 @@ visual_data={'panels':[{'kind':'bar','labels':[str(n) for n,_,_ in samples],'xla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:20.251555+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:09.092170+00:00. JAX 0.9.2.
 
 ```text
-measured local job seconds: [0.8654832500033081, 0.933383374940604, 0.9554184577427804]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.15923640962379673, 'load_fraction': 0.07961820481189837, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00039809102405949186, 'within_reserve': True}
+measured local job seconds: [0.6168613750487566, 0.6577395000495017, 0.6894487086683512]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.11490811811139186, 'load_fraction': 0.05745405905569593, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0002872702952784797, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-measured local job seconds: [0.7919033328071237, 0.7368434579111636, 0.7315183328464627]
-illustrative capacity plan: {'offered_worker_hours_per_hour': 0.13198388880118728, 'load_fraction': 0.06599194440059364, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003299597220029682, 'within_reserve': True}
+measured local job seconds: [0.7571705421432853, 0.6526923752389848, 0.6576270833611488]
+illustrative capacity plan: {'offered_worker_hours_per_hour': 0.1261950903572142, 'load_fraction': 0.0630975451786071, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00031548772589303555, 'within_reserve': True}
 assumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve
-nominal load at two demand scenarios: 0.06599194440059364 0.13198388880118728
+nominal load at two demand scenarios: 0.0630975451786071 0.1261950903572142
 required workers under changed hypothetical reserve: 1
 PASS: operations-05
 
@@ -763,9 +763,17 @@ Which claim is supported by the measured update duty fraction?
 
 <details><summary>Answer and explanation</summary>
 
-The fraction of local job wall time inside synchronized updates
+**1. The fraction of local job wall time inside synchronized updates (correct)**
 
 The timing boundary is an application measurement. Hardware occupancy and queue latency require additional evidence from the actual target workload.
+
+**2. The accelerator will be occupied by the same fraction**
+
+Device occupancy needs device-level evidence. This timer measures how the local worker divides its wall time.
+
+**3. The same worker count meets any bursty arrival pattern**
+
+A synchronized loop excludes queueing and burst arrivals. Use a load test for service-level latency claims.
 
 </details>
 

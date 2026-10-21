@@ -11,7 +11,12 @@
         "Any runtime can execute the model."
       ],
       "correct": 0,
-      "explanation": "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence."
+      "explanation": "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.",
+      "optionFeedback": [
+        "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.",
+        "Inference-weight parity does not map optimizer history or random state. Training continuation requires a larger conversion contract.",
+        "A tested Dense mapping cannot establish compatibility with every runtime, operator or architecture. Expand cases before expanding the claim."
+      ]
     }
   ]
 }

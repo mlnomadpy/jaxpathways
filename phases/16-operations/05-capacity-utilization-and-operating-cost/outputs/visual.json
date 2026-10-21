@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-05",
-  "contentHash": "b0557ff9b7365db24e95b83c012db26360219ce4bd2a154eb3472873123316da",
+  "contentHash": "daa386f25cf33ecf1e3d48d480d34dcfcfd2d89d6a2232b7c4569f4d518a55ae",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:29:43.316477+00:00",
+  "generatedAt": "2026-10-21T11:25:32.845430+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "measured local job seconds: [0.6655920408666134, 0.6406780001707375, 0.6088443747721612]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.11093200681110223, 'load_fraction': 0.05546600340555111, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.00027733001702775556, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
+  "stdout": "measured local job seconds: [0.7716957917436957, 0.893247458152473, 0.7868624171242118]\nillustrative capacity plan: {'offered_worker_hours_per_hour': 0.1488745763587455, 'load_fraction': 0.07443728817937274, 'minimum_workers_with_reserve': 1, 'hourly_budget': 3.0, 'hypothetical_cost_per_job': 0.0003721864408968637, 'within_reserve': True}\nassumptions: 600 arrivals/hour, 2 workers, hypothetical 1.50 per worker-hour, 25% reserve\n",
   "data": {
     "panels": [
       {
@@ -30,9 +30,9 @@
           {
             "label": "wall time",
             "y": [
-              0.6655920408666134,
-              0.6406780001707375,
-              0.6088443747721612
+              0.7716957917436957,
+              0.893247458152473,
+              0.7868624171242118
             ]
           }
         ]
@@ -51,9 +51,9 @@
           {
             "label": "update time",
             "y": [
-              0.00044512609019875526,
-              0.0010364111512899399,
-              0.0022432077676057816
+              0.000636084470897913,
+              0.0026813745498657227,
+              0.0041672056540846825
             ]
           }
         ]

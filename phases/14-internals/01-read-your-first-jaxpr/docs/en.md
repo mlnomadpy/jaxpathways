@@ -207,7 +207,7 @@ visual_data = {'kind': 'heatmap', 'values': jnp.stack([x, x + 1, (x + 1) ** 2]).
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:05.836158+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:09.546458+00:00. JAX 0.9.2.
 
 ```text
 Forward program:
@@ -530,9 +530,17 @@ A jaxpr has more equations after grad. What can you conclude from that observati
 
 <details><summary>Answer and explanation</summary>
 
-The traced derivative has a different computation structure; runtime needs separate measurement.
+**1. The derivative must run slower on every device.**
+
+Equation counts omit fusion, scheduling and memory effects. Measure the workload before ranking runtime cost.
+
+**2. The traced derivative has a different computation structure; runtime needs separate measurement. (correct)**
 
 A jaxpr describes traced primitives. Compiler transformations and hardware execution determine kernel boundaries and timing.
+
+**3. Every equation corresponds to one hardware kernel.**
+
+One jaxpr equation need not become one hardware kernel. Inspect lowered/compiler artifacts and device traces.
 
 </details>
 

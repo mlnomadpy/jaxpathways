@@ -196,7 +196,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:30.223618+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:30.993323+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213
@@ -394,7 +394,15 @@ The code matches the geometric-sequence reference exactly but differs from the e
 
 <details><summary>Answer and explanation</summary>
 
-The discrete update is implemented correctly; its time-step error still needs assessment.
+**1. The continuous equation must be wrong.**
+
+The geometric sequence is the exact solution of the chosen discrete update. Its difference from the continuous exponential is discretization error.
+
+**2. Automatic differentiation needs a smaller learning rate.**
+
+An optimizer learning rate does not explain a forward solver discrepancy. Compare the discrete recurrence before differentiating it.
+
+**3. The discrete update is implemented correctly; its time-step error still needs assessment. (correct)**
 
 The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions.
 

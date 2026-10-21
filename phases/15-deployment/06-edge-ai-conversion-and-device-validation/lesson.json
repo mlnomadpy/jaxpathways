@@ -220,6 +220,11 @@
         "code": "# Step 4 — Validate outputs and describe measurement scope\nexpected = (np.array([[255., 128., 0.]], np.float32) / 255.) @ np.asarray(weights) + np.asarray(bias)\nnp.testing.assert_allclose(json.loads(response)[\"scores\"], expected, atol=1e-6)\nreport = {\"runtime\": \"JAX CPU instructional proxy\", \"jax\": jax.__version__,\n          \"first_request_ms\": first_ms, \"warm_samples_ms\": samples,\n          \"p50_ms\": float(np.percentile(samples, 50)), \"p95_ms\": float(np.percentile(samples, 95)),\n          \"boundary\": \"JSON decode + normalize + transfer + infer + wait + encode\",\n          \"edge_device_validated\": False}\nassert len(samples) == 30 and all(t >= 0 for t in samples)\nprint(json.dumps(report, indent=2))\n\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(json.loads(request(json.dumps({'features':[[0,0,0]]})))['scores'], np.asarray(bias)[None,:], atol=1e-6)",
         "explanation": "The report records local CPU timings and explicitly leaves edge-device qualification false. Carry the same protocol to a named device before replacing that field."
       }
+    ],
+    "optionFeedback": [
+      "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
+      "CPU timing and compression ratio cannot establish NPU placement or latency. Inspect delegated operations on the actual device.",
+      "Conversion can leave unsupported operations on CPU. Confirm partitioning and measure the whole prediction boundary."
     ]
   }
 }

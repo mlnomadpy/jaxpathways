@@ -48,3 +48,13 @@ Qualify request duration bounds, concurrent streams, cancellation and recurrent/
 Do not promote until waveform, transcript/event labels, speaker/recording groups, source rights, resampling and split manifests are frozen. Link the acoustic encoder and task-head checkpoints to their data and optimizer/RNG state; real held-out WER or event metrics and slice counts are required, while synthetic audio only checks the interface.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+An audio representation is strong on in-domain clips but fails when speakers or microphones change.
+
+**Decide:** Split by speaker/source/session before learning frontend statistics. Compare self-supervised representation quality, supervised adaptation and robustness separately. Keep sample rate, channel policy, crop duration and label unit explicit; choose speech or general-audio tasks with appropriate metrics rather than one universal score.
+
+**Review packet:** Waveform/spectrogram fixtures, speaker/session split manifests, per-domain errors, task-specific baselines and an exported frontend/model parity test. Synthetic tones cannot establish speech recognition or speaker generalization.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

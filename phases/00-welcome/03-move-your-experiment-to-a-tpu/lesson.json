@@ -180,6 +180,11 @@
         "code": "# Assert that the device output matches the NumPy reference and print the portability report:\nassert report[\"max_absolute_error\"] < 1e-6\nprint(json.dumps(report, indent=2))\nprint(\"Completed prediction:\", np.asarray(y).tolist())",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "Backend qualification is a separate claim. A matching CPU result checks those numerical cases; it cannot show that a TPU executed the program.",
+      "A correct value can be produced on the wrong device. Require both reference agreement and the output placement before recording a successful target run.",
+      "Different hardware is not itself a mathematical failure. Compare the requested and observed backend before diagnosing the model."
     ]
   }
 }

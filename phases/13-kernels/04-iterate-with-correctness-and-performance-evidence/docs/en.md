@@ -392,7 +392,7 @@ visual_data={'kind':'bar','labels':labels,'ylabel':'max gap versus original floa
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:03.072730+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:06.617866+00:00. JAX 0.9.2.
 
 ```text
 Kernel errors versus represented-input oracle: [[0.0, 0.0], [0.0, 0.0], [0.0, 0.0], [0.0, 0.0]]
@@ -613,7 +613,15 @@ The kernel matches the represented-input oracle exactly but differs from the ori
 
 <details><summary>Answer and explanation</summary>
 
-Implementation correctness passed for the declared precision policy; the separate representation gap must still be reported.
+**1. The kernel is necessarily incorrect.**
+
+First compare against an oracle using the same represented operands. Error from casting the original FP32 inputs is a separate numerical budget.
+
+**2. The interpretation proves TPU throughput.**
+
+Numerical agreement says nothing about TPU throughput. Native lowering and target timing need separate evidence.
+
+**3. Implementation correctness passed for the declared precision policy; the separate representation gap must still be reported. (correct)**
 
 The references answer different questions. Correct execution of a low-precision contract does not imply identical values to a higher-precision dataset.
 

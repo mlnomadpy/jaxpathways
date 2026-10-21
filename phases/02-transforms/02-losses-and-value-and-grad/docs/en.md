@@ -160,7 +160,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:06.959574+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:26:59.585874+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211
@@ -362,9 +362,17 @@ You duplicate every example and keep the same learning rate. What happens to a s
 
 <details><summary>Answer and explanation</summary>
 
-Its gradient and update magnitude double.
+**1. Its gradient and update magnitude double. (correct)**
 
 A sum counts each replicated contribution again. A mean divides by the new batch size and would preserve the gradient in this example.
+
+**2. It stays unchanged because the data values are unchanged.**
+
+A sum counts both copies, so its gradient doubles. A mean would cancel the duplication through its denominator.
+
+**3. value_and_grad silently converts the sum to a mean.**
+
+value_and_grad preserves the objective you supply. Compare sum and mean explicitly; the transform does not normalize a loss for you.
 
 </details>
 

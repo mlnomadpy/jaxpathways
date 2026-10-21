@@ -42,11 +42,11 @@ Review: [Train a CNN on a small dataset](04-train-a-cnn-on-a-small-dataset/docs/
 
 ### Try a changed condition
 
-Training loss falls, but recall for a rare class is zero. Write the next three checks before changing the model.
+In a 100-example set, 95 labels are class zero and 5 are class one. A classifier always predicts zero. Interpret accuracy and rare-class recall.
 
 <details><summary>Compare an approach</summary>
 
-Inspect class counts and labels; compare a constant predictor and per-class confusion; then inspect score distributions and choose any threshold on validation data. Report final metrics on held-out data without using it to tune the repair.
+Accuracy is 95%, but class-one recall is \(0/5=0\). Record the confusion counts and compare against that constant baseline. Decide thresholds using validation data. Five rare examples leave substantial uncertainty, so the headline accuracy alone cannot establish useful rare-class behavior.
 
 </details>
 

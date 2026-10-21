@@ -244,7 +244,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gra
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:21.714604+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:24.461646+00:00. JAX 0.9.2.
 
 ```text
 Initial loss: 4.875
@@ -530,9 +530,17 @@ Four equal-size shards compute local mean gradients. Which aggregation gives the
 
 <details><summary>Answer and explanation</summary>
 
-Average them, or sum local gradient numerators and divide by total examples.
+**1. Sum them without scaling.**
+
+Summing local means multiplies the gradient for equal shard sizes. Compare the result with a single-device global mean.
+
+**2. Average them, or sum local gradient numerators and divide by total examples. (correct)**
 
 A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting.
+
+**3. Choose the device with the lowest local loss.**
+
+Choosing one device discards the other data. Aggregate all example contributions with the correct observation denominator.
 
 </details>
 

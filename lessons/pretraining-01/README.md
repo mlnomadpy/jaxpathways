@@ -287,7 +287,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:40.595336+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:23.765406+00:00. JAX 0.9.2.
 
 ```text
 MLM initial/final/changed-mask: 1.0986123085021973 0.010633035562932491 0.010457751341164112
@@ -515,9 +515,17 @@ Why are visible input tokens useful even when their output positions are exclude
 
 <details><summary>Answer and explanation</summary>
 
-They supply context to predictions at selected positions through the encoder.
+**1. They supply context to predictions at selected positions through the encoder. (correct)**
 
 The mask controls the supervised outputs, while attention controls how input context influences them.
+
+**2. Unselected output logits still receive a nonzero direct cross-entropy gradient.**
+
+Only selected targets contribute direct loss, but other input tokens still provide context through attention. Distinguish input masking from loss masking.
+
+**3. Excluding a position from the loss also masks its key and value vectors out of attention.**
+
+A loss mask selects scored positions; it does not remove keys or values from attention. Test those masks independently.
 
 </details>
 

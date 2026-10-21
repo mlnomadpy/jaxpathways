@@ -11,7 +11,12 @@
         "The service can guarantee the same throughput for every arrival pattern"
       ],
       "correct": 1,
-      "explanation": "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs."
+      "explanation": "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.",
+      "optionFeedback": [
+        "Dividing batch time by eight gives an amortized throughput cost, not each request’s elapsed latency. Requests still wait for batch execution.",
+        "Eight examples per four milliseconds gives two thousand per second when batches remain full. A request still waits for collection and the full execution, plus any other boundary costs.",
+        "Arrival rate and batching wait change latency. Measure the chosen traffic pattern instead of inferring a universal service guarantee."
+      ]
     }
   ]
 }

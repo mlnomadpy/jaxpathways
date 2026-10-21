@@ -135,6 +135,11 @@
       "connection": "All IDs from \\(0\\) through \\(10\\) appear once, so shuffling preserves membership while changing order. The final batch is shorter because \\(11\\) examples do not divide evenly into groups of \\(4\\). Dropping that batch would omit three examples from this epoch.\n\nThe connected segments are a visual aid for following the sequence; an ID halfway between two plotted IDs is not a generated example. For recovery, record the ordering rule and the iterator’s position, so the resumed run consumes the same remaining examples.",
       "alt": "Shuffling changes order, not dataset membership. The horizontal axis is position within a shuffled epoch. The vertical axis is the example ID encountered at that position. The line begins with IDs \\(9,10,4,1\\); its zigzags show a changed ordering, not increases and decreases in loss or example quality. The dotted separators fall between positions \\(3\\) and \\(4\\), and between \\(7\\) and \\(8\\). They divide the sequence into batches of sizes \\(4\\), \\(4\\), and \\(3\\). The final, shorter batch contains IDs \\(2,5,3\\).",
       "code": "visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position in epoch', 'ylabel': 'example ID', 'series': [{'label': 'shuffled order', 'y': seen.tolist()}], 'boundaries': [3.5, 7.5]}"
-    }
+    },
+    "optionFeedback": [
+      "Model state cannot reconstruct which records should be read next.",
+      "Column definitions do not identify the next examples, shuffle state or configuration. Compare the exact next batch IDs after restore.",
+      "Parameters summarize updates and cannot reconstruct the input cursor. Save the loader state and data identity explicitly."
+    ]
   }
 }

@@ -304,7 +304,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":names,"xlabel":"model after train
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:24:21.253929+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:32:30.335131+00:00. JAX 0.9.2.
 
 ```text
 {
@@ -568,9 +568,17 @@ Why should the two adaptation branches be compared using a common held-out crite
 
 <details><summary>Answer and explanation</summary>
 
-Their supervision differs, so their training losses answer different questions
+**1. Teacher targets always make training loss zero**
+
+A teacher target defines one branch’s objective; it does not make every branch’s training loss comparable or guarantee zero loss.
+
+**2. Their supervision differs, so their training losses answer different questions (correct)**
 
 The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.
+
+**3. Using the evaluation split during every update guarantees fairness**
+
+Using the final test split for iterative selection leaks test information. Compare branches on a separate common validation contract.
 
 </details>
 

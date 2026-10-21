@@ -250,17 +250,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:22:15.822023+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:30:19.171346+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'transcendentals': 256.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0}
-Local CPU samples seconds: [3.929203376173973e-05, 5.700020119547844e-05, 1.5208963304758072e-05, 1.0291580110788345e-05, 8.707866072654724e-06]
+Compiler estimates (backend-specific): {'flops': 8192.0, 'utilization0{}': 2.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0}
+Local CPU samples seconds: [4.2125117033720016e-05, 3.187498077750206e-05, 2.408307045698166e-05, 4.908395931124687e-05, 1.3459008187055588e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'flops': 8192.0, 'transcendentals': 256.0, 'utilization0{}': 2.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0}
-Local CPU samples seconds: [1.4874618500471115e-05, 1.254212111234665e-05, 9.542331099510193e-06, 7.832888513803482e-06, 7.916707545518875e-06]
+Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0}
+Local CPU samples seconds: [2.987496554851532e-05, 6.466684862971306e-05, 1.941714435815811e-05, 2.2666994482278824e-05, 2.562534064054489e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]
@@ -381,9 +381,17 @@ The lowered program contains a dot operation and a roofline model predicts a hig
 
 <details><summary>Answer and explanation</summary>
 
-A matching measured workload on the actual device, with justified traffic and precision assumptions.
+**1. Nothing; lowered operations establish throughput.**
+
+An HLO operation and a theoretical ceiling do not measure achieved throughput. Run the target workload with a defined synchronized boundary.
+
+**2. A matching measured workload on the actual device, with justified traffic and precision assumptions. (correct)**
 
 A typed intermediate representation and an optimistic ceiling do not measure execution. Workload equivalence, synchronization, device evidence and appropriate model assumptions are still required.
+
+**3. Only the number of Python source lines.**
+
+Source line counts do not describe data traffic or hardware utilization. Inspect operation shapes, precision and measured execution.
 
 </details>
 

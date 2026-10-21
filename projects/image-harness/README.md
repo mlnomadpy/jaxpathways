@@ -186,3 +186,11 @@ The expanded `assessments/models.md` retains the classifier fundamentals and add
 ## Primary references
 
 The implementation was checked against [JAX convolution dimension and accumulation contracts](https://docs.jax.dev/en/latest/_autosummary/jax.lax.conv_general_dilated.html), [JAX export/serialization](https://docs.jax.dev/en/latest/export/export.html) and [Pillow EXIF transposition](https://pillow.readthedocs.io/en/stable/reference/ImageOps.html#PIL.ImageOps.exif_transpose), then executed with the environment recorded in `validation.json`. Numerical and format support claims apply to those actual executions.
+
+## Review handoff: explain a changed condition
+
+Change channel order or normalization in only the exported input pipeline. Can a model load successfully while predictions become wrong?
+
+**Keep for review:** One labeled fixture through raw pixels, normalized tensor and final logits in both paths. Locate the first mismatch before changing model weights or error tolerances.
+
+Write your prediction before opening the reference implementation. Distinguish what the existing checker verifies from your proposed extension; record any extension command, actual output and limitation separately. A reviewer should be able to locate the first failed contract from your saved evidence.

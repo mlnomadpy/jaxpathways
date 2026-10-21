@@ -563,15 +563,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:25:38.853489+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:33:36.451842+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0012104581110179424, 'update_examples_per_s': 79308.81632844625, 'job_examples_per_s': 102.44077143536792, 'update_duty_fraction': 0.0012916694029466277}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.0006199595518410206, 'update_examples_per_s': 64520.33827241911, 'job_examples_per_s': 43.86845768858281, 'update_duty_fraction': 0.0006799167342142643}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.00038929283618927, 'update_examples_per_s': 246600.99307177032, 'job_examples_per_s': 132.80315821404676, 'update_duty_fraction': 0.0005385345637087355}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00037824828177690506, 'update_examples_per_s': 105750.645613223, 'job_examples_per_s': 56.760947196710525, 'update_duty_fraction': 0.0005367432687296348}
-examples / synchronized seconds: 96 0.00038929283618927
-measured update duty fraction, not hardware utilization: 0.0005385345637087355
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0007513347081840038, 'update_examples_per_s': 127772.6144610497, 'job_examples_per_s': 153.92118224720102, 'update_duty_fraction': 0.0012046492348649755}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00033241650089621544, 'update_examples_per_s': 120330.97000948366, 'job_examples_per_s': 57.709016973169405, 'update_duty_fraction': 0.000479585737309532}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0010775425471365452, 'update_examples_per_s': 89091.60965857896, 'job_examples_per_s': 122.48818158172256, 'update_duty_fraction': 0.0013748565330801352}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00022833328694105148, 'update_examples_per_s': 175182.51734503673, 'job_examples_per_s': 62.3818116072969, 'update_duty_fraction': 0.0003560961022407885}
+examples / synchronized seconds: 96 0.0010775425471365452
+measured update duty fraction, not hardware utilization: 0.0013748565330801352
 PASS: operations-02
 
 ```
@@ -737,7 +737,15 @@ What does update duty fraction establish in this lab?
 
 <details><summary>Answer and explanation</summary>
 
-The fraction of this job’s wall time inside the measured synchronized update boundary
+**1. GPU compute-unit occupancy**
+
+Wall time inside an update is not a hardware occupancy counter. Use a device profiler for utilization claims.
+
+**2. Cluster utilization across hosts**
+
+A local loop does not measure a fleet. State the measured process, device and timing boundary.
+
+**3. The fraction of this job’s wall time inside the measured synchronized update boundary (correct)**
 
 The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation.
 

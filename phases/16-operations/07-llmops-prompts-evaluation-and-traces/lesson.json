@@ -104,7 +104,7 @@
       "Prompt versions no longer need recording."
     ],
     "answer": 1,
-    "explanation": "LLMOps versions the whole application: model and tokenizer, prompt, retrieval corpus and index, tools, decoding configuration, evaluators and runtime. A model weight version alone cannot reproduce a retrieval-augmented or tool-using answer.",
+    "explanation": "A passing fixture suite establishes that the evaluator accepts those declared cases. It does not establish live application safety, general quality or coverage of unseen prompts. Version the model, prompt, retrieval inputs, tools and evaluator, and keep independent held-out cases.",
     "diagnosis": "When quality changes, compare prompt/model/retrieval/tool versions and case-level traces before tuning weights. A high average can hide an unsupported-case regression. Do not call a synthetic replay a measured LLM response.",
     "takeaways": [
       "Version the application boundary",
@@ -149,6 +149,11 @@
         "code": "assert results[1] == {'overall': 1., 'answerable': 1., 'unanswerable': 1.}\nassert not llm_case(cases[0],dict(answer='CPU',citations=['invented'],abstain=False),['course-v1'])",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "Fixtures cover their specified cases, not every live prompt or attack. Preserve scope and add held-out adversarial cases.",
+      "A passing fixture suite establishes that the evaluator accepts those declared cases. It does not establish live application safety, general quality or coverage of unseen prompts. Version the model, prompt, retrieval inputs, tools and evaluator, and keep independent held-out cases.",
+      "Evaluator success does not remove the need to version prompts, data and models. Record those inputs to make the result reproducible."
     ]
   }
 }

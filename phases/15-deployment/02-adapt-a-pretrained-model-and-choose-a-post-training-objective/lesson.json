@@ -154,6 +154,11 @@
         "code": "# Step 3 — 3. Compare on a held-out criterion shared by both objectives\nw_check=jnp.array([.2,-.3,.1])\n# Transfer the device result to the host for an independent NumPy comparison.\nhost_X=np.asarray(adapt_X,dtype=np.float64)\n# Transfer the device result to the host for an independent NumPy comparison.\nhost_w=np.asarray(w_check,dtype=np.float64)\nhost_p=1/(1+np.exp(-(host_X@host_w)))\nfor targets in (hard_targets,soft_targets):\n    # Transfer the device result to the host for an independent NumPy comparison.\n    expected=host_X.T@(host_p-np.asarray(targets))/len(host_X)\n    np.testing.assert_allclose(jax.grad(objective)(w_check,adapt_X,targets),expected,rtol=1e-5,atol=1e-6)\nmetrics={}\nfor name,weights in [('pretrained',restored),('supervised',sft),('teacher',distilled)]:\n    metrics[name]={'held_cross_entropy':float(objective(weights,held_X,held_prob)),\n                   'held_brier':float(jnp.mean((jax.nn.sigmoid(held_X@weights)-held_prob)**2)),\n                   'source_cross_entropy':float(objective(weights,source_X,source_targets))}\nassert metrics['supervised']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nassert metrics['teacher']['held_cross_entropy']<metrics['pretrained']['held_cross_entropy']\nprint(json.dumps(metrics,indent=2))\nprint('checkpoint source hash:',source_hash)",
         "explanation": "The teacher is the known generating rule in this fixture, so matching it is an especially favorable distillation setting. Report source retention as well as target-task improvement."
       }
+    ],
+    "optionFeedback": [
+      "A teacher target defines one branch’s objective; it does not make every branch’s training loss comparable or guarantee zero loss.",
+      "The common held-out task defines the comparison. Different training targets can yield different loss values even when prediction quality is similar; evaluating the final split during model selection would also leak information.",
+      "Using the final test split for iterative selection leaks test information. Compare branches on a separate common validation contract."
     ]
   }
 }

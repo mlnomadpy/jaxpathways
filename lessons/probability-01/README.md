@@ -183,7 +183,7 @@ visual_data = {"kind":"line","x":sizes.tolist(),"xlabel":"independent observatio
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:23:00.935725+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:31:03.330004+00:00. JAX 0.9.2.
 
 ```text
 sample mean, variance: 2.0067408084869385 9.035282135009766
@@ -371,7 +371,15 @@ Which statement explains why a large Monte Carlo sample can have a precise mean 
 
 <details><summary>Answer and explanation</summary>
 
-The standard error of the average decreases, while the distribution of an individual reading stays the same
+**1. Every sample becomes equal to the mean as sample size increases**
+
+The mean becomes more precisely estimated while individual draws remain variable. Compare the sampling distribution with the distribution of sample means.
+
+**2. The variance of each reading is divided by the sample size**
+
+Dividing variance by sample count describes uncertainty in the mean estimator, not the variability of one future reading.
+
+**3. The standard error of the average decreases, while the distribution of an individual reading stays the same (correct)**
 
 For independent draws the average has variance $\sigma^2/N$; a new reading still has variance $\sigma^2$. These are different random variables.
 

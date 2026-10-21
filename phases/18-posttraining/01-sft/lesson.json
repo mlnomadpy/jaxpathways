@@ -146,6 +146,11 @@
     "takeaways": [
       "Shift the role mask with target tokens \\(t+1\\) so the prediction made at the last prompt position still supervises the first response token.",
       "Keep causal attention visibility separate from the response loss mask, and carry numerator and valid-target counts explicitly when answers have unequal lengths."
+    ],
+    "optionFeedback": [
+      "Attention visibility and supervised output positions are separate contracts.",
+      "A response-only loss keeps prompt tokens as conditioning inputs. Attention visibility and target eligibility are separate contracts.",
+      "Eligibility belongs to the shifted target token, not simply the role of the input position. Inspect the last prompt position’s next-token target."
     ]
   }
 }

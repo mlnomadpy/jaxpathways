@@ -4,14 +4,19 @@
   "questions": [
     {
       "stage": "post",
-      "question": "What does a TPU generation's Roofline ridge point (`bf16_tflops / bw_gbs` in FLOPs/byte) tell you about a kernel?",
+      "question": "What does the theoretical BF16 Roofline ridge point, \\(1000 \\times \\text{TFLOP/s} / \\text{GB/s}\\) in FLOP/byte, describe?",
       "options": [
         "How many SSH keys can connect to the TPU VM",
-        "The minimum FLOPs performed per byte transferred from HBM required to become MXU compute-bound rather than HBM bandwidth-bound",
+        "The arithmetic intensity where the ideal HBM-bandwidth ceiling meets the ideal BF16-compute ceiling",
         "How long `gcloud compute tpus tpu-vm create` takes to provision"
       ],
       "correct": 1,
-      "explanation": "Below the ridge point, execution speed is limited by HBM memory bandwidth; above the ridge point, execution is limited by MXU matrix compute throughput."
+      "explanation": "Convert both rates to FLOP/s and byte/s first. The ratio locates the intersection of two ideal ceilings. Below it the bandwidth ceiling is lower; above it the compute ceiling is lower. Actual performance can fall below either ceiling because of tiling, communication, vector work or launch overhead.",
+      "optionFeedback": [
+        "A roofline ratio describes compute and memory rates. Authentication and SSH limits belong to a different control-plane contract.",
+        "Convert both rates to FLOP/s and byte/s first. The ratio locates the intersection of two ideal ceilings. Below it the bandwidth ceiling is lower; above it the compute ceiling is lower. Actual performance can fall below either ceiling because of tiling, communication, vector work or launch overhead.",
+        "Provisioning wait depends on capacity and scheduling, not this compute-to-bandwidth ratio. Keep capacity planning separate from kernel analysis."
+      ]
     }
   ]
 }

@@ -11,7 +11,12 @@
         "Ignore preprocessing because dependencies are pinned."
       ],
       "correct": 1,
-      "explanation": "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever."
+      "explanation": "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.",
+      "optionFeedback": [
+        "An image can build while carrying the wrong model. Verify the artifact digest and a known prediction inside the target runtime.",
+        "A container image packages the service runtime and code. The model artifact, runtime configuration and release identity are separate inputs. A reproducible service verifies all of them instead of assuming that an image tag names the same bytes forever.",
+        "Pinned packages do not specify preprocessing. Export and test the exact input-to-output pipeline."
+      ]
     }
   ]
 }

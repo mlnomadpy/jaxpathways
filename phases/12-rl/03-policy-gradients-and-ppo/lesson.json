@@ -148,6 +148,11 @@
         "code": "# Step 3 — Train and compare to a derivative reference\ntheta_pg, history_pg = train(seed=0, method='reinforce', epochs=1)\ntheta_ppo, history_ppo = train(seed=0, method='ppo', epochs=3)\nassert history_pg[-1] > .9 and history_ppo[-1] > .9\nassert jnp.allclose(history_pg[0], .466875, atol=1e-6)\nprint('REINFORCE initial/final exact return:', history_pg[0], history_pg[-1])\nprint('PPO initial/final exact return:', history_ppo[0], history_ppo[-1])\n# Compare a derivative of exact expectation with central differences.\nz = jnp.array([-.2, .3, .7])\neps = 1e-3\nd = jnp.array([0., 1., 0.])\nfd = (exact_return(z+eps*d)-exact_return(z-eps*d))/(2*eps)\nassert jnp.allclose(fd, jax.grad(exact_return)(z)[1], atol=1e-4)",
         "explanation": "The seed-specific return is measured after actual interaction and updates, while the derivative check uses deterministic expectations."
       }
+    ],
+    "optionFeedback": [
+      "The candidate policy changes during optimization; the collected actions and behavior log probabilities describe the fixed rollout.",
+      "Recomputing old probabilities with the updated policy destroys the importance ratio. Save them when the rollout is collected.",
+      "The probability ratio compares the changing candidate with the policy that actually generated the batch. Replacing its denominator destroys that comparison."
     ]
   }
 }

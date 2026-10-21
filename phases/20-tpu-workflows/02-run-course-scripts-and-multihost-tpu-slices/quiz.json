@@ -4,14 +4,19 @@
   "questions": [
     {
       "stage": "post",
-      "question": "What happens if you launch a distributed JAX script on a 4-host `v5litepod-16` slice without `--worker=all`?",
+      "question": "You launch an ordinary TPU-VM SSH command on worker zero of a multi-host slice, without another launcher. What can happen?",
       "options": [
         "Google Cloud automatically merges the 4 Linux hosts into 1 host",
-        "Only worker 0 starts Python, so `jax.distributed.initialize()` hangs waiting for the other 3 hosts (or 12 of the 16 TPU chips sit idle)",
+        "Only that worker starts the command; distributed initialization or collectives can wait for the missing participants",
         "The script runs four times faster"
       ],
       "correct": 1,
-      "explanation": "Each TPU VM worker has its own OS and Python process. Every worker must participate in the distributed program. gcloud --worker=all can launch them together; concurrent explicit worker commands or another supported job manager can do the same. Launching only one worker does not complete a global collective."
+      "explanation": "An explicit launcher must start every participating process with compatible configuration. --worker=all is one Cloud TPU API method; other orchestrators can do the same job. Initialization, data ownership and collected worker receipts still require separate checks.",
+      "optionFeedback": [
+        "An SSH command does not automatically launch Python on every worker. Use an explicit per-host launcher with matching configuration.",
+        "An explicit launcher must start every participating process with compatible configuration. --worker=all is one Cloud TPU API method; other orchestrators can do the same job. Initialization, data ownership and collected worker receipts still require separate checks.",
+        "Omitting participating workers cannot accelerate a collective that requires them. It can leave distributed initialization or communication waiting."
+      ]
     }
   ]
 }

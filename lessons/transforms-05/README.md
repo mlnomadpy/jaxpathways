@@ -165,7 +165,7 @@ visual_data = {'kind': 'bar', 'x': [0, 1], 'labels': ['sum', 'mean'], 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:12.240177+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:27:09.577956+00:00. JAX 0.9.2.
 
 ```text
 Sum: 6.0
@@ -415,9 +415,17 @@ A frequently changing runtime scalar controls a branch. What is the most appropr
 
 <details><summary>Answer and explanation</summary>
 
-Express the runtime decision with compatible JAX control flow.
+**1. Mark every runtime scalar static.**
+
+Making a value static specializes on it and can trigger a new compilation when it changes. Use runtime control flow when the predicate is data.
+
+**2. Express the runtime decision with compatible JAX control flow. (correct)**
 
 A runtime decision belongs in the staged computation. Static configuration is useful for a small program choice, but making changing data static can create unnecessary specializations.
+
+**3. Catch every exception and return zero.**
+
+Returning zero hides the original contract failure and changes the function. Express both branches with compatible JAX values instead.
 
 </details>
 

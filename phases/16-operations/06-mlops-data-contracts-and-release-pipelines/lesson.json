@@ -86,7 +86,7 @@
       "Declare accuracy has decreased by the drift score."
     ],
     "answer": 1,
-    "explanation": "MLOps connects data validation, training, evaluation, packaging, delivery and monitoring. Continuous integration tests code and contracts; model promotion additionally needs data and quality evidence. Automatic retraining is a policy decision, not the inevitable response to any drift alert.",
+    "explanation": "An unlabeled drift alert is evidence of a distribution change under the detector, not direct evidence of accuracy loss. Investigate data integrity, affected slices, service health and delayed outcomes. Retraining and promotion require their own declared quality gates.",
     "diagnosis": "Check denominators and slice counts before thresholds. A missing slice, nonfinite metric or changed evaluation manifest should block comparison. Investigate drift and training-serving skew separately from service health.",
     "takeaways": [
       "Validate data before the expensive job",
@@ -135,6 +135,11 @@
         "code": "shift = .5 * sum(abs(a-b) for a,b in zip(reference_mix,current_mix))\nassert math.isclose(shift, .4)",
         "explanation": "Checking these invariants confirms the computation is ready for the full worked experiment."
       }
+    ],
+    "optionFeedback": [
+      "Drift can reflect harmless distribution changes or instrumentation faults. Investigate data and labeled quality before promotion.",
+      "An unlabeled drift alert is evidence of a distribution change under the detector, not direct evidence of accuracy loss. Investigate data integrity, affected slices, service health and delayed outcomes. Retraining and promotion require their own declared quality gates.",
+      "Input drift and accuracy loss are different observations. Without labels, the detector cannot directly measure accuracy."
     ]
   }
 }

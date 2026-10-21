@@ -261,7 +261,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:27:07.386964+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:34:53.620441+00:00. JAX 0.9.2.
 
 ```text
 Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}
@@ -445,14 +445,22 @@ Deleting the Cloud TPU VM immediately after copying artifacts back avoids paying
 Why does `build_runtime_receipt()` run `jax.pmap` across `jax.local_devices()` and call `jax.block_until_ready` instead of only checking `jax.default_backend()`?
 
 1. Because `jax.default_backend()` deletes the virtual environment
-2. Because `jax.pmap` + `jax.block_until_ready` proves that `libtpu` compiled and executed a multi-device XLA computation across every local chip and returned the expected numerical result
+2. To exercise and synchronize a small computation on the visible local devices, beyond merely enumerating them
 3. Because `jax.pmap` automatically deletes the Cloud TPU VM
 
 <details><summary>Answer and explanation</summary>
 
-Because `jax.pmap` + `jax.block_until_ready` proves that `libtpu` compiled and executed a multi-device XLA computation across every local chip and returned the expected numerical result
+**1. Because `jax.default_backend()` deletes the virtual environment**
 
-A synchronized `pmap` reduction tests compilation, HBM allocation, and execution across all local devices rather than just querying a string.
+Backend discovery does not alter the environment. The extra computation tests a small operation on the visible local devices.
+
+**2. To exercise and synchronize a small computation on the visible local devices, beyond merely enumerating them (correct)**
+
+With the backend explicitly checked, mapped arithmetic and an independent expected sum exercise this small local-device contract. This does not qualify all chips on other hosts, the full model, precision paths or performance.
+
+**3. Because `jax.pmap` automatically deletes the Cloud TPU VM**
+
+pmap executes a mapped function; it does not manage cloud resources. Cleanup is a separate control-plane operation.
 
 </details>
 

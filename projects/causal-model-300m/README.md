@@ -62,3 +62,13 @@ Retain all stage manifests/checkpoints, one data/objective ablation, a recovery 
 Do not promote until corpus/source rights, document hashes, deduplication, contamination checks, tokenizer revision and stream ordering are frozen. Each pretraining/adaptation checkpoint must name its parent and retain optimizer, RNG and data cursor; held-out perplexity and fixed generation tasks must use separate real data, while toy next-token tables remain mechanics checks.
 
 Before this plan can change from **planned** to **authored**, provide independently checkable dataset/recipe manifests, staged parent-to-child checkpoint records with full resume state, real held-out evaluation outputs, and runnable plan-specific starter/reference/checks. Keep small CPU fixtures labeled as correctness evidence; they do not establish target-scale training, quality or production readiness.
+
+## Recipe decision rehearsal before target-scale training
+
+Instruction examples become more readable after continuation, but held-out base-domain NLL worsens.
+
+**Decide:** Separate domain continued pretraining from response-only SFT. Keep tokenization and token-weighted NLL fixed when comparing language-model likelihood; use separate instruction/retention/safety evaluation for behavior. Choose a mixture through a controlled pilot rather than assuming every continuation is an improvement.
+
+**Review packet:** Parent checkpoint and tokenizer hashes, source/token exposure, pretraining and SFT masks, held-out NLL plus generation examples, retention gates and exported loading/generation parity. The tiny causal-lineage run is not the target-scale model.
+
+This is a design exercise for a planned implementation. Record a hypothesis, a controlled pilot, a stopping criterion and the evidence needed to reject the recipe before requesting target-scale compute. Do not mark the capstone implemented or publish a model card with invented metrics.

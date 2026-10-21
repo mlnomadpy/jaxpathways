@@ -11,7 +11,12 @@
         "The number of optimizer iterations defines posterior variance"
       ],
       "correct": 0,
-      "explanation": "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer."
+      "explanation": "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.",
+      "optionFeedback": [
+        "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.",
+        "A Gaussian target can still have correlated coordinates that a diagonal variational family cannot represent.",
+        "More iterations can optimize the chosen family but cannot add missing covariance structure. Compare its uncertainty with the exact posterior."
+      ]
     }
   ]
 }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-01",
-  "contentHash": "b403b34976d1136fc1c14907cfdce91b95be88456f8d284da9584bd21c1cd6b2",
+  "contentHash": "5a7271813ed4860ccfc8ed2f6ddee3fdb0d3e378458e797dc3fad4d7da6ca612",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-20T22:28:32.402951+00:00",
+  "generatedAt": "2026-10-21T11:24:18.381919+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.0305721671320498,\n  \"warm_samples_seconds\": [\n    4.587508738040924e-05,\n    2.9374845325946808e-05,\n    2.2042077034711838e-05,\n    2.6333145797252655e-05,\n    2.9667280614376068e-05,\n    1.3665761798620224e-05,\n    7.91577622294426e-06\n  ],\n  \"warm_median_seconds\": 2.6333145797252655e-05,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
+  "stdout": "{\n  \"backend\": \"TFRT_CPU_0\",\n  \"jax\": \"0.9.2\",\n  \"numpy\": \"2.4.4\",\n  \"python\": \"3.14.3\",\n  \"input_shape\": [\n    64,\n    32\n  ],\n  \"weight_shape\": [\n    32,\n    16\n  ],\n  \"dtype\": \"float32\",\n  \"boundary\": \"input already placed; call plus output synchronization\",\n  \"first_call_seconds\": 0.03837099997326732,\n  \"warm_samples_seconds\": [\n    4.3375417590141296e-05,\n    5.27501106262207e-05,\n    5.087489262223244e-05,\n    3.99579294025898e-05,\n    5.358271300792694e-05,\n    4.850002005696297e-05,\n    4.408275708556175e-05\n  ],\n  \"warm_median_seconds\": 4.850002005696297e-05,\n  \"max_abs_error\": 2.384185791015625e-07\n}\n",
   "data": {
     "kind": "panels",
     "panels": [
@@ -28,7 +28,7 @@
           {
             "label": "synchronized call",
             "y": [
-              0.0305721671320498
+              0.03837099997326732
             ]
           }
         ]
@@ -51,13 +51,13 @@
           {
             "label": "synchronized call",
             "y": [
-              4.587508738040924e-05,
-              2.9374845325946808e-05,
-              2.2042077034711838e-05,
-              2.6333145797252655e-05,
-              2.9667280614376068e-05,
-              1.3665761798620224e-05,
-              7.91577622294426e-06
+              4.3375417590141296e-05,
+              5.27501106262207e-05,
+              5.087489262223244e-05,
+              3.99579294025898e-05,
+              5.358271300792694e-05,
+              4.850002005696297e-05,
+              4.408275708556175e-05
             ]
           }
         ]

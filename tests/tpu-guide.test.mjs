@@ -40,7 +40,8 @@ test('precision guide exposes measured CPU results, typeset math and deployment-
   const route = course.pathways.find(p => p.id === 'tpu');
   assert.match(renderPathway(route, course, true), /href="tpu-performance.html"/);
   const content = assessmentContent('content/guides/tpu-performance.md', href => /^(https?:|#)/.test(href) ? href : '/jaxpathways/' + href);
-  assert.equal(content.sections.length, 7);
+  assert(content.sections.some(section => /roofline claim with units/.test(section.label)));
+  for (const section of content.sections) assert(content.body.includes(`id="${section.id}"`));
   assert.match(content.body, /src="\/jaxpathways\/downloads\/tpu-performance\/precision.png"/);
   assert.match(content.body, /class="katex/);
   assert.doesNotMatch(content.body, /katex-error/);

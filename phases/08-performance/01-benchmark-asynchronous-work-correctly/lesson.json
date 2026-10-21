@@ -144,6 +144,11 @@
       "panel": {
         "kind": "timeline"
       }
-    }
+    },
+    "optionFeedback": [
+      "The measured boundary includes host dispatch and the wait. Calling it pure device-kernel time requires a device trace.",
+      "The boundary includes the call and its completion wait. It excludes input placement and does not isolate compiler or kernel stages.",
+      "Warmup has already performed compilation for the tested signature. A new shape or static argument may still introduce another compilation."
+    ]
   }
 }

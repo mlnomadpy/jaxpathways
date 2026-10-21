@@ -11,7 +11,12 @@
         "Compiled JAX cannot run exponentials."
       ],
       "correct": 1,
-      "explanation": "The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest."
+      "explanation": "The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest.",
+      "optionFeedback": [
+        "The primal operation can be mathematically differentiable while your interpreter lacks its rule. State the supported primitive set.",
+        "The missing piece is this interpreter’s derivative rule and semantics, not necessarily JAX support or mathematical differentiability. Explicit rejection keeps the supported contract honest.",
+        "JAX can differentiate exp. This exercise deliberately limits its own interpreter and should reject operations without verified rules."
+      ]
     }
   ]
 }

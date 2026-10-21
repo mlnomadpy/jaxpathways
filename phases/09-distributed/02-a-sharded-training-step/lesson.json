@@ -143,6 +143,11 @@
       "connection": "A gradient descent step subtracts these values. From zero weights with rate \\(0.1\\), the next weights would be \\((0.525,0.075)\\). This connects the signs in the picture to an actual update rather than treating taller or shorter bars as inherently better.\n\nAgreement with the global reference checks that sharding and reduction preserved the intended gradient on this batch. It is separate from a speedup, or imply that a coordinate’s current gradient sign reveals its final optimal weight. Input correlations and subsequent updates can change that sign.",
       "alt": "Sharded differentiation matches the global reference. For each weight coordinate, compare the sharded JAX gradient with the NumPy reference gradient beside it. Both methods give approximately \\((-5.25,-0.75)\\), so the paired bars have equal heights. They remain separate bars even where their edges touch. The bars extend below zero because the derivatives are negative. This is not a plot of negative loss. The larger magnitude for weight \\(0\\) indicates a stronger local sensitivity of the loss to that coordinate.",
       "code": "# Transfer the device result to the host for an independent NumPy comparison.\nvisual_data = {'kind': 'bar', 'labels': ['weight 0', 'weight 1'], 'ylabel': 'gradient coordinate', 'series': [{'label': 'sharded JAX', 'y': np.asarray(gradient).tolist()}, {'label': 'NumPy reference', 'y': expected_gradient.tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Summing local means multiplies the gradient for equal shard sizes. Compare the result with a single-device global mean.",
+      "A global mean gives each observation equal weight. With equal local counts, averaging local means preserves that weighting.",
+      "Choosing one device discards the other data. Aggregate all example contributions with the correct observation denominator."
+    ]
   }
 }

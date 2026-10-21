@@ -522,7 +522,7 @@ visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training ste
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:26:04.277217+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:33:54.456234+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]
@@ -722,9 +722,17 @@ Which evidence most directly supports a correct resume?
 
 <details><summary>Answer and explanation</summary>
 
-The next and later complete training states match a compatible uninterrupted run
+**1. The process prints started again**
+
+Starting a process does not show correct continuation. Compare the next batches, state and losses with an uninterrupted baseline.
+
+**2. The next and later complete training states match a compatible uninterrupted run (correct)**
 
 Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker.
+
+**3. The final loss is finite**
+
+A finite loss can belong to a different trajectory. Test state equality and several subsequent updates at the same boundary.
 
 </details>
 

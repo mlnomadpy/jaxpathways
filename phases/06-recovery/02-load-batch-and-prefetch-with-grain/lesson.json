@@ -134,6 +134,11 @@
       "connection": "The checkpoint captures the iterator after the first batch. Restoring it therefore resumes at the next batch, rather than replaying the first one. Equal IDs in the same slots establish that both membership and ordering agree at this boundary.\n\nIDs are labels, so a taller bar does not indicate a larger input value or a better batch. This comparison verifies the next batch only. To establish a complete training restart, also restore the matching model, optimizer, random state, and dataset configuration, then compare the next update.",
       "alt": "Restoring the iterator repeats the next batch. Each group is a slot within a batch, and bar height gives the example ID in that slot. Compare the “next batch” and “restored next” bars beside one another: their heights match at every slot. They are adjacent bars, not overlapping curves. The first batch contains \\((8,6,7,9)\\). The uninterrupted next batch contains \\((0,5,1,2)\\), and the restored iterator produces that same sequence. The zero-height bars in the first slot represent example ID \\(0\\); they are not missing data.",
       "code": "visual_data = {'kind': 'bar', 'labels': ['slot 0', 'slot 1', 'slot 2', 'slot 3'], 'ylabel': 'example ID', 'series': [{'label': 'first batch', 'y': first_batch['id'].tolist()}, {'label': 'next batch', 'y': second_batch['id'].tolist()}, {'label': 'restored next', 'y': replayed_batch['id'].tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "A seed restarts an initial sequence; it does not specify the current cursor. Rebuild the compatible pipeline and restore its iterator state.",
+      "Seed and source determine order, but iterator state determines where the resumed reader begins.",
+      "Consuming one batch moves the cursor and can skip data. Verify the restored next batch against the uninterrupted run before advancing."
+    ]
   }
 }

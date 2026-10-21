@@ -135,6 +135,11 @@
       "connection": "A large positive logit strongly favors label \\(1\\). That confidence is rewarded only if label \\(1\\) is actually observed. For label \\(0\\), the same confidence is a large mistake. The mirror-image curves make the dependence on the target explicit.\n\nLoss is not a probability or classification accuracy, so values above \\(1\\) are valid. The near-flat parts approach zero without implying an exact zero probability for the other class. Computing this loss from logits with a stable formula avoids unnecessary overflow or taking the logarithm of a rounded zero.",
       "alt": "Confidence is rewarded only when it matches the label. The horizontal axis is a logit, which becomes the predicted probability of label \\(1\\) after a sigmoid. The vertical axis is binary cross-entropy loss. The solid curve assumes the observed label is \\(1\\); the dashed curve assumes it is \\(0\\). At logit \\(0\\), the predicted probability is \\(0.5\\), and both losses are \\(\\log 2\\approx0.693\\). Moving right lowers the loss for observed label \\(1\\) but raises it for observed label \\(0\\). At logit \\(10\\), the latter loss is about \\(10\\), while the former is close to zero.",
       "code": "grid = jnp.linspace(-10.0, 10.0, 81)\nvisual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 'binary cross-entropy', 'series': [{'label': 'observed label 1', 'y': binary_loss(grid, 1.0).tolist()}, {'label': 'observed label 0', 'y': binary_loss(grid, 0.0).tolist()}]}"
-    }
+    },
+    "optionFeedback": [
+      "Numerical stability avoids overflow and cancellation. It does not guarantee that the learned decision boundary classifies every example correctly.",
+      "A logits-based implementation can stay finite for confident mistakes even when probabilities round to zero or one. It does not fix a poor model.",
+      "A stable loss is still a training objective. You need held-out data to estimate generalization and choose model settings."
+    ]
   }
 }

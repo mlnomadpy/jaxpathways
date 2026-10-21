@@ -11,7 +11,12 @@
         "Calling next once regardless of checkpoint position."
       ],
       "correct": 1,
-      "explanation": "Seed and source determine order, but iterator state determines where the resumed reader begins."
+      "explanation": "Seed and source determine order, but iterator state determines where the resumed reader begins.",
+      "optionFeedback": [
+        "A seed restarts an initial sequence; it does not specify the current cursor. Rebuild the compatible pipeline and restore its iterator state.",
+        "Seed and source determine order, but iterator state determines where the resumed reader begins.",
+        "Consuming one batch moves the cursor and can skip data. Verify the restored next batch against the uninterrupted run before advancing."
+      ]
     }
   ]
 }

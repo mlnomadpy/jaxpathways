@@ -11,7 +11,12 @@
         "Each device represents a separate TPU chip."
       ],
       "correct": 0,
-      "explanation": "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware."
+      "explanation": "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.",
+      "optionFeedback": [
+        "Partitioning divides the mapped dimension; it does not change the global shape or create accelerator hardware.",
+        "P(data, None) partitions the first axis. Divide twelve rows among four devices and inspect addressable_shards rather than assuming replication.",
+        "These are logical CPU devices. They let you test partitioning semantics, but provide no evidence about TPU chips, interconnects or throughput."
+      ]
     }
   ]
 }

@@ -11,7 +11,12 @@
         "The optimizer implementation is broken"
       ],
       "correct": 1,
-      "explanation": "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions."
+      "explanation": "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.",
+      "optionFeedback": [
+        "Stationarity alone does not establish global optimality. Inspect curvature, nearby values and any convexity assumptions.",
+        "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.",
+        "A valid stationary point can have a zero gradient. Check the derivative independently before blaming the optimizer."
+      ]
     }
   ]
 }

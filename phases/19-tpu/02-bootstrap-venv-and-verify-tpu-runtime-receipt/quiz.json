@@ -7,11 +7,16 @@
       "question": "Why does `build_runtime_receipt()` run `jax.pmap` across `jax.local_devices()` and call `jax.block_until_ready` instead of only checking `jax.default_backend()`?",
       "options": [
         "Because `jax.default_backend()` deletes the virtual environment",
-        "Because `jax.pmap` + `jax.block_until_ready` proves that `libtpu` compiled and executed a multi-device XLA computation across every local chip and returned the expected numerical result",
+        "To exercise and synchronize a small computation on the visible local devices, beyond merely enumerating them",
         "Because `jax.pmap` automatically deletes the Cloud TPU VM"
       ],
       "correct": 1,
-      "explanation": "A synchronized `pmap` reduction tests compilation, HBM allocation, and execution across all local devices rather than just querying a string."
+      "explanation": "With the backend explicitly checked, mapped arithmetic and an independent expected sum exercise this small local-device contract. This does not qualify all chips on other hosts, the full model, precision paths or performance.",
+      "optionFeedback": [
+        "Backend discovery does not alter the environment. The extra computation tests a small operation on the visible local devices.",
+        "With the backend explicitly checked, mapped arithmetic and an independent expected sum exercise this small local-device contract. This does not qualify all chips on other hosts, the full model, precision paths or performance.",
+        "pmap executes a mapped function; it does not manage cloud resources. Cleanup is a separate control-plane operation."
+      ]
     }
   ]
 }

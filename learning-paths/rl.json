@@ -42,7 +42,7 @@
     "rl"
   ],
   "modalityTrackIds": [],
-  "studyAdvice": "Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly.",
+  "studyAdvice": "Test one environment transition before batching it. Reconstruct a trajectory by hand, then compare the policy gradient with the small-state enumeration reference. Train multiple agents with different seeds and freeze the evaluation policy and random streams. Use the policy project to separate an implementation bug, Monte Carlo variation and an algorithm that learns poorly. For review, draw one terminal and one cutoff transition, showing the bootstrap observation. Then present per-agent held-out returns across independently trained seeds; episode count alone does not quantify training robustness.",
   "engineeringLessonIds": [
     "recovery-06",
     "operations-06"

@@ -181,7 +181,7 @@ visual_data = {'kind': 'bar', 'labels': ['observation 0', 'observation 1', 'obse
 
 ## Recorded reference execution
 
-CPU run: 2026-10-20T22:20:22.739680+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:35:29.946040+00:00. JAX 0.9.2.
 
 ```text
 Predictions: [3. 0. 2.]
@@ -397,9 +397,17 @@ What shape should one scalar target per observation have for predictions of shap
 
 <details><summary>Answer and explanation</summary>
 
-$(n,)$
+**1. $(n, 1)$**
+
+Subtracting $(n,)$ from $(n,1)$ broadcasts into an $(n,n)$ array. Check the residual shape before taking its mean.
+
+**2. $(n,)$ (correct)**
 
 Use matching $(n,)$ shapes. A column target can silently broadcast into pairwise residuals.
+
+**3. $(d,)$**
+
+The targets are indexed by observations, not features. There must be one target for each of the n predictions.
 
 </details>
 

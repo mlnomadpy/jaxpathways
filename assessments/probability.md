@@ -81,3 +81,9 @@ Explain why model-generated self-coverage checks arithmetic but verifies arithme
 Mark each task **accept**, **revise**, or **not demonstrated**. Accept requires agreement between the implementation, independent reference, observed output and explanation. Figures must explain actual plotted quantities. A reviewer should reject convergence claims based only on near-one R-hat, predictive intervals missing observation noise, or an approximation described as exact because its means match.
 
 After attempting the assessment, read [reviewer notes](probability-reviewer.md).
+
+## Reviewer discussion: distinguish evidence from a plausible claim
+
+The chains have similar means and classical R-hat near one, but all start in the same mode and predictive residuals show curvature.
+
+Before opening the reviewer notes, name the first unsupported claim and the smallest additional artifact that would resolve it. Keep correct partial reasoning even when the overall submission needs repair.

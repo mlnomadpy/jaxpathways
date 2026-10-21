@@ -267,6 +267,11 @@
         "code": "print(\"NumPy:\", np.__version__)\nprint(\"Backend:\", jax.default_backend())\nprint(\"Devices:\", jax.devices())\nx = jax.numpy.arange(4, dtype=jax.numpy.float32)\nprint(\"Sum:\", float(x.sum()))\nassert float(x.sum()) == 6.0",
         "explanation": "The array sum is 0 + 1 + 2 + 3 = 6. The equality check is exact here because these small integers are represented exactly in float32. The assembled blocks include the same version and device diagnostics as the complete example."
       }
+    ],
+    "optionFeedback": [
+      "A screenshot records the result, but leaves the inputs and computation hidden. Give another learner the script and environment record so they can try to reproduce it.",
+      "The script records what ran; versions and device information record where it ran. CPU success is separate from TPU compatibility.",
+      "The editor does not determine the numerical backend or package APIs. Record Python, package versions, devices and the runnable script."
     ]
   }
 }

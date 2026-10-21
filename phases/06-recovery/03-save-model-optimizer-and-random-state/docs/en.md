@@ -321,7 +321,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(saved_norms))), 'labels': [f'l
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T10:05:22.060810+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T11:29:11.083378+00:00. JAX 0.9.2.
 
 ```text
 Restored step: 3
@@ -560,9 +560,17 @@ Which checkpoint supports replaying the next Adam update with stochastic targets
 
 <details><summary>Answer and explanation</summary>
 
-Parameters, Adam state/count, continuation key, step and compatible data/configuration.
+**1. Parameters alone.**
+
+Adam moments, its count, random keys and data position affect later updates. Matching current parameters alone is insufficient.
+
+**2. Parameters, Adam state/count, continuation key, step and compatible data/configuration. (correct)**
 
 The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state.
+
+**3. A seed plus the last printed loss.**
+
+A seed and loss are not a snapshot of the trajectory. Compare complete state and the next batch, then continue for several steps.
 
 </details>
 

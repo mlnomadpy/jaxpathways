@@ -38,11 +38,11 @@ Review: [Select a TPU slice and provision your Cloud TPU VM](01-get-a-tpu-runnin
 
 ### Try a changed condition
 
-A script runs on a Cloud TPU VM without raising an error, but throughput is identical to a laptop CPU. What should your receipt check first?
+Your runtime receipt reports four local devices. Is that always four physical chips, and does it establish a production-model run?
 
 <details><summary>Compare an approach</summary>
 
-Inspect observed_backend and device_count in the JSON receipt; if libtpu was missing or JAX_PLATFORMS=tpu was not set, JAX silently fell back to CPU.
+No. The mapping depends on generation and topology; TPU7x exposes chiplets as devices. Record machine type and device kinds with a synchronized numerical check. A small runtime receipt qualifies only its tested work, and the named control-plane resources still need explicit cleanup.
 
 </details>
 
