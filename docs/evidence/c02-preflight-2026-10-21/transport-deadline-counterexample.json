@@ -1,0 +1,23 @@
+{
+  "serveSourceSha256": "223fb3617a4ac4b407300959cfbb9d018867df5dc38693a7e4b42be949e33fa4",
+  "declaredLifetimeSeconds": 0.15,
+  "scope": "Actual loopback incomplete-body deadline probe; no model inference.",
+  "observedElapsedSeconds": 0.8604801250621676,
+  "responseOrEOF": "no response or EOF before probe timeout",
+  "health": {
+    "status": 200,
+    "body": {
+      "status": "ready",
+      "model_status": "transport probe only",
+      "branch": "probe",
+      "manifest_sha256": "8003d3193959e164e1840748c50ef245454e6f920e2b0269da78b73b599d29f3",
+      "request_limits": {
+        "body_bytes": 8192,
+        "active_requests": 2,
+        "lifetime_seconds": 0.15,
+        "max_new_tokens": 32
+      }
+    }
+  },
+  "ownedServerStopped": true
+}
