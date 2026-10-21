@@ -1,0 +1,38 @@
+{
+  "scope": "Frozen C01 model sub-check only; no claim yet about complete stage-all acceptance or historical run invalidity. Own candidate mutation changes only the MLM logits body to ignore all parameters/inputs.",
+  "checker_sha256": "6f8f2b360f0a306508b6c658256cbac91195e4e665ad29741bafbcd7bc618aeb",
+  "reference_sha256": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+  "candidate_sha256": "27646676c933653aba0555e443e9bd47d5de9b0b4f3f0c0515ec50cf235040b4",
+  "reference": {
+    "model_check_passed": true,
+    "checks": {
+      "target_encoder_params": 302090240,
+      "target_with_mlm_params": 303191040,
+      "bidirectional_future_context": true,
+      "numpy_encoder_attention_rope_mask_pooling_oracle": true,
+      "uniform_attention_mutation_rejected": true,
+      "padding_and_batch_isolation": true,
+      "nonzero_dropout_responds_to_prng": true,
+      "mlm_numpy_oracle_and_gradient_fd": true,
+      "multi_positive_numpy_oracle_and_gradient_fd": true,
+      "candidate": "/private/tmp/jaxpathways-reader-review-fix/projects/embedding-model-300m/model.py"
+    }
+  },
+  "constant_mlm": {
+    "model_check_passed": true,
+    "checks": {
+      "target_encoder_params": 302090240,
+      "target_with_mlm_params": 303191040,
+      "bidirectional_future_context": true,
+      "numpy_encoder_attention_rope_mask_pooling_oracle": true,
+      "uniform_attention_mutation_rejected": true,
+      "padding_and_batch_isolation": true,
+      "nonzero_dropout_responds_to_prng": true,
+      "mlm_numpy_oracle_and_gradient_fd": true,
+      "multi_positive_numpy_oracle_and_gradient_fd": true,
+      "candidate": "/private/tmp/jaxpathways-c01-root-mlm-probe/zero_mlm_logits.py"
+    },
+    "actual_gradient_norm": 0.0,
+    "max_logit_error_vs_independent_tied_head": 0.29361255490383564
+  }
+}
