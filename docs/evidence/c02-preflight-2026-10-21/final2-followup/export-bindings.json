@@ -1,0 +1,54 @@
+{
+  "scope": "Full exporter CLI against real frozen data/checkpoint and evaluation receipts, including seven stale receipt mutations. No model publication.",
+  "source_sha256": "5e4e05d708fdb35ec38e1de89f7e25c2723a65590bdb86004bd4d1d53b3e85fc",
+  "cases": [
+    {
+      "altered_field": "recipe_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation recipe_sha256 differs from the frozen package inputs"
+    },
+    {
+      "altered_field": "tokenizer_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation tokenizer_sha256 differs from the frozen package inputs"
+    },
+    {
+      "altered_field": "evaluator_source_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation evaluator_source_sha256 differs from the frozen package inputs"
+    },
+    {
+      "altered_field": "scorer.reference_bytes_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation scorer.reference_bytes_sha256 differs from the frozen package inputs"
+    },
+    {
+      "altered_field": "branches.sft_full_from_domain.checkpoint_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation checkpoint digest differs from selected branch"
+    },
+    {
+      "altered_field": "branches.sft_full_from_domain.checkpoint_identity_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation checkpoint identity differs from selected branch"
+    },
+    {
+      "altered_field": "branches.sft_full_from_domain.candidate_source_sha256",
+      "exit_code": 1,
+      "output_absent": true,
+      "error": "ValueError: evaluation candidate identity differs from checkpoint"
+    }
+  ],
+  "positive_control": {
+    "accepted": true,
+    "evaluation_quality_still_failed": true,
+    "manifest_sha256": "8a44debff5a58a7640f40e0404f955d38190df45b3c92ab962c8f74d82044220"
+  },
+  "status": "pass"
+}
