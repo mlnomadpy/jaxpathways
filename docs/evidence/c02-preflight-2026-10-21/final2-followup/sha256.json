@@ -1,4 +1,6 @@
 {
+  "baseline-output-aggregation.json": "b14ce36a9c0dbd7e1faadabe2ec44590bde266c2005f51066d524bc73293ae99",
+  "check-baseline-outputs.py": "7828e5fe155bd375c7a5153fce2a2dccaca6eda77c0fd47dd1d7177a586c1d21",
   "check-export.py": "55182f9ba5a40465d474a96ad416d45b719106dcff441e4edad0567bdef3082f",
   "check-qa.py": "96ea539006ee9894aa8bea52709cf3ec7271ecb61b12d2367e2de61631960f54",
   "check-selected-generation.py": "86443019dde6182d87ef83285455fa3673a994ff74ed0e0aac69989c0dcf1a80",

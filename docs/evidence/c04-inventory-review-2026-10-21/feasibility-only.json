@@ -1,0 +1,47 @@
+{
+  "slr31-train-clean-5": {
+    "components": 24,
+    "utterances": 195,
+    "seconds": 956.964875
+  },
+  "slr31-dev-clean-2": {
+    "components": 23,
+    "utterances": 744,
+    "seconds": 3358.885125,
+    "illustrative_feasibility_only": {
+      "development": {
+        "components": 11,
+        "utterances": 370,
+        "seconds": 1682.4851875
+      },
+      "final": {
+        "components": 12,
+        "utterances": 374,
+        "seconds": 1676.3999374999999
+      }
+    }
+  },
+  "slr12-dev-other": {
+    "components": 29,
+    "utterances": 2059,
+    "seconds": 9265.2549375,
+    "illustrative_feasibility_only": {
+      "fit": {
+        "components": 21,
+        "utterances": 1391,
+        "seconds": 6418.325
+      },
+      "development": {
+        "components": 4,
+        "utterances": 350,
+        "seconds": 1436.4850000000001
+      },
+      "final": {
+        "components": 4,
+        "utterances": 318,
+        "seconds": 1410.4449375
+      }
+    }
+  },
+  "ctc_inventory_token_hash_mismatch_rows": 5466
+}

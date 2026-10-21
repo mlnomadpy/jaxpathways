@@ -16,6 +16,13 @@ the frozen 0.13 review candidate or qualify the full causal capstone.
   the same first four tokens in each record, including an explicit alpha-eight,
   rank-four LoRA merge. This bounded replay does not cover every QA record or
   corpus NLL and does not change the failed quality verdict.
+- Saved-output checks also reproduced the pinned Pythia baseline's 128 QA
+  scores and prompt/answer/tokenizer/checkpoint identities, and the native
+  task smoke's raw and character-normalized choice aggregations. The native
+  task sample size is eight per task. This is not independent execution of
+  the baseline/harness, reconstruction of task datasets, or acceptance of
+  the harness's source provenance. Its returned working-directory Git value
+  was misleadingly labeled as a harness hash and needs a separate correction.
 - The complete frozen exporter CLI rejected seven individually altered receipt
   bindings before creating an output directory: recipe, tokenizer, evaluator,
   scorer, checkpoint bytes, checkpoint identity and candidate identity. The

@@ -1,0 +1,25 @@
+{
+  "status": "pass",
+  "scope": "Saved Pythia QA prompt/answer/tokenizer/checkpoint identity and all 128 scores; native task raw-versus-character-normalized choice aggregation on 8 stored samples each. No independent model execution, harness source provenance, task dataset reconstruction or official benchmark qualification.",
+  "input_sha256": {
+    "jaxpathways-c02-pythia-qa-20261021.json": "85f97fea65f00b71d87aa97734856e7ad78830546664ce243987ec60be848916",
+    "jaxpathways-c02-lm-eval-20261021-final.json": "f1faea0146594ab72f1bf57e9bc2981fa82da7a465e9bd0078f786995d84f4bc"
+  },
+  "pythia": {
+    "questions": 128,
+    "exact_match": 0.0,
+    "token_f1": 0.03371150492863326
+  },
+  "native_task_smoke": {
+    "hellaswag": {
+      "examples": 8,
+      "accuracy": 0.25,
+      "accuracy_character_normalized": 0.375
+    },
+    "arc_easy": {
+      "examples": 8,
+      "accuracy": 0.125,
+      "accuracy_character_normalized": 0.25
+    }
+  }
+}
