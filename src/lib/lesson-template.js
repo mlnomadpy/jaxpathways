@@ -100,6 +100,10 @@ export function renderLesson({ phase, lesson, prerequisiteLinks, allLessons, ind
         <a class="stage-pill" data-stage-pill="Practice" href="#stage-practice"><span class="stage-step-num">${stageNumber('Practice')}</span> Exercise &amp; Check</a>
         <a class="stage-pill" data-stage-pill="Evidence" href="#stage-evidence"><span class="stage-step-num">${stageNumber('Evidence')}</span> Evidence</a>
       </div>
+      <div class="stage-bar-navigation" role="group" aria-label="Previous and next lesson activities">
+        <a class="button" id="previous-activity" href="#lesson-title" hidden>Previous activity</a>
+        <a class="button primary" id="next-activity" href="#stage-build">Next: Build</a>
+      </div>
     </div>
     <div id="stage-understand" class="lesson-stage stage-understand" data-lesson-stage="Understand" data-stage-active="true">
       <div class="stage-transition-banner"><span class="stage-kicker">Stage 1 of ${stageCount} · Understand the Mechanism</span><span class="stage-summary">Core mental model, equations &amp; visual walkthrough</span></div>

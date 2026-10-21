@@ -1,0 +1,10 @@
+# Bounded CPU implementation, tokenizer, Hub-compatible local loader and pinned baseline.
+jax==0.9.2
+jaxlib==0.9.2
+numpy==2.4.4
+tokenizers==0.22.2
+safetensors==0.7.0
+huggingface_hub==1.10.1
+sentence-transformers==6.2.0
+transformers==5.5.4
+torch==2.11.0

@@ -74,7 +74,14 @@
       "deployment-05"
     ],
     "status": "planned",
-    "source": "projects/embedding-model-300m/README.md"
+    "source": "projects/embedding-model-300m/README.md",
+    "pilot": {
+      "title": "C01 SciFact CPU pilot",
+      "scope": "A bounded CPU run observed the staged training and retrieval workflow. The precommitted retrieval floors failed; this pilot does not qualify the full approximately-300M capstone, target training, general retrieval quality, or production release.",
+      "anchor": "cpu-pilot",
+      "download": "embedding-model-300m-pilot.zip",
+      "evidence": "reference/evidence-index.json"
+    }
   },
   {
     "id": "causal-model-300m",

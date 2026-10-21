@@ -145,21 +145,36 @@ const ungroupedProjects = registry.projects.filter(
     <section id="alignment-retrieval" class="project-roadmap" aria-labelledby="alignment-heading">
       <h2 id="alignment-heading">Next: complete model lifecycles</h2>
       <p>
-        Planned capstones connect text, image, audio and multimodal training to evaluation and
-        release. Read their staged specifications; runnable workspaces and measured results are
-        still to come.
+        Full capstones connect text, image, audio and multimodal training to evaluation and release.
+        Their full implementations remain planned; the embedding-model plan also offers a bounded
+        CPU pilot with measured results.
       </p>
       <ul>
         {projectPlans.map((project) => (
           <li data-planned-project-id={project.id}>
             <div>
-              <p class="edition">Planned capstone</p>
+              <p class="edition">
+                {project.pilot
+                  ? 'Full capstone planned · bounded CPU pilot available'
+                  : 'Planned capstone'}
+              </p>
               <h3>{project.title}</h3>
               <p>{project.summary}</p>
             </div>
-            <a class="button" href={siteUrl(`project-plans/${project.id}.html`)}>
-              Read project plan
-            </a>
+            <div class="actions">
+              <a class="button" href={siteUrl(`project-plans/${project.id}.html`)}>
+                {project.pilot ? 'Read plan and pilot details' : 'Read project plan'}
+              </a>
+              {project.pilot && (
+                <a
+                  class="button primary"
+                  href={siteUrl(`downloads/${project.pilot.download}`)}
+                  download
+                >
+                  Download optional CPU pilot
+                </a>
+              )}
+            </div>
           </li>
         ))}
       </ul>

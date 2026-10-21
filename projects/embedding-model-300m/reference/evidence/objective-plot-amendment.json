@@ -1,0 +1,28 @@
+{
+  "amendment": {
+    "created_on": "2026-10-21",
+    "focused_test_command": "python3 -m unittest projects.embedding-model-300m.tests.test_plots -v",
+    "focused_test_result": "3 synthetic rendering tests passed: variable counts across phases, a single all-zero phase, and evidence-gated singleton interpretation.",
+    "full_training_or_evaluation_rerun": false,
+    "historical_receipt": {
+      "path": "reference/evidence/final8/sourcebound-receipt.json",
+      "sha256": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
+    },
+    "purpose": "Replace the overlapping shared-axis training-loss legend with independent phase panels in current learner runtime plots. The unchanged historical final8 run remains attributed only to its original source-bound receipt.",
+    "source_change": {
+      "path": "plots.py",
+      "historical_sha256": "6c0a67da4e5a6f1510ddcbd081715d54de6419571fd11df6c531a685679cd5f4",
+      "current_sha256": "f131d705fbe3962cdce716990fbbc98642a59e77a64805bdc260671740d99927"
+    },
+    "teaching_renderer": {
+      "path": "tools/render_teaching_objectives.py",
+      "sha256": "f867da008fa9bdaac11e1cb2ad85d82ee0dba65d8db455b9140982d1767d6008"
+    },
+    "teaching_output": {
+      "path": "reference/teaching/objective-panels.svg",
+      "sha256": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936"
+    },
+    "scope": "Plotting only. No model, training, recipe, data, or evaluation values changed. A full current checker run is still required for integration."
+  },
+  "schema": "jaxpathways.embedding-c01.plot-layout-amendment.v1"
+}

@@ -1,0 +1,77 @@
+{
+  "recordedAt": "2026-10-21T18:52:28.030224+00:00",
+  "pullRequest": {
+    "headRefOid": "93c0b2d1f547d52bb9118e12cb8857e76f9f65c3",
+    "isDraft": true,
+    "state": "OPEN",
+    "url": "https://github.com/mlnomadpy/jaxpathways/pull/64"
+  },
+  "checks": [
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397276",
+      "name": "tpu-dependencies",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850242/job/119405396827",
+      "name": "powershell",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397476",
+      "name": "site",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397061",
+      "name": "browser",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397342",
+      "name": "lessons",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397559",
+      "name": "projects (0)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397364",
+      "name": "projects (1)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397577",
+      "name": "projects (2)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397662",
+      "name": "projects (3)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397347",
+      "name": "loggers",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397517",
+      "name": "numpyro",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397529",
+      "name": "diffrax",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/mlnomadpy/jaxpathways/actions/runs/39652850250/job/119405397441",
+      "name": "decoder-foundations",
+      "state": "SUCCESS"
+    }
+  ],
+  "scope": "All13 hostedchecks for exact frozen v0.12 commit; not v0.13."
+}

@@ -1,0 +1,86 @@
+{
+  "historical_inputs": {
+    "figure_data": {
+      "path": "reference/evidence/final8/figure-data.json",
+      "sha256": "1ca4d365ca5f1179ecd858647d6eb781cab504bc3c1fd20e23968b79c9ce6766",
+      "trace_rows_equal_training_trace": true
+    },
+    "historical_combined_plot": {
+      "path": "reference/evidence/final8/figures/training-objectives.svg",
+      "preserved_unchanged": true,
+      "sha256": "485b691ed3ddf9b11239de4d6f4a30a0a31b433d5be5c6330189824776bfed72"
+    },
+    "historical_receipt": {
+      "path": "reference/evidence/final8/sourcebound-receipt.json",
+      "sha256": "514287dcfd125d3127f93c43d0c20540b6325c9d4d39f4a803ea2fa57aa942b8"
+    },
+    "training_trace": {
+      "path": "reference/evidence/final8/training-trace.json",
+      "sha256": "a9a8016bf4672083859daafe1a548c436bc5ebbbb7c463bf2ef265778917e5d1"
+    }
+  },
+  "outputs": {
+    "phase_panels": {
+      "path": "reference/teaching/objective-panels.svg",
+      "sha256": "6e86d755412a3943f6befa3b7f8524956679498e5f21e5dd86f2cd2f0edb8936",
+      "size_bytes": 19568
+    }
+  },
+  "panels": {
+    "phase1_mlm": {
+      "final_value": 6.253174781799316,
+      "loss_field": "loss_nats_per_masked_token",
+      "maximum": 6.276651382446289,
+      "minimum": 6.208186626434326,
+      "unit": "nats per selected masked token",
+      "updates": 8,
+      "zero_preserving_vertical_axis": true
+    },
+    "phase2_contrastive_only": {
+      "final_value": 3.416426658630371,
+      "loss_field": "contrastive_plus_weighted_mlm_loss",
+      "maximum": 5.324756622314453,
+      "minimum": 0.5515542030334473,
+      "unit": "contrastive objective units",
+      "updates": 8,
+      "zero_preserving_vertical_axis": true
+    },
+    "phase2_contrastive_plus_retained_mlm": {
+      "final_value": 4.048871994018555,
+      "loss_field": "contrastive_plus_weighted_mlm_loss",
+      "maximum": 5.9250922203063965,
+      "minimum": 1.1722111701965332,
+      "unit": "mixed contrastive + weighted MLM units",
+      "updates": 8,
+      "zero_preserving_vertical_axis": true
+    },
+    "phase3_human_pairs": {
+      "final_value": 0.0,
+      "loss_field": "multi_positive_loss",
+      "maximum": 4.185644149780273,
+      "minimum": 0.0,
+      "unit": "multi-positive contrastive objective units",
+      "updates": 71,
+      "zero_preserving_vertical_axis": true
+    }
+  },
+  "phase3_final_batch": {
+    "candidate_count": 1,
+    "interpretation": "The last partial batch contains one query, one positive pair, and one candidate. Its zero loss is not evidence of retrieval quality.",
+    "loss": 0.0,
+    "positive_pair_count": 1,
+    "query_count": 1,
+    "step": 71
+  },
+  "purpose": "Four phase-specific teaching panels from the same generic renderer used by learner runs; historical final8 trace, plot and receipt are preserved.",
+  "renderer": {
+    "path": "tools/render_teaching_objectives.py",
+    "sha256": "f867da008fa9bdaac11e1cb2ad85d82ee0dba65d8db455b9140982d1767d6008"
+  },
+  "runtime_renderer": {
+    "path": "plots.py",
+    "sha256": "f131d705fbe3962cdce716990fbbc98642a59e77a64805bdc260671740d99927",
+    "shared_function": "loss_figure"
+  },
+  "schema": "jaxpathways.embedding-c01.teaching-figure.v2"
+}

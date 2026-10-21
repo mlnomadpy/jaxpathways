@@ -1,6 +1,6 @@
 # Flagship capstone: build and release a 300M embedding model
 
-**Status: planned project specification, 2026-10-06.** No 300M model has been trained, benchmarked, production-qualified or published by this project. It is not yet part of the registered executable project count. This is the advanced integration capstone for the [course expansion plan](../../docs/course-roadmap-2026-10-06.md), within the [seven-project lifecycle catalog](../../docs/model-lifecycle-capstones.md). Its embedding branches remain below; causal, image/audio generation and grounded multimodal models now have separate project specifications.
+**Full capstone status: planned. Bounded C01 SciFact CPU workflow: in development.** No 300M model has been trained, benchmarked, production-qualified or published by this project. The executed C01 pilot below demonstrates a small, real-data lifecycle workflow; it does not qualify the target architecture, general embedding quality or a production runtime. Full-capstone registration and target-scale acceptance remain pending. This is the advanced integration capstone for the [course expansion plan](../../docs/course-roadmap-2026-10-06.md), within the [seven-project lifecycle catalog](../../docs/model-lifecycle-capstones.md). Its embedding branches remain below; causal, image/audio generation and grounded multimodal models now have separate project specifications.
 
 The learner will make and defend a sequence of decisions: what the model should retrieve, which data it may learn from, how inputs become representations, which objective belongs at each stage, whether the representation improves, and whether someone else can load and operate the released model.
 
@@ -14,7 +14,132 @@ The learner will make and defend a sequence of decisions: what the model should 
 - [Image, audio and cross-modal versions of the capstone](MODALITIES.md)
 - [Packaging, numerical parity and Hugging Face publication](RELEASE.md)
 
+## C01 SciFact CPU pilot
+
+The first executable workflow is under `data/`, `model.py`, `objectives.py`,
+`trainer.py`, `evaluation.py`, `package_runtime.py`, `run.py`, and `tests/`.
+It implements a real bidirectional RoPE Transformer, a tied masked-token head,
+two matched weak-pair phase-2 branches, and a human-evidence multi-positive
+phase 3. It saves a full-coverage exact BM25 baseline, a random-initialized
+encoder diagnostic, and a pinned external MiniLM-L6-v2 comparison. All quality
+numbers are measured on the full SciFact corpus with the frozen official-dev
+query inventory; this is a custom final protocol because the official test
+split has no public gold judgments.
+
+The official 3.1 MB data archive and every split inventory are byte- and
+membership-hashed by [`data/frozen_recipe.json`](data/frozen_recipe.json).
+The preparer writes normalized data outside the source tree and rejects any
+archive whose SHA-256 differs. Claims/evidence terms and corpus abstract terms
+are separate; see [`data/LICENSES.md`](data/LICENSES.md). The full candidate
+corpus remains available at retrieval time, while its complete final-connected
+document group and all final query text are excluded from tokenizer and
+training exposure. Candidate-corpus exposure is disclosed as transductive.
+There is a separate disclosed recipe-development document exposure: 29
+development-component documents are among the 4,888 permitted corpus documents
+used to fit the tokenizer, and the deterministic 128-document MLM sample
+contains 3 of them. Recipe-development claim text and human query/evidence pairs
+are excluded from training. Treat development retrieval metrics as document-text
+transductive; they are not a clean unseen-document estimate.
+
+Create an isolated environment from the fully pinned lock before running the
+CPU workflow. The baseline weights are about 90.9 MB and download from a pinned
+public revision on first run. The offline option requires that exact snapshot
+to exist in the output directory; missing files are errors.
+
+On Linux, install the CPU-only PyTorch wheel before the lock to avoid pulling CUDA packages; this is installation guidance, not Linux execution qualification.
+
+```sh
+python -m pip install --no-deps --index-url https://download.pytorch.org/whl/cpu 'torch==2.11.0'
+```
+
+POSIX shell:
+
+```sh
+C01_TMP="${TMPDIR:-/tmp}"
+mkdir -p "$C01_TMP"
+python3 -m venv "$C01_TMP/jaxpathways-embedding-env"
+. "$C01_TMP/jaxpathways-embedding-env/bin/activate"
+python -m pip install -r projects/embedding-model-300m/requirements-embedding-lock.txt
+python projects/embedding-model-300m/data/prepare.py --download --output "$C01_TMP/jaxpathways-scifact-c01-data"
+python projects/embedding-model-300m/tests/check.py --implementation solution --stage all --data "$C01_TMP/jaxpathways-scifact-c01-data" --output "$C01_TMP/jaxpathways-embedding-c01-check"
+```
+
+PowerShell:
+
+```powershell
+py -3 -m venv $env:TEMP\jaxpathways-embedding-env
+& $env:TEMP\jaxpathways-embedding-env\Scripts\Activate.ps1
+python -m pip install -r projects/embedding-model-300m/requirements-embedding-lock.txt
+python projects/embedding-model-300m/data/prepare.py --download --output "$env:TEMP\jaxpathways-scifact-c01-data"
+python projects/embedding-model-300m/tests/check.py --implementation solution --stage all --data "$env:TEMP\jaxpathways-scifact-c01-data" --output "$env:TEMP\jaxpathways-embedding-c01-check"
+```
+
+`run.py --stage phase1`, `--stage phase2`, `--stage phase3`, and `--stage all`
+are explicit executable milestones. Each command builds its prerequisites
+from the frozen recipe; an unavailable dependency, missing dataset, or missing
+pinned baseline is an error. The default run directory is a fresh external
+temporary folder. To work on the learner implementation, pass
+`--implementation starter`; it intentionally raises until the required model
+APIs are implemented.
+
+The pilot precommits its small data and update budget in the frozen recipe.
+The phase-2 joint branch is the declared phase-3 parent; development data does
+not select a branch after the fact. The final quality floors are gates, not
+claims of success. A short CPU run can establish mechanics, exact resume,
+source coverage and local consumer parity only. MTEB, quality-generalization,
+human review, full target training, accelerator qualification and remote Hub
+download remain open.
+
 Use the [shared tooling plan](../../docs/model-lifecycle-tooling.md) for equivalent Weights & Biases and MLflow tracking, bounded sweeps and artifact lineage. The tracking adapter is independent of the training objective.
+
+## Measured pilot results
+
+The retained `final8` run is a bounded CPU pilot, not a completed 300M capstone. Its retrieval figure compares seven systems on the same full corpus of 5,183 abstracts and the frozen 300-query SciFact development inventory. Only 188 queries have human evidence-document judgments; the other 112 remain in the inventory but are excluded from macro metric denominators. Recall@k divides retrieved judged positives by that query's number of relevant evidence documents, nDCG@k uses binary evidence relevance and its ideal ranking, and MRR is the reciprocal rank of the first relevant document. The horizontal axis is metric value from 0 to 1; blue bars are Recall@10 and orange bars are nDCG@10.
+
+![Measured final8 retrieval metrics](reference/evidence/final8/figures/final-retrieval.svg)
+
+| System | Recall@10 | nDCG@10 | MRR |
+| --- | ---: | ---: | ---: |
+| BM25 | 0.9242021 | 0.8218117 | 0.7959756 |
+| Pinned MiniLM-L6-v2 baseline | 0.9117021 | 0.7742753 | 0.7353779 |
+| Random initialization | 0.0159574 | 0.0120312 | 0.0149667 |
+| Phase 1 MLM | 0.0265957 | 0.0091670 | 0.0089226 |
+| Phase 2 contrastive-only | 0.0212766 | 0.0083259 | 0.0100976 |
+| Phase 2 with retained MLM | 0.0265957 | 0.0099271 | 0.0101971 |
+| Phase 3 human-evidence pairs | 0.0212766 | 0.0092948 | 0.0109189 |
+
+The precommitted phase-3 floors were Recall@10 ≥ 0.30 and nDCG@10 ≥ 0.10; the observed 0.0212766 and 0.0092948 fail both. The result is a negative pilot outcome: it does not support useful retrieval quality or promotion to a larger run. BM25 and the pinned MiniLM baseline are strong references on this small task, and every trained checkpoint remains far below them.
+
+Each panel has its own phase-local x axis—8, 8, 8, and 71 updates—and its own
+zero-preserving y axis, so values from different objectives are not compared
+on a shared scale. Each panel names its loss units: phase 1 uses nats per
+selected masked token; phase 2 contrastive-only uses the contrastive objective;
+its joint branch combines contrastive and weighted MLM loss; phase 3 uses
+multi-positive contrastive loss. Learner runs and the retained teaching
+figure use the same generic `plots.py::loss_figure` renderer; the evidence-
+bound wrapper checks the frozen final8 inputs before calling it. Its panel
+renderer and figure are bound to
+the unchanged trace and figure data by [`teaching/manifest.json`](reference/teaching/manifest.json)
+and the explicit [`teaching_extension`](reference/evidence-index.json) entry.
+
+Update 71 in phase 3 contains one query, one positive pair, and one candidate
+document. Its loss of 0 reflects a single-example final batch and is not
+evidence of retrieval quality. The historical combined plot remains
+byte-for-byte unchanged at
+[`evidence/final8/figures/training-objectives.svg`](reference/evidence/final8/figures/training-objectives.svg); its original hash is recorded alongside the new plot hash.
+
+![Four phase-specific views of the final8 training objectives](reference/teaching/objective-panels.svg)
+
+Actual training exposure from the saved traces was:
+
+| Stage | Consumed examples | Input exposure | Additional note |
+| --- | --- | --- | --- |
+| Phase 1 MLM | 32 distinct documents | 2,048 nonpadding token positions; 281 selected masked positions | 2 documents are from the disclosed recipe-development document-text subset |
+| Phase 2 contrastive-only | 32 weak pairs | 3,659 nonpadding pair-input tokens | Same pair inventory as the joint branch |
+| Phase 2 with retained MLM | 32 weak pairs plus 32 MLM documents | 3,659 pair-input tokens; 2,048 MLM token positions; 292 selected masked positions | 1 consumed MLM document is from the recipe-development document-text subset |
+| Phase 3 human-evidence pairs | 281 distinct fit queries and 212 positive documents | 12,916 query-token positions; 20,096 candidate-document token positions | Candidate documents are encoded during the objective; counts are not unique training pairs |
+
+The tokenizer and frozen source exposure, per-query metrics, raw figure data, seven complete ranking arrays, shared qrels and source hashes are recorded in the [evidence index](reference/evidence-index.json). The [full pilot record](reference/README.md) explains the axes, exposure, provenance, omissions and qualification limits. The two phase-2 branches had matched pair exposure; the joint branch also consumed its retained MLM batches.
 
 ## The connected journey
 
@@ -72,7 +197,7 @@ The teaching must include a full from-scratch lineage. A warm-started model can 
 | 9 — Hub release | Assemble, upload a candidate, download its immutable revision and rerun consumer checks | Model card, tokenizer/processor, weights, loader, benchmark/config records, commit ID and successful cold-load receipt |
 | 10 — Operate and defend | Monitor the deployed embedding/index pair; investigate an injected quality or data failure | Runbook, incident timeline, rollback to a compatible model/index, and a learner explanation of what the evidence supports |
 
-These artifact names are proposed outputs, not existing files or runnable commands. Starter functions, reference implementations and stage checks must be authored before project registration. Each stage needs a prediction, an actual executed figure, a changed condition and a failure diagnosis. The model card is written from the final receipts rather than from planned targets.
+The artifact names in this full-capstone stage table are proposed stage-level deliverables, not claims that every full-capstone acceptance artifact already exists. The bounded C01 implementation files and measured evidence are identified above; they do not complete the full capstone or its target-scale gates. Each full stage still needs a prediction, an executed figure, a changed condition and a failure diagnosis. The model card is written from final receipts rather than planned targets.
 
 ## Portfolio review
 

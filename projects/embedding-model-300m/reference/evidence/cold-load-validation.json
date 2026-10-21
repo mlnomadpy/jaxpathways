@@ -1,0 +1,42 @@
+{
+  "canary": {
+    "external_actual_vectors_sha256": "736cb36c84fb8e9f9cba7415ffd37eda8de6fed75e79db3682fa4eafbadef38d",
+    "external_expected_vectors_sha256": "736cb36c84fb8e9f9cba7415ffd37eda8de6fed75e79db3682fa4eafbadef38d",
+    "external_text_input_sha256": "39b9e6004d9f74a528f4a0ba0651130a5518089dfac935ff551607a1d9aa438b",
+    "original_text_in_packet": false,
+    "retained_expected_vectors": "cold-vectors.npy",
+    "retained_numeric_token_ids": "cold-token-input.npz"
+  },
+  "copied_external_package_sha256": {
+    "config.json": "a2fc03f1e6c7465677048ce47059244d7378b7132663ad44de662b2bf1c92805",
+    "config.py": "e61e01ad3f56d2fbcdbed72874de727bd9038c042d0070c6b907f5d49fd06a49",
+    "model.py": "0d50093ea497730be48007265b3db25b9044fa13b88a4485cfce7e4c45266f90",
+    "model.safetensors": "3da5afe63ecccdca3d04ec06c2400902a18fe937831c8c7b53d9c00c75ca2fd0",
+    "package.json": "6738f1c87d749e871ee0a721558ae9f4edc50bd840cfe4ee9bc15128011e21d6",
+    "package_runtime.py": "1ab45e32baa18b05af7c651a9c81001b0846e9c8ec5302c88390730a78f60f57",
+    "tokenizer.json": "c67fad800fed542e3fe28b579a9b30d6aa778ff617885cf4ccb3050bfa0eb131"
+  },
+  "execution": {
+    "actual_output_sha256": "706d7852ece63231bdb0a4949aac2c2a20780fce6e7e8b7014d88e3fd722def7",
+    "command_environment": [
+      "HF_HUB_OFFLINE=1",
+      "TRANSFORMERS_OFFLINE=1",
+      "JAX_PLATFORMS=cpu"
+    ],
+    "dtype": "float32",
+    "exact_array_equality": true,
+    "hub_access_disabled": true,
+    "input_count": 23,
+    "load_api": "JAXSentenceEncoder.from_local_directory(local_directory)",
+    "max_absolute_difference_from_retained_vectors": 0.0,
+    "output_shape": [
+      23,
+      32
+    ],
+    "retained_output_sha256": "706d7852ece63231bdb0a4949aac2c2a20780fce6e7e8b7014d88e3fd722def7",
+    "working_directory": "unrelated temporary directory, outside the project and package"
+  },
+  "result": "pass",
+  "schema": "jaxpathways.embedding-c01.offline-cold-load.v1",
+  "scope": "Offline local custom-package loader reproducibility only; this is not a public trained-model release or a retrieval-quality qualification."
+}

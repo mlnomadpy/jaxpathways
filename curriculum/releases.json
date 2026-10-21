@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.13.0",
+    "date": "2026-10-21",
+    "title": "Inspect a staged embedding pilot and navigate lessons with one stage bar",
+    "summary": "Make a bounded real-data embedding lifecycle available for practice, preserve its failed quality gates and consolidate the lesson navigation controls.",
+    "changes": [
+      "Added a separately pinned SciFact CPU embedding workflow with a bidirectional RoPE Transformer, masked-token pretraining, matched contrastive continuation branches and human-evidence pair fine-tuning. The workflow records actual sample exposure, checkpoint ancestry, full-state fresh-process recovery and a local custom-library consumer handoff.",
+      "Added independent attention, masking, objective, gradient, retrieval and checkpoint checks, including equivalent learner implementations and deliberately corrupted controls. Retained numeric evidence compares the pilot with BM25 and a pinned MiniLM baseline; the measured pilot fails its precommitted retrieval floors and remains in development.",
+      "Linked the optional CPU pilot from its existing planned-capstone page and the project catalog, with exact environment and named-stage instructions, a source/numeric-evidence download and separate CI execution. All ten full model/retrieval capstones keep their planned status. Target-scale training, broader benchmarks, hardware/service qualification, human review and public model release remain open.",
+      "Consolidated previous/next activity actions into the existing lesson stage bar and removed the overlapping duplicate bottom dock. Responsive controls retain keyboard navigation, reading-position restoration and lesson-boundary targets; browser checks cover short desktop and mobile viewports.",
+      "Reworked the actual runtime objective plot into separate phase panels with explicit units, observed update ranges and zero-preserving axes. A single-candidate tail batch is explained rather than presented as successful retrieval. Historical figures and receipts remain unchanged; the teaching view uses the same current renderer.",
+      "Reserved local PNG/SVG figure geometry before decoding and allowed long evidence paths to wrap in status labels. New browser cases check the pilot page at narrow widths and compare image layout before and after a deliberately delayed load."
+    ]
+  },
+  {
     "version": "0.12.0",
     "date": "2026-10-21",
     "title": "Adaptive solvers and natural-text decoder foundations",

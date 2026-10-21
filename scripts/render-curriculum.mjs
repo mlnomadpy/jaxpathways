@@ -2,7 +2,7 @@ import {loadLessonEvidence,restoreNotebookOutputs} from './figure-artifacts.mjs'
 import {portablePath} from './portable-path.mjs';
 import {lessonMarkdown,lessonScript,lessonCells,learnerNotebookCells,learnerScript,learnerStarterCoverage,learnerStarterInventory,readyLearnerArtifactPaths} from './lesson-artifacts.mjs';
 import {createHash} from 'node:crypto';
-import {readFileSync,writeFileSync,mkdirSync,readdirSync} from 'node:fs';
+import {readFileSync,writeFileSync,mkdirSync,readdirSync,existsSync} from 'node:fs';
 import path from 'node:path';
 const root=new URL('../',import.meta.url);
 mkdirSync(new URL('public/',root),{recursive:true});
@@ -132,13 +132,32 @@ json('public/api/v1/catalog.json',catalog);
 json('public/api/v1/pathways.json',{schemaVersion:1,pathways:course.pathways});
 json('public/api/v1/roles.json',{schemaVersion:1,roles:course.roles,domains:course.domains});
 for(const phase of course.phases)for(const lesson of phase.lessons)json(`public/api/v1/lessons/${lesson.id}.json`,{schemaVersion:1,phaseId:phase.id,...lesson});
-const llms=`# JAX Pathways\n\nHands-on JAX, Flax NNX, Optax, and Cloud TPU engineering course.\n\n- [Catalog](api/v1/catalog.json)\n- [Pathways](api/v1/pathways.json)\n- [Roles](api/v1/roles.json)\n- [Learner starter coverage](api/v1/learner-starters.json)\n- [Material maturity and contributions](api/v1/content-status.json)\n- [API contract](openapi.json)\n\n## Available lessons\n\n${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>`- [${l.title}](lesson.html?lesson=${l.id}) · [Source](api/v1/lessons/${l.id}.json) · ${l.path}`).join('\n')}\n\n## Open Engineering TODOs\n\n- Add runnable starter/solution harnesses for the 10 planned large-model and retrieval capstones in projects/.\n- Retain scoped physical target evidence separately from CPU reference checks; add fresh-process and worker-loss multi-host recovery qualification.\n`;
+const optionalPilot=currentPlans.find(plan=>plan.id==='embedding-model-300m'&&plan.pilot);
+const llms=`# JAX Pathways\n\nHands-on JAX, Flax NNX, Optax, and Cloud TPU engineering course.\n\n- [Catalog](api/v1/catalog.json)\n- [Pathways](api/v1/pathways.json)\n- [Roles](api/v1/roles.json)\n- [Learner starter coverage](api/v1/learner-starters.json)\n- [Material maturity and contributions](api/v1/content-status.json)\n- [API contract](openapi.json)\n\n## Available lessons\n\n${course.phases.flatMap(p=>p.lessons).filter(l=>l.status==='authored').map(l=>`- [${l.title}](lesson.html?lesson=${l.id}) · [Source](api/v1/lessons/${l.id}.json) · ${l.path}`).join('\n')}\n\n## Open Engineering TODOs\n\n- Complete and qualify all 10 planned model-lifecycle capstones. The [C01 plan](project-plans/${optionalPilot?.id}.html#${optionalPilot?.pilot.anchor}) offers a separately scoped bounded CPU pilot and [source-only pilot archive](downloads/${optionalPilot?.pilot.download}); its measured retrieval floors failed and it does not qualify the full capstone.\n- Retain scoped physical target evidence separately from CPU reference checks; add fresh-process and worker-loss multi-host recovery qualification.\n`;
 writeFileSync(new URL('public/llms.txt',root),llms);
 
 const projects=JSON.parse(readFileSync(new URL('curriculum/projects.json',root)));
 json('public/api/v1/projects.json',{schemaVersion:1,projects:projects.map(path=>JSON.parse(readFileSync(new URL(path,root))))});
 // Publish figure/audio/source assets used by the static project teaching guides.
 const projectPlans=JSON.parse(readFileSync(new URL('curriculum/project-plans.json',root)));
+const pilotPublicFiles=new Map();
+for(const plan of projectPlans.filter(item=>item.pilot)){
+  const projectRoot=`projects/${plan.id}/`;
+  const indexFile=projectRoot+plan.pilot.evidence;
+  if(!plan.pilot.evidence.startsWith('reference/') || plan.pilot.evidence.includes('..'))throw new Error(`${plan.id}: pilot evidence must stay under reference/`);
+  const indexPath=new URL(indexFile,root);
+  if(!existsSync(indexPath))throw new Error(`${plan.id}: missing required pilot evidence index ${indexFile}`);
+  const index=JSON.parse(readFileSync(indexPath,'utf8'));
+  if(!index.public_files || !Object.keys(index.public_files).length)throw new Error(`${plan.id}: pilot evidence index has no public_files`);
+  const publicFiles=new Set([plan.pilot.evidence]);
+  for(const [relative,expected] of Object.entries(index.public_files)){
+    if(!relative.startsWith('reference/') || relative.split('/').includes('..') || !/^[a-f0-9]{64}$/.test(expected))throw new Error(`${plan.id}: unsafe or invalid public evidence entry ${relative}`);
+    const source=new URL(projectRoot+relative,root);
+    if(!existsSync(source) || createHash('sha256').update(readFileSync(source)).digest('hex')!==expected)throw new Error(`${plan.id}: missing or hash-mismatched public evidence ${relative}`);
+    publicFiles.add(relative);
+  }
+  pilotPublicFiles.set(plan.id,publicFiles);
+}
 for(const project of [...projects.map(manifest=>JSON.parse(readFileSync(new URL(manifest,root)))),...projectPlans]){
   const directory=`projects/${project.id}/`;
   const files=readdirSync(new URL(directory,root),{recursive:true}).map(portablePath);
@@ -153,7 +172,9 @@ for(const project of [...projects.map(manifest=>JSON.parse(readFileSync(new URL(
   }
   for(const file of files){
     const linkedData=/\.(json|csv|txt)$/.test(file) && linkedAssets.has(file);
-    if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)) && !linkedData)continue;
+    const pilotFiles=pilotPublicFiles.get(project.id);
+    if(pilotFiles && file.startsWith('reference/') && !pilotFiles.has(file))continue;
+    if(!/\.(png|svg|wav|md)$/.test(file) && !(file.startsWith('reference/') && /\.(json|csv)$/.test(file)) && !linkedData && !pilotFiles?.has(file))continue;
     const output=`public/project-assets/${project.id}/${file}`;
     mkdirSync(new URL(output.slice(0,output.lastIndexOf('/')+1),root),{recursive:true});
     writeFileSync(new URL(output,root),readFileSync(new URL(directory+file,root)));

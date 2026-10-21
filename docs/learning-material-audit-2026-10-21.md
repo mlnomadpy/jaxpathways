@@ -12,11 +12,13 @@ The book is a substantial collection of bounded, runnable practice drafts. It is
 
 The inventory covers 203 material entries, 409 lesson exercises/checkpoints and 127 project stages. Section counts describe coverage, not quality scores. Duration estimates have not been calibrated with learners.
 
+10 full model-lifecycle capstones remain planned; 1 of 1 separately scoped optional pilots have source-matching public evidence packets.
+
 ## Learner labels
 
 - **Available Draft**: Material is available for its stated practice scope. Teaching review and learner validation are still pending.
 - **In Development**: Useful material exists, but important parts of this course or project are still being developed. Read its stated scope before starting.
-- **Planned**: A specification or brief exists; no runnable capstone implementation is supplied.
+- **Planned**: The full capstone is not yet implemented and qualified. A separately scoped pilot may be available.
 - **Needs Repair**: Required material is missing or its current checks fail. Do not rely on it until repaired.
 
 CPU checks, hardware scope, human review and learner completion are separate. Nothing is promoted to reviewed merely because files or a passing reference exist.
@@ -31,11 +33,11 @@ Recruit consented novices and independent specialists; bind accepted reports to 
 
 Evidence: [curriculum/teaching-reviews.json](../curriculum/teaching-reviews.json), [docs/teaching-review-protocol.md](../docs/teaching-review-protocol.md).
 
-### P1: All ten larger model and retrieval capstones are specifications
+### P1: All ten full model-lifecycle capstones remain planned
 
 Status: **open**.
 
-Implement one licensed-data, baseline-compared model lineage at a time. Existing tiny pilots and harnesses are preparation, not 300M releases.
+C01 has a bounded CPU workflow, and its precommitted retrieval-quality floors failed. Complete the full-scale and quality gates for C01, then implement and qualify the other nine capstones. Keep this scoped pilot separate from target-scale and production claims.
 
 Evidence: [curriculum/project-plans.json](../curriculum/project-plans.json), [projects/embedding-lineage/README.md](../projects/embedding-lineage/README.md), [projects/causal-lineage/README.md](../projects/causal-lineage/README.md).
 
@@ -157,7 +159,7 @@ Evidence: [src/pages/projects.astro](../src/pages/projects.astro), [src/pages/bo
 | [clip-model: Train a CLIP image–text model](https://www.tahabouhsine.com/jaxpathways/project-plans/clip-model.html) | planned | Specification only; no runnable capstone. Learn paired representations, test zero-shot classification, and qualify both retrieval directions before releasing the encoders. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
 | [siglip-model: Train and compare a SigLIP model](https://www.tahabouhsine.com/jaxpathways/project-plans/siglip-model.html) | planned | Specification only; no runnable capstone. Replace the softmax objective with pairwise sigmoid training. Audit labels, reduction, negatives and distributed gradients against a controlled CLIP baseline. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
 | [retrieval-system: Build a measured retrieval service](https://www.tahabouhsine.com/jaxpathways/project-plans/retrieval-system.html) | planned | Specification only; no runnable capstone. Take a qualified text or cross-modal encoder through exact search, approximate indexes, hybrid retrieval, reranking, evaluation and safe index migration. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
-| [embedding-model-300m: Build a staged embedding model](https://www.tahabouhsine.com/jaxpathways/project-plans/embedding-model-300m.html) | planned | Specification only; no runnable capstone. MLM to contrastive pretraining and retrieval fine-tuning, with frozen data, MTEB evaluation and release gates. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
+| [embedding-model-300m: Build a staged embedding model](https://www.tahabouhsine.com/jaxpathways/project-plans/embedding-model-300m.html) | planned | Bounded CPU pilot evidence verified; full capstone remains planned; evidence index projects/embedding-model-300m/reference/evidence-index.json (SHA-256 66cc6f7bec3c3b319e28ccc6d6ead1fab8d60519b3da370b41e038b1f7685691). MLM to contrastive pretraining and retrieval fine-tuning, with frozen data, MTEB evaluation and release gates. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
 | [causal-model-300m: Build a causal language model](https://www.tahabouhsine.com/jaxpathways/project-plans/causal-model-300m.html) | planned | Specification only; no runnable capstone. Connect tokenizer/data preparation, next-token pretraining, adaptation, generation evaluation and model publication. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
 | [image-model-300m: Build an image understanding model](https://www.tahabouhsine.com/jaxpathways/project-plans/image-model-300m.html) | planned | Specification only; no runnable capstone. Carry a frozen image recipe through representation learning, task adaptation and measured evaluation. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
 | [image-generation-model: Build an image generation pipeline](https://www.tahabouhsine.com/jaxpathways/project-plans/image-generation-model.html) | planned | Specification only; no runnable capstone. Qualify image representations, denoising training, conditioning and sampling with separate quality and runtime evidence. | Implement the scoped data recipe, architecture, training stages, independent evaluation and exported reload before attempting the target scale. |
