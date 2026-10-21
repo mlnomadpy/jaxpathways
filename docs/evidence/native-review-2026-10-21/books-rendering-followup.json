@@ -7,11 +7,13 @@
   "environment": {
     "app": "Apple Books on macOS",
     "appearance": "existing dark appearance; settings not changed",
-    "capture_dimensions": [
-      1008,
-      1896
-    ],
-    "reader_title": "JAX Pathways: course reader 0.14.0"
+    "capture_dimensions": [1008, 1896],
+    "reader_title": "JAX Pathways: course reader 0.14.0",
+    "app_version": "8.5",
+    "app_build": "6570",
+    "os_version": "26.5.1",
+    "os_build": "25F80",
+    "font_setting": "Existing user setting, not changed or measured"
   },
   "result": "bounded native rendering and TOC navigation passed",
   "observations": [
