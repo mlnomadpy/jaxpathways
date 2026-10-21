@@ -90,7 +90,23 @@
         "prompt": "Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing.",
         "hint": "List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.",
         "solution": "# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.\ndevice_report = {\"device\": None, \"runtime_version\": None, \"delegate\": None,\n                 \"quality_metric\": None, \"p95_ms\": None, \"peak_memory_bytes\": None,\n                 \"cold_start_ms\": None, \"fallback_operators\": None}\nmissing = [key for key, value in device_report.items() if value is None]\nassert missing and \"device\" in missing\nprint(\"Not device-validated; missing:\", \", \".join(missing))",
-        "explanation": "Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used."
+        "explanation": "Empty evidence stays empty. Desktop conversion and simulation cannot populate measurements for hardware that was never used.",
+        "learnerStarter": {
+          "inputs": [
+            "Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing."
+          ],
+          "outputs": [
+            "A report-validation result with missing target fields listed."
+          ],
+          "invariants": [
+            "Absent device measurements remain pending rather than receiving synthetic pass values."
+          ],
+          "hints": [
+            "List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.",
+            "Validate required fields before considering readiness."
+          ],
+          "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_make_incomplete_deployment_evidence_explicit(report, required_fields):\n    \"\"\"Complete the make incomplete deployment evidence explicit check.\"\"\"\n    # TODO: ('Validate that required target model/runtime/device/measurement fields are present and keep the report pending if any are absent.', 'A report schema and explicit not-ready result for missing device fields.', 'Missing target-device evidence never becomes a measured pass through default values.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Decide whether a model speedup meets the request budget",
@@ -98,7 +114,23 @@
         "prompt": "Use the illustrative serial times above. A \\(19\\)-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?",
         "hint": "Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.",
         "solution": "# Decide whether a model speedup meets the request budget (Transfer / diagnosis)\nfixed_ms=12.+4.\nmodel_ms=8.\ndeadline_ms=19.\nbefore_ms=fixed_ms+model_ms\nafter_ms=fixed_ms+model_ms/2\nnp.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])\nassert after_ms>deadline_ms and fixed_ms==16.\nprint('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)",
-        "explanation": "Halving model time leaves a \\(20\\)-millisecond request, so it misses the stated deadline. The serial fixed work gives a \\(16\\)-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision."
+        "explanation": "Halving model time leaves a \\(20\\)-millisecond request, so it misses the stated deadline. The serial fixed work gives a \\(16\\)-millisecond lower bound even with zero model time. Replace these illustrative values with measurements before making a device decision.",
+        "learnerStarter": {
+          "inputs": [
+            "Use the illustrative serial times above. A \\(19\\)-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?"
+          ],
+          "outputs": [
+            "A deadline decision and fixed-overhead lower bound."
+          ],
+          "invariants": [
+            "Only the model component changes while fixed overhead remains constant."
+          ],
+          "hints": [
+            "Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.",
+            "Take the model-time-to-zero limit to find the best possible total."
+          ],
+          "code": "import json\nimport time\nimport numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_decide_whether_a_model_speedup_meets_the_request_budget(fixed_overhead_ms, model_ms, deadline_ms):\n    \"\"\"Complete the decide whether a model speedup meets the request budget check.\"\"\"\n    # TODO: ('Compute fixed overhead plus halved model time against the predeclared 19 ms deadline, then take the zero-model-time lower bound.', 'Deadline decision and irreducible total-latency floor.', 'Only model time changes; other serial costs remain fixed.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A LiteRT file converts successfully. What must happen before claiming NPU latency?",
@@ -225,6 +257,22 @@
       "Conversion proves a converter accepted the graph. Device execution, fallback behavior and end-to-end latency require direct measurement.",
       "CPU timing and compression ratio cannot establish NPU placement or latency. Inspect delegated operations on the actual device.",
       "Conversion can leave unsupported operations on CPU. Confirm partitioning and measure the whole prediction boundary."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The edge request pipeline and the second raw input [0, 255, 128]."
+      ],
+      "outputs": [
+        "The normalized request, pipeline result, and an independent NumPy result for that raw input."
+      ],
+      "invariants": [
+        "Normalization follows the request contract and the pipeline output matches the independent normalized calculation."
+      ],
+      "hints": [
+        "Apply the same normalization used by the request path before calculating the host reference.",
+        "Keep target-device readiness evidence separate from this numerical request check."
+      ],
+      "code": "import numpy as np\n\ndef check_second_edge_request(request_pipeline, raw_input):\n    # TODO: Send the second raw vector through the full request and compare with independent normalized arithmetic.\n    raise NotImplementedError\n"
+    }
   }
 }

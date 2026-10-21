@@ -59,7 +59,22 @@
         "prompt": "Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor.",
         "hint": "Create a new mapping and replace only its optimizer entry.",
         "solution": "# Show what weights-only recovery loses (Transfer)\nfull=restored['training']\nweights_only=dict(full,optimizer=tx.init(full['params']))\nfull_next,_=step(full,x,y)\nreset_next,_=step(weights_only,x,y)\nassert int(full_next['optimizer'][0].count)==4\nassert int(reset_next['optimizer'][0].count)==1\nassert any(not np.allclose(a,b,rtol=1e-6,atol=1e-7) for a,b in zip(jax.tree.leaves(full_next['params']),jax.tree.leaves(reset_next['params'])))\nprint('Full restore Adam count: 4; reset memory count: 1; next parameters differ.')",
-        "explanation": "A checkpoint can return plausible predictions yet fail to resume the original training trajectory. Adam’s moments and count affect the next update even when the weights and batch match."
+        "explanation": "A checkpoint can return plausible predictions yet fail to resume the original training trajectory. Adam’s moments and count affect the next update even when the weights and batch match.",
+        "learnerStarter": {
+          "inputs": [
+            "Keep the restored parameters but reset Adam’s memory. Compare the next update with the full-state restore. Keep data and random state identical so the optimizer memory is the only changed factor."
+          ],
+          "outputs": [
+            "The two next parameter updates and their optimizer state difference."
+          ],
+          "invariants": [
+            "Data, random key, parameters, and learning rate stay identical across the comparison."
+          ],
+          "hints": [
+            "Create a new mapping and replace only its optimizer entry."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport orbax.checkpoint as ocp\nimport json\nimport hashlib\n\ndef practice_show_what_weights_only_recovery_loses(state, inputs, targets):\n    \"\"\"Implement the show what weights-only recovery loses check.\"\"\"\n    # TODO: Restore the same parameters with full Adam state and with fresh moments; compare their next updates on the identical batch.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reject an incompatible update configuration",
@@ -67,7 +82,22 @@
         "prompt": "Attempt to restore the contract under learning rate \\(0.1\\). Show the rejection, then validate the original configuration. Also inspect shape and dtype equality of restored parameter leaves.",
         "hint": "A compatible pytree can still represent the wrong update rule.",
         "solution": "# Reject an incompatible update configuration (Challenge)\nchanged_contract = dict(contract,learning_rate=0.1)\ntry:\n    validate_contract(restored[\"contract\"],changed_contract)\nexcept ValueError:\n    print(\"Expected changed configuration rejection\")\nelse:\n    raise AssertionError(\"Expected contract mismatch\")\nvalidate_contract(restored[\"contract\"],contract)\nfor a,b in zip(jax.tree.leaves(state[\"params\"]),jax.tree.leaves(restored[\"training\"][\"params\"])):\n    # Check tensor shape invariant: `a.shape==b.shape and a.dtype==b.dtype`\n    assert a.shape==b.shape and a.dtype==b.dtype\n# Integer PRNG words must be checked exactly, not with relative float tolerance.\nchanged_key = dict(state)\nchanged_key[\"key_data\"] = state[\"key_data\"].at[0].add(np.uint32(1))\ntry:\n    same_tree(state,changed_key)\nexcept AssertionError:\n    print(\"Expected exact key-data mismatch\")\nelse:\n    raise AssertionError(\"Expected changed PRNG word rejection\")",
-        "explanation": "Array restoration does not verify that a learning rate, data revision or PRNG implementation agrees with the saved experiment. Refuse an incompatible continuation before applying an update."
+        "explanation": "Array restoration does not verify that a learning rate, data revision or PRNG implementation agrees with the saved experiment. Refuse an incompatible continuation before applying an update.",
+        "learnerStarter": {
+          "inputs": [
+            "Attempt to restore the contract under learning rate \\(0.1\\). Show the rejection, then validate the original configuration. Also inspect shape and dtype equality of restored parameter leaves."
+          ],
+          "outputs": [
+            "Rejected changed configuration and validated original checkpoint state."
+          ],
+          "invariants": [
+            "Configuration validation happens before applying the resumed update."
+          ],
+          "hints": [
+            "A compatible pytree can still represent the wrong update rule."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport orbax.checkpoint as ocp\nimport json\nimport hashlib\n\ndef practice_reject_an_incompatible_update_configuration(checkpoint, contract):\n    \"\"\"Implement the reject an incompatible update configuration check.\"\"\"\n    # TODO: Attempt restore with the changed learning rate, then verify the original config and compare every restored leaf shape/dtype.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which checkpoint supports replaying the next Adam update with stochastic targets?",
@@ -142,6 +172,22 @@
       "Adam moments, its count, random keys and data position affect later updates. Matching current parameters alone is insufficient.",
       "The update reads all of those inputs; matching predictions before an update cannot replace preserving transition state.",
       "A seed and loss are not a snapshot of the trajectory. Compare complete state and the next batch, then continue for several steps."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A full training snapshot and a template state containing model, optimizer, step, and RNG state."
+      ],
+      "outputs": [
+        "A restored state that produces the same next update as uninterrupted training."
+      ],
+      "invariants": [
+        "Parameters, optimizer moments, step, and random key are restored together; contract mismatches are rejected."
+      ],
+      "hints": [
+        "Compare the next transition, not only restored parameter equality.",
+        "Change only optimizer state in a controlled comparison."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport numpy as np\nimport optax\nimport orbax.checkpoint as ocp\nimport json\nimport hashlib\n\ndef restore_training_state(checkpoint_path, template, contract):\n    \"\"\"A restored state that produces the same next update as uninterrupted training.\"\"\"\n    # TODO: Serialize full parameters, optimizer state, step, RNG key, and configuration; compare the next resumed update.\n    raise NotImplementedError\n"
+    }
   }
 }

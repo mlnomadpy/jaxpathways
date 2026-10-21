@@ -39,6 +39,23 @@ def prose(text):
 def code_block(text):
     return '<pre><code>'+esc(text)+'</code></pre>'
 
+def learner_starter(contract, scope):
+    """Render only an authored learner contract in the main EPUB chapter."""
+    if not isinstance(contract, dict) or not all(
+        isinstance(contract.get(key), list) and contract[key]
+        and all(isinstance(item, str) and item.strip() for item in contract[key])
+        for key in ('inputs', 'outputs', 'invariants', 'hints')
+    ) or not isinstance(contract.get('code'), str) or not contract['code'].strip():
+        return '<aside class="learner-starter-pending"><strong>Learner starter pending.</strong> This task has no complete, separately authored input/output contract, checks, hints and TODO scaffold yet.</aside>'
+    def field(title, items):
+        return '<h4>'+esc(title)+'</h4><ul>'+''.join('<li>'+rich(item)+'</li>' for item in items)+'</ul>'
+    return ('<section class="learner-starter-contract"><p><strong>'+esc(scope)+' · learner-only starter</strong></p>'
+            +field('Inputs', contract['inputs'])
+            +field('Outputs', contract['outputs'])
+            +field('Invariants to check', contract['invariants'])
+            +field('Hints', contract['hints'])
+            +'<h4>Your TODO scaffold</h4>'+code_block(contract['code'])+'</section>')
+
 book_guides = json.loads(subprocess.check_output(["node", "scripts/render-book-guides.mjs"], cwd=ROOT, text=True))
 
 solutions=[]
@@ -85,13 +102,13 @@ def chapter(lesson):
         body += '<h2>Recorded reference execution</h2><p>The saved instructor run is in the separate solutions and execution appendix.</p>'
     for experiment in c.get('experiments',[]):
         body += '<h2>'+esc(experiment['title'])+'</h2><p><strong>Predict before running:</strong> '+rich(experiment['prediction'])+'</p>'+code_block(experiment['code'])+prose(experiment['output'])+prose(experiment['explanation'])
-    body += '<h2>Your exercise</h2>'+prose(c['exercise'])+'<p>Attempt this before consulting the separate solutions appendix.</p>'
+    body += '<h2>Your exercise</h2>'+prose(c['exercise'])+learner_starter(c.get('learnerStarter'), 'Exercise')+'<p>Attempt this before consulting the separate solutions appendix.</p>'
     solutions.append(f'<section><h2>{esc(lesson["title"])}</h2><h3>Assembled example code</h3>{code_block(c["code"])}<h3>Exercise solution</h3>{code_block(c["solution"])}')
     if lesson.get('execution'):
         run=lesson['execution']
         solutions.append('<h3>Recorded reference execution</h3><p>Saved instructor CPU run · '+esc(run['executedAt'])+'</p>'+code_block(run['stdout']))
     for practice in c.get('practice',[]):
-        body += '<h2>'+esc(practice['title'])+'</h2><p>'+esc(practice['difficulty'])+'</p>'+prose(practice['prompt'])+'<h3>Hint</h3>'+prose(practice['hint'])
+        body += '<h2>'+esc(practice['title'])+'</h2><p>'+esc(practice['difficulty'])+'</p>'+prose(practice['prompt'])+'<h3>Hint</h3>'+prose(practice['hint'])+learner_starter(practice.get('learnerStarter'), 'Practice: '+practice['title'])
         solutions.append('<h3>'+esc(practice['title'])+'</h3>'+code_block(practice['solution'])+prose(practice['explanation']))
     body += f'<h2>Checkpoint</h2><p>{rich(c["question"])}</p><ol>' + ''.join(f'<li>{rich(o)}</li>' for o in c['options']) + '</ol>'
     body += '<p>Answer and explanation are in the separate solutions appendix.</p>'

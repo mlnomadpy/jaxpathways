@@ -119,11 +119,9 @@ test('TPU staging guidance keeps CPU examples and target qualification separate'
   const phase = manifest.phases.find((item) => item.id === 'tpu-workflows');
   const staged = phase.lessons.find((item) => item.id === 'tpu-05');
   const authored = JSON.parse(readFileSync(`${staged.path}/lesson.json`, 'utf8'));
-  assert.deepEqual(
-    staged.content,
-    authored.content,
-    'stale embedded content must not contradict the authored execution matrix',
-  );
+  assert.equal(Object.hasOwn(staged, 'content'), false, 'the registry stores lesson metadata only');
+  const rendered = course.phases.find((item) => item.id === 'tpu-workflows').lessons.find((item) => item.id === 'tpu-05');
+  assert.deepEqual(rendered.content, authored.content, 'the rendered lesson must come from its canonical source');
   for (const prose of [
     phase.learningAdvice,
     staged.objective,
@@ -148,7 +146,10 @@ test('onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson 
   );
   const lesson = welcome.lessons.find((item) => item.id === 'welcome-03');
   const authored = JSON.parse(readFileSync(`${lesson.path}/lesson.json`, 'utf8'));
-  assert.deepEqual(lesson.content, authored.content);
+  assert.equal(Object.hasOwn(lesson, 'content'), false, 'the registry stores lesson metadata only');
+  const rendered = course.phases.find((phase) => phase.lessons.some((item) => item.id === 'welcome-03'))
+    .lessons.find((item) => item.id === 'welcome-03');
+  assert.deepEqual(rendered.content, authored.content, 'the rendered lesson must come from its canonical source');
   const advice = manifest.phases.map((phase) => phase.learningAdvice).join('\n');
   assert.doesNotMatch(advice, /run (?:subsequent lessons|every course|any accelerator phase)/i);
   const commands = authored.content.sections
@@ -169,6 +170,22 @@ test('onboarding uses bounded, reviewed TPU targets instead of arbitrary lesson 
     authored.content.sections[5].body,
     /source, dependencies, backend assertion, topology, and input ownership/,
   );
+});
+
+test('lesson metadata has no embedded content and rendered content matches every canonical lesson source', () => {
+  const manifest = JSON.parse(readFileSync('curriculum/course.json', 'utf8'));
+  for (const phase of manifest.phases) {
+    const renderedPhase = course.phases.find((item) => item.id === phase.id);
+    assert(renderedPhase, `missing rendered phase ${phase.id}`);
+    for (const lesson of phase.lessons) {
+      assert.equal(Object.hasOwn(lesson, 'content'), false, `${lesson.id} duplicates canonical content in metadata`);
+      if (lesson.status !== 'authored') continue;
+      const authored = JSON.parse(readFileSync(`${lesson.path}/lesson.json`, 'utf8'));
+      const rendered = renderedPhase.lessons.find((item) => item.id === lesson.id);
+      assert(rendered, `missing rendered lesson ${lesson.id}`);
+      assert.deepEqual(rendered.content, authored.content, `${lesson.id} rendered content drifted from its source`);
+    }
+  }
 });
 
 test('downloaded notebooks and Markdown preserve the same runtime boundaries as the reader', () => {

@@ -147,7 +147,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -247,7 +248,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -298,7 +300,7 @@ visual_data = {'kind':'line','x':list(range(1,9)),'xlabel':'transition index','y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:22.256006+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:57.228603+00:00. JAX 0.9.2.
 
 ```text
 return mean: 0.5848437547683716
@@ -351,26 +353,35 @@ Change the batch to $7$ environments and the horizon to $5$. Verify array shapes
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A policy parameter vector `theta` and explicit JAX key.
+- Changed batch size 7 and horizon 5.
+- The lesson’s `rollout` collector and its time-major records.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
-2. Check tensor shape invariant: `r7['reward'].shape == (5`
+**Outputs:**
+- Final state for each environment and the retained rollout record.
+- A small set of assertions about shapes, activity, and ending events.
+
+**Invariants to check:**
+- Reward and event arrays have shape `(5, 7)`.
+- Every episode has one ending event.
+- Rows after finishing are padding and carry no reward.
+
+**Hints:**
+- The first axis is time and the second is environment.
+- The active flag describes the state before the action.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Change the batch to 7 environments and the horizon to 5.
-# Create or split explicit PRNG key(s) (`(final7, r7)`) for reproducible randomness.
-final7, r7 = rollout(...)  # TODO: compute final7, r7
-# Check tensor shape invariant: `r7['reward'].shape == (5`
-assert r7['reward'].shape  # TODO: complete assertion check
-assert bool(final7.done.all())  # TODO: complete assertion check
-assert jnp.array_equal((r7['terminated'] | r7['truncated']).sum(0), jnp.ones(7))  # TODO: complete assertion check
-assert bool(jnp.all(jnp.where(r7['active'],0.,r7['reward'])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_changed_rollout(theta, key):
+    # TODO: collect with seven environments and a five-step horizon
+    final_state, records = ...
+    # TODO: check time/environment axes and episode endings
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -402,25 +413,31 @@ Record the mask before calling step; the successful transition still belongs to 
 
 ### How to write: Catch a shifted mask — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Accumulate the next contribution into `correct`.
-2. Accumulate the next contribution into `broken`.
+**Inputs:**
+- State at position 1, unfinished.
+- Two right actions and the lesson transition.
+
+**Outputs:**
+- The accumulated transition reward with the correct pre-action mask.
+- A second total showing the effect of a shifted post-action mask.
+
+**Invariants to check:**
+- The successful transition remains active.
+- The two totals differ because only one uses the pre-transition done flag.
+
+**Hints:**
+- Capture activity before calling `step`.
+- Do not discard the transition that reaches the goal.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a shifted mask (Transfer / diagnosis)
-s = State(...)  # TODO: compute s
-correct, broken = ...  # TODO: compute correct, broken
-for a in [1,1]:
-    active = ...  # TODO: compute active
-    s, reward, _, _ = step(...)  # TODO: compute s, reward, _, _
-    # Accumulate the next contribution into `correct`.
-    correct += float(reward*active)
-    # Accumulate the next contribution into `broken`.
-    broken += float(reward*(~s.done))
-assert abs(correct-.99)  # TODO: complete assertion check
-assert abs(broken+.01)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_activity_masks(step, State):
+    state = State(jnp.int32(1), jnp.int32(0), jnp.bool_(False))
+    # TODO: evaluate both actions using pre-step and post-step masks
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -458,24 +475,35 @@ The two start states need different numbers of actions. Compare each return agai
 
 ### How to write: Check a deterministic policy limit — Step-by-step recipe & starter scaffold
 
+**Inputs:**
+- A policy with strongly positive action logits.
+- A batch of 23 environments, a fixed key, and an eight-step horizon.
+
+**Outputs:**
+- Collected trajectories and a summary of their action and ending behavior.
+
+**Invariants to check:**
+- Repeated calls with the same key replay.
+- The sampled rollouts obey the same environment and horizon contract.
+
+**Hints:**
+- Use a fresh key to test reproducibility separately.
+- A deterministic limit is a behavioral check, not a return benchmark.
+
 **Key functions & syntax to use:**
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
-
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check a deterministic policy limit (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(_, easy)`) for reproducible randomness.
-_, easy = rollout(...)  # TODO: compute _, easy
-expected = jnp.where(...)  # TODO: compute expected
-assert jnp.allclose(easy['reward'].sum(0),expected,atol=1e-6)  # TODO: complete assertion check
-assert jnp.array_equal(easy['active'].sum(0),3-easy['observation'][0])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_right_biased_policy(rollout, key):
+    theta = jnp.full((3,), 100.)
+    # TODO: collect with the requested batch and horizon
+    final_state, records = ...
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

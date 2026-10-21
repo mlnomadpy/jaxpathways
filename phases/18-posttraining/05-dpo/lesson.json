@@ -86,7 +86,23 @@
         "prompt": "Differentiate with respect to reference log probabilities and verify that their gradient is zero.",
         "hint": "The reference is an input to the objective but not an optimization variable.",
         "solution": "# Freeze the reference numerically and in autodiff (Transfer)\nreference_grad = jax.grad(dpo_loss, argnums=1)(\n    policy, reference, chosen, rejected, 0.3\n)\nnp.testing.assert_array_equal(\n    reference_grad, np.zeros(reference_grad.shape)\n)\nprint('Reference gradient is zero.')",
-        "explanation": "Also retain the actual reference checkpoint and tokenizer identity. A detached but reloaded different model is still a changed reference."
+        "explanation": "Also retain the actual reference checkpoint and tokenizer identity. A detached but reloaded different model is still a changed reference.",
+        "learnerStarter": {
+          "inputs": [
+            "Policy logits, reference log probabilities, chosen/rejected IDs, and beta."
+          ],
+          "outputs": [
+            "The reference-input gradient of the DPO objective."
+          ],
+          "invariants": [
+            "Reference values affect the numeric margin but are stopped from receiving optimization gradients."
+          ],
+          "hints": [
+            "Differentiate with respect to the reference argument only.",
+            "Check the gradient shape and that every entry is zero."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef check_reference_gradient(policy_logits, reference_logps, chosen, rejected, beta):\n    # TODO: differentiate the pair objective with respect to the reference values.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Derive a one-pair categorical gradient",
@@ -94,7 +110,23 @@
         "prompt": "At a fresh three-action policy, compute the corrected margin and derive the logit gradient for one chosen/rejected pair. Why does the third action have zero direct logit gradient here?",
         "hint": "The log-softmax normalizer cancels in a log-probability difference. Shared model parameters make real sequence updates less isolated.",
         "solution": "# Derive a one-pair categorical gradient (Challenge)\nprobe = jnp.array([0.6, -0.3, 0.1])\nchoice = jnp.array([0])\nreject = jnp.array([1])\nbeta = 0.3\none_pair = lambda logits: dpo_loss(\n    jax.nn.log_softmax(logits), reference, choice, reject, beta\n)\nmargin_value = float((probe[0] - probe[1]) - (reference[0] - reference[1]))\nfactor = -beta / (1 + np.exp(beta * margin_value))\nnp.testing.assert_allclose(\n    jax.grad(one_pair)(probe), [factor, -factor, 0.0], atol=1e-6\n)\nprint('One-pair logit gradient agrees with independent margin derivative.')",
-        "explanation": "The unpaired logit is absent from this categorical difference, yet its normalized probability can change when the other logits move."
+        "explanation": "The unpaired logit is absent from this categorical difference, yet its normalized probability can change when the other logits move.",
+        "learnerStarter": {
+          "inputs": [
+            "Three-action policy logits, fixed reference log probabilities, one chosen ID, one rejected ID, and beta."
+          ],
+          "outputs": [
+            "Corrected margin and analytic logit-gradient vector checked against autodiff."
+          ],
+          "invariants": [
+            "Only chosen and rejected action logits have direct gradient; the third action cancels in the pairwise log-probability difference."
+          ],
+          "hints": [
+            "Write the log-softmax derivative for each selected action.",
+            "Check all three entries against autodiff."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef derive_one_pair_logit_gradient(logits, reference_logps, chosen, rejected, beta):\n    # TODO: derive the corrected pair margin and compare the three logit derivatives.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Does this DPO loop require a separately trained reward model and fresh policy rollouts?",
@@ -234,6 +266,22 @@
       "DPO uses offline preference pairs and a fixed reference policy rather than an online reward-model rollout loop. Its reference-corrected relative objective does not guarantee higher absolute chosen probability or better independently evaluated outputs.",
       "A relative chosen-versus-rejected margin can improve while both absolute probabilities fall. Compare both log probabilities and their difference.",
       "The reference is a fixed policy in this offline objective. It is not an on-policy estimate updated from rollouts."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Policy and reference log probabilities plus chosen and rejected comparison IDs."
+      ],
+      "outputs": [
+        "Pairwise loss before and after swapping the chosen/rejected identities."
+      ],
+      "invariants": [
+        "The reference correction uses the same frozen reference for both response IDs."
+      ],
+      "hints": [
+        "Swap IDs without changing either probability table.",
+        "Evaluate the loss at the trained policy."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_swapped_preference_loss(policy_logps, reference_logps, chosen, rejected):\n    # TODO: evaluate the corrected objective under original and swapped pair identities.\n    raise NotImplementedError"
+    }
   }
 }

@@ -160,7 +160,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'weight', 'ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:59.585874+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:33.705972+00:00. JAX 0.9.2.
 
 ```text
 Loss: 4.6666669845581055 gradient: -9.333333969116211
@@ -216,22 +216,31 @@ Foundation · Starting from $w=1$, calculate the next weight and loss for $\alph
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The lesson model inputs and targets.
+- Starting weight 1 and learning rates 0.1 and 0.3.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Each candidate weight and its post-update loss.
+
+**Invariants to check:**
+- Both updates use a gradient evaluated at the same starting weight.
+- Loss is recomputed at each candidate.
+- Overshoot is explained through the objective, not an autodiff failure.
+
+**Hints:**
+- Keep the initial gradient separate from the candidate evaluations.
+- Compare each rate independently.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-small_step = ...  # TODO: compute small_step
-large_step = ...  # TODO: compute large_step
-assert jnp.allclose(small_step, 29. / 15.)  # TODO: complete assertion check
-assert loss(small_step)  # TODO: complete assertion check
-assert loss(large_step)  # TODO: complete assertion check
-assert jnp.allclose(loss(2.), 0.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_updates(loss, initial_weight, rates):
+    # TODO: compute the initial gradient and evaluate each candidate
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -262,23 +271,35 @@ Default differentiation is with respect to the first argument, not every floatin
 
 ### How to write: Make the data boundary explicit — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.value_and_grad(loss_fn)(params, ...)` — Evaluates both the scalar loss and its gradient PyTree `(loss_val, grads)` in a single forward+backward pass.
+**Inputs:**
+- A scalar weight and input/target arrays passed as arguments.
+- Starting weight 1.
 
-**Step-by-step implementation plan:**
-1. Make the data boundary explicit (Practice)
+**Outputs:**
+- Loss and weight gradient from `value_and_grad`.
+
+**Invariants to check:**
+- Data are explicit function inputs.
+- Differentiation is with respect to the weight.
+- Compare with an independent hand result.
+
+**Hints:**
+- Place the parameter as the first argument.
+- Use the same fixed data in both checks.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make the data boundary explicit (Practice)
+import jax
+import jax.numpy as jnp
+
 def explicit_loss(weight, inputs, targets):
-    return ...  # TODO: return computed result
-v_explicit, g_explicit = jax.value_and_grad(...)  # TODO: compute v_explicit, g_explicit
-assert jnp.allclose(v_explicit, 14. / 3.)  # TODO: complete assertion check
-assert jnp.allclose(g_explicit, -28. / 3.)  # TODO: complete assertion check
+    # TODO: return the scalar batch objective
+    raise NotImplementedError
+
+def check_value_and_gradient(inputs, targets):
+    # TODO: evaluate value_and_grad at the requested weight
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -310,27 +331,31 @@ Duplicate data are not new information. Track the factor $N$ in the mathematical
 
 ### How to write: Audit reduction and batch replication — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Inputs and targets for one batch.
+- A repeated copy of that batch.
 
-**Step-by-step implementation plan:**
-1. Audit reduction and batch replication (Challenge)
+**Outputs:**
+- Mean-loss and sum-loss gradients before and after repetition.
+
+**Invariants to check:**
+- Repeating the batch preserves a mean gradient.
+- A sum gradient scales with repeated example count.
+- State the learning-rate adjustment that matches the update.
+
+**Hints:**
+- Keep mean and sum in separate functions.
+- Track the batch duplication factor.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit reduction and batch replication (Challenge)
-def summed_loss(weight, inputs, targets):
-    return ...  # TODO: return computed result
-g_mean = jax.grad(...)  # TODO: compute g_mean
-g_sum = jax.grad(...)  # TODO: compute g_sum
-x_twice, y_twice = jnp.tile(...)  # TODO: compute x_twice, y_twice
-assert jnp.allclose(g_sum, len(x) * g_mean)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_sum)  # TODO: complete assertion check
-assert jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_reductions_and_repeats(inputs, targets, weight):
+    # TODO: compute both reductions before and after repeating data
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

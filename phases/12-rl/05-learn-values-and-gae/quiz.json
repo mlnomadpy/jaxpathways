@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "lessonId": "rl-05",
+  "questions": [
+    {
+      "stage": "post",
+      "question": "At a continuing-task time-limit cutoff, what should happen to the value bootstrap and the reverse GAE trace?",
+      "options": [
+        "Zero both because the environment reset",
+        "Bootstrap from the final pre-reset observation, then stop the trace",
+        "Bootstrap from the reset observation and continue the trace",
+        "Continue the trace but suppress the bootstrap"
+      ],
+      "correct": 1,
+      "explanation": "A collector cutoff does not end the continuing task, so its final pre-reset state supplies the value bootstrap. The trace stops at the cutoff to prevent advantages from a later reset episode from crossing the boundary.",
+      "optionFeedback": [
+        "The cutoff ends collection, not the underlying continuing process; it keeps its final-state bootstrap but breaks the trace.",
+        "A collector cutoff does not end the continuing task, so its final pre-reset state supplies the value bootstrap. The trace stops at the cutoff to prevent advantages from a later reset episode from crossing the boundary.",
+        "The reset observation belongs to the new episode and must not replace the retained transition result.",
+        "The trace must stop at the boundary, while the value bootstrap remains enabled for a continuing task."
+      ]
+    }
+  ]
+}

@@ -74,7 +74,22 @@
         "prompt": "Make each value a single scalar \\([3, 6, 9]\\). Check the output shape and zero-query mean.",
         "hint": "The score matrix does not depend on Dv.",
         "solution": "# Use a different value dimension (Transfer / diagnosis)\nscalar_v = jnp.array([[3.], [6.], [9.]])\nscalar_out, _ = attend(q, k, scalar_v)\n# Check tensor shape invariant: `scalar_out.shape == (2, 1)`\nassert scalar_out.shape == (2, 1)\nassert jnp.allclose(scalar_out, 6.)",
-        "explanation": "Queries and keys share \\(Dk\\); values may have an independent feature dimension."
+        "explanation": "Queries and keys share \\(Dk\\); values may have an independent feature dimension.",
+        "learnerStarter": {
+          "inputs": [
+            "Make each value a single scalar \\([3, 6, 9]\\). Check the output shape and zero-query mean."
+          ],
+          "outputs": [
+            "One scalar attention output per query and a zero-query mean check."
+          ],
+          "invariants": [
+            "The key/value row pairing remains aligned and the query axis is preserved."
+          ],
+          "hints": [
+            "The score matrix does not depend on Dv."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_use_a_different_value_dimension(values):\n    \"\"\"Implement the use a different value dimension check.\"\"\"\n    # TODO: Construct scalar values with shape (3,1), attend with a zero query, and assert the output shape and arithmetic mean.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Expose a wrong softmax axis",
@@ -82,7 +97,22 @@
         "prompt": "Normalize zero scores along axis \\(0\\) and compare row sums with the intended contract. Repair the axis.",
         "hint": "Two queries and three keys make the incorrect result visible.",
         "solution": "# Expose a wrong softmax axis (Transfer / diagnosis): A legal operation can normalize the wrong axis.\nwrong_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=0)\nassert jnp.allclose(wrong_w.sum(axis=-1), 1.5)\nright_w = jax.nn.softmax(jnp.zeros((2, 3)), axis=-1)\nassert jnp.allclose(right_w.sum(axis=-1), 1.)",
-        "explanation": "A legal operation can normalize the wrong axis. Rectangular shapes expose the mismatch."
+        "explanation": "A legal operation can normalize the wrong axis. Rectangular shapes expose the mismatch.",
+        "learnerStarter": {
+          "inputs": [
+            "Normalize zero scores along axis \\(0\\) and compare row sums with the intended contract. Repair the axis."
+          ],
+          "outputs": [
+            "Both row-sum diagnostics and a corrected attention-weight matrix."
+          ],
+          "invariants": [
+            "For each query, probabilities sum across key positions."
+          ],
+          "hints": [
+            "Two queries and three keys make the incorrect result visible."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_expose_a_wrong_softmax_axis(scores):\n    \"\"\"Implement the expose a wrong softmax axis check.\"\"\"\n    # TODO: Normalize a zero score matrix across axis zero, inspect column sums, and implement the key-axis normalization.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which dimension should softmax normalize for one query to combine all key/value pairs?",
@@ -145,6 +175,22 @@
       "Normalizing over queries changes which probabilities sum to one. For each query, sum its weights over the available keys.",
       "One query needs a probability distribution across keys; each row must sum to one.",
       "The value-feature axis belongs to the weighted output representation. Attention probabilities normalize over candidate key positions."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Q/K/V arrays with explicit batch, query, key, and feature axes."
+      ],
+      "outputs": [
+        "Attention outputs with one result per query and value feature."
+      ],
+      "invariants": [
+        "Softmax normalizes over keys; paired key/value permutations preserve the function."
+      ],
+      "hints": [
+        "Compute score scaling from the key feature width.",
+        "Check zero queries against the mean of the values."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef scaled_dot_product_attention(queries, keys, values):\n    \"\"\"Attention outputs with one result per query and value feature.\"\"\"\n    # TODO: Compute scaled query-key scores, normalize along keys, and combine the paired value vectors.\n    raise NotImplementedError\n"
+    }
   }
 }

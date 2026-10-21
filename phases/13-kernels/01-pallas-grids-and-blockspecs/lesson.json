@@ -69,7 +69,24 @@
         "hint": "Require identical matrix shapes, not merely broadcast-compatible shapes.",
         "solution": "# Reject a broadcast that changes the contract (Practice): The operation promises paired matrices.\nrejected=False\ntry:blocked_axpy(x,jnp.ones((5,1),dtype=jnp.float32))\nexcept ValueError:rejected=True\nassert rejected\nprint(\"Mismatched global shape rejected\")",
         "explanation": "The operation promises paired matrices. A separate row/column-bias kernel can define an intentional broadcast contract.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "A kernel wrapper and a (n,1) second input where the contract requires matching vector shape."
+          ],
+          "outputs": [
+            "A pre-launch validation error and its message."
+          ],
+          "invariants": [
+            "Shape validation happens before kernel execution.",
+            "Broadcast compatibility does not imply the documented input contract."
+          ],
+          "hints": [
+            "Check exact ranks and dimensions before creating a launch grid.",
+            "Make the failure distinguishable from arithmetic errors."
+          ],
+          "code": "def reject_broadcast_input(kernel_wrapper, values, column_values):\n    # TODO: call the wrapper and require its documented shape error.\n    raise NotImplementedError(\"Verify invalid broadcast shapes are rejected before launch\")"
+        }
       },
       {
         "title": "Measure padding overhead without claiming runtime",
@@ -77,7 +94,24 @@
         "hint": "Use integer ceiling division; do not time interpretation as accelerator performance.",
         "solution": "# Measure padding overhead without claiming runtime (Challenge): Program count and padded work expose different costs.\nfor shape in [(5,11),(33,129)]:\n    counts=[]\n    for bm,bn in [(2,4),(8,128),(16,256)]:\n        gm=(shape[0]+bm-1)//bm\n        gn=(shape[1]+bn-1)//bn\n        counts.append((bm,bn,gm*gn,gm*gn*bm*bn))\n    assert all(padded>=shape[0]*shape[1] for _,_,_,padded in counts)\n    print(\"Shape, block/program/padded counts:\",shape,counts)",
         "explanation": "Program count and padded work expose different costs. Actual target measurements are still needed to rank configurations.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "Logical shapes (5,11) and (33,129), plus three valid block shapes."
+          ],
+          "outputs": [
+            "Program count and padded elements for each shape/block choice."
+          ],
+          "invariants": [
+            "Logical element count is invariant across tile choices.",
+            "Padded element count can rise even when program count falls."
+          ],
+          "hints": [
+            "Compute ceil-divided grid dimensions.",
+            "Report logical work and padded launch work as separate columns."
+          ],
+          "code": "import math\n\ndef padding_report(shapes, blocks):\n    # TODO: calculate grids, program counts, and padded elements.\n    raise NotImplementedError(\"Quantify launch padding without making a timing claim\")"
+        }
       }
     ],
     "diagnosis": "If only the boundary is wrong, inspect ceiling division, padding and cropping before editing arithmetic. If blocks skip input regions, check whether the index map returns block coordinates or incorrectly pre-multiplied offsets. If a mean looks right but full comparison fails, inspect tile permutation or duplicate ownership.",
@@ -185,6 +219,25 @@
       "BlockSpec coordinates select blocks. Pallas scales them by the block dimensions; an extra multiplication in the map would skip windows.",
       "The index map returns block coordinates; BlockSpec scales them by block dimensions. Distinguish a program index from an element origin.",
       "Applying the scale twice skips blocks. Write the element interval for program \\((1,1)\\) before implementing the map."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Two same-shaped float32 matrices for each fixture: singleton-row shape (1,7) and changed tail shape (7,9).",
+        "Two block choices, (2,4) and (3,5), with the lesson kernel wrapper."
+      ],
+      "outputs": [
+        "Exact logical output shape for each fixture/block pair.",
+        "Full elementwise agreement with the independent NumPy expression."
+      ],
+      "invariants": [
+        "Each input pair has identical shape and the result preserves that shape.",
+        "Masked partial blocks cover every logical element, including negative values."
+      ],
+      "hints": [
+        "Test the one-row case separately from a partial final tile.",
+        "Compare every output element with the NumPy expression."
+      ],
+      "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef verify_changed_kernel(wrapper, singleton_pair, changed_pair, block_choices):\n    # TODO: run both same-shaped input pairs under each block and check NumPy values.\n    raise NotImplementedError(\"Exercise singleton rows and nondivisible negative-valued tails\")"
+    }
   }
 }

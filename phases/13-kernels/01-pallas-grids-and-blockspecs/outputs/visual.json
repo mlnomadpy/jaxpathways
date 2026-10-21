@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "kernels-01",
-  "contentHash": "b82305aa59f8f4070ca8a6c5d791048e2438f7ae06cfed1f5c8344896fc0d5ef",
+  "contentHash": "5c2bf71a7aad7ee0646907ed755c064137f9d20f71ce5548a5b1e5b45fe61c80",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T11:33:20.417181+00:00",
+  "generatedAt": "2026-10-21T16:05:19.591135+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

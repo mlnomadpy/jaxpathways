@@ -73,7 +73,23 @@
         "prompt": "Two updates process \\(8\\) examples each in \\(1\\) and \\(3\\) seconds. Compare the average rate with the rate of all completed work.",
         "hint": "Sum examples and seconds first.",
         "solution": "# Catch an average-of-rates error (Transfer / diagnosis)\ndurations=[1.,3.]\ncounts=[8,8]\nwrong=sum(n/t for n,t in zip(counts,durations))/2\nright=sum(counts)/sum(durations)\nassert abs(wrong-16/3)<1e-12 and right==4.",
-        "explanation": "The short step gets excessive influence when rates are averaged without accounting for their duration."
+        "explanation": "The short step gets excessive influence when rates are averaged without accounting for their duration.",
+        "learnerStarter": {
+          "inputs": [
+            "Two updates process \\(8\\) examples each in \\(1\\) and \\(3\\) seconds. Compare the average rate with the rate of all completed work."
+          ],
+          "outputs": [
+            "Unweighted mean of rates and total-work throughput."
+          ],
+          "invariants": [
+            "Aggregate throughput is total examples divided by total elapsed seconds."
+          ],
+          "hints": [
+            "Sum examples and seconds first.",
+            "Sum numerators and denominators before dividing."
+          ],
+          "code": "import math\n\ndef practice_catch_an_average_of_rates_error(example_counts, elapsed_seconds):\n    \"\"\"Complete the catch an average-of-rates error check.\"\"\"\n    # TODO: ('Compute mean of the two update rates and total examples divided by total seconds for the 8-example updates.', 'Both rate summaries with the total-work rate identified.', 'The aggregate rate uses summed examples over summed elapsed time.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Change the checkpoint cadence",
@@ -81,7 +97,23 @@
         "prompt": "Run with checkpoint cadence \\(3\\) and fail after update \\(5\\). Predict the committed step and replay count.",
         "hint": "Expect the most recent multiple of the checkpoint interval before the failure.",
         "solution": "# Change the checkpoint cadence (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as folder:\n    changed=launch(folder,dict(checkpoint_every=3,fail_after=5))\nstats=summarize(changed)\nassert stats['checkpoint_step']==3 and stats['uncheckpointed_updates']==2",
-        "explanation": "The run tests a changed operational policy rather than assuming every failure loses exactly one update."
+        "explanation": "The run tests a changed operational policy rather than assuming every failure loses exactly one update.",
+        "learnerStarter": {
+          "inputs": [
+            "Run with checkpoint cadence \\(3\\) and fail after update \\(5\\). Predict the committed step and replay count."
+          ],
+          "outputs": [
+            "Committed checkpoint step and amount of replay after failure."
+          ],
+          "invariants": [
+            "A failure after update five cannot advance beyond the last completed cadence checkpoint."
+          ],
+          "hints": [
+            "Expect the most recent multiple of the checkpoint interval before the failure.",
+            "Distinguish attempted updates from committed state."
+          ],
+          "code": "from pathlib import Path\nimport hashlib\nimport json\nimport math\nimport os\nimport time\nimport numpy as np\n\ndef practice_change_the_checkpoint_cadence(updates, checkpoint_every, failure_after):\n    \"\"\"Complete the change the checkpoint cadence check.\"\"\"\n    # TODO: ('Simulate checkpoint interval three and failure after update five, then replay from the last committed step.', 'Committed step and replay count from the declared cadence.', 'Only committed checkpoints survive the injected failure.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What does update duty fraction establish in this lab?",
@@ -164,6 +196,22 @@
       "Wall time inside an update is not a hardware occupancy counter. Use a device profiler for utilization claims.",
       "A local loop does not measure a fleet. State the measured process, device and timing boundary.",
       "The numerator and denominator describe an application timing boundary. They do not measure device occupancy, memory bandwidth or fleet allocation."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The synchronized-update duration and supervisor wall-clock duration for the same run."
+      ],
+      "outputs": [
+        "The fraction of supervisor wall time spent in synchronized updates and a precise list of excluded intervals."
+      ],
+      "invariants": [
+        "The duty fraction is synchronized-update time divided by supervisor wall time, and does not claim to include time outside that boundary."
+      ],
+      "hints": [
+        "Use durations measured over the same run window.",
+        "Name setup, queue, and checkpoint intervals only if the supervisor timing boundary excludes them."
+      ],
+      "code": "def compute_update_duty_fraction(synchronized_update_seconds, supervisor_wall_seconds):\n    # TODO: Divide synchronized update time by supervisor wall time and state what that interval excludes.\n    raise NotImplementedError\n"
+    }
   }
 }

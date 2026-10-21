@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "networks-05",
-  "contentHash": "2dd6cb55e5049921d8d4365c3da08a483b3d25c30c4faf2b110aba62d2a88391",
+  "contentHash": "ab5ea6cd4307680501d01319c555aa25a71aafb80ea99fe2ea883cd94bf19ae3",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T11:23:53.187608+00:00",
+  "generatedAt": "2026-10-21T16:04:05.806550+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",

@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "rl-03",
-  "contentHash": "9339626f997ba770399f90993de93af13798f499a6e33e2c05e39f9666d28f2f",
-  "executedAt": "2026-10-21T11:31:29.324297+00:00",
+  "contentHash": "ca30eab5328b13074f97a434318edbf29023940e246726bc44b50c4c96813bf4",
+  "executedAt": "2026-10-21T16:08:04.996308+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -14,7 +14,7 @@
   "stdout": "REINFORCE initial/final exact return: 0.46687505 0.9521624\nPPO initial/final exact return: 0.46687505 0.97578394\nREINFORCE initial/final exact return: 0.46687505 0.9521624\nPPO initial/final exact return: 0.46687505 0.97578394\npositive / negative targets: [0.6 1.  1.2] [-0.8 -1.  -1.4]\nsampled / exact gradient: [0.12067959 0.21948992 0.13326262] [0.12001554 0.21822323 0.13327113]\nchanged seed final exact return: 0.9501661\nPASS: rl-03\n",
   "notebookCells": [
     {
-      "sourceHash": "e9e751ca0f60465a88eaa2b355342290e142dd220427d825379f1c0953a8b5f9",
+      "sourceHash": "7c4c752b8ab36c5a746a4df077bae9e9e16b30a0dbbbf8edc1a6137dd59dabec",
       "outputs": []
     },
     {
@@ -35,7 +35,7 @@
       ]
     },
     {
-      "sourceHash": "0b29cc118b69fda5db1b173818af8739832c1c3455dfe68b6a897af8a90cb54f",
+      "sourceHash": "adbd8028106fbc10aa6384bdb94bbdef3ab2b11ad11e0b080e325fcb6f894943",
       "outputs": [
         {
           "output_type": "stream",
@@ -91,7 +91,7 @@
       ]
     },
     {
-      "sourceHash": "39657385566cbbc67e68bd0d34b3051199dbd122bfadd4a87f5c930b3efadc05",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -107,7 +107,7 @@
       ]
     },
     {
-      "sourceHash": "3544a17371249848a730dd574ff371f3a9bce50352b5b2e96d7dca67137205d0",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -115,7 +115,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "07eec9cd69e1abaad3008f7a1d67d794991b977812af40547182babd1934ccca",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

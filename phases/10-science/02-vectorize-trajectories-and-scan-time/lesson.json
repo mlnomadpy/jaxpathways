@@ -68,7 +68,26 @@
         "hint": "scan may emit None while its carry still advances.",
         "solution": "# Save only what the objective needs (Practice): The explicit trajectory output is removed.\n# Define `final_only(rate, initial, steps, dt)` to carry state across steps with `jax.lax.scan`:\ndef final_only(rate, initial, steps=40, dt=0.05):\n    def advance(value, unused):\n        return rk4_step(rate,value,dt), None\n    return jax.lax.scan(advance,initial,None,length=steps)[0]\n# Vectorize across the batch dimension with `jax.vmap` (`finals`).\nfinals = jax.vmap(lambda u: final_only(0.7,u))(initials)\nnp.testing.assert_allclose(finals,trajectories[:,-1],rtol=1e-12)\nprint(\"Only final states returned:\", np.asarray(finals))",
         "explanation": "The explicit trajectory output is removed. Differentiation memory requires separate analysis and measurement.",
-        "title": "Save only what the objective needs"
+        "title": "Save only what the objective needs",
+        "learnerStarter": {
+          "inputs": [
+            "A vector of four initial conditions, fixed scalar rate, and saved time grid."
+          ],
+          "outputs": [
+            "Final-state-only values and the final column from the trajectory solve.",
+            "A short explanation naming the intermediate-trajectory allocation no longer retained."
+          ],
+          "invariants": [
+            "Both methods agree at the final time.",
+            "The final-only solve avoids retaining intermediate states.",
+            "Final-only evaluation carries the state without storing every time point."
+          ],
+          "hints": [
+            "Use the same integrator, step count, and initial values in both paths.",
+            "Compare arrays by shape and values, not a single selected element."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef compare_final_only(initial_values, rate, dt, steps):\n    # TODO: implement a scan that returns only its carry, then compare with saved states.\n    raise NotImplementedError(\"Compare final-only integration with the saved trajectory\")"
+        }
       },
       {
         "difficulty": "Challenge",
@@ -76,7 +95,24 @@
         "hint": "Use nested vmap; identify the rate, initial-condition and time axes explicitly.",
         "solution": "# Pairing versus Cartesian products (Challenge): Paired batches and Cartesian products are different experiments.\n# Vectorize across the batch dimension with `jax.vmap` (`grid`).\ngrid = jax.vmap(lambda k: jax.vmap(lambda u: solve(k,u))(initials))(rates)\n# Check tensor shape invariant: `grid.shape == (3,3,41)`\nassert grid.shape == (3,3,41)\nnp.testing.assert_allclose(grid[jnp.arange(3),jnp.arange(3)],paired,rtol=1e-12)\nprint(\"Grid axes: rate, initial condition, time\", grid.shape)",
         "explanation": "Paired batches and Cartesian products are different experiments. The diagonal correspondence verifies the axis interpretation.",
-        "title": "Pairing versus Cartesian products"
+        "title": "Pairing versus Cartesian products",
+        "learnerStarter": {
+          "inputs": [
+            "Three rates and three initial values for the scalar decay model."
+          ],
+          "outputs": [
+            "Paired outputs and a full rate-by-initial-value grid."
+          ],
+          "invariants": [
+            "Paired evaluation returns one output per matching input pair.",
+            "Cartesian evaluation returns a (3, 3) grid; its diagonal matches paired results."
+          ],
+          "hints": [
+            "Use vmap over both arguments for pairing.",
+            "Nest vectorization over rates and initial values for the Cartesian grid."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef compare_pairing_and_grid(solve, rates, initials):\n    # TODO: construct paired and Cartesian evaluations.\n    # Return both arrays and an explicit diagonal consistency check.\n    raise NotImplementedError(\"Distinguish paired mapping from a Cartesian product\")"
+        }
       }
     ],
     "diagnosis": "If the reference comparison broadcasts unexpectedly, print both shapes before reducing anything. Compare a named row and a named time column. If changing one initial condition changes other rows, inspect reductions or coupling across the batch. A reduction can hide an axis error while still producing a plausible scalar.",
@@ -282,6 +318,26 @@
       "vmap contributes the leading independent-experiment axis. The scalar solve contributes its forty-one saved states; no device placement is specified.",
       "The first axis indexes initial conditions, not times. The second includes the initial value and forty subsequent states.",
       "A batch dimension does not imply device placement. Inspect array sharding separately from its logical shape."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Rate 0.7, a four-element initial-condition vector, and the lesson time grid with 41 points.",
+        "A permutation of the four initial conditions."
+      ],
+      "outputs": [
+        "Batched trajectory with shape (4, 41), checked against initial * exp(-rate*time).",
+        "Reordered trajectories whose rows follow the changed initial-condition order."
+      ],
+      "invariants": [
+        "Each initial condition scales the same scalar decay trajectory.",
+        "Reordering inputs changes rows only; time columns remain unchanged.",
+        "The batch/time axes have shape (4, 41)."
+      ],
+      "hints": [
+        "Vectorize over initial values while preserving the time axis.",
+        "Compare all values with the analytic exponential and apply the same row permutation."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef verify_batched_trajectories(solve, initial_values, rate, times, permutation):\n    # TODO: evaluate four starts, check shape and exponential values, then row reordering.\n    raise NotImplementedError(\"Check analytic trajectories and preserve batch/time axes\")"
+    }
   }
 }

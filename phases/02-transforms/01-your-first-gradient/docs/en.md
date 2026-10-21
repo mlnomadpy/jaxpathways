@@ -175,7 +175,7 @@ visual_data['markers'] = [{'x': point, 'y': float(f(point)), 'label': 'selected 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:55.490385+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:30.867688+00:00. JAX 0.9.2.
 
 ```text
 Finite-difference estimate: 5.999999999999339
@@ -236,23 +236,36 @@ Foundation · Define $f(x)=x^3$. Derive $f\prime(x)$, predict the values at $-2$
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A scalar cubic function defined by the learner.
+- Evaluation points -2, 0, and 3.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The function and its JAX derivatives at each point.
+- An explanation that separates a stationary point from a minimum.
+
+**Invariants to check:**
+- `grad` receives a scalar-output function.
+- Every requested point is checked.
+- A zero derivative alone does not classify a minimum.
+
+**Hints:**
+- Derive the polynomial rule before calling autodiff.
+- Check function behavior on either side of the stationary point.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Foundation · Define f(x)=x^3.
+import jax
+import jax.numpy as jnp
+
 def cubic(x):
-    return ...  # TODO: return computed result
-for point in (-2., 0., 3.):
-    assert jnp.allclose(jax.grad(cubic)(point), 3. * point ** 2)  # TODO: complete assertion check
-assert cubic(-0.1)  # TODO: complete assertion check
+    # TODO: define the scalar cubic
+    raise NotImplementedError
+
+def check_cubic(points):
+    # TODO: evaluate and retain one JAX derivative per point
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -282,21 +295,34 @@ grad defaults to `argnums=0.` The other input remains an input to the transforme
 
 ### How to write: Differentiate the parameter you intended — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- The scalar prediction `weight * x`.
+- Weight 2 and input 3.
+- Two requested differentiation arguments.
 
-**Step-by-step implementation plan:**
-1. Differentiate the parameter you intended (Practice)
+**Outputs:**
+- A derivative with respect to each argument.
+
+**Invariants to check:**
+- The unselected argument remains an ordinary input.
+- Distinguish prediction from derivative.
+
+**Hints:**
+- Name the differentiation argument explicitly.
+- Check each derivative against its own input.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Differentiate the parameter you intended (Practice)
+import jax
+
 def scalar_prediction(weight, x):
-    return ...  # TODO: return computed result
-assert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)  # TODO: complete assertion check
-assert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)  # TODO: complete assertion check
+    # TODO: define the scalar prediction
+    raise NotImplementedError
+
+def compare_argument_gradients():
+    # TODO: transform the function for each requested argument
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -327,26 +353,35 @@ Write the reduction as a mathematical function first: its mean is $x^2-2x+2$.
 
 ### How to write: Repair an objective without hiding its meaning — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A two-element output containing squared costs.
+- Inputs 0, 1, and 2.
 
-**Step-by-step implementation plan:**
-1. Repair an objective without hiding its meaning (Challenge)
+**Outputs:**
+- A scalar mean objective and its derivatives.
+- A comparison with the sum objective’s derivative scale.
+
+**Invariants to check:**
+- `grad` receives one scalar objective.
+- Mean and sum remain distinct objectives.
+
+**Hints:**
+- Choose the reduction before differentiating.
+- Compare the factors analytically.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair an objective without hiding its meaning (Challenge)
-def two_costs(x):
-    return ...  # TODO: return computed result
-def mean_cost(x):
-    return ...  # TODO: return computed result
-for point in (0., 1., 2.):
-    assert jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)  # TODO: complete assertion check
-    assert jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def mean_objective(x):
+    # TODO: construct the two costs and reduce to one scalar
+    raise NotImplementedError
+
+def compare_reductions(points):
+    # TODO: evaluate derivatives for the mean and sum objectives
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

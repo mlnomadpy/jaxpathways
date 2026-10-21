@@ -1,8 +1,8 @@
 # RL synthesis: defend an agent trained from interaction
 
-**Scope:** tabular policies, functional finite-horizon environments, randomized rollouts, REINFORCE and clipped policy updates, independent expectation checks, and held-out evaluation.
+**Scope:** tabular policies, functional finite-horizon environments, randomized rollouts, REINFORCE and clipped policy updates, independent expectation checks, held-out evaluation, and a separate tabular critic/GAE audit.
 
-[Open the project](../project.html?id=policy-evaluation). Complete `rl-01` through `rl-04`, then retain your own implementation, `assessment.py`, and a short report. Keep reference code separate from learner evidence.
+[Open the project](../project.html?id=policy-evaluation). Complete `rl-01` through `rl-05`, then retain your own implementation, `assessment.py`, and a short report. Keep reference code separate from learner evidence.
 
 ## Establish the baseline
 
@@ -10,7 +10,7 @@ Run the cumulative project checks from the workspace root:
 
 ```sh
 # Run run command in terminal using the course Python environment
-python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 4
+python3 projects/policy-evaluation/tests/check.py --implementation projects/policy-evaluation/my_model.py --stage 5
 ```
 
 Record the source revision, Python/JAX/NumPy versions, backend, dtype, configuration, training seeds and evaluation seed sets. Predict each changed-condition result before execution. The following tasks require new evidence beyond passing the public fixture.
@@ -76,6 +76,14 @@ Report individual results even when an agent disappoints. Summarize variation ac
 
 No fixed score threshold is imposed on this changed protocol. The assessment asks for a faithful, reproducible experiment and a diagnosis supported by evidence, not a conveniently chosen successful run.
 
+## Task 6: audit the learned value estimate and reset boundary
+
+Collect a new batch with a declared seed and horizon. Fit the four-entry value table to retained reward-to-go targets. Independently compute the masked mean squared error with NumPy from the returned table, observations and targets. Compare it with the reported loss history. Derive the best constant prediction for each observed state by averaging that state's valid targets; explain the remaining variance and the missing time-remaining feature.
+
+Construct three transitions with observations \(0,1,0\), next observations \(1,3,1\), rewards \(1,2,3\), a cutoff on the second transition and a true terminal on the third. Use values \(V=(0.5,1,2,4)\), \(\gamma=0.5\) and \(\lambda=0.5\). Derive the GAE trace twice, allowing and suppressing cutoff bootstrap. Change the third reward and show why neither earlier advantage should change across the reset.
+
+Finally, put NaN targets in padded rows. Demonstrate that valid loss and parameter gradients stay unchanged. Keep this failure case, its repair and a changed-shape batch. These checks establish a bounded critic and advantage implementation; the project's actor still uses reward-to-go and has not become a full actor-critic benchmark.
+
 ## Evidence and review
 
 Use **accept**, **revise**, or **not demonstrated** for each task:
@@ -85,6 +93,7 @@ Use **accept**, **revise**, or **not demonstrated** for each task:
 - **Gradient:** enumeration, finite differences and sampled estimators are compared with justified precision and sampling tolerances.
 - **Clipping:** both target signs are correct; behavior data stay frozen; the explanation avoids claiming a guaranteed trust region.
 - **Evaluation:** multiple agents, reserved streams, complete histories, baselines, replay, isolation and honest aggregation are all inspectable.
+- **Value and advantages:** actual returned parameters support the reported error reduction; a separate per-state oracle and hand-derived GAE trace check bootstrap, resets and padding gradients.
 - **Limits:** the report identifies the small synthetic environment, stationary policy class, CPU-only verification, public tests and absence of independent expert review.
 
 Every task needs inspectable learner evidence for overall acceptance. A reviewer may request a different horizon, policy or seed set. The public [reviewer notes](rl-reviewer.md) help check arithmetic after the attempt; they are not a hidden exam key.

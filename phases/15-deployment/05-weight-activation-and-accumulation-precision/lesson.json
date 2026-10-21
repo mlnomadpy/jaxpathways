@@ -99,7 +99,23 @@
         "prompt": "Use calibrated symmetric scales for \\(x\\) and per-channel scales for \\(w\\). Multiply integer codes with INT32 accumulation, rescale, and compare to the float baseline. Do not multiply int8 arrays directly.",
         "hint": "Cast both integer-code arrays before multiplication. The real accumulator unit is the activation scale multiplied by each output channel’s weight scale; compare with the unchanged floating-point reference.",
         "solution": "sx = float(np.max(np.abs(x))) / 127\nqx = np.clip(np.rint(x / sx), -127, 127).astype(np.int8)\nqw, sw = quantize_weights(w, 8)\naccumulator = qx.astype(np.int32) @ qw.astype(np.int32)\ny_integer = accumulator.astype(np.float32) * sx * sw\nassert accumulator.dtype == np.int32\nnp.testing.assert_allclose(y_integer, reference, atol=.06, rtol=0)\nprint(\"W8A8 fixture error\", float(np.max(np.abs(y_integer-reference))))",
-        "explanation": "This dense fixture uses zero points of zero and no bias. A real affine operator must subtract zero points and handle bias and output requantization. Wide accumulation avoids int8 overflow; sufficiently long reductions can still overflow INT32."
+        "explanation": "This dense fixture uses zero points of zero and no bias. A real affine operator must subtract zero points and handle bias and output requantization. Wide accumulation avoids int8 overflow; sufficiently long reductions can still overflow INT32.",
+        "learnerStarter": {
+          "inputs": [
+            "Use calibrated symmetric scales for \\(x\\) and per-channel scales for \\(w\\). Multiply integer codes with INT32 accumulation, rescale, and compare to the float baseline. Do not multiply int8 arrays directly."
+          ],
+          "outputs": [
+            "An integer-coded output, float baseline, and error comparison."
+          ],
+          "invariants": [
+            "Integer dot products widen to int32 before summation."
+          ],
+          "hints": [
+            "Cast both integer-code arrays before multiplication. The real accumulator unit is the activation scale multiplied by each output channel’s weight scale; compare with the unchanged floating-point reference.",
+            "Apply activation and per-output-channel weight scales after accumulation."
+          ],
+          "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef practice_compute_w8a8_with_a_wide_accumulator(activation, weights, activation_scale, weight_scales):\n    \"\"\"Complete the compute w8a8 with a wide accumulator check.\"\"\"\n    # TODO: ('Quantize activation and per-channel weight values, multiply integer codes with an int32 accumulator, rescale, and compare with float output.', 'Integer-path output, float reference, and per-output error.', 'Integer products are widened before accumulation; calibration scales are retained per channel.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Change the code origin without changing the values",
@@ -107,7 +123,23 @@
         "prompt": "Change the activation zero point from \\(-3\\) to \\(17\\), shift the input codes accordingly, and prove that predictions stay unchanged. Then feed codes representing real zero and identify the expected bias-only result.",
         "hint": "Shift the zero point and codes by the same amount before subtracting; verify representability before casting back to INT8.",
         "solution": "# Change the code origin without changing the values (Transfer): Integer codes are coordinates on a grid.\nshifted_zx = 17\nshifted_codes_wide = a_qx.astype(np.int64) + (shifted_zx - a_zx)\nassert np.all((-128 <= shifted_codes_wide) & (shifted_codes_wide <= 127))\nshifted_codes = shifted_codes_wide.astype(np.int8)\nshifted_acc = (shifted_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes\nnp.testing.assert_array_equal(shifted_acc, a_acc)\nzero_codes = np.full((1, 3), shifted_zx, np.int8)\nzero_result = ((zero_codes.astype(np.int64) - shifted_zx) @ a_qw.astype(np.int64) + a_bias_codes) * a_sx * a_sw\nnp.testing.assert_array_equal(zero_result, a_bias[None, :])\nfor bad_scale in (0., -1., float('nan')):\n    try:\n        output_grid(a_real, bad_scale, -8)\n    except ValueError:\n        pass\n    else:\n        raise AssertionError('invalid scale accepted')\nprint('Code-origin invariance and bias-only zero input verified.')",
-        "explanation": "Integer codes are coordinates on a grid. Changing the coordinate origin consistently preserves represented values. The zero-input check exposes a missing zero-point correction or bias in the wrong accumulator units."
+        "explanation": "Integer codes are coordinates on a grid. Changing the coordinate origin consistently preserves represented values. The zero-input check exposes a missing zero-point correction or bias in the wrong accumulator units.",
+        "learnerStarter": {
+          "inputs": [
+            "Change the activation zero point from \\(-3\\) to \\(17\\), shift the input codes accordingly, and prove that predictions stay unchanged. Then feed codes representing real zero and identify the expected bias-only result."
+          ],
+          "outputs": [
+            "Equivalent dequantized activations and output for both code origins."
+          ],
+          "invariants": [
+            "Real activation values remain fixed after code and zero-point shift together."
+          ],
+          "hints": [
+            "Shift the zero point and codes by the same amount before subtracting; verify representability before casting back to INT8.",
+            "Use the declared zero point to identify which codes represent real zero."
+          ],
+          "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef practice_change_the_code_origin_without_changing_the_values(codes, old_zero_point, new_zero_point):\n    \"\"\"Complete the change the code origin without changing the values check.\"\"\"\n    # TODO: ('Recenter activation codes from zero point -3 to 17, adjust codes consistently, and test the real-zero input response.', 'Matching predictions before/after recoding plus the expected bias-only result for real zero.', 'Dequantized real activation values are invariant under the zero-point change.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Account for actual low-bit storage",
@@ -115,7 +147,23 @@
         "prompt": "Calculate FP32 storage, ideal packed four-bit storage, and the actual int8-backed four-bit simulation for the fixture. Include per-output-channel FP32 scales; keep biases and runtime workspace explicitly outside this subtotal.",
         "hint": "Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is not implemented by astype(int8).",
         "solution": "# Account for actual low-bit storage (Transfer / diagnosis)\nq4, s4 = quantize_weights(w, 4)\nfloat_weight_bytes = w.nbytes\nsimulated_weight_and_scale_bytes = q4.nbytes + s4.nbytes\nideal_packed_weight_and_scale_bytes = (w.size + 1)//2 + s4.nbytes\nassert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes) == (24,14,11)\nprint('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)",
-        "explanation": "The simulation uses \\(14\\) bytes for its codes and scales, not the ideally packed \\(11\\). Tiny tensors emphasize metadata overhead; large models also need block/group metadata, alignment, biases and working memory."
+        "explanation": "The simulation uses \\(14\\) bytes for its codes and scales, not the ideally packed \\(11\\). Tiny tensors emphasize metadata overhead; large models also need block/group metadata, alignment, biases and working memory.",
+        "learnerStarter": {
+          "inputs": [
+            "Calculate FP32 storage, ideal packed four-bit storage, and the actual int8-backed four-bit simulation for the fixture. Include per-output-channel FP32 scales; keep biases and runtime workspace explicitly outside this subtotal."
+          ],
+          "outputs": [
+            "Separate ideal packed and actual simulated storage totals."
+          ],
+          "invariants": [
+            "Per-channel scales count as FP32 metadata and biases/workspace stay outside the subtotal."
+          ],
+          "hints": [
+            "Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is not implemented by astype(int8).",
+            "Report the actual backing dtype separately from nominal bit width."
+          ],
+          "code": "import numpy as np\nimport jax.numpy as jnp\n\ndef practice_account_for_actual_low_bit_storage(parameter_count, output_channels, bits):\n    \"\"\"Complete the account for actual low-bit storage check.\"\"\"\n    # TODO: ('Compute FP32, ideal packed four-bit, and int8-backed four-bit payload bytes including per-channel scales.', 'Three storage totals with biases/workspace explicitly excluded.', 'The simulated format is counted using its actual int8 backing storage, not ideal bit packing.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What must a deployment policy specify beyond “INT8 weights”?",
@@ -256,6 +304,22 @@
       "Bit width alone is incomplete. Arithmetic, scale metadata, calibration and runtime support determine both behavior and practical benefit.",
       "A filename or container format does not define tensor scales, calibration or accumulation. Write the numerical contract explicitly.",
       "Smaller storage does not guarantee faster execution. Check native operator support, data movement and measured target latency."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The output weight matrix with one added all-zero output channel and the channel-wise quantizer."
+      ],
+      "outputs": [
+        "The zero channel’s quantization scale and reconstructed values."
+      ],
+      "invariants": [
+        "The scale is finite and every reconstructed value for the all-zero channel is exactly zero."
+      ],
+      "hints": [
+        "Handle a zero channel maximum explicitly when forming its scale.",
+        "Inspect the reconstructed channel after quantization, not only its integer codes."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef check_zero_output_channel(weights, quantize_weights):\n    # TODO: Add an all-zero output channel, run channel-wise quantization, and inspect its scale and reconstruction.\n    raise NotImplementedError\n"
+    }
   }
 }

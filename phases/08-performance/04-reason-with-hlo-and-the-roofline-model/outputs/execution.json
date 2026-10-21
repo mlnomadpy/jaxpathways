@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "performance-04",
-  "contentHash": "5c797410f553331c5da7e62152796a5d03dc861026f060811e9ba10feb87e28e",
-  "executedAt": "2026-10-21T11:30:19.171346+00:00",
+  "contentHash": "bf053e5000a75083976a7c9a6b77e9deb02201f7d3d3608a828741f4e86f2894",
+  "executedAt": "2026-10-21T16:06:28.152905+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'flops': 8192.0, 'utilization0{}': 2.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0}\nLocal CPU samples seconds: [4.2125117033720016e-05, 3.187498077750206e-05, 2.408307045698166e-05, 4.908395931124687e-05, 1.3459008187055588e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nStableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0}\nLocal CPU samples seconds: [2.987496554851532e-05, 6.466684862971306e-05, 1.941714435815811e-05, 2.2666994482278824e-05, 2.562534064054489e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nCeilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]\nChanged contract: 27648 8064 3.4285714285714284 bandwidth-limited in the hypothetical model\nArithmetic unchanged; modeled traffic halved and intensity doubled.\nPASS: performance-04\n",
+  "stdout": "StableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0}\nLocal CPU samples seconds: [1.9958242774009705e-05, 1.5458092093467712e-05, 1.0792165994644165e-05, 8.750241249799728e-06, 8.20821151137352e-06]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nStableHLO operations present: dot_general and tanh\nCompiler estimates (backend-specific): {'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0}\nLocal CPU samples seconds: [5.254102870821953e-05, 4.5332591980695724e-05, 4.333304241299629e-05, 4.616566002368927e-05, 4.270905628800392e-05]\nMatmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\nHypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\nCeilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]\nChanged contract: 27648 8064 3.4285714285714284 bandwidth-limited in the hypothetical model\nArithmetic unchanged; modeled traffic halved and intensity doubled.\nPASS: performance-04\n",
   "notebookCells": [
     {
       "sourceHash": "0ab36e5f589da7d5ea790d43fe521350034c433c2cb44bf4e6b87b8e960946d8",
@@ -25,7 +25,7 @@
           "name": "stdout",
           "text": [
             "StableHLO operations present: dot_general and tanh\n",
-            "Compiler estimates (backend-specific): {'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'bytes accessed': 5632.0, 'flops': 8192.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0, 'utilization0{}': 2.0, 'bytes accessed1{}': 512.0}\n"
+            "Compiler estimates (backend-specific): {'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'utilization0{}': 2.0, 'flops': 8192.0, 'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'transcendentals': 256.0, 'bytes accessed0{}': 3072.0}\n"
           ]
         }
       ]
@@ -41,7 +41,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "Local CPU samples seconds: [2.2292137145996094e-05, 4.0875282138586044e-05, 8.800020441412926e-05, 0.00010079191997647285, 2.224976196885109e-05]\n",
+            "Local CPU samples seconds: [2.2792257368564606e-05, 1.4165882021188736e-05, 1.1167023330926895e-05, 1.0750256478786469e-05, 9.542331099510193e-06]\n",
             "Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\n",
             "Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n"
           ]
@@ -56,8 +56,8 @@
           "name": "stdout",
           "text": [
             "StableHLO operations present: dot_general and tanh\n",
-            "Compiler estimates (backend-specific): {'bytes accessed0{}': 3072.0, 'bytes accessed': 5632.0, 'utilization0{}': 2.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'flops': 8192.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0}\n",
-            "Local CPU samples seconds: [2.954108640551567e-05, 2.6416033506393433e-05, 3.112480044364929e-05, 2.445792779326439e-05, 1.00000761449337e-05]\n",
+            "Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'bytes accessedout{}': 2048.0, 'transcendentals': 256.0}\n",
+            "Local CPU samples seconds: [6.39171339571476e-05, 8.937530219554901e-05, 3.570783883333206e-05, 5.0208065658807755e-05, 3.4582801163196564e-05]\n",
             "Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}\n",
             "Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]\n"
           ]
@@ -96,7 +96,7 @@
       ]
     },
     {
-      "sourceHash": "70dd208aacbdc6a13ee6d1b654eceb6701d191cff2112ff91dc89178f8123821",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -112,7 +112,7 @@
       ]
     },
     {
-      "sourceHash": "b069c4605466f9ae9b0e03c09b7ca49b8cf4445a726a4f0d07a4e713bcde1b53",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

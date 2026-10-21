@@ -86,7 +86,22 @@
         "prompt": "Multiply the trained reward weights by two and compare ordering and preference probabilities.",
         "hint": "Positive scaling preserves ordering but sharpens probabilities.",
         "solution": "# Show that feature scale can change scores without changing ranking (Transfer): A policy’s reward-versus-KL tradeoff depends on reward scale.\nscaled_rewards = features @ (2 * w)\nnp.testing.assert_array_equal(np.argsort(rewards), np.argsort(scaled_rewards))\nassert float(preference_loss(2 * w, chosen, rejected)) < float(\n    preference_loss(w, chosen, rejected)\n)\nprint('Ranking unchanged; confidence and downstream reward scale change.')",
-        "explanation": "A policy’s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone is distinct from an equivalent RL objective."
+        "explanation": "A policy’s reward-versus-KL tradeoff depends on reward scale. Rank agreement alone is distinct from an equivalent RL objective.",
+        "learnerStarter": {
+          "inputs": [
+            "Feature pairs, the trained reward weights, and the same weights multiplied by two."
+          ],
+          "outputs": [
+            "Score-order comparisons and preference probabilities before and after scaling."
+          ],
+          "invariants": [
+            "Positive scaling preserves ordering while it changes probability sharpness."
+          ],
+          "hints": [
+            "Compare score order and sigmoid probability as separate quantities."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef compare_reward_scale(features, chosen, rejected, weights):\n    # TODO: compare pair ordering and probabilities at both scales.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Derive the linear reward gradient",
@@ -94,7 +109,23 @@
         "prompt": "At a fresh weight vector, calculate the mean feature difference weighted by probability-minus-one and compare with autodiff. Repeat after reversing labels.",
         "hint": "Use NumPy sigmoid values for the independent calculation; reversing both feature order and probabilities is necessary.",
         "solution": "# Derive the linear reward gradient (Challenge)\nprobe_w = jnp.array([0.2, -0.4])\nfor positive, negative in [(chosen, rejected), (rejected, chosen)]:\n    # Transfer the device result to the host for an independent NumPy comparison.\n    difference = np.asarray(positive - negative, dtype=np.float64)\n    margin_host = difference @ np.asarray(probe_w)\n    # Reduce along axis=0 to compute `analytic`.\n    analytic = np.mean(\n        (1 / (1 + np.exp(-margin_host)) - 1)[:, None] * difference, axis=0\n    )\n    np.testing.assert_allclose(\n        jax.grad(preference_loss)(probe_w, positive, negative),\n        analytic,\n        atol=1e-6,\n    )\nprint('Independent reward gradients agree in both label directions.')",
-        "explanation": "Checking both directions catches a sign error that a single decreasing training curve might conceal."
+        "explanation": "Checking both directions catches a sign error that a single decreasing training curve might conceal.",
+        "learnerStarter": {
+          "inputs": [
+            "Chosen and rejected feature matrices plus a fresh reward weight vector."
+          ],
+          "outputs": [
+            "Mean feature-difference gradient from the likelihood formula and autodiff, repeated with reversed labels."
+          ],
+          "invariants": [
+            "The gradient is averaged across comparisons and flips consistently when every label is reversed."
+          ],
+          "hints": [
+            "Differentiate the scalar loss with respect to the weight vector.",
+            "Use the same parameter values for both labelings."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_linear_reward_gradient(weights, chosen, rejected):\n    # TODO: derive and check the preference-loss gradient before and after label reversal.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "What do pairwise preferences identify directly?",
@@ -152,6 +183,24 @@
       "A shared additive offset cancels from every pairwise probability.",
       "Pairwise losses are unchanged by a shared score offset for each compared pair. They do not identify an absolute utility zero.",
       "Changing reward scale changes its balance with the KL penalty. Compare the terms in the actual policy objective."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Chosen and rejected feature pairs plus a zero-initialized reward vector.",
+        "A trained reward vector for the same comparisons."
+      ],
+      "outputs": [
+        "Initial tied-score preference loss and a check of the trained chosen-over-rejected ordering."
+      ],
+      "invariants": [
+        "At equal scores, each binary preference contributes the same finite loss.",
+        "The ordering check compares chosen and rejected scores for each labeled pair."
+      ],
+      "hints": [
+        "Compute the score difference for each pair before applying the softplus loss.",
+        "Keep the initial calculation independent from the trained ordering check."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef audit_initial_and_trained_preferences(chosen, rejected, trained_weights):\n    # TODO: calculate the tied-score loss and audit the trained pair ordering.\n    raise NotImplementedError"
+    }
   }
 }

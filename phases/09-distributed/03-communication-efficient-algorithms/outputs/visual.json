@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "distributed-03",
-  "contentHash": "0f3e6c962164b55fa0cf96198f4f94fdb096638c6531d10b0301da9deec14e43",
+  "contentHash": "7e8030ff1df539475ca7b07f15be850009cce6d9ffadb66a38dddb66de2cf46e",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T11:24:25.383897+00:00",
+  "generatedAt": "2026-10-21T16:04:45.564800+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 107.33306407928467, 'reduce_scatter': 93.00000965595245, 'all_gather_only': 101.41683742403984}\n",
+  "stdout": "Gradient reference: [0.0029296851716935635, 0.00219726306386292, 0.0014648411888629198, 0.0007324193138629198, -2.6193447411060333e-09, -0.000732424552552402, -0.001464846427552402, -0.002197268418967724]\nLocal result shapes: replicated (8,), reduce-scatter (2,), gathered (8,)\nIdealized ring bytes per rank: 48.0 24.0\nCompleted CPU median microseconds: {'all_reduce': 112.62530460953712, 'reduce_scatter': 101.58400982618332, 'all_gather_only': 97.16721251606941}\n",
   "data": {
     "panels": [
       {

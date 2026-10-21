@@ -1,0 +1,9 @@
+PASS stage 1: posterior oracle, non-centered/rank-deficient data, log density, derivatives, input contracts
+seed 19 mean [ 0.6829027 -0.4082704] classical R-hat [1.0002191 1.0000464]
+seed 43 mean [ 0.7016259 -0.4002317] classical R-hat [1.000242  0.9997227]
+PASS stage 2: two-seed moments, replay, changed keys, R-hat oracle, stuck and unstable chains
+PASS stage 3: independent predictive variance, noise simulation, extrapolation, shifted-outcome check
+All requested public stages passed. Human review and real-data validation remain separate.
+
+
+PASS: all 31 project receipts match current sources; Bayesian reference rerun after optional helper repair

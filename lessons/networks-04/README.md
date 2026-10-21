@@ -271,7 +271,7 @@ visual_data = {'kind': 'panels', 'panels': [{'kind': 'heatmap', 'title': 'Held-o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:42.608380+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:14.555972+00:00. JAX 0.9.2.
 
 ```text
 Held-out loss: 0.015700625 accuracy: 1.0 confusion:
@@ -329,25 +329,29 @@ Apply the trained model to one $10\times10$ image. Predict the intermediate acti
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+**Inputs:**
+- The trained convolutional classifier and one image with shape (1, 10, 10, channels).
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `model.conv(larger).shape==(1,8,8,4)`
-2. Check tensor shape invariant: `model(larger).shape==(1,2)`
+**Outputs:**
+- The intermediate activation shape for that image, the trainable parameter count, and the prediction shape.
+
+**Invariants to check:**
+- The observed activation dimensions follow the convolution and pooling sequence; parameter count is independent of input batch size.
+
+**Hints:**
+- Trace spatial dimensions through each convolution and pooling operation.
+- Count model parameter leaves once; do not count activations as parameters.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Apply the trained model to one 10\times10 image.
-larger = jnp.zeros(...)  # TODO: compute larger
-larger = ...  # TODO: compute larger
-# Check tensor shape invariant: `model.conv(larger).shape==(1,8,8,4)`
-assert model.conv(larger).shape  # TODO: complete assertion check
-# Check tensor shape invariant: `model(larger).shape==(1,2)`
-assert model(larger).shape  # TODO: complete assertion check
-assert sum(a.size for a  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+from flax import nnx
+
+def inspect_single_image(model, image):
+    # TODO: Run one image, capture the requested intermediate shape, and count trainable parameter scalars.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -379,32 +383,27 @@ Keep the integer counts; a normalized row without a count hides how much evidenc
 
 ### How to write: Read a confusion matrix as conditional rates — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Normalize each confusion-matrix row by its true-class count. Explain the diagonal and verify that weighting class recalls by class counts reproduces overall accuracy. Then remove a class in a constructed case and report its recall as undefined.
 
-**Step-by-step implementation plan:**
-1. Reduce along axis=1 to compute `counts`.
-2. Reduce along axis=1 to compute `n`.
-3. Ensure all array elements remain finite: `np.isnan(missing_rates[1]).all()`
+**Outputs:**
+- Per-class recalls, undefined absent-class recall, and reconstructed accuracy.
+
+**Invariants to check:**
+- Rows are conditioned on true labels; classes with zero support are not assigned a numeric recall.
+
+**Hints:**
+- Keep the integer counts; a normalized row without a count hides how much evidence supports it.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Read a confusion matrix as conditional rates (Transfer): Each row asks where examples of one true class went.
-# Reduce along axis=1 to compute `counts`.
-counts = confusion.sum(...)  # TODO: compute counts
-rates = np.divide(...)  # TODO: compute rates
-np.testing.assert_allclose(rates.sum(axis = ...  # TODO: compute np.testing.assert_allclose(rates.sum(axis
-np.testing.assert_allclose((np.diag(rates)*counts).sum()/counts.sum(),accuracy)
-missing = np.array(...)  # TODO: compute missing
-# Reduce along axis=1 to compute `n`.
-n = missing.sum(...)  # TODO: compute n
-missing_rates = np.divide(...)  # TODO: compute missing_rates
-# Ensure all array elements remain finite: `np.isnan(missing_rates[1]).all()`
-assert np.isnan(missing_rates[1]).all()  # TODO: complete assertion check
-print('True-class counts:',counts,'row-normalized confusion:',rates)
-print('Absent class recall: undefined, not zero.')
+import jax.numpy as jnp
+
+def practice_read_a_confusion_matrix_as_conditional_rates(confusion, class_counts):
+    """Implement the read a confusion matrix as conditional rates check."""
+    # TODO: Divide each true-class row by its support, mask zero-support recall, and reconstruct accuracy by support weighting.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -444,25 +443,27 @@ The final axis is the input-channel dimension for NNX Conv.
 
 ### How to write: Catch a channel-order mistake — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Transpose NHWC images to NCHW and show why this convolution rejects them. Repair the layout and compare predictions.
 
-**Step-by-step implementation plan:**
-1. Catch a channel-order mistake (Intermediate)
-2. Rearrange tensor axes to match the required layout for `repaired`.
+**Outputs:**
+- The failure case and repaired NHWC output/prediction comparison.
+
+**Invariants to check:**
+- The input batch follows the convolution module’s declared spatial/channel axis order.
+
+**Hints:**
+- The final axis is the input-channel dimension for NNX Conv.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a channel-order mistake (Intermediate)
-wrong = jnp.transpose(...)  # TODO: compute wrong
-caught = ...  # TODO: compute caught
-try:model(wrong)
-except (ValueError,TypeError):caught=True
-assert caught  # TODO: complete assertion check
-# Rearrange tensor axes to match the required layout for `repaired`.
-repaired = jnp.transpose(...)  # TODO: compute repaired
-np.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)
+import jax.numpy as jnp
+
+def practice_catch_a_channel_order_mistake(model, images):
+    """Implement the catch a channel-order mistake check."""
+    # TODO: Transpose the declared NHWC batch to NCHW to reproduce the shape rejection, then restore NHWC and compare predictions.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -183,7 +183,7 @@ visual_data = {'kind': 'bar', 'labels': ['batch 1', 'batch 2', 'batch 3'], 'ylab
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:02.904778+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:38.226400+00:00. JAX 0.9.2.
 
 ```text
 full gradient / single variance / pair variance: -2.5 1.25 0.625
@@ -235,22 +235,29 @@ Enumerate all $64$ ordered batches of size $3$. Check their mean and variance ag
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A fixed scalar parameter, finite dataset, and ordered minibatch size.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The exact expected minibatch gradient and its variance.
+
+**Invariants to check:**
+- The sampler distribution is explicit; weighting unequal microbatches uses example counts.
+
+**Hints:**
+- Enumerate the small batch space before relying on a closed-form expectation.
+- Keep the parameter fixed across microbatch gradient accumulation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Enumerate all 64 ordered batches of size 3.
-triples = ...  # TODO: compute triples
-assert triples.size  # TODO: complete assertion check
-assert jnp.allclose(jnp.mean(triples), full, atol=1e-06)  # TODO: complete assertion check
-assert jnp.allclose(jnp.var(triples), 1.25 / 3, atol=1e-06)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def batch_gradient_statistics(parameter, dataset, batch_size):
+    """The exact expected minibatch gradient and its variance."""
+    # TODO: Enumerate the small sampler and compute expected gradient and variance at a fixed parameter.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -279,23 +286,28 @@ Do not update parameters between microbatches. Weight each mean by its sample co
 
 ### How to write: Accumulate before updating — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- At the same fixed $w$, accumulate gradients from microbatches of sizes $3$ and $1$. Verify that one update matches the full-batch update.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- One accumulated update and a full-batch comparison.
+
+**Invariants to check:**
+- The parameter remains fixed until all microbatch contributions are accumulated.
+
+**Hints:**
+- Do not update parameters between microbatches. Weight each mean by its sample count.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Accumulate before updating (Transfer / diagnosis)
-g1 = jax.grad(...)  # TODO: compute g1
-g2 = jax.grad(...)  # TODO: compute g2
-accumulated = ...  # TODO: compute accumulated
-assert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_accumulate_before_updating(parameter, microbatches):
+    """Implement the accumulate before updating check."""
+    # TODO: Differentiate both microbatches at one fixed parameter, sum gradients by example count, then perform one update.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -326,20 +338,28 @@ Use the sampling probabilities as weights. Missing examples cannot be recovered 
 
 ### How to write: Detect a biased sampler — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A sampler chooses targets $1$ and $4$ with probabilities $0.9$ and $0.1$, never the others. Compute its expected gradient. Does it estimate the uniform dataset gradient?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The biased expected gradient and the uniform reference gradient.
+
+**Invariants to check:**
+- The expectation uses the stated sampling probabilities, including zero probability for omitted targets.
+
+**Hints:**
+- Use the sampling probabilities as weights. Missing examples cannot be recovered by naive averaging.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a biased sampler (Transfer / diagnosis)
-biased = ...  # TODO: compute biased
-assert jnp.allclose(biased, -1.3)  # TODO: complete assertion check
-assert not jnp.allclose(biased, full)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_detect_a_biased_sampler(targets, probabilities):
+    """Implement the detect a biased sampler check."""
+    # TODO: Enumerate the sampler-weighted gradient and compare it to the uniform four-target dataset gradient.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -272,88 +272,88 @@ visual_data = {'kind': 'line', 'x': list(range(1, len(samples) + 1)), 'xlabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:56.384220+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:09:38.267360+00:00. JAX 0.9.2.
 
 ```text
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 13.248082716017962,
+  "first_request_ms": 18.5333751142025,
   "warm_samples_ms": [
-    0.16675004735589027,
-    0.07037492468953133,
-    0.05179084837436676,
-    0.04554213955998421,
-    0.043082982301712036,
-    0.04191696643829346,
-    0.038500409573316574,
-    0.03695907071232796,
-    0.0360412523150444,
-    0.03733299672603607,
-    0.03591692075133324,
-    0.034667085856199265,
-    0.03404170274734497,
-    0.03316672518849373,
-    0.03354111686348915,
-    0.03470899537205696,
-    0.0333334319293499,
+    0.34283287823200226,
+    0.11820904910564423,
+    0.215957872569561,
+    0.13975007459521294,
+    0.06841588765382767,
+    0.05349982529878616,
+    0.04595937207341194,
+    0.04449998959898949,
+    0.04016701132059097,
     0.03787502646446228,
-    0.033833086490631104,
-    0.033832620829343796,
-    0.03258371725678444,
-    0.03245798870921135,
-    0.03345822915434837,
-    0.03308383747935295,
-    0.03283284604549408,
+    0.03712484613060951,
+    0.03604218363761902,
+    0.03416743129491806,
+    0.034040771424770355,
+    0.03374973312020302,
+    0.03445800393819809,
+    0.03462517634034157,
+    0.034957658499479294,
     0.032874755561351776,
-    0.03254227340221405,
-    0.03191595897078514,
-    0.03262516111135483,
-    0.03262469545006752
+    0.03237510100007057,
+    0.032957643270492554,
+    0.032791867852211,
+    0.03674998879432678,
+    0.035999808460474014,
+    0.03316625952720642,
+    0.0338749960064888,
+    0.03945920616388321,
+    0.03316625952720642,
+    0.03312481567263603,
+    0.032957643270492554
   ],
-  "p50_ms": 0.03393739461898804,
-  "p95_ms": 0.062012090347707216,
+  "p50_ms": 0.035478733479976654,
+  "p95_ms": 0.18166436348110415,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
 {
   "runtime": "JAX CPU instructional proxy",
   "jax": "0.9.2",
-  "first_request_ms": 10.585166979581118,
+  "first_request_ms": 15.551791060715914,
   "warm_samples_ms": [
-    0.15520863234996796,
-    0.060374848544597626,
-    0.04750024527311325,
-    0.042292289435863495,
-    0.03987504169344902,
-    0.03679189831018448,
-    0.034874770790338516,
-    0.03424985334277153,
-    0.0338749960064888,
-    0.03383401781320572,
-    0.03395788371562958,
-    0.032499898225069046,
-    0.03179116174578667,
-    0.03241701051592827,
-    0.0317087396979332,
-    0.031750183552503586,
-    0.0322503037750721,
-    0.03233412280678749,
-    0.03145821392536163,
-    0.03095809370279312,
-    0.03208313137292862,
-    0.03158301115036011,
-    0.031165778636932373,
-    0.030499882996082306,
-    0.033375341445207596,
-    0.04116632044315338,
-    0.030874740332365036,
-    0.0310409814119339,
-    0.031042378395795822,
-    0.030667055398225784
+    0.1688329502940178,
+    0.06729084998369217,
+    0.051999930292367935,
+    0.04733307287096977,
+    0.042415689677000046,
+    0.07879221811890602,
+    0.03895815461874008,
+    0.037291087210178375,
+    0.03641704097390175,
+    0.03645801916718483,
+    0.03595789894461632,
+    0.03529200330376625,
+    0.03495905548334122,
+    0.036207959055900574,
+    0.44391676783561707,
+    0.13912515714764595,
+    0.06808387115597725,
+    0.05475012585520744,
+    0.05033286288380623,
+    0.04866672679781914,
+    0.04633283242583275,
+    0.05012517794966698,
+    0.04558265209197998,
+    0.04324968904256821,
+    0.10295910760760307,
+    0.1561674289405346,
+    0.07124990224838257,
+    0.051083043217659,
+    0.047250185161828995,
+    0.042791012674570084
   ],
-  "p50_ms": 0.03237556666135788,
-  "p95_ms": 0.05458127707242962,
+  "p50_ms": 0.047999899834394455,
+  "p95_ms": 0.16313346568495032,
   "boundary": "JSON decode + normalize + transfer + infer + wait + encode",
   "edge_device_validated": false
 }
@@ -414,23 +414,27 @@ Send a second raw input $[0, 255, 128]$ through the full request, and verify its
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The edge request pipeline and the second raw input [0, 255, 128].
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The normalized request, pipeline result, and an independent NumPy result for that raw input.
+
+**Invariants to check:**
+- Normalization follows the request contract and the pipeline output matches the independent normalized calculation.
+
+**Hints:**
+- Apply the same normalization used by the request path before calculating the host reference.
+- Keep target-device readiness evidence separate from this numerical request check.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_raw = np.array(...)  # TODO: compute changed_raw
-changed_response = json.loads(...)  # TODO: compute changed_response
-# Transfer the device result to the host for an independent NumPy comparison.
-expected_changed = ...  # TODO: compute expected_changed
-np.testing.assert_allclose(changed_response["scores"], expected_changed, atol = ...  # TODO: compute np.testing.assert_allclose(changed_response["scores"], expected_changed, atol
-print("Changed end-to-end request verified")
+import numpy as np
+
+def check_second_edge_request(request_pipeline, raw_input):
+    # TODO: Send the second raw vector through the full request and compare with independent normalized arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -461,20 +465,32 @@ List the hardware, runtime, delegate and measurement fields before testing compl
 
 ### How to write: Make incomplete deployment evidence explicit — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Create a device report template with required hardware and measurement fields. Reject it as ready while those fields are missing.
+
+**Outputs:**
+- A report-validation result with missing target fields listed.
+
+**Invariants to check:**
+- Absent device measurements remain pending rather than receiving synthetic pass values.
+
+**Hints:**
+- List the hardware, runtime, delegate and measurement fields before testing completeness. A missing value is different from a measured zero or an explicitly unsupported capability.
+- Validate required fields before considering readiness.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Make incomplete deployment evidence explicit (Transfer): Empty evidence stays empty.
-device_report = ...  # TODO: compute device_report
-                 "quality_metric": None, "p95_ms": None, "peak_memory_bytes": None,
-                 "cold_start_ms": None, "fallback_operators": None}
-missing = ...  # TODO: compute missing
-assert missing  # TODO: complete assertion check
-print("Not device-validated; missing:", ", ".join(missing))
+import json
+import time
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_make_incomplete_deployment_evidence_explicit(report, required_fields):
+    """Complete the make incomplete deployment evidence explicit check."""
+    # TODO: ('Validate that required target model/runtime/device/measurement fields are present and keep the report pending if any are absent.', 'A report schema and explicit not-ready result for missing device fields.', 'Missing target-device evidence never becomes a measured pass through default values.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -507,25 +523,32 @@ Keep the fixed work unchanged. Compare the total request with the deadline, not 
 
 ### How to write: Decide whether a model speedup meets the request budget — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Use the illustrative serial times above. A $19$-millisecond deadline is declared before optimization. Does halving model time meet it? What is the best possible total if model time tends to zero?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A deadline decision and fixed-overhead lower bound.
+
+**Invariants to check:**
+- Only the model component changes while fixed overhead remains constant.
+
+**Hints:**
+- Keep the fixed work unchanged. Compare the total request with the deadline, not the model-only duration.
+- Take the model-time-to-zero limit to find the best possible total.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Decide whether a model speedup meets the request budget (Transfer / diagnosis)
-fixed_ms = ...  # TODO: compute fixed_ms
-model_ms = ...  # TODO: compute model_ms
-deadline_ms = ...  # TODO: compute deadline_ms
-before_ms = ...  # TODO: compute before_ms
-after_ms = ...  # TODO: compute after_ms
-np.testing.assert_allclose([before_ms,after_ms,before_ms/after_ms],[24.,20.,1.2])
-assert after_ms  # TODO: complete assertion check
-print('Illustrative request before/after/lower-bound (ms):',before_ms,after_ms,fixed_ms)
+import json
+import time
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def practice_decide_whether_a_model_speedup_meets_the_request_budget(fixed_overhead_ms, model_ms, deadline_ms):
+    """Complete the decide whether a model speedup meets the request budget check."""
+    # TODO: ('Compute fixed overhead plus halved model time against the predeclared 19 ms deadline, then take the zero-model-time lower bound.', 'Deadline decision and irreducible total-latency floor.', 'Only model time changes; other serial costs remain fixed.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

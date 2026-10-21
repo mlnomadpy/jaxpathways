@@ -90,7 +90,22 @@
         "prompt": "Replace tanh with a row-wise sum of squared predictions, returning one scalar per row. Derive the NumPy reference, warm this new function, collect five synchronized samples and record the changed output shape.",
         "hint": "Square before reducing the output-feature axis; the result has shape \\((64,)\\).",
         "solution": "# Benchmark a different equivalent workload (Transfer): Changing the computation changes the performance question.\n# Wrap with `jax.jit` (`energy`) so XLA traces and compiles the function.\nenergy = jax.jit(lambda a, b: jnp.sum((a @ b)**2, axis=1))\n# Wait for device work to finish before timing it or comparing its result on the host.\nenergy(x, w).block_until_ready()\nenergy_result, energy_times = synchronized_samples(energy, (x, w), 5)\n# Reduce along axis=1 to compute `energy_reference`.\nenergy_reference = np.sum((x_host @ w_host)**2, axis=1)\n# Check tensor shape invariant: `energy_result.shape == (64,)`\nassert energy_result.shape == (64,)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(energy_result), energy_reference, atol=2e-3, rtol=2e-5)\nprint(\"Energy shape and samples:\", energy_result.shape, energy_times)",
-        "explanation": "Changing the computation changes the performance question. The shape and independent numerical check prevent a benchmark from accidentally timing an unrelated scalar reduction."
+        "explanation": "Changing the computation changes the performance question. The shape and independent numerical check prevent a benchmark from accidentally timing an unrelated scalar reduction.",
+        "learnerStarter": {
+          "inputs": [
+            "Replace tanh with a row-wise sum of squared predictions, returning one scalar per row. Derive the NumPy reference, warm this new function, collect five synchronized samples and record the changed output shape."
+          ],
+          "outputs": [
+            "Per-row scalar outputs, NumPy parity, and five completed timing samples."
+          ],
+          "invariants": [
+            "The benchmark synchronizes each output and records the changed output shape."
+          ],
+          "hints": [
+            "Square before reducing the output-feature axis; the result has shape \\((64,)\\)."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\nimport time\nimport statistics\n\ndef practice_benchmark_a_different_equivalent_workload(features, weights):\n    \"\"\"Implement the benchmark a different equivalent workload check.\"\"\"\n    # TODO: Implement row-wise squared-sum predictions, derive a NumPy reference, warm the changed function, and collect five synchronized samples.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair a timer that includes setup but omits completion",
@@ -98,7 +113,22 @@
         "prompt": "Inspect the broken timer below conceptually: start; create inputs; call `jit(predict)(inputs)`; stop. Write a repaired runner and show its explicit boundary. Explain which stages the broken interval mixes and misses.",
         "hint": "Prepare and wait for inputs, reuse one compiled callable, warm it, then synchronize the returned output inside every measured interval.",
         "solution": "# Repair a timer that includes setup but omits completion (Diagnosis)\ndef repaired_benchmark(fn, args):\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(args)\n    # Wait for device work to finish before timing it or comparing its result on the host.\n    jax.block_until_ready(fn(*args))\n    result, measured = synchronized_samples(fn, args, 5)\n    return {\"boundary\": \"placed inputs; warm call plus output wait\", \"samples\": measured}, result\nfixed_report, fixed_result = repaired_benchmark(compiled_predict, (x, w))\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(fixed_result), reference, atol=2e-5, rtol=2e-5)\nassert len(fixed_report[\"samples\"]) == 5\nprint(fixed_report)",
-        "explanation": "The repaired boundary excludes setup, separates warmup and waits before stopping. A speedup cannot be reconstructed from the flawed interval; rerun both implementations under the same contract."
+        "explanation": "The repaired boundary excludes setup, separates warmup and waits before stopping. A speedup cannot be reconstructed from the flawed interval; rerun both implementations under the same contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Inspect the broken timer below conceptually: start; create inputs; call `jit(predict)(inputs)`; stop. Write a repaired runner and show its explicit boundary. Explain which stages the broken interval mixes and misses."
+          ],
+          "outputs": [
+            "A runner with separately stated setup and completed-work timing boundaries."
+          ],
+          "invariants": [
+            "The measured interval contains the declared workload and waits for its result."
+          ],
+          "hints": [
+            "Prepare and wait for inputs, reuse one compiled callable, warm it, then synchronize the returned output inside every measured interval."
+          ],
+          "code": "import jax.numpy as jnp\nimport time\n\ndef practice_repair_a_timer_that_includes_setup_but_omits_completion(function, arguments):\n    \"\"\"Implement the repair a timer that includes setup but omits completion check.\"\"\"\n    # TODO: Move input creation outside the timed region and block on the output before stopping the clock.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "What does the synchronized warmed timer in this lesson measure?",
@@ -149,6 +179,22 @@
       "The measured boundary includes host dispatch and the wait. Calling it pure device-kernel time requires a device trace.",
       "The boundary includes the call and its completion wait. It excludes input placement and does not isolate compiler or kernel stages.",
       "Warmup has already performed compilation for the tested signature. A new shape or static argument may still introduce another compilation."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A JAX function, fixed workload, warmup count, and repeat count."
+      ],
+      "outputs": [
+        "Raw synchronized timings with compilation separated from warmed execution."
+      ],
+      "invariants": [
+        "Every sample waits for completed output; workload shape/dtype and timing boundary are recorded."
+      ],
+      "hints": [
+        "Call block_until_ready inside each measured interval.",
+        "Use an independent NumPy result for the changed equivalent workload."
+      ],
+      "code": "import jax.numpy as jnp\nimport time\nimport statistics\n\ndef synchronized_benchmark(function, arguments, warmup, repeats):\n    \"\"\"Raw synchronized timings with compilation separated from warmed execution.\"\"\"\n    # TODO: Warm the selected JAX function and synchronize every timed result while retaining raw samples.\n    raise NotImplementedError\n"
+    }
   }
 }

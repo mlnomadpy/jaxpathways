@@ -177,7 +177,7 @@ visual_data = {'kind': 'line', 'x': grid.tolist(), 'xlabel': 'logit', 'ylabel': 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:52.517152+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:29.794133+00:00. JAX 0.9.2.
 
 ```text
 uncertain loss / confident-wrong loss: 0.6931472 100.0
@@ -228,21 +228,28 @@ Compute the binary losses for positive labels at probabilities $0.8$ and $0.2$, 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Binary logits and same-shaped binary labels.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- A finite per-example loss and a declared reduction.
+
+**Invariants to check:**
+- Use the logits-based stable loss; duplicated examples preserve a mean and scale a sum.
+
+**Hints:**
+- Check confident correct and incorrect predictions separately.
+- Keep reduction choice explicit so its gradient scale is inspectable.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-probabilities = jnp.array(...)  # TODO: compute probabilities
-z_from_p = jnp.log(...)  # TODO: compute z_from_p
-assert jnp.allclose(binary_loss(z_from_p, 1.0), -jnp.log(probabilities), atol=1e-06)  # TODO: complete assertion check
-assert binary_loss(z_from_p[0], 1.0)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def binary_cross_entropy(logits, labels):
+    """A finite per-example loss and a declared reduction."""
+    # TODO: Compute stable per-example binary losses from logits and make the mean-versus-sum reduction explicit.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -271,25 +278,27 @@ The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 
 ### How to write: Fit a constant probability — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A dataset contains labels $(1,1,1,0)$. For a model with one constant logit, show that $p=3/4$ is stationary and has less mean loss than $p=1/2$.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Stationarity at the empirical class fraction and a lower mean loss than the half-probability case.
+
+**Invariants to check:**
+- Every label contributes once to the mean binary loss.
+
+**Hints:**
+- The mean gradient is $p-\bar y$. Convert the desired probability to log-odds.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Fit a constant probability (Transfer / diagnosis): The constant model matches the observed class frequency.
-ys = jnp.array(...)  # TODO: compute ys
-constant_loss = ...  # TODO: compute constant_loss
-optimum = jnp.log(...)  # TODO: compute optimum
-assert jnp.allclose(jax.grad(constant_loss)(optimum), 0.0, atol=1e-06)  # TODO: complete assertion check
-assert constant_loss(optimum)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_fit_a_constant_probability(labels):
+    """Implement the fit a constant probability check."""
+    # TODO: Evaluate the constant-logit objective and derivative at logit(log(3)) and at zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -321,29 +330,28 @@ The mean divides by the new observation count; the sum does not.
 
 ### How to write: Catch a reduction mistake — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Duplicate every observation. Verify that mean loss stays fixed while total loss doubles. What happens to gradients?
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Unchanged mean loss, doubled total loss, and both gradient scales.
+
+**Invariants to check:**
+- The duplicated dataset contains two copies of each original example.
+
+**Hints:**
+- The mean divides by the new observation count; the sum does not.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a reduction mistake (Transfer / diagnosis)
-zs = jnp.array(...)  # TODO: compute zs
-ys2 = jnp.array(...)  # TODO: compute ys2
-original = binary_loss(...)  # TODO: compute original
-doubled = binary_loss(...)  # TODO: compute doubled
-assert jnp.allclose(jnp.mean(original), jnp.mean(doubled))  # TODO: complete assertion check
-assert jnp.allclose(jnp.sum(doubled), 2 * jnp.sum(original))  # TODO: complete assertion check
-mean_grad = ...  # TODO: compute mean_grad
-duplicated_grad = jax.grad(...)  # TODO: compute duplicated_grad
-assert jnp.allclose(mean_grad(zs), duplicated_grad)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_catch_a_reduction_mistake(labels):
+    """Implement the catch a reduction mistake check."""
+    # TODO: Duplicate every observation and compute both mean and total losses and their gradients.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

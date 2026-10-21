@@ -85,7 +85,22 @@
         "prompt": "Increase only the cloned model’s output bias by one. Predict the change in every logit and verify the original model’s parameter leaves remain unchanged.",
         "hint": "Snapshot the original parameters before editing clone.out.bias.",
         "solution": "# Change a clone without changing its source (Transfer)\noriginal_leaves=[np.array(a,copy=True) for a in jax.tree.leaves(nnx.state(model,nnx.Param))]\n# Transfer the device result to the host for an independent NumPy comparison.\nold_clone=np.asarray(clone(batch)).copy()\nclone.out.bias[...] = clone.out.bias[...] + 1.\nnp.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)\nfor before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):\n    np.testing.assert_array_equal(before,after)\nprint('Clone logits shifted by one; original parameters unchanged.')",
-        "explanation": "The bias is broadcast over observations, so every logit shifts equally. Comparing original leaves detects accidental aliasing; equal parameter counts cannot detect that bug."
+        "explanation": "The bias is broadcast over observations, so every logit shifts equally. Comparing original leaves detects accidental aliasing; equal parameter counts cannot detect that bug.",
+        "learnerStarter": {
+          "inputs": [
+            "Increase only the cloned model’s output bias by one. Predict the change in every logit and verify the original model’s parameter leaves remain unchanged."
+          ],
+          "outputs": [
+            "Logit shift on the clone and an unchanged source snapshot."
+          ],
+          "invariants": [
+            "The clone owns independent variable state rather than aliasing the original module."
+          ],
+          "hints": [
+            "Snapshot the original parameters before editing clone.out.bias."
+          ],
+          "code": "from flax import nnx\nimport jax.numpy as jnp\n\ndef practice_change_a_clone_without_changing_its_source(model, cloned_model):\n    \"\"\"Implement the change a clone without changing its source check.\"\"\"\n    # TODO: Clone model state, increment only the clone output bias, and compare all source parameter leaves before and after.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Diagnose a shared module reference",
@@ -93,7 +108,22 @@
         "prompt": "Assign `shared = model`, increment its counter, and demonstrate why this is not a snapshot. Then reconstruct an independent module.",
         "hint": "Assignment changes which name refers to the same object.",
         "solution": "# Diagnose a shared module reference (Intermediate)\nsaved_count=int(model.calls[...])\nshared=model\nshared(batch,record=True)\nassert int(model.calls[...])==saved_count+1\ngraph,state=nnx.split(model)\nindependent=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))\nindependent(batch,record=True)\nassert int(model.calls[...])==saved_count+1\nassert int(independent.calls[...])==saved_count+2",
-        "explanation": "Sharing a graph is useful for tied layers but wrong for an independent evaluation copy. Split, copy state, and merge supply independent variables in this example."
+        "explanation": "Sharing a graph is useful for tied layers but wrong for an independent evaluation copy. Split, copy state, and merge supply independent variables in this example.",
+        "learnerStarter": {
+          "inputs": [
+            "Assign `shared = model`, increment its counter, and demonstrate why this is not a snapshot. Then reconstruct an independent module."
+          ],
+          "outputs": [
+            "The shared-reference mutation and an isolated copy check."
+          ],
+          "invariants": [
+            "Assignment preserves object identity; a snapshot must preserve values without shared mutable state."
+          ],
+          "hints": [
+            "Assignment changes which name refers to the same object."
+          ],
+          "code": "from flax import nnx\n\ndef practice_diagnose_a_shared_module_reference(model):\n    \"\"\"Implement the diagnose a shared module reference check.\"\"\"\n    # TODO: Assign an alias, mutate its counter, compare the original object, and then construct an independent copy.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "exercise": "Apply the model to one new row and to five rows. Verify the scalar parameter count stays \\(13\\) and the batch axis survives.",
@@ -135,6 +165,22 @@
       "Trainability and mutability are different properties. Filtering controls differentiation; the forward function still controls state updates.",
       "Excluding a value from nnx.Param does not freeze it. State such as a counter can still change in the forward computation.",
       "State classification does not persist anything to disk. Saving and restoring requires an explicit checkpoint contract."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The lesson’s Flax NNX model and one input row plus a five-row batch."
+      ],
+      "outputs": [
+        "Predictions whose leading dimensions match the input batch sizes, and the trainable scalar count."
+      ],
+      "invariants": [
+        "Applying the same model to one row and five rows preserves the leading batch axis; the parameter count remains unchanged."
+      ],
+      "hints": [
+        "Use inputs shaped (1, 2) and (5, 2), then inspect output shapes.",
+        "Count only nnx.Param leaves, not the non-parameter call counter."
+      ],
+      "code": "from flax import nnx\nimport jax\nimport jax.numpy as jnp\n\ndef check_model_batch_contract(model, single_row, five_rows):\n    # TODO: Apply the model to both batches and verify output shapes and trainable scalar count.\n    raise NotImplementedError\n"
+    }
   }
 }

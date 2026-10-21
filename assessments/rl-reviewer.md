@@ -41,3 +41,10 @@ One trained policy has hundreds of evaluation episodes and a narrow confidence i
 These measure different sources of variation. Require an experimental-unit statement and retain agent-level means before comparing training procedures. Do not treat episodes from one fitted agent as independent training runs.
 
 Record the learner’s original explanation, the requested evidence and the revised claim. This discussion is qualitative review; it adds no automatic score and is not an independent teaching-review receipt.
+
+
+## Value and GAE review
+
+For Task 6, the continuing-cutoff residuals are \(1,3,2.5\). The cutoff stops recursion, so advantages are \(1.75,3,2.5\). Suppressing cutoff bootstrap changes them to \(1.25,1,2.5\). A later episode's reward must not cross the cutoff. Independently recompute final MSE from actual returned parameters, not only the history supplied by an implementation. For each observed state, its valid target mean minimizes squared error; compare both the fit and its remaining variance with this separate oracle. Padded NaN targets must affect neither valid loss nor its parameter gradient.
+
+This is a proposed learner review task. A passing public project check and an AI review do not establish independent learner acceptance.

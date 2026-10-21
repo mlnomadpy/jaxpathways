@@ -80,7 +80,26 @@
         "prompt": "Rewrite `loss(weight, inputs, targets)` with data as arguments. Use value_and_grad and verify the gradient at \\(w=1\\) against the hand-derived result.",
         "hint": "Default differentiation is with respect to the first argument, not every floating-point input.",
         "solution": "# Make the data boundary explicit (Practice)\ndef explicit_loss(weight, inputs, targets):\n    return jnp.mean((weight * inputs - targets) ** 2)\nv_explicit, g_explicit = jax.value_and_grad(explicit_loss)(1., x, y)\nassert jnp.allclose(v_explicit, 14. / 3.)\nassert jnp.allclose(g_explicit, -28. / 3.)",
-        "explanation": "Keeping data explicit prepares the function for new batches and avoids accidentally closing over stale training data."
+        "explanation": "Keeping data explicit prepares the function for new batches and avoids accidentally closing over stale training data.",
+        "learnerStarter": {
+          "inputs": [
+            "A scalar weight and input/target arrays passed as arguments.",
+            "Starting weight 1."
+          ],
+          "outputs": [
+            "Loss and weight gradient from `value_and_grad`."
+          ],
+          "invariants": [
+            "Data are explicit function inputs.",
+            "Differentiation is with respect to the weight.",
+            "Compare with an independent hand result."
+          ],
+          "hints": [
+            "Place the parameter as the first argument.",
+            "Use the same fixed data in both checks."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef explicit_loss(weight, inputs, targets):\n    # TODO: return the scalar batch objective\n    raise NotImplementedError\n\ndef check_value_and_gradient(inputs, targets):\n    # TODO: evaluate value_and_grad at the requested weight\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Audit reduction and batch replication",
@@ -88,7 +107,26 @@
         "prompt": "Compare the mean and sum loss gradients. Repeat this batch twice and predict the gradient under both reductions. Explain which learning-rate adjustment makes a sum-based update match a mean-based update.",
         "hint": "Duplicate data are not new information. Track the factor \\(N\\) in the mathematical objective.",
         "solution": "# Audit reduction and batch replication (Challenge)\ndef summed_loss(weight, inputs, targets):\n    return jnp.sum((weight * inputs - targets) ** 2)\ng_mean = jax.grad(explicit_loss)(1., x, y)\ng_sum = jax.grad(summed_loss)(1., x, y)\nx_twice, y_twice = jnp.tile(x, 2), jnp.tile(y, 2)\nassert jnp.allclose(g_sum, len(x) * g_mean)\nassert jnp.allclose(jax.grad(explicit_loss)(1., x_twice, y_twice), g_mean)\nassert jnp.allclose(jax.grad(summed_loss)(1., x_twice, y_twice), 2. * g_sum)\nassert jnp.allclose(1. - 0.1 * g_mean, 1. - (0.1 / len(x)) * g_sum)",
-        "explanation": "Mean gradients stay fixed under exact batch replication; sum gradients scale with the count. Compensating the rate by 1/N makes this particular SGD update match."
+        "explanation": "Mean gradients stay fixed under exact batch replication; sum gradients scale with the count. Compensating the rate by 1/N makes this particular SGD update match.",
+        "learnerStarter": {
+          "inputs": [
+            "Inputs and targets for one batch.",
+            "A repeated copy of that batch."
+          ],
+          "outputs": [
+            "Mean-loss and sum-loss gradients before and after repetition."
+          ],
+          "invariants": [
+            "Repeating the batch preserves a mean gradient.",
+            "A sum gradient scales with repeated example count.",
+            "State the learning-rate adjustment that matches the update."
+          ],
+          "hints": [
+            "Keep mean and sum in separate functions.",
+            "Track the batch duplication factor."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_reductions_and_repeats(inputs, targets, weight):\n    # TODO: compute both reductions before and after repeating data\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "If an update increases loss, verify the subtraction sign, reduction scale, and learning rate before blaming the gradient transform. If the objective is nonscalar, inspect the residual and reduction shapes. If metrics look plausible but gradients are wrong, compare against the independently derived formula at more than one parameter setting. These checks separate implementation mistakes from an unstable optimization choice.",
@@ -137,6 +175,25 @@
       "A sum counts each replicated contribution again. A mean divides by the new batch size and would preserve the gradient in this example.",
       "A sum counts both copies, so its gradient doubles. A mean would cancel the duplication through its denominator.",
       "value_and_grad preserves the objective you supply. Compare sum and mean explicitly; the transform does not normalize a loss for you."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The lesson model inputs and targets.",
+        "Starting weight 1 and learning rates 0.1 and 0.3."
+      ],
+      "outputs": [
+        "Each candidate weight and its post-update loss."
+      ],
+      "invariants": [
+        "Both updates use a gradient evaluated at the same starting weight.",
+        "Loss is recomputed at each candidate.",
+        "Overshoot is explained through the objective, not an autodiff failure."
+      ],
+      "hints": [
+        "Keep the initial gradient separate from the candidate evaluations.",
+        "Compare each rate independently."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef compare_updates(loss, initial_weight, rates):\n    # TODO: compute the initial gradient and evaluate each candidate\n    raise NotImplementedError\n"
+    }
   }
 }

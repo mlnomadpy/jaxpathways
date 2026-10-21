@@ -398,7 +398,7 @@ visual_data = {'kind': 'line', 'x': [3, 4, 5, 6], 'xlabel': 'training step after
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:24.040104+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:42.523863+00:00. JAX 0.9.2.
 
 ```text
 Restored next four ID batches: [[4, 10, 11, 3], [2, 0, 11, 1], [5, 7, 6, 8], [4, 3, 10, 9]]
@@ -459,32 +459,34 @@ Repeat the protocol after one batch and compare the next five batches through st
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A saved data/training contract and proposed resume configuration.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- A validated continuation that resumes at the exact next sample.
+
+**Invariants to check:**
+- Reject changed seed, data fingerprint, or batch size before consuming data.
+
+**Hints:**
+- Validate metadata before constructing or advancing the data iterator.
+- Retain the original contract while testing each incompatible field separately.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-other_iterator = iter(...)  # TODO: compute other_iterator
-other_state,_,_ = consume(...)  # TODO: compute other_state,_,_
-other_payload = ...  # TODO: compute other_payload
-with ocp.StandardCheckpointer() as cp:
-    other_path = Path(...)  # TODO: compute other_path
-    cp.save(other_path,other_payload)
-    cp.wait_until_finished()
-    other_saved = cp.restore(...)  # TODO: compute other_saved
-other_resumed = iter(...)  # TODO: compute other_resumed
-other_resumed.set_state(unpack_bytes(other_saved["pipeline"]))
-a,loss_a,ids_a = consume(...)  # TODO: compute a,loss_a,ids_a
-b,loss_b,ids_b = consume(...)  # TODO: compute b,loss_b,ids_b
-for l,r in zip(ids_a,ids_b):np.testing.assert_array_equal(l,r)
-np.testing.assert_allclose(loss_a,loss_b,rtol = ...  # TODO: compute np.testing.assert_allclose(loss_a,loss_b,rtol
-same_tree(a,b)
-assert int(b["step"])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def validate_resume(saved_contract, current_contract, iterator):
+    """A validated continuation that resumes at the exact next sample."""
+    # TODO: Validate dataset/sampler/batch metadata before restoring the next data position.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -525,21 +527,33 @@ Use validate_contract on copies of the expected contract; do not rewrite the sav
 
 ### How to write: Reject an incompatible resume before consuming data — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Try the saved contract with a changed sampler seed and then a changed dataset fingerprint. Both must fail before training resumes. Verify that the unchanged contract still passes.
+
+**Outputs:**
+- Two early compatibility failures and a successful unchanged-contract check.
+
+**Invariants to check:**
+- A failed preflight consumes no training examples.
+
+**Hints:**
+- Use validate_contract on copies of the expected contract; do not rewrite the saved payload.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject an incompatible resume before consuming data (Transfer)
-for field,value in [('seed',43),('sha256','different-dataset')]:
-    incompatible = dict(...)  # TODO: compute incompatible
-    try:validate_contract(restored_payload['contract'],incompatible)
-    except ValueError:print('Rejected incompatible',field)
-    else:raise AssertionError('Incompatible resume was accepted')
-validate_contract(restored_payload['contract'],contract)
-print('Original run contract remains valid.')
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def practice_reject_an_incompatible_resume_before_consuming_data(saved_contract, current_contract, iterator):
+    """Implement the reject an incompatible resume before consuming data check."""
+    # TODO: Check changed sampler seed and changed dataset digest against the saved contract before constructing the iterator.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -573,25 +587,33 @@ The stored cursor is interpreted in a particular pipeline configuration.
 
 ### How to write: Reject changed batch size before consuming — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Pretend the resumed application now uses batch size three. Reject the saved contract before a reader is used, then restore the original configuration and check the next IDs.
+
+**Outputs:**
+- Early size rejection and replayed next IDs under the matching batch size.
+
+**Invariants to check:**
+- The reader is not advanced until the saved and current contracts match.
+
+**Hints:**
+- The stored cursor is interpreted in a particular pipeline configuration.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject changed batch size before consuming (Challenge): Changing batching changes consumption semantics.
-changed = dict(...)  # TODO: compute changed
-try:
-    validate_contract(restored_payload["contract"],changed)
-except ValueError:
-    print("Expected batch-configuration mismatch")
-else:
-    raise AssertionError("Expected incompatible restore rejection")
-validate_contract(restored_payload["contract"],contract)
-fixed_reader = iter(...)  # TODO: compute fixed_reader
-fixed_reader.set_state(unpack_bytes(restored_payload["pipeline"]))
-np.testing.assert_array_equal(next(fixed_reader)["id"],reference_ids[0])
+import jax
+import jax.numpy as jnp
+import numpy as np
+import optax
+import orbax.checkpoint as ocp
+import json
+import hashlib
+
+def practice_reject_changed_batch_size_before_consuming(saved_contract, changed_batch_size, iterator):
+    """Implement the reject changed batch size before consuming check."""
+    # TODO: Preflight batch size three against the saved contract, then resume with the original size and inspect the next IDs.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

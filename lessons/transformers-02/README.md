@@ -187,7 +187,7 @@ visual_data = {'kind': 'heatmap', 'values': weights.tolist(), 'rows': ['query ' 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:50.956765+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:59.541486+00:00. JAX 0.9.2.
 
 ```text
 Causal means: [2.       3.       4.666667 7.5     ]
@@ -235,24 +235,28 @@ Encode abcab with a three-character vocabulary. Create shifted inputs/targets, a
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+**Inputs:**
+- Token IDs, shifted targets, segment IDs, and a validity mask.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A causal attention mask and loss-eligibility mask that respect segment boundaries.
+
+**Invariants to check:**
+- No future token or cross-segment token is visible; padded queries have finite zero outputs.
+
+**Hints:**
+- Separate attention permission from target-loss eligibility.
+- Give all-masked padded queries an explicit fallback before applying the output mask.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Encode abcab with a three-character vocabulary.
-vocab = ...  # TODO: compute vocab
-ids = jnp.array(...)  # TODO: compute ids
-assert jnp.array_equal(ids[:-1], jnp.array([0,1,2,0]))  # TODO: complete assertion check
-assert jnp.array_equal(ids[1:], jnp.array([1,2,0,1]))  # TODO: complete assertion check
-seg = jnp.array(...)  # TODO: compute seg
-loss_valid = ...  # TODO: compute loss_valid
-assert jnp.array_equal(loss_valid, jnp.array([True,True,False,True]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def packed_causal_mask(segment_ids, valid):
+    """A causal attention mask and loss-eligibility mask that respect segment boundaries."""
+    # TODO: Build causal and segment-aware permission masks, then define which shifted targets enter loss.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -284,29 +288,27 @@ Insert a diagonal fallback only for invalid queries.
 
 ### How to write: Repair padding-query NaNs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- Use `valid=[True,True,False,False]`. Reproduce the undefined all-masked rows, then give padded queries a fallback and zero their outputs.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Finite attention outputs with padded query rows exactly zero.
+
+**Invariants to check:**
+- Valid queries preserve their allowed keys; only invalid padded-query rows use the fallback.
+
+**Hints:**
+- Insert a diagonal fallback only for invalid queries.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair padding-query NaNs (Transfer / diagnosis)
-pad_valid = jnp.array(...)  # TODO: compute pad_valid
-pad_mask = make_mask(...)  # TODO: compute pad_mask
-bad_pad, _ = masked_mean(...)  # TODO: compute bad_pad, _
-assert not jnp.all(jnp.isfinite(bad_pad))  # TODO: complete assertion check
-fallback = ...  # TODO: compute fallback
-pad_out, _ = masked_mean(...)  # TODO: compute pad_out, _
-pad_out = jnp.where(...)  # TODO: compute pad_out
-assert jnp.all(jnp.isfinite(pad_out))  # TODO: complete assertion check
-assert jnp.allclose(pad_out[:,0], jnp.array([2.,3.,0.,0.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_repair_padding_query_nans(valid, logits):
+    """Implement the repair padding-query nans check."""
+    # TODO: Create an all-masked padded query, add a numerically safe fallback for that row, and zero its output afterward.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -342,20 +344,27 @@ Query $2$ should see only value $8$ from its own segment.
 
 ### How to write: Detect packed-example leakage — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Compare causal-only and segment-aware outputs at query $2$. Explain which prior values caused the difference.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Two outputs and a boundary-leakage difference check.
+
+**Invariants to check:**
+- A packed query attends only to causal keys from its own segment.
+
+**Hints:**
+- Query $2$ should see only value $8$ from its own segment.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect packed-example leakage (Transfer / diagnosis)
-assert jnp.allclose(out[2,0], 14/3)  # TODO: complete assertion check
-assert jnp.allclose(packed_out[2,0], 8.)  # TODO: complete assertion check
-assert not jnp.allclose(out[2,0], packed_out[2,0])  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_detect_packed_example_leakage(segment_ids, values):
+    """Implement the detect packed-example leakage check."""
+    # TODO: Compare outputs at query two with causal-only and segment-aware masks, then identify the prior-segment values that change the result.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

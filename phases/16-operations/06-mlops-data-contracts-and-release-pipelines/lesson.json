@@ -76,7 +76,23 @@
         "prompt": "Keep the two slice errors, but evaluate nine high-slice examples and one low-slice example.",
         "hint": "Change counts rather than the model errors.",
         "solution": "# Change the population mix (transfer)\nshifted=gate_metrics([.01]+[4.]*9,['low']+['high']*9,.5)\nassert math.isclose(shifted['overall']['mse'],3.601)\nassert shifted['high']['mse']==metrics['high']['mse']\nprint('New population MSE:',shifted['overall']['mse'])",
-        "explanation": "Aggregate performance changes with population mix even when each slice’s error is unchanged. Report both before attributing the change to a model regression."
+        "explanation": "Aggregate performance changes with population mix even when each slice’s error is unchanged. Report both before attributing the change to a model regression.",
+        "learnerStarter": {
+          "inputs": [
+            "Keep the two slice errors, but evaluate nine high-slice examples and one low-slice example."
+          ],
+          "outputs": [
+            "A weighted overall error under the new slice counts."
+          ],
+          "invariants": [
+            "Slice errors remain fixed while only population counts change."
+          ],
+          "hints": [
+            "Change counts rather than the model errors.",
+            "Weight slice errors by their example counts."
+          ],
+          "code": "import math\n\ndef practice_change_the_population_mix(high_error, low_error, high_count, low_count):\n    \"\"\"Complete the change the population mix check.\"\"\"\n    # TODO: ('Keep high/low slice errors fixed and recompute weighted aggregate error for nine high-slice and one low-slice example.', 'New count-weighted aggregate error and unchanged slice metrics.', 'Weights come from the new example counts, not an unweighted mean of slice means.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "An input drift alert fired before new labels arrived. What follows?",
@@ -140,6 +156,22 @@
       "Drift can reflect harmless distribution changes or instrumentation faults. Investigate data and labeled quality before promotion.",
       "An unlabeled drift alert is evidence of a distribution change under the detector, not direct evidence of accuracy loss. Investigate data integrity, affected slices, service health and delayed outcomes. Retraining and promotion require their own declared quality gates.",
       "Input drift and accuracy loss are different observations. Without labels, the detector cannot directly measure accuracy."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The two slice mean errors and their example counts."
+      ],
+      "outputs": [
+        "The unweighted mean of slice means and the count-weighted overall error for comparison."
+      ],
+      "invariants": [
+        "Unequal slice counts can make the unweighted average differ from the overall per-example mean."
+      ],
+      "hints": [
+        "Multiply each slice mean by its count to recover its error sum.",
+        "Divide the combined sum by the combined count."
+      ],
+      "code": "import numpy as np\n\ndef compare_slice_averages(slice_means, slice_counts):\n    # TODO: Compute the simple mean of slice means and the count-weighted overall mean.\n    raise NotImplementedError\n"
+    }
   }
 }

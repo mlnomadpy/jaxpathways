@@ -285,19 +285,19 @@ visual_data={"kind":"panels","panels":[{"kind":"bar","x":[0,1,2],"labels":["batc
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:55.002413+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:09:36.143311+00:00. JAX 0.9.2.
 
 ```text
-{'batch': 1, 'first_call_ms': 40.03216698765755, 'p50_ms': 0.012270873412489891, 'p95_ms': 0.07185202557593583, 'steady_examples_per_second': 81493.79154886819}
-{'batch': 8, 'first_call_ms': 24.695958010852337, 'p50_ms': 0.02254103310406208, 'p95_ms': 0.0645504333078861, 'steady_examples_per_second': 354908.3115697272}
-{'batch': 32, 'first_call_ms': 25.196250062435865, 'p50_ms': 0.03366637974977493, 'p95_ms': 0.06809143815189599, 'steady_examples_per_second': 950503.1499626546}
-measured batch-one service proxy (ms): 0.012270873412489891
-simulated last stable/overloaded response (ms): 0.012270873412489891 0.3018634859472513
-{'batch': 1, 'first_call_ms': 26.054666843265295, 'p50_ms': 0.009604496881365776, 'p95_ms': 0.04470832645893096, 'steady_examples_per_second': 104117.89522678238}
-{'batch': 8, 'first_call_ms': 21.883500274270773, 'p50_ms': 0.028500333428382874, 'p95_ms': 0.058129383251070976, 'steady_examples_per_second': 280698.4704267695}
-{'batch': 32, 'first_call_ms': 20.954708103090525, 'p50_ms': 0.02204161137342453, 'p95_ms': 0.05853539332747457, 'steady_examples_per_second': 1451799.483162209}
-measured batch-one service proxy (ms): 0.009604496881365776
-simulated last stable/overloaded response (ms): 0.009604496881365776 0.2362706232815981
+{'batch': 1, 'first_call_ms': 48.685625195503235, 'p50_ms': 0.00818772241473198, 'p95_ms': 0.059150205925106995, 'steady_examples_per_second': 122134.08678837513}
+{'batch': 8, 'first_call_ms': 30.844833236187696, 'p50_ms': 0.014541670680046082, 'p95_ms': 0.057191750966012436, 'steady_examples_per_second': 550143.114640707}
+{'batch': 32, 'first_call_ms': 30.623292084783316, 'p50_ms': 0.02647959627211094, 'p95_ms': 0.07394021376967427, 'steady_examples_per_second': 1208477.639581813}
+measured batch-one service proxy (ms): 0.00818772241473198
+simulated last stable/overloaded response (ms): 0.00818772241473198 0.2014179714024067
+{'batch': 1, 'first_call_ms': 31.81570814922452, 'p50_ms': 0.008645933121442795, 'p95_ms': 0.05794912576675415, 'steady_examples_per_second': 115661.31566758227}
+{'batch': 8, 'first_call_ms': 28.422708623111248, 'p50_ms': 0.019083265215158463, 'p95_ms': 0.07076908368617293, 'steady_examples_per_second': 419215.4701935043}
+{'batch': 32, 'first_call_ms': 31.39637503772974, 'p50_ms': 0.03477046266198158, 'p95_ms': 0.0936855562031269, 'steady_examples_per_second': 920321.37481418}
+measured batch-one service proxy (ms): 0.008645933121442795
+simulated last stable/overloaded response (ms): 0.008645933121442795 0.21268995478749275
 hypothetical planned replicas: 3
 Analytic sample p95 / max (ms): 5.95000000000007 100.0
 Requests beyond the declared deadline: 2
@@ -363,19 +363,27 @@ Simulate a burst of four requests arriving at time zero with a two-millisecond s
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Four arrival times all equal to zero and a two-millisecond serial service time.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The four finish times and four response times in arrival order.
+
+**Invariants to check:**
+- Each request starts when the prior serial request finishes; response time is finish time minus arrival time.
+
+**Hints:**
+- Derive each finish as the previous finish plus service time.
+- Keep queue arithmetic separate from model execution timing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-_,burst_finish,burst_latency = simulate_queue(...)  # TODO: compute _,burst_finish,burst_latency
-np.testing.assert_allclose(burst_finish,[2.,4.,6.,8.])
-np.testing.assert_allclose(burst_latency,[2.,4.,6.,8.])
+import numpy as np
+
+def simulate_four_request_burst(service_ms):
+    # TODO: Calculate serial finish and response times for four arrivals at time zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -403,17 +411,28 @@ The worker is idle between spaced requests but never idle during the burst.
 
 ### How to write: Expose burst sensitivity — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Compare five requests spaced three milliseconds apart with five simultaneous requests. Use two-millisecond service and compare maximum response latency.
+
+**Outputs:**
+- Two simulated response-time vectors and their maxima.
+
+**Invariants to check:**
+- Both cases use five arrivals and the same 2 ms service assumption.
+
+**Hints:**
+- The worker is idle between spaced requests but never idle during the burst.
+- Keep spaced and simultaneous arrival vectors separate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose burst sensitivity (Transfer / diagnosis)
-_,_,smooth = simulate_queue(...)  # TODO: compute _,_,smooth
-_,_,burst = simulate_queue(...)  # TODO: compute _,_,burst
-assert smooth.max()  # TODO: complete assertion check
+import math
+
+def practice_expose_burst_sensitivity(spaced_arrivals_ms, simultaneous_arrivals_ms, service_ms):
+    """Complete the expose burst sensitivity check."""
+    # TODO: ('Simulate five requests spaced 3 ms apart and five simultaneous requests with 2 ms service.', 'Two response-time vectors and their maximum latencies.', 'Service duration is fixed at 2 ms and the two scenarios differ only in arrivals.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -443,21 +462,28 @@ Public simulation inputs need finite, ordered values and positive service time.
 
 ### How to write: Reject a broken timeline — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Pass an out-of-order arrival vector and a zero service duration. Confirm both are rejected instead of returning a plausible chart.
+
+**Outputs:**
+- Explicit input errors for unsorted arrivals and nonpositive service.
+
+**Invariants to check:**
+- Queue calculation runs only for ordered arrivals and positive service duration.
+
+**Hints:**
+- Public simulation inputs need finite, ordered values and positive service time.
+- Validate the timeline before deriving finish times.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a broken timeline (Transfer / diagnosis)
-for arrivals,duration in [([2.,1.],2.),([0.,1.],0.)]:
-    try:
-        simulate_queue(arrivals,duration)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError("invalid timeline was accepted")
+import math
+
+def practice_reject_a_broken_timeline(arrival_ms, service_ms):
+    """Complete the reject a broken timeline check."""
+    # TODO: ('Validate monotone arrival times and strictly positive service duration before queue simulation.', 'Clear errors for out-of-order arrivals and zero service time.', 'Invalid timing inputs are rejected instead of yielding a chart or capacity estimate.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -491,19 +517,28 @@ Compute finish minus arrival for each request. Here a response exactly at the de
 
 ### How to write: Measure the margin below a response deadline — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- For five simultaneous requests and a $2$-millisecond serial service, count responses that exceed a $6$-millisecond deadline. Explain why adding a faster model alone is not the only intervention.
+
+**Outputs:**
+- A simulated count of requests past the deadline.
+
+**Invariants to check:**
+- Deadline violations use completion-minus-arrival response time.
+
+**Hints:**
+- Compute finish minus arrival for each request. Here a response exactly at the deadline is accepted; declare that convention.
+- Label the result as serial queue simulation, not a measured service SLO.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Measure the margin below a response deadline (Transfer / diagnosis): Two responses miss the deadline in this serial simulation.
-_,_,deadline_latencies = simulate_queue(...)  # TODO: compute _,_,deadline_latencies
-np.testing.assert_array_equal(deadline_latencies,[2.,4.,6.,8.,10.])
-missed_deadlines = int(...)  # TODO: compute missed_deadlines
-assert missed_deadlines  # TODO: complete assertion check
-print('Requests beyond the declared deadline:',missed_deadlines)
+import math
+
+def practice_measure_the_margin_below_a_response_deadline(arrival_ms, service_ms, deadline_ms):
+    """Complete the measure the margin below a response deadline check."""
+    # TODO: ('Count serial burst responses exceeding the declared 6 ms deadline and compare with an alternative queue intervention.', 'Deadline violation count and an explicitly labeled simulated response-time result.', 'The deadline and service-time assumptions remain fixed across the comparison.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

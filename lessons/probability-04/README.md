@@ -73,7 +73,7 @@ A posterior predictive check draws plausible replicated observations and compare
 
 ## Keep inference and model errors separate
 
-The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. **TODO (NumPyro Extension):** Compare this hand-written ELBO loop against `numpyro.infer.SVI` and `numpyro.infer.NUTS` on the same target density.
+The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. The optional project workflow in `projects/bayesian-regression/` runs NumPyro NUTS on the same known Gaussian regression, then compares a linear model with a centered quadratic remedy on a deliberately curved fixture. It saves the posterior predictive histogram counts and observed discrepancy alongside the figure. This demonstrates one observable failure and a targeted remedy; it does not estimate real-data coverage or replace the separate diagonal-family experiment.
 
 ## 1. Specify a correlated target and a simpler approximation
 
@@ -205,7 +205,7 @@ visual_data={"kind":"bar","x":[0,1,2],"labels":["weight 1","weight 2","sum of we
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:16.033812+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:50.776965+00:00. JAX 0.9.2.
 
 ```text
 VI mean: [ 0.99999994 -0.99999994] variances: [0.36000016 0.36000016] remaining KL: 0.5108256340026855
@@ -265,21 +265,27 @@ Replace the target correlation by zero and rederive the optimal diagonal varianc
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The target mean and covariance after setting the target correlation to zero.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The optimized diagonal-family variances, the minimum KL value, and whether the family represents this target exactly.
+
+**Invariants to check:**
+- The result uses the exercise’s KL direction; when the target covariance is diagonal, the optimized diagonal family can match its covariance exactly.
+
+**Hints:**
+- Recompute the target precision after setting the correlation to zero.
+- Evaluate the KL at the optimized diagonal covariance and compare the two covariance matrices.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def independent_kl(location,log_scale):
-    return ...  # TODO: return computed result
-assert jnp.allclose(independent_kl(mu,jnp.zeros(2)),0.)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_diagonal_family_at_zero_correlation(mean, target_covariance):
+    # TODO: Set the target correlation to zero and evaluate the optimal diagonal approximation and minimum KL.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -307,24 +313,25 @@ Retain the off-diagonal covariance terms in the target calculation.
 
 ### How to write: A correct diagonal is not a correct covariance — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A full target covariance and a projection direction.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Projected variance under the full target and a diagonal approximation.
+
+**Invariants to check:**
+- The full covariance projection includes off-diagonal contributions.
+
+**Hints:**
+- Evaluate v.T @ covariance @ v for each covariance choice.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# A correct diagonal is not a correct covariance (Transfer / diagnosis)
-direction = jnp.ones(...)  # TODO: compute direction
-true_sum_var = ...  # TODO: compute true_sum_var
-approx_sum_var = jnp.sum(...)  # TODO: compute approx_sum_var
-assert jnp.allclose(true_sum_var,3.6)  # TODO: complete assertion check
-assert jnp.allclose(approx_sum_var,.72,atol=1e-5)  # TODO: complete assertion check
+def compare_projected_uncertainty(covariance, direction, diagonal_variance):
+    """Return the projected variances under full and diagonal covariance."""
+    # TODO: compute both quadratic forms from the supplied values.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -356,24 +363,25 @@ The fixture supplies the true curvature; real data would require fitting and hel
 
 ### How to write: Repair the changed mean without hiding noise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.linspace(start, stop, num)` — Creates `num` evenly spaced float points across the closed interval `[start, stop]`.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Inputs, observed targets, a known curved mean, a noise scale, and a random key.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
+**Outputs:**
+- Observed and replicated discrepancy summaries before/after the mean repair.
+
+**Invariants to check:**
+- Use the same discrepancy on observed and replicated data.
+
+**Hints:**
+- Keep the noise scale fixed when adding the missing mean term.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair the changed mean without hiding noise (Transfer / diagnosis)
-truth = jnp.linspace(...)  # TODO: compute truth
-# Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.
-fresh = ...  # TODO: compute fresh
-residual = ...  # TODO: compute residual
-assert abs(float(residual.std())-.25)  # TODO: complete assertion check
-assert abs(float(residual.mean()))  # TODO: complete assertion check
+def compare_curved_mean_repair(X, y, corrected_mean, noise_scale, key):
+    """Return paired posterior predictive discrepancy summaries."""
+    # TODO: evaluate the same residual statistic under both mean models.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

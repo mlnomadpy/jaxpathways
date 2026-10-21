@@ -68,7 +68,24 @@
         "hint": "Compare successive squared magnitudes. The sign-alternating case from the experiment still loses energy.",
         "solution": "# Energy does not check every invariant (Practice)\nfor h in (0.5, 2.0):\n    u = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, h))\n    assert np.all(np.diff(u*u/2) < 0)\nu = np.asarray(euler_solve(0.7, jnp.array(2.0), 6, 3.0))\nassert np.all(np.diff(u*u/2) > 0)\nprint(\"Energy checks distinguish growth, but not sign preservation\")",
         "explanation": "A scalar diagnostic can establish decay without capturing every physical invariant. Preserve sign checks separately.",
-        "title": "Energy does not check every invariant"
+        "title": "Energy does not check every invariant",
+        "learnerStarter": {
+          "inputs": [
+            "A stable and an unstable explicit-Euler step size for scalar decay."
+          ],
+          "outputs": [
+            "Energy histories and state-sign checks for both runs."
+          ],
+          "invariants": [
+            "Energy E=u²/2 can decrease even after the state crosses below zero.",
+            "Stability and nonnegativity are separate properties."
+          ],
+          "hints": [
+            "Track signed state as well as its square.",
+            "Use a step large enough to cross zero but remain within a simple decay example."
+          ],
+          "code": "import numpy as np\n\ndef energy_diagnostics(initial, rate, step_sizes, steps):\n    # TODO: simulate each grid and return state and energy histories.\n    raise NotImplementedError(\"Check signed-state and energy invariants separately\")"
+        }
       },
       {
         "difficulty": "Challenge",
@@ -76,7 +93,24 @@
         "hint": "The horizon is number of updates multiplied by step length.",
         "solution": "# Keep the physical horizon fixed (Challenge)\nhorizon = 2.0\nerrors = []\nfor n in (10, 20, 40):\n    h = horizon/n\n    final = euler_solve(0.7, jnp.array(2.0), n, h)[-1]\n    errors.append(abs(float(final)-2*np.exp(-0.7*horizon)))\nassert errors[2] < errors[1] < errors[0]\nprint(\"Same-horizon errors:\", errors)",
         "explanation": "A refinement study must hold the modeled experiment fixed; comparing different end times conflates physical change and numerical accuracy.",
-        "title": "Keep the physical horizon fixed"
+        "title": "Keep the physical horizon fixed",
+        "learnerStarter": {
+          "inputs": [
+            "Two step-size/update-count pairs and a fixed physical decay problem."
+          ],
+          "outputs": [
+            "Final physical time and endpoint error for each configuration."
+          ],
+          "invariants": [
+            "A fair accuracy comparison uses the same final time.",
+            "Changing the step count changes the horizon unless dt*steps stays fixed."
+          ],
+          "hints": [
+            "Compute the horizon before comparing endpoint values.",
+            "Use the exponential solution at each run’s actual horizon."
+          ],
+          "code": "import numpy as np\n\ndef compare_horizons(initial, rate, runs):\n    # TODO: for each (dt, steps), compute its horizon and endpoint error.\n    raise NotImplementedError(\"Separate discretization error from a changed horizon\")"
+        }
       }
     ],
     "diagnosis": "If outputs alternate sign, inspect \\(kh\\) before editing the physical rate. If the curve has the right shape but every point is shifted, compare the saved initial point and time indexing. If a refinement study improves unpredictably, verify that every run ends at the same physical time.",
@@ -148,6 +182,24 @@
       "The geometric sequence is the exact solution of the chosen discrete update. Its difference from the continuous exponential is discretization error.",
       "An optimizer learning rate does not explain a forward solver discrepancy. Compare the discrete recurrence before differentiating it.",
       "The geometric sequence is an oracle for the discrete method. The exponential is a separate oracle for the differential equation. They answer different questions."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Initial excess 5.0, rate 0.3, step size 0.1, and twenty explicit-Euler steps."
+      ],
+      "outputs": [
+        "Full discrete state trajectory and the analytic exponential trajectory.",
+        "An endpoint-error bound relative to the exponential solution at the matching final time."
+      ],
+      "invariants": [
+        "Each update uses the previous state.",
+        "The endpoint uses the same physical time for both methods."
+      ],
+      "hints": [
+        "Record the initial value before applying any step.",
+        "Compare discrete updates with exp(-rate * time), including the final time."
+      ],
+      "code": "import numpy as np\n\ndef compare_euler_and_exponential(initial, rate, dt, steps):\n    # TODO: return times, discrete trajectory, and analytic values.\n    raise NotImplementedError(\"Build both trajectories on the same time grid\")"
+    }
   }
 }

@@ -175,7 +175,7 @@ visual_data = {'kind': 'line', 'x': list(range(12)), 'xlabel': 'completed update
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:46.124799+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:24.340793+00:00. JAX 0.9.2.
 
 ```text
 Final weight: 1.9999969005584717
@@ -243,17 +243,30 @@ Run ten steps with learning rate $1.1$. Predict whether the error contracts befo
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- An initial scalar parameter, step size, and fixed number of updates.
+
+**Outputs:**
+- The parameter/loss history for the requested update schedule.
+
+**Invariants to check:**
+- Each update uses the gradient evaluated at the current parameter; report divergence rather than clipping it away.
+
+**Hints:**
+- Use value_and_grad to measure the loss and gradient at one point.
+- Check whether the update changes the loss in the direction predicted by curvature.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Run ten steps with learning rate 1.1.
-unstable, unstable_history = train(...)  # TODO: compute unstable, unstable_history
-assert unstable_history[-1]  # TODO: complete assertion check
-assert abs(1 - 2 * 1.1)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def gradient_descent(initial, rate, steps):
+    """The parameter/loss history for the requested update schedule."""
+    # TODO: Record parameter and loss after each explicit gradient-descent transition, including the high-rate case.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -281,28 +294,27 @@ The error multiplier is $1-8\eta$; use $\eta=0.1$.
 
 ### How to write: Transfer the stability analysis — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- For $4(w-3)^2$, derive a stable rate and verify convergence from zero.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A finite loss history that contracts under the derived rate.
+
+**Invariants to check:**
+- The rate is checked against the new curvature rather than copied from the earlier example.
+
+**Hints:**
+- The error multiplier is $1-8\eta$; use $\eta=0.1$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Transfer the stability analysis (Transfer / diagnosis)
-def scaled_loss(w):
-    return ...  # TODO: return computed result
-def scaled_step(w, _):
-    new = ...  # TODO: compute new
-    return ...  # TODO: return computed result
-scaled_w, scaled_history = jax.lax.scan(...)  # TODO: compute scaled_w, scaled_history
-assert jnp.allclose(scaled_w, 3., atol=1e-5)  # TODO: complete assertion check
-assert jnp.all(jnp.diff(scaled_history)  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def practice_transfer_the_stability_analysis(rate):
+    """Implement the transfer the stability analysis check."""
+    # TODO: Derive the update multiplier for the changed quadratic, select a stable rate, and retain loss history from zero.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -337,23 +349,28 @@ The derivative at zero is $-4$.
 
 ### How to write: Reproduce an uphill update and repair it — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Show how adding the gradient increases loss, then verify subtraction at the same starting point.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both candidate losses and an explicit direction check.
+
+**Invariants to check:**
+- The candidates share the same starting point and learning rate.
+
+**Hints:**
+- The derivative at zero is $-4$.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reproduce an uphill update and repair it (Transfer / diagnosis)
-uphill = ...  # TODO: compute uphill
-downhill = ...  # TODO: compute downhill
-assert loss(uphill)  # TODO: complete assertion check
-assert loss(downhill)  # TODO: complete assertion check
-assert jnp.allclose(downhill, 0.4)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def practice_reproduce_an_uphill_update_and_repair_it(initial, rate):
+    """Implement the reproduce an uphill update and repair it check."""
+    # TODO: Apply a plus-gradient step and a minus-gradient step from the same initial value, then compare their losses.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

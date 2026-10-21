@@ -182,7 +182,7 @@ visual_data = {'kind': 'line', 'x': x.tolist(), 'xlabel': 'input', 'ylabel': 'pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:06.898731+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:04:41.499420+00:00. JAX 0.9.2.
 
 ```text
 Parameters: {'bias': Array(1., dtype=float32), 'weight': Array(1.9999996, dtype=float32)}
@@ -259,25 +259,30 @@ At the original zero parameters, compare the first Optax SGD update with an expl
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- A parameter pytree, an Optax transformation and its state, and a scalar loss.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The updated parameter pytree and next optimizer state.
+
+**Invariants to check:**
+- Update leaves match parameter leaves; Optax updates are applied once and state is carried forward.
+
+**Hints:**
+- Use value_and_grad to get the gradient tree.
+- Keep optimizer state as a separate returned value so it can be replayed.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-start = ...  # TODO: compute start
-grads = jax.grad(...)  # TODO: compute grads
-updates, _ = optimizer.update(...)  # TODO: compute updates, _
-actual = optax.apply_updates(...)  # TODO: compute actual
-expected = jax.tree.map(...)  # TODO: compute expected
-assert all(jnp.allclose(a, b) for a, b  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+import optax
+
+def sgd_update(params, optimizer, opt_state, loss_fn):
+    """The updated parameter pytree and next optimizer state."""
+    # TODO: Initialize the Optax state, compute one gradient tree, request updates, and apply them once to the parameters.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -308,21 +313,28 @@ Optimizer transformations return new state; reuse the saved value for the replay
 
 ### How to write: Replay a momentum continuation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Save the state after the first update; run the next update twice from that state and compare every state leaf.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Equal next parameters and state leaves from replayed continuations.
+
+**Invariants to check:**
+- Both continuations start from the same parameters, gradients, and saved optimizer state.
+
+**Hints:**
+- Optimizer transformations return new state; reuse the saved value for the replay.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.
-replay_u, replay_state = momentum.update(...)  # TODO: compute replay_u, replay_state
-assert jnp.allclose(replay_u, u2)  # TODO: complete assertion check
-assert all(jnp.allclose(a,b) for a,b  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_replay_a_momentum_continuation(params, opt_state, grads):
+    """Implement the replay a momentum continuation check."""
+    # TODO: Advance momentum once, snapshot every optimizer-state leaf, and compare two next updates restored from that snapshot.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -352,21 +364,28 @@ SGD updates already contain the minus sign.
 
 ### How to write: Catch double subtraction — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Correct and double-subtracted parameter trees with a loss comparison.
+
+**Invariants to check:**
+- Each update is applied with its documented sign exactly once.
+
+**Hints:**
+- SGD updates already contain the minus sign.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch double subtraction (Transfer / diagnosis)
-wrong = jax.tree.map(...)  # TODO: compute wrong
-right = optax.apply_updates(...)  # TODO: compute right
-assert loss(wrong)  # TODO: complete assertion check
-assert loss(right)  # TODO: complete assertion check
+import jax.numpy as jnp
+import optax
+
+def practice_catch_double_subtraction(params, opt_state, grads):
+    """Implement the catch double subtraction check."""
+    # TODO: Apply the Optax update with apply_updates, then deliberately subtract the update once more and compare losses.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

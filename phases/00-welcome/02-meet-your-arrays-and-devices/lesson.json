@@ -70,7 +70,24 @@
         "hint": "Keep observation rows and measurement columns.",
         "solution": "# Add a new observation (Practice)\ntable=jnp.arange(9,dtype=jnp.float32).reshape(3,3)\nassert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))\nassert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))",
         "explanation": "Changing the observation count changes axis \\(0\\), while the measurement count stays three.",
-        "difficulty": "Practice"
+        "difficulty": "Practice",
+        "learnerStarter": {
+          "inputs": [
+            "The original two-row table and the new observation `[6, 7, 8]`."
+          ],
+          "outputs": [
+            "The extended table, row totals, and feature means."
+          ],
+          "invariants": [
+            "Appending adds an observation without changing feature count.",
+            "Row and feature reductions preserve opposite axes."
+          ],
+          "hints": [
+            "Concatenate along the observation axis.",
+            "Write down the table shape before reducing."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef extend_and_summarize(table, new_row):\n    # TODO: append one observation and compute both summaries\n    extended = ...\n    row_totals = ...\n    feature_means = ...\n    return extended, row_totals, feature_means\n"
+        }
       },
       {
         "title": "Diagnose an impossible reshape",
@@ -78,7 +95,25 @@
         "hint": "Count required elements before changing the code.",
         "solution": "# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.\ntry:\n    x.reshape(2,4)\nexcept TypeError:\n    print(\"Expected element-count mismatch\")\nelse:\n    raise AssertionError(\"Expected reshape to fail\")\nassert x.reshape(2,3).size==6",
         "explanation": "An incompatible reshape is an element-count error. Changing a dtype or moving devices cannot fix it. Choose a shape whose product matches six.",
-        "difficulty": "Challenge"
+        "difficulty": "Challenge",
+        "learnerStarter": {
+          "inputs": [
+            "A six-value array and target shape `(2, 4)`.",
+            "The intended table has three measurements per row."
+          ],
+          "outputs": [
+            "A captured incompatible reshape and a repaired three-feature layout."
+          ],
+          "invariants": [
+            "Reshape preserves the number of elements.",
+            "The repaired table retains every value."
+          ],
+          "hints": [
+            "Count required elements before reshaping.",
+            "Catch the shape error without discarding data."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef diagnose_reshape(values):\n    # TODO: attempt the requested shape and capture its incompatibility\n    attempted = ...\n    repaired = ...\n    return attempted, repaired\n"
+        }
       }
     ],
     "objectives": [
@@ -135,6 +170,24 @@
       "This would describe reducing the columns within each row. Axis zero runs down the observations; write the two row vectors and add them element by element.",
       "Axis \\(0\\) is reduced. The three columns remain, so the result has shape \\((3,)\\).",
       "A reduction removes the selected axis unless keepdims is requested. Count the three column sums left after combining the two rows."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A two-row, three-feature JAX array named `x`.",
+        "The lesson has checked its dtype and device."
+      ],
+      "outputs": [
+        "Column totals and an explicit output-shape check."
+      ],
+      "invariants": [
+        "Reduce the observation axis and preserve the feature axis.",
+        "Check shape separately from numeric values."
+      ],
+      "hints": [
+        "Read the dimensions before choosing a reduction axis.",
+        "The result retains the feature dimension."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef column_summary(x):\n    # TODO: reduce observations and return feature-wise values and shape\n    values = ...\n    shape = ...\n    return values, shape\n"
+    }
   }
 }

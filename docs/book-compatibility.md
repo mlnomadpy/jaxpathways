@@ -5,7 +5,8 @@ Structural export checks are automated. This matrix records reading-environment 
 | Environment | Evidence | Status |
 | --- | --- | --- |
 | Standalone HTML, embedded fonts and figures | `tests/course-reader.test.mjs`, `scripts/check-distribution.py` | Automated structural checks; native visual result recorded separately |
-| Apple Books EPUB | No retained native reading session | Pending |
+| EPUB package and MathML conformance | Official EPUBCheck 5.4.0, edition 0.11.0: zero errors and zero warnings; [report](evidence/course-review-0.11/epubcheck-report.json) | Passed automated conformance |
+| Apple Books EPUB | Native attempt blocked by the locked desktop on 2026-10-21; no retained reading session | Pending |
 | Second EPUB reader, such as Thorium | No retained native reading session | Pending |
 | Screen reader equation speech and reading order | No retained assistive-technology session | Pending |
 | Chrome print-to-PDF pagination | No retained printed PDF inspection | Pending |

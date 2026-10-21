@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "deployment-04",
-  "contentHash": "084e4ec61590bfe5c9251652498c91b65283569553745cae9dc21a63c29c8ca1",
+  "contentHash": "14c19f720d2031d56104d43e661ed6257da92d39cd6a52b8372c1399636c6608",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T11:25:12.642260+00:00",
+  "generatedAt": "2026-10-21T16:05:47.391198+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "{'batch': 1, 'first_call_ms': 36.1583330668509, 'p50_ms': 0.010021030902862549, 'p95_ms': 0.046742311678826795, 'steady_examples_per_second': 99790.13234200743}\n{'batch': 8, 'first_call_ms': 23.837999906390905, 'p50_ms': 0.01612515188753605, 'p95_ms': 0.06304373964667319, 'steady_examples_per_second': 496119.3578699626}\n{'batch': 32, 'first_call_ms': 22.197125013917685, 'p50_ms': 0.01887488178908825, 'p95_ms': 0.052965339273214326, 'steady_examples_per_second': 1695374.856254703}\nmeasured batch-one service proxy (ms): 0.010021030902862549\nsimulated last stable/overloaded response (ms): 0.010021030902862549 0.2465173602104187\n",
+  "stdout": "{'batch': 1, 'first_call_ms': 51.27604212611914, 'p50_ms': 0.021374784409999847, 'p95_ms': 0.04745223559439181, 'steady_examples_per_second': 46784.09759923315}\n{'batch': 8, 'first_call_ms': 28.202208690345287, 'p50_ms': 0.031166477128863335, 'p95_ms': 0.08348750416189431, 'steady_examples_per_second': 256686.05299606302}\n{'batch': 32, 'first_call_ms': 26.498707942664623, 'p50_ms': 0.018208054825663567, 'p95_ms': 0.032870285212993594, 'steady_examples_per_second': 1757463.9524314925}\nmeasured batch-one service proxy (ms): 0.021374784409999847\nsimulated last stable/overloaded response (ms): 0.021374784409999847 0.5258196964859962\n",
   "data": {
     "kind": "panels",
     "panels": [
@@ -35,17 +35,17 @@
           {
             "label": "warm p50",
             "y": [
-              0.010021030902862549,
-              0.01612515188753605,
-              0.01887488178908825
+              0.021374784409999847,
+              0.031166477128863335,
+              0.018208054825663567
             ]
           },
           {
             "label": "warm p95",
             "y": [
-              0.046742311678826795,
-              0.06304373964667319,
-              0.052965339273214326
+              0.04745223559439181,
+              0.08348750416189431,
+              0.032870285212993594
             ]
           }
         ]
@@ -226,7 +226,7 @@
               16.2,
               16.6,
               17.0,
-              17.400000000000002,
+              17.4,
               17.8,
               18.2,
               18.6,

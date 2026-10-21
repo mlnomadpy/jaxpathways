@@ -136,7 +136,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -304,7 +305,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -416,7 +418,7 @@ visual_data = {'kind':'line','x':list(range(41)),'xlabel':'fresh rollout batches
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:29.324297+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:04.996308+00:00. JAX 0.9.2.
 
 ```text
 REINFORCE initial/final exact return: 0.46687505 0.9521624
@@ -472,18 +474,38 @@ Run REINFORCE with a different training seed and retain the initial and final ex
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- A fresh integer training seed different from the earlier example.
+- The finite-horizon `train` function using REINFORCE and one epoch per rollout.
+- The initial uniform policy and returned exact-return history.
+
+**Outputs:**
+- The trained policy and its full exact-return history.
+- A comparison against the initial policy under the same exact evaluator.
+
+**Invariants to check:**
+- A changed seed changes the sampled learning path.
+- The final exact return improves for this declared run.
+- Intermediate points need not increase monotonically.
+
+**Hints:**
+- Pass the new seed to training; do not reuse an evaluation key.
+- Use exact expected return for this tiny environment, not a noisy training batch mean.
+
+**Key functions & syntax to use:**
+- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-other_theta, other_history = train(...)  # TODO: compute other_theta, other_history
-assert other_history[-1]  # TODO: complete assertion check
-assert other_history[-1]  # TODO: complete assertion check
-assert not jnp.array_equal(other_theta,theta_pg)  # TODO: complete assertion check
-print('changed seed final exact return:', other_history[-1])
+import jax.numpy as jnp
+
+def compare_reinforce_seed(seed, train, exact_return):
+    # TODO: run one fresh REINFORCE training run
+    theta, history = ...
+    initial_policy = jnp.zeros((3,))
+    # TODO: compare initial and final values and return the evidence
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -513,27 +535,33 @@ Compute new probabilities from changed parameters, leaving the rollout dictionar
 
 ### How to write: Inspect a frozen behavior reference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A rollout collected with zero logits and a fixed key.
+- A candidate policy with logits equal to one.
+- Stored behavior log probabilities from the unchanged rollout.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(_, b)`) for reproducible randomness.
+**Outputs:**
+- The ratio range and a check that collection-time log probabilities stay fixed.
+
+**Invariants to check:**
+- Ratios compare current action likelihood to the saved behavior likelihood.
+- The saved old log probabilities are not recomputed or mutated.
+
+**Hints:**
+- Copy or retain the old array before evaluating the candidate.
+- Use the recorded actions and observations in both calculations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Inspect a frozen behavior reference (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(_, b)`) for reproducible randomness.
-_, b = rollout(...)  # TODO: compute _, b
-old = ...  # TODO: compute old
-newlog = log_probability(...)  # TODO: compute newlog
-ratios = jnp.exp(...)  # TODO: compute ratios
-assert jnp.array_equal(old,b['old_logp'])  # TODO: complete assertion check
-assert float(jnp.min(ratios))  # TODO: complete assertion check
-old_grad = jax.grad(...)  # TODO: compute old_grad
-assert jnp.all(old_grad  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def inspect_behavior_ratios(rollout, log_probability, key):
+    # TODO: collect the behavior batch and save its old log probabilities
+    # TODO: evaluate the changed policy on those same observations/actions
+    # TODO: calculate and inspect the action probability ratios
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -569,21 +597,35 @@ From position $0$, two moves earn $-0.02$. From position $1$, they earn $0.99$.
 
 ### How to write: Change the time budget — Step-by-step recipe & starter scaffold
 
+**Inputs:**
+- The always-right policy and horizon 2.
+- The exact finite-horizon evaluator.
+
+**Outputs:**
+- An independent hand calculation and the evaluator result.
+
+**Invariants to check:**
+- Only the starting positions that can reach the goal within the budget contribute a success reward.
+- The exact result changes with the time budget.
+
+**Hints:**
+- Enumerate the two equally likely start positions.
+- Write each path’s transition rewards before taking their mean.
+
 **Key functions & syntax to use:**
 - `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the time budget (Transfer / diagnosis): Changing the horizon changes the task itself.
-short = exact_return(...)  # TODO: compute short
-assert jnp.allclose(short,(-.02+.99)/2,atol=1e-6)  # TODO: complete assertion check
-assert short  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def check_short_horizon(exact_return):
+    # TODO: compute the hand expectation from the two starts
+    hand_value = ...
+    evaluated = exact_return(jnp.full((3,), 100.), horizon=2)
+    # TODO: compare the independent value with the evaluator
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

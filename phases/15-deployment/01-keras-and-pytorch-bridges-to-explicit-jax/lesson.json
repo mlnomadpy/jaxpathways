@@ -99,7 +99,23 @@
         "prompt": "Suppose the source model expects inputs divided by \\(255\\), while the target receives raw pixels. Demonstrate why correct weight transfer still fails.",
         "hint": "Compute both predictions from the same raw input: once with the source normalization and once without it. Matching weights cannot cancel an input-scale mismatch.",
         "solution": "# Detect a preprocessing mismatch (Transfer): Input normalization belongs in the deployment contract.\npixels = np.array([[255., 128., 0.]], np.float32)\nsource = predict(params, pixels / 255.)\nwrong = predict(params, pixels)\nassert not np.allclose(source, wrong)\nnp.testing.assert_allclose(source, predict(params, pixels / 255.), atol=1e-6)",
-        "explanation": "Input normalization belongs in the deployment contract. Matching weights cannot compensate for a different input distribution."
+        "explanation": "Input normalization belongs in the deployment contract. Matching weights cannot compensate for a different input distribution.",
+        "learnerStarter": {
+          "inputs": [
+            "Suppose the source model expects inputs divided by \\(255\\), while the target receives raw pixels. Demonstrate why correct weight transfer still fails."
+          ],
+          "outputs": [
+            "A pair of prediction paths using identical transferred weights."
+          ],
+          "invariants": [
+            "Changing only input normalization changes the model input seen by the dense layer."
+          ],
+          "hints": [
+            "Compute both predictions from the same raw input: once with the source normalization and once without it. Matching weights cannot cancel an input-scale mismatch.",
+            "Transform the raw pixel row before inference and compare it with the target path."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_detect_a_preprocessing_mismatch(source_model, target_model, raw_pixels, source_scale):\n    \"\"\"Complete the detect a preprocessing mismatch check.\"\"\"\n    # TODO: ('Apply source scaling and target raw-input paths to the same pixels and compare their dense outputs.', 'Two predictions and a mismatch attributable to preprocessing while weights remain fixed.', 'The only changed factor is input normalization; transferred parameters are identical.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Map a second layer and locate an omitted activation",
@@ -107,7 +123,23 @@
         "prompt": "Extend the dense mapping with ReLU and a second dense layer. Use independently computed final scores to catch a converter that forgets ReLU. Then show why an all-positive probe would be a weak test.",
         "hint": "Compute both first-layer rows by hand, replace negative entries by zero, and apply the new output weights.",
         "solution": "# Map a second layer and locate an omitted activation (Transfer / diagnosis)\nsecond_kernel = np.array([[2.], [-1.]], np.float32)\nsecond_bias = np.array([.3], np.float32)\n# Transfer the device result to the host for an independent NumPy comparison.\nhidden = np.maximum(np.asarray(predict(params, x)), 0.)\nbridged_scores = hidden @ second_kernel + second_bias\nnp.testing.assert_allclose(bridged_scores[:, 0], [6.5, -4.25], atol=2e-6)\n# Transfer the device result to the host for an independent NumPy comparison.\nomitted_relu = np.asarray(predict(params, x)) @ second_kernel + second_bias\nassert not np.allclose(omitted_relu, bridged_scores)\npositive_probe = np.array([[1., 2.]], np.float32)\nnp.testing.assert_array_equal(np.maximum(positive_probe, 0), positive_probe)\nprint('Two-layer reference scores:', bridged_scores[:, 0])",
-        "explanation": "The first dense layer agrees, but the activation is the first divergent boundary. The final reference scores are \\(6.5\\) and \\(-4.25\\). A probe containing only positive hidden values would make an omitted ReLU invisible."
+        "explanation": "The first dense layer agrees, but the activation is the first divergent boundary. The final reference scores are \\(6.5\\) and \\(-4.25\\). A probe containing only positive hidden values would make an omitted ReLU invisible.",
+        "learnerStarter": {
+          "inputs": [
+            "Extend the dense mapping with ReLU and a second dense layer. Use independently computed final scores to catch a converter that forgets ReLU. Then show why an all-positive probe would be a weak test."
+          ],
+          "outputs": [
+            "Independent scores for a two-layer dense mapping with an intermediate activation."
+          ],
+          "invariants": [
+            "A negative hidden preactivation exercises the ReLU boundary in the parity check."
+          ],
+          "hints": [
+            "Compute both first-layer rows by hand, replace negative entries by zero, and apply the new output weights.",
+            "Compare the first layer, activation, and second layer in sequence."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef practice_map_a_second_layer_and_locate_an_omitted_activation(weight1, bias1, weight2, bias2, inputs):\n    \"\"\"Complete the map a second layer and locate an omitted activation check.\"\"\"\n    # TODO: ('Implement both dense layers with the intermediate ReLU and compare against independent feature-by-feature scores on a probe containing a negative hidden activation.', 'Independent two-layer scores and a converter failure when the activation is omitted.', 'The comparison includes a probe where ReLU changes the intermediate representation.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "The Dense predictions match after transposing weights. What has been established?",
@@ -169,6 +201,22 @@
       "The comparison establishes bounded numerical equivalence. Training state, other operators, shapes and target runtime support each need their own evidence.",
       "Inference-weight parity does not map optimizer history or random state. Training continuation requires a larger conversion contract.",
       "A tested Dense mapping cannot establish compatibility with every runtime, operator or architecture. Expand cases before expanding the claim."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A dense layer weight/bias pair, the source preprocessing rule, and one or more raw input rows."
+      ],
+      "outputs": [
+        "JAX-compatible predictions for each input row plus a per-feature independent arithmetic check."
+      ],
+      "invariants": [
+        "Weight layout, input normalization, bias, activation, and batch axis are all explicit at the framework boundary."
+      ],
+      "hints": [
+        "Use an asymmetric weight matrix and inputs so a transpose or scale mismatch is visible.",
+        "Compare the same raw values through both paths before testing a new batch."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef map_dense_inference(weights, bias, inputs, input_transform):\n    \"\"\"JAX-compatible predictions for each input row plus a per-feature independent arithmetic check.\"\"\"\n    # TODO: Keep raw input normalization and dense weight layout explicit, then compare each output row with a NumPy reference.\n    raise NotImplementedError\n"
+    }
   }
 }

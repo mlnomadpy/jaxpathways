@@ -563,15 +563,15 @@ visual_data={'kind':'line','x':points,'xlabel':'completed update number','ylabel
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:33:36.451842+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:10:19.758849+00:00. JAX 0.9.2.
 
 ```text
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0007513347081840038, 'update_examples_per_s': 127772.6144610497, 'job_examples_per_s': 153.92118224720102, 'update_duty_fraction': 0.0012046492348649755}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00033241650089621544, 'update_examples_per_s': 120330.97000948366, 'job_examples_per_s': 57.709016973169405, 'update_duty_fraction': 0.000479585737309532}
-healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0010775425471365452, 'update_examples_per_s': 89091.60965857896, 'job_examples_per_s': 122.48818158172256, 'update_duty_fraction': 0.0013748565330801352}
-incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00022833328694105148, 'update_examples_per_s': 175182.51734503673, 'job_examples_per_s': 62.3818116072969, 'update_duty_fraction': 0.0003560961022407885}
-examples / synchronized seconds: 96 0.0010775425471365452
-measured update duty fraction, not hardware utilization: 0.0013748565330801352
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0005424180999398232, 'update_examples_per_s': 176985.2444279614, 'job_examples_per_s': 134.0888322292049, 'update_duty_fraction': 0.0007576271833428652}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00017024856060743332, 'update_examples_per_s': 234950.59140167283, 'job_examples_per_s': 63.73120309435376, 'update_duty_fraction': 0.0002712536398148432}
+healthy: {'status': 'completed', 'updates': 12, 'examples': 96, 'last_step': 12, 'checkpoint_step': 12, 'uncheckpointed_updates': 0, 'update_s': 0.0010205814614892006, 'update_examples_per_s': 94064.02489412241, 'job_examples_per_s': 145.81407297938878, 'update_duty_fraction': 0.0015501577052812246}
+incident: {'status': 'failed', 'updates': 5, 'examples': 40, 'last_step': 5, 'checkpoint_step': 4, 'uncheckpointed_updates': 1, 'update_s': 0.00019728997722268105, 'update_examples_per_s': 202747.2483047227, 'job_examples_per_s': 62.60537761097469, 'update_duty_fraction': 0.0003087853380721636}
+examples / synchronized seconds: 96 0.0010205814614892006
+measured update duty fraction, not hardware utilization: 0.0015501577052812246
 PASS: operations-02
 
 ```
@@ -615,17 +615,25 @@ Compute the fraction of supervisor wall time spent inside synchronized updates, 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The synchronized-update duration and supervisor wall-clock duration for the same run.
+
+**Outputs:**
+- The fraction of supervisor wall time spent in synchronized updates and a precise list of excluded intervals.
+
+**Invariants to check:**
+- The duty fraction is synchronized-update time divided by supervisor wall time, and does not claim to include time outside that boundary.
+
+**Hints:**
+- Use durations measured over the same run window.
+- Name setup, queue, and checkpoint intervals only if the supervisor timing boundary excludes them.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-duty = sum(...)  # TODO: compute duty
-assert 0  # TODO: complete assertion check
-assert abs(duty-healthy['update_duty_fraction'])  # TODO: complete assertion check
-print('measured update duty fraction, not hardware utilization:',duty)
+def compute_update_duty_fraction(synchronized_update_seconds, supervisor_wall_seconds):
+    # TODO: Divide synchronized update time by supervisor wall time and state what that interval excludes.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -654,19 +662,28 @@ Sum examples and seconds first.
 
 ### How to write: Catch an average-of-rates error — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Two updates process $8$ examples each in $1$ and $3$ seconds. Compare the average rate with the rate of all completed work.
+
+**Outputs:**
+- Unweighted mean of rates and total-work throughput.
+
+**Invariants to check:**
+- Aggregate throughput is total examples divided by total elapsed seconds.
+
+**Hints:**
+- Sum examples and seconds first.
+- Sum numerators and denominators before dividing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch an average-of-rates error (Transfer / diagnosis)
-durations = ...  # TODO: compute durations
-counts = ...  # TODO: compute counts
-wrong = sum(...)  # TODO: compute wrong
-right = sum(...)  # TODO: compute right
-assert abs(wrong-16/3)  # TODO: complete assertion check
+import math
+
+def practice_catch_an_average_of_rates_error(example_counts, elapsed_seconds):
+    """Complete the catch an average-of-rates error check."""
+    # TODO: ('Compute mean of the two update rates and total examples divided by total seconds for the 8-example updates.', 'Both rate summaries with the total-work rate identified.', 'The aggregate rate uses summed examples over summed elapsed time.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -698,18 +715,34 @@ Expect the most recent multiple of the checkpoint interval before the failure.
 
 ### How to write: Change the checkpoint cadence — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- Run with checkpoint cadence $3$ and fail after update $5$. Predict the committed step and replay count.
+
+**Outputs:**
+- Committed checkpoint step and amount of replay after failure.
+
+**Invariants to check:**
+- A failure after update five cannot advance beyond the last completed cadence checkpoint.
+
+**Hints:**
+- Expect the most recent multiple of the checkpoint interval before the failure.
+- Distinguish attempted updates from committed state.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the checkpoint cadence (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    changed = launch(...)  # TODO: compute changed
-stats = summarize(...)  # TODO: compute stats
-assert stats['checkpoint_step']  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import math
+import os
+import time
+import numpy as np
+
+def practice_change_the_checkpoint_cadence(updates, checkpoint_every, failure_after):
+    """Complete the change the checkpoint cadence check."""
+    # TODO: ('Simulate checkpoint interval three and failure after update five, then replay from the last committed step.', 'Committed step and replay count from the declared cadence.', 'Only committed checkpoints survive the injected failure.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

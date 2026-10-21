@@ -215,7 +215,7 @@ visual_data = {'kind':'line','x':[1,2,3,4],'xlabel':'transition index','ylabel':
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:17.951411+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:52.776966+00:00. JAX 0.9.2.
 
 ```text
 positions: [1, 2, 3, 3, 3] rewards: [-0.009999999776482582, 1.0, 0.0, 0.0]
@@ -268,24 +268,45 @@ Begin at position $0$, choose left for three actions with horizon $3$, and then 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Accumulate the next contribution into `total`.
+**Inputs:**
+- Initial state is position 0, elapsed count 0, and not done.
+- The attempted action is left (0), and the horizon is 3.
+- Use the lesson’s `State` and `step` definitions.
+
+**Outputs:**
+- A trace with one next state, reward, termination flag, and truncation flag per transition.
+- A check for a repeated call after the state has finished.
+
+**Invariants to check:**
+- The step at the deadline remains part of the return.
+- A call after finishing emits no new reward or ending event.
+- Position and elapsed count follow the declared environment contract.
+
+**Hints:**
+- Keep event flags separate from the persistent `done` state.
+- Record the reward from each transition before checking the next state.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-s = State(...)  # TODO: compute s
-total = ...  # TODO: compute total
-for i in range(3):
-    s, r, term, trunc = step(...)  # TODO: compute s, r, term, trunc
-    # Accumulate the next contribution into `total`.
-    total += float(r)
-    assert not bool(term)  # TODO: complete assertion check
-assert abs(total + .03)  # TODO: complete assertion check
-s2, r, term, trunc = step(...)  # TODO: compute s2, r, term, trunc
-assert int(s2.position)  # TODO: complete assertion check
+from typing import NamedTuple
+import jax.numpy as jnp
+
+class State(NamedTuple):
+    position: jnp.ndarray
+    elapsed: jnp.ndarray
+    done: jnp.ndarray
+
+def step(state, action, horizon=3):
+    # TODO: implement the transition contract from the lesson
+    raise NotImplementedError
+
+def inspect_deadline():
+    state = State(jnp.int32(0), jnp.int32(0), jnp.bool_(False))
+    rewards = []
+    events = []
+    # TODO: record the three requested transitions and one call after done
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -320,20 +341,31 @@ Use the termination flag for the continuing task. The finite-horizon task assign
 
 ### How to write: Separate the two target meanings — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A transition reward of -0.01, discount 0.9, and next-state value 2.
+- Two meanings for the ending event: a continuing-task timeout and a true terminal.
+
+**Outputs:**
+- Both candidate targets and a comparison with the finite-horizon contract.
+
+**Invariants to check:**
+- A true terminal has no future value.
+- The finite-horizon deadline and a continuing-task collection cutoff express different objectives.
+
+**Hints:**
+- Write the one-step target before substituting the timeout or terminal mask.
+- Keep the reward term in both cases.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Separate the two target meanings (Transfer / diagnosis): The arithmetic exposes a modeling choice.
-r, gamma, value = ...  # TODO: compute r, gamma, value
-continuing_timeout = ...  # TODO: compute continuing_timeout
-terminal = ...  # TODO: compute terminal
-finite_horizon_timeout = ...  # TODO: compute finite_horizon_timeout
-assert abs(continuing_timeout - 1.79)  # TODO: complete assertion check
-assert terminal  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def compare_ending_targets(reward, discount, next_value):
+    # TODO: compute the continuing-cutoff and terminal targets
+    timeout_target = ...
+    terminal_target = ...
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -366,26 +398,33 @@ Use ordinary min and max for the independent reference.
 
 ### How to write: Enumerate all one-step moves — Step-by-step recipe & starter scaffold
 
+**Inputs:**
+- Every unfinished corridor position and both binary actions.
+- The lesson’s transition function.
+
+**Outputs:**
+- A Python reference result and the compiled transition result for each case.
+
+**Invariants to check:**
+- Both action choices are checked at both boundaries.
+- The reference check does not call the JAX transition to compute its expected result.
+
+**Hints:**
+- Represent the independent reference using ordinary Python integers.
+- Compare next state, reward, and both ending flags.
+
 **Key functions & syntax to use:**
 - `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-
-**Step-by-step implementation plan:**
-1. Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Enumerate all one-step moves (Transfer / diagnosis)
-# Wrap with `jax.jit` (`compiled`) so XLA traces and compiles the function.
-compiled = jax.jit(...)  # TODO: compute compiled
-for position in range(3):
-    for action in [0, 1]:
-        s = State(...)  # TODO: compute s
-        nxt, reward, term, trunc = compiled(...)  # TODO: compute nxt, reward, term, trunc
-        expected = min(...)  # TODO: compute expected
-        assert int(nxt.position)  # TODO: complete assertion check
-        assert bool(term)  # TODO: complete assertion check
-        assert abs(float(reward) - (1. if expected  # TODO: complete assertion check
+import jax
+
+def compare_all_moves(step, State):
+    compiled_step = jax.jit(step)
+    # TODO: enumerate positions/actions and compare with an independent rule
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

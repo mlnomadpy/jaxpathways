@@ -100,15 +100,47 @@
         "prompt": "Write a check `is_four_chip_tpu_receipt(r)` that returns `True` only when `r['backend'] == 'tpu'`, `r['local_device_count'] == 4`, and `r['observed_total'] == 10416.0`.",
         "hint": "Check all three fields in the receipt dictionary.",
         "solution": "# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)\ndef is_four_chip_tpu_receipt(r):\n    return bool(r[\"backend\"] == \"tpu\" and r[\"local_device_count\"] == 4 and np.isclose(r[\"observed_total\"], 10416.0))\n\nsimulated_tpu = {\"backend\": \"tpu\", \"local_device_count\": 4, \"observed_total\": 10416.0}\nprint(\"Simulated 4-chip TPU check:\", is_four_chip_tpu_receipt(simulated_tpu), \"Local CPU check:\", is_four_chip_tpu_receipt(receipt))\n# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds\nassert is_four_chip_tpu_receipt(simulated_tpu) is True",
-        "explanation": "Requiring `backend == 'tpu'`, `local_device_count == 4`, and the 4-chip `pmap` total prevents a misconfigured environment from passing as a 4-chip TPU run."
+        "explanation": "Requiring `backend == 'tpu'`, `local_device_count == 4`, and the 4-chip `pmap` total prevents a misconfigured environment from passing as a 4-chip TPU run.",
+        "learnerStarter": {
+          "inputs": [
+            "A candidate runtime receipt mapping with backend, local device count, and observed total fields."
+          ],
+          "outputs": [
+            "A Boolean predicate for the exact four-chip TPU receipt contract."
+          ],
+          "invariants": [
+            "All required fields must match; missing fields or CPU backend return false."
+          ],
+          "hints": [
+            "Validate backend, count, and total independently.",
+            "Use a tolerance only for the floating representation of the exact integer total."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef is_four_chip_tpu_receipt(receipt):\n    # TODO: return whether all required four-chip TPU receipt fields are valid.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Estimate hourly billing savings from immediate teardown",
         "difficulty": "Transfer / diagnosis",
-        "prompt": "If a 4-chip TPU slice costs \\(4.80\\) USD/hour and your verification + experiment takes \\(0.5\\) hours, compute how many USD you save by deleting the VM immediately instead of leaving it idle overnight for \\(16\\) hours.",
+        "prompt": "If a 4-chip TPU slice costs \\(4.80\\) USD/hour and verification plus experiment takes \\(0.5\\) hours, compute how much you save by deleting the VM immediately instead of keeping it running for \\(16\\) total hours, including the active time.",
         "hint": "Compare `16.0 * 4.80` against `0.5 * 4.80`.",
         "solution": "# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)\nhourly_rate = 4.80\nsaved_usd = round((16.0 - 0.5) * hourly_rate, 2)\nprint(\"Overnight idle cost avoided (USD):\", saved_usd)\n# Assert invariant `saved_usd == 74.4` holds\nassert saved_usd == 74.4",
-        "explanation": "Deleting the Cloud TPU VM immediately after copying artifacts back avoids paying for 15.5 idle hours."
+        "explanation": "Deleting the Cloud TPU VM immediately after copying artifacts back avoids paying for 15.5 idle hours.",
+        "learnerStarter": {
+          "inputs": [
+            "Hourly slice cost, active verification duration of 0.5 hours, and total elapsed VM time of 16 hours."
+          ],
+          "outputs": [
+            "Avoided idle duration and the corresponding teardown savings."
+          ],
+          "invariants": [
+            "Total elapsed time includes the active work, so idle time is total time minus active time; immediate teardown and the overnight choice share the active-time cost."
+          ],
+          "hints": [
+            "Subtract active hours from total hours to get avoidable idle hours.",
+            "Multiply only those idle hours by the hourly rate; 16 idle hours would be $76.80, while 16 total hours including 0.5 active hour yields $74.40."
+          ],
+          "code": "def idle_teardown_savings(hourly_cost, active_hours, total_hours):\n    # TODO: compute avoidable idle hours and savings when total_hours includes active work.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Why does `build_runtime_receipt()` run `jax.pmap` across `jax.local_devices()` and call `jax.block_until_ready` instead of only checking `jax.default_backend()`?",
@@ -151,6 +183,22 @@
       "Backend discovery does not alter the environment. The extra computation tests a small operation on the visible local devices.",
       "With the backend explicitly checked, mapped arithmetic and an independent expected sum exercise this small local-device contract. This does not qualify all chips on other hosts, the full model, precision paths or performance.",
       "pmap executes a mapped function; it does not manage cloud resources. Cleanup is a separate control-plane operation."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The closed-form sum helper and a runtime receipt produced by the active CPU or TPU backend."
+      ],
+      "outputs": [
+        "Theoretical sums for the requested four- and eight-chip mappings, plus the receipt verification flag, observed backend, and actual device counts."
+      ],
+      "invariants": [
+        "The four-chip theoretical total matches the exercise value and the active receipt reports its actual backend and counts. A CPU receipt may pass this local exercise but does not qualify as physical TPU evidence."
+      ],
+      "hints": [
+        "Evaluate the helper for both requested chip counts.",
+        "Keep theoretical chip-mapping totals separate from observed device arithmetic; read verified status, backend, and device counts from the receipt."
+      ],
+      "code": "def audit_runtime_sum_receipt(receipt, closed_form_sum_of_squares):\n    # TODO: check both theoretical totals and report the active receipt fields as observed.\n    raise NotImplementedError"
+    }
   }
 }

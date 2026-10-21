@@ -62,7 +62,22 @@
         "prompt": "Create a manifest pointing to a nonexistent checkpoint in a disposable variable. Write a preflight that rejects it without replacing the real accepted manifest. Explain why a preflight alone cannot prove numerical correctness.",
         "hint": "Check path existence and the declared step before restoration; still compare restored contents afterward.",
         "solution": "# Keep only a genuinely accepted target (Transfer)\ndef preflight(record):\n    if not Path(record['path']).is_dir() or int(record['step'])<0:\n        raise ValueError('checkpoint target unavailable')\n    return record\nbefore=accepted()\ntry:preflight({'path':str(root/'never_saved'),'step':99})\nexcept ValueError:pass\nelse:raise AssertionError('missing target accepted')\nassert accepted()==before\npreflight(before)\nprint('Missing target rejected; accepted checkpoint unchanged.')",
-        "explanation": "File presence is a necessary local preflight, not proof that metadata, data or training state is correct. The restore comparison supplies the stronger check."
+        "explanation": "File presence is a necessary local preflight, not proof that metadata, data or training state is correct. The restore comparison supplies the stronger check.",
+        "learnerStarter": {
+          "inputs": [
+            "Create a manifest pointing to a nonexistent checkpoint in a disposable variable. Write a preflight that rejects it without replacing the real accepted manifest. Explain why a preflight alone cannot prove numerical correctness."
+          ],
+          "outputs": [
+            "Rejected missing target and byte-identical accepted manifest."
+          ],
+          "invariants": [
+            "Preflight failure never publishes or replaces the accepted checkpoint pointer."
+          ],
+          "hints": [
+            "Check path existence and the declared step before restoration; still compare restored contents afterward."
+          ],
+          "code": "import json\nimport tempfile\nimport time\nfrom pathlib import Path\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\n\ndef practice_keep_only_a_genuinely_accepted_target(accepted_manifest, candidate_path):\n    \"\"\"Implement the keep only a genuinely accepted target check.\"\"\"\n    # TODO: Build a disposable manifest for a nonexistent checkpoint and reject it without modifying the accepted manifest.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A new checkpoint directory exists but the completion wait raises an exception. Which recovery decision follows this lesson’s protocol?",
@@ -122,6 +137,22 @@
       "Directory creation can precede a failed asynchronous write. A candidate becomes accepted only after completion and validation.",
       "Deleting the last accepted checkpoint removes the recovery path. Retain it until a new candidate has completed and passed validation.",
       "A directory is not the application’s acceptance signal. Completion, restoration checks and publication must succeed before replacing the previous recovery point."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The already written second-checkpoint path, its live state, and the original step-one snapshot."
+      ],
+      "outputs": [
+        "The restored second state, a comparison of its next transition with the live continuation, and a published step-two pointer."
+      ],
+      "invariants": [
+        "The restored step-two state matches the live state; both next transitions agree; the original snapshot remains at step one."
+      ],
+      "hints": [
+        "Restore the second checkpoint against a target shaped like the live state.",
+        "Publish only after restored values and the next transition have been checked."
+      ],
+      "code": "import json\nfrom pathlib import Path\nimport jax.numpy as jnp\nimport numpy as np\nimport orbax.checkpoint as ocp\n\ndef verify_publish_and_compare(checkpoint_path, live_state, original_snapshot, publish_fn):\n    # TODO: Restore step two, compare its next transition with the live continuation, then publish it.\n    raise NotImplementedError\n"
+    }
   }
 }

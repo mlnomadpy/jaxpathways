@@ -85,7 +85,22 @@
         "prompt": "Evaluate the held-out set in batches of seven and forty-one observations. Reconstruct both metrics from sums and counts. Use a separate constructed count example to demonstrate why averaging batch accuracies can be wrong.",
         "hint": "Weight each batch mean by its number of observations.",
         "solution": "sizes=np.array([7,41])\n# Transfer the device result to the host for an independent NumPy comparison.\nmetrics=np.asarray([evaluate(model,test_x[:7],test_y[:7]),evaluate(model,test_x[7:],test_y[7:])])\n# Reduce along axis=0 to compute `weighted`.\nweighted=(metrics*sizes[:,None]).sum(axis=0)/sizes.sum()\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(weighted,np.asarray(evaluate(model,test_x,test_y)),rtol=1e-5,atol=1e-6)\ncorrect=np.array([6,20])\ncounts=np.array([7,41])\nexpected=26/48\nnp.testing.assert_allclose(correct.sum()/counts.sum(),expected)\nassert not np.isclose(np.mean(correct/counts),expected)\nprint('Count-weighted held-out metrics:',weighted,'constructed accuracy:',expected)",
-        "explanation": "A batch is a packaging choice, not a unit of evidence. The constructed counts expose the bias even if a particular model happens to obtain equal accuracy on both actual batches."
+        "explanation": "A batch is a packaging choice, not a unit of evidence. The constructed counts expose the bias even if a particular model happens to obtain equal accuracy on both actual batches.",
+        "learnerStarter": {
+          "inputs": [
+            "Evaluate the held-out set in batches of seven and forty-one observations. Reconstruct both metrics from sums and counts. Use a separate constructed count example to demonstrate why averaging batch accuracies can be wrong."
+          ],
+          "outputs": [
+            "Count-weighted aggregate metrics and a constructed unequal-count accuracy example."
+          ],
+          "invariants": [
+            "Batch metrics are weighted by the number of examples, not averaged equally."
+          ],
+          "hints": [
+            "Weight each batch mean by its number of observations."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_aggregate_unequal_batches(model, features, labels, batch_sizes):\n    \"\"\"Implement the aggregate unequal batches check.\"\"\"\n    # TODO: Accumulate metric sums and example counts for batch sizes seven and forty-one, then compare with concatenated evaluation.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch an evaluation function that trains",
@@ -93,7 +108,22 @@
         "prompt": "On an independent clone, deliberately call train_step with held-out data and show the isolation checks fail. Keep the real model untouched.",
         "hint": "Compare both optimizer.step and model parameters around the bad call.",
         "solution": "# Catch an evaluation function that trains (Intermediate): A plausible returned loss is separate from evaluation.\ngraph,state=nnx.split(model)\nbad_model=nnx.merge(graph,jax.tree.map(lambda a:jnp.array(a,copy=True),state))\nbad_optimizer=nnx.Optimizer(bad_model,optax.adam(.03),wrt=nnx.Param)\nprior=snapshot(bad_model)\ntrain_step(bad_model,bad_optimizer,test_x,test_y)\nassert int(bad_optimizer.step[...])==1\nassert any(not np.array_equal(a,b) for a,b in zip(prior,snapshot(bad_model)))\nassert int(optimizer.step[...])==80",
-        "explanation": "A plausible returned loss is separate from evaluation. Passing held-out data through the update function leaks it into learned state."
+        "explanation": "A plausible returned loss is separate from evaluation. Passing held-out data through the update function leaks it into learned state.",
+        "learnerStarter": {
+          "inputs": [
+            "On an independent clone, deliberately call train_step with held-out data and show the isolation checks fail. Keep the real model untouched."
+          ],
+          "outputs": [
+            "A detected clone mutation and an unchanged real model snapshot."
+          ],
+          "invariants": [
+            "The model used for held-out evaluation and the model used for the deliberate failure are distinct."
+          ],
+          "hints": [
+            "Compare both optimizer.step and model parameters around the bad call."
+          ],
+          "code": "from flax import nnx\nimport jax.numpy as jnp\n\ndef practice_catch_an_evaluation_function_that_trains(model, optimizer, heldout_features, heldout_labels):\n    \"\"\"Implement the catch an evaluation function that trains check.\"\"\"\n    # TODO: Run the mutating train_step only on a disposable clone and compare its state snapshot before and after evaluation.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "exercise": "Compute held-out metrics in three equal chunks and reconstruct the overall means. Then confirm no state changed.",
@@ -136,6 +166,22 @@
       "The order of statements matters: value_and_grad runs before applying the update. Use a fresh evaluation call to measure final parameters.",
       "The computed loss belongs to the parameters used before that update. Recompute after updating if you want a post-update loss.",
       "The data used in the loss determines whether it is held out. Calling optimizer.update does not create a validation split."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A model and held-out arrays split into chunks with a final partial batch."
+      ],
+      "outputs": [
+        "Count-weighted aggregate loss/accuracy and an unchanged model snapshot."
+      ],
+      "invariants": [
+        "Metrics are weighted by example counts; evaluation does not update model or optimizer state."
+      ],
+      "hints": [
+        "Accumulate metric sums and counts, then divide once.",
+        "Use a separate clone when deliberately testing a training call on held-out data."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef evaluate_in_chunks(model, features, labels, chunk_size):\n    \"\"\"Count-weighted aggregate loss/accuracy and an unchanged model snapshot.\"\"\"\n    # TODO: Aggregate held-out metric sums by example count and assert evaluation leaves model state unchanged.\n    raise NotImplementedError\n"
+    }
   }
 }

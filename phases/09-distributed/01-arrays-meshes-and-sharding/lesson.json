@@ -68,7 +68,25 @@
         "prompt": "Use a \\((12,8)\\) array. Verify row and column layouts and predict every local shape.",
         "hint": "Four devices divide twelve rows or eight columns.",
         "solution": "# Change both dimensions (Challenge)\nother = np.arange(96,dtype=np.float32).reshape(12,8)\nfor spec, expected in [(rows,(3,8)),(columns,(12,2))]:\n    # Place `placed` explicitly onto the target JAX device.\n    placed = jax.device_put(other,spec)\n    for shard in placed.addressable_shards:\n        # Check tensor shape invariant: `shard.data.shape == expected`\n        assert shard.data.shape == expected\n        # Transfer the device result to the host for an independent NumPy comparison.\n        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])",
-        "explanation": "The row layout owns three complete feature vectors per device; the column layout owns two features for every observation."
+        "explanation": "The row layout owns three complete feature vectors per device; the column layout owns two features for every observation.",
+        "learnerStarter": {
+          "inputs": [
+            "A (12,8) host matrix and four logical CPU devices.",
+            "Row and column shardings from the lesson."
+          ],
+          "outputs": [
+            "Exact per-device shapes for both placements."
+          ],
+          "invariants": [
+            "Every shard contains the indexed global slice.",
+            "The global matrix is unchanged by placement."
+          ],
+          "hints": [
+            "Divide the partitioned dimension by four.",
+            "Check shard.index as well as shard.data.shape."
+          ],
+          "code": "import numpy as np\nimport jax\n\ndef verify_changed_layout(host, row_sharding, column_sharding):\n    # TODO: place the matrix under both shardings and check each local slice.\n    raise NotImplementedError(\"Verify both local shapes and indexed values\")"
+        }
       },
       {
         "title": "Pad an uneven batch without corrupting its mean",
@@ -76,7 +94,25 @@
         "prompt": "Ten observations cannot be row-partitioned over four devices. Pad to twelve and use a mask to recover the true column mean. Demonstrate the wrong unmasked mean.",
         "hint": "The divisor is the sum of the mask, not padded length.",
         "solution": "# Pad an uneven batch without corrupting its mean (Challenge): Padding repairs the shape but adds artificial rows.\noriginal = np.arange(40,dtype=np.float32).reshape(10,4)\ntry:\n    jax.device_put(original, rows)\nexcept ValueError:\n    print(\"Expected indivisible batch\")\nelse:\n    raise AssertionError(\"Expected divisibility failure\")\n# Place `padded` explicitly onto the target JAX device.\npadded = jax.device_put(np.pad(original,((0,2),(0,0))),rows)\nmask_sharding = NamedSharding(mesh,P(\"data\"))\nmask = jax.device_put(np.array([1]*10+[0]*2,dtype=np.float32),mask_sharding)\n# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.\nmasked_mean = jax.jit(lambda a,m:(a*m[:,None]).sum(axis=0)/m.sum(),in_shardings=(rows,mask_sharding),out_shardings=replicated)(padded,mask)\n# Transfer the device result to the host for an independent NumPy comparison.\nnp.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis=0),rtol=1e-6)\nassert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))",
-        "explanation": "Padding repairs the shape but adds artificial rows. The mask keeps them out of both numerator and denominator. Checking only divisibility would miss this statistical error."
+        "explanation": "Padding repairs the shape but adds artificial rows. The mask keeps them out of both numerator and denominator. Checking only divisibility would miss this statistical error.",
+        "learnerStarter": {
+          "inputs": [
+            "A ten-row host batch with four features and a four-device row sharding."
+          ],
+          "outputs": [
+            "Masked column mean with shape (4,).",
+            "Unmasked padded mean as a diagnostic."
+          ],
+          "invariants": [
+            "Padding contributes zero to both the numerator and valid-count denominator.",
+            "The masked result matches the original ten-row host mean."
+          ],
+          "hints": [
+            "Pad only the row axis to a device-divisible length.",
+            "Mask invalid rows before summing and divide by valid rows."
+          ],
+          "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef masked_column_mean(batch, row_sharding):\n    # TODO: pad rows, place the values and mask, then compute both means.\n    # Return device results as host arrays for comparison.\n    raise NotImplementedError(\"Implement masked statistics for the ten valid rows\")"
+        }
       }
     ],
     "question": "With row sharding, why does a global column sum need results from other devices?",
@@ -149,6 +185,26 @@
       "The reduction spans the partitioned row dimension, so partial contributions must be combined.",
       "The array reduction can execute as device collectives. Global semantics do not require collecting the rows into a Python list.",
       "The sum is still over the same global observations. Placement changes the required communication, not the mathematical definition."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Four logical CPU devices; row and column NamedSharding objects.",
+        "A (12, 8) matrix and a separate ten-observation, four-feature batch."
+      ],
+      "outputs": [
+        "Per-device local shapes and values for both (12, 8) layouts.",
+        "A masked ten-row column mean plus an unmasked padded mean for diagnosis."
+      ],
+      "invariants": [
+        "Both placements preserve the same global matrix and each shard matches its indexed host slice.",
+        "Padded rows contribute to neither the masked numerator nor the valid-row denominator.",
+        "The masked mean agrees with the original ten-row host mean."
+      ],
+      "hints": [
+        "Read each PartitionSpec against the axis it partitions.",
+        "Use shard.index for local-value comparisons; mask padded rows before summing and divide by valid rows."
+      ],
+      "code": "import numpy as np\nimport jax\nimport jax.numpy as jnp\n\ndef verify_layouts_and_masked_mean(host, uneven_batch, row_sharding, column_sharding):\n    # TODO: compare both placements and their indexed shard values.\n    # Then pad the ten-row batch, place a validity mask, and compare masked/unmasked means.\n    raise NotImplementedError(\"Verify both shard layouts and mask-preserved batch statistics\")"
+    }
   }
 }

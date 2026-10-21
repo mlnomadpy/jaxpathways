@@ -81,7 +81,22 @@
         "prompt": "Save the state after the first update; run the next update twice from that state and compare every state leaf.",
         "hint": "Optimizer transformations return new state; reuse the saved value for the replay.",
         "solution": "# Replay a momentum continuation (Transfer / diagnosis): This verifies an in-memory optimizer transition.\nreplay_u, replay_state = momentum.update(jnp.array(1.), m1)\nassert jnp.allclose(replay_u, u2)\nassert all(jnp.allclose(a,b) for a,b in zip(jax.tree.leaves(replay_state), jax.tree.leaves(m2)))",
-        "explanation": "This verifies an in-memory optimizer transition. It does not test serialization or a data-loader resume."
+        "explanation": "This verifies an in-memory optimizer transition. It does not test serialization or a data-loader resume.",
+        "learnerStarter": {
+          "inputs": [
+            "Save the state after the first update; run the next update twice from that state and compare every state leaf."
+          ],
+          "outputs": [
+            "Equal next parameters and state leaves from replayed continuations."
+          ],
+          "invariants": [
+            "Both continuations start from the same parameters, gradients, and saved optimizer state."
+          ],
+          "hints": [
+            "Optimizer transformations return new state; reuse the saved value for the replay."
+          ],
+          "code": "import jax.numpy as jnp\nimport optax\n\ndef practice_replay_a_momentum_continuation(params, opt_state, grads):\n    \"\"\"Implement the replay a momentum continuation check.\"\"\"\n    # TODO: Advance momentum once, snapshot every optimizer-state leaf, and compare two next updates restored from that snapshot.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch double subtraction",
@@ -89,7 +104,22 @@
         "prompt": "At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates.",
         "hint": "SGD updates already contain the minus sign.",
         "solution": "# Catch double subtraction (Transfer / diagnosis)\nwrong = jax.tree.map(lambda p,u: p-u, p0,u0)\nright = optax.apply_updates(p0,u0)\nassert loss(wrong) > loss(p0)\nassert loss(right) < loss(p0)",
-        "explanation": "Comparing identical gradients exposes an update-sign error rather than a hyperparameter difference."
+        "explanation": "Comparing identical gradients exposes an update-sign error rather than a hyperparameter difference.",
+        "learnerStarter": {
+          "inputs": [
+            "At zero parameters, subtract SGD updates by mistake. Show the loss increases; repair using apply_updates."
+          ],
+          "outputs": [
+            "Correct and double-subtracted parameter trees with a loss comparison."
+          ],
+          "invariants": [
+            "Each update is applied with its documented sign exactly once."
+          ],
+          "hints": [
+            "SGD updates already contain the minus sign."
+          ],
+          "code": "import jax.numpy as jnp\nimport optax\n\ndef practice_catch_double_subtraction(params, opt_state, grads):\n    \"\"\"Implement the catch double subtraction check.\"\"\"\n    # TODO: Apply the Optax update with apply_updates, then deliberately subtract the update once more and compare losses.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -146,6 +176,22 @@
       "The scalar loss does not contain the optimizer moments or update count. Keep the returned optimizer state with the parameters.",
       "State carries momentum or adaptive statistics between steps. Reinitializing it discards that history.",
       "Reinitialization discards history and changes later updates. Compare two steps with retained state against two first-step updates."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A parameter pytree, an Optax transformation and its state, and a scalar loss."
+      ],
+      "outputs": [
+        "The updated parameter pytree and next optimizer state."
+      ],
+      "invariants": [
+        "Update leaves match parameter leaves; Optax updates are applied once and state is carried forward."
+      ],
+      "hints": [
+        "Use value_and_grad to get the gradient tree.",
+        "Keep optimizer state as a separate returned value so it can be replayed."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nimport optax\n\ndef sgd_update(params, optimizer, opt_state, loss_fn):\n    \"\"\"The updated parameter pytree and next optimizer state.\"\"\"\n    # TODO: Initialize the Optax state, compute one gradient tree, request updates, and apply them once to the parameters.\n    raise NotImplementedError\n"
+    }
   }
 }

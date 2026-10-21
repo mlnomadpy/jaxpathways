@@ -91,7 +91,22 @@
         "prompt": "At the origin of \\(S(w)=w_0^2-w_1^2\\), show zero gradient and both a lower and higher nearby value.",
         "hint": "Move by \\(0.1\\) along each axis separately.",
         "solution": "# Reject the zero-gradient shortcut (Transfer / diagnosis)\nsaddle = lambda z: z[0] ** 2 - z[1] ** 2\nzero = jnp.zeros(2)\nassert jnp.allclose(jax.grad(saddle)(zero), zero)\nassert saddle(jnp.array([0.0, 0.1])) < saddle(zero)\nassert saddle(jnp.array([0.1, 0.0])) > saddle(zero)\nassert jnp.allclose(jnp.linalg.eigvalsh(jax.hessian(saddle)(zero)), jnp.array([-2.0, 2.0]))",
-        "explanation": "Stationarity is a first-order condition, not a proof of a minimum."
+        "explanation": "Stationarity is a first-order condition, not a proof of a minimum.",
+        "learnerStarter": {
+          "inputs": [
+            "At the origin of \\(S(w)=w_0^2-w_1^2\\), show zero gradient and both a lower and higher nearby value."
+          ],
+          "outputs": [
+            "One stationary point with a lower and a higher nearby objective value."
+          ],
+          "invariants": [
+            "A zero gradient is not accepted as evidence of a local minimum."
+          ],
+          "hints": [
+            "Move by \\(0.1\\) along each axis separately."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_reject_the_zero_gradient_shortcut(point, curvatures):\n    \"\"\"Implement the reject the zero-gradient shortcut check.\"\"\"\n    # TODO: Evaluate the saddle objective at the origin and on both coordinate-axis perturbations.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Transfer to a nonquadratic function",
@@ -99,7 +114,22 @@
         "prompt": "For \\(F(w)=\\sum_i e^{w_i}\\), verify a Hessian-vector product at \\((0,\\log 2)\\) along \\((1,3)\\).",
         "hint": "The analytic Hessian is diagonal with entries \\(e^{w_i}\\).",
         "solution": "# Transfer to a nonquadratic function (Transfer / diagnosis)\npoint = jnp.array([0.0, jnp.log(2.0)])\ndirection = jnp.array([1.0, 3.0])\nproduct = jax.jvp(jax.grad(lambda z: jnp.sum(jnp.exp(z))), (point,), (direction,))[1]\nassert jnp.allclose(product, jnp.array([1.0, 6.0]), atol=1e-06)",
-        "explanation": "For a nonquadratic function the Hessian changes with the point; a bound from one location is not a global guarantee."
+        "explanation": "For a nonquadratic function the Hessian changes with the point; a bound from one location is not a global guarantee.",
+        "learnerStarter": {
+          "inputs": [
+            "For \\(F(w)=\\sum_i e^{w_i}\\), verify a Hessian-vector product at \\((0,\\log 2)\\) along \\((1,3)\\)."
+          ],
+          "outputs": [
+            "A finite HVP matching the elementwise analytic curvature action."
+          ],
+          "invariants": [
+            "The product uses the full nonuniform direction and the specified point."
+          ],
+          "hints": [
+            "The analytic Hessian is diagonal with entries \\(e^{w_i}\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_transfer_to_a_nonquadratic_function(point, direction):\n    \"\"\"Implement the transfer to a nonquadratic function check.\"\"\"\n    # TODO: Compute a Hessian-vector product for the exponential sum at the requested point and direction.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "A smooth function has zero gradient at a point. What can we conclude?",
@@ -138,6 +168,22 @@
       "Stationarity alone does not establish global optimality. Inspect curvature, nearby values and any convexity assumptions.",
       "A zero gradient is compatible with a minimum, maximum or saddle. Even second-order information can be inconclusive in flat directions.",
       "A valid stationary point can have a zero gradient. Check the derivative independently before blaming the optimizer."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A point, positive quadratic curvatures, and a proposed gradient-descent rate."
+      ],
+      "outputs": [
+        "One updated point and an independently evaluated loss change."
+      ],
+      "invariants": [
+        "Stability is determined by the largest curvature; check the actual update at the supplied rate."
+      ],
+      "hints": [
+        "For a quadratic, inspect each coordinate multiplier after one step.",
+        "Use a nonzero direction when checking the Hessian-vector product."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef quadratic_step(point, curvatures, rate):\n    \"\"\"One updated point and an independently evaluated loss change.\"\"\"\n    # TODO: Use each curvature to check the proposed update multiplier and evaluate one changed-rate step.\n    raise NotImplementedError\n"
+    }
   }
 }

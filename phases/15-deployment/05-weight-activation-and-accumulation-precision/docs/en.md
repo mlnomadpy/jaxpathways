@@ -313,7 +313,7 @@ visual_data = {'panels': [first_panel, {'kind': 'bar', 'labels': ['output 0', 'o
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:51.717726+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:09:31.198039+00:00. JAX 0.9.2.
 
 ```text
 <class 'jax.numpy.float32'> max absolute error 0.0
@@ -436,22 +436,27 @@ Add a zero-valued output channel and verify that its quantization scale is finit
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- The output weight matrix with one added all-zero output channel and the channel-wise quantizer.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The zero channel’s quantization scale and reconstructed values.
+
+**Invariants to check:**
+- The scale is finite and every reconstructed value for the all-zero channel is exactly zero.
+
+**Hints:**
+- Handle a zero channel maximum explicitly when forming its scale.
+- Inspect the reconstructed channel after quantization, not only its integer codes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-with_zero = np.column_stack(...)  # TODO: compute with_zero
-q, scale = quantize_weights(...)  # TODO: compute q, scale
-assert np.isfinite(scale).all()  # TODO: complete assertion check
-np.testing.assert_array_equal(q[:, -1], 0)
-np.testing.assert_array_equal((q * scale)[:, -1], 0)
-print("Zero channel handled")
+import jax.numpy as jnp
+
+def check_zero_output_channel(weights, quantize_weights):
+    # TODO: Add an all-zero output channel, run channel-wise quantization, and inspect its scale and reconstruction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -482,24 +487,29 @@ Cast both integer-code arrays before multiplication. The real accumulator unit i
 
 ### How to write: Compute W8A8 with a wide accumulator — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Use calibrated symmetric scales for $x$ and per-channel scales for $w$. Multiply integer codes with INT32 accumulation, rescale, and compare to the float baseline. Do not multiply int8 arrays directly.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An integer-coded output, float baseline, and error comparison.
+
+**Invariants to check:**
+- Integer dot products widen to int32 before summation.
+
+**Hints:**
+- Cast both integer-code arrays before multiplication. The real accumulator unit is the activation scale multiplied by each output channel’s weight scale; compare with the unchanged floating-point reference.
+- Apply activation and per-output-channel weight scales after accumulation.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-sx = float(...)  # TODO: compute sx
-qx = np.clip(...)  # TODO: compute qx
-qw, sw = quantize_weights(...)  # TODO: compute qw, sw
-accumulator = qx.astype(...)  # TODO: compute accumulator
-y_integer = accumulator.astype(...)  # TODO: compute y_integer
-assert accumulator.dtype  # TODO: complete assertion check
-np.testing.assert_allclose(y_integer, reference, atol = ...  # TODO: compute np.testing.assert_allclose(y_integer, reference, atol
-print("W8A8 fixture error", float(np.max(np.abs(y_integer-reference))))
+import numpy as np
+import jax.numpy as jnp
+
+def practice_compute_w8a8_with_a_wide_accumulator(activation, weights, activation_scale, weight_scales):
+    """Complete the compute w8a8 with a wide accumulator check."""
+    # TODO: ('Quantize activation and per-channel weight values, multiply integer codes with an int32 accumulator, rescale, and compare with float output.', 'Integer-path output, float reference, and per-output error.', 'Integer products are widened before accumulation; calibration scales are retained per channel.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -533,31 +543,29 @@ Shift the zero point and codes by the same amount before subtracting; verify rep
 
 ### How to write: Change the code origin without changing the values — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Change the activation zero point from $-3$ to $17$, shift the input codes accordingly, and prove that predictions stay unchanged. Then feed codes representing real zero and identify the expected bias-only result.
+
+**Outputs:**
+- Equivalent dequantized activations and output for both code origins.
+
+**Invariants to check:**
+- Real activation values remain fixed after code and zero-point shift together.
+
+**Hints:**
+- Shift the zero point and codes by the same amount before subtracting; verify representability before casting back to INT8.
+- Use the declared zero point to identify which codes represent real zero.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change the code origin without changing the values (Transfer): Integer codes are coordinates on a grid.
-shifted_zx = ...  # TODO: compute shifted_zx
-shifted_codes_wide = a_qx.astype(...)  # TODO: compute shifted_codes_wide
-assert np.all((-128  # TODO: complete assertion check
-shifted_codes = shifted_codes_wide.astype(...)  # TODO: compute shifted_codes
-shifted_acc = ...  # TODO: compute shifted_acc
-np.testing.assert_array_equal(shifted_acc, a_acc)
-zero_codes = np.full(...)  # TODO: compute zero_codes
-zero_result = ...  # TODO: compute zero_result
-np.testing.assert_array_equal(zero_result, a_bias[None, :])
-for bad_scale in (0., -1., float('nan')):
-    try:
-        output_grid(a_real, bad_scale, -8)
-    except ValueError:
-        pass
-    else:
-        raise AssertionError('invalid scale accepted')
-print('Code-origin invariance and bias-only zero input verified.')
+import numpy as np
+import jax.numpy as jnp
+
+def practice_change_the_code_origin_without_changing_the_values(codes, old_zero_point, new_zero_point):
+    """Complete the change the code origin without changing the values check."""
+    # TODO: ('Recenter activation codes from zero point -3 to 17, adjust codes consistently, and test the real-zero input response.', 'Matching predictions before/after recoding plus the expected bias-only result for real zero.', 'Dequantized real activation values are invariant under the zero-point change.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -601,20 +609,29 @@ Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is
 
 ### How to write: Account for actual low-bit storage — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Calculate FP32 storage, ideal packed four-bit storage, and the actual int8-backed four-bit simulation for the fixture. Include per-output-channel FP32 scales; keep biases and runtime workspace explicitly outside this subtotal.
+
+**Outputs:**
+- Separate ideal packed and actual simulated storage totals.
+
+**Invariants to check:**
+- Per-channel scales count as FP32 metadata and biases/workspace stay outside the subtotal.
+
+**Hints:**
+- Use nbytes for actual arrays. Packing two signed four-bit codes into one byte is not implemented by astype(int8).
+- Report the actual backing dtype separately from nominal bit width.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Account for actual low-bit storage (Transfer / diagnosis)
-q4, s4 = quantize_weights(...)  # TODO: compute q4, s4
-float_weight_bytes = ...  # TODO: compute float_weight_bytes
-simulated_weight_and_scale_bytes = ...  # TODO: compute simulated_weight_and_scale_bytes
-ideal_packed_weight_and_scale_bytes = ...  # TODO: compute ideal_packed_weight_and_scale_bytes
-assert (float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)  # TODO: complete assertion check
-print('Weight-plus-scale subtotals:', float_weight_bytes, simulated_weight_and_scale_bytes, ideal_packed_weight_and_scale_bytes)
+import numpy as np
+import jax.numpy as jnp
+
+def practice_account_for_actual_low_bit_storage(parameter_count, output_channels, bits):
+    """Complete the account for actual low-bit storage check."""
+    # TODO: ('Compute FP32, ideal packed four-bit, and int8-backed four-bit payload bytes including per-channel scales.', 'Three storage totals with biases/workspace explicitly excluded.', 'The simulated format is counted using its actual int8 backing storage, not ideal bit packing.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -91,7 +91,22 @@
         "prompt": "At the same fixed \\(w\\), accumulate gradients from microbatches of sizes \\(3\\) and \\(1\\). Verify that one update matches the full-batch update.",
         "hint": "Do not update parameters between microbatches. Weight each mean by its sample count.",
         "solution": "# Accumulate before updating (Transfer / diagnosis)\ng1 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[:3]) ** 2))(w)\ng2 = jax.grad(lambda z: jnp.mean(0.5 * (z - y[3:]) ** 2))(w)\naccumulated = (3 * g1 + g2) / 4\nassert jnp.allclose(w - 0.1 * accumulated, w - 0.1 * full)",
-        "explanation": "Exact accumulation matches the full mean gradient only when all microbatches use the same parameters and the reduction is correct."
+        "explanation": "Exact accumulation matches the full mean gradient only when all microbatches use the same parameters and the reduction is correct.",
+        "learnerStarter": {
+          "inputs": [
+            "At the same fixed \\(w\\), accumulate gradients from microbatches of sizes \\(3\\) and \\(1\\). Verify that one update matches the full-batch update."
+          ],
+          "outputs": [
+            "One accumulated update and a full-batch comparison."
+          ],
+          "invariants": [
+            "The parameter remains fixed until all microbatch contributions are accumulated."
+          ],
+          "hints": [
+            "Do not update parameters between microbatches. Weight each mean by its sample count."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_accumulate_before_updating(parameter, microbatches):\n    \"\"\"Implement the accumulate before updating check.\"\"\"\n    # TODO: Differentiate both microbatches at one fixed parameter, sum gradients by example count, then perform one update.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Detect a biased sampler",
@@ -99,7 +114,22 @@
         "prompt": "A sampler chooses targets \\(1\\) and \\(4\\) with probabilities \\(0.9\\) and \\(0.1\\), never the others. Compute its expected gradient. Does it estimate the uniform dataset gradient?",
         "hint": "Use the sampling probabilities as weights. Missing examples cannot be recovered by naive averaging.",
         "solution": "# Detect a biased sampler (Transfer / diagnosis)\nbiased = 0.9 * per[0] + 0.1 * per[3]\nassert jnp.allclose(biased, -1.3)\nassert not jnp.allclose(biased, full)",
-        "explanation": "Uniform mean-gradient claims require the corresponding sampling assumptions. A biased sampler changes the expected objective unless properly corrected."
+        "explanation": "Uniform mean-gradient claims require the corresponding sampling assumptions. A biased sampler changes the expected objective unless properly corrected.",
+        "learnerStarter": {
+          "inputs": [
+            "A sampler chooses targets \\(1\\) and \\(4\\) with probabilities \\(0.9\\) and \\(0.1\\), never the others. Compute its expected gradient. Does it estimate the uniform dataset gradient?"
+          ],
+          "outputs": [
+            "The biased expected gradient and the uniform reference gradient."
+          ],
+          "invariants": [
+            "The expectation uses the stated sampling probabilities, including zero probability for omitted targets."
+          ],
+          "hints": [
+            "Use the sampling probabilities as weights. Missing examples cannot be recovered by naive averaging."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_detect_a_biased_sampler(targets, probabilities):\n    \"\"\"Implement the detect a biased sampler check.\"\"\"\n    # TODO: Enumerate the sampler-weighted gradient and compare it to the uniform four-target dataset gradient.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "When does averaging batch means reproduce the dataset mean?",
@@ -138,6 +168,22 @@
       "A small batch and a large batch should not receive equal weight. Compare batches of sizes one and three with different means.",
       "The dataset mean weights examples equally. Unequal batches need count weighting.",
       "The aggregation identity does not depend on Adam. Weight each batch mean by its observation count and divide by the total count."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A fixed scalar parameter, finite dataset, and ordered minibatch size."
+      ],
+      "outputs": [
+        "The exact expected minibatch gradient and its variance."
+      ],
+      "invariants": [
+        "The sampler distribution is explicit; weighting unequal microbatches uses example counts."
+      ],
+      "hints": [
+        "Enumerate the small batch space before relying on a closed-form expectation.",
+        "Keep the parameter fixed across microbatch gradient accumulation."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef batch_gradient_statistics(parameter, dataset, batch_size):\n    \"\"\"The exact expected minibatch gradient and its variance.\"\"\"\n    # TODO: Enumerate the small sampler and compute expected gradient and variance at a fixed parameter.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -85,7 +85,23 @@
         "prompt": "Validate an all-prompt batch before computing the token average.",
         "hint": "Use the shifted target mask, not the unshifted input mask.",
         "solution": "# Reject a batch with no answer targets (Transfer)\ntry:\n    validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)\nexcept ValueError:\n    print('No-target SFT batch rejected')\nelse:\n    raise AssertionError('empty supervision accepted')",
-        "explanation": "An empty answer mask should trigger a clear skip/rejection policy before the update; a fabricated zero objective disguises lost training data."
+        "explanation": "An empty answer mask should trigger a clear skip/rejection policy before the update; a fabricated zero objective disguises lost training data.",
+        "learnerStarter": {
+          "inputs": [
+            "A batch whose roles mark every token as prompt context."
+          ],
+          "outputs": [
+            "A validation error or explicit skip result before averaging token loss."
+          ],
+          "invariants": [
+            "An all-prompt batch never creates a zero-denominator supervised update."
+          ],
+          "hints": [
+            "Build the mask for shifted target positions.",
+            "Choose and document reject-versus-skip behavior."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef validate_response_targets(tokens, roles):\n    # TODO: validate the shifted response mask and return its selected-token count.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Create a failure this model cannot fix",
@@ -93,7 +109,23 @@
         "prompt": "Build two contexts ending in token zero but requiring different next tokens. Prove that the transition table gives identical distributions. Name the model capability needed to resolve the conflict.",
         "hint": "Keep the final input token equal and change an earlier token.",
         "solution": "# Create a failure this model cannot fix (Challenge)\ncontexts = jnp.array([[1, 0], [3, 0]])\nlast_logits = p[contexts[:, -1]]\nnp.testing.assert_array_equal(last_logits[0], last_logits[1])\nconflicting_targets = jnp.array([2, 3])\nassert conflicting_targets[0] != conflicting_targets[1]\nprint('Identical final tokens force identical table predictions despite different contexts.')",
-        "explanation": "A model that conditions on the earlier context can represent this distinction. More iterations on the same transition-table architecture cannot."
+        "explanation": "A model that conditions on the earlier context can represent this distinction. More iterations on the same transition-table architecture cannot.",
+        "learnerStarter": {
+          "inputs": [
+            "Two contexts with the same final token but different required next-token labels."
+          ],
+          "outputs": [
+            "The shared transition-table distributions and an explanation-ready conflict indicator."
+          ],
+          "invariants": [
+            "A first-order token transition model has identical outputs for identical final token IDs."
+          ],
+          "hints": [
+            "Encode the two examples with the exact same context state.",
+            "Compare full next-token distributions, not just top predictions."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef expose_context_aliasing(context_a, context_b, labels, transition_table):\n    # TODO: compare next-token distributions for contexts sharing the same final token.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Should prompt inputs disappear when using response-only loss?",
@@ -151,6 +183,22 @@
       "Attention visibility and supervised output positions are separate contracts.",
       "A response-only loss keeps prompt tokens as conditioning inputs. Attention visibility and target eligibility are separate contracts.",
       "Eligibility belongs to the shifted target token, not simply the role of the input position. Inspect the last prompt position’s next-token target."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Causal logits, token IDs, role labels, and a response-only target mask."
+      ],
+      "outputs": [
+        "The count and mean loss for only the first response token per sequence."
+      ],
+      "invariants": [
+        "Logits at time t score token t+1; prompt targets are excluded after shifting."
+      ],
+      "hints": [
+        "Shift token and role arrays consistently.",
+        "Count selected shifted targets before averaging."
+      ],
+      "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef score_first_response_token(logits, tokens, roles):\n    # TODO: construct the shifted target mask and return the selected loss and count.\n    raise NotImplementedError"
+    }
   }
 }

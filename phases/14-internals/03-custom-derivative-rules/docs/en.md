@@ -275,7 +275,7 @@ visual_data={'panels':[{'kind':'line','x':np.asarray(grid).tolist(),'xlabel':'in
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:32:20.085754+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:59.040338+00:00. JAX 0.9.2.
 
 ```text
 Softplus first/second: [0.01798621 0.5        0.95257413] [0.01766271 0.25       0.04517666]
@@ -352,38 +352,30 @@ Check the custom log-sum-exp gradient on $(-3,0.2,2,5)$ against an independent s
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Logits (-3, 0.2, 2, 5), explicit scalar output cotangent, and two directions.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
-3. Accumulate the next contribution into `p`.
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Custom-gradient result, stable softmax reference, and centered directional differences.
+
+**Invariants to check:**
+- The custom gradient scales by the explicit cotangent.
+- Softmax reference is stable under large logits.
+
+**Hints:**
+- Subtract the maximum before exponentiating.
+- Use the same cotangent for autodiff and independent directional checks.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed = jnp.array(...)  # TODO: compute changed
-# Transfer the device result to the host for an independent NumPy comparison.
-# Accumulate the next contribution into `p`.
-host = np.asarray(...)  # TODO: compute host
-p = np.exp(...)  # TODO: compute p
-p/=p.sum()
-actual = jax.grad(...)  # TODO: compute actual
-np.testing.assert_allclose(actual,p,rtol = ...  # TODO: compute np.testing.assert_allclose(actual,p,rtol
-for direction in (np.array([1.,-.5,.2,0.]),np.array([0.,1.,-1.,.3])):
-    eps = ...  # TODO: compute eps
-    reference = ...  # TODO: compute reference
-    fd = ...  # TODO: compute fd
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol = ...  # TODO: compute np.testing.assert_allclose(np.dot(np.asarray(actual),direction),fd,rtol
-np.testing.assert_allclose(jax.vjp(stable_logsumexp,changed)[1](2.5)[0],2.5*p,rtol=1e-12)
-print("Changed-size gradient and cotangent scaling verified")
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def check_custom_logsumexp(logits, cotangent, directions, epsilon):
+    # TODO: compare custom VJP with stable softmax and directional differences.
+    raise NotImplementedError("Audit the explicit cotangent and two independent directions")
 ```
 
 <details><summary>Reference solution</summary>
@@ -424,26 +416,29 @@ Use stable references and avoid direct exponentiation of the shifted logits.
 
 ### How to write: Check common-shift invariance of curvature — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A stable log-sum-exp custom derivative, a logit vector, and a common shift of 1000.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Value shift, gradient comparison, and Hessian row sums before/after shift.
+
+**Invariants to check:**
+- The value increases by the common shift.
+- Gradient stays invariant and Hessian has near-zero row sums.
+
+**Hints:**
+- Use centered logits for numerical stability.
+- Compute Hessian row sums from derivatives, not from a stored expected answer.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check common-shift invariance of curvature (Practice): The common shift leaves probabilities unchanged.
-shift = ...  # TODO: compute shift
-np.testing.assert_allclose(stable_logsumexp(x+shift)-stable_logsumexp(x),shift,rtol=1e-12)
-np.testing.assert_allclose(jax.grad(stable_logsumexp)(x+shift),jax.grad(stable_logsumexp)(x),rtol=1e-12)
-hess = jax.jacrev(...)  # TODO: compute hess
-np.testing.assert_allclose(jnp.sum(hess,axis = ...  # TODO: compute np.testing.assert_allclose(jnp.sum(hess,axis
-print("Stable shift invariance and zero common-direction curvature verified")
+import jax
+import jax.numpy as jnp
+
+def check_shift_curvature(logsumexp, logits, shift):
+    # TODO: compare values, gradients, and Hessian row sums under a common shift.
+    raise NotImplementedError("Check shift invariance of first and second derivatives")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -476,24 +471,28 @@ At fixed x, compare the response to twice a tangent with twice the response.
 
 ### How to write: Audit a nonlinear seed rule before registering it — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jvp / jax.vjp / jax.jacfwd / jax.hessian` — Computes JVPs, VJPs, Jacobians or Hessians by differentiating the implemented operations. Results still have floating-point error.
+**Inputs:**
+- A proposed JVP rule returning sigmoid(x)*dx**2 and a repaired tangent-linear rule.
 
-**Step-by-step implementation plan:**
-1. Audit a nonlinear seed rule before registering it (Challenge)
+**Outputs:**
+- A mixed-seed counterexample to additivity and a repaired-rule check.
+
+**Invariants to check:**
+- A derivative is linear in the tangent at fixed primal input.
+- The repaired rule passes mixed linear-combination checks.
+
+**Hints:**
+- Compare the rule at dx1, dx2, and dx1+dx2.
+- Keep the primal input fixed in each additivity test.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Audit a nonlinear seed rule before registering it (Challenge)
-coefficient = float(...)  # TODO: compute coefficient
-bad = ...  # TODO: compute bad
-assert not np.isclose(bad(2.0),2*bad(1.0))  # TODO: complete assertion check
-good = ...  # TODO: compute good
-np.testing.assert_allclose(good(2*.7-.3),2*good(.7)-good(.3),rtol=1e-12)
-print("Nonlinear seed rule rejected by its contract; repaired JVP is linear")
+import jax.numpy as jnp
+
+def audit_jvp_rule(primal, dx1, dx2):
+    # TODO: expose nonlinearity in the proposed seed rule, then repair it.
+    raise NotImplementedError("Require additivity and homogeneity in every tangent seed")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

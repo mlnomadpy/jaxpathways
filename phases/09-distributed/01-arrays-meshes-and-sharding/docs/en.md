@@ -239,7 +239,7 @@ visual_data = {'kind': 'panels', 'panels': panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:23.157834+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:34.009406+00:00. JAX 0.9.2.
 
 ```text
 Row-shard shapes: [(2, 4), (2, 4), (2, 4), (2, 4)]
@@ -299,49 +299,34 @@ Compare row and column layouts of a $(12,8)$ array, and repair a ten-row mean wi
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- Four logical CPU devices; row and column NamedSharding objects.
+- A (12, 8) matrix and a separate ten-observation, four-feature batch.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `placed` explicitly onto the target JAX device.
-3. Check tensor shape invariant: `shard.data.shape == expected`
-4. Transfer the device result to the host for an independent NumPy comparison.
-5. Place `padded` explicitly onto the target JAX device.
+**Outputs:**
+- Per-device local shapes and values for both (12, 8) layouts.
+- A masked ten-row column mean plus an unmasked padded mean for diagnosis.
+
+**Invariants to check:**
+- Both placements preserve the same global matrix and each shard matches its indexed host slice.
+- Padded rows contribute to neither the masked numerator nor the valid-row denominator.
+- The masked mean agrees with the original ten-row host mean.
+
+**Hints:**
+- Read each PartitionSpec against the axis it partitions.
+- Use shard.index for local-value comparisons; mask padded rows before summing and divide by valid rows.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-other = np.arange(...)  # TODO: compute other
-for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
-    # Place `placed` explicitly onto the target JAX device.
-    placed = jax.device_put(...)  # TODO: compute placed
-    for shard in placed.addressable_shards:
-        # Check tensor shape invariant: `shard.data.shape == expected`
-        assert shard.data.shape  # TODO: complete assertion check
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
+import numpy as np
+import jax
+import jax.numpy as jnp
 
-original = np.arange(...)  # TODO: compute original
-try:
-    jax.device_put(original, rows)
-except ValueError:
-    print("Expected indivisible batch")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `padded` explicitly onto the target JAX device.
-padded = jax.device_put(...)  # TODO: compute padded
-mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-mask = jax.device_put(...)  # TODO: compute mask
-# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-masked_mean = jax.jit(...)  # TODO: compute masked_mean
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
+def verify_layouts_and_masked_mean(host, uneven_batch, row_sharding, column_sharding):
+    # TODO: compare both placements and their indexed shard values.
+    # Then pad the ten-row batch, place a validity mask, and compare masked/unmasked means.
+    raise NotImplementedError("Verify both shard layouts and mask-preserved batch statistics")
 ```
 
 <details><summary>Reference solution</summary>
@@ -392,29 +377,30 @@ Four devices divide twelve rows or eight columns.
 
 ### How to write: Change both dimensions — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- A (12,8) host matrix and four logical CPU devices.
+- Row and column shardings from the lesson.
 
-**Step-by-step implementation plan:**
-1. Change both dimensions (Challenge)
-2. Place `placed` explicitly onto the target JAX device.
-3. Check tensor shape invariant: `shard.data.shape == expected`
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Exact per-device shapes for both placements.
+
+**Invariants to check:**
+- Every shard contains the indexed global slice.
+- The global matrix is unchanged by placement.
+
+**Hints:**
+- Divide the partitioned dimension by four.
+- Check shard.index as well as shard.data.shape.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change both dimensions (Challenge)
-other = np.arange(...)  # TODO: compute other
-for spec, expected in [(rows,(3,8)),(columns,(12,2))]:
-    # Place `placed` explicitly onto the target JAX device.
-    placed = jax.device_put(...)  # TODO: compute placed
-    for shard in placed.addressable_shards:
-        # Check tensor shape invariant: `shard.data.shape == expected`
-        assert shard.data.shape  # TODO: complete assertion check
-        # Transfer the device result to the host for an independent NumPy comparison.
-        np.testing.assert_array_equal(np.asarray(shard.data),other[shard.index])
+import numpy as np
+import jax
+
+def verify_changed_layout(host, row_sharding, column_sharding):
+    # TODO: place the matrix under both shardings and check each local slice.
+    raise NotImplementedError("Verify both local shapes and indexed values")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -450,37 +436,32 @@ The divisor is the sum of the mask, not padded length.
 
 ### How to write: Pad an uneven batch without corrupting its mean — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- A ten-row host batch with four features and a four-device row sharding.
 
-**Step-by-step implementation plan:**
-1. Place `padded` explicitly onto the target JAX device.
-2. Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-3. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Masked column mean with shape (4,).
+- Unmasked padded mean as a diagnostic.
+
+**Invariants to check:**
+- Padding contributes zero to both the numerator and valid-count denominator.
+- The masked result matches the original ten-row host mean.
+
+**Hints:**
+- Pad only the row axis to a device-divisible length.
+- Mask invalid rows before summing and divide by valid rows.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Pad an uneven batch without corrupting its mean (Challenge): Padding repairs the shape but adds artificial rows.
-original = np.arange(...)  # TODO: compute original
-try:
-    jax.device_put(original, rows)
-except ValueError:
-    print("Expected indivisible batch")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `padded` explicitly onto the target JAX device.
-padded = jax.device_put(...)  # TODO: compute padded
-mask_sharding = NamedSharding(...)  # TODO: compute mask_sharding
-mask = jax.device_put(...)  # TODO: compute mask
-# Wrap with `jax.jit` (`masked_mean`) so XLA traces and compiles the function.
-masked_mean = jax.jit(...)  # TODO: compute masked_mean
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis = ...  # TODO: compute np.testing.assert_allclose(np.asarray(masked_mean),original.mean(axis
-assert not np.allclose(np.asarray(padded.mean(axis=0)), original.mean(axis=0))  # TODO: complete assertion check
+import numpy as np
+import jax
+import jax.numpy as jnp
+
+def masked_column_mean(batch, row_sharding):
+    # TODO: pad rows, place the values and mask, then compute both means.
+    # Return device results as host arrays for comparison.
+    raise NotImplementedError("Implement masked statistics for the ten valid rows")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

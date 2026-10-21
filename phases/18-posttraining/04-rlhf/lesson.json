@@ -87,7 +87,23 @@
         "prompt": "Differentiate the objective with respect to supplied old log probabilities and advantages; both must be fixed within this update.",
         "hint": "Use argnums to inspect only those two inputs.",
         "solution": "# Verify detached behavior information (Transfer)\nold_grad, adv_grad = jax.grad(ppo_loss, argnums=(1, 3))(\n    theta, old_selected, actions, advantage, reference, 0.2, 0.2\n)\nnp.testing.assert_array_equal(old_grad, np.zeros(old_grad.shape))\nnp.testing.assert_array_equal(adv_grad, np.zeros(adv_grad.shape))\nprint('Behavior log probabilities and advantages are detached.')",
-        "explanation": "Detaching is not enough if you recompute old probabilities after every optimizer step. Store their values at collection time and verify identity across all epochs on that batch."
+        "explanation": "Detaching is not enough if you recompute old probabilities after every optimizer step. Store their values at collection time and verify identity across all epochs on that batch.",
+        "learnerStarter": {
+          "inputs": [
+            "A callable PPO objective, policy logits, supplied old action log probabilities, sampled actions, advantages, reference log probabilities, and PPO coefficients."
+          ],
+          "outputs": [
+            "Gradients of the objective with respect to old log probabilities and advantages."
+          ],
+          "invariants": [
+            "Both rollout-time inputs are stop-gradient constants in this update, while policy logits remain differentiable."
+          ],
+          "hints": [
+            "Differentiate the supplied objective with respect to the two rollout arrays only.",
+            "Check zero arrays with their original shapes."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef check_rollout_inputs_are_detached(ppo_objective, logits, old_logps, actions, advantages, reference_logps, clip, beta):\n    # TODO: differentiate the objective with respect to old_logps and advantages.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Compare with the finite-action regularized optimum",
@@ -95,7 +111,23 @@
         "prompt": "Compute the analytic optimum for beta 0.2, then compare its regularized objective with the trained policy and the reference.",
         "hint": "Evaluate expected reward minus beta times KL for all three policies, and compute the optimum in log space.",
         "solution": "# Compare with the finite-action regularized optimum (Challenge)\nbeta = 0.2\noptimal_logp = jax.nn.log_softmax(reference + rewards / beta)\n\ndef regularized(logp):\n    return jnp.sum(jnp.exp(logp) * rewards) - beta * jnp.sum(\n        jnp.exp(logp) * (logp - reference)\n    )\n\noptimum = float(regularized(optimal_logp))\ntrained = float(regularized(logp))\nbaseline = float(regularized(reference))\nassert optimum >= trained - 1e-5 and optimum >= baseline - 1e-5\nprint(\n    'Regularized objective reference/trained/optimum:',\n    baseline,\n    trained,\n    optimum,\n)",
-        "explanation": "An independently derived optimum bounds this finite-action objective. It does not qualify language generation or the reward model’s judgment."
+        "explanation": "An independently derived optimum bounds this finite-action objective. It does not qualify language generation or the reward model’s judgment.",
+        "learnerStarter": {
+          "inputs": [
+            "A finite action set, frozen reference distribution, reward vector, beta equal to 0.2, and trained policy."
+          ],
+          "outputs": [
+            "The analytic regularized optimum and matching regularized objective values for the reference and trained policy."
+          ],
+          "invariants": [
+            "Every objective uses D_KL(policy || reference) with the same reward, frozen reference, and beta."
+          ],
+          "hints": [
+            "Normalize reward-adjusted reference log probabilities with log-sum-exp.",
+            "Compare objective values, including the policy-to-reference KL, rather than only the highest-probability action."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef compare_policy_with_regularized_optimum(reward, reference_probs, policy_probs, beta):\n    # TODO: construct the finite-action optimum and evaluate all policies with D_KL(policy || reference).\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Which policy is refreshed for the next rollout batch?",
@@ -200,6 +232,22 @@
       "Behavior identity belongs to the collected data. Reference identity belongs to the regularized objective.",
       "Behavior probabilities stay fixed within the collected rollout’s update epochs. The candidate policy changes; the reference remains frozen.",
       "Keeping the old behavior forever makes later rollout ratios describe the wrong collection policy. Refresh behavior data for each new rollout."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Reference-policy log probabilities and final-policy log probabilities for the same categorical action set."
+      ],
+      "outputs": [
+        "The self-KL and \\(D_{\\mathrm{KL}}(\\pi_{\\mathrm{final}}\\parallel\\pi_{\\mathrm{ref}})\\) for the exact categorical distributions."
+      ],
+      "invariants": [
+        "The self-KL is zero up to floating-point tolerance; compute \\(D_{\\mathrm{KL}}(\\pi_{\\mathrm{final}}\\parallel\\pi_{\\mathrm{ref}})=\\sum_a \\pi_{\\mathrm{final}}(a)\\log(\\pi_{\\mathrm{final}}(a)/\\pi_{\\mathrm{ref}}(a))\\), never the reverse direction."
+      ],
+      "hints": [
+        "Normalize both log-probability vectors.",
+        "Weight each log ratio by the corresponding final-policy probability."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef compare_reference_and_policy_kl(reference_logps, final_policy_logps):\n    # TODO: compute self-KL and D_KL(final policy || frozen reference).\n    raise NotImplementedError"
+    }
   }
 }

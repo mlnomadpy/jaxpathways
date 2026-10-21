@@ -85,7 +85,22 @@
         "prompt": "Normalize each confusion-matrix row by its true-class count. Explain the diagonal and verify that weighting class recalls by class counts reproduces overall accuracy. Then remove a class in a constructed case and report its recall as undefined.",
         "hint": "Keep the integer counts; a normalized row without a count hides how much evidence supports it.",
         "solution": "# Read a confusion matrix as conditional rates (Transfer): Each row asks where examples of one true class went.\n# Reduce along axis=1 to compute `counts`.\ncounts=confusion.sum(axis=1)\nrates=np.divide(confusion,counts[:,None],out=np.full(confusion.shape,np.nan),where=counts[:,None]!=0)\nnp.testing.assert_allclose(rates.sum(axis=1),np.ones(2))\nnp.testing.assert_allclose((np.diag(rates)*counts).sum()/counts.sum(),accuracy)\nmissing=np.array([[3,1],[0,0]])\n# Reduce along axis=1 to compute `n`.\nn=missing.sum(axis=1)\nmissing_rates=np.divide(missing,n[:,None],out=np.full(missing.shape,np.nan),where=n[:,None]!=0)\n# Ensure all array elements remain finite: `np.isnan(missing_rates[1]).all()`\nassert np.isnan(missing_rates[1]).all()\nprint('True-class counts:',counts,'row-normalized confusion:',rates)\nprint('Absent class recall: undefined, not zero.')",
-        "explanation": "Each row asks where examples of one true class went. A missing class has no observed recall; assigning zero confuses missing evidence with demonstrated failure."
+        "explanation": "Each row asks where examples of one true class went. A missing class has no observed recall; assigning zero confuses missing evidence with demonstrated failure.",
+        "learnerStarter": {
+          "inputs": [
+            "Normalize each confusion-matrix row by its true-class count. Explain the diagonal and verify that weighting class recalls by class counts reproduces overall accuracy. Then remove a class in a constructed case and report its recall as undefined."
+          ],
+          "outputs": [
+            "Per-class recalls, undefined absent-class recall, and reconstructed accuracy."
+          ],
+          "invariants": [
+            "Rows are conditioned on true labels; classes with zero support are not assigned a numeric recall."
+          ],
+          "hints": [
+            "Keep the integer counts; a normalized row without a count hides how much evidence supports it."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_read_a_confusion_matrix_as_conditional_rates(confusion, class_counts):\n    \"\"\"Implement the read a confusion matrix as conditional rates check.\"\"\"\n    # TODO: Divide each true-class row by its support, mask zero-support recall, and reconstruct accuracy by support weighting.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch a channel-order mistake",
@@ -93,7 +108,22 @@
         "prompt": "Transpose NHWC images to NCHW and show why this convolution rejects them. Repair the layout and compare predictions.",
         "hint": "The final axis is the input-channel dimension for NNX Conv.",
         "solution": "# Catch a channel-order mistake (Intermediate)\nwrong=jnp.transpose(test_x[:2],(0,3,1,2))\ncaught=False\ntry:model(wrong)\nexcept (ValueError,TypeError):caught=True\nassert caught\n# Rearrange tensor axes to match the required layout for `repaired`.\nrepaired=jnp.transpose(wrong,(0,2,3,1))\nnp.testing.assert_allclose(model(repaired),model(test_x[:2]),rtol=1e-6)",
-        "explanation": "The mistaken array has eight channels where the layer expects one. Explicit layout conversion is the repair; changing the declared channel count would silently change the model task."
+        "explanation": "The mistaken array has eight channels where the layer expects one. Explicit layout conversion is the repair; changing the declared channel count would silently change the model task.",
+        "learnerStarter": {
+          "inputs": [
+            "Transpose NHWC images to NCHW and show why this convolution rejects them. Repair the layout and compare predictions."
+          ],
+          "outputs": [
+            "The failure case and repaired NHWC output/prediction comparison."
+          ],
+          "invariants": [
+            "The input batch follows the convolution module’s declared spatial/channel axis order."
+          ],
+          "hints": [
+            "The final axis is the input-channel dimension for NNX Conv."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_catch_a_channel_order_mistake(model, images):\n    \"\"\"Implement the catch a channel-order mistake check.\"\"\"\n    # TODO: Transpose the declared NHWC batch to NCHW to reproduce the shape rejection, then restore NHWC and compare predictions.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "exercise": "Apply the trained model to one \\(10\\times10\\) image. Predict the intermediate activation shape and total parameter count before executing, then verify both assertions.",
@@ -147,6 +177,22 @@
       "Pooling summarizes each feature channel over positions. This can support orientation classification, but it cannot preserve exact bar coordinates.",
       "A mean over spatial axes preserves the channel axis. Inspect which axes disappear from the output shape.",
       "Convolutional channels can encode orientation responses before pooling. The direct information lost here is the exact spatial arrangement."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The trained convolutional classifier and one image with shape (1, 10, 10, channels)."
+      ],
+      "outputs": [
+        "The intermediate activation shape for that image, the trainable parameter count, and the prediction shape."
+      ],
+      "invariants": [
+        "The observed activation dimensions follow the convolution and pooling sequence; parameter count is independent of input batch size."
+      ],
+      "hints": [
+        "Trace spatial dimensions through each convolution and pooling operation.",
+        "Count model parameter leaves once; do not count activations as parameters."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\nfrom flax import nnx\n\ndef inspect_single_image(model, image):\n    # TODO: Run one image, capture the requested intermediate shape, and count trainable parameter scalars.\n    raise NotImplementedError\n"
+    }
   }
 }

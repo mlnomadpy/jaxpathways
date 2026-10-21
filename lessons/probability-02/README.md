@@ -183,7 +183,7 @@ visual_data={"kind":"line","x":grid.tolist(),"xlabel":"input value","ylabel":"pr
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:06.814419+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:40.328163+00:00. JAX 0.9.2.
 
 ```text
 posterior mean: [0.923077  1.7777778] covariance: [[0.30769232 0.        ]
@@ -233,17 +233,28 @@ Strengthen the prior by changing its scale from two to one half. Predict the dir
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A design matrix with an explicit intercept column, outcomes, known noise scale, and two prior scales.
+
+**Outputs:**
+- Posterior mean and covariance for both prior choices.
+
+**Invariants to check:**
+- The covariance is symmetric positive definite.
+- The stronger zero-centered prior cannot increase the posterior mean norm in this fixed fixture.
+
+**Hints:**
+- Build posterior precision from prior and likelihood precision.
+- Solve linear systems instead of explicitly inverting a matrix.
+- Interpret the changed posterior separately from predictive model quality.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Strengthen the prior by changing its scale from two to one half.
-strong_mean,strong_cov = posterior(...)  # TODO: compute strong_mean,strong_cov
-assert jnp.linalg.norm(strong_mean)  # TODO: complete assertion check
-assert jnp.all(jnp.diag(strong_cov)  # TODO: complete assertion check
+def compare_prior_strength(X, y, noise_scale, prior_scales):
+    """Return posterior moments under two prior scales."""
+    # TODO: solve both Gaussian precision systems and compare their means.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -271,26 +282,27 @@ The intercept and slope can compensate for each other when features are not cent
 
 ### How to write: Move away from centered inputs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The requested design rows, outcomes, known noise scale, and prior scale.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- The JAX posterior mean/covariance, host NumPy solve results, and an off-diagonal covariance check.
+
+**Invariants to check:**
+- The two solves use the same precision system; the shifted design yields a full posterior covariance with a nonzero off-diagonal entry.
+
+**Hints:**
+- Construct the precision matrix in float64 on the host for an independent solve.
+- Check the covariance off-diagonal directly instead of reducing it to a diagonal summary.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move away from centered inputs (Transfer / diagnosis)
-shift_X = jnp.array(...)  # TODO: compute shift_X
-shift_m,shift_c = posterior(...)  # TODO: compute shift_m,shift_c
-# Transfer the device result to the host for an independent NumPy comparison.
-host_X = np.asarray(...)  # TODO: compute host_X
-host_P = np.eye(...)  # TODO: compute host_P
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_allclose(shift_m,np.linalg.solve(host_P,host_X.T@np.asarray(y)),rtol=1e-5,atol=1e-6)
-assert shift_c[0,1]  # TODO: complete assertion check
+import numpy as np
+
+def compare_posterior_with_host_solve(posterior, outcomes, noise_scale, prior_scale):
+    # TODO: Solve the requested design case with JAX and independent host NumPy arithmetic.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -325,25 +337,28 @@ Use separate keys for weights and noise; sample with a Cholesky factor.
 
 ### How to write: Verify total predictive variance — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- Posterior weight mean/covariance, observation noise scale, an explicit random key, and the requested sample count.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
-2. Sample deterministic random values into `weights` using an explicit PRNG key.
-3. Sample deterministic random values into `replicated` using an explicit PRNG key.
+**Outputs:**
+- Empirical prediction variance from sampled weights plus observation noise and analytic observation variance at input zero.
+
+**Invariants to check:**
+- The sampled observation variance is compared with the analytic predictive variance, including the noise contribution.
+
+**Hints:**
+- Draw parameter samples from the full posterior covariance.
+- Use a separate subkey for observation noise and evaluate the prediction at input zero.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify total predictive variance (Transfer / diagnosis)
-# Create or split explicit PRNG key(s) (`(kw, kn)`) for reproducible randomness.
-kw,kn = jax.random.split(...)  # TODO: compute kw,kn
-# Sample deterministic random values into `weights` using an explicit PRNG key.
-weights = ...  # TODO: compute weights
-# Sample deterministic random values into `replicated` using an explicit PRNG key.
-replicated = ...  # TODO: compute replicated
-assert abs(float(replicated.var())-float(observation_var[0]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_sampled_and_analytic_observation_variance(mean, covariance, noise_scale, key, sample_count):
+    # TODO: Sample posterior weights and independent observation noise, then compare variances at x=0.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

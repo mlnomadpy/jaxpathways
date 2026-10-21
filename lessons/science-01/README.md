@@ -196,7 +196,7 @@ visual_data = {'kind':'line','x':times.tolist(),'xlabel':'time (seconds)','ylabe
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:30.993323+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:51.212821+00:00. JAX 0.9.2.
 
 ```text
 Euler final: 0.3570125000000001 analytic final: 0.493193927883213
@@ -251,23 +251,29 @@ Change the rate to $0.3$, the initial excess to $5$, and use twenty steps of $0.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Initial excess 5.0, rate 0.3, step size 0.1, and twenty explicit-Euler steps.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- Full discrete state trajectory and the analytic exponential trajectory.
+- An endpoint-error bound relative to the exponential solution at the matching final time.
+
+**Invariants to check:**
+- Each update uses the previous state.
+- The endpoint uses the same physical time for both methods.
+
+**Hints:**
+- Record the initial value before applying any step.
+- Compare discrete updates with exp(-rate * time), including the final time.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed = euler_solve(...)  # TODO: compute changed
-reference = ...  # TODO: compute reference
-np.testing.assert_allclose(changed, reference, rtol = ...  # TODO: compute np.testing.assert_allclose(changed, reference, rtol
-assert float(changed[0])  # TODO: complete assertion check
-assert abs(float(changed[-1])-5*np.exp(-0.6))  # TODO: complete assertion check
-print("Changed rate, initial state and grid verified")
+import numpy as np
+
+def compare_euler_and_exponential(initial, rate, dt, steps):
+    # TODO: return times, discrete trajectory, and analytic values.
+    raise NotImplementedError("Build both trajectories on the same time grid")
 ```
 
 <details><summary>Reference solution</summary>
@@ -298,22 +304,28 @@ Compare successive squared magnitudes. The sign-alternating case from the experi
 
 ### How to write: Energy does not check every invariant — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+**Inputs:**
+- A stable and an unstable explicit-Euler step size for scalar decay.
 
-**Step-by-step implementation plan:**
-1. Energy does not check every invariant (Practice)
+**Outputs:**
+- Energy histories and state-sign checks for both runs.
+
+**Invariants to check:**
+- Energy E=u²/2 can decrease even after the state crosses below zero.
+- Stability and nonnegativity are separate properties.
+
+**Hints:**
+- Track signed state as well as its square.
+- Use a step large enough to cross zero but remain within a simple decay example.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Energy does not check every invariant (Practice)
-for h in (0.5, 2.0):
-    u = np.asarray(...)  # TODO: compute u
-    assert np.all(np.diff(u*u/2)  # TODO: complete assertion check
-u = np.asarray(...)  # TODO: compute u
-assert np.all(np.diff(u*u/2)  # TODO: complete assertion check
-print("Energy checks distinguish growth, but not sign preservation")
+import numpy as np
+
+def energy_diagnostics(initial, rate, step_sizes, steps):
+    # TODO: simulate each grid and return state and energy histories.
+    raise NotImplementedError("Check signed-state and energy invariants separately")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -346,24 +358,28 @@ The horizon is number of updates multiplied by step length.
 
 ### How to write: Keep the physical horizon fixed — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+**Inputs:**
+- Two step-size/update-count pairs and a fixed physical decay problem.
 
-**Step-by-step implementation plan:**
-1. Keep the physical horizon fixed (Challenge)
+**Outputs:**
+- Final physical time and endpoint error for each configuration.
+
+**Invariants to check:**
+- A fair accuracy comparison uses the same final time.
+- Changing the step count changes the horizon unless dt*steps stays fixed.
+
+**Hints:**
+- Compute the horizon before comparing endpoint values.
+- Use the exponential solution at each run’s actual horizon.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep the physical horizon fixed (Challenge)
-horizon = ...  # TODO: compute horizon
-errors = ...  # TODO: compute errors
-for n in (10, 20, 40):
-    h = ...  # TODO: compute h
-    final = euler_solve(...)  # TODO: compute final
-    errors.append(abs(float(final)-2*np.exp(-0.7*horizon)))
-assert errors[2]  # TODO: complete assertion check
-print("Same-horizon errors:", errors)
+import numpy as np
+
+def compare_horizons(initial, rate, runs):
+    # TODO: for each (dt, steps), compute its horizon and endpoint error.
+    raise NotImplementedError("Separate discretization error from a changed horizon")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

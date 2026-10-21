@@ -168,7 +168,7 @@ visual_data = {'kind': 'line', 'x': [1, 2, 3, 4], 'xlabel': 'completed step', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:17.990505+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:50.876078+00:00. JAX 0.9.2.
 
 ```text
 History: [1.    1.5   1.75  1.875]
@@ -227,26 +227,28 @@ Make the decay an explicit scalar argument. Differentiate the final value with r
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- The initial scalar state, increments, and explicit decay scalar from the exercise.
 
-**Step-by-step implementation plan:**
-1. Define `simulate(decay)` to carry state across steps with `jax.lax.scan`:
+**Outputs:**
+- The final scan value, per-step history, autodiff derivative with respect to decay, and comparison with the analytic value at 0.5.
+
+**Invariants to check:**
+- The final value is differentiated through the scan; the derivative check uses decay 0.5 and the stated analytic reference.
+
+**Hints:**
+- Pass decay as an explicit scan-transition input.
+- Differentiate the function returning only the final carry, then compare at the requested decay.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Make the decay an explicit scalar argument.
-# Define `simulate(decay)` to carry state across steps with `jax.lax.scan`:
-def simulate(decay):
-    def transition(carry, increment):
-        value = ...  # TODO: compute value
-        return ...  # TODO: return computed result
-    return ...  # TODO: return computed result
-assert jnp.allclose(jax.grad(simulate)(0.5), 2.75)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def check_scan_decay_derivative(initial, increments, decay):
+    # TODO: Return the scan history and final carry, then differentiate the final carry with respect to decay.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -278,22 +280,30 @@ The second returned value is only the recorded output.
 
 ### How to write: Record a different output — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- An initial scalar carry and a sequence of increments.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The final state and the squared state recorded at every step.
+
+**Invariants to check:**
+- The carry remains unsquared between transitions.
+- Recorded output has the same leading length as increments.
+
+**Hints:**
+- Compute the next state once in the transition.
+- Return that state as carry and its square as the scan output.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Record a different output (Practice): Carry and history need not have the same interpretation.
-last,energy = jax.lax.scan(...)  # TODO: compute last,energy
-assert jnp.allclose(last,1.875)  # TODO: complete assertion check
-assert jnp.allclose(energy,jnp.array([1.,2.25,3.0625,3.515625]))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def state_and_energy(initial: jax.Array, increments: jax.Array, decay: float = 0.5) -> tuple[jax.Array, jax.Array]:
+    """Scan a scalar state while recording its squared energy."""
+    # TODO: define the transition and return lax.scan outputs.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -323,29 +333,30 @@ The carry shape is part of the loop type.
 
 ### How to write: Diagnose a growing carry — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jax.lax.scan(step_fn, init_carry, xs, length=...)` — Compiles a sequential loop where `step_fn(carry, x)` returns `(next_carry, y)`, returning `(final_carry, stacked_ys)`.
+**Inputs:**
+- A fixed-shape scan carry and a sequence whose values are to be recorded.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A scan result whose carry shape stays fixed while all per-step values are stacked in output.
+
+**Invariants to check:**
+- Carry shape and dtype agree on every iteration.
+- History length equals the sequence length, including empty sequences.
+
+**Hints:**
+- A growing array belongs in the scan output, not in carry.
+- Keep the carry fixed and return each new value as the output.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a growing carry (Challenge): The error identifies incompatible carry input/output types.
-def growing(c,u):
-    return ...  # TODO: return computed result
-try:
-    jax.lax.scan(growing,jnp.zeros((0,)),increments)
-except TypeError:
-    print("Expected carry-shape mismatch")
-else:
-    raise AssertionError("Expected scan type failure")
-_,saved = jax.lax.scan(...)  # TODO: compute _,saved
-assert jnp.array_equal(saved,increments)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def collect_scan(initial: jax.Array, values: jax.Array) -> tuple[jax.Array, jax.Array]:
+    """Keep a fixed carry and collect each input in the scan history."""
+    # TODO: implement a fixed-type carry transition with per-step output.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

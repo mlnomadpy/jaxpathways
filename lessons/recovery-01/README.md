@@ -224,16 +224,16 @@ visual_data = {'kind': 'line', 'x': list(range(len(seen))), 'xlabel': 'position 
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:48.561775+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:18.574146+00:00. JAX 0.9.2.
 
 ```text
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 0.014189708977937698
+Preparation seconds (local observation only): 0.01423758314922452
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Batch sizes: [4, 4, 3]
 Example order: [9, 10, 4, 1, 0, 7, 6, 8, 2, 5, 3]
-Preparation seconds (local observation only): 2.9291026294231415e-05
+Preparation seconds (local observation only): 2.0207837224006653e-05
 Dataset SHA256: 1a81451a8fb32a1bf0ad6307ea19198153ab1603b37174c76c4d498e343e6892
 Epoch one order: [4, 0, 5, 10, 6, 2, 1, 9, 7, 3, 8]
 Omitted IDs: [2, 3, 5]
@@ -282,24 +282,27 @@ Pad the final three-label batch to four elements with zero. Show that an unmaske
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- The final three labels from the lesson’s last batch.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Four padded label slots, a validity mask, the ordinary padded mean, and the masked mean.
+
+**Invariants to check:**
+- The padded unmasked mean differs from the mean of the three real labels; the masked mean equals that real-label mean.
+
+**Hints:**
+- Build the mask from the number of real labels, not from label values.
+- Divide the masked sum by the count of valid elements.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Pad the final three-label batch to four elements with zero.
-last = ...  # TODO: compute last
-padded_labels = np.pad(...)  # TODO: compute padded_labels
-mask = np.array(...)  # TODO: compute mask
-masked = ...  # TODO: compute masked
-np.testing.assert_allclose(masked,last.mean(),atol = ...  # TODO: compute np.testing.assert_allclose(masked,last.mean(),atol
-assert not np.isclose(padded_labels.mean(),last.mean())  # TODO: complete assertion check
+import numpy as np
+
+def compare_padded_and_masked_mean(labels):
+    # TODO: Pad three labels to four with zero and compare the two means using a validity mask.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -330,22 +333,28 @@ The fingerprint includes dtype, shape and array bytes.
 
 ### How to write: Fingerprint meaning, not just a row count — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Accumulate the next contribution into `changed_labels[0]`.
+**Inputs:**
+- Reorder features and labels together, then change one label without changing any shape. Verify that both changes alter the dataset fingerprint while copying unchanged arrays preserves it. Explain why a new iterator order differs from a changed source dataset.
+
+**Outputs:**
+- Three fingerprint comparisons for reordered data, changed labels, and copied arrays.
+
+**Invariants to check:**
+- Changes to row order or values alter the fingerprint while exact copies preserve it.
+
+**Hints:**
+- The fingerprint includes dtype, shape and array bytes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Fingerprint meaning, not just a row count (Transfer): A sampler permutation can be reproduced against a fixed source.
-same = dataset_digest(...)  # TODO: compute same
-reversed_digest = dataset_digest(...)  # TODO: compute reversed_digest
-# Accumulate the next contribution into `changed_labels[0]`.
-changed_labels = labels.copy(...)  # TODO: compute changed_labels
-changed_labels[0]+=0.1
-changed_digest = dataset_digest(...)  # TODO: compute changed_digest
-assert same  # TODO: complete assertion check
-assert reversed_digest  # TODO: complete assertion check
-print('Copy preserves fingerprint; reordered source and edited labels invalidate it.')
+import numpy as np
+import hashlib
+
+def practice_fingerprint_meaning_not_just_a_row_count(features, labels):
+    """Implement the fingerprint meaning, not just a row count check."""
+    # TODO: Hash canonical feature and label bytes plus shape/dtype metadata; compare reorder, label-edit, and unchanged-copy cases.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -381,25 +390,28 @@ The known relation $y=2x-1$ provides a stronger oracle than a falling training l
 
 ### How to write: Catch a feature/label shuffle mismatch — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Reverse the target order inside a batch but keep features unchanged. Reject this batch with an independent alignment check, then repair shared indexing.
 
-**Step-by-step implementation plan:**
-1. Accumulate the next contribution into `changed_labels[0]`.
+**Outputs:**
+- An accepted jointly shuffled batch and a rejected split-shuffled batch.
+
+**Invariants to check:**
+- Features and labels carry the same row IDs after batching.
+
+**Hints:**
+- The known relation $y=2x-1$ provides a stronger oracle than a falling training loss.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Catch a feature/label shuffle mismatch (Challenge): Wrong alignment can preserve shapes and numeric ranges.
-batch = ...  # TODO: compute batch
-wrong_labels = ...  # TODO: compute wrong_labels
-assert not np.allclose(wrong_labels,2*batch["x"]-1)  # TODO: complete assertion check
-fixed = ...  # TODO: compute fixed
-np.testing.assert_allclose(fixed,2*batch["x"]-1,atol=1e-7)
-# Accumulate the next contribution into `changed_labels[0]`.
-changed_labels = labels.copy(...)  # TODO: compute changed_labels
-changed_labels[0]+=1
-assert dataset_digest(features,changed_labels)  # TODO: complete assertion check
+import numpy as np
+import hashlib
+
+def practice_catch_a_feature_label_shuffle_mismatch(features, labels, order):
+    """Implement the catch a feature/label shuffle mismatch check."""
+    # TODO: Apply one shared permutation to aligned arrays, then deliberately reverse only labels and reject the mismatched rows.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -1,0 +1,6 @@
+# Optional project-only CPU environment. Install into .venv-numpyro from this directory.
+# This does not modify requirements-cpu.txt or the shared course environment.
+jax==0.9.2
+numpy==2.4.4
+numpyro==0.22.0
+matplotlib==3.10.8

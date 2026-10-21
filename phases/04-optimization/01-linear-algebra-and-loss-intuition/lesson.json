@@ -82,7 +82,22 @@
         "prompt": "Extend \\(X\\) with \\([2, -1]\\), supply its target, and check predictions using ordinary arithmetic.",
         "hint": "The new target is the dot product plus bias.",
         "solution": "# Add an unseen observation (Transfer / diagnosis)\nX_new = jnp.concatenate([X, jnp.array([[2., -1.]])])\ny_new = jnp.concatenate([targets, jnp.array([6.])])\nassert jnp.allclose(predict(w, 1., X_new), y_new)",
-        "explanation": "The fourth row checks a combination absent from the original three observations."
+        "explanation": "The fourth row checks a combination absent from the original three observations.",
+        "learnerStarter": {
+          "inputs": [
+            "Extend \\(X\\) with \\([2, -1]\\), supply its target, and check predictions using ordinary arithmetic."
+          ],
+          "outputs": [
+            "Prediction for the added row and a direct-arithmetic parity check."
+          ],
+          "invariants": [
+            "The added target stays paired to its row and the original training rows are unchanged."
+          ],
+          "hints": [
+            "The new target is the dot product plus bias."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_add_an_unseen_observation(features, targets):\n    \"\"\"Implement the add an unseen observation check.\"\"\"\n    # TODO: Append exactly one feature row and target, evaluate its prediction, and compare with the direct row calculation.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Reject and repair a column target",
@@ -90,7 +105,22 @@
         "prompt": "Write a loss that rejects mismatched prediction/target shapes. Demonstrate rejection and then restore the intended one-target-per-row format.",
         "hint": "Compare shapes before subtraction; reshape only this known scalar-target dataset.",
         "solution": "# Reject and repair a column target (Transfer / diagnosis)\ndef checked_loss(prediction, target):\n    if prediction.shape != target.shape:\n        raise ValueError(\"one target required per prediction\")\n    return jnp.mean((prediction-target)**2)\ntry:\n    checked_loss(predict(w, 1., X), column_targets)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError(\"bad shape accepted\")\nassert checked_loss(predict(w, 1., X), column_targets[:, 0]) == 0",
-        "explanation": "The failure is reproduced at the boundary and the repair is verified against zero residuals."
+        "explanation": "The failure is reproduced at the boundary and the repair is verified against zero residuals.",
+        "learnerStarter": {
+          "inputs": [
+            "Write a loss that rejects mismatched prediction/target shapes. Demonstrate rejection and then restore the intended one-target-per-row format."
+          ],
+          "outputs": [
+            "A shape-mismatch error followed by a correctly aligned scalar loss."
+          ],
+          "invariants": [
+            "The loss reduces B paired residuals rather than a B by B broadcast matrix."
+          ],
+          "hints": [
+            "Compare shapes before subtraction; reshape only this known scalar-target dataset."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_reject_and_repair_a_column_target(predictions, targets):\n    \"\"\"Implement the reject and repair a column target check.\"\"\"\n    # TODO: Add an exact shape guard, demonstrate rejection of (B,) versus (B, 1), then reshape only the target to one value per row.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -147,6 +177,22 @@
       "Subtracting \\((n,)\\) from \\((n,1)\\) broadcasts into an \\((n,n)\\) array. Check the residual shape before taking its mean.",
       "Use matching \\((n,)\\) shapes. A column target can silently broadcast into pairwise residuals.",
       "The targets are indexed by observations, not features. There must be one target for each of the n predictions."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A feature matrix X, one weight per column, aligned target vector, and a scalar bias."
+      ],
+      "outputs": [
+        "Predictions with one scalar per row and a mean squared error."
+      ],
+      "invariants": [
+        "Prediction and target arrays stay one-dimensional and have identical shape; each row contributes one residual."
+      ],
+      "hints": [
+        "Check the row/feature axes before reducing.",
+        "For the zero-bias exercise, compute the row predictions first and keep the supplied targets aligned."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef linear_model_loss(weights, features, targets):\n    \"\"\"Predictions with one scalar per row and a mean squared error.\"\"\"\n    # TODO: Compute one prediction per feature row, form aligned residuals, and reduce their squares with a mean.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -257,7 +257,7 @@ visual_data={'kind':'line','x':list(range(1,31)),'xlabel':'completed update','yl
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:43.036990+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:53.428377+00:00. JAX 0.9.2.
 
 ```text
 Validation MSE by learning rate: {0.02: 0.11994461715221405, 0.15: 5.049471951679152e-10}
@@ -289,16 +289,27 @@ Add a third, deliberately wrong model artifact and show why the smallest trainin
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The fitted candidate parameters, held-out inputs and labels, and the current release candidate selected from the two trained runs.
+
+**Outputs:**
+- The deliberately wrong third candidate’s held-out loss and a decision that rejects it despite its low training loss.
+
+**Invariants to check:**
+- Release selection uses held-out evidence; a low training loss alone cannot override the candidate’s worse validation result.
+
+**Hints:**
+- Evaluate the zero-weight, zero-bias candidate on the existing held-out set.
+- Compare its validation error with the selected candidate and record why it is not released.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-bad_validation = sum(...)  # TODO: compute bad_validation
-assert bad_validation  # TODO: complete assertion check
-print('Wrong zero model validation MSE:',bad_validation)
+import jax.numpy as jnp
+
+def evaluate_third_release_candidate(candidate_params, heldout_inputs, heldout_targets, selected_validation_loss):
+    # TODO: Measure the deliberately wrong candidate on held-out rows and decide whether it passes release selection.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -326,20 +337,32 @@ Hash the same input bytes plus changed target bytes.
 
 ### How to write: Change a data value — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Change a data value (transfer): Identical filenames or shapes do not imply identical data.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Inputs:**
+- Change one training target and compute the data fingerprint again without overwriting the original record.
+
+**Outputs:**
+- Original and changed fingerprints with the source record preserved.
+
+**Invariants to check:**
+- The only dataset change is one target value, and its fingerprint is distinct.
+
+**Hints:**
+- Hash the same input bytes plus changed target bytes.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change a data value (transfer): Identical filenames or shapes do not imply identical data.
-changed_y = np.asarray(...)  # TODO: compute changed_y
-changed_y[0]+=.1
-# Transfer the device result to the host for an independent NumPy comparison.
-changed_hash = hashlib.sha256(...)  # TODO: compute changed_hash
-assert changed_hash  # TODO: complete assertion check
-print('Changed target changes dataset identity.')
+import hashlib
+import json
+from pathlib import Path
+import numpy as np
+import mlflow
+from mlflow import MlflowClient
+
+def practice_change_a_data_value(features, labels):
+    """Implement the change a data value check."""
+    # TODO: Copy the training targets, change one value, and recompute the content fingerprint without overwriting the original.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

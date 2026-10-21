@@ -44,6 +44,18 @@ jobs:
       - run: npm run check
       - run: npm run check:deployment
       - run: xargs python -m black --check < scripts/python-format-files.txt
+      - name: Validate EPUB with official W3C EPUBCheck
+        run: |
+          curl -fL https://github.com/w3c/epubcheck/releases/download/v5.4.0/epubcheck-5.4.0.zip -o /tmp/epubcheck.zip
+          echo "33350c61038e71dfb3d45a76aed04bf5481e6d5500cb780f6e98db8bbd15a28c  /tmp/epubcheck.zip" | sha256sum --check
+          unzip -q /tmp/epubcheck.zip -d /tmp/epubcheck
+          java -jar /tmp/epubcheck/epubcheck-5.4.0/epubcheck.jar public/downloads/jax-foundations.epub --json /tmp/epubcheck-report.json
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: epubcheck-report
+          path: /tmp/epubcheck-report.json
+          if-no-files-found: ignore
   browser:
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -140,3 +152,27 @@ jobs:
             projects/reproducible-experiments/requirements-loggers.txt
       - run: python -m pip install -r requirements-cpu.txt -r projects/reproducible-experiments/requirements-loggers.txt
       - run: python projects/reproducible-experiments/tests/loggers_check.py
+
+  numpyro:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.14'
+          cache: pip
+          cache-dependency-path: projects/bayesian-regression/requirements-numpyro.txt
+      - run: python -m pip install -r projects/bayesian-regression/requirements-numpyro.txt
+      - name: Verify raw NumPyro samples and independent diagnostic controls
+        run: python projects/bayesian-regression/tests/check_numpyro.py --implementation projects/bayesian-regression/solution/numpyro_workflow.py --evidence-dir /tmp/numpyro-evidence
+        env:
+          JAX_PLATFORMS: cpu
+      - uses: actions/upload-artifact@v6
+        if: always()
+        with:
+          name: numpyro-cpu-evidence
+          path: /tmp/numpyro-evidence
+          if-no-files-found: ignore

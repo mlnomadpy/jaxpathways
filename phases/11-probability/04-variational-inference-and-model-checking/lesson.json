@@ -41,7 +41,7 @@
       },
       {
         "title": "Keep inference and model errors separate",
-        "body": "The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. **TODO (NumPyro Extension):** Compare this hand-written ELBO loop against `numpyro.infer.SVI` and `numpyro.infer.NUTS` on the same target density."
+        "body": "The first experiment has a correct known target but an inadequate variational family. The second deliberately changes the data-generating mean while retaining an inadequate likelihood. Posterior predictive checks can reveal tension but are verified separately from model truth. For a real workflow, choose checks before inspecting a final held-out split, keep group sizes and uncertainty in reported coverage, and refit only on permitted data. The optional project workflow in `projects/bayesian-regression/` runs NumPyro NUTS on the same known Gaussian regression, then compares a linear model with a centered quadratic remedy on a deliberately curved fixture. It saves the posterior predictive histogram counts and observed discrepancy alongside the figure. This demonstrates one observable failure and a targeted remedy; it does not estimate real-data coverage or replace the separate diagonal-family experiment."
       }
     ],
     "output": "The optimized variances are \\((0.36,0.36)\\), compared with target marginal variances \\((1,1)\\). Remaining KL is approximately \\(0.5108\\). The curved stress fixture has visibly structured residuals and low nominal interval coverage.",
@@ -79,7 +79,22 @@
         "prompt": "Compare the variance of the sum of two target coordinates with that under the optimized diagonal approximation.",
         "hint": "Retain the off-diagonal covariance terms in the target calculation.",
         "solution": "# A correct diagonal is not a correct covariance (Transfer / diagnosis)\ndirection=jnp.ones(2)\ntrue_sum_var=direction@Sigma@direction\napprox_sum_var=jnp.sum(variance)\nassert jnp.allclose(true_sum_var,3.6)\nassert jnp.allclose(approx_sum_var,.72,atol=1e-5)",
-        "explanation": "Joint predictions can reveal approximation error that examining means alone completely misses."
+        "explanation": "Joint predictions can reveal approximation error that examining means alone completely misses.",
+        "learnerStarter": {
+          "inputs": [
+            "A full target covariance and a projection direction."
+          ],
+          "outputs": [
+            "Projected variance under the full target and a diagonal approximation."
+          ],
+          "invariants": [
+            "The full covariance projection includes off-diagonal contributions."
+          ],
+          "hints": [
+            "Evaluate v.T @ covariance @ v for each covariance choice."
+          ],
+          "code": "def compare_projected_uncertainty(covariance, direction, diagonal_variance):\n    \"\"\"Return the projected variances under full and diagonal covariance.\"\"\"\n    # TODO: compute both quadratic forms from the supplied values.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Repair the changed mean without hiding noise",
@@ -87,7 +102,22 @@
         "prompt": "Replace the zero mean by the known curved mean in the stress fixture. Draw fresh noisy targets and compare residual spread to the stated noise scale.",
         "hint": "The fixture supplies the true curvature; real data would require fitting and held-out evaluation.",
         "solution": "# Repair the changed mean without hiding noise (Transfer / diagnosis)\ntruth=jnp.linspace(-2,2,20000)**2-1\n# Create or split explicit PRNG key(s) (`fresh`) for reproducible randomness.\nfresh=truth+.25*jax.random.normal(jax.random.key(95),(20000,))\nresidual=fresh-truth\nassert abs(float(residual.std())-.25)<.01\nassert abs(float(residual.mean()))<.01",
-        "explanation": "Correcting the mean removes systematic residual structure in this known simulation; observation noise remains."
+        "explanation": "Correcting the mean removes systematic residual structure in this known simulation; observation noise remains.",
+        "learnerStarter": {
+          "inputs": [
+            "Inputs, observed targets, a known curved mean, a noise scale, and a random key."
+          ],
+          "outputs": [
+            "Observed and replicated discrepancy summaries before/after the mean repair."
+          ],
+          "invariants": [
+            "Use the same discrepancy on observed and replicated data."
+          ],
+          "hints": [
+            "Keep the noise scale fixed when adding the missing mean term."
+          ],
+          "code": "def compare_curved_mean_repair(X, y, corrected_mean, noise_scale, key):\n    \"\"\"Return paired posterior predictive discrepancy summaries.\"\"\"\n    # TODO: evaluate the same residual statistic under both mean models.\n    raise NotImplementedError"
+        }
       }
     ],
     "takeaways": [
@@ -154,6 +184,22 @@
       "For this KL direction and correlated target, the optimal diagonal variances are 0.36 rather than the target marginal variances of one. This is approximation error, not an unfinished optimizer.",
       "A Gaussian target can still have correlated coordinates that a diagonal variational family cannot represent.",
       "More iterations can optimize the chosen family but cannot add missing covariance structure. Compare its uncertainty with the exact posterior."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The target mean and covariance after setting the target correlation to zero."
+      ],
+      "outputs": [
+        "The optimized diagonal-family variances, the minimum KL value, and whether the family represents this target exactly."
+      ],
+      "invariants": [
+        "The result uses the exercise’s KL direction; when the target covariance is diagonal, the optimized diagonal family can match its covariance exactly."
+      ],
+      "hints": [
+        "Recompute the target precision after setting the correlation to zero.",
+        "Evaluate the KL at the optimized diagonal covariance and compare the two covariance matrices."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef check_diagonal_family_at_zero_correlation(mean, target_covariance):\n    # TODO: Set the target correlation to zero and evaluate the optimal diagonal approximation and minimum KL.\n    raise NotImplementedError\n"
+    }
   }
 }

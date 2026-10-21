@@ -264,7 +264,7 @@ visual_data={'panels':[{'kind':'line','x':indices,'xlabel':'completed updates','
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:59.965943+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:07:33.149207+00:00. JAX 0.9.2.
 
 ```text
 Initial/fitted rate: 1.4 0.7000000090128304
@@ -276,7 +276,7 @@ Initial/final loss: 0.11676630453561089 1.9484774169068916e-32
 Held-out RMSE: 4.572895313141112e-16 finer-grid RMSE: 7.282689372293896e-09
 Initial-time-only gradient: 0.0
 True rate: 0.7 perfect coarse Euler rate: 0.5906238205625731
-batch, median milliseconds, milliseconds per trajectory: [(1, 0.004500150680541992, 0.004500150680541992), (16, 0.005416106432676315, 0.0003385066520422697), (256, 0.03458419814705849, 0.00013509452401194721)]
+batch, median milliseconds, milliseconds per trajectory: [(1, 0.006667338311672211, 0.006667338311672211), (16, 0.0063749030232429504, 0.0003984314389526844), (256, 0.06220769137144089, 0.00024299879441969097)]
 Changed true/recovered rate: 0.4 0.40000000054230433
 Recovered initial amplitude: 2.8000000000000003
 Noisy grid-search estimate: 0.7 residual MSE: 2.6000611439697964e-05
@@ -339,34 +339,32 @@ Repeat inference for a new true rate $0.4$ using analytically generated observat
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
+**Inputs:**
+- Training initial conditions and times with analytically generated observations at true rate 0.4.
+- A rate-optimization start of 0.9 and held-out times/initial conditions.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Recovered rate from training observations.
+- Predictions at held-out times and initial conditions using the fitted rate.
+
+**Invariants to check:**
+- The rate parameter starts at 0.9 and converges toward the generating rate 0.4.
+- Held-out labels are not used to choose the fitted parameter.
+- Predictions use the new fitted rate and corresponding initial conditions.
+
+**Hints:**
+- Generate training observations from each initial condition and the shared decay rate.
+- Optimize the rate using training observations only; evaluate held-out conditions afterward.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-changed_truth = ...  # TODO: compute changed_truth
-changed_observations = ...  # TODO: compute changed_observations
-def changed_objective(theta):
-    return ...  # TODO: return computed result
-changed_update = jax.jit(...)  # TODO: compute changed_update
-changed_theta = jnp.log(...)  # TODO: compute changed_theta
-for _ in range(200):
-    changed_theta = changed_update(...)  # TODO: compute changed_theta
-changed_rate = float(...)  # TODO: compute changed_rate
-assert abs(changed_rate-changed_truth)  # TODO: complete assertion check
-# Transfer the device result to the host for an independent NumPy comparison.
-changed_held = np.asarray(...)  # TODO: compute changed_held
-np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol = ...  # TODO: compute np.testing.assert_allclose(predict(changed_rate,held_initials),changed_held,rtol
-print("Changed true/recovered rate:",changed_truth,changed_rate)
+import jax
+import jax.numpy as jnp
+
+def fit_changed_rate(train_times, train_initials, train_values, held_out_times, held_out_initials, initial_rate=0.9):
+    # TODO: fit the shared rate from training trajectories and predict held-out ones.
+    raise NotImplementedError("Fit from training trajectories and preserve held-out separation")
 ```
 
 <details><summary>Reference solution</summary>
@@ -405,27 +403,28 @@ At fixed rate, predictions are amplitude multiplied by a known decay vector.
 
 ### How to write: Infer a different physical quantity — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A fixed rate, observation times, and a trajectory with unknown initial amplitude.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Least-squares amplitude estimate and NumPy closed-form estimate.
+
+**Invariants to check:**
+- The fitted amplitude uses training observations only.
+- The closed form matches a one-parameter linear least-squares solution.
+
+**Hints:**
+- Factor the unit-amplitude trajectory from the unknown scalar.
+- Use dot(b,y)/dot(b,b) for the independent closed form.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Infer a different physical quantity (Practice): The inverse problem becomes linear when rate is fixed.
-basis = np.exp(...)  # TODO: compute basis
-unknown_initial = ...  # TODO: compute unknown_initial
-measured = ...  # TODO: compute measured
-estimate = float(...)  # TODO: compute estimate
-assert abs(estimate-unknown_initial)  # TODO: complete assertion check
-def amplitude_loss(amplitude):
-    return ...  # TODO: return computed result
-assert abs(float(jax.grad(amplitude_loss)(estimate)))  # TODO: complete assertion check
-print("Recovered initial amplitude:",estimate)
+import numpy as np
+
+def estimate_initial_amplitude(rate, times, observations):
+    # TODO: solve the scalar least-squares problem and verify its closed form.
+    raise NotImplementedError("Estimate amplitude as a linear parameter")
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -461,27 +460,29 @@ Search a dense one-dimensional grid using the analytic forward model and report 
 
 ### How to write: Compare noisy inference with an independent search — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- A deterministic noisy trajectory generated with seed 19, training times, and a candidate rate grid.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
-2. Reduce along axis=(1 to compute `reference_losses`.
+**Outputs:**
+- Training residual per candidate and selected rate.
+- Held-out prediction error reported after selection.
+
+**Invariants to check:**
+- Selection uses training labels only.
+- The search is independent of the JAX autodiff fit.
+
+**Hints:**
+- Generate noise from a local seeded generator.
+- Keep held-out values out of the candidate scoring loop.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare noisy inference with an independent search (Challenge): A noisy optimum need not equal the generating parameter exactly.
-noisy = np.asarray(...)  # TODO: compute noisy
-candidates = np.linspace(...)  # TODO: compute candidates
-# Transfer the device result to the host for an independent NumPy comparison.
-reference_predictions = np.asarray(...)  # TODO: compute reference_predictions
-# Reduce along axis=(1 to compute `reference_losses`.
-reference_losses = np.mean(...)  # TODO: compute reference_losses
-best = float(...)  # TODO: compute best
-assert abs(best-0.7)  # TODO: complete assertion check
-assert float(np.min(reference_losses))  # TODO: complete assertion check
-print("Noisy grid-search estimate:",best,"residual MSE:",float(np.min(reference_losses)))
+import numpy as np
+
+def grid_search_noisy_rate(train_times, train_values, candidates, initial, held_out_times, held_out_values):
+    # TODO: score candidates on training data, select, then report held-out error.
+    raise NotImplementedError("Keep candidate selection independent of held-out labels")
 ```
 
 <details><summary>Reference solution and reasoning</summary>

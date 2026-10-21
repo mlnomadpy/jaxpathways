@@ -172,7 +172,7 @@ visual_data = {'kind': 'bar', 'labels': ['row 0', 'row 1', 'row 2'], 'ylabel': '
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:03.192499+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:36.085578+00:00. JAX 0.9.2.
 
 ```text
 [1. 1. 8.]
@@ -234,23 +234,30 @@ Foundation · Compute each prediction gradient with respect to the shared weight
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- A single-example prediction function and shared weight vector.
+- A batch of three rows.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
+**Outputs:**
+- One weight gradient per row and the dot-product gradient.
+
+**Invariants to check:**
+- Map the batch axis while sharing parameters.
+- Predict the output shape before execution.
+
+**Hints:**
+- Compare vectorized output with independent row calculations.
+- Map only the example input axis.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-per_example_gradient = jax.vmap(...)  # TODO: compute per_example_gradient
-# Check tensor shape invariant: `per_example_gradient.shape == (3, 2)`
-assert per_example_gradient.shape  # TODO: complete assertion check
-assert jnp.allclose(per_example_gradient, batch)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def batched_prediction_grad(predict, weight, batch):
+    # TODO: map the single-example gradient across rows
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -279,28 +286,36 @@ The per-example squared-loss gradient is $2(\hat y-y)x$: twice the residual time
 
 ### How to write: Turn sensitivities into training gradients — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- The lesson batch and targets `[0, 2, 7]`.
+- A scalar squared-error function for one example.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `individual_grads.shape == (3, 2)`
+**Outputs:**
+- One parameter gradient per example.
+- An independent first-row calculation.
+
+**Invariants to check:**
+- Each example loss is scalar.
+- A prediction sensitivity is not substituted for a loss gradient.
+- The mapped result preserves the batch axis.
+
+**Hints:**
+- Differentiate the per-example loss with respect to parameters.
+- Keep targets aligned with rows.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Turn sensitivities into training gradients (Practice): The first residual is 1, so the first loss gradient is [2, 2].
-targets = jnp.array(...)  # TODO: compute targets
+import jax
+import jax.numpy as jnp
+
 def single_loss(parameters, row, target):
-    return ...  # TODO: return computed result
-individual_grads = jax.vmap(...)  # TODO: compute individual_grads
-manual_grads = ...  # TODO: compute manual_grads
-# Check tensor shape invariant: `individual_grads.shape == (3, 2)`
-assert individual_grads.shape  # TODO: complete assertion check
-assert jnp.allclose(individual_grads, manual_grads)  # TODO: complete assertion check
-assert jnp.allclose(individual_grads[0], jnp.array([2., 2.]))  # TODO: complete assertion check
+    # TODO: define one scalar example loss
+    raise NotImplementedError
+
+def collect_example_gradients(parameters, rows, targets):
+    # TODO: map the loss gradient across aligned examples
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -336,28 +351,31 @@ Differentiation is linear over these independent sums. Ensure your function actu
 
 ### How to write: Prove the mean-gradient identity with an experiment — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
+**Inputs:**
+- A mapped single-example loss and parameter tree.
+- Original targets and a changed target vector.
 
-**Step-by-step implementation plan:**
-1. Prove the mean-gradient identity with an experiment (Challenge)
-2. Check tensor shape invariant: `aggregate.shape == weight.shape`
+**Outputs:**
+- The batch-mean gradient and average individual gradient for both target sets.
+
+**Invariants to check:**
+- The mean reduction uses the example axis.
+- Changed targets are included in the comparison.
+- A sum is identified as a different objective.
+
+**Hints:**
+- Define the batch objective from the mapped single loss.
+- Keep the parameter axis shared in `vmap`.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Prove the mean-gradient identity with an experiment (Challenge)
-def batch_mean_loss(parameters, rows, labels):
-    return jnp.mean(jax.vmap(single_loss, in_axes = ...  # TODO: compute return jnp.mean(jax.vmap(single_loss, in_axes
-for labels in (targets, targets + 0.5):
-    each = jax.vmap(...)  # TODO: compute each
-    aggregate = jax.grad(...)  # TODO: compute aggregate
-    # Check tensor shape invariant: `aggregate.shape == weight.shape`
-    assert aggregate.shape  # TODO: complete assertion check
-    assert jnp.allclose(aggregate, jnp.mean(each, axis=0))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_batch_and_individual_gradients(single_loss, parameters, rows, targets):
+    # TODO: compare a batch-mean gradient with mapped gradients
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

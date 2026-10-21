@@ -254,7 +254,7 @@ visual_data={'kind':'panels','panels':panels}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:21.532254+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:31.781028+00:00. JAX 0.9.2.
 
 ```text
 Saved residual descriptions:
@@ -276,7 +276,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.758320912718773e-05, 1.8292106688022614e-05, 9.874813258647919e-06, 4.650000482797623e-05, 4.716683179140091e-05], [3.841705620288849e-05, 4.245806485414505e-05, 2.9375310987234116e-05, 1.4625024050474167e-05, 1.2874603271484375e-05]]
+Synchronized gradient samples: [[5.2333809435367584e-05, 2.6166904717683792e-05, 2.6541296392679214e-05, 5.112495273351669e-05, 3.154156729578972e-05], [2.1709129214286804e-05, 9.375158697366714e-06, 2.7916859835386276e-05, 3.804219886660576e-05, 2.2625084966421127e-05]]
 Independent reverse recurrence agrees with both gradients.
 plain 
 f32[16,16] from a constant
@@ -296,7 +296,7 @@ f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 f32[16] output of tanh from <string>:15:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[5.758320912718773e-05, 1.8292106688022614e-05, 9.874813258647919e-06, 4.650000482797623e-05, 4.716683179140091e-05], [3.841705620288849e-05, 4.245806485414505e-05, 2.9375310987234116e-05, 1.4625024050474167e-05, 1.2874603271484375e-05]]
+Synchronized gradient samples: [[5.2333809435367584e-05, 2.6166904717683792e-05, 2.6541296392679214e-05, 5.112495273351669e-05, 3.154156729578972e-05], [2.1709129214286804e-05, 9.375158697366714e-06, 2.7916859835386276e-05, 3.804219886660576e-05, 2.2625084966421127e-05]]
 Saved residual descriptions:
 plain 
 f32[16,16] from a constant
@@ -316,7 +316,7 @@ f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 f32[16] output of tanh from <string>:81:20 (layer)
 Compiler memory estimates: [{'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}, {'argument_size_in_bytes': 64, 'output_size_in_bytes': 64, 'temp_size_in_bytes': 256, 'alias_size_in_bytes': 0}]
-Synchronized gradient samples: [[2.7832575142383575e-05, 1.9374769181013107e-05, 1.1874828487634659e-05, 1.0540708899497986e-05, 8.124858140945435e-06], [2.3958273231983185e-05, 2.4499837309122086e-05, 1.195911318063736e-05, 1.0124873369932175e-05, 1.070881262421608e-05]]
+Synchronized gradient samples: [[5.8542005717754364e-05, 1.600012183189392e-05, 1.1499971151351929e-05, 9.750016033649445e-06, 8.20821151137352e-06], [1.6999896615743637e-05, 8.333008736371994e-06, 7.541850209236145e-06, 7.584225386381149e-06, 7.750000804662704e-06]]
 Independent reverse recurrence agrees with both gradients.
 Whole-objective residuals: ['f32[16,16] from a constant', 'f32[16] from the argument v']
 Whole-objective memory estimate: CompiledMemoryStats(generated_code_size_in_bytes=0, argument_size_in_bytes=64, output_size_in_bytes=64, alias_size_in_bytes=0, temp_size_in_bytes=256, host_generated_code_size_in_bytes=0, host_argument_size_in_bytes=0, host_output_size_in_bytes=0, host_alias_size_in_bytes=0, host_temp_size_in_bytes=0)
@@ -349,23 +349,28 @@ Use the direction $v=(1,\ldots,1)$ and central differences to independently chec
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- The original objective, its existing evaluation point, an all-ones direction, and the finite-difference perturbation.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Outputs:**
+- The central-difference directional derivative, gradient dot direction, and their discrepancy at the stated perturbation.
+
+**Invariants to check:**
+- The derivative uses the original objective and existing input; the finite-difference direction is the requested all-ones vector.
+
+**Hints:**
+- Evaluate the scalar objective at the point plus and minus epsilon times the direction.
+- Compute the autodiff gradient once and take its dot product with the same direction.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-direction = jnp.ones_like(...)  # TODO: compute direction
-eps = ...  # TODO: compute eps
-finite = ...  # TODO: compute finite
-automatic = float(...)  # TODO: compute automatic
-np.testing.assert_allclose(finite,automatic,rtol = ...  # TODO: compute np.testing.assert_allclose(finite,automatic,rtol
-print('Directional derivative finite/automatic:',finite,automatic,'epsilon',eps)
+import jax
+import jax.numpy as jnp
+
+def check_directional_derivative(objective, point, direction, epsilon):
+    # TODO: Compare the directional central difference with the gradient dot direction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -396,26 +401,30 @@ Apply jvp to each gradient function with the same primal point and tangent.
 
 ### How to write: Check higher-order differentiation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.linspace(start, stop, num)` — Creates `num` evenly spaced float points across the closed interval `[start, stop]`.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- Compare Hessian-vector products of the ordinary and rematerialized objectives along a nonuniform direction. Explain why equal first derivatives alone would be a weaker test.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Both HVP vectors and an independent parity check.
+
+**Invariants to check:**
+- The comparison uses the same point, direction, and objective for both differentiation paths.
+
+**Hints:**
+- Apply jvp to each gradient function with the same primal point and tangent.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check higher-order differentiation (Transfer)
-direction = jnp.linspace(...)  # TODO: compute direction
-_,hvp_plain = jax.jvp(...)  # TODO: compute _,hvp_plain
-_,hvp_remat = jax.jvp(...)  # TODO: compute _,hvp_remat
-np.testing.assert_allclose(hvp_plain,hvp_remat,rtol = ...  # TODO: compute np.testing.assert_allclose(hvp_plain,hvp_remat,rtol
-assert np.isfinite(np.asarray(hvp_plain)).all()  # TODO: complete assertion check
-print('Higher-order directional derivatives agree.')
+import jax
+import jax.numpy as jnp
+import numpy as np
+from jax.ad_checkpoint import print_saved_residuals
+
+def practice_check_higher_order_differentiation(objective, point, direction):
+    """Implement the check higher-order differentiation check."""
+    # TODO: Compare ordinary and rematerialized Hessian-vector products along the nonuniform direction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

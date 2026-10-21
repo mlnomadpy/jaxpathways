@@ -79,7 +79,24 @@
         "prompt": "Implement `with_bias(params, new_bias)`, returning a new dictionary. Verify outputs for new bias \\(-2\\) and replay the original prediction.",
         "hint": "A new dictionary is required; changing a binding in the original dictionary breaks the promised contract.",
         "solution": "# Update the bias without changing either parameter input (Practice)\ndef with_bias(parameters, new_bias):\n    return {**parameters, \"bias\": jnp.asarray(new_bias)}\nchanged_bias = with_bias(params, -2.)\nassert changed_bias is not params\nassert jnp.allclose(predict(changed_bias, x), jnp.array([-2., 0., 2.]))\nassert jnp.allclose(predict(params, x), jnp.array([1., 3., 5.]))",
-        "explanation": "The caller can evaluate both the old and new model without restoring a global value or depending on call order."
+        "explanation": "The caller can evaluate both the old and new model without restoring a global value or depending on call order.",
+        "learnerStarter": {
+          "inputs": [
+            "The original parameters, a new bias value, and the lesson prediction function."
+          ],
+          "outputs": [
+            "A new mapping and predictions for both parameter versions."
+          ],
+          "invariants": [
+            "The returned mapping is a distinct container.",
+            "Changing bias does not alter the original prediction."
+          ],
+          "hints": [
+            "Create a copy with one updated field.",
+            "Check identity and numerical replay separately."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef with_bias(params, new_bias, predict, inputs):\n    # TODO: return a new mapping and compare both prediction paths\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Return predictions and metrics together",
@@ -87,7 +104,25 @@
         "prompt": "Write `evaluate(params, inputs, targets)` that returns predictions and a scalar MSE. Test two model configurations on targets \\([1, 3, 5]\\). Keep printing outside the function.",
         "hint": "Compute data inside the numerical core and report it outside. A tuple return does not itself imply mutation.",
         "solution": "# Return predictions and metrics together (Challenge)\ndef evaluate(parameters, inputs, targets):\n    predictions = predict(parameters, inputs)\n    return predictions, jnp.mean((predictions - targets) ** 2)\nlabels = jnp.array([1., 3., 5.])\noutputs, error = evaluate(first_params, x, labels)\nother_outputs, other_error = evaluate(second_params, x, labels)\n# Check tensor shape invariant: `error.shape == ()`\nassert error.shape == ()\nassert jnp.allclose(error, 0.)\nassert jnp.allclose(other_error, 6.)\nassert jnp.allclose(outputs, first_output)\nprint(\"evaluation losses:\", float(error), float(other_error))",
-        "explanation": "The second model has residuals \\([3, 0, -3]\\), giving mean squared error \\(6\\). Known output arithmetic makes the check independent of the implementation."
+        "explanation": "The second model has residuals \\([3, 0, -3]\\), giving mean squared error \\(6\\). Known output arithmetic makes the check independent of the implementation.",
+        "learnerStarter": {
+          "inputs": [
+            "Two parameter configurations, inputs, and targets."
+          ],
+          "outputs": [
+            "Predictions and scalar loss for both configurations."
+          ],
+          "invariants": [
+            "Evaluation returns numerical data without printing.",
+            "The loss reduces example errors to one scalar.",
+            "Parameter inputs are not mutated."
+          ],
+          "hints": [
+            "Keep reporting outside the function.",
+            "Use the supplied prediction function."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef evaluate(params, inputs, targets, predict):\n    # TODO: return predictions and scalar mean squared error\n    raise NotImplementedError\n"
+        }
       }
     ],
     "diagnosis": "If a replay differs, inspect hidden globals, mutable aliases, and random state before assuming nondeterministic hardware. If an update affects an old model, check whether the caller reused the same dictionary. If logs disappear under a transform, inspect whether they are Python side effects. Preserve numerical results as return values so you can investigate without relying on side-effect behavior.",
@@ -140,6 +175,25 @@
       "A mutable global makes the result depend on hidden state and can be captured during tracing. Pass the current parameters explicitly.",
       "Explicit inputs expose the computation and let you compare calls with controlled parameter values.",
       "Printing exposes a trace or value but does not make the function pure. Check whether the return depends only on explicit inputs."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A parameter mapping with weight and bias.",
+        "A requested new weight and the prediction inputs."
+      ],
+      "outputs": [
+        "A new parameter mapping and predictions under both versions."
+      ],
+      "invariants": [
+        "The original mapping remains unchanged.",
+        "The retained field keeps its original value.",
+        "Original predictions can be replayed."
+      ],
+      "hints": [
+        "Return a new mapping instead of assigning into the input.",
+        "Pass the changed mapping explicitly to prediction."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef update_weight(params, new_weight):\n    # TODO: return a new mapping with only the requested field changed\n    raise NotImplementedError\n"
+    }
   }
 }

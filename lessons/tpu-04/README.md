@@ -261,7 +261,7 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:53.620441+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:43.731071+00:00. JAX 0.9.2.
 
 ```text
 Runtime receipt: {"backend": "cpu", "expected_total": 140.0, "jax": "0.9.2", "local_device_count": 1, "observed_total": 140.0, "per_device_sums": [140.0], "python": "3.14.3", "receipt_sha256": "8c6bd0cbe29edc78", "verified": true}
@@ -321,19 +321,25 @@ Compute `closed_form_sum_of_squares(4)` and `closed_form_sum_of_squares(8)`, ver
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
+**Inputs:**
+- The closed-form sum helper and a runtime receipt produced by the active CPU or TPU backend.
+
+**Outputs:**
+- Theoretical sums for the requested four- and eight-chip mappings, plus the receipt verification flag, observed backend, and actual device counts.
+
+**Invariants to check:**
+- The four-chip theoretical total matches the exercise value and the active receipt reports its actual backend and counts. A CPU receipt may pass this local exercise but does not qualify as physical TPU evidence.
+
+**Hints:**
+- Evaluate the helper for both requested chip counts.
+- Keep theoretical chip-mapping totals separate from observed device arithmetic; read verified status, backend, and device counts from the receipt.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-s4 = closed_form_sum_of_squares(...)  # TODO: compute s4
-s8 = closed_form_sum_of_squares(...)  # TODO: compute s8
-print("4-chip expected sum:", s4, "8-chip expected sum:", s8, "receipt hash:", receipt["receipt_sha256"])
-# Assert invariant `s4 == 10416.0 and s8 == 85344.0 and receipt["verified"] is True` holds
-assert s4  # TODO: complete assertion check
+def audit_runtime_sum_receipt(receipt, closed_form_sum_of_squares):
+    # TODO: check both theoretical totals and report the active receipt fields as observed.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -363,21 +369,28 @@ Check all three fields in the receipt dictionary.
 
 ### How to write: Detect a silent fallback from 4 TPU chips to 1 CPU device — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
-2. Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
+**Inputs:**
+- A candidate runtime receipt mapping with backend, local device count, and observed total fields.
+
+**Outputs:**
+- A Boolean predicate for the exact four-chip TPU receipt contract.
+
+**Invariants to check:**
+- All required fields must match; missing fields or CPU backend return false.
+
+**Hints:**
+- Validate backend, count, and total independently.
+- Use a tolerance only for the floating representation of the exact integer total.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Detect a silent fallback from 4 TPU chips to 1 CPU device (Foundations)
-def is_four_chip_tpu_receipt(r):
-    return bool(r["backend"] = ...  # TODO: compute return bool(r["backend"]
+import jax.numpy as jnp
+import numpy as np
 
-simulated_tpu = ...  # TODO: compute simulated_tpu
-print("Simulated 4-chip TPU check:", is_four_chip_tpu_receipt(simulated_tpu), "Local CPU check:", is_four_chip_tpu_receipt(receipt))
-# Assert invariant `is_four_chip_tpu_receipt(simulated_tpu) is True` holds
-assert is_four_chip_tpu_receipt(simulated_tpu) is True  # TODO: complete assertion check
+def is_four_chip_tpu_receipt(receipt):
+    # TODO: return whether all required four-chip TPU receipt fields are valid.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -401,7 +414,7 @@ Requiring `backend == 'tpu'`, `local_device_count == 4`, and the 4-chip `pmap` t
 
 **Transfer / diagnosis**
 
-If a 4-chip TPU slice costs $4.80$ USD/hour and your verification + experiment takes $0.5$ hours, compute how many USD you save by deleting the VM immediately instead of leaving it idle overnight for $16$ hours.
+If a 4-chip TPU slice costs $4.80$ USD/hour and verification plus experiment takes $0.5$ hours, compute how much you save by deleting the VM immediately instead of keeping it running for $16$ total hours, including the active time.
 
 <details><summary>Hint</summary>
 
@@ -411,18 +424,25 @@ Compare `16.0 * 4.80` against `0.5 * 4.80`.
 
 ### How to write: Estimate hourly billing savings from immediate teardown — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Assert invariant `saved_usd == 74.4` holds
+**Inputs:**
+- Hourly slice cost, active verification duration of 0.5 hours, and total elapsed VM time of 16 hours.
+
+**Outputs:**
+- Avoided idle duration and the corresponding teardown savings.
+
+**Invariants to check:**
+- Total elapsed time includes the active work, so idle time is total time minus active time; immediate teardown and the overnight choice share the active-time cost.
+
+**Hints:**
+- Subtract active hours from total hours to get avoidable idle hours.
+- Multiply only those idle hours by the hourly rate; 16 idle hours would be $76.80, while 16 total hours including 0.5 active hour yields $74.40.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Estimate hourly billing savings from immediate teardown (Transfer / diagnosis)
-hourly_rate = ...  # TODO: compute hourly_rate
-saved_usd = round(...)  # TODO: compute saved_usd
-print("Overnight idle cost avoided (USD):", saved_usd)
-# Assert invariant `saved_usd == 74.4` holds
-assert saved_usd  # TODO: complete assertion check
+def idle_teardown_savings(hourly_cost, active_hours, total_hours):
+    # TODO: compute avoidable idle hours and savings when total_hours includes active work.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

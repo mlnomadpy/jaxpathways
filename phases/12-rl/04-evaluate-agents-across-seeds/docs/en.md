@@ -128,7 +128,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -315,7 +316,8 @@ def rollout(theta, key, batch_size=256, horizon=8):
         # Vectorize across the batch dimension without a Python loop (`(next_states, rewards, terminated, truncated)`).
         next_states, rewards, terminated, truncated = jax.vmap(
             lambda s, a: step(s, a, horizon))(states, actions)
-        record = dict(observation=observations, action=actions, reward=rewards,
+        record = dict(observation=observations, next_observation=next_states.position,
+                      next_elapsed=next_states.elapsed, action=actions, reward=rewards,
                       active=~states.done, terminated=terminated, truncated=truncated,
                       old_logp=log_probability(theta, observations, actions))
         return next_states, record
@@ -446,7 +448,7 @@ visual_data = {'kind':'bar','labels':[str(s) for s in training_seeds],'xlabel':'
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:31:34.495446+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:08:08.686005+00:00. JAX 0.9.2.
 
 ```text
 training seeds: [0, 7, 23, 41, 59]
@@ -511,23 +513,32 @@ Compute the paired held-out improvement over the uniform baseline for each train
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- A vector of five held-out means, one per trained policy.
+- The baseline mean evaluated on the same streams.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Check tensor shape invariant: `deltas.shape == (5,)`
+**Outputs:**
+- The five paired per-agent improvements and their mean.
+
+**Invariants to check:**
+- Keep one result per training run.
+- The baseline uses the same held-out streams for every agent.
+- Do not treat episodes as independent training runs.
+
+**Hints:**
+- Subtract the shared baseline from each agent mean before averaging.
+- Preserve the per-agent differences for inspection.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-deltas = ...  # TODO: compute deltas
-# Check tensor shape invariant: `deltas.shape == (5,)`
-assert deltas.shape  # TODO: complete assertion check
-assert np.all(deltas  # TODO: complete assertion check
-print('paired improvements:', deltas)
-print('mean improvement across trained agents:', deltas.mean())
+import numpy as np
+
+def paired_improvements(agent_means, baseline_mean):
+    # TODO: compute one difference for each independently trained policy
+    differences = ...
+    # TODO: return the individual differences and their average
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -558,22 +569,31 @@ Weight each shard mean by its episode count.
 
 ### How to write: Expose an unequal-batch averaging bug — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- Two evaluation shards with means 1 and 0.
+- Episode counts 1 and 9.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- An unweighted average of shard means and the episode-weighted mean.
+
+**Invariants to check:**
+- Each episode has equal weight in the episode-level mean.
+- Unequal shard sizes change the result if shard means are averaged equally.
+
+**Hints:**
+- Use the episode counts as weights.
+- Keep the two summaries named to expose the aggregation choice.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Expose an unequal-batch averaging bug (Transfer / diagnosis): Equal shard weighting changes the unit from episode to shard.
-means = np.array(...)  # TODO: compute means
-counts = np.array(...)  # TODO: compute counts
-wrong = means.mean(...)  # TODO: compute wrong
-right = np.average(...)  # TODO: compute right
-assert wrong  # TODO: complete assertion check
+import numpy as np
+
+def compare_shard_averages():
+    means = np.array([1., 0.])
+    counts = np.array([1, 9])
+    # TODO: compute an unweighted and episode-weighted summary
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -605,20 +625,30 @@ Use sample standard deviation with ddof=1; a standard error divides by the squar
 
 ### How to write: Distinguish spread from standard error — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Three trained-agent means: 0.8, 0.9, and 1.0.
+- A sample-standard-deviation calculation and the number of agents.
+
+**Outputs:**
+- Across-agent spread and a naive standard-error calculation.
+
+**Invariants to check:**
+- Use sample standard deviation with ddof=1.
+- Label the unit of observation as a trained agent.
+
+**Hints:**
+- The standard error divides spread by the square root of the independent-agent count.
+- Explain the limits of that calculation under shared evaluation streams.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Distinguish spread from standard error (Transfer / diagnosis)
-values = np.array(...)  # TODO: compute values
-sd = values.std(...)  # TODO: compute sd
-naive_se = ...  # TODO: compute naive_se
-assert abs(sd-.1)  # TODO: complete assertion check
-assert abs(naive_se-.0577350269)  # TODO: complete assertion check
-print('sample sd / independence-assuming SE:',sd,naive_se)
+import numpy as np
+
+def summarize_agent_spread():
+    agent_means = np.array([.8, .9, 1.])
+    # TODO: calculate sample spread and the naive standard error
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

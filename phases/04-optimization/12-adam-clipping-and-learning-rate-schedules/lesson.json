@@ -96,7 +96,22 @@
         "prompt": "After five scheduled SGD steps with constant gradient \\(1\\), compare a retained optimizer state with a freshly initialized state for the next update.",
         "hint": "The retained count has reached the final rate; a reset count starts at \\(0\\).",
         "solution": "# Catch schedule restart (Transfer / diagnosis)\ntx = optax.sgd(schedule)\np = jnp.array(0.0)\ns = tx.init(p)\nfor _ in range(5):\n    delta, s = tx.update(jnp.array(1.0), s, p)\n    p = optax.apply_updates(p, delta)\ncontinued, _ = tx.update(jnp.array(1.0), s, p)\nrestarted, _ = tx.update(jnp.array(1.0), tx.init(p), p)\nassert jnp.allclose(continued, -0.01, atol=1e-06)\nassert jnp.allclose(restarted, -0.1, atol=1e-06)",
-        "explanation": "Restoring weights without optimizer state can silently restart the learning-rate schedule."
+        "explanation": "Restoring weights without optimizer state can silently restart the learning-rate schedule.",
+        "learnerStarter": {
+          "inputs": [
+            "After five scheduled SGD steps with constant gradient \\(1\\), compare a retained optimizer state with a freshly initialized state for the next update."
+          ],
+          "outputs": [
+            "Both parameter updates and the scheduler/optimizer states."
+          ],
+          "invariants": [
+            "Only the optimizer-state reset differs between the two continuations."
+          ],
+          "hints": [
+            "The retained count has reached the final rate; a reset count starts at \\(0\\)."
+          ],
+          "code": "import jax.numpy as jnp\nimport optax\n\ndef practice_catch_schedule_restart(gradient, state, next_step):\n    \"\"\"Implement the catch schedule restart check.\"\"\"\n    # TODO: Apply the next scheduled update with retained state and with reset state after the same first five steps.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Check transformation order",
@@ -104,7 +119,22 @@
         "prompt": "For gradient \\((3,4)\\), compare clipping before SGD at rate \\(0.1\\) with clipping after it. Write a decision memo explaining which quantity you intended to bound.",
         "hint": "The un-clipped SGD update already has norm \\(0.5\\), below the threshold \\(1\\).",
         "solution": "# Check transformation order (Transfer / diagnosis): Transformation order changes the algorithm.\nbefore = optax.chain(optax.clip_by_global_norm(1.0), optax.sgd(0.1))\nafter = optax.chain(optax.sgd(0.1), optax.clip_by_global_norm(1.0))\nu_before, _ = before.update(g, before.init(jnp.zeros(2)))\nu_after, _ = after.update(g, after.init(jnp.zeros(2)))\nassert jnp.allclose(jnp.linalg.norm(u_before), 0.1, atol=1e-06)\nassert jnp.allclose(jnp.linalg.norm(u_after), 0.5, atol=1e-06)",
-        "explanation": "Transformation order changes the algorithm. State whether the bound applies to the raw gradient or the parameter update, and retain the observed evidence."
+        "explanation": "Transformation order changes the algorithm. State whether the bound applies to the raw gradient or the parameter update, and retain the observed evidence.",
+        "learnerStarter": {
+          "inputs": [
+            "For gradient \\((3,4)\\), compare clipping before SGD at rate \\(0.1\\) with clipping after it. Write a decision memo explaining which quantity you intended to bound."
+          ],
+          "outputs": [
+            "Both transformed gradients and their global norms."
+          ],
+          "invariants": [
+            "The declared bound names whether it applies to raw gradients or scaled updates."
+          ],
+          "hints": [
+            "The un-clipped SGD update already has norm \\(0.5\\), below the threshold \\(1\\)."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\nimport optax\n\ndef practice_check_transformation_order(gradient, learning_rate, max_norm):\n    \"\"\"Implement the check transformation order check.\"\"\"\n    # TODO: Apply clipping before the learning-rate transform and after it, recording both bounded quantities.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Does clipping gradients before Adam guarantee that final updates obey the same norm threshold?",
@@ -158,6 +188,22 @@
       "Adam rescales coordinates using its moment estimates after clipping. Inspect the norm of the actual parameter delta separately.",
       "The clipping threshold bounds the incoming gradient. Adam’s stateful rescaling and learning rate determine the final update.",
       "A scalar loss can have a large or poorly scaled gradient. Compute the gradient norm and update norm rather than inferring them from loss shape."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The gradient vector (3, 4) and the global and coordinate clipping bound used in the lesson."
+      ],
+      "outputs": [
+        "The globally clipped vector and coordinate-wise clipped vector, their coordinate ratios, and which operation preserves the original ratio."
+      ],
+      "invariants": [
+        "Global norm clipping scales both coordinates by one factor, while coordinate clipping can change their ratio."
+      ],
+      "hints": [
+        "Compute the vector norm before the global rescaling.",
+        "Apply coordinate clipping independently to each component and compare ratios."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef compare_global_and_coordinate_clipping(gradient, max_norm):\n    # TODO: Compute both clipped vectors for the supplied gradient and report their coordinate ratios.\n    raise NotImplementedError\n"
+    }
   }
 }

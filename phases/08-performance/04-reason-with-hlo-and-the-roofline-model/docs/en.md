@@ -250,17 +250,17 @@ visual_data={'kind':'line','x':plot_intensity.tolist(),'xlabel':'minimum-traffic
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:30:19.171346+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:06:28.152905+00:00. JAX 0.9.2.
 
 ```text
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'flops': 8192.0, 'utilization0{}': 2.0, 'bytes accessed': 5632.0, 'transcendentals': 256.0, 'bytes accessed1{}': 512.0, 'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0}
-Local CPU samples seconds: [4.2125117033720016e-05, 3.187498077750206e-05, 2.408307045698166e-05, 4.908395931124687e-05, 1.3459008187055588e-05]
+Compiler estimates (backend-specific): {'bytes accessedout{}': 2048.0, 'utilization1{}': 1.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0, 'bytes accessed0{}': 3072.0}
+Local CPU samples seconds: [1.9958242774009705e-05, 1.5458092093467712e-05, 1.0792165994644165e-05, 8.750241249799728e-06, 8.20821151137352e-06]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 StableHLO operations present: dot_general and tanh
-Compiler estimates (backend-specific): {'bytes accessed': 5632.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'transcendentals': 256.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'utilization1{}': 1.0, 'bytes accessed0{}': 3072.0}
-Local CPU samples seconds: [2.987496554851532e-05, 6.466684862971306e-05, 1.941714435815811e-05, 2.2666994482278824e-05, 2.562534064054489e-05]
+Compiler estimates (backend-specific): {'bytes accessed0{}': 3072.0, 'utilization1{}': 1.0, 'bytes accessedout{}': 2048.0, 'utilization0{}': 2.0, 'transcendentals': 256.0, 'flops': 8192.0, 'bytes accessed1{}': 512.0, 'bytes accessed': 5632.0}
+Local CPU samples seconds: [5.254102870821953e-05, 4.5332591980695724e-05, 4.333304241299629e-05, 4.616566002368927e-05, 4.270905628800392e-05]
 Matmul-only accounting: {'flops': 8192, 'minimum_bytes': 3584, 'flops_per_byte': 2.2857142857142856}
 Hypothetical ceilings GFLOP/s: [26.666666666666664, 53.33333333333333, 100.0, 100.0, 100.0]
 Ceilings with twice minimum traffic GFLOP/s: [13.333333333333332, 26.666666666666664, 53.33333333333333, 100.0, 100.0]
@@ -293,22 +293,28 @@ Derive the work and minimum traffic for shapes $(48,24)$ and $(24,12)$. Compare 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Matrix dimensions, element storage size, and a declared hardware budget.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling.
+
+**Invariants to check:**
+- State the storage and traffic assumptions; a bound is not observed throughput.
+
+**Hints:**
+- Count multiply-add work and both input/output bytes independently.
+- Change only itemsize to isolate its effect on the estimate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Derive the work and minimum traffic for shapes (48,24) and (24,12).
-work,traffic,ratio = contract(...)  # TODO: compute work,traffic,ratio
-assert work  # TODO: complete assertion check
-np.testing.assert_allclose(ratio,24/7)
-assert bandwidth*ratio  # TODO: complete assertion check
-print('Changed contract:',work,traffic,ratio,'bandwidth-limited in the hypothetical model')
+import numpy as np
+
+def roofline_contract(m, k, n, itemsize):
+    """FLOP count, minimum-byte estimate, arithmetic intensity, and hypothetical roofline ceiling."""
+    # TODO: Count matrix FLOPs and minimum bytes from the declared dimensions and element size.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -338,22 +344,27 @@ The model assumes both inputs and output use that element size; real accumulatio
 
 ### How to write: Keep the same shapes but change storage precision — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Change only the assumed element size from four bytes to two bytes. Calculate the resulting traffic and intensity, and explain why this is insufficient to predict an actual speedup.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Changed byte estimate and intensity under the explicit storage assumption.
+
+**Invariants to check:**
+- Only the bytes per element change; the operation count and shapes stay fixed.
+
+**Hints:**
+- The model assumes both inputs and output use that element size; real accumulation and conversion may differ.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep the same shapes but change storage precision (Transfer)
-f32,b32,i32 = contract(...)  # TODO: compute f32,b32,i32
-f16,b16,i16 = contract(...)  # TODO: compute f16,b16,i16
-assert f32  # TODO: complete assertion check
-np.testing.assert_allclose(i16,2*i32)
-print('Arithmetic unchanged; modeled traffic halved and intensity doubled.')
+import numpy as np
+
+def practice_keep_the_same_shapes_but_change_storage_precision(m, k, n, itemsize):
+    """Implement the keep the same shapes but change storage precision check."""
+    # TODO: Recompute minimum traffic and arithmetic intensity with two-byte elements while holding dimensions fixed.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

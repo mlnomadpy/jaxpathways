@@ -173,7 +173,7 @@ visual_data = {'kind': 'line', 'x': [0, 1, 2], 'xlabel': 'sample coordinate', 'y
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:13.092659+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:44.072333+00:00. JAX 0.9.2.
 
 ```text
 Replay equal: True
@@ -234,26 +234,30 @@ Split a fresh seed into four keys, then use vmap to draw two normal values from 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.vmap(fn, in_axes=..., out_axes=...)` — Vectorizes a single-example function across a batch axis without writing a Python loop.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- An integer seed and a batch-shaped input array x.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
-3. Check tensor shape invariant: `draw(7).shape == (4, 2)`
+**Outputs:**
+- A noisy prediction batch that can be replayed exactly from the same seed.
+
+**Invariants to check:**
+- Randomness is derived from an explicit JAX PRNG key.
+- Changing x while holding the seed fixed changes the deterministic prediction by the corresponding 2x+1 input difference.
+
+**Hints:**
+- Create a root key from the seed and draw one noise value for every element of x.
+- Do not reuse a consumed subkey for another independent draw.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-def draw(seed):
-    # Create or split explicit PRNG key(s) (`keys`) for reproducible randomness.
-    keys = jax.random.split(...)  # TODO: compute keys
-    return ...  # TODO: return computed result
-# Check tensor shape invariant: `draw(7).shape == (4, 2)`
-assert draw(7).shape  # TODO: complete assertion check
-assert jnp.array_equal(draw(7), draw(7))  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def noisy_prediction(seed: int, x: jax.Array) -> jax.Array:
+    """Return 2*x+1 plus reproducible elementwise Gaussian noise."""
+    # TODO: derive a key from seed, sample noise with x.shape, and form the prediction.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -285,25 +289,30 @@ Reuse the random construction for a controlled comparison, not accidentally acro
 
 ### How to write: Replay a noisy prediction — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A seed and a one-dimensional input array x.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
+**Outputs:**
+- A reproducible batch of noisy predictions.
+
+**Invariants to check:**
+- The same seed and x produce identical results.
+- Holding the seed fixed while shifting every x by one shifts each prediction by two.
+
+**Hints:**
+- Use one normal draw per input element.
+- Reconstruct the key from the seed on every call to make replay explicit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Replay a noisy prediction (Practice): Holding noise fixed isolates the changed numerical input.
-def noisy_prediction(seed,x):
-    # Create or split explicit PRNG key(s) (`eps`) for reproducible randomness.
-    eps = jax.random.normal(...)  # TODO: compute eps
-    return ...  # TODO: return computed result
-inputs = jnp.array(...)  # TODO: compute inputs
-assert jnp.array_equal(noisy_prediction(4,inputs),noisy_prediction(4,inputs))  # TODO: complete assertion check
-assert jnp.allclose(noisy_prediction(4,inputs+1)-noisy_prediction(4,inputs),2.,atol=1e-6)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def noisy_prediction(seed: int, x: jax.Array) -> jax.Array:
+    """Add replayable, elementwise noise to the prediction 2*x+1."""
+    # TODO: sample noise from a key made from seed and preserve x.shape.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -337,32 +346,30 @@ The draw function does not mutate the key.
 
 ### How to write: Diagnose key reuse in a loop — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A root PRNG key and a requested number of two-value draws.
 
-**Step-by-step implementation plan:**
-1. Create or split explicit PRNG key(s) (`root`) for reproducible randomness.
-2. Sample deterministic random values into `broken` using an explicit PRNG key.
-3. Check tensor shape invariant: `fixed.shape==(3,2)`
+**Outputs:**
+- A broken batch showing repeated draws and a repaired batch of independent subkey draws.
+
+**Invariants to check:**
+- Reusing a key reproduces the same row.
+- Each repaired draw consumes a new key and has shape (2,).
+
+**Hints:**
+- Keep the broken case as a diagnostic demonstration.
+- Thread the continuation key through the loop; collect only the sample subkeys.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose key reuse in a loop (Challenge): The repeated-row symptom comes from key allocation.
-# Create or split explicit PRNG key(s) (`root`) for reproducible randomness.
-root = jax.random.key(...)  # TODO: compute root
-# Sample deterministic random values into `broken` using an explicit PRNG key.
-broken = jnp.stack(...)  # TODO: compute broken
-assert jnp.array_equal(broken[0],broken[1])  # TODO: complete assertion check
-current = ...  # TODO: compute current
-rows = ...  # TODO: compute rows
-for _ in range(3):
-    current,noise = noise_step(...)  # TODO: compute current,noise
-    rows.append(noise)
-fixed = jnp.stack(...)  # TODO: compute fixed
-# Check tensor shape invariant: `fixed.shape==(3,2)`
-assert fixed.shape  # TODO: complete assertion check
-assert not jnp.array_equal(fixed[0],fixed[1])  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def compare_key_use(root: jax.Array, count: int = 3) -> tuple[jax.Array, jax.Array]:
+    """Return repeated-key draws and draws made from distinct subkeys."""
+    # TODO: build both batches and return arrays with shape (count, 2).
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

@@ -267,7 +267,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:41.782947+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:31.789139+00:00. JAX 0.9.2.
 
 ```text
 LoRA initial/final: 0.043869297951459885 2.466217665642034e-07 ; trainable: 10 base: 24
@@ -335,43 +335,28 @@ Save both adapter factors and their rank/scaling metadata, reload them and check
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Frozen base matrix, trained low-rank factors, rank, scaling metadata, and a held-out input batch.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
-3. Transfer the device result to the host for an independent NumPy comparison.
-4. Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
+**Outputs:**
+- Reloaded factors and predictions from merged and adapter forms.
+
+**Invariants to check:**
+- The base weights stay frozen; metadata reproduces the same scale after save and reload.
+
+**Hints:**
+- Store rank and alpha with factor arrays.
+- Evaluate both forms on new inputs after loading.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-import tempfile
-from pathlib import Path
+import jax.numpy as jnp
+import numpy as np
 
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    path = Path(...)  # TODO: compute path
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.savez(
-        path,
-        a = np.asarray(...)  # TODO: compute a
-        b = np.asarray(...)  # TODO: compute b
-        alpha = np.array(...)  # TODO: compute alpha
-        rank = np.array(...)  # TODO: compute rank
-    )
-    with np.load(path, allow_pickle=False) as z:
-        # Check tensor shape invariant: `int(z['rank']) == z['a'].shape[1]`
-        assert int(z['rank'])  # TODO: complete assertion check
-        np.testing.assert_allclose(
-            lora_forward(x, base, z['a'], z['b'], float(z['alpha'])),
-            x @ merged,
-            atol = ...  # TODO: compute atol
-            rtol = ...  # TODO: compute rtol
-        )
-print('Adapter round trip and merge checked.')
+def roundtrip_lora_adapter(base, a, b, alpha, heldout_x, path):
+    # TODO: save adapter metadata, reload it, and compare merged with unmerged predictions.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -420,23 +405,28 @@ The equivalence is algebraic, so a new input should still agree.
 
 ### How to write: Check the merge on new inputs — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- Frozen base matrix, trained adapter factors, rank and alpha metadata, and a newly drawn input batch.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- Merged-layer and adapter-path predictions for the new batch, plus their maximum difference.
+
+**Invariants to check:**
+- The same alpha-over-rank scale is used in both paths; the frozen base is unchanged.
+
+**Hints:**
+- Draw a fresh input batch rather than reusing training examples.
+- Compare predictions after applying the adapter and after merging its update into the base.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Check the merge on new inputs (Transfer)
-new_x = jnp.asarray(...)  # TODO: compute new_x
-np.testing.assert_allclose(
-    lora_forward(new_x, base, a, b), new_x @ merged, atol=1e-6, rtol=1e-5
-)
-assert np.linalg.norm(np.asarray(new_x @ (base + 2 * a @ b) - new_x @ merged))  # TODO: complete assertion check
-print('New-input merge passes; accidental double merge changes outputs.')
+import jax.numpy as jnp
+import numpy as np
+
+def compare_lora_merge_on_new_inputs(base, a, b, alpha, new_x):
+    # TODO: compare the adapter path with the merged matrix on this held-out batch.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -469,34 +459,28 @@ Use an independent singular-value decomposition for the rank bound, and divide a
 
 ### How to write: Test nonunit scaling and an impossible rank-one target — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A frozen base matrix, rank-two adapter factors, alpha equal to three, identity input rows, and a diagonal target with singular values three and one.
 
-**Step-by-step implementation plan:**
-1. Test nonunit scaling and an impossible rank-one target (Challenge)
+**Outputs:**
+- The adapter-versus-merged predictions on identity inputs and the best rank-one residual norm for the diagonal target.
+
+**Invariants to check:**
+- The adapter contribution is scaled by alpha divided by rank; the rank-one residual is determined by the smaller nonzero singular value.
+
+**Hints:**
+- Compare adapter and merged predictions using the identity input rows.
+- Then compute the best rank-one approximation residual for the specified diagonal target.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Test nonunit scaling and an impossible rank-one target (Challenge)
-rng = np.random.default_rng(...)  # TODO: compute rng
-a2 = jnp.asarray(...)  # TODO: compute a2
-b2 = jnp.asarray(...)  # TODO: compute b2
-np.testing.assert_allclose(
-    lora_forward(x, base, a2, b2, alpha = ...  # TODO: compute lora_forward(x, base, a2, b2, alpha
-    x @ (base + 1.5 * a2 @ b2),
-    rtol = ...  # TODO: compute rtol
-    atol = ...  # TODO: compute atol
-)
-target_update = np.diag(...)  # TODO: compute target_update
-u_s, s_s, v_s = np.linalg.svd(...)  # TODO: compute u_s, s_s, v_s
-rank_one = ...  # TODO: compute rank_one
-np.testing.assert_allclose(np.sum((target_update - rank_one) ** 2), 1.0)
-np.testing.assert_allclose(
-    np.mean((np.eye(2) @ target_update - np.eye(2) @ rank_one) ** 2), 0.25
-)
-print('Nonunit scaling passes; best rank-one identity-input MSE is 0.25.')
+import jax.numpy as jnp
+import numpy as np
+
+def audit_lora_scaling_and_rank_limit(base, a, b, identity_inputs, target):
+    # TODO: check alpha=3 rank-two merging and determine the best rank-one residual.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

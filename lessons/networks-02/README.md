@@ -202,7 +202,7 @@ visual_data = {'kind': 'bar', 'x': list(range(len(leaves_vis))), 'labels': [f'le
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:28:23.332910+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:00.472904+00:00. JAX 0.9.2.
 
 ```text
 Trainable scalars: 13; other state: 1; clone counters: 1 2
@@ -252,24 +252,29 @@ Apply the model to one new row and to five rows. Verify the scalar parameter cou
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+**Inputs:**
+- The lesson’s Flax NNX model and one input row plus a five-row batch.
 
-**Step-by-step implementation plan:**
-1. Check tensor shape invariant: `model(single).shape==(1,)`
-2. Check tensor shape invariant: `model(jnp.repeat(single,5,axis=0)).shape==(5,)`
+**Outputs:**
+- Predictions whose leading dimensions match the input batch sizes, and the trainable scalar count.
+
+**Invariants to check:**
+- Applying the same model to one row and five rows preserves the leading batch axis; the parameter count remains unchanged.
+
+**Hints:**
+- Use inputs shaped (1, 2) and (5, 2), then inspect output shapes.
+- Count only nnx.Param leaves, not the non-parameter call counter.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Apply the model to one new row and to five rows.
-single = jnp.array(...)  # TODO: compute single
-# Check tensor shape invariant: `model(single).shape==(1,)`
-assert model(single).shape  # TODO: complete assertion check
-# Check tensor shape invariant: `model(jnp.repeat(single,5,axis=0)).shape==(5,)`
-assert model(jnp.repeat(single,5,axis=0)).shape  # TODO: complete assertion check
-assert sum(a.size for a  # TODO: complete assertion check
+from flax import nnx
+import jax
+import jax.numpy as jnp
+
+def check_model_batch_contract(model, single_row, five_rows):
+    # TODO: Apply the model to both batches and verify output shapes and trainable scalar count.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -300,25 +305,28 @@ Snapshot the original parameters before editing clone.out.bias.
 
 ### How to write: Change a clone without changing its source — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `nnx.Module / nnx.Linear / nnx.Optimizer` — Flax NNX stateful module and optimizer containers with explicit RNG streams (`nnx.Rngs`) and traced graph updates.
+**Inputs:**
+- Increase only the cloned model’s output bias by one. Predict the change in every logit and verify the original model’s parameter leaves remain unchanged.
 
-**Step-by-step implementation plan:**
-1. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Logit shift on the clone and an unchanged source snapshot.
+
+**Invariants to check:**
+- The clone owns independent variable state rather than aliasing the original module.
+
+**Hints:**
+- Snapshot the original parameters before editing clone.out.bias.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Change a clone without changing its source (Transfer)
-original_leaves = ...  # TODO: compute original_leaves
-# Transfer the device result to the host for an independent NumPy comparison.
-old_clone = np.asarray(...)  # TODO: compute old_clone
-clone.out.bias[...] = ...  # TODO: compute clone.out.bias[...]
-np.testing.assert_allclose(clone(batch),old_clone+1.,rtol=1e-5,atol=1e-6)
-for before,after in zip(original_leaves,jax.tree.leaves(nnx.state(model,nnx.Param))):
-    np.testing.assert_array_equal(before,after)
-print('Clone logits shifted by one; original parameters unchanged.')
+from flax import nnx
+import jax.numpy as jnp
+
+def practice_change_a_clone_without_changing_its_source(model, cloned_model):
+    """Implement the change a clone without changing its source check."""
+    # TODO: Clone model state, increment only the clone output bias, and compare all source parameter leaves before and after.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -353,26 +361,27 @@ Assignment changes which name refers to the same object.
 
 ### How to write: Diagnose a shared module reference — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- Assign `shared = model`, increment its counter, and demonstrate why this is not a snapshot. Then reconstruct an independent module.
 
-**Step-by-step implementation plan:**
-1. Diagnose a shared module reference (Intermediate)
+**Outputs:**
+- The shared-reference mutation and an isolated copy check.
+
+**Invariants to check:**
+- Assignment preserves object identity; a snapshot must preserve values without shared mutable state.
+
+**Hints:**
+- Assignment changes which name refers to the same object.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose a shared module reference (Intermediate)
-saved_count = int(...)  # TODO: compute saved_count
-shared = ...  # TODO: compute shared
-shared(batch,record = ...  # TODO: compute shared(batch,record
-assert int(model.calls[...])  # TODO: complete assertion check
-graph,state = nnx.split(...)  # TODO: compute graph,state
-independent = nnx.merge(...)  # TODO: compute independent
-independent(batch,record = ...  # TODO: compute independent(batch,record
-assert int(model.calls[...])  # TODO: complete assertion check
-assert int(independent.calls[...])  # TODO: complete assertion check
+from flax import nnx
+
+def practice_diagnose_a_shared_module_reference(model):
+    """Implement the diagnose a shared module reference check."""
+    # TODO: Assign an alias, mutate its counter, compare the original object, and then construct an independent copy.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

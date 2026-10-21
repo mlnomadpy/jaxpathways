@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "transforms-04",
-  "contentHash": "3cc83bffe28e858f9a8bf014ae3435e94d05e4664fb0f86f210852a81fb67a69",
-  "executedAt": "2026-10-21T11:27:06.518873+00:00",
+  "contentHash": "d721e8983fc6c60c71b1fe05d7843828601e69b0f9b46869323099ec9c7ba31d",
+  "executedAt": "2026-10-21T16:03:38.371314+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -11,7 +11,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.027464875020086765 2.8207898139953613e-05\neager median / min / max seconds: 3.749970346689224e-05 3.474997356534004e-05 5.954178050160408e-05\ncompiled median / min / max seconds: 5.729496479034424e-06 5.33275306224823e-06 8.167233318090439e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 9.666429832577705e-06\nPASS: transforms-04\n",
+  "stdout": "Loss: 0.46000000834465027\nFirst/repeat seconds: 0.014777290634810925 2.187490463256836e-05\neager median / min / max seconds: 2.4584122002124786e-05 2.3334287106990814e-05 4.179216921329498e-05\ncompiled median / min / max seconds: 4.082918167114258e-06 3.666616976261139e-06 5.499925464391708e-06\nbackend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\ncompiled value-and-grad median seconds: 7.874798029661179e-06\nPASS: transforms-04\n",
   "notebookCells": [
     {
       "sourceHash": "804d1fb2173681aa29e6cc555464b209a33a5dfc21c699342755c4856344a511",
@@ -33,7 +33,7 @@
           "name": "stdout",
           "text": [
             "Loss: 0.46000000834465027\n",
-            "First/repeat seconds: 0.02886591712012887 2.6499852538108826e-05\n"
+            "First/repeat seconds: 0.017373041715472937 1.941714435815811e-05\n"
           ]
         }
       ]
@@ -68,15 +68,15 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "eager median / min / max seconds: 3.510434180498123e-05 3.220932558178902e-05 5.8542005717754364e-05\n",
-            "compiled median / min / max seconds: 5.500158295035362e-06 5.333218723535538e-06 7.125083357095718e-06\n",
+            "eager median / min / max seconds: 2.6083551347255707e-05 2.4707987904548645e-05 4.145922139286995e-05\n",
+            "compiled median / min / max seconds: 4.479661583900452e-06 4.292000085115433e-06 5.667097866535187e-06\n",
             "backend / shapes / dtype: cpu (4, 3) (3,) (4,) float32\n"
           ]
         }
       ]
     },
     {
-      "sourceHash": "5f840447f3d750e044cec6a256009f8c7cfc4633a05de2d281dd710e1153f200",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -84,7 +84,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "6d5f51b4b41e3769d303a54d461fda96fe7724ad01d33f2e926784edc451cfaf",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -92,7 +92,7 @@
       "outputs": []
     },
     {
-      "sourceHash": "431007fc3e1d415aa3118992a51dfc1e7b9455f6a8bd7102c87b6d2f139e8ff2",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -102,7 +102,7 @@
           "output_type": "stream",
           "name": "stdout",
           "text": [
-            "compiled value-and-grad median seconds: 1.1041294783353806e-05\n"
+            "compiled value-and-grad median seconds: 9.353971108794212e-06\n"
           ]
         }
       ]

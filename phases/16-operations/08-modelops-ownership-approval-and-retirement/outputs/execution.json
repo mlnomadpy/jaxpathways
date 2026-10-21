@@ -1,8 +1,8 @@
 {
   "schemaVersion": 1,
   "lessonId": "operations-08",
-  "contentHash": "8df04386622ebbca1915109d34ba8854b96654de59788395c9056e7be6110bb8",
-  "executedAt": "2026-10-21T11:34:18.986696+00:00",
+  "contentHash": "eb0aa87d8a8593142c19fcf378004b40301f04a302adcc6087ff19b414dd520e",
+  "executedAt": "2026-10-21T16:11:04.357947+00:00",
   "environment": {
     "backend": "cpu",
     "deviceCount": 1,
@@ -87,7 +87,7 @@
       ]
     },
     {
-      "sourceHash": "610f74c87f535395b4b36edb3c75da45053b3c4aa202c2cebf1c2945df31eac2",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {
@@ -103,7 +103,7 @@
       ]
     },
     {
-      "sourceHash": "323ead78ec5d7827f8a4878809f9324a245508b21d7811393ac5f3814cce8b05",
+      "sourceHash": "22d5d8896e54aecd8b70f9aafa0c68cf3475cdb9799648df8d1bbbd8b53d1ac8",
       "outputs": []
     },
     {

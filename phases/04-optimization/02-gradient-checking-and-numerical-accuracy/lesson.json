@@ -80,7 +80,22 @@
         "prompt": "Check the derivative of `sum(sin(z))` at \\([0.2, -0.7]\\) using cosine and central differences.",
         "hint": "Use cosine as the analytic reference; here truncation error also matters.",
         "solution": "# Move to a different smooth objective (Transfer / diagnosis)\nz = jnp.array([0.2, -0.7])\ndef trig_loss(z):\n    return jnp.sum(jnp.sin(z))\n# Vectorize across the batch dimension with `jax.vmap` (`fd`).\nfd = jax.vmap(lambda e: (trig_loss(z+1e-2*e)-trig_loss(z-1e-2*e))/(2e-2))(jnp.eye(2))\nassert jnp.allclose(jax.grad(trig_loss)(z), jnp.cos(z))\nassert jnp.allclose(fd, jnp.cos(z), atol=5e-5, rtol=5e-5)",
-        "explanation": "The analytic reference checks a nonquadratic function at a new point."
+        "explanation": "The analytic reference checks a nonquadratic function at a new point.",
+        "learnerStarter": {
+          "inputs": [
+            "Check the derivative of `sum(sin(z))` at \\([0.2, -0.7]\\) using cosine and central differences."
+          ],
+          "outputs": [
+            "Autodiff, analytic derivative, and finite-difference values for both coordinates."
+          ],
+          "invariants": [
+            "All methods evaluate the same scalar objective at the requested point."
+          ],
+          "hints": [
+            "Use cosine as the analytic reference; here truncation error also matters."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_move_to_a_different_smooth_objective(point):\n    \"\"\"Implement the move to a different smooth objective check.\"\"\"\n    # TODO: Differentiate the sine-sum objective at both supplied coordinates and compare each result with cosine and central differences.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Catch the wrong objective despite correct gradients",
@@ -88,7 +103,22 @@
         "prompt": "A model is meant to use both coordinates. Show that an objective omitting the second coordinate has a correct derivative for itself but fails the intended analytic reference. Repair it.",
         "hint": "Differentiate \\((z_0-2)^2\\) and compare both coordinates.",
         "solution": "# Catch the wrong objective despite correct gradients (Transfer / diagnosis)\ndef incomplete(z):\n    return (z[0]-2.)**2\nbad = jax.grad(incomplete)(w)\nassert jnp.allclose(bad, jnp.array([-3., 0.]))\nassert not jnp.allclose(bad, analytic)\nassert jnp.allclose(jax.grad(objective)(w), analytic)",
-        "explanation": "The omitted term is a specification error; numerical differentiation of the same incomplete loss would not expose it."
+        "explanation": "The omitted term is a specification error; numerical differentiation of the same incomplete loss would not expose it.",
+        "learnerStarter": {
+          "inputs": [
+            "A model is meant to use both coordinates. Show that an objective omitting the second coordinate has a correct derivative for itself but fails the intended analytic reference. Repair it."
+          ],
+          "outputs": [
+            "A counterexample for the incomplete objective and a passing repaired comparison."
+          ],
+          "invariants": [
+            "The derivative is checked against the intended function, not only the function that produced it."
+          ],
+          "hints": [
+            "Differentiate \\((z_0-2)^2\\) and compare both coordinates."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef practice_catch_the_wrong_objective_despite_correct_gradients(point):\n    \"\"\"Implement the catch the wrong objective despite correct gradients check.\"\"\"\n    # TODO: Construct the objective that drops the second coordinate, compare its gradient to the intended two-coordinate reference, then restore the missing dependence.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "references": [
@@ -145,6 +175,22 @@
       "An independent derivative or finite difference helps test AD. Reusing AD as its own expected answer cannot detect a shared objective error.",
       "Independent gradient calculations help expose errors, but finite test cases do not prove all behavior.",
       "Gradient checks are useful on CPU too. Their limits concern tested inputs, tolerances and objective correctness, not a requirement for TPUs."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A differentiable scalar objective and a vector of evaluation points."
+      ],
+      "outputs": [
+        "A report comparing autodiff with central finite differences at multiple step sizes."
+      ],
+      "invariants": [
+        "Compare the same scalar objective and coordinate at every step size; finite differences are estimates, not a proof for all inputs."
+      ],
+      "hints": [
+        "Check a smooth point, and compare several perturbation scales.",
+        "Keep the analytic derivative independent from the finite-difference implementation."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef gradient_check_report(point, epsilons):\n    \"\"\"A report comparing autodiff with central finite differences at multiple step sizes.\"\"\"\n    # TODO: Evaluate autodiff and central-difference gradients at the supplied point across the requested perturbations.\n    raise NotImplementedError\n"
+    }
   }
 }

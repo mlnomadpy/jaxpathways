@@ -307,19 +307,19 @@ visual_data = {
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:35:02.849718+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:53.281492+00:00. JAX 0.9.2.
 
 ```text
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
-Captured *.xplane.pb trace count: 16 steady_ms: 0.0803
+Captured *.xplane.pb trace count: 19 steady_ms: 0.0677
 Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]
 Retained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace
-Captured *.xplane.pb trace count: 16 steady_ms: 0.0847
+Captured *.xplane.pb trace count: 19 steady_ms: 0.0598
 BF16-accum / FP32-accum max error ratio: 1.49
-Warmup ms: 17.771 Traced steady step ms: 0.0847
-Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 16
+Warmup ms: 17.851 Traced steady step ms: 0.0598
+Seed 42 mean errors: {'bf16 (fp32 accum)': 0.0075, 'bf16 (bf16 accum)': 0.00902, 'int8 per-col (fp32 accum)': 0.02182} xplane files: 19
 Mean error (per-channel vs per-tensor): 0.01389 0.0979
-xplane.pb bytes: 259901
+xplane.pb bytes: 259925
 PASS: tpu-06
 
 ```
@@ -363,17 +363,27 @@ Run `evaluate_precision_policies(seed=42)` and `capture_warmed_trace(steps=3)`, 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
+**Inputs:**
+- The seeded precision-policy evaluator and warmed trace capture helper.
+
+**Outputs:**
+- Seed-42 policy error measurements, trace receipt, and the observed backend.
+
+**Invariants to check:**
+- The stated BF16 error ordering holds for this run, and the trace receipt records at least one XPlane file; report the backend that actually ran.
+
+**Hints:**
+- Compare rows by policy name rather than relying on incidental table formatting.
+- A CPU trace is a valid local exercise result; reserve TPU-performance claims for a TPU receipt.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-p42 = evaluate_precision_policies(...)  # TODO: compute p42
-t3 = capture_warmed_trace(...)  # TODO: compute t3
-print("Seed 42 mean errors:", {r["policy"]: r["mean_abs_err"] for r in p42}, "xplane files:", t3["xplane_count"])
-assert p42[0]["mean_abs_err"]  # TODO: complete assertion check
+import jax
+
+def compare_precision_run(evaluate_precision_policies, capture_warmed_trace):
+    # TODO: Run the seeded comparison and trace, then validate the requested results and backend.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -402,38 +412,28 @@ Multiply `w[:, :1]` by `10.0` and compare per-column `axis=0` scale vs global sc
 
 ### How to write: Compare per-channel vs per-tensor INT8 quantization error — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jax.random.PRNGKey(seed) & jax.random.split(key)` — Uses explicit PRNG keys. Split a key when you need independent random draws; reusing a key repeats its random stream.
+**Inputs:**
+- A weight matrix with one column scaled by ten and per-channel and global INT8 quantizers.
 
-**Step-by-step implementation plan:**
-1. Compare per-channel vs per-tensor INT8 quantization error (Foundations)
-2. Create or split explicit PRNG key(s) (`w_skew`) for reproducible randomness.
-3. Create or split explicit PRNG key(s) (`x_in`) for reproducible randomness.
-4. Cast or evaluate `ref` in explicit floating-point precision.
-5. Reduce along axis=0 to compute `s_col`.
+**Outputs:**
+- Maximum reconstruction errors for both quantization scales.
+
+**Invariants to check:**
+- The global scale covers the largest magnitude; per-channel scales are computed per output column (axis 0 for this weight layout).
+
+**Hints:**
+- Construct the skewed matrix deterministically by multiplying one column by ten.
+- Compare dequantized weights with the same original matrix using global and per-column scales.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Compare per-channel vs per-tensor INT8 quantization error (Foundations)
-# Create or split explicit PRNG key(s) (`w_skew`) for reproducible randomness.
-w_skew = jax.random.normal(...)  # TODO: compute w_skew
-w_skew = ...  # TODO: compute w_skew
-# Create or split explicit PRNG key(s) (`x_in`) for reproducible randomness.
-x_in = jax.random.normal(...)  # TODO: compute x_in
-# Cast or evaluate `ref` in explicit floating-point precision.
-ref = jnp.dot(...)  # TODO: compute ref
-# Reduce along axis=0 to compute `s_col`.
-s_col = jnp.max(...)  # TODO: compute s_col
-s_glb = jnp.max(...)  # TODO: compute s_glb
-q_col = jnp.clip(...)  # TODO: compute q_col
-q_glb = jnp.clip(...)  # TODO: compute q_glb
-err_col = float(...)  # TODO: compute err_col
-err_glb = float(...)  # TODO: compute err_glb
-print("Mean error (per-channel vs per-tensor):", round(err_col, 5), round(err_glb, 5))
-# Assert invariant `err_col < err_glb` holds
-assert err_col  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def compare_int8_scale_granularity(weights):
+    # TODO: skew one column and compare max error from global and per-channel scales.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -477,38 +477,28 @@ Check `xplane_files[0].stat().st_size > 0`.
 
 ### How to write: Verify non-empty XProf *.xplane.pb byte size — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.zeros / jnp.ones(shape, dtype=...)` — Allocates a tensor of the given `shape` initialized with constants.
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `jax.block_until_ready(output)` — Synchronizes with the accelerator/CPU device so asynchronous dispatch finishes before wall-clock timing.
+**Inputs:**
+- A temporary trace directory and the public capture_warmed_trace function.
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.
-3. Wait for device work to finish before timing it or comparing its result on the host.
-4. Enter managed runtime/context scope for this block:
-5. Wait for device work to finish before timing it or comparing its result on the host.
+**Outputs:**
+- The captured XPlane file path and its byte size.
+
+**Invariants to check:**
+- The reported trace must be an actual file with positive size; a directory count alone is insufficient.
+
+**Hints:**
+- Capture a short warmed run.
+- Inspect each generated xplane.pb file with stat.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Verify non-empty XProf *.xplane.pb byte size (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory(prefix="tpu-xplane-size-") as d:
-    a = jnp.ones(...)  # TODO: compute a
-    # Wrap with `jax.jit` (`fn`) so XLA traces and compiles the function.
-    fn = jax.jit(...)  # TODO: compute fn
-    # Wait for device work to finish before timing it or comparing its result on the host.
-    jax.block_until_ready(fn(a))
-    # Enter managed runtime/context scope for this block:
-    with jax.profiler.trace(d):
-        # Wait for device work to finish before timing it or comparing its result on the host.
-        jax.block_until_ready(fn(a))
-    pb = list(...)  # TODO: compute pb
-    size_bytes = pb.stat(...)  # TODO: compute size_bytes
-print("xplane.pb bytes:", size_bytes)
-# Assert invariant `size_bytes > 0` holds
-assert size_bytes  # TODO: complete assertion check
+import jax.numpy as jnp
+import numpy as np
+
+def inspect_xplane_file(capture_warmed_trace, root):
+    # TODO: capture a trace and return the nonempty XPlane file evidence.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

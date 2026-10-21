@@ -72,7 +72,23 @@
         "prompt": "After saving a checkpoint, alter one momentum value without updating its checksum, then attempt to restore.",
         "hint": "The expected outcome is a failed restore; preserve the failure event.",
         "solution": "# Reject accidental checkpoint corruption (Transfer / diagnosis)\n# Keep this run’s database and artifacts in a scratch directory removed on exit.\nwith tempfile.TemporaryDirectory() as folder:\n    launch(folder,dict(steps=4))\n    path=Path(folder)/'checkpoint.json'\n    state=json.loads(path.read_text())\n    # Accumulate the next contribution into `state['velocity'][0]`.\n    state['velocity'][0]+=1.\n    path.write_text(json.dumps(state))\n    bad=launch(folder,dict(resume=True))\nassert bad['status']=='failed'\nassert any(e['event']=='failed' and 'checksum' in e['message'] for e in bad['events'])",
-        "explanation": "Rejecting corruption is safer and more inspectable than treating plausible parameter values as evidence of a valid checkpoint."
+        "explanation": "Rejecting corruption is safer and more inspectable than treating plausible parameter values as evidence of a valid checkpoint.",
+        "learnerStarter": {
+          "inputs": [
+            "After saving a checkpoint, alter one momentum value without updating its checksum, then attempt to restore."
+          ],
+          "outputs": [
+            "Restore rejection for a changed payload with stale checksum."
+          ],
+          "invariants": [
+            "Corrupt state is rejected before a training update resumes."
+          ],
+          "hints": [
+            "The expected outcome is a failed restore; preserve the failure event.",
+            "Checksum the exact serialized momentum content."
+          ],
+          "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef practice_reject_accidental_checkpoint_corruption(checkpoint_path):\n    \"\"\"Complete the reject accidental checkpoint corruption check.\"\"\"\n    # TODO: ('Change one serialized momentum value without recomputing its checksum and require restore rejection.', 'A checksum failure with no resumed transition.', 'The checkpoint payload is immutable after its recorded checksum.')\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Explain a weights-only mismatch by hand",
@@ -80,7 +96,23 @@
         "prompt": "Let saved velocity be \\(2\\), the next gradient \\(3\\), momentum \\(0.8\\), and learning rate \\(0.1\\). Compare the correct parameter decrement with a reset-momentum decrement.",
         "hint": "Apply the recurrence before multiplying by the learning rate.",
         "solution": "# Explain a weights-only mismatch by hand (Transfer / diagnosis)\ncorrect=.1*(.8*2+3)\nweights_only=.1*3\nassert abs(correct-.46)<1e-12 and abs(weights_only-.3)<1e-12\nassert abs(correct-weights_only-.16)<1e-12",
-        "explanation": "The next loss could initially look close, but the state transition has already changed."
+        "explanation": "The next loss could initially look close, but the state transition has already changed.",
+        "learnerStarter": {
+          "inputs": [
+            "Let saved velocity be \\(2\\), the next gradient \\(3\\), momentum \\(0.8\\), and learning rate \\(0.1\\). Compare the correct parameter decrement with a reset-momentum decrement."
+          ],
+          "outputs": [
+            "Two parameter decrements for saved and reset momentum."
+          ],
+          "invariants": [
+            "Both cases share the same current gradient and learning rate."
+          ],
+          "hints": [
+            "Apply the recurrence before multiplying by the learning rate.",
+            "Apply momentum recurrence before multiplying by learning rate."
+          ],
+          "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef practice_explain_a_weights_only_mismatch_by_hand(parameter, saved_velocity, gradient, momentum, learning_rate):\n    \"\"\"Complete the explain a weights-only mismatch by hand check.\"\"\"\n    # TODO: ('Compute the next momentum velocity and parameter decrement from saved velocity 2, gradient 3, momentum .8, and rate .1, then compare with zero velocity.', 'Correct and reset-momentum decrements from the same parameter.', 'Only the prior velocity differs between the two calculations.')\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Which evidence most directly supports a correct resume?",
@@ -157,6 +189,22 @@
       "Starting a process does not show correct continuation. Compare the next batches, state and losses with an uninterrupted baseline.",
       "Recovery preserves a continuation, so the first resumed update and subsequent state are the relevant evidence. Startup and a finite scalar loss are much weaker.",
       "A finite loss can belong to a different trajectory. Test state equality and several subsequent updates at the same boundary."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A deterministic training state, checkpoint location, injected failure point, and matching resume configuration."
+      ],
+      "outputs": [
+        "A restored continuation whose every post-resume state matches uninterrupted execution."
+      ],
+      "invariants": [
+        "Only an accepted full-state checkpoint is restored; verify parameters, momentum, random state, and step after each resumed update."
+      ],
+      "hints": [
+        "Retain a complete event timeline around the last committed checkpoint.",
+        "Compare resumed and uninterrupted runs with identical seed and configuration."
+      ],
+      "code": "from pathlib import Path\nimport hashlib\nimport json\nimport tempfile\nimport jax\nimport jax.numpy as jnp\nimport numpy as np\n\ndef resume_after_failure(initial_state, checkpoint_path, failure_step, config):\n    \"\"\"A restored continuation whose every post-resume state matches uninterrupted execution.\"\"\"\n    # TODO: Inject a local worker failure, restore only the last complete state, and compare every resumed transition with uninterrupted execution.\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -203,7 +203,7 @@ visual_data = {'kind': 'heatmap', 'values': owners.tolist(), 'unit': 'logical CP
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:40.276651+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:18.471477+00:00. JAX 0.9.2.
 
 ```text
 JAX version: 0.9.2
@@ -275,45 +275,32 @@ Predict and verify the per-device shapes for twelve rows, then demonstrate how r
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Four virtual CPU devices and the row-sharded placement from the lesson.
+- Twelve rows with two features, plus a five-row placement case.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Place `z` explicitly onto the target JAX device.
-3. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-4. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-5. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Observed shard shapes and slices for twelve rows.
+- A captured uneven-placement failure and a replicated placement retaining all five rows.
+
+**Invariants to check:**
+- Every source row appears in the reference comparison.
+- Replication preserves data but does not prove uneven partition support.
+- Label logical CPU devices accurately.
+
+**Hints:**
+- Use shard indices to select matching reference rows.
+- Keep partition failure and replicated repair as separate observations.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-twelve = np.arange(...)  # TODO: compute twelve
-# Place `z` explicitly onto the target JAX device.
-z = jax.device_put(...)  # TODO: compute z
-# Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-z2 = jax.jit(...)  # TODO: compute z2
-# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-assert all(s.data.shape  # TODO: complete assertion check
-for shard in z2.addressable_shards:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
+import jax
+import numpy as np
 
-uneven = np.arange(...)  # TODO: compute uneven
-try:
-    jax.device_put(uneven, rows)
-except ValueError:
-    print("Expected indivisible row dimension")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `fixed` explicitly onto the target JAX device.
-fixed = jax.device_put(...)  # TODO: compute fixed
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_array_equal(np.asarray(fixed), uneven)
-assert fixed.is_fully_replicated  # TODO: complete assertion check
+def audit_row_placements(row_sharding, devices):
+    # TODO: place the requested arrays and inspect shard metadata
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -361,31 +348,30 @@ Use each shard index to select the corresponding NumPy reference slice.
 
 ### How to write: Move from four rows to twelve — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `jax.jit(fn) / @jax.jit` — Traces `fn` for its input signatures and compiles an executable. Changed shapes, dtypes or static arguments can trigger another compilation.
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- Four row-sharded devices and twelve two-feature rows.
+- The squared output for each row.
 
-**Step-by-step implementation plan:**
-1. Place `z` explicitly onto the target JAX device.
-2. Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-3. Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-4. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- Every output shard and its matching NumPy slice.
+
+**Invariants to check:**
+- Each shard index selects matching global rows.
+- Local shape matches an even partition.
+
+**Hints:**
+- Build the full reference before selecting slices.
+- Compare the complete shard payload.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Move from four rows to twelve (Challenge): The twelve rows split into four groups of three.
-twelve = np.arange(...)  # TODO: compute twelve
-# Place `z` explicitly onto the target JAX device.
-z = jax.device_put(...)  # TODO: compute z
-# Wrap with `jax.jit` (`z2`) so XLA traces and compiles the function.
-z2 = jax.jit(...)  # TODO: compute z2
-# Check tensor shape invariant: `all(s.data.shape == (3,2) for s in z2.addressable_shards)`
-assert all(s.data.shape  # TODO: complete assertion check
-for shard in z2.addressable_shards:
-    # Transfer the device result to the host for an independent NumPy comparison.
-    np.testing.assert_array_equal(np.asarray(shard.data), (twelve*twelve)[shard.index])
+import jax
+import numpy as np
+
+def verify_twelve_rows(row_sharding):
+    # TODO: square the sharded data and compare every indexed slice
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -422,30 +408,29 @@ Do not drop a row to hide the error.
 
 ### How to write: Repair a batch that does not divide evenly — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `Mesh + PartitionSpec + NamedSharding` — Maps logical tensor axes onto physical device mesh axes for SPMD data, tensor, or pipeline parallelism.
+**Inputs:**
+- The same four-way row sharding and a five-by-two input.
 
-**Step-by-step implementation plan:**
-1. Place `fixed` explicitly onto the target JAX device.
-2. Transfer the device result to the host for an independent NumPy comparison.
+**Outputs:**
+- A captured partitioning failure and a replicated placement with all rows.
+
+**Invariants to check:**
+- No row is dropped to force divisibility.
+- Replication is not described as uneven partition support.
+
+**Hints:**
+- Capture the expected placement error.
+- Inspect the replicated values and state the evidence limit.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a batch that does not divide evenly (Challenge): Five rows cannot be evenly split across the four-way data axis.
-uneven = np.arange(...)  # TODO: compute uneven
-try:
-    jax.device_put(uneven, rows)
-except ValueError:
-    print("Expected indivisible row dimension")
-else:
-    raise AssertionError("Expected divisibility failure")
-# Place `fixed` explicitly onto the target JAX device.
-fixed = jax.device_put(...)  # TODO: compute fixed
-# Transfer the device result to the host for an independent NumPy comparison.
-np.testing.assert_array_equal(np.asarray(fixed), uneven)
-assert fixed.is_fully_replicated  # TODO: complete assertion check
+import jax
+import numpy as np
+
+def diagnose_uneven_rows(row_sharding):
+    # TODO: capture the partition attempt, then test replicated placement
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

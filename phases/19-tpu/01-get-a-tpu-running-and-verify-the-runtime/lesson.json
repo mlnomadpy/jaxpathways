@@ -128,7 +128,23 @@
         "prompt": "Given a training state requiring \\(48\\) GiB of HBM, determine which slices in `topologies` have at least \\(48\\) GiB of total HBM.",
         "hint": "Filter `topologies` by `t['total_hbm_gib'] >= 48`.",
         "solution": "# Check whether a model state fits on a single-host TPU slice (Foundations)\nfitting_slices = [t[\"slice\"] for t in topologies if t[\"total_hbm_gib\"] >= 48]\nprint(\"Slices fitting 48 GiB:\", fitting_slices)\n# Assert invariant `fitting_slices == [\"v5litepod-4\"` holds\nassert fitting_slices == [\"v5litepod-4\", \"v5litepod-8\", \"v6e-4\"]",
-        "explanation": "A single v5litepod-1 chip has 16 GiB HBM, whereas v5litepod-4 (64 GiB), v5litepod-8 (128 GiB), and v6e-4 (128 GiB) fit a 48 GiB sharded state on a single host."
+        "explanation": "A single v5litepod-1 chip has 16 GiB HBM, whereas v5litepod-4 (64 GiB), v5litepod-8 (128 GiB), and v6e-4 (128 GiB) fit a 48 GiB sharded state on a single host.",
+        "learnerStarter": {
+          "inputs": [
+            "A slice catalog with total HBM values and a required state size of 48 GiB."
+          ],
+          "outputs": [
+            "The names of slices with enough catalogued aggregate HBM."
+          ],
+          "invariants": [
+            "Capacity filtering uses the provided requirement and catalog units consistently; it does not prove per-device fit."
+          ],
+          "hints": [
+            "Filter the catalog by total_hbm_gib.",
+            "Keep memory capacity claims separate from runtime verification."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef slices_meeting_hbm_requirement(topologies, required_gib):\n    # TODO: return the catalog slices whose aggregate HBM meets the requirement.\n    raise NotImplementedError"
+        }
       },
       {
         "title": "Verify the pmap sum-of-squares formula for 4 TPU devices",
@@ -136,7 +152,23 @@
         "prompt": "Compute the exact sum of squares that `verify_runtime_contract` expects when `len(local_devices) == 4` (`32` elements `0..31`).",
         "hint": "Sum `np.arange(32, dtype=np.float64) ** 2`.",
         "solution": "# Verify the pmap sum-of-squares formula for 4 TPU devices (Transfer / diagnosis)\nfour_device_expected = float(np.sum(np.arange(4 * 8, dtype=np.float64) ** 2))\nprint(\"Expected 4-device pmap sum of squares:\", four_device_expected)\n# Assert invariant `four_device_expected == 10416.0` holds\nassert four_device_expected == 10416.0",
-        "explanation": "On a 4-chip TPU VM (`v5litepod-4` or `v6e-4`), `x` has shape `(4, 8)` and the synchronized sum of squares across the 4 chips is `10416.0`."
+        "explanation": "On a 4-chip TPU VM (`v5litepod-4` or `v6e-4`), `x` has shape `(4, 8)` and the synchronized sum of squares across the 4 chips is `10416.0`.",
+        "learnerStarter": {
+          "inputs": [
+            "Four local TPU devices and the mapped range of 32 integers from zero through 31."
+          ],
+          "outputs": [
+            "Expected exact sum of squares for the four-device pmap fixture."
+          ],
+          "invariants": [
+            "The expected value sums each integer exactly once; it is an oracle for the four-device test only."
+          ],
+          "hints": [
+            "Use the closed-form sum-of-squares identity or an integer reference sum.",
+            "Run the pmap assertion on a real four-chip TPU to qualify runtime behavior."
+          ],
+          "code": "import jax.numpy as jnp\nimport numpy as np\n\ndef expected_four_chip_sum():\n    # TODO: compute the integer oracle for the range consumed by the four-device pmap.\n    raise NotImplementedError"
+        }
       }
     ],
     "question": "Which workflow records a small synchronized TPU computation and checks that the lab’s cloud resources were removed?",
@@ -260,6 +292,22 @@
       "Closing a laptop does not stop a remote job or release capacity. Retrieve the receipt, then inspect both the VM and any owning request.",
       "The computation receipt identifies a bounded tested runtime. The separate cleanup checks cover the named VM and request. Neither a small arithmetic pass nor an empty resource listing proves all workload behavior or a final bill.",
       "Local packages describe the workstation, not the remote backend. Execute and synchronize the verifier on the TPU host."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "The verify_runtime_contract callable, active backend expectation, minimum local device count, and named TPU slice catalog."
+      ],
+      "outputs": [
+        "A runtime receipt plus chip and aggregate HBM counts for v5litepod-4."
+      ],
+      "invariants": [
+        "Runtime acceptance describes devices actually discovered by JAX; a CPU backend must not be reported as TPU qualification."
+      ],
+      "hints": [
+        "Call the verifier for the active backend with a minimum of one local device.",
+        "Treat catalog capacity as descriptive and runtime discovery as observed evidence."
+      ],
+      "code": "import jax\n\ndef inspect_runtime_and_slice(verify_runtime_contract, expected_backend, min_devices, topologies):\n    # TODO: verify the active runtime and look up v5litepod-4 chip and HBM metadata.\n    raise NotImplementedError"
+    }
   }
 }

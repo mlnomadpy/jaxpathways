@@ -162,7 +162,7 @@ visual_data = {'kind': 'heatmap', 'values': x.tolist(), 'rows': ['row 0', 'row 1
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:26:38.011988+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:16.771051+00:00. JAX 0.9.2.
 
 ```text
 Shape: (2, 3)
@@ -227,24 +227,31 @@ Compute column sums instead. State the resulting shape before running the code.
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A two-row, three-feature JAX array named `x`.
+- The lesson has checked its dtype and device.
 
-**Step-by-step implementation plan:**
-1. Reduce along axis=0 to compute `column_sums`.
-2. Check tensor shape invariant: `column_sums.shape == (3,)`
+**Outputs:**
+- Column totals and an explicit output-shape check.
+
+**Invariants to check:**
+- Reduce the observation axis and preserve the feature axis.
+- Check shape separately from numeric values.
+
+**Hints:**
+- Read the dimensions before choosing a reduction axis.
+- The result retains the feature dimension.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute column sums instead.
-# Reduce along axis=0 to compute `column_sums`.
-column_sums = x.sum(...)  # TODO: compute column_sums
-# Check tensor shape invariant: `column_sums.shape == (3,)`
-assert column_sums.shape  # TODO: complete assertion check
-assert jnp.allclose(column_sums, jnp.array([3., 5., 7.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def column_summary(x):
+    # TODO: reduce observations and return feature-wise values and shape
+    values = ...
+    shape = ...
+    return values, shape
 ```
 
 <details><summary>Reference solution</summary>
@@ -274,22 +281,31 @@ Keep observation rows and measurement columns.
 
 ### How to write: Add a new observation — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.arange(n, dtype=...)` — Creates a 1-D JAX array of evenly spaced values `[0, 1, ..., n-1]` on the target device.
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
+**Inputs:**
+- The original two-row table and the new observation `[6, 7, 8]`.
 
-**Step-by-step implementation plan:**
-1. Add a new observation (Practice)
+**Outputs:**
+- The extended table, row totals, and feature means.
+
+**Invariants to check:**
+- Appending adds an observation without changing feature count.
+- Row and feature reductions preserve opposite axes.
+
+**Hints:**
+- Concatenate along the observation axis.
+- Write down the table shape before reducing.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Add a new observation (Practice)
-table = jnp.arange(...)  # TODO: compute table
-assert jnp.allclose(table.sum(axis=1),jnp.array([3.,12.,21.]))  # TODO: complete assertion check
-assert jnp.allclose(table.mean(axis=0),jnp.array([3.,4.,5.]))  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def extend_and_summarize(table, new_row):
+    # TODO: append one observation and compute both summaries
+    extended = ...
+    row_totals = ...
+    feature_means = ...
+    return extended, row_totals, feature_means
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -319,24 +335,31 @@ Count required elements before changing the code.
 
 ### How to write: Diagnose an impossible reshape — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `array.reshape(new_shape)` — Reorganizes tensor axes without changing the total element count (`array.size`).
+**Inputs:**
+- A six-value array and target shape `(2, 4)`.
+- The intended table has three measurements per row.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A captured incompatible reshape and a repaired three-feature layout.
+
+**Invariants to check:**
+- Reshape preserves the number of elements.
+- The repaired table retains every value.
+
+**Hints:**
+- Count required elements before reshaping.
+- Catch the shape error without discarding data.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Diagnose an impossible reshape (Challenge): An incompatible reshape is an element-count error.
-try:
-    x.reshape(2,4)
-except TypeError:
-    print("Expected element-count mismatch")
-else:
-    raise AssertionError("Expected reshape to fail")
-assert x.reshape(2,3).size  # TODO: complete assertion check
+import jax.numpy as jnp
+
+def diagnose_reshape(values):
+    # TODO: attempt the requested shape and capture its incompatibility
+    attempted = ...
+    repaired = ...
+    return attempted, repaired
 ```
 
 <details><summary>Reference solution and reasoning</summary>

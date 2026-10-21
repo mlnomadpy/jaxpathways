@@ -83,7 +83,26 @@
         "prompt": "For the prediction \\(\\hat y=wx\\), find the derivative with respect to \\(w\\) and then with respect to \\(x\\). Evaluate them at \\(w=2\\) and \\(x=3\\). Predict both answers before choosing `argnums`.",
         "hint": "grad defaults to `argnums=0.` The other input remains an input to the transformed callable.",
         "solution": "# Differentiate the parameter you intended (Practice)\ndef scalar_prediction(weight, x):\n    return weight * x\nassert jnp.allclose(jax.grad(scalar_prediction, argnums=0)(2., 3.), 3.)\nassert jnp.allclose(jax.grad(scalar_prediction, argnums=1)(2., 3.), 2.)",
-        "explanation": "A parameter gradient and an input sensitivity answer different questions even when they originate from the same function."
+        "explanation": "A parameter gradient and an input sensitivity answer different questions even when they originate from the same function.",
+        "learnerStarter": {
+          "inputs": [
+            "The scalar prediction `weight * x`.",
+            "Weight 2 and input 3.",
+            "Two requested differentiation arguments."
+          ],
+          "outputs": [
+            "A derivative with respect to each argument."
+          ],
+          "invariants": [
+            "The unselected argument remains an ordinary input.",
+            "Distinguish prediction from derivative."
+          ],
+          "hints": [
+            "Name the differentiation argument explicitly.",
+            "Check each derivative against its own input."
+          ],
+          "code": "import jax\n\ndef scalar_prediction(weight, x):\n    # TODO: define the scalar prediction\n    raise NotImplementedError\n\ndef compare_argument_gradients():\n    # TODO: transform the function for each requested argument\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Repair an objective without hiding its meaning",
@@ -91,7 +110,26 @@
         "prompt": "A function returns \\([x^2,(x-2)^2]\\). Explain why ordinary grad rejects it. Build a scalar objective using their mean, derive its derivative, and check \\(x=0\\), \\(1\\), and \\(2\\). Would a sum have the same derivative magnitude?",
         "hint": "Write the reduction as a mathematical function first: its mean is \\(x^2-2x+2\\).",
         "solution": "# Repair an objective without hiding its meaning (Challenge)\ndef two_costs(x):\n    return jnp.array([x ** 2, (x - 2.) ** 2])\ndef mean_cost(x):\n    return jnp.mean(two_costs(x))\nfor point in (0., 1., 2.):\n    assert jnp.allclose(jax.grad(mean_cost)(point), 2. * point - 2.)\n    assert jnp.allclose(jax.grad(lambda z: jnp.sum(two_costs(z)))(point), 2. * jax.grad(mean_cost)(point))",
-        "explanation": "Mean and sum agree on the minimizer here but differ by a factor of two in gradient magnitude. Reducing output is a modeling choice, not just a syntax repair."
+        "explanation": "Mean and sum agree on the minimizer here but differ by a factor of two in gradient magnitude. Reducing output is a modeling choice, not just a syntax repair.",
+        "learnerStarter": {
+          "inputs": [
+            "A two-element output containing squared costs.",
+            "Inputs 0, 1, and 2."
+          ],
+          "outputs": [
+            "A scalar mean objective and its derivatives.",
+            "A comparison with the sum objective’s derivative scale."
+          ],
+          "invariants": [
+            "`grad` receives one scalar objective.",
+            "Mean and sum remain distinct objectives."
+          ],
+          "hints": [
+            "Choose the reduction before differentiating.",
+            "Compare the factors analytically."
+          ],
+          "code": "import jax\nimport jax.numpy as jnp\n\ndef mean_objective(x):\n    # TODO: construct the two costs and reduce to one scalar\n    raise NotImplementedError\n\ndef compare_reductions(points):\n    # TODO: evaluate derivatives for the mean and sum objectives\n    raise NotImplementedError\n"
+        }
       }
     ],
     "takeaways": [
@@ -143,6 +181,26 @@
       "A zero first derivative is compatible with a maximum, minimum or stationary inflection. Compare nearby values on both sides of zero.",
       "The cubic is stationary at zero but takes smaller values to the left. A zero first derivative alone does not prove a minimum.",
       "The derivative is zero because the function is locally flat to first order at this input. Differentiate at a nonzero input to check the rule."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "A scalar cubic function defined by the learner.",
+        "Evaluation points -2, 0, and 3."
+      ],
+      "outputs": [
+        "The function and its JAX derivatives at each point.",
+        "An explanation that separates a stationary point from a minimum."
+      ],
+      "invariants": [
+        "`grad` receives a scalar-output function.",
+        "Every requested point is checked.",
+        "A zero derivative alone does not classify a minimum."
+      ],
+      "hints": [
+        "Derive the polynomial rule before calling autodiff.",
+        "Check function behavior on either side of the stationary point."
+      ],
+      "code": "import jax\nimport jax.numpy as jnp\n\ndef cubic(x):\n    # TODO: define the scalar cubic\n    raise NotImplementedError\n\ndef check_cubic(points):\n    # TODO: evaluate and retain one JAX derivative per point\n    raise NotImplementedError\n"
+    }
   }
 }

@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "lessonId": "tpu-06",
-  "contentHash": "578a53769a2177f02cca8eb1ef243a4981f9e0eab21b3f689a46ecd87374dd8f",
+  "contentHash": "694ea9a2b1e1b702348cf837eab4f61c58c02361417965a65c1f19be6a2aebe2",
   "rendererHash": "a1bd5b648f4731ae5d5f0a24811c2540d1a0a132149ce589d17c4113509cbedf",
   "kind": "executed",
-  "generatedAt": "2026-10-21T11:26:01.481128+00:00",
+  "generatedAt": "2026-10-21T16:06:35.527007+00:00",
   "provenance": "recorded_cpu_computation",
   "environment": {
     "backend": "cpu",
@@ -13,7 +13,7 @@
     "numpy": "2.4.4",
     "matplotlib": "3.10.8"
   },
-  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nRetained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace\nCaptured *.xplane.pb trace count: 15 steady_ms: 0.1323\n",
+  "stdout": "Precision comparison: [{'policy': 'bf16 (fp32 accum)', 'max_abs_err': 0.03718, 'mean_abs_err': 0.00756, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'bf16 (bf16 accum)', 'max_abs_err': 0.05545, 'mean_abs_err': 0.00912, 'weight_bytes': 16384, 'scale_bytes': 256}, {'policy': 'int8 per-col (fp32 accum)', 'max_abs_err': 0.12516, 'mean_abs_err': 0.02322, 'weight_bytes': 16384, 'scale_bytes': 256}]\nRetained trace directory: /Users/tahabsn/Documents/ChatGPT/jaxpathways/tpu-xprof-trace\nCaptured *.xplane.pb trace count: 18 steady_ms: 0.1684\n",
   "data": {
     "kind": "bar",
     "labels": [

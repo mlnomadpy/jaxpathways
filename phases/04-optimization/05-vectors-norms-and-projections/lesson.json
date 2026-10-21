@@ -91,7 +91,22 @@
         "prompt": "Show that a zero direction produces a clear input error instead of a misleading projection.",
         "hint": "Use a try/except block; a silent successful result should fail the check.",
         "solution": "# Handle an undefined direction (Transfer / diagnosis): Rejecting an undefined input is part of the function contract.\ntry:\n    project(u, jnp.zeros_like(a))\nexcept ValueError as exc:\n    assert 'nonzero' in str(exc)\nelse:\n    raise AssertionError('Zero direction was accepted')",
-        "explanation": "Rejecting an undefined input is part of the function contract."
+        "explanation": "Rejecting an undefined input is part of the function contract.",
+        "learnerStarter": {
+          "inputs": [
+            "Show that a zero direction produces a clear input error instead of a misleading projection."
+          ],
+          "outputs": [
+            "A clear rejection for zero direction and a finite projection for a nonzero direction."
+          ],
+          "invariants": [
+            "A projection is returned only when its direction has nonzero squared norm."
+          ],
+          "hints": [
+            "Use a try/except block; a silent successful result should fail the check."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_handle_an_undefined_direction(vector, direction):\n    \"\"\"Implement the handle an undefined direction check.\"\"\"\n    # TODO: Check the direction norm before dividing and raise a clear ValueError for the zero vector.\n    raise NotImplementedError\n"
+        }
       },
       {
         "title": "Use two perpendicular directions",
@@ -99,7 +114,22 @@
         "prompt": "Reconstruct \\(u\\) from projections onto \\((1,1)\\) and \\((1,-1)\\). Would adding independent projections still work for arbitrary nonorthogonal directions?",
         "hint": "Check the directions have zero dot product. Nonorthogonal directions can count the same component twice.",
         "solution": "# Use two perpendicular directions (Transfer / diagnosis)\na1 = jnp.array([1.0, 1.0])\na2 = jnp.array([1.0, -1.0])\nassert jnp.allclose(project(u, a1) + project(u, a2), u)\nassert not jnp.allclose(project(u, a) + project(u, a1), u)",
-        "explanation": "Adding separate projections reconstructs a vector in an orthogonal basis. Correlated feature directions require a joint least-squares solve."
+        "explanation": "Adding separate projections reconstructs a vector in an orthogonal basis. Correlated feature directions require a joint least-squares solve.",
+        "learnerStarter": {
+          "inputs": [
+            "Reconstruct \\(u\\) from projections onto \\((1,1)\\) and \\((1,-1)\\). Would adding independent projections still work for arbitrary nonorthogonal directions?"
+          ],
+          "outputs": [
+            "Reconstructed vector and residual norm for the perpendicular basis."
+          ],
+          "invariants": [
+            "The sum is interpreted as a reconstruction only for the stated orthogonal directions."
+          ],
+          "hints": [
+            "Check the directions have zero dot product. Nonorthogonal directions can count the same component twice."
+          ],
+          "code": "import jax.numpy as jnp\n\ndef practice_use_two_perpendicular_directions(vector, first_direction, second_direction):\n    \"\"\"Implement the use two perpendicular directions check.\"\"\"\n    # TODO: Compute each orthogonal projection, add the two components, and measure the reconstruction residual.\n    raise NotImplementedError\n"
+        }
       }
     ],
     "question": "Does doubling a nonzero direction double the projection onto its line?",
@@ -138,6 +168,22 @@
       "Doubling the direction also quadruples its squared norm. Work out the coefficient and the reconstructed vector separately.",
       "The line is unchanged, so its closest point is unchanged. The coefficient absorbs the rescaling.",
       "Orthogonality is not required. Substitute a general nonzero direction into the projection formula and cancel the scale factor."
-    ]
+    ],
+    "learnerStarter": {
+      "inputs": [
+        "Two same-shaped vectors and a nonzero projection direction."
+      ],
+      "outputs": [
+        "The projection and orthogonal residual."
+      ],
+      "invariants": [
+        "The residual is orthogonal to the direction; a zero direction is rejected."
+      ],
+      "hints": [
+        "Compute the scalar coefficient from a dot product and squared norm.",
+        "Use an inner-product check on the residual instead of checking only its length."
+      ],
+      "code": "import jax.numpy as jnp\n\ndef project_onto(vector, direction):\n    \"\"\"The projection and orthogonal residual.\"\"\"\n    # TODO: Guard against a zero direction, compute the projection coefficient, and verify the residual dot product.\n    raise NotImplementedError\n"
+    }
   }
 }

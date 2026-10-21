@@ -239,7 +239,7 @@ visual_data={"panels":[*visual_data.get("panels",[visual_data]),extra_panel]}
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:34:37.532819+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:11:27.894234+00:00. JAX 0.9.2.
 
 ```text
 Response-only token NLL initial/final: 1.6094379425048828 0.07985548675060272
@@ -305,26 +305,28 @@ Score only the first response token in each sequence and compare the resulting c
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.isfinite(x)` — Returns a boolean mask verifying that no element is `NaN` or `Inf`.
+**Inputs:**
+- Causal logits, token IDs, role labels, and a response-only target mask.
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Ensure all array elements remain finite: `np.isfinite(float(value))`
+**Outputs:**
+- The count and mean loss for only the first response token per sequence.
+
+**Invariants to check:**
+- Logits at time t score token t+1; prompt targets are excluded after shifting.
+
+**Hints:**
+- Shift token and role arrays consistently.
+- Count selected shifted targets before averaging.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-first_only = ...  # TODO: compute first_only
-value = ...  # TODO: compute value
-    first_only[:, 1:]
-)
-assert int(jnp.sum(first_only[:, 1:]))  # TODO: complete assertion check
-# Ensure all array elements remain finite: `np.isfinite(float(value))`
-assert np.isfinite(float(value))  # TODO: complete assertion check
-print('Two first-response targets:', float(value))
+import jax.numpy as jnp
+import numpy as np
+
+def score_first_response_token(logits, tokens, roles):
+    # TODO: construct the shifted target mask and return the selected loss and count.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -357,20 +359,28 @@ Use the shifted target mask, not the unshifted input mask.
 
 ### How to write: Reject a batch with no answer targets — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- A batch whose roles mark every token as prompt context.
+
+**Outputs:**
+- A validation error or explicit skip result before averaging token loss.
+
+**Invariants to check:**
+- An all-prompt batch never creates a zero-denominator supervised update.
+
+**Hints:**
+- Build the mask for shifted target positions.
+- Choose and document reject-versus-skip behavior.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject a batch with no answer targets (Transfer)
-try:
-    validate_mask(jnp.zeros_like(roles[:, 1:]), tokens[:, 1:].shape)
-except ValueError:
-    print('No-target SFT batch rejected')
-else:
-    raise AssertionError('empty supervision accepted')
+import jax.numpy as jnp
+import numpy as np
+
+def validate_response_targets(tokens, roles):
+    # TODO: validate the shifted response mask and return its selected-token count.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -403,22 +413,28 @@ Keep the final input token equal and change an earlier token.
 
 ### How to write: Create a failure this model cannot fix — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
+**Inputs:**
+- Two contexts with the same final token but different required next-token labels.
 
-**Step-by-step implementation plan:**
-1. Create a failure this model cannot fix (Challenge)
+**Outputs:**
+- The shared transition-table distributions and an explanation-ready conflict indicator.
+
+**Invariants to check:**
+- A first-order token transition model has identical outputs for identical final token IDs.
+
+**Hints:**
+- Encode the two examples with the exact same context state.
+- Compare full next-token distributions, not just top predictions.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Create a failure this model cannot fix (Challenge)
-contexts = jnp.array(...)  # TODO: compute contexts
-last_logits = ...  # TODO: compute last_logits
-np.testing.assert_array_equal(last_logits[0], last_logits[1])
-conflicting_targets = jnp.array(...)  # TODO: compute conflicting_targets
-assert conflicting_targets[0]  # TODO: complete assertion check
-print('Identical final tokens force identical table predictions despite different contexts.')
+import jax.numpy as jnp
+import numpy as np
+
+def expose_context_aliasing(context_a, context_b, labels, transition_table):
+    # TODO: compare next-token distributions for contexts sharing the same final token.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

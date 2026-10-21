@@ -243,21 +243,21 @@ visual_data={'kind':'bar','labels':['saved snapshot','live state','accepted chec
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:29:28.862525+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:05:45.217630+00:00. JAX 0.9.2.
 
 ```text
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-wd23ag1m
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-e6nu1154
 {
-  "save_call_seconds": 0.004686499945819378,
-  "remaining_work_and_wait_seconds": 0.029625291004776955,
+  "save_call_seconds": 0.0043574171140789986,
+  "remaining_work_and_wait_seconds": 0.017880792263895273,
   "accepted_step": 1,
   "live_step": 2
 }
 Unpublished step 2 exists; application recovery still selects verified step 1.
-Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-3nu25rwx
+Checkpoint workspace: /var/folders/mp/_mq7srqx2y10p5nhjz9m7hj40000gn/T/jax-async-lesson-i_l7ei0e
 {
-  "save_call_seconds": 0.003711916971951723,
-  "remaining_work_and_wait_seconds": 0.01665245834738016,
+  "save_call_seconds": 0.0023497911170125008,
+  "remaining_work_and_wait_seconds": 0.011486874893307686,
   "accepted_step": 1,
   "live_step": 2
 }
@@ -303,22 +303,31 @@ Verify and publish the already written second checkpoint. Restore it and compare
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- The already written second-checkpoint path, its live state, and the original step-one snapshot.
+
+**Outputs:**
+- The restored second state, a comparison of its next transition with the live continuation, and a published step-two pointer.
+
+**Invariants to check:**
+- The restored step-two state matches the live state; both next transitions agree; the original snapshot remains at step one.
+
+**Hints:**
+- Restore the second checkpoint against a target shaped like the live state.
+- Publish only after restored values and the next transition have been checked.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Verify and publish the already written second checkpoint.
-with ocp.StandardCheckpointer() as cp:
-    verified = cp.restore(...)  # TODO: compute verified
-np.testing.assert_array_equal(verified['weight'],live['weight'])
-assert int(verified['step'])  # TODO: complete assertion check
-publish(unpublished,2)
-np.testing.assert_array_equal(transition(verified)['weight'],transition(live)['weight'])
-assert accepted()['step']  # TODO: complete assertion check
-print('Step two verified and accepted; next transition agrees.')
+import json
+from pathlib import Path
+import jax.numpy as jnp
+import numpy as np
+import orbax.checkpoint as ocp
+
+def verify_publish_and_compare(checkpoint_path, live_state, original_snapshot, publish_fn):
+    # TODO: Restore step two, compare its next transition with the live continuation, then publish it.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -351,25 +360,34 @@ Check path existence and the declared step before restoration; still compare res
 
 ### How to write: Keep only a genuinely accepted target — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Create a manifest pointing to a nonexistent checkpoint in a disposable variable. Write a preflight that rejects it without replacing the real accepted manifest. Explain why a preflight alone cannot prove numerical correctness.
+
+**Outputs:**
+- Rejected missing target and byte-identical accepted manifest.
+
+**Invariants to check:**
+- Preflight failure never publishes or replaces the accepted checkpoint pointer.
+
+**Hints:**
+- Check path existence and the declared step before restoration; still compare restored contents afterward.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Keep only a genuinely accepted target (Transfer)
-def preflight(record):
-    if not Path(record['path']).is_dir() or int(record['step'])<0:
-        raise ValueError('checkpoint target unavailable')
-    return ...  # TODO: return computed result
-before = accepted(...)  # TODO: compute before
-try:preflight({'path':str(root/'never_saved'),'step':99})
-except ValueError:pass
-else:raise AssertionError('missing target accepted')
-assert accepted()  # TODO: complete assertion check
-preflight(before)
-print('Missing target rejected; accepted checkpoint unchanged.')
+import json
+import tempfile
+import time
+from pathlib import Path
+import jax
+import jax.numpy as jnp
+import numpy as np
+import orbax.checkpoint as ocp
+
+def practice_keep_only_a_genuinely_accepted_target(accepted_manifest, candidate_path):
+    """Implement the keep only a genuinely accepted target check."""
+    # TODO: Build a disposable manifest for a nonexistent checkpoint and reject it without modifying the accepted manifest.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

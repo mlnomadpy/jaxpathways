@@ -162,7 +162,7 @@ visual_data = {'kind': 'bar', 'labels': ['weight[0]', 'weight[1]', 'bias'], 'yla
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:27:15.892416+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:03:47.877883+00:00. JAX 0.9.2.
 
 ```text
 Before/after: 4.0 0.6399999260902405
@@ -212,22 +212,30 @@ Compute the squared norm of all gradient leaves. Verify it by adding the weight 
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `x.sum(axis=...) / x.mean(axis=..., keepdims=...)` — Reduces values along the named `axis` (the axis you name is collapsed unless `keepdims=True`).
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
+**Inputs:**
+- A nested parameter pytree with weight and bias leaves and a matching gradient pytree.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The squared Euclidean norm of all gradient leaves.
+
+**Invariants to check:**
+- Every gradient leaf contributes exactly once.
+- The pytree structure is preserved while reducing the scalar contributions.
+
+**Hints:**
+- Map a square operation over gradient leaves, then reduce the resulting leaves.
+- Compare your result to direct weight and bias contributions.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution: Compute the squared norm of all gradient leaves.
-norm_squared = sum(...)  # TODO: compute norm_squared
-manual = jnp.sum(...)  # TODO: compute manual
-assert jnp.allclose(norm_squared, manual)  # TODO: complete assertion check
-assert jnp.allclose(norm_squared, 96.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def squared_gradient_norm(grads: dict) -> jax.Array:
+    """Return the sum of squared values across all gradient leaves."""
+    # TODO: traverse the pytree leaves and reduce their squared entries.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -256,26 +264,30 @@ At the starting point prediction is $1$ and residual is $-2$, so the scale deriv
 
 ### How to write: Extend to a nested model — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.array(values, dtype=...)` — Constructs an immutable device-backed JAX array from Python/NumPy values.
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.grad(loss_fn)(params, ...)` — Transforms a scalar-output function into a function returning the gradient PyTree with the same structure as `params`.
+**Inputs:**
+- A weight vector, scalar bias, scalar scale, and input vector.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- The gradient pytree for the squared prediction loss of scale*(weight dot x + bias).
+
+**Invariants to check:**
+- Gradient leaves follow the same nested structure as the parameters.
+- The scale derivative is computed by autodiff for the supplied values.
+
+**Hints:**
+- Put weight and bias below a layer key, with scale as a separate leaf.
+- Differentiate a scalar loss with jax.grad.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Extend to a nested model (Practice): Nested parameter identity survives differentiation.
-nested = ...  # TODO: compute nested
-def nested_loss(p):
-    pred = ...  # TODO: compute pred
-    return ...  # TODO: return computed result
-g = jax.grad(...)  # TODO: compute g
-assert jax.tree.structure(g)  # TODO: complete assertion check
-assert jnp.allclose(g["scale"],-4.)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def nested_gradients(weight: jax.Array, bias: jax.Array, scale: jax.Array, x: jax.Array, target: jax.Array) -> dict:
+    """Return gradients for a nested scaled linear model."""
+    # TODO: construct the parameter pytree and differentiate its scalar loss.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -309,26 +321,30 @@ Matching leaf counts is not enough; key paths matter.
 
 ### How to write: Repair a mismatched update tree — Step-by-step recipe & starter scaffold
 
-**Key functions & syntax to use:**
-- `jnp.allclose(actual, expected, rtol=..., atol=...)` — Checks that two arrays match elementwise within floating-point tolerance.
-- `jax.tree.map(lambda p, g: ..., params, grads)` — Applies a function leaf-by-leaf across matching PyTrees (such as updating every parameter tensor with its gradient).
+**Inputs:**
+- A parameter pytree and a matching gradient pytree.
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Outputs:**
+- A gradient tree validated against the parameter structure and a matching updated parameter pytree.
+
+**Invariants to check:**
+- Every parameter path has exactly one gradient leaf.
+- A missing bias gradient is rejected instead of broadcast or silently omitted.
+
+**Hints:**
+- Use tree structure comparison or a tree map to validate alignment.
+- Apply the hand update only after the structures match.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Repair a mismatched update tree (Challenge): A missing bias gradient is a tree mismatch.
-try:
-    jax.tree.map(lambda p,g:p-0.05*g,params,{"weight":grads["weight"]})
-except ValueError:
-    print("Expected tree mismatch")
-else:
-    raise AssertionError("Expected a missing-key failure")
-fixed = jax.tree.map(...)  # TODO: compute fixed
-assert jnp.allclose(loss(fixed),0.64,atol=1e-6)  # TODO: complete assertion check
+import jax
+import jax.numpy as jnp
+
+def checked_tree_update(params: dict, grads: dict, learning_rate: float = 0.05) -> dict:
+    """Reject a mismatched pytree and otherwise perform one aligned update."""
+    # TODO: check structure compatibility, then update corresponding leaves.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>

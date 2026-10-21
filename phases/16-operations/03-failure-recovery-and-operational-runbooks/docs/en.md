@@ -522,7 +522,7 @@ visual_data={'kind':'line','x':list(range(3,9)),'xlabel':'completed training ste
 
 ## Recorded reference execution
 
-CPU run: 2026-10-21T11:33:54.456234+00:00. JAX 0.9.2.
+CPU run: 2026-10-21T16:10:40.910852+00:00. JAX 0.9.2.
 
 ```text
 restored step: 2 replayed updates: [3, 4, 5, 6, 7, 8]
@@ -574,25 +574,34 @@ Repeat the recovery drill with seed $9$, checkpoint cadence $3$ and failure afte
 
 ### How to write this exercise — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Exercise solution
-2. Keep this run’s database and artifacts in a scratch directory removed on exit.
+**Inputs:**
+- A deterministic training state, checkpoint location, injected failure point, and matching resume configuration.
+
+**Outputs:**
+- A restored continuation whose every post-resume state matches uninterrupted execution.
+
+**Invariants to check:**
+- Only an accepted full-state checkpoint is restored; verify parameters, momentum, random state, and step after each resumed update.
+
+**Hints:**
+- Retain a complete event timeline around the last committed checkpoint.
+- Compare resumed and uninterrupted runs with identical seed and configuration.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Exercise solution
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    base = Path(...)  # TODO: compute base
-    cfg = dict(...)  # TODO: compute cfg
-    ref = launch(...)  # TODO: compute ref
-    broken = launch(...)  # TODO: compute broken
-    cp = json.loads(...)  # TODO: compute cp
-    assert cp['step']  # TODO: complete assertion check
-    fixed = launch(...)  # TODO: compute fixed
-    assert fixed['status']  # TODO: complete assertion check
-    assert json.loads((base/'ref'/'checkpoint.json').read_text())  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def resume_after_failure(initial_state, checkpoint_path, failure_step, config):
+    """A restored continuation whose every post-resume state matches uninterrupted execution."""
+    # TODO: Inject a local worker failure, restore only the last complete state, and compare every resumed transition with uninterrupted execution.
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution</summary>
@@ -628,25 +637,34 @@ The expected outcome is a failed restore; preserve the failure event.
 
 ### How to write: Reject accidental checkpoint corruption — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Keep this run’s database and artifacts in a scratch directory removed on exit.
-2. Accumulate the next contribution into `state['velocity'][0]`.
+**Inputs:**
+- After saving a checkpoint, alter one momentum value without updating its checksum, then attempt to restore.
+
+**Outputs:**
+- Restore rejection for a changed payload with stale checksum.
+
+**Invariants to check:**
+- Corrupt state is rejected before a training update resumes.
+
+**Hints:**
+- The expected outcome is a failed restore; preserve the failure event.
+- Checksum the exact serialized momentum content.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Reject accidental checkpoint corruption (Transfer / diagnosis)
-# Keep this run’s database and artifacts in a scratch directory removed on exit.
-with tempfile.TemporaryDirectory() as folder:
-    launch(folder,dict(steps = ...  # TODO: compute launch(folder,dict(steps
-    path = Path(...)  # TODO: compute path
-    state = json.loads(...)  # TODO: compute state
-    # Accumulate the next contribution into `state['velocity'][0]`.
-    state['velocity'][0]+=1.
-    path.write_text(json.dumps(state))
-    bad = launch(...)  # TODO: compute bad
-assert bad['status']  # TODO: complete assertion check
-assert any(e['event']  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def practice_reject_accidental_checkpoint_corruption(checkpoint_path):
+    """Complete the reject accidental checkpoint corruption check."""
+    # TODO: ('Change one serialized momentum value without recomputing its checksum and require restore rejection.', 'A checksum failure with no resumed transition.', 'The checkpoint payload is immutable after its recorded checksum.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
@@ -684,18 +702,34 @@ Apply the recurrence before multiplying by the learning rate.
 
 ### How to write: Explain a weights-only mismatch by hand — Step-by-step recipe & starter scaffold
 
-**Step-by-step implementation plan:**
-1. Set up the changed input or configuration parameters requested in the prompt.
-2. Run the target function or transformation and assert that the output matches your prediction.
+**Inputs:**
+- Let saved velocity be $2$, the next gradient $3$, momentum $0.8$, and learning rate $0.1$. Compare the correct parameter decrement with a reset-momentum decrement.
+
+**Outputs:**
+- Two parameter decrements for saved and reset momentum.
+
+**Invariants to check:**
+- Both cases share the same current gradient and learning rate.
+
+**Hints:**
+- Apply the recurrence before multiplying by the learning rate.
+- Apply momentum recurrence before multiplying by learning rate.
 
 **Starter code scaffold (fill in the TODOs):**
 
 ```python
-# Explain a weights-only mismatch by hand (Transfer / diagnosis)
-correct = ...  # TODO: compute correct
-weights_only = ...  # TODO: compute weights_only
-assert abs(correct-.46)  # TODO: complete assertion check
-assert abs(correct-weights_only-.16)  # TODO: complete assertion check
+from pathlib import Path
+import hashlib
+import json
+import tempfile
+import jax
+import jax.numpy as jnp
+import numpy as np
+
+def practice_explain_a_weights_only_mismatch_by_hand(parameter, saved_velocity, gradient, momentum, learning_rate):
+    """Complete the explain a weights-only mismatch by hand check."""
+    # TODO: ('Compute the next momentum velocity and parameter decrement from saved velocity 2, gradient 3, momentum .8, and rate .1, then compare with zero velocity.', 'Correct and reset-momentum decrements from the same parameter.', 'Only the prior velocity differs between the two calculations.')
+    raise NotImplementedError
 ```
 
 <details><summary>Reference solution and reasoning</summary>
