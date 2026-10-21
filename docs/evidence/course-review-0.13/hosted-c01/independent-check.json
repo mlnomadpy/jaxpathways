@@ -1,0 +1,72 @@
+{
+  "data": {
+    "archive_sha256": "11c621288d41ac144d29b13b0f8503b3820b7d6e8b1f6ff24dff335c196d76be",
+    "corpus_docs": 5183,
+    "final_claims": 300,
+    "final_judged_claims": 188,
+    "fit_claims": 478,
+    "recipe_development_claims": 53
+  },
+  "lifecycle": {
+    "bm25_scores_regenerated": true,
+    "candidate_stages_independently_ranked": [
+      "phase1_mlm",
+      "phase2_contrastive_only",
+      "phase2_contrastive_plus_retained_mlm",
+      "phase3_human_pairs",
+      "random_initialization"
+    ],
+    "external_baseline_revision": "1110a243fdf4706b3f48f1d95db1a4f5529b4d41",
+    "full_lifecycle": "pilot_executed_in_development",
+    "independent_exact_scores_and_metrics": true,
+    "matched_phase2_exposure": 32,
+    "phase3_fit_queries_covered": 281
+  },
+  "limitations": [
+    "CPU pilot is not 300M target training",
+    "one seed is insufficient for a training-variance claim",
+    "SciFact dev is the custom final evaluation because official test lacks public labels",
+    "MTEB and human review remain unrun"
+  ],
+  "model": {
+    "bidirectional_future_context": true,
+    "candidate": "/home/runner/work/jaxpathways/jaxpathways/projects/embedding-model-300m/model.py",
+    "mlm_numpy_oracle_and_gradient_fd": true,
+    "multi_positive_numpy_oracle_and_gradient_fd": true,
+    "nonzero_dropout_responds_to_prng": true,
+    "numpy_encoder_attention_rope_mask_pooling_oracle": true,
+    "padding_and_batch_isolation": true,
+    "target_encoder_params": 302090240,
+    "target_with_mlm_params": 303191040,
+    "uniform_attention_mutation_rejected": true
+  },
+  "output": "/tmp/jaxpathways-embedding-c01-check",
+  "resume": {
+    "changed_identity_rejected": true,
+    "fresh_process_next_sample_and_dropout_keys_equal": true,
+    "fresh_process_next_update_exact": true,
+    "fresh_process_resume_stages": [
+      "phase1_mlm",
+      "phase2_contrastive_only",
+      "phase2_joint",
+      "phase3_human"
+    ],
+    "next_batch_indices": [
+      9,
+      0
+    ],
+    "partial_tail_coverage": [
+      4,
+      4,
+      2
+    ],
+    "rechecksummed_semantic_mutations_rejected": [
+      "cursor",
+      "moment_dtype",
+      "moment_nan",
+      "permutation"
+    ]
+  },
+  "stage": "all",
+  "status": "pass"
+}
